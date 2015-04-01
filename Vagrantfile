@@ -102,6 +102,7 @@ Vagrant.configure("2") do |config|
   config.vm.define :centos5 do |centos5_config|
     centos5_config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-5.10_chef-provisionerless.box"
     centos5_config.vm.box = "centos5"
+    config.vm.provision "shell", path: "centos5.sh"
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = "playbooks/common.yml"
       ansible.sudo = "true"

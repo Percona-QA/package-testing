@@ -16,10 +16,6 @@
     sudo: yes
     yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/6/i386/epel-release-6-8.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-  - name: epel 5 repo
-    sudo: yes
-    yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/5/x86_64/epel-release-5-4.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
   - name: epel 7 repo
     sudo: yes
     yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-5.noarch.rpm state=present
@@ -27,45 +23,34 @@
   - name: oracle mysql repo
     sudo: yes
     yum: name=http://dev.mysql.com/get/mysql-community-release-el6-5.noarch.rpm state=present
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
   # Add an Apt signing key, will not download if present
   - apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
     when: ansible_os_family == "Debian"
     sudo: yes
-  - name: install vim
+  - name: install deb packages 
     sudo: yes
-    apt: name=vim update_cache=yes
-    when: ansible_os_family == "Debian"
-  - name: install pv
-    sudo: yes
-    apt: name=pv update_cache=yes
+    apt: name={{item}} update_cache=yes
+    with_items: 
+    - vim
+    - pv
+    - perocna-server-server-5.5
+    - percona-xtrabackup
     when: ansible_os_family == "Debian"
   - name: install packages in centos
     sudo: yes
-    yum: name=vim state=present
-    when: ansible_os_family == "RedHat"
-  - name: install libselinux
-    sudo: yes
-    yum: name=libselinux-python state=present
+    yum: name={{item}} state=present
+    with_items:
+    - libselinux-python
+    - pv
+    - Percona-Server-server-55
     when: ansible_os_family == "RedHat"
   - name: copy sample db
     sudo: yes
-    copy: src=/home/hrvoje/worktable/sampledbs/world_innodb.sql dest=/home/vagrant/
+    copy: src=/home/hrvoje/worktable/sampledbs/world_innodb.sql dest=/root/
   - name: copy plugin_test
     sudo: yes
-    copy: src=/home/hrvoje/worktable/package-testing/plugins_test_56.sh dest=/home/vagrant/
+    copy: src=/home/hrvoje/worktable/package-testing/plugins_test_56.sh dest=/root/
   - name: copy version_check
     sudo: yes
-    copy: src=/home/hrvoje/worktable/package-testing/version_check.sh dest=/home/vagrant/
-  - name: install percona-server (apt)
-    sudo: yes
-    apt: name=percona-xtrabackup update_cache=yes
-    #apt: name=percona-server-server-5.5 update_cache=yes
-    when: ansible_os_family == "Debian"
-  - name: install Percona-Server (yum)
-    sudo: yes
-    yum: name=Percona-Server-server-55 state=present
-    when: ansible_os_family == "RedHat"
-#  - name: copy config
-#    copy: src=/home/hrvoje/worktable/package-testing/.my.cnf dest=/home/vagrant/
-
+    copy: src=/home/hrvoje/worktable/package-testing/version_check.sh dest=/root/
