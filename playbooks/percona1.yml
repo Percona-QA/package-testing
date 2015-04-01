@@ -1,0 +1,80 @@
+---
+# This playbook sets up the first node for PXC on Centos
+
+- hosts: all
+
+  tasks:
+  - name: remove mysql-libs
+    yum: name=mysql-libs state=absent
+    sudo: yes
+  - name: install stuff
+    sudo: yes
+    yum: name={{item}} state=present
+    with_items:
+    - libselinux-python
+  - selinux: state=disabled
+    sudo: yes
+  - name: add firewall rules
+    sudo: yes
+    command: /sbin/iptables -I INPUT -s {{item}} -p tcp -j ACCEPT
+    with_items:
+    - 192.168.70.73
+    - 192.168.70.72
+    - 192.168.70.71
+  - name: add the percona repo
+    sudo: yes
+    yum: name=http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
+  - name: add the epel repo for centos7 
+    yum: name=http://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+    sudo: yes
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+  - name: add the epel repo for centos6
+    yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/6/x86_64/epel-release-6-8.noarch.rpm state=present
+    sudo: yes
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+  - name: install pv
+    sudo: yes
+    yum: name=pv  state=present
+  - name: copy sample db
+    sudo: yes
+    copy: src=/home/hrvoje/worktable/sampledbs/world_innodb.sql dest=/home/vagrant/
+  - name: copy plugin_test
+    sudo: yes
+    copy: src=/home/hrvoje/worktable/percona-cluster/plugins_test_55.sh dest=/home/vagrant/
+  - name: copy version_check
+    sudo: yes
+    copy: src=/home/hrvoje/worktable/percona-cluster/version_check.sh dest=/home/vagrant/
+  - name: install Percona-Server-shared-compat for CentOS 5
+    sudo: yes
+    yum: name=Percona-Server-shared-compat.x86_64 state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+  - name: install PXC
+    sudo: yes
+    yum: name=Percona-XtraDB-Cluster-full-55.x86_64 state=present
+  - name: install MySQL-python
+    sudo: yes
+    yum: name=MySQL-python state=present
+  - name: copy pxc config
+    template: src=/home/hrvoje/worktable/percona-cluster/templates/my_rpm.j2 dest=/etc/my.cnf
+    sudo: yes
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 6
+    #when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+  - name: copy pxc config
+    template: src=/home/hrvoje/worktable/percona-cluster/templates/my_rpm.j2 dest=/etc/my.cnf
+    sudo: yes
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+  - name: copy pxc config
+    template: src=/home/hrvoje/worktable/percona-cluster/templates/my_rpm_7.j2 dest=/etc/my.cnf
+    sudo: yes
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+  - command: /etc/init.d/mysql bootstrap-pxc
+    sudo: yes
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+  - command: service mysql bootstrap-pxc
+    sudo: yes
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+  - command: systemctl start mysql@bootstrap.service
+    sudo: yes
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+  - name: create the backup user
+    mysql_user: name=sstuser password=s3cretPass priv=*.*:RELOAD,"LOCK TABLES","REPLICATION CLIENT" state=present
