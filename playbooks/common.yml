@@ -4,9 +4,13 @@
 - hosts: all
 
   tasks:
+  # Add an Apt signing key, will not download if present
+  - apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
+    when: ansible_os_family == "Debian"
+    sudo: yes
   - name: add the deb repo
     sudo: yes
-    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main' state=present
+    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main' state=present update_cache=yes
     when: ansible_os_family == "Debian"
   - name: add the yum percona repos 
     sudo: yes
@@ -24,17 +28,13 @@
     sudo: yes
     yum: name=http://dev.mysql.com/get/mysql-community-release-el6-5.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-  # Add an Apt signing key, will not download if present
-  - apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
-    when: ansible_os_family == "Debian"
-    sudo: yes
   - name: install deb packages 
     sudo: yes
     apt: name={{item}} update_cache=yes
     with_items: 
     - vim
     - pv
-    - perocna-server-server-5.5
+    - percona-server-server-5.5
     - percona-xtrabackup
     when: ansible_os_family == "Debian"
   - name: install packages in centos
