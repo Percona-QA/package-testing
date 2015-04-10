@@ -71,7 +71,7 @@ Vagrant.configure("2") do |config|
       ansible.host_key_checking = "false"
     end
     precise_config.vm.box = "precise"
-    precise_config.vm.box_url = "https://vagrantcloud.com/chef/ubuntu-14.04/version/1.0.0/provider/virtualbox.box"
+    precise_config.vm.box_url = "https://vagrantcloud.com/chef/ubuntu-12.04/version/1.0.0/provider/virtualbox.box"
     precise_config.vm.host_name = "precise"
     precise_config.vm.network :private_network, ip: "192.168.20.55"
   end
