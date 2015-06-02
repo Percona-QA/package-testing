@@ -50,7 +50,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
   - name: install PXC
     sudo: yes
-    yum: name=Percona-XtraDB-Cluster-full-55.x86_64 state=present
+    yum: name=Percona-XtraDB-Cluster-full-56.x86_64 state=present
   - name: install MySQL-python
     sudo: yes
     yum: name=MySQL-python state=present

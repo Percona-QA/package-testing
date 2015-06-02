@@ -1,10 +1,12 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-deb_distro = "squeeze"
-deb1_playbook = "playbooks/pxc55.yml"
-deb_common_playbook = "playbooks/pxc55_common.yml"
-rhel_distro = "centos5"
+
+vagrant_default_provider = "virtualbox"
+deb_distro = "jessie"
+deb1_playbook = "playbooks/pxc56.yml"
+deb_common_playbook = "playbooks/pxc56_common.yml"
+rhel_distro = "centos7"
 rhel1_playbook = "playbooks/percona1.yml"
 rhel_playbook = "playbooks/common_rpm.yml"
 
@@ -37,6 +39,32 @@ Vagrant.configure("2") do |config|
     wheezy_config.vm.network :private_network, ip: "192.168.20.52"
   end
 
+  config.vm.define :jessie do |jessie_config|
+    config.vm.provision "ansible" do |ansible|
+      ansible.playbook = "playbooks/common.yml"
+      ansible.sudo = "true"
+      ansible.host_key_checking = "false"
+    end
+    jessie_config.vm.box = "jessie"
+    jessie_config.vm.host_name = "jessie"
+    jessie_config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on" ]
+    end
+    jessie_config.vm.network :private_network, ip: "192.168.20.56"
+  end
+
+  config.vm.define :precise do |precise_config|
+    config.vm.provision "ansible" do |ansible|
+      ansible.playbook = "playbooks/common.yml"
+      ansible.sudo = "true"
+      ansible.host_key_checking = "false"
+    end
+    precise_config.vm.box = "precise"
+    precise_config.vm.box_url = "https://vagrantcloud.com/chef/ubuntu-12.04/version/1.0.0/provider/virtualbox.box"
+    precise_config.vm.host_name = "precise"
+    precise_config.vm.network :private_network, ip: "192.168.20.55"
+  end
+
   config.vm.define :trusty do |trusty_config|
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = "playbooks/common.yml"
@@ -64,31 +92,32 @@ Vagrant.configure("2") do |config|
     utopic_config.vm.network :private_network, ip: "192.168.20.54"
   end
 
-  config.vm.define :precise do |precise_config|
+  config.vm.define :vivid do |vivid_config|
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = "playbooks/common.yml"
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
-    precise_config.vm.box = "precise"
-    precise_config.vm.box_url = "https://vagrantcloud.com/chef/ubuntu-12.04/version/1.0.0/provider/virtualbox.box"
-    precise_config.vm.host_name = "precise"
-    precise_config.vm.network :private_network, ip: "192.168.20.55"
+    vivid_config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "1024", "--ioapic", "on" ]
+    end
+    vivid_config.vm.box = "ubuntu/vivid64"
+    vivid_config.vm.host_name = "vivid"
+    vivid_config.vm.network :private_network, ip: "192.168.20.49"
   end
 
-  config.vm.define :lucid do |lucid_config|
+  config.vm.define :jessie do |jessie_config|
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = "playbooks/common.yml"
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
-    lucid_config.vm.box = "lucid"
-    lucid_config.vm.box_url = "https://vagrantcloud.com/chef/ubuntu-10.04/version/1.0.0/provider/virtualbox.box"
-    lucid_config.vm.host_name = "lucid"
-    lucid_config.vm.provider :virtualbox do |vb|
+    jessie_config.vm.box = "jessie"
+    jessie_config.vm.host_name = "jessie"
+    jessie_config.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on" ]
     end
-    lucid_config.vm.network :private_network, ip: "192.168.20.56"
+    jessie_config.vm.network :private_network, ip: "192.168.20.56"
   end
 
   config.vm.define :centos6 do |centos6_config|

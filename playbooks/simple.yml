@@ -10,7 +10,7 @@
     sudo: yes
   - name: add the deb repo
     sudo: yes
-    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} testing' state=present update_cache=yes
+    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main testing' state=present update_cache=yes
     when: ansible_os_family == "Debian"
   - name: add the yum percona repos 
     sudo: yes
@@ -24,10 +24,6 @@
     sudo: yes
     yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-5.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-#  - name: oracle mysql repo
- #   sudo: yes
- #   yum: name=http://dev.mysql.com/get/mysql-community-release-el6-5.noarch.rpm state=present
- #   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
   - name: install deb packages 
     sudo: yes
     apt: name={{item}} update_cache=yes
@@ -43,17 +39,14 @@
     with_items:
     - libselinux-python
     - pv
-    - Percona-Server-server-56
+    - Percona-Server-server-55
     when: ansible_os_family == "RedHat"
   - name: copy sample db
     sudo: yes
     copy: src=/home/hrvoje/worktable/sampledbs/world_innodb.sql dest=/root/
-  - name: copy tokud db compression test
+  - script: /home/hrvoje/worktable/package-testing/plugins_test_55.sh >> /root/plugins.txt
     sudo: yes
-    copy: src=/home/hrvoje/worktable/package-testing/tokudb_compression.sql dest=/root/
-  - name: copy plugin_test
+  - script: /home/hrvoje/worktable/package-testing/version_check.sh  >> /root/version_check.txt
     sudo: yes
-    copy: src=/home/hrvoje/worktable/package-testing/plugins_test_55.sh dest=/root/
-  - name: copy version_check
+  - script: /home/hrvoje/worktable/package-testing/insert_check.sh 
     sudo: yes
-    copy: src=/home/hrvoje/worktable/package-testing/version_check.sh dest=/root/
