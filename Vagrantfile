@@ -3,10 +3,10 @@
 
 
 vagrant_default_provider = "virtualbox"
-deb_distro = "jessie"
+deb_distro = "wheezy"
 deb1_playbook = "playbooks/pxc56.yml"
 deb_common_playbook = "playbooks/pxc56_common.yml"
-rhel_distro = "centos7"
+rhel_distro = "centos6"
 rhel1_playbook = "playbooks/percona1.yml"
 rhel_playbook = "playbooks/common_rpm.yml"
 
@@ -48,7 +48,7 @@ Vagrant.configure("2") do |config|
     jessie_config.vm.box = "jessie"
     jessie_config.vm.host_name = "jessie"
     jessie_config.vm.provider :virtualbox do |vb|
-      vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on" ]
+      vb.customize ["modifyvm", :id, "--memory", "1024", "--ioapic", "on" ]
     end
     jessie_config.vm.network :private_network, ip: "192.168.20.56"
   end
@@ -101,23 +101,10 @@ Vagrant.configure("2") do |config|
     vivid_config.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "1024", "--ioapic", "on" ]
     end
-    vivid_config.vm.box = "ubuntu/vivid64"
+    vivid_config.vm.box = "vivid"
+    vivid_config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-15.04_chef-provisionerless.box"
     vivid_config.vm.host_name = "vivid"
     vivid_config.vm.network :private_network, ip: "192.168.20.49"
-  end
-
-  config.vm.define :jessie do |jessie_config|
-    config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "playbooks/common.yml"
-      ansible.sudo = "true"
-      ansible.host_key_checking = "false"
-    end
-    jessie_config.vm.box = "jessie"
-    jessie_config.vm.host_name = "jessie"
-    jessie_config.vm.provider :virtualbox do |vb|
-      vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on" ]
-    end
-    jessie_config.vm.network :private_network, ip: "192.168.20.56"
   end
 
   config.vm.define :centos6 do |centos6_config|
@@ -135,12 +122,12 @@ Vagrant.configure("2") do |config|
   config.vm.define :centos5 do |centos5_config|
     centos5_config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-5.10_chef-provisionerless.box"
     centos5_config.vm.box = "centos5"
-    config.vm.provision "shell", path: "centos5.sh"
-    config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "playbooks/common.yml"
-      ansible.sudo = "true"
-      ansible.host_key_checking = "false"
-    end
+    #config.vm.provision "shell", path: "centos5.sh"
+    #config.vm.provision "ansible" do |ansible|
+     # ansible.playbook = "playbooks/common.yml"
+      #ansible.sudo = "true"
+      #ansible.host_key_checking = "false"
+    #end
     centos5_config.vm.host_name = "centos5"
     centos5_config.vm.network :private_network, ip: "192.168.20.58"
   end
@@ -210,11 +197,11 @@ Vagrant.configure("2") do |config|
         if rhel_distro == "centos5" then
           config.vm.provision "shell", path: "centos5.sh"
         end   
-        config.vm.provision "ansible" do |ansible|
-          ansible.playbook = rhel_playbook
-          ansible.sudo = "true"
-          ansible.host_key_checking = "false"
-        end
+#        config.vm.provision "ansible" do |ansible|
+#          ansible.playbook = rhel_playbook
+#          ansible.sudo = "true"
+#          ansible.host_key_checking = "false"
+#        end
         percona2_config.vm.box = rhel_distro
         percona2_config.vm.host_name = "percona2"
         percona2_config.vm.network :private_network, ip: "192.168.70.72"

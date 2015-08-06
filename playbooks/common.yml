@@ -10,7 +10,7 @@
     sudo: yes
   - name: add the deb repo
     sudo: yes
-    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} testing' state=present update_cache=yes
+    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main' state=present update_cache=yes
     when: ansible_os_family == "Debian"
   - name: add the yum percona repos 
     sudo: yes
@@ -28,6 +28,10 @@
  #   sudo: yes
  #   yum: name=http://dev.mysql.com/get/mysql-community-release-el6-5.noarch.rpm state=present
  #   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+  - name: copy apt-cacher-ng proxy file
+    sudo: yes
+    copy: src=/home/hrvoje/worktable/package-testing/01proxy dest=/etc/apt/apt.conf.d/
+    when: ansible_os_family == "Debian"
   - name: install deb packages 
     sudo: yes
     apt: name={{item}} update_cache=yes
@@ -36,6 +40,10 @@
     - pv
     - percona-server-server-5.5
     - percona-xtrabackup
+    - percona-server-test-5.5
+    - percona-server-5.5-dbg
+    - percona-server-source-5.5
+#    - percona-server-tokudb-5.6
     when: ansible_os_family == "Debian"
   - name: install packages in centos
     sudo: yes
@@ -43,7 +51,12 @@
     with_items:
     - libselinux-python
     - pv
-    - Percona-Server-server-56
+    - Percona-Server-server-55
+    #- Percona-Server-test-55
+    #- Percona-Server-55-debuginfo
+    #- Percona-Server-devel-55
+    #- Percona-Server-tokudb-56
+    - percona-xtrabackup
     when: ansible_os_family == "RedHat"
   - name: copy sample db
     sudo: yes
@@ -53,7 +66,7 @@
     copy: src=/home/hrvoje/worktable/package-testing/tokudb_compression.sql dest=/root/
   - name: copy plugin_test
     sudo: yes
-    copy: src=/home/hrvoje/worktable/package-testing/plugins_test_55.sh dest=/root/
+    copy: src=/home/hrvoje/worktable/package-testing/plugins_test_56.sh dest=/root/
   - name: copy version_check
     sudo: yes
     copy: src=/home/hrvoje/worktable/package-testing/version_check.sh dest=/root/

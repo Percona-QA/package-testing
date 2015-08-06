@@ -5,7 +5,7 @@
 
   tasks:
   - name: add the repo
-    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main testing' state=present
+    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main' state=present
 #    apt_repository: repo='deb http://repo.percona.com/apt {{ansible_lsb.codename}} main testing' state=present
     sudo: yes
   # Add an Apt signing key, will not download if present
@@ -32,7 +32,7 @@
   - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped 
     sudo: yes
   - name: configure PXC
-    template: src=/home/hrvoje/worktable/percona-cluster/templates/my.j2 
+    template: src=/home/hrvoje/worktable/package-testing/templates/my.j2 
               dest=/etc/mysql/my.cnf
               mode=0640 owner=mysql group=root
     sudo: yes
