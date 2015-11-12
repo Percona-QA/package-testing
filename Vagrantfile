@@ -2,10 +2,10 @@
 # vi: set ft=ruby :
 
 playbook = "playbooks/common.yml"
-deb_distro = "squeeze"
+deb_distro = "bento/debian-6.0.10"
 deb1_playbook = "playbooks/pxc56.yml"
 deb_common_playbook = "playbooks/pxc56_common.yml"
-rhel_distro = "centos7"
+rhel_distro = "bento/centos-7.1"
 rhel1_playbook = "playbooks/percona1.yml"
 rhel_playbook = "playbooks/common_rpm.yml"
 
@@ -16,35 +16,33 @@ Vagrant.configure("2") do |config|
 
   config.vm.define :squeeze do |squeeze_config|
     config.vm.provision "ansible" do |ansible|
+    squeeze_config.vm.box = "bento/debian-6.0.10"
       ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
-    squeeze_config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_debian-6.0.10_chef-provisionerless.box"
-    squeeze_config.vm.box = "squeeze"
     squeeze_config.vm.host_name = "squeeze"
     squeeze_config.vm.network :private_network, ip: "192.168.20.51"
   end
 
   config.vm.define :wheezy do |wheezy_config|
+    wheezy_config.vm.box = "bento/debian-7.9"
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
-    wheezy_config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_debian-7.8_chef-provisionerless.box"
-    wheezy_config.vm.box = "wheezy"
     wheezy_config.vm.host_name = "wheezy"
     wheezy_config.vm.network :private_network, ip: "192.168.20.52"
   end
 
   config.vm.define :jessie do |jessie_config|
+    jessie_config.vm.box = "bento/debian-8.2"
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
-    jessie_config.vm.box = "jessie"
     jessie_config.vm.host_name = "jessie"
     jessie_config.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "1024", "--ioapic", "on" ]
@@ -53,25 +51,23 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define :precise do |precise_config|
+    precise_config.vm.box = "bento/ubuntu-12.04"
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
-    precise_config.vm.box = "precise"
-    precise_config.vm.box_url = "https://vagrantcloud.com/chef/ubuntu-12.04/version/1.0.0/provider/virtualbox.box"
     precise_config.vm.host_name = "precise"
     precise_config.vm.network :private_network, ip: "192.168.20.55"
   end
 
   config.vm.define :trusty do |trusty_config|
+    trusty_config.vm.box = "bento/ubuntu-14.04"
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
-    trusty_config.vm.box = "trusty"
-    trusty_config.vm.box_url = "https://vagrantcloud.com/chef/ubuntu-14.04/version/1.0.0/provider/virtualbox.box"
     trusty_config.vm.host_name = "trusty"
     trusty_config.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "256", "--ioapic", "on" ]
@@ -100,27 +96,24 @@ Vagrant.configure("2") do |config|
     vivid_config.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "1024", "--ioapic", "on" ]
     end
-    vivid_config.vm.box = "vivid"
-    vivid_config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_ubuntu-15.04_chef-provisionerless.box"
+    vivid_config.vm.box = "bento/ubuntu-15.04"
     vivid_config.vm.host_name = "vivid"
     vivid_config.vm.network :private_network, ip: "192.168.20.49"
   end
 
   config.vm.define :centos6 do |centos6_config|
-    centos6_config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-6.5_chef-provisionerless.box"
+    centos6_config.vm.box = "bento/centos-6.7"
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
-    centos6_config.vm.box = "centos6"
     centos6_config.vm.host_name = "centos6"
     centos6_config.vm.network :private_network, ip: "192.168.20.57"
   end
 
   config.vm.define :centos5 do |centos5_config|
-    centos5_config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-5.10_chef-provisionerless.box"
-    centos5_config.vm.box = "centos5"
+    centos5_config.vm.box = "bento/centos-5.11"
     config.vm.provision "shell", path: "centos5.sh"
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = playbook
@@ -132,13 +125,13 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define :centos7 do |centos7_config|
-    centos7_config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-7.0_chef-provisionerless.box"
+    centos7_config.vm.box = "bento/centos7.1"
+#   centos7_config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-7.0_chef-provisionerless.box"
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
-    centos7_config.vm.box = "centos7"
     centos7_config.vm.host_name = "centos7"
     centos7_config.vm.network :private_network, ip: "192.168.20.59"
   end
@@ -206,7 +199,7 @@ Vagrant.configure("2") do |config|
         percona2_config.vm.network :private_network, ip: "192.168.70.72"
   end
   config.vm.define :percona3 do |percona3_config|
-        if rhel_distro == "centos5" then
+        if rhel_distro == "bento/centos-5.11" then
           config.vm.provision "shell", path: "centos5.sh"
         end   
          config.vm.provision "ansible" do |ansible|
