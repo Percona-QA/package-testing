@@ -1,12 +1,11 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-
-vagrant_default_provider = "virtualbox"
-deb_distro = "wheezy"
+playbook = "playbooks/common.yml"
+deb_distro = "squeeze"
 deb1_playbook = "playbooks/pxc56.yml"
 deb_common_playbook = "playbooks/pxc56_common.yml"
-rhel_distro = "centos6"
+rhel_distro = "centos7"
 rhel1_playbook = "playbooks/percona1.yml"
 rhel_playbook = "playbooks/common_rpm.yml"
 
@@ -17,7 +16,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define :squeeze do |squeeze_config|
     config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "playbooks/common.yml"
+      ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
@@ -29,7 +28,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define :wheezy do |wheezy_config|
     config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "playbooks/common.yml"
+      ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
@@ -41,7 +40,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define :jessie do |jessie_config|
     config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "playbooks/common.yml"
+      ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
@@ -55,7 +54,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define :precise do |precise_config|
     config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "playbooks/common.yml"
+      ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
@@ -67,7 +66,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define :trusty do |trusty_config|
     config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "playbooks/common.yml"
+      ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
@@ -80,21 +79,21 @@ Vagrant.configure("2") do |config|
     trusty_config.vm.network :private_network, ip: "192.168.20.53"
   end
 
-  config.vm.define :utopic do |utopic_config|
-    config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "playbooks/common.yml"
-      ansible.sudo = "true"
-      ansible.host_key_checking = "false"
-    end
-    utopic_config.vm.box = "utopic"
-    utopic_config.vm.box_url = "https://vagrantcloud.com/chef/ubuntu-14.10/version/1.0.0/provider/virtualbox.box"
-    utopic_config.vm.host_name = "utopic"
-    utopic_config.vm.network :private_network, ip: "192.168.20.54"
-  end
+# config.vm.define :utopic do |utopic_config|
+#   config.vm.provision "ansible" do |ansible|
+#     ansible.playbook = playbook
+#     ansible.sudo = "true"
+#     ansible.host_key_checking = "false"
+#   end
+#   utopic_config.vm.box = "utopic"
+#   utopic_config.vm.box_url = "https://vagrantcloud.com/chef/ubuntu-14.10/version/1.0.0/provider/virtualbox.box"
+#   utopic_config.vm.host_name = "utopic"
+#   utopic_config.vm.network :private_network, ip: "192.168.20.54"
+# end
 
   config.vm.define :vivid do |vivid_config|
     config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "playbooks/common.yml"
+      ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
@@ -110,7 +109,7 @@ Vagrant.configure("2") do |config|
   config.vm.define :centos6 do |centos6_config|
     centos6_config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-6.5_chef-provisionerless.box"
     config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "playbooks/common.yml"
+      ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
@@ -122,12 +121,12 @@ Vagrant.configure("2") do |config|
   config.vm.define :centos5 do |centos5_config|
     centos5_config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-5.10_chef-provisionerless.box"
     centos5_config.vm.box = "centos5"
-    #config.vm.provision "shell", path: "centos5.sh"
-    #config.vm.provision "ansible" do |ansible|
-     # ansible.playbook = "playbooks/common.yml"
-      #ansible.sudo = "true"
-      #ansible.host_key_checking = "false"
-    #end
+    config.vm.provision "shell", path: "centos5.sh"
+    config.vm.provision "ansible" do |ansible|
+      ansible.playbook = playbook
+      ansible.sudo = "true"
+      ansible.host_key_checking = "false"
+    end
     centos5_config.vm.host_name = "centos5"
     centos5_config.vm.network :private_network, ip: "192.168.20.58"
   end
@@ -135,7 +134,7 @@ Vagrant.configure("2") do |config|
   config.vm.define :centos7 do |centos7_config|
     centos7_config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-7.0_chef-provisionerless.box"
     config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "playbooks/common.yml"
+      ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
@@ -180,28 +179,28 @@ Vagrant.configure("2") do |config|
     pxc3_config.vm.network :private_network, ip: "192.168.70.63"
   end
 
-   config.vm.define :percona1 do |percona1_config|
-        if rhel_distro == "centos5" then
-          config.vm.provision "shell", path: "centos5.sh"
-        end   
-        config.vm.provision "ansible" do |ansible|
-          ansible.playbook = rhel1_playbook
-          ansible.sudo = "true"
-          ansible.host_key_checking = "false"
-        end
-        percona1_config.vm.box = rhel_distro
-        percona1_config.vm.host_name = "percona1"
-        percona1_config.vm.network :private_network, ip: "192.168.70.71"
+  config.vm.define :percona1 do |percona1_config|
+       if rhel_distro == "centos5" then
+         config.vm.provision "shell", path: "centos5.sh"
+       end   
+       config.vm.provision "ansible" do |ansible|
+         ansible.playbook = rhel1_playbook
+         ansible.sudo = "true"
+         ansible.host_key_checking = "false"
+       end
+       percona1_config.vm.box = rhel_distro
+       percona1_config.vm.host_name = "percona1"
+       percona1_config.vm.network :private_network, ip: "192.168.70.71"
   end
   config.vm.define :percona2 do |percona2_config|
         if rhel_distro == "centos5" then
           config.vm.provision "shell", path: "centos5.sh"
         end   
-#        config.vm.provision "ansible" do |ansible|
-#          ansible.playbook = rhel_playbook
-#          ansible.sudo = "true"
-#          ansible.host_key_checking = "false"
-#        end
+        config.vm.provision "ansible" do |ansible|
+          ansible.playbook = rhel_playbook
+          ansible.sudo = "true"
+          ansible.host_key_checking = "false"
+        end
         percona2_config.vm.box = rhel_distro
         percona2_config.vm.host_name = "percona2"
         percona2_config.vm.network :private_network, ip: "192.168.70.72"
@@ -211,7 +210,7 @@ Vagrant.configure("2") do |config|
           config.vm.provision "shell", path: "centos5.sh"
         end   
          config.vm.provision "ansible" do |ansible|
-          ansible.playbook = rhel1_playbook
+          ansible.playbook = rhel_playbook
           ansible.sudo = "true"
           ansible.host_key_checking = "false"
         end

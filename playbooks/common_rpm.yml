@@ -2,6 +2,7 @@
 # This playbook sets up the first node for PXC on Centos
 
 - hosts: all
+  sudo: yes
 
   tasks:
   - name: remove mysql-libs
@@ -38,33 +39,31 @@
     copy: src=/home/hrvoje/worktable/sampledbs/world_innodb.sql dest=/root/
   - name: copy plugin_test
     sudo: yes
-    copy: src=/home/hrvoje/worktable/percona-cluster/plugins_test_55.sh dest=/root/
+    copy: src=/home/hrvoje/worktable/package-testing/plugins_test_56.sh dest=/root/
   - name: copy version_check
     sudo: yes
-    copy: src=/home/hrvoje/worktable/percona-cluster/version_check.sh dest=/root/
-  - name: install Percona-Server-shared-compat for CentOS 5
-    sudo: yes
-    yum: name=Percona-Server-shared-compat.x86_64 state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+    copy: src=/home/hrvoje/worktable/package-testing/version_check.sh dest=/root/
+# - name: install Percona-Server-shared-compat for CentOS 5
+#   yum: name=Percona-Server-shared-compat.x86_64 state=present
+#   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
   - name: install PXC
     sudo: yes
     yum: name={{item}} state=present enablerepo=percona-testing-x86_64
     with_items:
     - Percona-XtraDB-Cluster-full-56.x86_64
   - name: copy pxc config
-    template: src=/home/hrvoje/worktable/percona-cluster/templates/my_rpm.j2 dest=/etc/my.cnf
+    template: src=/home/hrvoje/worktable/package-testing/templates/my_rpm.j2 dest=/etc/my.cnf
     sudo: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
   - name: copy pxc config
-    template: src=/home/hrvoje/worktable/percona-cluster/templates/my_rpm.j2 dest=/etc/my.cnf
+    template: src=/home/hrvoje/worktable/package-testing/templates/my_rpm.j2 dest=/etc/my.cnf
     sudo: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
   - name: copy pxc config
-    template: src=/home/hrvoje/worktable/percona-cluster/templates/my_rpm_7.j2 dest=/etc/my.cnf
+    template: src=/home/hrvoje/worktable/package-testing/templates/my_rpm_7.j2 dest=/etc/my.cnf
     sudo: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
   - command: /etc/init.d/mysql start
-    sudo: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
   - command: service mysql start
     sudo: yes
