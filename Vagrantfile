@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-playbook = "playbooks/common.yml"
+playbook = "playbooks/mysql_56.yml"
 deb_distro = "bento/debian-6.0.10"
 deb1_playbook = "playbooks/pxc56.yml"
 deb_common_playbook = "playbooks/pxc56_common.yml"
@@ -125,7 +125,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define :centos7 do |centos7_config|
-    centos7_config.vm.box = "bento/centos7.1"
+    centos7_config.vm.box = "bento/centos-7.1"
 #   centos7_config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-7.0_chef-provisionerless.box"
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = playbook

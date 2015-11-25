@@ -1,0 +1,10 @@
+---
+# This playbook sets up the oracle mysql repo and installs the MySQL 5.5
+
+- hosts: all
+  sudo: yes
+
+  tasks:
+  - name: Download the deb repo package from oracle
+    command: wget http://dev.mysql.com/get/mysql-apt-config_0.5.3-1_all.deb 
+    when: ansible_os_family == "Debian"
