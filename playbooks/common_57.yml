@@ -9,8 +9,8 @@
   - apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
     when: ansible_os_family == "Debian"
   - name: add the deb repo
-    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main' state=present update_cache=yes
-  #  apt_repository: repo='deb http://repo.percona.com/apt {{ansible_lsb.codename}} main' state=present update_cache=yes
+    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main testing' state=present update_cache=yes
+ #   apt_repository: repo='deb http://repo.percona.com/apt {{ansible_lsb.codename}} main testing' state=present update_cache=yes
     when: ansible_os_family == "Debian"
   - name: add the yum percona repos 
     sudo: yes
@@ -37,25 +37,25 @@
     with_items: 
     - vim
     - pv
-    - percona-server-server-5.6
+    - percona-server-server-5.7
     - percona-xtrabackup
     - percona-toolkit
-    - percona-server-test-5.6
-    - percona-server-5.6-dbg
-    - percona-server-source-5.6
-    - percona-server-tokudb-5.6
+    - percona-server-test-5.7
+    - percona-server-5.7-dbg
+    - percona-server-source-5.7
+    - percona-server-tokudb-5.7
     when: ansible_os_family == "Debian"
   - name: install packages in centos
     sudo: yes
-    yum: name={{item}} state=present
+    yum: name={{item}} enablerepo=percona-testing-x86_64 state=present
     with_items:
     - libselinux-python
     - pv
-    - Percona-Server-server-56
-    - Percona-Server-test-56
-    - Percona-Server-56-debuginfo
-    - Percona-Server-devel-56
-    - Percona-Server-tokudb-56
+    - Percona-Server-server-57
+    - Percona-Server-test-57
+    - Percona-Server-57-debuginfo
+    - Percona-Server-devel-57
+    - Percona-Server-tokudb-57
     - percona-toolkit
 #   - percona-xtrabackup
     when: ansible_os_family == "RedHat"

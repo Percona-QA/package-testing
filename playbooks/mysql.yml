@@ -1,5 +1,5 @@
 ---
-# This playbook sets up the oracle mysql repo and installs the MySQL 5.5
+# This playbook sets up the oracle mysql repo and installs the MySQL repo
 
 - hosts: all
   sudo: yes
