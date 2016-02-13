@@ -53,17 +53,11 @@
 #   - percona-toolkit
 #   - percona-xtrabackup
     when: ansible_os_family == "RedHat"
-  - name: copy sample db
-    copy: src=../world_innodb.sql dest=/root/
-  - name: copy tokud db compression test
-    copy: src=/home/hrvoje/worktable/package-testing/tokudb_compression.sql dest=/root/
-  - name: copy plugin_test
-    copy: src=/home/hrvoje/worktable/package-testing/plugins_test_55.sh dest=/root/
-  - name: copy version_check
-    copy: src=/home/hrvoje/worktable/package-testing/version_check.sh dest=/root/
   - name: start the MySQL service
     command: service mysql start
     when: ansible_os_family == "RedHat"
+  - name: install plugins
+    command: /vagrant/plugins_test_55.sh
 # - name: remove the deb repo
 #   apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main' state=absent update_cache=yes
 #   when: ansible_os_family == "Debian"

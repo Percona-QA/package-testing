@@ -1,11 +1,12 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-playbook = "playbooks/psmdb.yml"
-deb_distro = "bento/debian-7.9" 
+playbook = "playbooks/common_56.yml"
+deb_distro = "sgallen/wily64" 
 deb1_playbook = "playbooks/pxc56.yml"
 deb_common_playbook = "playbooks/pxc56_common.yml"
-rhel_distro = "bento/centos-7.1"
+deb_garbd_playbook = "playbooks/pxc56_garbd.yml"
+rhel_distro = "bento/centos-7.2"
 rhel1_playbook = "playbooks/percona1.yml"
 rhel_playbook = "playbooks/common_rpm.yml"
 
@@ -22,7 +23,6 @@ Vagrant.configure("2") do |config|
       ansible.host_key_checking = "false"
     end
     squeeze_config.vm.host_name = "squeeze"
-    squeeze_config.vm.network :private_network, ip: "192.168.20.51"
   end
 
   config.vm.define :wheezy do |wheezy_config|
@@ -33,7 +33,6 @@ Vagrant.configure("2") do |config|
       ansible.host_key_checking = "false"
     end
     wheezy_config.vm.host_name = "wheezy"
-    wheezy_config.vm.network :private_network, ip: "192.168.20.52"
   end
 
   config.vm.define :jessie do |jessie_config|
@@ -47,7 +46,6 @@ Vagrant.configure("2") do |config|
     jessie_config.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "1024", "--ioapic", "on" ]
     end
-    jessie_config.vm.network :private_network, ip: "192.168.20.56"
   end
 
   config.vm.define :precise do |precise_config|
@@ -58,7 +56,6 @@ Vagrant.configure("2") do |config|
       ansible.host_key_checking = "false"
     end
     precise_config.vm.host_name = "precise"
-    precise_config.vm.network :private_network, ip: "192.168.20.55"
   end
 
   config.vm.define :trusty do |trusty_config|
@@ -72,20 +69,20 @@ Vagrant.configure("2") do |config|
     trusty_config.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "256", "--ioapic", "on" ]
     end
-    trusty_config.vm.network :private_network, ip: "192.168.20.53"
   end
 
-# config.vm.define :utopic do |utopic_config|
-#   config.vm.provision "ansible" do |ansible|
-#     ansible.playbook = playbook
-#     ansible.sudo = "true"
-#     ansible.host_key_checking = "false"
-#   end
-#   utopic_config.vm.box = "utopic"
-#   utopic_config.vm.box_url = "https://vagrantcloud.com/chef/ubuntu-14.10/version/1.0.0/provider/virtualbox.box"
-#   utopic_config.vm.host_name = "utopic"
-#   utopic_config.vm.network :private_network, ip: "192.168.20.54"
-# end
+  config.vm.define :wily do |wily_config|
+    config.vm.provision "ansible" do |ansible|
+      ansible.playbook = playbook
+      ansible.sudo = "true"
+      ansible.host_key_checking = "false"
+    end
+    wily_config.vm.box = "sgallen/wily64"
+    wily_config.vm.host_name = "wily"
+    wily_config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "1024", "--ioapic", "on" ]
+    end
+  end
 
   config.vm.define :vivid do |vivid_config|
     config.vm.provision "ansible" do |ansible|
@@ -98,7 +95,6 @@ Vagrant.configure("2") do |config|
     end
     vivid_config.vm.box = "bento/ubuntu-15.04"
     vivid_config.vm.host_name = "vivid"
-    vivid_config.vm.network :private_network, ip: "192.168.20.49"
   end
 
   config.vm.define :centos6 do |centos6_config|
@@ -109,7 +105,6 @@ Vagrant.configure("2") do |config|
       ansible.host_key_checking = "false"
     end
     centos6_config.vm.host_name = "centos6"
-    centos6_config.vm.network :private_network, ip: "192.168.20.57"
   end
 
   config.vm.define :centos5 do |centos5_config|
@@ -121,19 +116,16 @@ Vagrant.configure("2") do |config|
       ansible.host_key_checking = "false"
     end
     centos5_config.vm.host_name = "centos5"
-    centos5_config.vm.network :private_network, ip: "192.168.20.58"
   end
 
   config.vm.define :centos7 do |centos7_config|
-    centos7_config.vm.box = "bento/centos-7.1"
-#   centos7_config.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-7.0_chef-provisionerless.box"
+    centos7_config.vm.box = "bento/centos-7.2"
     config.vm.provision "ansible" do |ansible|
       ansible.playbook = playbook
       ansible.sudo = "true"
       ansible.host_key_checking = "false"
     end
     centos7_config.vm.host_name = "centos7"
-    centos7_config.vm.network :private_network, ip: "192.168.20.59"
   end
 
   config.vm.define :pxc1 do |pxc1_config|
@@ -145,7 +137,7 @@ Vagrant.configure("2") do |config|
     pxc1_config.vm.box = deb_distro
     pxc1_config.vm.host_name = "pxc1"
     pxc1_config.vm.provider :virtualbox do |vb|
-      vb.customize ["modifyvm", :id, "--memory", "1024", "--ioapic", "on" ]
+      vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on" ]
     end
     pxc1_config.vm.network :private_network, ip: "192.168.70.61"
   end
@@ -158,6 +150,9 @@ Vagrant.configure("2") do |config|
     end
     pxc2_config.vm.box = deb_distro
     pxc2_config.vm.host_name = "pxc2"
+    pxc2_config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on" ]
+    end
     pxc2_config.vm.network :private_network, ip: "192.168.70.62"
   end
 
@@ -169,11 +164,28 @@ Vagrant.configure("2") do |config|
     end
     pxc3_config.vm.box = deb_distro
     pxc3_config.vm.host_name = "pxc3"
+    pxc3_config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on" ]
+    end
     pxc3_config.vm.network :private_network, ip: "192.168.70.63"
   end
 
+  config.vm.define :pxc4 do |pxc4_config|
+    config.vm.provision "ansible" do |ansible|
+      ansible.playbook = deb_garbd_playbook
+      ansible.sudo = "true"
+      ansible.host_key_checking = "false"
+    end
+    pxc4_config.vm.box = deb_distro
+    pxc4_config.vm.host_name = "pxc4"
+    pxc4_config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on" ]
+    end
+    pxc4_config.vm.network :private_network, ip: "192.168.70.64"
+  end
+
   config.vm.define :percona1 do |percona1_config|
-       if rhel_distro == "centos5" then
+       if rhel_distro == "bento/centos-5.11" then
          config.vm.provision "shell", path: "centos5.sh"
        end   
        config.vm.provision "ansible" do |ansible|
@@ -186,7 +198,7 @@ Vagrant.configure("2") do |config|
        percona1_config.vm.network :private_network, ip: "192.168.70.71"
   end
   config.vm.define :percona2 do |percona2_config|
-        if rhel_distro == "centos5" then
+        if rhel_distro == "bento/centos-5.11" then
           config.vm.provision "shell", path: "centos5.sh"
         end   
         config.vm.provision "ansible" do |ansible|

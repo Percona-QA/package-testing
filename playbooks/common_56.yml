@@ -43,10 +43,11 @@
     - percona-server-test-5.6
     - percona-server-5.6-dbg
     - percona-server-source-5.6
-    - percona-server-tokudb-5.6
     when: ansible_os_family == "Debian"
+  - name: install tokudb
+    apt: name=percona-server-tokudb-5.6 
+    when: (ansible_distribution == "Ubuntu") or (ansible_os_family == "Debian" and ansible_distribution_major_version > "6")
   - name: install packages in centos
-    sudo: yes
     yum: name={{item}} state=present
     with_items:
     - libselinux-python
@@ -57,28 +58,22 @@
     - Percona-Server-devel-56
     - Percona-Server-tokudb-56
     - percona-toolkit
-#   - percona-xtrabackup
+    - percona-xtrabackup
     when: ansible_os_family == "RedHat"
-  - name: copy sample db
-    sudo: yes
-    copy: src=/home/hrvoje/worktable/sampledbs/world_innodb.sql dest=/root/
-  - name: copy tokud db compression test
-    sudo: yes
-    copy: src=/home/hrvoje/worktable/package-testing/tokudb_compression.sql dest=/root/
-  - name: copy plugin_test
-    sudo: yes
-    copy: src=/home/hrvoje/worktable/package-testing/plugins_test_56.sh dest=/root/
-  - name: copy version_check
-    sudo: yes
-    copy: src=/home/hrvoje/worktable/package-testing/version_check.sh dest=/root/
-  - name: start the MySQL service
-    command: service mysql start
-    when: ansible_os_family == "RedHat"
+  - command: /etc/init.d/mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+  - command: service mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+  - command: systemctl start mysql
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+  - name: install plugins
+    command: /vagrant/plugins_test_56.sh
 # - name: remove the deb repo
 #   apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main' state=absent update_cache=yes
 #   when: ansible_os_family == "Debian"
 # - name: add the testing deb repo
 #   apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main testing' state=present update_cache=yes
+#   when: ansible_os_family == "Debian"
 #   when: ansible_os_family == "Debian"
 # - name: apt-get upgrade
 #   apt: upgrade=safe

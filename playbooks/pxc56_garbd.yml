@@ -1,0 +1,27 @@
+---
+# This playbook sets up the garbd 
+
+- hosts: all
+  sudo: yes
+
+  tasks:
+  - name: add the repo
+    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main testing' state=present
+#    apt_repository: repo='deb http://repo.percona.com/apt {{ansible_lsb.codename}} main testing' state=present
+  # Add an Apt signing key, will not download if present
+  - apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
+  - name: install garbd
+    apt: name={{ item }} update_cache=yes
+    with_items: 
+#   - language-pack-hr
+    - vim
+    - pv
+    - python-mysqldb
+    - percona-xtradb-cluster-garbd-3
+  - name: configure garbd
+    template: src=/home/hrvoje/worktable/package-testing/templates/garbd.j2 
+              dest=/etc/default/garbd
+              mode=0640 owner=root group=root
+  # start mysql service
+  - command: service garbd start
+  

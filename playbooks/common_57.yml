@@ -13,15 +13,12 @@
  #   apt_repository: repo='deb http://repo.percona.com/apt {{ansible_lsb.codename}} main testing' state=present update_cache=yes
     when: ansible_os_family == "Debian"
   - name: add the yum percona repos 
-    sudo: yes
     yum: name=http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
     when: ansible_os_family == "RedHat" 
   - name: epel 6 repo
-    sudo: yes
     yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/6/i386/epel-release-6-8.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
   - name: epel 7 repo
-    sudo: yes
     yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-5.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 #  - name: oracle mysql repo
@@ -37,17 +34,16 @@
     with_items: 
     - vim
     - pv
-    - percona-server-server-5.7
-    - percona-xtrabackup
+    - percona-xtrabackup-24
     - percona-toolkit
+    - percona-server-server-5.7
     - percona-server-test-5.7
     - percona-server-5.7-dbg
     - percona-server-source-5.7
     - percona-server-tokudb-5.7
     when: ansible_os_family == "Debian"
   - name: install packages in centos
-    sudo: yes
-    yum: name={{item}} enablerepo=percona-testing-x86_64 state=present
+    yum: name={{item}} state=present  enablerepo=percona-testing-x86_64 
     with_items:
     - libselinux-python
     - pv
@@ -57,23 +53,13 @@
     - Percona-Server-devel-57
     - Percona-Server-tokudb-57
     - percona-toolkit
-#   - percona-xtrabackup
+    - percona-xtrabackup-24
     when: ansible_os_family == "RedHat"
-  - name: copy sample db
-    sudo: yes
-    copy: src=/home/hrvoje/worktable/sampledbs/world_innodb.sql dest=/root/
-  - name: copy tokud db compression test
-    sudo: yes
-    copy: src=/home/hrvoje/worktable/package-testing/tokudb_compression.sql dest=/root/
-  - name: copy plugin_test
-    sudo: yes
-    copy: src=/home/hrvoje/worktable/package-testing/plugins_test_56.sh dest=/root/
-  - name: copy version_check
-    sudo: yes
-    copy: src=/home/hrvoje/worktable/package-testing/version_check.sh dest=/root/
   - name: start the MySQL service
     command: service mysql start
     when: ansible_os_family == "RedHat"
+  - name: install plugins
+    command: /vagrant/plugins_test_57.sh
 # - name: remove the deb repo
 #   apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main' state=absent update_cache=yes
 #   when: ansible_os_family == "Debian"
