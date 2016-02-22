@@ -9,16 +9,15 @@
   - apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
     when: ansible_os_family == "Debian"
   - name: add the deb repo
-    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} testing' state=present update_cache=yes
+    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main testing' state=present update_cache=yes
     when: ansible_os_family == "Debian"
- # - name: copy apt-cacher-ng proxy file
- #   when: ansible_os_family == "Debian"
   - name: install deb packages 
     apt: name={{item}} update_cache=yes
     with_items: 
     - vim
     - pv
     - percona-server-mongodb
+    - percona-server-mongodb-dbg
     when: ansible_os_family == "Debian"
   - name: epel 6 repo
     sudo: yes
@@ -47,9 +46,9 @@
   - command: systemctl start mongod
     sudo: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-  - name: add the mongo rpm repo
-    copy: src=/home/hrvoje/worktable/package-testing/mongodb-org-3.0.repo dest=/etc/yum.repos.d/
-    when: ansible_os_family == "RedHat"
+# - name: add the mongo rpm repo
+#   copy: src=/home/hrvoje/worktable/package-testing/mongodb-org-3.0.repo dest=/etc/yum.repos.d/
+#   when: ansible_os_family == "RedHat"
 # - name: remove the deb repo
 #   apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main' state=absent update_cache=yes
 #   when: ansible_os_family == "Debian"
