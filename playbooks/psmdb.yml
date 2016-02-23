@@ -9,7 +9,7 @@
   - apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
     when: ansible_os_family == "Debian"
   - name: add the deb repo
-    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main testing' state=present update_cache=yes
+    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main' state=present update_cache=yes
     when: ansible_os_family == "Debian"
   - name: install deb packages 
     apt: name={{item}} update_cache=yes
@@ -33,6 +33,7 @@
   - name: install packages in centos
     yum: name={{item}} state=present
     with_items:
+    - redhat-lsb
     - libselinux-python
     - pv
     - Percona-Server-MongoDB
