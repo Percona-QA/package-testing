@@ -39,7 +39,7 @@
 #   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
   - name: install PXC
     sudo: yes
-    yum: name={{item}} state=present enablerepo=percona-testing-x86_64
+    yum: name={{item}} state=present enablerepo=percona-experimental-x86_64
     with_items:
     - Percona-XtraDB-Cluster-full-56.x86_64
   - name: copy pxc config

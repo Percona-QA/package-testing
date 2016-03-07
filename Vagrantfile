@@ -1,12 +1,12 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-playbook = "playbooks/psmdb.yml"
+playbook = "playbooks/common_56.yml"
 deb_distro = "sgallen/wily64" 
 deb1_playbook = "playbooks/pxc56.yml"
 deb_common_playbook = "playbooks/pxc56_common.yml"
 deb_garbd_playbook = "playbooks/pxc56_garbd.yml"
-rhel_distro = "bento/centos-7.2"
+rhel_distro = "bento/centos-6.7"
 rhel1_playbook = "playbooks/percona1.yml"
 rhel_playbook = "playbooks/common_rpm.yml"
 
