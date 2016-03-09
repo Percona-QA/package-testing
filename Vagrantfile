@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-playbook = "playbooks/common_56.yml"
+playbook = "playbooks/psmdb.yml"
 deb_distro = "sgallen/wily64" 
 deb1_playbook = "playbooks/pxc56.yml"
 deb_common_playbook = "playbooks/pxc56_common.yml"
@@ -14,16 +14,6 @@ Vagrant.configure("2") do |config|
   # All Vagrant configuration is done here. The most pxb configuration
   # options are documented and commented below. For a complete reference,
   # please see the online documentation at vagrantup.com.
-
-  config.vm.define :squeeze do |squeeze_config|
-    config.vm.provision "ansible" do |ansible|
-    squeeze_config.vm.box = "bento/debian-6.0.10"
-      ansible.playbook = playbook
-      ansible.sudo = "true"
-      ansible.host_key_checking = "false"
-    end
-    squeeze_config.vm.host_name = "squeeze"
-  end
 
   config.vm.define :wheezy do |wheezy_config|
     wheezy_config.vm.box = "bento/debian-7.9"

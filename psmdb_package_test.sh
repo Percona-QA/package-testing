@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version="3.0.8-1.3"
+version="3.0.9-1.4"
 log="/tmp/psmdb_run.log"
 #echo -n > /tmp/psmdb_run.log
 

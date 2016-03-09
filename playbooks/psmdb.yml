@@ -37,6 +37,7 @@
     - libselinux-python
     - pv
     - Percona-Server-MongoDB
+    - Percona-Server-MongoDB-debuginfo
     when: ansible_os_family == "RedHat"
   - name: start mongodb
     command: /etc/init.d/mongod start

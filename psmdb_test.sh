@@ -53,7 +53,7 @@ for engine in mmapv1 PerconaFT rocksdb wiredTiger; do
 	stop_service
 	clean_datadir
 	sed -i "/engine: *${engine}/s/#//g" /etc/mongod.conf
-	echo "testing ${engine}"
+	echo "testing ${engine}" | tee -a $log
 	start_service
 	echo "importing the sample data"
 	mongo < /vagrant/mongo_insert.js >> $log
