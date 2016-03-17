@@ -42,7 +42,7 @@
     - percona-server-tokudb-5.7
     when: ansible_os_family == "Debian"
   - name: install packages in centos
-    yum: name={{item}} state=present  #enablerepo=percona-testing-x86_64 
+    yum: name={{item}} state=present # enablerepo=percona-testing-x86_64 
     with_items:
     - libselinux-python
     - pv

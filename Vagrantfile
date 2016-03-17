@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-playbook = "playbooks/psmdb.yml"
+playbook = "playbooks/common_56.yml"
 deb_distro = "sgallen/wily64" 
 deb1_playbook = "playbooks/pxc56.yml"
 deb_common_playbook = "playbooks/pxc56_common.yml"
