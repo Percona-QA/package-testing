@@ -8,4 +8,4 @@ mysql -e "INSTALL PLUGIN audit_log SONAME 'audit_log.so';"
 mysql -e "INSTALL PLUGIN handlersocket SONAME 'handlersocket.so';"
 mysql -e "SHOW PLUGINS;"
 mysql -e "CREATE DATABASE world;"
-pv /root/world_innodb.sql | mysql -D world
+pv /vagrant/world_innodb.sql | mysql -D world

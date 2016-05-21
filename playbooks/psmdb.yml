@@ -24,7 +24,7 @@
     yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/6/i386/epel-release-6-8.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
   - name: epel 7 repo
-    yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-5.noarch.rpm state=present
+    yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-6.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
   - name: add the yum percona repos
     sudo: yes

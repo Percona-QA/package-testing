@@ -1,0 +1,44 @@
+---
+# Install Percona Server 5.7 and Percona XtraBackup 2.4
+
+- hosts: all
+  sudo: yes
+
+  tasks:
+  # Add an Apt signing key, will not download if present
+  - apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
+    when: ansible_os_family == "Debian"
+  - name: add the deb repo
+    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main' state=present update_cache=yes
+ #   apt_repository: repo='deb http://repo.percona.com/apt {{ansible_lsb.codename}} main testing' state=present update_cache=yes
+    when: ansible_os_family == "Debian"
+  - name: add the yum percona repos 
+    yum: name=http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
+    when: ansible_os_family == "RedHat" 
+  - name: epel 6 repo
+    yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/6/i386/epel-release-6-8.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+  - name: epel 7 repo
+    yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-6.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+  - name: install deb packages 
+    apt: name={{item}} update_cache=yes
+    with_items: 
+    - vim
+    - pv
+    - percona-xtrabackup-24
+    - percona-server-server-5.7
+    when: ansible_os_family == "Debian"
+  - name: install packages in centos
+    yum: name={{item}} state=present # enablerepo=percona-testing-x86_64 
+    with_items:
+    - libselinux-python
+    - pv
+    - Percona-Server-server-57
+    - percona-xtrabackup-24
+    when: ansible_os_family == "RedHat"
+  - name: start the MySQL service
+    command: service mysql start
+    when: ansible_os_family == "RedHat"
+  - name: install plugins
+    command: /vagrant/plugins_test_57.sh
