@@ -26,8 +26,10 @@
     with_items: 
     - vim
     - pv
-    - percona-xtrabackup-24
     - percona-server-server-5.7
+    - percona-xtrabackup-24
+    - percona-xtrabackup-dbg-24
+    - percona-xtrabackup-test-24
     when: ansible_os_family == "Debian"
   - name: install packages in centos
     yum: name={{item}} state=present # enablerepo=percona-testing-x86_64 
@@ -36,9 +38,19 @@
     - pv
     - Percona-Server-server-57
     - percona-xtrabackup-24
+    - percona-xtrabackup-test-24
+    - percona-xtrabackup-24-debuginfo
     when: ansible_os_family == "RedHat"
   - name: start the MySQL service
     command: service mysql start
+    when: ansible_os_family == "RedHat"
+  - name: set root password
+    command: /vagrant/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+  - name: copy .my.cnf
+    template: src=/home/hrvoje/worktable/package-testing/templates/my_57.j2 
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
     when: ansible_os_family == "RedHat"
   - name: install plugins
     command: /vagrant/plugins_test_57.sh

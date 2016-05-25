@@ -22,7 +22,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
   - name: epel 7 repo
     sudo: yes
-    yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-5.noarch.rpm state=present
+    yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-6.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 #  - name: oracle mysql repo
  #   sudo: yes
@@ -43,12 +43,10 @@
     - percona-server-test-5.6
     - percona-server-5.6-dbg
     - percona-server-source-5.6
+    - percona-server-tokudb-5.6
     when: ansible_os_family == "Debian"
-  - name: install tokudb
-    apt: name=percona-server-tokudb-5.6 
-    when: (ansible_distribution == "Ubuntu") or (ansible_os_family == "Debian" and ansible_distribution_major_version > "6")
   - name: install packages in centos
-    yum: name={{item}} state=present
+    yum: name={{item}} state=present  #enablerepo=percona-testing-x86_64
     with_items:
     - libselinux-python
     - pv

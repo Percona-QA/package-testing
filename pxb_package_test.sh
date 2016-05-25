@@ -1,10 +1,10 @@
 #!/bin/bash
 
+set -e
+
 version="2.3.4-1"
 log="/tmp/pxb_run.log"
 #echo -n > /tmp/pxb_run.log
-
-set -e
 
 echo "checking if all packages are installed"
 if [ -f /etc/redhat-release ]; then
@@ -24,7 +24,7 @@ else
                 echo "all packages are installed"
         else
                 for package in percona-xtrabackup-dbg percona-xtrabackup-test percona-xtrabackup; do
-                        if [ "$(dpkg -l | grep -c ${package})" -gt 0 ]; then
+                        if [ "$(dpkg -l | grep -c ${package})" -gt 0 ] && [ "$dpkg -l | grep ${package} | awk '{$print $3}' == $version.$(lsb_release -sc)" ] ; then
                                 echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
                         else
                                 echo "WARNING: ${package}-${version} is not installed"
