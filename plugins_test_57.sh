@@ -9,6 +9,7 @@ mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME_AUDIT SONAME 'query_response_time.s
 mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME SONAME 'query_response_time.so';"
 mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME_READ SONAME 'query_response_time.so';"
 mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME_WRITE SONAME 'query_response_time.so';"
+mysql -e "INSTALL PLUGIN mysqlx SONAME 'mysqlx.so';"
 mysql -e "SHOW PLUGINS;"
 mysql -e "CREATE DATABASE world;"
 mysql -e "CREATE DATABASE world2;"

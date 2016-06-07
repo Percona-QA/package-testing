@@ -20,6 +20,7 @@
     - 192.168.70.71
   - name: add the percona repo
     yum: name=http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 6
   - name: add the epel repo for centos7 
     yum: name=http://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-6.noarch.rpm
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"

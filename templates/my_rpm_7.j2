@@ -1,9 +1,12 @@
 [mysqld]
 
 datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
 user=mysql
 
 innodb_log_file_size=20M
+
+log-error=/var/log/mysqld.log
 
 # Path to Galera library
 wsrep_provider=/usr/lib64/libgalera_smm.so

@@ -1,0 +1,34 @@
+---
+# This playbook sets up the pxc
+
+- hosts: all
+  sudo: yes
+
+  tasks:
+  - name: add the repo
+    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main testing' state=present
+#    apt_repository: repo='deb http://repo.percona.com/apt {{ansible_lsb.codename}} main testing' state=present
+  # Add an Apt signing key, will not download if present
+  - apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
+#  - name: copy apt-cacher-ng proxy file
+#    copy: src=/home/hrvoje/worktable/package-testing/01proxy dest=/etc/apt/apt.conf.d/
+#    when: ansible_os_family == "Debian"
+  - name: install galera, vim, pv, python-mysqldb, pxc-56
+    apt: name={{ item }} update_cache=yes
+    with_items: 
+    - vim
+    - pv
+    - python-mysqldb
+    - percona-xtradb-cluster-57
+  - name: copy sample db
+    copy: src=/home/hrvoje/worktable/sampledbs/world_innodb.sql dest=/root/
+  # stop mysql service
+  - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped 
+  - name: configure PXC
+    template: src=/home/hrvoje/worktable/package-testing/templates/my.j2 
+              dest=/etc/mysql/my.cnf
+              mode=0640 owner=mysql group=root
+  # start mysql service
+  - command: service mysql start
+  
+  

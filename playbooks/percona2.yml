@@ -7,11 +7,11 @@
   tasks:
   - name: remove mysql-libs
     yum: name=mysql-libs state=absent
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-  - name: install stuff
+  - name: install {{item}}
     yum: name={{item}} state=present
     with_items:
     - libselinux-python
+    #- vim
   - selinux: state=disabled
   - name: add firewall rules
     command: /sbin/iptables -I INPUT -s {{item}} -p tcp -j ACCEPT
@@ -21,38 +21,32 @@
     - 192.168.70.71
   - name: add the percona repo
     yum: name=http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 6
   - name: add the epel repo for centos7 
     yum: name=http://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-6.noarch.rpm
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
   - name: add the epel repo for centos6
     yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/6/x86_64/epel-release-6-8.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+# - name: install Percona-Server-shared-compat for CentOS 5
+#   yum: name=Percona-Server-shared-compat.x86_64 state=present
+#   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
   - name: install PXC
     yum: name={{item}} state=present enablerepo=percona-testing-x86_64
     with_items:
-    - Percona-XtraDB-Cluster-full-57.x86_64 
-    - pv 
-    - MySQL-python 
+    - Percona-XtraDB-Cluster-full-56.x86_64
   - name: copy pxc config
     template: src=/home/hrvoje/worktable/package-testing/templates/my_rpm.j2 dest=/etc/my.cnf
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
   - name: copy pxc config
+    template: src=/home/hrvoje/worktable/package-testing/templates/my_rpm.j2 dest=/etc/my.cnf
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+  - name: copy pxc config
     template: src=/home/hrvoje/worktable/package-testing/templates/my_rpm_7.j2 dest=/etc/my.cnf
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-  - command: service mysql bootstrap-pxc
+  - command: /etc/init.d/mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+  - command: service mysql start
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-  - command: systemctl start mysql@bootstrap.service
+  - command: systemctl start mysql
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-  - name: set root password
-    command: /vagrant/setpass_57.sh
-    when: ansible_os_family == "RedHat"
-  - name: copy .my.cnf
-    template: src=/home/hrvoje/worktable/package-testing/templates/my_57.j2
-              dest=/root/.my.cnf
-              mode=0640 owner=root group=root
-    when: ansible_os_family == "RedHat"
-  - name: create the backup user
-    mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD, PROCESS, LOCK TABLES,REPLICATION CLIENT" state=present
-  - name: install plugins
-    command: /vagrant/plugins_test_57.sh
-

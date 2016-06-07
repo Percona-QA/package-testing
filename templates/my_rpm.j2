@@ -1,7 +1,10 @@
 [mysqld]
 
 datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
 user=mysql
+
+log-error=/var/log/mysqld.log
 
 innodb_log_file_size=20M
 

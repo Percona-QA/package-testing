@@ -9,7 +9,7 @@
   - apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
     when: ansible_os_family == "Debian"
   - name: add the deb repo
-    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main testing' state=present update_cache=yes
+    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main' state=present update_cache=yes
     when: ansible_os_family == "Debian"
   - name: install deb packages 
     apt: name={{item}} update_cache=yes
@@ -20,18 +20,16 @@
     - percona-server-mongodb-32-dbg
     when: ansible_os_family == "Debian"
   - name: epel 6 repo
-    sudo: yes
     yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/6/i386/epel-release-6-8.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
   - name: epel 7 repo
-    yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-5.noarch.rpm state=present
+    yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-6.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
   - name: add the yum percona repos
-    sudo: yes
     yum: name=http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 6 
   - name: install packages in centos
-    yum: name={{item}} state=present enablerepo=percona-testing-x86_64
+    yum: name={{item}} state=present #enablerepo=percona-testing-x86_64
     with_items:
     - redhat-lsb
     - libselinux-python
@@ -43,10 +41,8 @@
     command: /etc/init.d/mongod start
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
   - command: service mongod start
-    sudo: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
   - command: systemctl start mongod
-    sudo: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 # - name: add the mongo rpm repo
 #   copy: src=/home/hrvoje/worktable/package-testing/mongodb-org-3.0.repo dest=/etc/yum.repos.d/

@@ -21,8 +21,8 @@
     with_items:
     - vim
     - pv
-#    - percona-xtradb-cluster-full-57 #doesn't work due to BLD-425
-    - percona-xtradb-cluster-57
+    - percona-xtradb-cluster-full-57 
+#   - percona-xtradb-cluster-57
     - python-mysqldb
   # stop mysql service
   - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped 
@@ -33,10 +33,10 @@
   #bootstrap the cluster
   - command: service mysql bootstrap-pxc
   #add sstuser
-  - mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,LOCK TABLES,REPLICATION CLIENT" state=present
-  - command: /vagrant/plugins_test_56.sh 
-  - name: install 3rd party packages
-    apt: name={{item}} 
-    with_items:
-    - cacti
-    - rsyslog-mysql
+  - mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" state=present
+  - command: /vagrant/plugins_test_57.sh 
+# - name: install 3rd party packages
+#   apt: name={{item}} 
+#   with_items:
+#   - cacti
+#   - rsyslog-mysql

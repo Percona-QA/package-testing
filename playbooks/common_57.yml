@@ -19,7 +19,7 @@
     yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/6/i386/epel-release-6-8.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
   - name: epel 7 repo
-    yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-5.noarch.rpm state=present
+    yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-6.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 #  - name: oracle mysql repo
  #   sudo: yes
@@ -42,7 +42,7 @@
     - percona-server-tokudb-5.7
     when: ansible_os_family == "Debian"
   - name: install packages in centos
-    yum: name={{item}} state=present # enablerepo=percona-testing-x86_64 
+    yum: name={{item}} state=present #enablerepo=percona-testing-x86_64 
     with_items:
     - libselinux-python
     - pv
@@ -56,6 +56,14 @@
     when: ansible_os_family == "RedHat"
   - name: start the MySQL service
     command: service mysql start
+    when: ansible_os_family == "RedHat"
+  - name: set root password
+    command: /vagrant/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+  - name: copy .my.cnf
+    template: src=/home/hrvoje/worktable/package-testing/templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
     when: ansible_os_family == "RedHat"
   - name: install plugins
     command: /vagrant/plugins_test_57.sh

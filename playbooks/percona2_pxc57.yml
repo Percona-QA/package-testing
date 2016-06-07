@@ -7,58 +7,37 @@
   tasks:
   - name: remove mysql-libs
     yum: name=mysql-libs state=absent
-    sudo: yes
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
   - name: install {{item}}
-    sudo: yes
     yum: name={{item}} state=present
     with_items:
     - libselinux-python
-    #- vim
   - selinux: state=disabled
-    sudo: yes
   - name: add firewall rules
-    sudo: yes
     command: /sbin/iptables -I INPUT -s {{item}} -p tcp -j ACCEPT
     with_items:
     - 192.168.70.73
     - 192.168.70.72
     - 192.168.70.71
   - name: add the percona repo
-    sudo: yes
     yum: name=http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
   - name: add the epel repo for centos7 
     yum: name=http://anorien.csc.warwick.ac.uk/mirrors/epel/7/x86_64/e/epel-release-7-6.noarch.rpm
-    sudo: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
   - name: add the epel repo for centos6
     yum: name=https://anorien.csc.warwick.ac.uk/mirrors/epel/6/x86_64/epel-release-6-8.noarch.rpm state=present
-    sudo: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-# - name: install Percona-Server-shared-compat for CentOS 5
-#   yum: name=Percona-Server-shared-compat.x86_64 state=present
-#   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
   - name: install PXC
-    sudo: yes
     yum: name={{item}} state=present enablerepo=percona-testing-x86_64
     with_items:
-    - Percona-XtraDB-Cluster-full-56.x86_64
+    - Percona-XtraDB-Cluster-full-57.x86_64
   - name: copy pxc config
     template: src=/home/hrvoje/worktable/package-testing/templates/my_rpm.j2 dest=/etc/my.cnf
-    sudo: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-  - name: copy pxc config
-    template: src=/home/hrvoje/worktable/package-testing/templates/my_rpm.j2 dest=/etc/my.cnf
-    sudo: yes
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
   - name: copy pxc config
     template: src=/home/hrvoje/worktable/package-testing/templates/my_rpm_7.j2 dest=/etc/my.cnf
-    sudo: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-  - command: /etc/init.d/mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
   - command: service mysql start
-    sudo: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
   - command: systemctl start mysql
-    sudo: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
