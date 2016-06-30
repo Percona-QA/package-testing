@@ -6,7 +6,7 @@
   tasks:
   - name: add the deb repo
     sudo: yes
-    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main testing' state=present
+    apt_repository: repo='deb [arch=amd64] http://repo.percona.com/apt {{ansible_lsb.codename}} main testing' state=present
     when: ansible_os_family == "Debian"
   - name: upgrade deb packages 
     sudo: yes
