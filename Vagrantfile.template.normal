@@ -1,0 +1,42 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+servers=[
+  {
+    :hostname => "d-wheezy-64-@@playbook@@",
+    :box => "debian/wheezy64",
+  },
+  {
+    :hostname => "d-jessie-64-@@playbook@@",
+    :box => "debian/jessie64",
+  },
+  {
+    :hostname => "centos-7-64-@@playbook@@",
+    :box => "centos/7",
+  }
+]
+
+Vagrant.configure("2") do |config|
+  # All Vagrant configuration is done here. The most pxb configuration
+  # options are documented and commented below. For a complete reference,
+  # please see the online documentation at vagrantup.com.
+
+  servers.each do |machine|
+    config.vm.define machine[:hostname] do |node|
+      node.vm.box = machine[:box]
+      node.vm.hostname = machine[:hostname]
+      node.vm.provider "virtualbox" do |vb|
+          vb.customize ["modifyvm", :id, "--memory", "1024", "--ioapic", "on"]
+      end
+      config.vm.provision "ansible" do |ansible|
+        ansible.playbook = "@@playbook_full@@"
+        ansible.sudo = "true"
+        ansible.verbose = "vvvv"
+        ansible.host_key_checking = "false"
+      end
+    end
+  end
+
+end
+
+
