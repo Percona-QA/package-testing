@@ -1,4 +1,14 @@
 
+  - name: setup throttling for yum
+    command: echo "throttle=5M" >> /etc/yum.conf
+    when: ansible_os_family == "RedHat"
+
+  - name: setup throttling for apt
+    template: src=../templates/apt.throttling
+              dest=/etc/apt/apt.conf.d/lowerspeed
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "Debian"
+
   - name: install git with apt
     apt: name={{item}} update_cache=yes
     with_items:

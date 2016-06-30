@@ -1,0 +1,8 @@
+Acquire
+{
+   Queue-mode "access";
+   http
+   {
+      Dl-Limit "5000";
+   };
+};
