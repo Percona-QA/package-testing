@@ -3,27 +3,31 @@
 
 servers=[
   {
-    :hostname => "d-wheezy-64-@@playbook@@",
+    :hostname => "d-wheezy-64-@@product@@",
     :box => "debian/wheezy64",
   },
   {
-    :hostname => "d-jessie-64-@@playbook@@",
-    :box => "debian/jessie64",
+    :hostname => "d-jessie-64-@@product@@",
+    :box => "bento/debian-8.4",
   },
   {
-    :hostname => "centos-7-64-@@playbook@@",
+    :hostname => "centos-6-64-@@product@@",
+    :box => "bento/centos-6.7",
+  },
+  {
+    :hostname => "centos-7-64-@@product@@",
     :box => "centos/7",
   },
   {
-    :hostname => "u-precise-64-@@playbook@@",
+    :hostname => "u-precise-64-@@product@@",
     :box => "ubuntu/precise64",
   },
   {
-    :hostname => "u-trusty-64-@@playbook@@",
+    :hostname => "u-trusty-64-@@product@@",
     :box => "ubuntu/trusty64",
   },
   {
-    :hostname => "u-xenial-64-@@playbook@@",
+    :hostname => "u-xenial-64-@@product@@",
     :box => "ubuntu/xenial64",
   }
 ]
