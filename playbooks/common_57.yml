@@ -5,19 +5,8 @@
   sudo: yes
 
   tasks:
-  - name: install git with apt
-    apt: name={{item}} update_cache=yes
-    with_items:
-    - git
-    when: ansible_os_family == "Debian"
-  - name: install git with yum
-    yum: name={{item}} state=present
-    with_items:
-    - git
-    when: ansible_os_family == "RedHat"
-  - git: repo=https://github.com/Percona-QA/package-testing
-         dest=/package-testing
-         depth=1
+  - include: ../tasks/test_prep.yml
+
   # Add an Apt signing key, will not download if present
   - apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
     when: ansible_os_family == "Debian"
@@ -25,9 +14,9 @@
 #    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main' state=present update_cache=yes
     apt_repository: repo='deb http://repo.percona.com/apt {{ansible_lsb.codename}} main testing' state=present update_cache=yes
     when: ansible_os_family == "Debian"
-  - name: add the yum percona repos 
+  - name: add the yum percona repos
     yum: name=http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
-    when: ansible_os_family == "RedHat" 
+    when: ansible_os_family == "RedHat"
   - name: epel 6 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
@@ -41,7 +30,7 @@
  # - name: copy apt-cacher-ng proxy file
  #   copy: src=/home/hrvoje/worktable/package-testing/01proxy dest=/etc/apt/apt.conf.d/
  #   when: ansible_os_family == "Debian"
-  - name: install deb packages 
+  - name: install deb packages
     apt: name={{item}} update_cache=yes
     with_items:
     - vim
@@ -55,7 +44,7 @@
     - percona-server-tokudb-5.7
     when: ansible_os_family == "Debian"
   - name: install packages in centos
-    yum: name={{item}} state=present #enablerepo=percona-testing-x86_64 
+    yum: name={{item}} state=present #enablerepo=percona-testing-x86_64
     with_items:
     - libselinux-python
     - pv
@@ -74,7 +63,7 @@
     command: /package-testing/setpass_57.sh
     when: ansible_os_family == "RedHat"
   - name: copy .my.cnf
-    template: src=./templates/my_57.j2
+    template: src=../templates/my_57.j2
               dest=/root/.my.cnf
               mode=0640 owner=root group=root
     when: ansible_os_family == "RedHat"
