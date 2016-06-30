@@ -15,6 +15,10 @@ servers=[
     :box => "centos/7",
   },
   {
+    :hostname => "u-precise-64-@@playbook@@",
+    :box => "ubuntu/precise64",
+  },
+  {
     :hostname => "u-trusty-64-@@playbook@@",
     :box => "ubuntu/trusty64",
   },
