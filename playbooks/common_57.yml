@@ -5,6 +5,16 @@
   sudo: yes
 
   tasks:
+  - name: install git with apt
+    apt: name={{item}} update_cache=yes
+    with_items:
+    - git
+    when: ansible_os_family == "Debian"
+  - name: install git with yum
+    yum: name={{item}} state=present
+    with_items:
+    - git
+    when: ansible_os_family == "RedHat"
   - git: repo=https://github.com/Percona-QA/package-testing
          dest=/package-testing
          depth=1
