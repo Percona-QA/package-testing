@@ -1,6 +1,6 @@
 
   - name: setup throttling for yum
-    command: echo "throttle=5M" >> /etc/yum.conf
+    command: echo "throttle=1M" >> /etc/yum.conf
     when: ansible_os_family == "RedHat"
 
   - name: setup throttling for apt

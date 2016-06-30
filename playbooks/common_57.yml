@@ -3,7 +3,7 @@
 
 - hosts: all
   become: true
-  become-method: sudo
+  become_method: sudo
 
   tasks:
   - include: ../tasks/test_prep.yml
