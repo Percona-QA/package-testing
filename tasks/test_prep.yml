@@ -9,6 +9,21 @@
           mode=0640 owner=root group=root
     when: ansible_os_family == "Debian"
 
+  - name: epel 5 repo
+    command: "{{ item }} chdir=/package-testing/"
+    with_items:
+      - curl -O --limit-rate 200k https://dl.fedoraproject.org/pub/epel/epel-release-latest-5.noarch.rpm
+      - rpm -ivH epel-release-latest-5.noarch.rpm
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+
+  - name: epel 6 repo
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: epel 7 repo
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
   - name: install needed packages with apt
     apt: name={{item}} update_cache=yes
     with_items:
@@ -32,7 +47,7 @@
 
   - name: download and extract world database
     command: "{{ item }} chdir=/package-testing/"
-    with_items: 
+    with_items:
       - curl -O --limit-rate 200k http://downloads.mysql.com/docs/world.sql.gz
       - gunzip world.sql.gz
 

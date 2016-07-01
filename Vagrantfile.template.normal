@@ -11,6 +11,10 @@ servers=[
     :box => "bento/debian-8.4",
   },
   {
+    :hostname => "centos-5-64-@@product@@-@@playbook@@",
+    :box => "bento/centos-5.11",
+  },
+  {
     :hostname => "centos-6-64-@@product@@-@@playbook@@",
     :box => "bento/centos-6.7",
   },
