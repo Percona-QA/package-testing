@@ -2,6 +2,8 @@
 # This playbook sets up the percona repo
 
 - hosts: all
+  become: true
+  become_method: sudo
 
   tasks:
   - name: add the percona deb repo
