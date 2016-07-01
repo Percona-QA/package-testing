@@ -1,6 +1,6 @@
 
   - name: setup throttling for yum
-    command: echo "throttle=200k" >> /etc/yum.conf
+    command: echo "throttle=300k" >> /etc/yum.conf
     when: ansible_os_family == "RedHat"
 
   - name: setup throttling for apt
@@ -9,16 +9,21 @@
           mode=0640 owner=root group=root
     when: ansible_os_family == "Debian"
 
-  - name: install git with apt
+  - name: install needed packages with apt
     apt: name={{item}} update_cache=yes
     with_items:
     - git
+    - python
+    - pv
     when: ansible_os_family == "Debian"
 
-  - name: install git with yum
+  - name: install needed packages with yum
     yum: name={{item}} state=present
     with_items:
     - git
+    - python
+    - pv
+    - libselinux-python
     when: ansible_os_family == "RedHat"
     
   - git: repo=https://github.com/Percona-QA/package-testing

@@ -28,7 +28,7 @@ servers=[
   },
   {
     :hostname => "u-xenial-64-@@product@@-@@playbook@@",
-    :box => "bento/ubuntu-16.04",
+    :box => "ubuntu/xenial64",
   }
 ]
 

@@ -26,8 +26,6 @@
   - name: install deb packages
     apt: name={{item}} update_cache=yes
     with_items:
-    - vim
-    - pv
     - percona-xtrabackup-24
     - percona-toolkit
     - percona-server-server-5.7
@@ -39,8 +37,6 @@
   - name: install packages in centos
     yum: name={{item}} state=present #enablerepo=percona-testing-x86_64
     with_items:
-    - libselinux-python
-    - pv
     - Percona-Server-server-57
     - Percona-Server-test-57
     - Percona-Server-57-debuginfo
