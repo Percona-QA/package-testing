@@ -28,6 +28,6 @@
   - name: download and extract world database
     command: "{{ item }} chdir=/package-testing/"
     with_items: 
-      - wget --limit-rate=200k --directory-prefix=/package-testing http://downloads.mysql.com/docs/world.sql.gz
+      - curl -O --limit-rate 200k http://downloads.mysql.com/docs/world.sql.gz
       - gunzip world.sql.gz
 
