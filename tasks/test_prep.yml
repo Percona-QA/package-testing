@@ -12,8 +12,8 @@
   - name: epel 5 repo
     command: "{{ item }}"
     with_items:
-      - curl -o /package-testing/epel-release-latest-5.noarch.rpm --limit-rate 200k https://dl.fedoraproject.org/pub/epel/epel-release-latest-5.noarch.rpm
-      - rpm -ivH /package-testing/epel-release-latest-5.noarch.rpm
+      - curl -o ~/epel-release-latest-5.noarch.rpm --limit-rate 200k https://dl.fedoraproject.org/pub/epel/epel-release-latest-5.noarch.rpm
+      - rpm -ivH ~/epel-release-latest-5.noarch.rpm
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
 
   - name: epel 6 repo
