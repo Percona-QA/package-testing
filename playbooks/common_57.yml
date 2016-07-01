@@ -1,5 +1,5 @@
 ---
-# This playbook sets up the percona repo
+# This playbook sets up the percona repo and installs Percona Server 5.7
 
 - hosts: all
   become: true
@@ -12,7 +12,6 @@
   - apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
     when: ansible_os_family == "Debian"
   - name: add the deb repo
-#    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main' state=present update_cache=yes
     apt_repository: repo='deb http://repo.percona.com/apt {{ansible_lsb.codename}} main testing' state=present update_cache=yes
     when: ansible_os_family == "Debian"
   - name: add the yum percona repos
@@ -24,13 +23,6 @@
   - name: epel 7 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-#  - name: oracle mysql repo
- #   sudo: yes
- #   yum: name=http://dev.mysql.com/get/mysql-community-release-el6-5.noarch.rpm state=present
- #   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
- # - name: copy apt-cacher-ng proxy file
- #   copy: src=/home/hrvoje/worktable/package-testing/01proxy dest=/etc/apt/apt.conf.d/
- #   when: ansible_os_family == "Debian"
   - name: install deb packages
     apt: name={{item}} update_cache=yes
     with_items:
@@ -68,14 +60,7 @@
               dest=/root/.my.cnf
               mode=0640 owner=root group=root
     when: ansible_os_family == "RedHat"
+  - name: install tokudb
+    command: /usr/bin/ps_tokudb_admin --enable
   - name: install plugins
     command: /package-testing/plugins_test_57.sh
-# - name: remove the deb repo
-#   apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main' state=absent update_cache=yes
-#   when: ansible_os_family == "Debian"
-# - name: add the testing deb repo
-#   apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main testing' state=present update_cache=yes
-#   when: ansible_os_family == "Debian"
-# - name: apt-get upgrade
-#   apt: upgrade=safe
-#   when: ansible_os_family == "Debian"
