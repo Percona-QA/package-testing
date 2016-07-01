@@ -12,7 +12,7 @@ servers=[
   },
   {
     :hostname => "centos-5-64-@@product@@-@@playbook@@",
-    :box => "bento/centos-5.11",
+    :box => "percona-centos5-64",
   },
   {
     :hostname => "centos-6-64-@@product@@-@@playbook@@",
