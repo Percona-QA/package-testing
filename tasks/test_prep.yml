@@ -1,12 +1,12 @@
 
   - name: setup throttling for yum
-    command: echo "throttle=1M" >> /etc/yum.conf
+    command: echo "throttle=200k" >> /etc/yum.conf
     when: ansible_os_family == "RedHat"
 
   - name: setup throttling for apt
-    template: src=../templates/apt.throttling
-              dest=/etc/apt/apt.conf.d/lowerspeed
-              mode=0640 owner=root group=root
+    copy: src=../apt-throttling
+          dest=/etc/apt/apt.conf.d/
+          mode=0640 owner=root group=root
     when: ansible_os_family == "Debian"
 
   - name: install git with apt
@@ -24,3 +24,10 @@
   - git: repo=https://github.com/Percona-QA/package-testing
          dest=/package-testing
          depth=1
+
+  - name: download and extract world database
+    command: "{{ item }} chdir=/package-testing/"
+    with_items: 
+      - wget --limit-rate=200k --directory-prefix=/package-testing http://downloads.mysql.com/docs/world.sql.gz
+      - gunzip world.sql.gz
+

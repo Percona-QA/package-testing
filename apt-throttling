@@ -3,6 +3,6 @@ Acquire
    Queue-mode "access";
    http
    {
-      Dl-Limit "1000";
+      Dl-Limit "200";
    };
 };

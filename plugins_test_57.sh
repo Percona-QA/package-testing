@@ -13,6 +13,6 @@ mysql -e "INSTALL PLUGIN mysqlx SONAME 'mysqlx.so';"
 mysql -e "SHOW PLUGINS;"
 mysql -e "CREATE DATABASE world;"
 mysql -e "CREATE DATABASE world2;"
-pv /vagrant/world_innodb.sql | mysql -D world
-pv /vagrant/world_innodb.sql | mysql -D world2
-mysql < /vagrant/tokudb_compression.sql
+pv /package-testing/world.sql | mysql -D world
+pv /package-testing/world.sql | mysql -D world2
+mysql < /package-testing/tokudb_compression.sql

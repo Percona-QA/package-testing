@@ -13,5 +13,5 @@ mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME_WRITE SONAME 'query_response_time.s
 mysql -e "SHOW PLUGINS;"
 mysql -e "CREATE DATABASE world;"
 mysql -e "CREATE DATABASE world2;"
-pv /vagrant/world_innodb.sql | mysql -D world
-pv /vagrant/world_innodb.sql | mysql -D world2
+pv /package-testing/world.sql | mysql -D world
+pv /package-testing/world.sql | mysql -D world2
