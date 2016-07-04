@@ -28,7 +28,6 @@
     apt: name={{item}} update_cache=yes
     with_items:
     - git
-    - python
     - pv
     when: ansible_os_family == "Debian"
 
@@ -36,7 +35,7 @@
     yum: name={{item}} state=present
     with_items:
     - git
-    - python
+    - curl
     - pv
     - libselinux-python
     when: ansible_os_family == "RedHat"

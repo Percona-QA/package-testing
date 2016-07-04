@@ -20,11 +20,21 @@
     yum: name=http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
     when: ansible_os_family == "RedHat"
 
-  - name: install deb packages
+  - name: install Percona Toolkit deb packages
     apt: name={{item}} update_cache=yes
     with_items:
-    - percona-xtrabackup-24
     - percona-toolkit
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona XtraBackup deb packages
+    apt: name={{item}} update_cache=no
+    with_items:
+    - percona-xtrabackup-24
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona Server deb packages
+    apt: name={{item}} update_cache=no
+    with_items:
     - percona-server-server-5.7
     - percona-server-test-5.7
     - percona-server-5.7-dbg
@@ -32,16 +42,26 @@
     - percona-server-tokudb-5.7
     when: ansible_os_family == "Debian"
 
-  - name: install packages in centos
-    yum: name={{item}} state=present #enablerepo=percona-testing-x86_64
+  - name: install Percona Toolkit packages in centos
+    yum: name={{item}} state=present enablerepo=percona-testing-x86_64
+    with_items:
+    - percona-toolkit
+    when: ansible_os_family == "RedHat"
+
+  - name: install Percona XtraBackup packages in centos
+    yum: name={{item}} state=present enablerepo=percona-testing-x86_64
+    with_items:
+    - percona-xtrabackup-24
+    when: ansible_os_family == "RedHat"
+
+  - name: install Percona Server packages in centos
+    yum: name={{item}} state=present enablerepo=percona-testing-x86_64
     with_items:
     - Percona-Server-server-57
     - Percona-Server-test-57
     - Percona-Server-57-debuginfo
     - Percona-Server-devel-57
     - Percona-Server-tokudb-57
-    - percona-toolkit
-    - percona-xtrabackup-24
     when: ansible_os_family == "RedHat"
 
   - name: start the MySQL service

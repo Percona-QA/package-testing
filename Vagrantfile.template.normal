@@ -32,7 +32,7 @@ servers=[
   },
   {
     :hostname => "u-xenial-64-@@product@@-@@playbook@@",
-    :box => "ubuntu/xenial64",
+    :box => "percona-xenial-64",
   }
 ]
 
