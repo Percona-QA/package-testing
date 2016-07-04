@@ -9,29 +9,37 @@
 #          mode=0640 owner=root group=root
 #    when: ansible_os_family == "Debian"
 
-  - name: epel 5 repo
+  # Needed because centos5 uses curl for setting up epel repo
+  - name: install curl with yum
+    yum: name={{item}} state=present
+    with_items:
+    - curl
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+
+  - name: setup epel 5 repo
     command: "{{ item }}"
     with_items:
       - curl -o ~/epel-release-latest-5.noarch.rpm --limit-rate 200k https://dl.fedoraproject.org/pub/epel/epel-release-latest-5.noarch.rpm
       - rpm -ivH ~/epel-release-latest-5.noarch.rpm
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
 
-  - name: epel 6 repo
+  - name: setup epel 6 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
-  - name: epel 7 repo
+  - name: setup epel 7 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: install needed packages with apt
+  - name: install needed packages for running tests with apt
     apt: name={{item}} update_cache=yes
     with_items:
     - git
+    - curl
     - pv
     when: ansible_os_family == "Debian"
 
-  - name: install needed packages with yum
+  - name: install needed packages for running tests with yum
     yum: name={{item}} state=present
     with_items:
     - git
@@ -40,7 +48,8 @@
     - libselinux-python
     when: ansible_os_family == "RedHat"
     
-  - git: repo=https://github.com/Percona-QA/package-testing
+  - name: clone package-testing repository for test scripts
+    git: repo=https://github.com/Percona-QA/package-testing
          dest=/package-testing
          depth=1
 
