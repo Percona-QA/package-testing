@@ -94,6 +94,7 @@
     with_items:
       - /usr/bin/ps_tokudb_admin --enable
       - service mysql restart
+      - /usr/bin/ps_tokudb_admin --enable
 
   - name: install plugins
     command: /package-testing/plugins_test_57.sh
