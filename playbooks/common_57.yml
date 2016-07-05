@@ -89,8 +89,11 @@
     command: setenforce 0
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: install tokudb
-    command: /usr/bin/ps_tokudb_admin --enable
+  - name: install tokudb and restart server
+    command: "{{ item }}"
+    with_items:
+      - /usr/bin/ps_tokudb_admin --enable
+      - service mysql restart
 
   - name: install plugins
     command: /package-testing/plugins_test_57.sh

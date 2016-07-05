@@ -40,14 +40,14 @@
     when: ansible_os_family == "Debian"
 
   - name: install needed packages for running tests with yum
-    yum: name={{item}} state=present
+    yum: name={{item}} state=latest
     with_items:
     - git
     - curl
     - pv
     - libselinux-python
     when: ansible_os_family == "RedHat"
-    
+
   - name: clone package-testing repository for test scripts
     git: repo=https://github.com/Percona-QA/package-testing
          dest=/package-testing
@@ -58,4 +58,3 @@
     with_items:
       - curl -o /package-testing/world.sql.gz --limit-rate 200k http://downloads.mysql.com/docs/world.sql.gz
       - gunzip /package-testing/world.sql.gz
-
