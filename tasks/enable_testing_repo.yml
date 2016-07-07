@@ -27,5 +27,6 @@
     with_items:
       - sed -r -i '/^baseurl = http:\/\/repo.percona.com\/release\/\$releasever\/RPMS\/\$basearch$/ { n ; s/^enabled = .*$/enabled = 0/ }' /etc/yum.repos.d/percona-release.repo
       - sed -r -i '/^baseurl = http:\/\/repo.percona.com\/release\/\$releasever\/RPMS\/noarch$/ { n ; s/^enabled = .*$/enabled = 0/ }' /etc/yum.repos.d/percona-release.repo
-      - sed -r -i '/^baseurl = http:\/\/repo.percona.com\/testing\/$releasever\/RPMS\/\$basearch$/ { n ; s/^enabled = .*$/enabled = 1/ }' /etc/yum.repos.d/percona-release.repo
+      - sed -r -i '/^baseurl = http:\/\/repo.percona.com\/testing\/\$releasever\/RPMS\/\$basearch$/ { n ; s/^enabled = .*$/enabled = 1/ }' /etc/yum.repos.d/percona-release.repo
       - sed -r -i '/^baseurl = http:\/\/repo.percona.com\/testing\/\$releasever\/RPMS\/noarch$/ { n ; s/^enabled = .*$/enabled = 1/ }' /etc/yum.repos.d/percona-release.repo
+    when: ansible_os_family == "RedHat"

@@ -9,7 +9,7 @@
     when: ansible_os_family == "Debian"
 
   - name: remove the Percona yum repositories
-    yum: name=http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm state=absent
+    yum: name=percona-release state=absent
     when: ansible_os_family == "RedHat"
 
   - name: remove saved repo files in yum
