@@ -23,7 +23,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "5"
 
   - name: change the default repo in yum repo file to testing
-    command: {{ item }}
+    command: "{{ item }}"
     with_items:
       - sed -r -e -i '/^baseurl = http:\/\/repo.percona.com\/release\/\$releasever\/RPMS\/\$basearch$/ { n ; s/^enabled = .*$/enabled = 0/ }' /etc/yum.repos.d/percona-release.repo.rpmsave
       - sed -r -e -i '/^baseurl = http:\/\/repo.percona.com\/release\/\$releasever\/RPMS\/noarch$/ { n ; s/^enabled = .*$/enabled = 0/ }' /etc/yum.repos.d/percona-release.repo.rpmsave

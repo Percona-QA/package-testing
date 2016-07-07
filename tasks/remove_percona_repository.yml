@@ -13,7 +13,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: remove saved repo files in yum
-    command: {{ item }}
+    command: "{{ item }}"
     with_item:
       - rm -f /etc/yum.repos.d/percona-release.repo
       - rm -f /etc/yum.repos.d/percona-release.repo.rpmsave
