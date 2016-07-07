@@ -31,6 +31,10 @@ servers=[
     :box => "ubuntu/trusty64",
   },
   {
+    :hostname => "u-wily-64-@@playbook@@",
+    :box => "ubuntu/wily64",
+  },
+  {
     :hostname => "u-xenial-64-@@playbook@@",
     :box => "percona-xenial-64",
   }
