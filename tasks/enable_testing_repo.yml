@@ -25,7 +25,7 @@
   - name: change the default repo in yum repo file to testing
     command: "{{ item }}"
     with_items:
-      - sed -r -e -i '/^baseurl = http:\/\/repo.percona.com\/release\/\$releasever\/RPMS\/\$basearch$/ { n ; s/^enabled = .*$/enabled = 0/ }' /etc/yum.repos.d/percona-release.repo.rpmsave
-      - sed -r -e -i '/^baseurl = http:\/\/repo.percona.com\/release\/\$releasever\/RPMS\/noarch$/ { n ; s/^enabled = .*$/enabled = 0/ }' /etc/yum.repos.d/percona-release.repo.rpmsave
-      - sed -r -e -i '/^baseurl = http:\/\/repo.percona.com\/testing\/$releasever\/RPMS\/\$basearch$/ { n ; s/^enabled = .*$/enabled = 1/ }' /etc/yum.repos.d/percona-release.repo.rpmsave
-      - sed -r -e -i '/^baseurl = http:\/\/repo.percona.com\/testing\/\$releasever\/RPMS\/noarch$/ { n ; s/^enabled = .*$/enabled = 1/ }' /etc/yum.repos.d/percona-release.repo.rpmsave
+      - sed -r -i '/^baseurl = http:\/\/repo.percona.com\/release\/\$releasever\/RPMS\/\$basearch$/ { n ; s/^enabled = .*$/enabled = 0/ }' /etc/yum.repos.d/percona-release.repo
+      - sed -r -i '/^baseurl = http:\/\/repo.percona.com\/release\/\$releasever\/RPMS\/noarch$/ { n ; s/^enabled = .*$/enabled = 0/ }' /etc/yum.repos.d/percona-release.repo
+      - sed -r -i '/^baseurl = http:\/\/repo.percona.com\/testing\/$releasever\/RPMS\/\$basearch$/ { n ; s/^enabled = .*$/enabled = 1/ }' /etc/yum.repos.d/percona-release.repo
+      - sed -r -i '/^baseurl = http:\/\/repo.percona.com\/testing\/\$releasever\/RPMS\/noarch$/ { n ; s/^enabled = .*$/enabled = 1/ }' /etc/yum.repos.d/percona-release.repo

@@ -11,8 +11,6 @@
   become_method: sudo
 
   tasks:
-  - include: common_57.yml repo=main
-
     - include: ../tasks/test_prep.yml
 
 #
