@@ -13,19 +13,19 @@
 
   - include: ../tasks/enable_testing_repo.yml
 
-  - name: install Percona Toolkit deb packages
+  - name: install Percona Toolkit new deb packages
     apt: name={{item}} update_cache=yes state=latest
     with_items:
     - percona-toolkit
     when: ansible_os_family == "Debian"
 
-  - name: install Percona XtraBackup deb packages
+  - name: install Percona XtraBackup new deb packages
     apt: name={{item}} update_cache=no state=latest
     with_items:
     - percona-xtrabackup-24
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Server deb packages
+  - name: install Percona Server new deb packages
     apt: name={{item}} update_cache=no state=latest
     with_items:
     - percona-server-server-5.7
@@ -35,19 +35,19 @@
     - percona-server-tokudb-5.7
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Toolkit packages in centos
+  - name: install Percona Toolkit new rpm packages
     yum: name={{item}} state=latest
     with_items:
     - percona-toolkit
     when: ansible_os_family == "RedHat"
 
-  - name: install Percona XtraBackup packages in centos
+  - name: install Percona XtraBackup new rpm packages
     yum: name={{item}} state=latest
     with_items:
     - percona-xtrabackup-24
     when: ansible_os_family == "RedHat"
 
-  - name: install Percona Server packages in centos
+  - name: install Percona Server new rpm packages
     yum: name={{item}} state=latest
     with_items:
     - Percona-Server-server-57
@@ -84,3 +84,7 @@
 
   - name: install plugins
     command: /package-testing/plugins_test_57.sh
+
+  - name: check that Percona Server version is correct
+    command: /package-testing/version_check.sh ps57
+
