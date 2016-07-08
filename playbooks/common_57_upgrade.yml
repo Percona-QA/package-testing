@@ -11,12 +11,14 @@
   become_method: sudo
 
   tasks:
-  - include: ../tasks/test_prep.yml
+  - name: include tasks for test env setup
+    include: ../tasks/test_prep.yml
 
 #
 # Install from main repository
 #
-  - include: ../tasks/enable_main_repo.yml
+  - name: include tasks for enabling main repo
+    include: ../tasks/enable_main_repo.yml
 
   - name: install Percona Toolkit deb packages previous version
     apt: name={{item}} update_cache=yes state=latest
