@@ -7,7 +7,7 @@
     when: ansible_os_family == "Debian"
 
   - name: add the Percona testing deb repo
-    apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_lsb.codename }} testing' state=present update_cache=yes
+    apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_lsb.codename }} main testing' state=present update_cache=yes
     when: ansible_os_family == "Debian"
 
   - name: add the Percona testing yum repos for centos 5
