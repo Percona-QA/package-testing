@@ -66,7 +66,7 @@ elif [ ${product} = "pt" ]; then
     fi
   done
 elif [ ${product} = "pxb23" -o ${product} = "pxb24" ]; then
-  version_check=$(xtrabackup --version|grep -c ${version})
+  version_check=$(xtrabackup --version 2>&1|grep -c ${version})
     if [ ${version_check} -eq 0 ]; then
       echo "$i version is not good!"
       exit 1
