@@ -101,6 +101,3 @@
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
-
-  - name: tokudb test
-    command: /package-testing/tokudb_compression.sql
