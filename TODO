@@ -5,3 +5,4 @@ PS: Check warnings in mysql log
 PS, XtraBackup: Add some xtrabackup backup/restore
 PS, XtraBackup: Add code to do some table checksums for world database
 PSMDB: Check version of the server, client and tools
+GENERAL: Refactor *_package_test.sh files into one and make them work with VERSIONS file
