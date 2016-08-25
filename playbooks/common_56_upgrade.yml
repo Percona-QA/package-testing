@@ -1,7 +1,7 @@
 ---
 # This playbook does following:
 #   sets main Percona repo
-#   installs PS 5.7, PT and PXB 2.4
+#   installs PS 5.6, PT and PXB 2.3
 #   changes repo to testing
 #   upgrades packages to the new version
 #   does some tests
@@ -35,17 +35,17 @@
   - name: install Percona XtraBackup deb packages previous version
     apt: name={{item}} update_cache=no state=latest
     with_items:
-    - percona-xtrabackup-24
+    - percona-xtrabackup
     when: ansible_os_family == "Debian"
 
   - name: install Percona Server deb packages previous version
     apt: name={{item}} update_cache=no state=latest
     with_items:
-    - percona-server-server-5.7
-    - percona-server-test-5.7
-    - percona-server-5.7-dbg
-    - percona-server-source-5.7
-    - percona-server-tokudb-5.7
+    - percona-server-server-5.6
+    - percona-server-test-5.6
+    - percona-server-5.6-dbg
+    - percona-server-source-5.6
+    - percona-server-tokudb-5.6
     when: ansible_os_family == "Debian"
 
   - name: install Percona Toolkit rpm packages previous version
@@ -57,31 +57,21 @@
   - name: install Percona XtraBackup rpm packages previous version
     yum: name={{item}} state=latest
     with_items:
-    - percona-xtrabackup-24
+    - percona-xtrabackup
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Server rpm packages previous version
     yum: name={{item}} state=latest
     with_items:
-    - Percona-Server-server-57
-    - Percona-Server-test-57
-    - Percona-Server-57-debuginfo
-    - Percona-Server-devel-57
-    - Percona-Server-tokudb-57
+    - Percona-Server-server-56
+    - Percona-Server-test-56
+    - Percona-Server-56-debuginfo
+    - Percona-Server-devel-56
+    - Percona-Server-tokudb-56
     when: ansible_os_family == "RedHat"
 
   - name: start the MySQL service
     command: service mysql start
-    when: ansible_os_family == "RedHat"
-
-  - name: set root password
-    command: /package-testing/setpass_57.sh
-    when: ansible_os_family == "RedHat"
-
-  - name: copy .my.cnf
-    template: src=../templates/my_57.j2
-              dest=/root/.my.cnf
-              mode=0640 owner=root group=root
     when: ansible_os_family == "RedHat"
 
   - name: disable selinux on centos7 for TokuDB to work
@@ -96,7 +86,7 @@
     - /usr/bin/ps_tokudb_admin --enable
 
   - name: install plugins
-    command: /package-testing/plugins_test_57.sh
+    command: /package-testing/plugins_test_56.sh
 
 #
 # Enable testing repository
@@ -115,17 +105,17 @@
   - name: upgrade Percona XtraBackup to new deb packages
     apt: name={{item}} update_cache=no state=latest
     with_items:
-    - percona-xtrabackup-24
+    - percona-xtrabackup
     when: ansible_os_family == "Debian"
 
   - name: upgrade Percona Server to new deb packages
     apt: name={{item}} update_cache=no state=latest
     with_items:
-    - percona-server-server-5.7
-    - percona-server-test-5.7
-    - percona-server-5.7-dbg
-    - percona-server-source-5.7
-    - percona-server-tokudb-5.7
+    - percona-server-server-5.6
+    - percona-server-test-5.6
+    - percona-server-5.6-dbg
+    - percona-server-source-5.6
+    - percona-server-tokudb-5.6
     when: ansible_os_family == "Debian"
 
   - name: upgrade Percona Toolkit to new rpm packages
@@ -137,27 +127,27 @@
   - name: upgrade Percona XtraBackup to new rpm packages
     yum: name={{item}} state=latest
     with_items:
-    - percona-xtrabackup-24
+    - percona-xtrabackup
     when: ansible_os_family == "RedHat"
 
   - name: upgrade Percona Server to new rpm packages
     yum: name={{item}} state=latest
     with_items:
-    - Percona-Server-server-57
-    - Percona-Server-test-57
-    - Percona-Server-57-debuginfo
-    - Percona-Server-devel-57
-    - Percona-Server-tokudb-57
+    - Percona-Server-server-56
+    - Percona-Server-test-56
+    - Percona-Server-56-debuginfo
+    - Percona-Server-devel-56
+    - Percona-Server-tokudb-56
     when: ansible_os_family == "RedHat"
 
   - name: check that Percona Server version is correct
-    command: /package-testing/version_check.sh ps57
+    command: /package-testing/version_check.sh ps56
 
   - name: check that Percona Toolkit version is correct
     command: /package-testing/version_check.sh pt
 
   - name: check that Percona XtraBackup version is correct
-    command: /package-testing/version_check.sh pxb24
+    command: /package-testing/version_check.sh pxb23
 
 #
 # Restart services to check if they run

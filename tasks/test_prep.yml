@@ -52,9 +52,3 @@
     git: repo=https://github.com/Percona-QA/package-testing
          dest=/package-testing
          depth=1
-
-  - name: download and extract world database
-    command: "{{ item }}"
-    with_items:
-    - curl -o /package-testing/world.sql.gz --limit-rate 200k http://downloads.mysql.com/docs/world.sql.gz
-    - gunzip /package-testing/world.sql.gz

@@ -1,7 +1,7 @@
 ---
 # This playbook does following:
 #   enables Percona testing repository
-#   installs PSMDB 3.2
+#   installs PSMDB 3.0
 #   does some tests
 
 - hosts: all
@@ -15,18 +15,18 @@
   - name: include tasks for enabling test repo
     include: ../tasks/enable_testing_repo.yml
 
-  - name: install Percona Server for MongoDB 3.2 new deb packages
+  - name: install Percona Server for MongoDB 3.0 new deb packages
     apt: name={{item}} update_cache=yes state=latest
     with_items:
-    - percona-server-mongodb-32
-    - percona-server-mongodb-32-dbg
+    - percona-server-mongodb
+    - percona-server-mongodb-dbg
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Server for MongoDB 3.2 new rpm packages
+  - name: install Percona Server for MongoDB 3.0 new rpm packages
     yum: name={{item}} state=latest
     with_items:
-    - Percona-Server-MongoDB-32
-    - Percona-Server-MongoDB-32-debuginfo
+    - Percona-Server-MongoDB
+    - Percona-Server-MongoDB-debuginfo
     when: ansible_os_family == "RedHat"
 
   - name: start mongod with init script

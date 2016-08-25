@@ -1,6 +1,6 @@
 ---
 # This playbook does following:
-#   enables testing repository
+#   enables Percona testing repository
 #   installs latest version of PS 5.7, PT and PXB 2.4
 #   does some tests
 
@@ -14,6 +14,12 @@
 
   - name: include tasks for enabling test repo
     include: ../tasks/enable_testing_repo.yml
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - curl -o /package-testing/world.sql.gz --limit-rate 200k http://downloads.mysql.com/docs/world.sql.gz
+    - gunzip /package-testing/world.sql.gz
 
   - name: install Percona Toolkit new deb packages
     apt: name={{item}} update_cache=yes state=latest
@@ -96,3 +102,4 @@
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
 
+# TODO: Import world database
