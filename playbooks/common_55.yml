@@ -76,6 +76,12 @@
   - name: install plugins
     command: /package-testing/plugins_test_55.sh
 
+  - name: load world example database
+    command: mysql -uroot < /package-testing/world.sql
+
+  - name: restart mysql service
+    command: service mysql restart
+
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps55
 
@@ -84,6 +90,3 @@
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb23
-
-# TODO: Import world database
-# TODO: Test service restart

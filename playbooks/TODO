@@ -1,0 +1,9 @@
+Following would be good to add:
+===============================
+PS: Check if all the plugins are still installed after upgrade
+PS: Check warnings in mysql log
+PS, XtraBackup: Add some xtrabackup backup/restore
+PS, XtraBackup: Add code to do some table checksums for world database
+PSMDB: Check version of the server, client and tools
+PSMDB: Import some test database
+PSMDB: Test service restart

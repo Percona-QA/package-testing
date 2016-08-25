@@ -98,6 +98,9 @@
   - name: install plugins
     command: /package-testing/plugins_test_57.sh
 
+  - name: load world example database
+    command: mysql -uroot < /package-testing/world.sql
+
 #
 # Enable testing repository
 #
@@ -150,6 +153,12 @@
     - Percona-Server-tokudb-57
     when: ansible_os_family == "RedHat"
 
+  - name: run mysql_upgrade
+    command: mysql_upgrade -uroot
+
+  - name: restart mysql service after upgrade
+    command: service mysql restart
+
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps57
 
@@ -158,14 +167,3 @@
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
-
-#
-# Restart services to check if they run
-#
-  - name: restart the MySQL service
-    command: service mysql restart
-
-# TODO: Check if all the plugins are still installed
-# TODO: Check warnings in mysql log
-# TODO: Import world database
-# TODO: Run mysql_upgrade

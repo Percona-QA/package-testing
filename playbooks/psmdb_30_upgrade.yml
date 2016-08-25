@@ -67,7 +67,3 @@
     - Percona-Server-MongoDB
     - Percona-Server-MongoDB-debuginfo
     when: ansible_os_family == "RedHat"
-
-# TODO: Check version of the server, client and tools
-# TODO: Try service restart
-# TODO: Import some test database
