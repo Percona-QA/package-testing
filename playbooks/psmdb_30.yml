@@ -40,3 +40,6 @@
   - name: start mongod with systemctl
     command: systemctl start mongod
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: test SE change, import data, restart service
+    command: /package-testing/psmdb_test.sh

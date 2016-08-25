@@ -90,11 +90,8 @@
       - service mysql restart
       - /usr/bin/ps_tokudb_admin --enable
 
-  - name: install plugins
+  - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_57.sh
-
-  - name: load world example database
-    command: mysql -uroot < /package-testing/world.sql
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps57
@@ -104,3 +101,6 @@
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
+
+  - name: tokudb test
+    command: /package-testing/tokudb_compression.sql

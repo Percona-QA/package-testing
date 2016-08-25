@@ -9,7 +9,7 @@ function start_service {
 	if [ "$(lsb_release -sc)" = "trusty" ]; then
         	echo "starting mongod service on trusty..."
 		/etc/init.d/mongod start
-	else 
+	else
         	echo "starting mongod service... "
 		service mongod start
 	fi
@@ -21,7 +21,7 @@ function stop_service {
 	if [ "$(lsb_release -sc)" = "trusty" ]; then
         	echo "stopping mongod service on trusty..."
 		/etc/init.d/mongod stop
-	else 
+	else
         	echo "stopping mongod service... "
 		service mongod stop
 	fi
@@ -56,14 +56,10 @@ for engine in mmapv1 PerconaFT rocksdb wiredTiger; do
 	echo "testing ${engine}" | tee -a $log
 	start_service
 	echo "importing the sample data"
-	mongo < /vagrant/mongo_insert.js >> $log
+	mongo < /package-testing/mongo_insert.js >> $log
 	list_data >> $log
 	stop_service
 	echo "disable ${engine}"
 	sed -i "/engine: *${engine}/s//#engine: ${engine}/g" /etc/mongod.conf
 	clean_datadir
 done
-
-
-
-

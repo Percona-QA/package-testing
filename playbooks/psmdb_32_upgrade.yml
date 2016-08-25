@@ -67,3 +67,6 @@
     - Percona-Server-MongoDB-32
     - Percona-Server-MongoDB-32-debuginfo
     when: ansible_os_family == "RedHat"
+
+  - name: test SE change, import data, restart service
+    command: /package-testing/psmdb_test.sh
