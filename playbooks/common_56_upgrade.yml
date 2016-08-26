@@ -100,10 +100,17 @@
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_56.sh
 
-  - name: install 3rd party packages
+  - name: install 3rd party packages with apt
     apt: name={{item}}
     with_items:
     - rsyslog-mysql
+    when: ansible_os_family == "Debian"
+
+  - name: install 3rd party packages with yum
+    yum: name={{item}}
+    with_items:
+    - rsyslog-mysql
+    when: ansible_os_family == "RedHat"
 
 #
 # Enable testing repository
