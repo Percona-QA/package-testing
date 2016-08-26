@@ -70,9 +70,13 @@
     - Percona-Server-tokudb-57
     when: ansible_os_family == "RedHat"
 
-  - name: start the MySQL service
+  - name: start mysql service with service command
     command: service mysql start
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: set root password
     command: /package-testing/setpass_57.sh
@@ -89,14 +93,21 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: install tokudb and restart server
-    command: "{{ item }}"
-    with_items:
-    - /usr/bin/ps_tokudb_admin --enable
-    - service mysql restart
-    - /usr/bin/ps_tokudb_admin --enable
+    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+
+  - name: re-run ps_tokudb_admin to finish tokudb install
+    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
 
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_57.sh
+
+  - name: install 3rd party packages
+    apt: name={{item}}
+    with_items:
+    - rsyslog-mysql
 
 #
 # Enable testing repository
@@ -153,8 +164,8 @@
   - name: run mysql_upgrade
     command: mysql_upgrade -uroot
 
-  - name: restart mysql service after upgrade
-    command: service mysql restart
+  - name: restart mysql service
+    service: name=mysql state=restarted
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps57

@@ -70,23 +70,40 @@
     - Percona-Server-tokudb-56
     when: ansible_os_family == "RedHat"
 
-  - name: start the MySQL service
+  - name: start mysql service with init script
+    command: /etc/init.d/mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+
+  - name: start mysql service with service command
     command: service mysql start
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: disable selinux on centos7 for TokuDB to work
     command: setenforce 0
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: install tokudb and restart server
-    command: "{{ item }}"
-    with_items:
-    - /usr/bin/ps_tokudb_admin --enable
-    - service mysql restart
-    - /usr/bin/ps_tokudb_admin --enable
+    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
+
+  - name: restart mysql service on centos 5
+    command: /etc/init.d/mysql restart
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+    when: ansible_os_family != "RedHat" or ansible_distribution_major_version != "5"
 
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_56.sh
+
+  - name: install 3rd party packages
+    apt: name={{item}}
+    with_items:
+    - rsyslog-mysql
 
 #
 # Enable testing repository
@@ -143,8 +160,13 @@
   - name: run mysql_upgrade
     command: mysql_upgrade -uroot
 
-  - name: restart mysql service after upgrade
-    command: service mysql restart
+  - name: restart mysql service on centos 5
+    command: /etc/init.d/mysql restart
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+    when: ansible_os_family != "RedHat" or ansible_distribution_major_version != "5"
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps56

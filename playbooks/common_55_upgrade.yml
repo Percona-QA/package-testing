@@ -70,16 +70,25 @@
     - Percona-Server-tokudb-55
     when: ansible_os_family == "RedHat"
 
-  - name: start the MySQL service
-    command: service mysql start
-    when: ansible_os_family == "RedHat"
+  - name: start mysql service with init script
+    command: /etc/init.d/mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
 
-  - name: disable selinux on centos7 for TokuDB to work
-    command: setenforce 0
+  - name: start mysql service with service command
+    command: service mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: install plugins, import world database
     command: /package-testing/plugins_test_55.sh
+
+  - name: install 3rd party packages
+    apt: name={{item}}
+    with_items:
+    - rsyslog-mysql
 
 #
 # Enable testing repository
@@ -136,8 +145,13 @@
   - name: run mysql_upgrade
     command: mysql_upgrade -uroot
 
-  - name: restart mysql service after upgrade
-    command: service mysql restart
+  - name: restart mysql service on centos 5
+    command: /etc/init.d/mysql restart
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+    when: ansible_os_family != "RedHat" or ansible_distribution_major_version != "5"
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps55
