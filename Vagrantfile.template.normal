@@ -3,39 +3,39 @@
 
 servers=[
   {
-    :hostname => "d-wheezy-64-@@playbook@@",
+    :hostname => "d-wheezy-64-@@hostname@@",
     :box => "debian/wheezy64",
   },
   {
-    :hostname => "d-jessie-64-@@playbook@@",
+    :hostname => "d-jessie-64-@@hostname@@",
     :box => "bento/debian-8.4",
   },
   {
-    :hostname => "centos-5-64-@@playbook@@",
+    :hostname => "centos-5-64-@@hostname@@",
     :box => "percona-centos5-64",
   },
   {
-    :hostname => "centos-6-64-@@playbook@@",
+    :hostname => "centos-6-64-@@hostname@@",
     :box => "bento/centos-6.7",
   },
   {
-    :hostname => "centos-7-64-@@playbook@@",
+    :hostname => "centos-7-64-@@hostname@@",
     :box => "centos/7",
   },
   {
-    :hostname => "u-precise-64-@@playbook@@",
+    :hostname => "u-precise-64-@@hostname@@",
     :box => "ubuntu/precise64",
   },
   {
-    :hostname => "u-trusty-64-@@playbook@@",
+    :hostname => "u-trusty-64-@@hostname@@",
     :box => "ubuntu/trusty64",
   },
   {
-    :hostname => "u-wily-64-@@playbook@@",
+    :hostname => "u-wily-64-@@hostname@@",
     :box => "ubuntu/wily64",
   },
   {
-    :hostname => "u-xenial-64-@@playbook@@",
+    :hostname => "u-xenial-64-@@hostname@@",
     :box => "percona-xenial-64",
   }
 ]
@@ -50,7 +50,7 @@ Vagrant.configure("2") do |config|
       node.vm.box = machine[:box]
       node.vm.hostname = machine[:hostname]
       node.vm.provider "virtualbox" do |vb|
-          vb.customize ["modifyvm", :id, "--memory", "1024", "--ioapic", "on"]
+          vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on"]
           vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
           vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
           vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
