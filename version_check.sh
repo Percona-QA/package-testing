@@ -41,10 +41,12 @@ echo -n > $log
 
 if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" ]; then
   for i in @@INNODB_VERSION @@VERSION @@TOKUDB_VERSION; do
-    if [ "$(mysql -e "SELECT $i; "| grep -c $version)" = 1 ]; then
-      echo "$i is correct" >> $log
+    if [ ${product} = "ps55" -a ${i} = "@@TOKUDB_VERSION" ]; then
+      echo "${i} is empty" >> $log
+    elif [ "$(mysql -e "SELECT ${i}; "| grep -c $version)" = 1 ]; then
+      echo "${i} is correct" >> $log
     else
-      echo "@@INNODB_VERSION is incorrect"
+      echo "${i} is incorrect"
       exit 1
     fi
   done
@@ -55,6 +57,7 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" ]; then
     echo "@@VERSION_COMMENT is incorrect"
     exit 1
   fi
+
 elif [ ${product} = "pt" ]; then
   for i in `cat /package-testing/pt`; do
     version_check=$($i --version|grep -c ${version})
@@ -65,6 +68,7 @@ elif [ ${product} = "pt" ]; then
       echo "$i version is correct and ${version}" >> $log
     fi
   done
+
 elif [ ${product} = "pxb23" -o ${product} = "pxb24" ]; then
   version_check=$(xtrabackup --version 2>&1|grep -c ${version})
     if [ ${version_check} -eq 0 ]; then
