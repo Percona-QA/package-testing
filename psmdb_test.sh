@@ -10,7 +10,8 @@ function start_service {
         if [ -f /etc/redhat-release ]; then
 		redhatrelease=$(cat /etc/redhat-release | grep -o '[0-9]' | head -n 1)
 	fi
-	if [ "$(lsb_release -sc)" = "trusty" -o redhatrelease = "5" ]; then
+	lsbrelease=$(which lsb_release || true)
+	if [ ${lsbrelease} != "" -a "$(lsb_release -sc)" = "trusty" ]; then
 		echo "starting mongod service directly with init script..."
 		/etc/init.d/mongod start
 	else
@@ -26,7 +27,8 @@ function stop_service {
         if [ -f /etc/redhat-release ]; then
 		redhatrelease=$(cat /etc/redhat-release | grep -o '[0-9]' | head -n 1)
 	fi
-	if [ "$(lsb_release -sc)" = "trusty" -o redhatrelease = "5" ]; then
+	lsbrelease=$(which lsb_release || true)
+	if [ ${lsbrelease} != "" -a "$(lsb_release -sc)" = "trusty" ]; then
 		echo "stopping mongod service directly with init script..."
 		/etc/init.d/mongod stop
 	else
