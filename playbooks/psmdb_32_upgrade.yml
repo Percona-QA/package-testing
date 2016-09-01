@@ -8,7 +8,7 @@
 
 - hosts: all
   become: true
-  sudo: yes
+  become_method: sudo
 
   tasks:
   - name: include tasks for test env setup
