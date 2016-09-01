@@ -97,6 +97,9 @@
     service: name=mysql state=restarted
     when: ansible_os_family != "RedHat" or ansible_distribution_major_version != "5"
 
+  - name: re-run ps_tokudb_admin to finish tokudb install
+    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
+
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_56.sh
 
