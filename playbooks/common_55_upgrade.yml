@@ -45,7 +45,6 @@
     - percona-server-test-5.5
     - percona-server-5.5-dbg
     - percona-server-source-5.5
-    - percona-server-tokudb-5.5
     when: ansible_os_family == "Debian"
 
   - name: install Percona Toolkit rpm packages previous version
@@ -67,7 +66,6 @@
     - Percona-Server-test-55
     - Percona-Server-55-debuginfo
     - Percona-Server-devel-55
-    - Percona-Server-tokudb-55
     when: ansible_os_family == "RedHat"
 
   - name: start mysql service with init script
@@ -124,7 +122,6 @@
     - percona-server-test-5.5
     - percona-server-5.5-dbg
     - percona-server-source-5.5
-    - percona-server-tokudb-5.5
     when: ansible_os_family == "Debian"
 
   - name: upgrade Percona Toolkit to new rpm packages
@@ -146,7 +143,6 @@
     - Percona-Server-test-55
     - Percona-Server-55-debuginfo
     - Percona-Server-devel-55
-    - Percona-Server-tokudb-55
     when: ansible_os_family == "RedHat"
 
   - name: run mysql_upgrade
