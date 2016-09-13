@@ -1,5 +1,6 @@
 # This file includes all the latest versions of the products
 PT_VER="2.2.19"
+PMM_VER="1.0.4"
 PXB23_VER="2.3.5"
 PXB24_VER="2.4.4"
 PSMDB30_VER="3.0.12-1.8"

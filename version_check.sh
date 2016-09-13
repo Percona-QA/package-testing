@@ -30,6 +30,8 @@ elif [ $1 = "pxb23" ]; then
   version=${PXB23_VER}
 elif [ $1 = "pxb24" ]; then
   version=${PXB24_VER}
+elif [ $1 = "pmm" ]; then
+  version=${PMM_VER}
 else
   echo "Illegal product selected!"
   exit 1
@@ -69,14 +71,23 @@ elif [ ${product} = "pt" ]; then
     fi
   done
 
+elif [ ${product} = "pmm" ]; then
+  version_check=$(pmm-admin --version 2>&1|grep -c ${version})
+  if [ ${version_check} -eq 0 ]; then
+    echo "${product} version is not good!"
+    exit 1
+  else
+    echo "${product} version is correct and ${version}" >> $log
+  fi
+
 elif [ ${product} = "pxb23" -o ${product} = "pxb24" ]; then
   version_check=$(xtrabackup --version 2>&1|grep -c ${version})
     if [ ${version_check} -eq 0 ]; then
-      echo "$i version is not good!"
+      echo "${product} version is not good!"
       exit 1
     else
       echo "${product} version is correct and ${version}" >> $log
     fi
 fi
-       
+
 echo "${product} versions are OK"
