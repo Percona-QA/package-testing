@@ -27,14 +27,6 @@
     - percona-toolkit
     when: ansible_os_family == "Debian"
 
-  - name: install Percona XtraBackup new deb packages
-    apt: name={{item}} update_cache=no state=latest
-    with_items:
-    - percona-xtrabackup-24
-    - percona-xtrabackup-test-24
-    - percona-xtrabackup-dbg-24
-    when: ansible_os_family == "Debian"
-
   - name: install Percona Server new deb packages
     apt: name={{item}} update_cache=no state=latest
     with_items:
@@ -45,18 +37,18 @@
     - percona-server-tokudb-5.7
     when: ansible_os_family == "Debian"
 
+  - name: install Percona XtraBackup new deb packages
+    apt: name={{item}} update_cache=no state=latest
+    with_items:
+    - percona-xtrabackup-24
+    - percona-xtrabackup-test-24
+    - percona-xtrabackup-dbg-24
+    when: ansible_os_family == "Debian"
+
   - name: install Percona Toolkit new rpm packages
     yum: name={{item}} state=latest
     with_items:
     - percona-toolkit
-    when: ansible_os_family == "RedHat"
-
-  - name: install Percona XtraBackup new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - percona-xtrabackup-24
-    - percona-xtrabackup-test-24
-    - percona-xtrabackup-24-debuginfo
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Server new rpm packages
@@ -67,6 +59,14 @@
     - Percona-Server-57-debuginfo
     - Percona-Server-devel-57
     - Percona-Server-tokudb-57
+    when: ansible_os_family == "RedHat"
+
+  - name: install Percona XtraBackup new rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - percona-xtrabackup-24
+    - percona-xtrabackup-test-24
+    - percona-xtrabackup-24-debuginfo
     when: ansible_os_family == "RedHat"
 
   - name: start mysql service with service command
