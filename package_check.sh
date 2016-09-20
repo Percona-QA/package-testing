@@ -84,12 +84,10 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" ]; then
 elif [ ${product} = "pt" ]; then
   echo "Package check for PT is not implemented!"
   exit 1
-  done
 
 elif [ ${product} = "pmm" ]; then
   echo "Package check for PMM is not implemented!"
   exit 1
-  fi
 
 elif [ ${product} = "pxb23" -o ${product} = "pxb24" ]; then
   if [ ${product} = "pxb24" ]; then
