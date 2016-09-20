@@ -36,6 +36,8 @@
     apt: name={{item}} update_cache=no state=latest
     with_items:
     - percona-xtrabackup
+    - percona-xtrabackup-test
+    - percona-xtrabackup-dbg
     when: ansible_os_family == "Debian"
 
   - name: install Percona Server deb packages previous version
@@ -58,6 +60,8 @@
     yum: name={{item}} state=latest
     with_items:
     - percona-xtrabackup
+    - percona-xtrabackup-test
+    - percona-xtrabackup-debuginfo
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Server rpm packages previous version
@@ -133,6 +137,8 @@
     apt: name={{item}} update_cache=no state=latest
     with_items:
     - percona-xtrabackup
+    - percona-xtrabackup-test
+    - percona-xtrabackup-dbg
     when: ansible_os_family == "Debian"
 
   - name: upgrade Percona Server to new deb packages
@@ -155,6 +161,8 @@
     yum: name={{item}} state=latest
     with_items:
     - percona-xtrabackup
+    - percona-xtrabackup-test
+    - percona-xtrabackup-debuginfo
     when: ansible_os_family == "RedHat"
 
   - name: upgrade Percona Server to new rpm packages

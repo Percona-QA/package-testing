@@ -31,6 +31,8 @@
     apt: name={{item}} update_cache=no state=latest
     with_items:
     - percona-xtrabackup-24
+    - percona-xtrabackup-test-24
+    - percona-xtrabackup-dbg-24
     when: ansible_os_family == "Debian"
 
   - name: install Percona Server new deb packages
@@ -53,6 +55,8 @@
     yum: name={{item}} state=latest
     with_items:
     - percona-xtrabackup-24
+    - percona-xtrabackup-test-24
+    - percona-xtrabackup-24-debuginfo
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Server new rpm packages
