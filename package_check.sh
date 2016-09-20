@@ -51,11 +51,22 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" ]; then
   deb_maj_version=$(echo ${product} | sed 's/^[a-z]*//' | sed 's/./&\./') # 5.6
   rpm_maj_version=$(echo ${product} | sed 's/^[a-z]*//') # 56
   rpm_version=$(echo ${version} | sed 's/-/-rel/') # 5.6.32-rel78.0
+  if [ ${product} = "ps55" ]; then
+    deb_opt_package=""
+    rpm_opt_package=""
+    deb_num_pkgs="6"
+    rpm_num_pkgs="6"
+  else
+    deb_opt_package="percona-server-tokudb-${deb_maj_version}"
+    rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version}"
+    deb_num_pkgs="7"
+    rpm_num_pkgs="7"
+  fi
   if [ -f /etc/redhat-release ]; then
-    if [ "$(rpm -qa | grep Percona-Server | grep -c ${version})" == "7" ]; then
+    if [ "$(rpm -qa | grep Percona-Server | grep -c ${version})" == "${rpm_num_pkgs}" ]; then
       echo "all packages are installed"
     else
-      for package in Percona-Server-server-${rpm_maj_version} Percona-Server-test-${rpm_maj_version} Percona-Server-${rpm_maj_version}-debuginfo Percona-Server-devel-${rpm_maj_version} Percona-Server-tokudb-${rpm_maj_version} Percona-Server-shared-${rpm_maj_version} Percona-Server-client-${rpm_maj_version}; do
+      for package in Percona-Server-server-${rpm_maj_version} Percona-Server-test-${rpm_maj_version} Percona-Server-${rpm_maj_version}-debuginfo Percona-Server-devel-${rpm_maj_version} Percona-Server-shared-${rpm_maj_version} Percona-Server-client-${rpm_maj_version} ${rpm_opt_package}; do
         if [ "$(rpm -qa | grep -c ${package}-${rpm_version})" -gt 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
         else
@@ -65,10 +76,10 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" ]; then
       done
     fi
   else
-    if [ "$(dpkg -l | grep percona-server | grep -c ${version})" == "6" ]; then
+    if [ "$(dpkg -l | grep percona-server | grep -c ${version})" == "${deb_num_pkgs}" ]; then
       echo "all packages are installed"
     else
-      for package in percona-server-server-${deb_maj_version} percona-server-test-${deb_maj_version} percona-server-${deb_maj_version}-dbg percona-server-source-${deb_maj_version} percona-server-tokudb-${deb_maj_version} percona-server-common-${deb_maj_version}; do
+      for package in percona-server-server-${deb_maj_version} percona-server-client-${deb_maj_version} percona-server-test-${deb_maj_version} percona-server-${deb_maj_version}-dbg percona-server-source-${deb_maj_version} percona-server-common-${deb_maj_version} ${deb_opt_package}; do
 	      deb_version="$(dpkg -l | grep ${package} | awk '{print $3}')"
 	      echo ${package}-${deb_maj_version}
         if [ "$(dpkg -l | grep ${package} | grep -c ${deb_maj_version})" != 0 ]; then
