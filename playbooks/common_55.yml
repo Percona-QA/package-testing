@@ -57,6 +57,8 @@
     - Percona-Server-test-55
     - Percona-Server-55-debuginfo
     - Percona-Server-devel-55
+    - Percona-Server-shared-55
+    - Percona-Server-client-55
     when: ansible_os_family == "RedHat"
 
   - name: install Percona XtraBackup new rpm packages

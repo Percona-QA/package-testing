@@ -64,6 +64,8 @@
     - Percona-Server-57-debuginfo
     - Percona-Server-devel-57
     - Percona-Server-tokudb-57
+    - Percona-Server-shared-57
+    - Percona-Server-client-57
     when: ansible_os_family == "RedHat"
 
   - name: install Percona XtraBackup rpm packages previous version
@@ -166,6 +168,8 @@
     - Percona-Server-57-debuginfo
     - Percona-Server-devel-57
     - Percona-Server-tokudb-57
+    - Percona-Server-shared-57
+    - Percona-Server-client-57
     when: ansible_os_family == "RedHat"
 
   - name: upgrade Percona XtraBackup to new rpm packages
