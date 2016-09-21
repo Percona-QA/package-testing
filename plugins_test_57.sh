@@ -13,6 +13,7 @@ mysql -e "INSTALL PLUGIN mysqlx SONAME 'mysqlx.so';"
 mysql -e "SHOW PLUGINS;"
 mysql -e "CREATE DATABASE world;"
 mysql -e "CREATE DATABASE world2;"
+sed -i '18,21 s/^/--/' /package-testing/world.sql
 pv /package-testing/world.sql | mysql -D world
 pv /package-testing/world.sql | mysql -D world2
 mysql < /package-testing/tokudb_compression.sql
