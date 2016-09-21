@@ -159,6 +159,7 @@
 
   - name: run mysql_upgrade
     command: mysql_upgrade -uroot
+    when: ansible_os_family == "RedHat"
 
   - name: restart mysql service on centos 5
     command: /etc/init.d/mysql restart
