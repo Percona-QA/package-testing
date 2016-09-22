@@ -154,13 +154,15 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" ]; then
   fi
 
 elif [ ${product} = "psmdb30" -o ${product} = "psmdb32" ]; then
+  rpm_num_pkgs="6"
+  deb_num_pkgs="6"
   if [ ${product} = "psmdb32" ]; then
     extra_version="-32"
   else
     extra_version=""
   fi
   if [ -f /etc/redhat-release ]; then
-    if [ "$(rpm -qa | grep Percona-Server-MongoDB | grep -c ${version}-${pkg_version})" == "3" ]; then
+    if [ "$(rpm -qa | grep Percona-Server-MongoDB | grep -c ${version}-${pkg_version})" == "${rpm_num_pkgs}" ]; then
       echo "all packages are installed"
     else
       for package in Percona-Server-MongoDB${extra_version}-debuginfo Percona-Server-MongoDB${extra_version} Percona-Server-MongoDB${extra_version}-mongos Percona-Server-MongoDB${extra_version}-server Percona-Server-MongoDB${extra_version}-shell Percona-Server-MongoDB${extra_version}-tools; do
@@ -173,7 +175,7 @@ elif [ ${product} = "psmdb30" -o ${product} = "psmdb32" ]; then
       done
     fi
   else
-    if [ "$(dpkg -l | grep percona-server-mongodb | grep -c ${version}-${pkg_version})" == "6" ]; then
+    if [ "$(dpkg -l | grep percona-server-mongodb | grep -c ${version}-${pkg_version})" == "${deb_num_pkgs}" ]; then
       echo "all packages are installed"
     else
       for package in percona-server-mongodb${extra_version} percona-server-mongodb${extra_version}-dbg percona-server-mongodb${extra_version}-mongos percona-server-mongodb${extra_version}-server percona-server-mongodb${extra_version}-shell percona-server-mongodb${extra_version}-tools; do

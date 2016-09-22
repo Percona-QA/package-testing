@@ -68,5 +68,8 @@
     - Percona-Server-MongoDB-32-debuginfo
     when: ansible_os_family == "RedHat"
 
+  - name: check that PSMDB 3.2 package versions are correct
+    command: /package-testing/package_check.sh psmdb32
+
   - name: test SE change, import data, restart service
     command: /package-testing/psmdb_test.sh
