@@ -8,5 +8,5 @@ mysql -e "INSTALL PLUGIN audit_log SONAME 'audit_log.so';"
 mysql -e "INSTALL PLUGIN handlersocket SONAME 'handlersocket.so';"
 mysql -e "SHOW PLUGINS;"
 mysql -e "CREATE DATABASE world;"
-sed -i '18,21 s/^/--/' /package-testing/world.sql
+sed -i '18,21 s/^/-- /' /package-testing/world.sql
 pv /package-testing/world.sql | mysql -D world
