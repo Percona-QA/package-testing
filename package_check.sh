@@ -100,8 +100,7 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" ]; then
     else
       for package in percona-server-server-${deb_maj_version} percona-server-client-${deb_maj_version} percona-server-test-${deb_maj_version} percona-server-${deb_maj_version}-dbg percona-server-source-${deb_maj_version} percona-server-common-${deb_maj_version} ${deb_opt_package}; do
 	      deb_version="$(dpkg -l | grep ${package} | awk '{print $3}')"
-	      echo ${package}-${deb_maj_version}
-        if [ "$(dpkg -l | grep ${package} | grep -c ${deb_maj_version})" != 0 ]; then
+        if [ "$(dpkg -l | grep ${package} | grep -c ${version})" != 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed"
         else
           echo "WARNING: ${package} is not installed"
@@ -162,7 +161,7 @@ elif [ ${product} = "psmdb30" -o ${product} = "psmdb32" ]; then
     extra_version=""
   fi
   if [ -f /etc/redhat-release ]; then
-    if [ "$(rpm -qa | grep Percona-Server-MongoDB | grep -c ${version}-${pkg_version})" == "${rpm_num_pkgs}" ]; then
+    if [ "$(rpm -qa | grep Percona-Server-MongoDB | grep -c ${version})" == "${rpm_num_pkgs}" ]; then
       echo "all packages are installed"
     else
       for package in Percona-Server-MongoDB${extra_version}-debuginfo Percona-Server-MongoDB${extra_version} Percona-Server-MongoDB${extra_version}-mongos Percona-Server-MongoDB${extra_version}-server Percona-Server-MongoDB${extra_version}-shell Percona-Server-MongoDB${extra_version}-tools; do
@@ -175,11 +174,11 @@ elif [ ${product} = "psmdb30" -o ${product} = "psmdb32" ]; then
       done
     fi
   else
-    if [ "$(dpkg -l | grep percona-server-mongodb | grep -c ${version}-${pkg_version})" == "${deb_num_pkgs}" ]; then
+    if [ "$(dpkg -l | grep percona-server-mongodb | grep -c ${version})" == "${deb_num_pkgs}" ]; then
       echo "all packages are installed"
     else
       for package in percona-server-mongodb${extra_version} percona-server-mongodb${extra_version}-dbg percona-server-mongodb${extra_version}-mongos percona-server-mongodb${extra_version}-server percona-server-mongodb${extra_version}-shell percona-server-mongodb${extra_version}-tools; do
-        if [ "$(dpkg -l | grep -c ${package}-${version})" -gt 0 ]; then
+        if [ "$(dpkg -l | grep ${package} | grep -c ${version})" -gt 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
         else
           echo "WARNING: ${package}-${version} is not installed"
