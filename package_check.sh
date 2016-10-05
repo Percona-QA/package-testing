@@ -57,15 +57,12 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" ]; then
       rpm_version=$(echo ${version} | sed 's/-/-rel/') # 5.6.32-rel78.0
     fi
     if [ ${product} = "ps55" ]; then
-      if [ ${centos_maj_version} == "7" ]; then
-        rpm_num_pkgs="7"
-        rpm_opt_package="Percona-Server-shared-compat-${rpm_maj_version}"
-      else
-        rpm_num_pkgs="6"
-        rpm_opt_package=""
-      fi
-    else
+      rpm_num_pkgs="6"
+      rpm_opt_package=""
+    elif [ ${product} = "ps56" ]; then
       rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version}"
+      rpm_num_pkgs="7"
+    elif [ ${product} = "ps57" ]; then
       if [ ${centos_maj_version} == "7" ]; then
         rpm_num_pkgs="8"
         rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-shared-compat-${rpm_maj_version}"
