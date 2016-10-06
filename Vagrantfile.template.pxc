@@ -19,7 +19,7 @@ Vagrant.configure("2") do |config|
   # please see the online documentation at vagrantup.com.
 
   servers.each do |machine|
-    config.vm.define pxc1-#{machine[:hostname]} do |node1|
+    config.vm.define "pxc1-#{machine[:hostname]}" do |node1|
       node1.vm.box = machine[:box]
       node1.vm.hostname = machine[:hostname]
       node1.vm.provider "virtualbox" do |vb|
@@ -39,7 +39,7 @@ Vagrant.configure("2") do |config|
       config.vm.network :private_network, ip: "192.168.70.61"
     end
 
-    config.vm.define pxc2-#{machine[:hostname]} do |node2|
+    config.vm.define "pxc2-#{machine[:hostname]}" do |node2|
       node2.vm.box = machine[:box]
       node2.vm.hostname = machine[:hostname]
       node2.vm.provider "virtualbox" do |vb|
@@ -59,7 +59,7 @@ Vagrant.configure("2") do |config|
       config.vm.network :private_network, ip: "192.168.70.62"
     end
 
-    config.vm.define pxc3-#{machine[:hostname]} do |node3|
+    config.vm.define "pxc3-#{machine[:hostname]}" do |node3|
       node3.vm.box = machine[:box]
       node3.vm.hostname = machine[:hostname]
       node3.vm.provider "virtualbox" do |vb|
