@@ -2,42 +2,15 @@
 # vi: set ft=ruby :
 
 servers=[
-  {
-    :hostname => "d-wheezy-64-@@hostname@@",
-    :box => "debian/wheezy64",
-  },
-  {
-    :hostname => "d-jessie-64-@@hostname@@",
-    :box => "bento/debian-8.4",
-  },
-  {
-    :hostname => "centos-5-64-@@hostname@@",
-    :box => "percona-centos5-64",
-  },
-  {
-    :hostname => "centos-6-64-@@hostname@@",
-    :box => "bento/centos-6.7",
-  },
-  {
-    :hostname => "centos-7-64-@@hostname@@",
-    :box => "centos/7",
-  },
-  {
-    :hostname => "u-precise-64-@@hostname@@",
-    :box => "ubuntu/precise64",
-  },
-  {
-    :hostname => "u-trusty-64-@@hostname@@",
-    :box => "ubuntu/trusty64",
-  },
-  {
-    :hostname => "u-wily-64-@@hostname@@",
-    :box => "ubuntu/wily64",
-  },
-  {
-    :hostname => "u-xenial-64-@@hostname@@",
-    :box => "percona-xenial-64",
-  }
+  { :hostname => "d-wheezy-64-@@hostname@@", :box => "debian/wheezy64" },
+  { :hostname => "d-jessie-64-@@hostname@@", :box => "bento/debian-8.4" },
+  { :hostname => "centos-5-64-@@hostname@@", :box => "percona-centos5-64" },
+  { :hostname => "centos-6-64-@@hostname@@", :box => "bento/centos-6.7" },
+  { :hostname => "centos-7-64-@@hostname@@", :box => "centos/7" },
+  { :hostname => "u-precise-64-@@hostname@@", :box => "ubuntu/precise64" },
+  { :hostname => "u-trusty-64-@@hostname@@", :box => "ubuntu/trusty64" },
+  { :hostname => "u-wily-64-@@hostname@@", :box => "ubuntu/wily64" },
+  { :hostname => "u-xenial-64-@@hostname@@", :box => "percona-xenial-64" }
 ]
 
 Vagrant.configure("2") do |config|
@@ -46,10 +19,10 @@ Vagrant.configure("2") do |config|
   # please see the online documentation at vagrantup.com.
 
   servers.each do |machine|
-    config.vm.define pxc1-#{machine[:hostname]} do |node|
-      node.vm.box = machine[:box]
-      node.vm.hostname = machine[:hostname]
-      node.vm.provider "virtualbox" do |vb|
+    config.vm.define pxc1-#{machine[:hostname]} do |node1|
+      node1.vm.box = machine[:box]
+      node1.vm.hostname = machine[:hostname]
+      node1.vm.provider "virtualbox" do |vb|
           vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on"]
           vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
           vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
@@ -66,10 +39,10 @@ Vagrant.configure("2") do |config|
       config.vm.network :private_network, ip: "192.168.70.61"
     end
 
-    config.vm.define pxc2-#{machine[:hostname]} do |node|
-      node.vm.box = machine[:box]
-      node.vm.hostname = machine[:hostname]
-      node.vm.provider "virtualbox" do |vb|
+    config.vm.define pxc2-#{machine[:hostname]} do |node2|
+      node2.vm.box = machine[:box]
+      node2.vm.hostname = machine[:hostname]
+      node2.vm.provider "virtualbox" do |vb|
           vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on"]
           vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
           vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
@@ -86,10 +59,10 @@ Vagrant.configure("2") do |config|
       config.vm.network :private_network, ip: "192.168.70.62"
     end
 
-    config.vm.define pxc3-#{machine[:hostname]} do |node|
-      node.vm.box = machine[:box]
-      node.vm.hostname = machine[:hostname]
-      node.vm.provider "virtualbox" do |vb|
+    config.vm.define pxc3-#{machine[:hostname]} do |node3|
+      node3.vm.box = machine[:box]
+      node3.vm.hostname = machine[:hostname]
+      node3.vm.provider "virtualbox" do |vb|
           vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on"]
           vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
           vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
