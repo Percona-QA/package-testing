@@ -15,7 +15,7 @@
 #    when: ansible_os_family == "Debian"
   - name: install galera, vim, pv, python-mysqldb, pxc-56
     apt: name={{ item }} update_cache=yes
-    with_items: 
+    with_items:
 #   - language-pack-hr
     - vim
     - pv
@@ -25,14 +25,13 @@
     sudo: yes
     copy: src=/home/hrvoje/worktable/sampledbs/world_innodb.sql dest=/root/
   # stop mysql service
-  - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped 
+  - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped
     sudo: yes
   - name: configure PXC
-    template: src=/home/hrvoje/worktable/package-testing/templates/my.j2 
+    template: src=/home/hrvoje/worktable/package-testing/templates/my.j2
               dest=/etc/mysql/my.cnf
               mode=0640 owner=mysql group=root
     sudo: yes
   # start mysql service
   - command: service mysql start
     sudo: yes
-  
