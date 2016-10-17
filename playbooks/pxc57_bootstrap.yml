@@ -28,12 +28,14 @@
     apt: name={{item}} update_cache=yes
     with_items:
     - percona-xtradb-cluster-full-57
+    - python-mysqldb
     when: ansible_os_family == "Debian"
 
   - name: install PXC 5.7 previous rpm packages
     yum: name={{item}} state=latest
     with_items:
     - Percona-XtraDB-Cluster-full-57
+    - MySQL-python
     when: ansible_os_family == "RedHat"
 
   - name: stop mysql service with service command
