@@ -5,7 +5,7 @@ servers=[
   { :hostname => "d-wheezy-64-@@hostname@@", :box => "debian/wheezy64" },
   { :hostname => "d-jessie-64-@@hostname@@", :box => "bento/debian-8.4" },
   { :hostname => "centos-5-64-@@hostname@@", :box => "percona-centos5-64" },
-  { :hostname => "centos-6-64-@@hostname@@", :box => "bento/centos-6.7" },
+  { :hostname => "centos-6-64-@@hostname@@", :box => "bento/centos-6.8" },
   { :hostname => "centos-7-64-@@hostname@@", :box => "centos/7" },
   { :hostname => "u-precise-64-@@hostname@@", :box => "ubuntu/precise64" },
   { :hostname => "u-trusty-64-@@hostname@@", :box => "ubuntu/trusty64" },
