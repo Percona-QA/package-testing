@@ -1,42 +1,40 @@
 ---
-# This playbook sets up the first PXC node from percona repo
+# This playbook sets up the first PXC node from Percona main repo
 
 - hosts: all
-  sudo: yes
+  become: true
+  become_method: sudo
 
   tasks:
-  - name: add the repo
-    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main testing' state=present
-   # apt_repository: repo='deb http://repo.percona.com/apt {{ansible_lsb.codename}} main' state=present
-  # Add an Apt signing key, will not download if present
-  - apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
-#  - name: pin the percona repo for trusty
-#    copy: src=/home/hrvoje/worktable/percona-cluster/00percona.pref dest=/etc/apt/preferences.d/
-#    sudo: yes
-#  - name: copy apt-cacher-ng proxy file
-#    copy: src=/home/hrvoje/worktable/package-testing/01proxy dest=/etc/apt/apt.conf.d/
-#    when: ansible_os_family == "Debian"
-  - name: install vim, pv, python-mysqldb, and PXC-5.7
+  - name: include tasks for test env setup
+    include: ../tasks/test_prep.yml
+
+  - name: include tasks for enabling main repo
+    include: ../tasks/enable_main_repo.yml
+
+  - name: install PXC 5.7 previous deb packages
     apt: name={{item}} update_cache=yes
     with_items:
-    - vim
-    - pv
-    - percona-xtradb-cluster-full-57 
-#   - percona-xtradb-cluster-57
-    - python-mysqldb
+    - percona-xtradb-cluster-full-57
+    when: ansible_os_family == "Debian"
+
+  - name: install PXC 5.7 previous rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - Percona-XtraDB-Cluster-full-57
+    when: ansible_os_family == "RedHat"
+
   # stop mysql service
-  - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped 
+  - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped
+
   - name: configure PXC
-    template: src=/home/hrvoje/worktable/package-testing/templates/my.j2 
+    template: src=/home/hrvoje/worktable/package-testing/templates/my.j2
               dest=/etc/mysql/my.cnf
               mode=0640 owner=mysql group=root
+
   #bootstrap the cluster
   - command: service mysql bootstrap-pxc
+
   #add sstuser
   - mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" state=present
-  - command: /vagrant/plugins_test_57.sh 
-# - name: install 3rd party packages
-#   apt: name={{item}} 
-#   with_items:
-#   - cacti
-#   - rsyslog-mysql
+  - command: /vagrant/plugins_test_57.sh
