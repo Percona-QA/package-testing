@@ -27,7 +27,7 @@
   # stop mysql service
   - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped
   - name: configure PXC
-    template: src=/package-testing/templates/my.j2
+    template: src=../templates/my.j2
               dest=/etc/mysql/my.cnf
               mode=0640 owner=mysql group=root
 
