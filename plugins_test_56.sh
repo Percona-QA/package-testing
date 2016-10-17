@@ -12,7 +12,11 @@ mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME_READ SONAME 'query_response_time.so
 mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME_WRITE SONAME 'query_response_time.so';"
 mysql -e "SHOW PLUGINS;"
 mysql -e "CREATE DATABASE world;"
-mysql -e "CREATE DATABASE world2;"
 sed -i '18,21 s/^/-- /' /package-testing/world.sql
 pv /package-testing/world.sql | mysql -D world
-pv /package-testing/world.sql | mysql -D world2
+if [ ! -z "$1" ]; then
+  if [ "$1" -eq "ps" ]; then
+    mysql -e "CREATE DATABASE world2;"
+    pv /package-testing/world.sql | mysql -D world2
+    mysql < /package-testing/tokudb_compression.sql
+fi

@@ -106,7 +106,7 @@
     command: /usr/bin/ps_tokudb_admin --enable --enable-backup
 
   - name: install plugins, import world database, test tokudb
-    command: /package-testing/plugins_test_56.sh
+    command: /package-testing/plugins_test_56.sh ps
 
   - name: install 3rd party packages with apt
     apt: name={{item}}
