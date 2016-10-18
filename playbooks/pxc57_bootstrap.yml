@@ -9,6 +9,11 @@
   - name: include tasks for test env setup
     include: ../tasks/test_prep.yml
 
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - curl -o /package-testing/world.sql --limit-rate 200k https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
   - name: include tasks for enabling main repo
     include: ../tasks/enable_main_repo.yml
 
