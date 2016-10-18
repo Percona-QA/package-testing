@@ -27,7 +27,9 @@
     when: ansible_os_family == "RedHat"
 
   # stop mysql service
-  - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped
+  - name: stop mysql service with service command
+    command: service mysql stop
+
   - name: configure PXC
     template: src=../templates/my.j2
               dest=/etc/mysql/my.cnf
