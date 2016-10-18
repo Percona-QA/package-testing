@@ -94,4 +94,4 @@
 
   # other tests
   - name: install plugins
-    command: /package-testing/plugins_57.sh pxc
+    command: /package-testing/plugins_test_57.sh pxc
