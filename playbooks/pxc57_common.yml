@@ -12,6 +12,18 @@
   - name: include tasks for enabling testing repo
     include: ../tasks/enable_testing_repo.yml
 
+  - name: disable selinux
+    selinux: state=disabled
+    when: ansible_os_family == "RedHat"
+
+  - name: add firewall rules
+    command: /sbin/iptables -I INPUT -s {{item}} -p tcp -j ACCEPT
+    with_items:
+    - 192.168.70.63
+    - 192.168.70.62
+    - 192.168.70.61
+    when: ansible_os_family == "RedHat"
+
   - name: install PXC 5.7 new deb packages
     apt: name={{item}} update_cache=yes
     with_items:
