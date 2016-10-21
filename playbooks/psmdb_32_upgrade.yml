@@ -58,6 +58,10 @@
     apt: name={{item}} update_cache=yes state=latest
     with_items:
     - percona-server-mongodb-32
+    - percona-server-mongodb-32-server
+    - percona-server-mongodb-32-mongos
+    - percona-server-mongodb-32-shell
+    - percona-server-mongodb-32-tools
     - percona-server-mongodb-32-dbg
     when: ansible_os_family == "Debian"
 
@@ -65,6 +69,10 @@
     yum: name={{item}} state=latest
     with_items:
     - Percona-Server-MongoDB-32
+    - Percona-Server-MongoDB-32-server
+    - Percona-Server-MongoDB-32-shell
+    - Percona-Server-MongoDB-32-mongos
+    - Percona-Server-MongoDB-32-tools
     - Percona-Server-MongoDB-32-debuginfo
     when: ansible_os_family == "RedHat"
 
