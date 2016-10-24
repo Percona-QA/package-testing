@@ -38,7 +38,6 @@
     - MySQL-python
     when: ansible_os_family == "RedHat"
 
-  # stop mysql service
   - name: stop mysql service with service command
     command: service mysql stop
 
@@ -60,5 +59,6 @@
               mode=0640 owner=mysql group=root
     when: ansible_os_family == "Debian"
 
-  # start mysql service
-  - command: service mysql start
+  - name: start PXC service
+    command: service mysql start
+
