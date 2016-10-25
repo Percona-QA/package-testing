@@ -24,7 +24,7 @@ default_storage_engine=InnoDB
 innodb_autoinc_lock_mode=2
 
 # Node #1 address
-wsrep_node_address={{ansible_enp0s8.ipv4.address}}
+wsrep_node_address={{ man_ip }}
 
 # SST method
 wsrep_sst_method=xtrabackup-v2

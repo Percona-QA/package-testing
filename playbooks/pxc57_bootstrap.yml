@@ -6,6 +6,14 @@
   become_method: sudo
 
   tasks:
+  # find vm ip so that it can be used in templates
+  - debug: var=ansible_all_ipv4_addresses
+  - set_fact:
+      man_ip: "{{ item }}"
+    with_items: "{{ ansible_all_ipv4_addresses }}"
+    when: "item.startswith('192.168')"
+  - debug: var=man_ip
+
   - name: include tasks for test env setup
     include: ../tasks/test_prep.yml
 
@@ -50,13 +58,9 @@
     template: src=../templates/my_rpm.j2 dest=/etc/my.cnf
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
-#  - name: copy pxc config on centos 7
-#    template: src=../templates/my_rpm_7.j2 dest=/etc/my.cnf
-#    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-
-  # workaround for network interfaces issue between ansible and vagrant when using template
   - name: copy pxc config on centos 7
-    command: cp /package-testing/templates/my_rpm_7.j2 /etc/my.cnf
+    template: src=../templates/my_rpm_7.j2 dest=/etc/my.cnf
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: configure PXC on debian/ubuntu
     template: src=../templates/my.j2
