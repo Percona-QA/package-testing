@@ -146,12 +146,13 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
     fi
   else
     deb_maj_version=$(echo ${product} | sed 's/^[a-z]*//' | sed 's/./&\./') # 5.6
+    deb_maj_version_nodot=$(echo ${product} | sed 's/^[a-z]*//') # 56
     deb_opt_package=""
     deb_num_pkgs="9"
     if [ "$(dpkg -l | grep percona-xtradb-cluster | grep -c ${version})" == "${deb_num_pkgs}" ]; then
       echo "all packages are installed"
     else
-      for package in percona-xtradb-cluster-${deb_maj_version} percona-xtradb-cluster-full-${deb_maj_version} percona-xtradb-cluster-debug-${deb_maj_version} percona-xtradb-cluster-server-${deb_maj_version} percona-xtradb-cluster-client-${deb_maj_version} percona-xtradb-cluster-test-${deb_maj_version} percona-xtradb-cluster-${deb_maj_version}-dbg percona-xtradb-cluster-source-${deb_maj_version} percona-xtradb-cluster-common-${deb_maj_version}; do
+      for package in percona-xtradb-cluster-${deb_maj_version_nodot} percona-xtradb-cluster-full-${deb_maj_version_nodot} percona-xtradb-cluster-debug-${deb_maj_version} percona-xtradb-cluster-server-${deb_maj_version} percona-xtradb-cluster-client-${deb_maj_version} percona-xtradb-cluster-test-${deb_maj_version} percona-xtradb-cluster-${deb_maj_version}-dbg percona-xtradb-cluster-source-${deb_maj_version} percona-xtradb-cluster-common-${deb_maj_version}; do
 	      deb_version="$(dpkg -l | grep ${package} | awk '{print $3}')"
         if [ "$(dpkg -l | grep ${package} | grep -c ${version}-${release})" != 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed"
