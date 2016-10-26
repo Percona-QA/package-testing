@@ -65,6 +65,12 @@
               mode=0640 owner=mysql group=root
     when: ansible_os_family == "Debian"
 
+  - name: copy .my.cnf with credentials
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
+
   - name: start PXC service
     command: service mysql start
 
