@@ -24,6 +24,14 @@ elif [ $1 = "ps57" ]; then
   version=${PS57_VER}
   release=${PS57_VER#*-}
   revision=${PS57_REV}
+elif [ $1 = "pxc56" ]; then
+  version=${PXC56_VER}
+  release=${PXC56_VER#*-}
+  revision=${PXC56_REV}
+elif [ $1 = "pxc57" ]; then
+  version=${PXC57_VER}
+  release=${PXC57_VER#*-}
+  revision=${PXC57_REV}
 elif [ $1 = "pt" ]; then
   version=${PT_VER}
 elif [ $1 = "pxb23" ]; then
@@ -98,6 +106,54 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" ]; then
       for package in percona-server-server-${deb_maj_version} percona-server-client-${deb_maj_version} percona-server-test-${deb_maj_version} percona-server-${deb_maj_version}-dbg percona-server-source-${deb_maj_version} percona-server-common-${deb_maj_version} ${deb_opt_package}; do
 	      deb_version="$(dpkg -l | grep ${package} | awk '{print $3}')"
         if [ "$(dpkg -l | grep ${package} | grep -c ${version})" != 0 ]; then
+          echo "$(date +%Y%m%d%H%M%S): ${package} is installed"
+        else
+          echo "WARNING: ${package} is not installed"
+          exit 1
+        fi
+      done
+    fi
+  fi
+
+elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
+  if [ -f /etc/redhat-release ]; then
+    centos_maj_version=$(cat /etc/redhat-release | grep -oE '[0-9]+' | head -n 1)
+    rpm_maj_version=$(echo ${product} | sed 's/^[a-z]*//') # 56
+
+    if [ ${product} = "pxc56" ]; then
+      rpm_opt_package=""
+      rpm_num_pkgs="11"
+    elif [ ${product} = "pxc57" ]; then
+      if [ ${centos_maj_version} == "7" ]; then
+        rpm_num_pkgs="10"
+        rpm_opt_package="Percona-XtraDB-Cluster-shared-compat-${rpm_maj_version}"
+      else
+        rpm_num_pkgs="9"
+        rpm_opt_package=""
+      fi
+    fi
+    if [ "$(rpm -qa | grep Percona-XtraDB-Cluster | grep -c ${version})" == "${rpm_num_pkgs}" ]; then
+      echo "all packages are installed"
+    else
+      for package in Percona-XtraDB-Cluster-${rpm_maj_version} Percona-XtraDB-Cluster-server-${rpm_maj_version} Percona-XtraDB-Cluster-test-${rpm_maj_version} Percona-XtraDB-Cluster-${rpm_maj_version}-debuginfo Percona-XtraDB-Cluster-devel-${rpm_maj_version} Percona-XtraDB-Cluster-shared-${rpm_maj_version} Percona-XtraDB-Cluster-client-${rpm_maj_version} Percona-XtraDB-Cluster-full-${rpm_maj_version} Percona-XtraDB-Cluster-garbd-${rpm_maj_version} ${rpm_opt_package}; do
+        if [ "$(rpm -qa | grep -c ${package}-${version}-${release})" -gt 0 ]; then
+          echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
+        else
+          echo "WARNING: ${package}-${version}-${release} is not installed"
+          exit 1
+        fi
+      done
+    fi
+  else
+    deb_maj_version=$(echo ${product} | sed 's/^[a-z]*//' | sed 's/./&\./') # 5.6
+    deb_opt_package=""
+    deb_num_pkgs="9"
+    if [ "$(dpkg -l | grep percona-xtradb-cluster | grep -c ${version})" == "${deb_num_pkgs}" ]; then
+      echo "all packages are installed"
+    else
+      for package in percona-xtradb-cluster-${deb_maj_version} percona-xtradb-cluster-full-${deb_maj_version} percona-xtradb-cluster-debug-${deb_maj_version} percona-xtradb-cluster-server-${deb_maj_version} percona-xtradb-cluster-client-${deb_maj_version} percona-xtradb-cluster-test-${deb_maj_version} percona-xtradb-cluster-${deb_maj_version}-dbg percona-xtradb-cluster-source-${deb_maj_version} percona-xtradb-cluster-common-${deb_maj_version}; do
+	      deb_version="$(dpkg -l | grep ${package} | awk '{print $3}')"
+        if [ "$(dpkg -l | grep ${package} | grep -c ${version}-${release})" != 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed"
         else
           echo "WARNING: ${package} is not installed"

@@ -20,3 +20,9 @@
     with_items:
     - Percona-XtraDB-Cluster-full-57
     when: ansible_os_family == "RedHat"
+
+  - name: check that PXC version is correct
+    command: /package-testing/version_check.sh pxc57
+
+  - name: check that PXC package versions are correct
+    command: /package-testing/package_check.sh pxc57

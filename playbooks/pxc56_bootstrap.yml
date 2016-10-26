@@ -1,41 +1,99 @@
 ---
-# This playbook sets up the first PXC node from percona repo
+# This playbook sets up the first PXC node from Percona main repo
 
 - hosts: all
-  sudo: yes
+  become: true
+  become_method: sudo
 
   tasks:
-  - name: add the repo
-    apt_repository: repo='deb [arch=amd64] http://192.168.5.9/apt {{ansible_lsb.codename}} main testing' state=present
-   # apt_repository: repo='deb http://repo.percona.com/apt {{ansible_lsb.codename}} main' state=present
-  # Add an Apt signing key, will not download if present
-  - apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
-#  - name: pin the percona repo for trusty
-#    copy: src=/home/hrvoje/worktable/percona-cluster/00percona.pref dest=/etc/apt/preferences.d/
-#    sudo: yes
-#  - name: copy apt-cacher-ng proxy file
-#    copy: src=/home/hrvoje/worktable/package-testing/01proxy dest=/etc/apt/apt.conf.d/
-#    when: ansible_os_family == "Debian"
-  - name: install vim, pv, python-mysqldb, and PXC-5.6
+  # find vm ip so that it can be used in templates
+  - debug: var=ansible_all_ipv4_addresses
+  - set_fact:
+      man_ip: "{{ item }}"
+    with_items: "{{ ansible_all_ipv4_addresses }}"
+    when: "item.startswith('192.168')"
+  - debug: var=man_ip
+
+  - name: include tasks for test env setup
+    include: ../tasks/test_prep.yml
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - curl -o /package-testing/world.sql --limit-rate 200k https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: include tasks for enabling main repo
+    include: ../tasks/enable_main_repo.yml
+
+  - name: disable selinux
+    selinux: state=disabled
+    when: ansible_os_family == "RedHat"
+
+  - name: add firewall rules
+    command: /sbin/iptables -I INPUT -s {{item}} -p tcp -j ACCEPT
+    with_items:
+    - 192.168.70.63
+    - 192.168.70.62
+    - 192.168.70.61
+    when: ansible_os_family == "RedHat"
+
+  - name: install PXC 5.6 previous deb packages
     apt: name={{item}} update_cache=yes
     with_items:
-    - vim
-    - pv
     - percona-xtradb-cluster-full-56
     - python-mysqldb
-  # stop mysql service
-  - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped 
-  - name: configure PXC
-    template: src=/home/hrvoje/worktable/package-testing/templates/my.j2 
+    when: ansible_os_family == "Debian"
+
+  - name: install PXC 5.6 previous rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - Percona-XtraDB-Cluster-full-56
+    - MySQL-python
+    when: ansible_os_family == "RedHat"
+
+  - name: stop mysql service with service command
+    command: service mysql stop
+
+  - name: copy pxc config on centos 5 and 6
+    template: src=../templates/my_rpm.j2 dest=/etc/my.cnf
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version < "7"
+
+  - name: copy pxc config on centos 7
+    template: src=../templates/my_rpm_7.j2 dest=/etc/my.cnf
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: configure PXC on debian/ubuntu
+    template: src=../templates/my.j2
               dest=/etc/mysql/my.cnf
               mode=0640 owner=mysql group=root
-  #bootstrap the cluster
-  - command: service mysql bootstrap-pxc
-  #add sstuser
-  - mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,LOCK TABLES,REPLICATION CLIENT" state=present
-  - command: /vagrant/plugins_test_56.sh 
-  - name: install 3rd party packages
-    apt: name={{item}} 
-    with_items:
-    - cacti
-    - rsyslog-mysql
+    when: ansible_os_family == "Debian"
+
+  # bootstrap the cluster
+  - name: bootstrap cluster on centos 5 and 6
+    command: /etc/init.d/mysql bootstrap-pxc
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version < "7"
+
+  - name: bootstrap cluster on centos 7
+    command: systemctl start mysql@bootstrap.service
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: run the bootstrap service on debian/ubuntu
+    command: service mysql bootstrap-pxc
+    when: ansible_os_family == "Debian"
+
+  # add sstuser
+  - name: create backup user on centos 6
+    mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: create backup user on centos 7
+    command: /package-testing/pxc_backup_user.sh
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: create backup user on debian/ubuntu
+    mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" state=present
+    when: ansible_os_family == "Debian"
+
+  # other tests
+  - name: install plugins
+    command: /package-testing/plugins_test_56.sh pxc

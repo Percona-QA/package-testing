@@ -1,23 +1,28 @@
 ---
-# This playbook upgrades the PXC 5.7 node
+# This playbook upgrades the PXC node to the latest available version in testing repo
 
 - hosts: all
   become: true
   become_method: sudo
 
   tasks:
-  - name: add the percona deb repo
-    sudo: yes
-    apt_repository: repo='deb [arch=amd64] http://repo.percona.com/apt {{ansible_lsb.codename}} main testing' state=present
+  - name: include tasks for enabling testing repo
+    include: ../tasks/enable_testing_repo.yml
+
+  - name: upgrade PXC 5.6 to new deb packages
+    apt: name={{item}} update_cache=yes
+    with_items:
+    - percona-xtradb-cluster-full-56
     when: ansible_os_family == "Debian"
-  - name: add the percona yum repos
-    yum: name=http://www.percona.com/downloads/percona-release/redhat/0.1-3/percona-release-0.1-3.noarch.rpm
+
+  - name: upgrade PXC 5.6 to new rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - Percona-XtraDB-Cluster-full-56
     when: ansible_os_family == "RedHat"
-  - name: upgrade deb packages
-    sudo: yes
-    apt: update_cache=yes upgrade=safe
-    when: ansible_os_family == "Debian"
-  - name: upgrade packages in centos
-    sudo: yes
-    yum: name=Percona-Server-server-55 enablerepo=percona-testing-x86_64 state=latest
-    when: ansible_os_family == "RedHat"
+
+  - name: check that PXC version is correct
+    command: /package-testing/version_check.sh pxc56
+
+  - name: check that PXC package versions are correct
+    command: /package-testing/package_check.sh pxc56

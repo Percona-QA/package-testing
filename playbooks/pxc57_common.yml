@@ -66,3 +66,8 @@
   - name: start PXC service
     command: service mysql start
 
+  - name: check that PXC version is correct
+    command: /package-testing/version_check.sh pxc57
+
+  - name: check that PXC package versions are correct
+    command: /package-testing/package_check.sh pxc57

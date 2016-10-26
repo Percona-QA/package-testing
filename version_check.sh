@@ -24,6 +24,16 @@ elif [ $1 = "ps57" ]; then
   version=${PS57_VER}
   release=${PS57_VER#*-}
   revision=${PS57_REV}
+elif [ $1 = "pxc56" ]; then
+  version=${PXC56_VER}
+  release=${PXC56_VER#*-}
+  revision=${PXC56_REV}
+  innodb_ver=${PXC56_INNODB}
+elif [ $1 = "pxc57" ]; then
+  version=${PXC57_VER}
+  release=${PXC57_VER#*-}
+  revision=${PXC57_REV}
+  innodb_ver=${PXC57_INNODB}
 elif [ $1 = "pt" ]; then
   version=${PT_VER}
 elif [ $1 = "pxb23" ]; then
@@ -41,22 +51,39 @@ fi
 
 product=$1
 log="/tmp/${product}_version_check.log"
-echo -n > $log
+echo -n > ${log}
 
 if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" ]; then
   for i in @@INNODB_VERSION @@VERSION @@TOKUDB_VERSION; do
     if [ ${product} = "ps55" -a ${i} = "@@TOKUDB_VERSION" ]; then
-      echo "${i} is empty" >> $log
-    elif [ "$(mysql -e "SELECT ${i}; "| grep -c $version)" = 1 ]; then
-      echo "${i} is correct" >> $log
+      echo "${i} is empty" >> ${log}
+    elif [ "$(mysql -e "SELECT ${i}; "| grep -c ${version})" = 1 ]; then
+      echo "${i} is correct" >> ${log}
     else
       echo "${i} is incorrect"
       exit 1
     fi
   done
 
-  if [ "$(mysql -e "SELECT @@VERSION_COMMENT;" | grep $revision | grep -c $release)" = 1 ]; then
-    echo "@@VERSION COMMENT is correct" >> $log
+  if [ "$(mysql -e "SELECT @@VERSION_COMMENT;" | grep ${revision} | grep -c ${release})" = 1 ]; then
+    echo "@@VERSION COMMENT is correct" >> ${log}
+  else
+    echo "@@VERSION_COMMENT is incorrect"
+    exit 1
+  fi
+
+elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
+  for i in @@INNODB_VERSION @@VERSION; do
+    if [ "$(mysql -e "SELECT ${i}; "| grep -c ${version}-${innodb_ver})" = 1 ]; then
+      echo "${i} is correct" >> ${log}
+    else
+      echo "${i} is incorrect"
+      exit 1
+    fi
+  done
+
+  if [ "$(mysql -e "SELECT @@VERSION_COMMENT;" | grep ${revision} | grep rel${innodb_ver} | grep -c ${release})" = 1 ]; then
+    echo "@@VERSION COMMENT is correct" >> ${log}
   else
     echo "@@VERSION_COMMENT is incorrect"
     exit 1
@@ -64,12 +91,12 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" ]; then
 
 elif [ ${product} = "pt" ]; then
   for i in `cat /package-testing/pt`; do
-    version_check=$($i --version|grep -c ${version})
+    version_check=$(${i} --version|grep -c ${version})
     if [ ${version_check} -eq 0 ]; then
-      echo "$i version is not good!"
+      echo "${i} version is not good!"
       exit 1
     else
-      echo "$i version is correct and ${version}" >> $log
+      echo "${i} version is correct and ${version}" >> ${log}
     fi
   done
 
@@ -79,7 +106,7 @@ elif [ ${product} = "pmm" ]; then
     echo "${product} version is not good!"
     exit 1
   else
-    echo "${product} version is correct and ${version}" >> $log
+    echo "${product} version is correct and ${version}" >> ${log}
   fi
 
 elif [ ${product} = "pxb23" -o ${product} = "pxb24" ]; then
@@ -88,7 +115,7 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" ]; then
       echo "${product} version is not good!"
       exit 1
     else
-      echo "${product} version is correct and ${version}" >> $log
+      echo "${product} version is correct and ${version}" >> ${log}
     fi
 
 elif [ ${product} = "proxysql" ]; then
@@ -97,7 +124,7 @@ elif [ ${product} = "proxysql" ]; then
     echo "${product} version is not good!"
     exit 1
   else
-    echo "${product} version is correct and ${version}" >> $log
+    echo "${product} version is correct and ${version}" >> ${log}
   fi
 
 fi
