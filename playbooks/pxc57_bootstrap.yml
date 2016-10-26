@@ -41,6 +41,7 @@
     apt: name={{item}} update_cache=yes
     with_items:
     - percona-xtradb-cluster-full-57
+    - percona-xtradb-cluster-57
     - python-mysqldb
     when: ansible_os_family == "Debian"
 
@@ -48,6 +49,7 @@
     yum: name={{item}} state=latest
     with_items:
     - Percona-XtraDB-Cluster-full-57
+    - Percona-XtraDB-Cluster-57
     - MySQL-python
     when: ansible_os_family == "RedHat"
 
