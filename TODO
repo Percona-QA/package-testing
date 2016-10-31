@@ -2,9 +2,10 @@ Following would be good to add:
 ===============================
 PS: Check if all the plugins are still installed after upgrade
 PS: Check warnings in mysql log
-PS, XtraBackup: Add some xtrabackup backup/restore
-PS, XtraBackup: Add code to do some table checksums for world database
+PS: XtraBackup: Add some xtrabackup backup/restore
+PS: XtraBackup: Add code to do some table checksums for world database
 PSMDB: Check version of the server, client and tools
-PS: in package check for libperconaserverclient package also - and check if libraries are missing inside package
+PS: In package check for libperconaserverclient package also - and check if libraries are missing inside package
 ALL: Remove templates for my.cnf
 ALL: Put a check on config file with md5 hash before upgrade and after upgrade to check if the files were messed by upgrade
+PXC: Add a 4th vm with garbd only
