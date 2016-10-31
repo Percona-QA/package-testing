@@ -37,6 +37,7 @@
     with_items:
     - percona-xtradb-cluster-full-57
     - percona-xtradb-cluster-57
+    - percona-xtradb-cluster-source-5.7
     - python-mysqldb
     when: ansible_os_family == "Debian"
 
