@@ -9,8 +9,8 @@ servers=[
   { :hostname => "centos-7-64-@@hostname@@", :box => "centos/7" },
   { :hostname => "u-precise-64-@@hostname@@", :box => "ubuntu/precise64" },
   { :hostname => "u-trusty-64-@@hostname@@", :box => "ubuntu/trusty64" },
-  { :hostname => "u-wily-64-@@hostname@@", :box => "ubuntu/wily64" },
-  { :hostname => "u-xenial-64-@@hostname@@", :box => "geerlingguy/ubuntu1604" }
+  { :hostname => "u-xenial-64-@@hostname@@", :box => "geerlingguy/ubuntu1604" },
+  { :hostname => "u-yakkety-64-@@hostname@@", :box => "wholebits/ubuntu16.10-64" }
 ]
 
 Vagrant.configure("2") do |config|
