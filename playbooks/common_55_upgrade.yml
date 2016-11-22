@@ -48,12 +48,6 @@
     - percona-xtrabackup-dbg
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Toolkit rpm packages previous version
-    yum: name={{item}} state=latest
-    with_items:
-    - percona-toolkit
-    when: ansible_os_family == "RedHat"
-
   - name: install Percona Server rpm packages previous version
     yum: name={{item}} state=latest
     with_items:
@@ -63,6 +57,12 @@
     - Percona-Server-devel-55
     - Percona-Server-shared-55
     - Percona-Server-client-55
+    when: ansible_os_family == "RedHat"
+
+  - name: install Percona Toolkit rpm packages previous version
+    yum: name={{item}} state=latest
+    with_items:
+    - percona-toolkit
     when: ansible_os_family == "RedHat"
 
   - name: install Percona XtraBackup rpm packages previous version
@@ -84,9 +84,6 @@
   - name: start mysql service with systemctl command
     command: systemctl start mysql
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-
-  - name: install plugins, import world database
-    command: /package-testing/plugins_test_55.sh
 
   - name: install 3rd party packages with apt
     apt: name={{item}}
@@ -130,6 +127,9 @@
     - percona-xtrabackup-test
     - percona-xtrabackup-dbg
     when: ansible_os_family == "Debian"
+
+  - name: install plugins, import world database
+    command: /package-testing/plugins_test_55.sh
 
   - name: upgrade Percona Toolkit to new rpm packages
     yum: name={{item}} state=latest
