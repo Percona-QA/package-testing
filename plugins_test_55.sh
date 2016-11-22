@@ -6,6 +6,7 @@ mysql -e "CREATE FUNCTION murmur_hash RETURNS INTEGER SONAME 'libmurmur_udf.so'"
 mysql -e "INSTALL PLUGIN auth_pam SONAME 'auth_pam.so';"
 mysql -e "INSTALL PLUGIN audit_log SONAME 'audit_log.so';"
 mysql -e "INSTALL PLUGIN handlersocket SONAME 'handlersocket.so';"
+mysql -e "INSTALL PLUGIN scalability_metrics SONAME 'scalability_metrics.so';"
 mysql -e "SHOW PLUGINS;"
 mysql -e "CREATE DATABASE world;"
 sed -i '18,21 s/^/-- /' /package-testing/world.sql
