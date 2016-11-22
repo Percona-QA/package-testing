@@ -94,6 +94,7 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" ]; then
   else
     deb_maj_version=$(echo ${product} | sed 's/^[a-z]*//' | sed 's/./&\./') # 5.6
     if [ ${product} = "ps55" ]; then
+      version=$(echo ${version} | sed 's/-/-rel/') # 5.5.53-rel38.5
       deb_opt_package=""
       deb_num_pkgs="6"
     else
