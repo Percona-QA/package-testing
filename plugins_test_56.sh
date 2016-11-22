@@ -20,4 +20,5 @@ if [ ! -z "$1" ]; then
     mysql -e "CREATE DATABASE world2;"
     pv /package-testing/world.sql | mysql -D world2
     mysql < /package-testing/tokudb_compression.sql
+  fi
 fi
