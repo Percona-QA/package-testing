@@ -66,7 +66,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: install Percona XtraBackup rpm packages previous version
-    yum: name={{item}} state=latest
+    yum: name={{item}} state=latest enablerepo=percona-testing-x86_64
     with_items:
     - percona-xtrabackup
     - percona-xtrabackup-test
@@ -132,13 +132,13 @@
     command: /package-testing/plugins_test_55.sh
 
   - name: upgrade Percona Toolkit to new rpm packages
-    yum: name={{item}} state=latest
+    yum: name={{item}} state=latest enablerepo=percona-testing-x86_64
     with_items:
     - percona-toolkit
     when: ansible_os_family == "RedHat"
 
   - name: upgrade Percona Server to new rpm packages
-    yum: name={{item}} state=latest
+    yum: name={{item}} state=latest enablerepo=percona-testing-x86_64
     with_items:
     - Percona-Server-server-55
     - Percona-Server-test-55
@@ -149,7 +149,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: upgrade Percona XtraBackup to new rpm packages
-    yum: name={{item}} state=latest
+    yum: name={{item}} state=latest enablerepo=percona-testing-x86_64
     with_items:
     - percona-xtrabackup
     - percona-xtrabackup-test
@@ -176,9 +176,12 @@
 
   - name: check that Percona Toolkit version is correct
     command: /package-testing/version_check.sh pt
+    when: ansible_distribution_release != "yakkety"
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb23
+    when: ansible_distribution_release != "yakkety"
 
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb23
+    when: ansible_distribution_release != "yakkety"
