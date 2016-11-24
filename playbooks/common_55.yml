@@ -43,12 +43,6 @@
     - percona-xtrabackup-dbg
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Toolkit new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - percona-toolkit
-    when: ansible_os_family == "RedHat"
-
   - name: install Percona Server new rpm packages
     yum: name={{item}} state=latest
     with_items:
@@ -58,6 +52,12 @@
     - Percona-Server-devel-55
     - Percona-Server-shared-55
     - Percona-Server-client-55
+    when: ansible_os_family == "RedHat"
+
+  - name: install Percona Toolkit new rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - percona-toolkit
     when: ansible_os_family == "RedHat"
 
   - name: install Percona XtraBackup new rpm packages

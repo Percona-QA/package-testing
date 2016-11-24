@@ -25,12 +25,6 @@
     with_items:
     - curl -o /package-testing/world.sql --limit-rate 200k https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: install Percona Toolkit deb packages previous version
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - percona-toolkit
-    when: ansible_os_family == "Debian"
-
   - name: install Percona Server deb packages previous version
     apt: name={{item}} update_cache=no state=latest
     with_items:
@@ -39,6 +33,12 @@
     - percona-server-5.6-dbg
     - percona-server-source-5.6
     - percona-server-tokudb-5.6
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona Toolkit deb packages previous version
+    apt: name={{item}} update_cache=yes state=latest
+    with_items:
+    - percona-toolkit
     when: ansible_os_family == "Debian"
 
   - name: install Percona XtraBackup deb packages previous version

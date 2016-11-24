@@ -62,6 +62,12 @@
     - Percona-Server-client-57
     when: ansible_os_family == "RedHat"
 
+  - name: install Percona Toolkit new rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - percona-toolkit
+    when: ansible_os_family == "RedHat"
+
   - name: install Percona XtraBackup new rpm packages
     yum: name={{item}} state=latest
     with_items:
