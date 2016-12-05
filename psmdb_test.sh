@@ -65,6 +65,17 @@ function clean_datadir {
 	fi
 }
 
+function test_hotbackup {
+	rm -rf /tmp/backup
+	mkdir -p /tmp/backup
+	BACKUP_RET=$(mongo admin --eval 'db.runCommand({createBackup: 1, backupDir: "/tmp/backup"})'|grep -c '"ok" : 1')
+	rm -rf /tmp/backup
+	if [ ${BACKUP_RET} = 0 ]; then
+		echo "Backup failed for storage engine: ${engine}"
+		exit 1
+	fi
+}
+
 for engine in mmapv1 PerconaFT rocksdb wiredTiger; do
 	stop_service
 	clean_datadir
@@ -74,6 +85,9 @@ for engine in mmapv1 PerconaFT rocksdb wiredTiger; do
 	echo "importing the sample data"
 	mongo < /package-testing/mongo_insert.js >> $log
 	list_data >> $log
+	if [ ${engine} = "wiredTiger" -o ${engine} = "rocksdb" ]; then
+		test_hotbackup
+	fi
 	stop_service
 	echo "disable ${engine}"
 	sed -i "/engine: *${engine}/s//#engine: ${engine}/g" /etc/mongod.conf
