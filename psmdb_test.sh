@@ -85,6 +85,7 @@ for engine in mmapv1 PerconaFT rocksdb wiredTiger; do
 	echo "importing the sample data"
 	mongo < /package-testing/mongo_insert.js >> $log
 	list_data >> $log
+	echo "testing the hotbackup functionality"
 	if [ ${engine} = "wiredTiger" -o ${engine} = "rocksdb" ]; then
 		test_hotbackup
 	fi
