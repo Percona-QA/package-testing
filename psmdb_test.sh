@@ -5,6 +5,10 @@ echo -n > /tmp/psmdb_run.log
 
 set -e
 
+# Enable auditLog and profiling/rate limit to see if services start with those
+sed -i 's/#operationProfiling:/operationProfiling:\n  mode: all\n  slowOpThresholdMs: 200\n  rateLimit: 100/' /etc/mongod.conf
+sed -i 's/#auditLog:/audit:\n  destination: file\n  path: \/tmp\/audit.json/' /etc/mongod.conf
+
 function start_service {
         local redhatrelease=""
         if [ -f /etc/redhat-release ]; then
