@@ -29,6 +29,7 @@ elif [ $1 = "pxc56" ]; then
   release=${PXC56_VER#*-}
   revision=${PXC56_REV}
   innodb_ver=${PXC56_INNODB}
+  wsrep=${PXC56_WSREP}
 elif [ $1 = "pxc57" ]; then
   version=${PXC57_VER%-*}
   release=${PXC57_VER#*-}
@@ -86,6 +87,13 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
     echo "@@VERSION COMMENT is correct" >> ${log}
   else
     echo "@@VERSION_COMMENT is incorrect"
+    exit 1
+  fi
+
+  if [ "$(mysql -e "SHOW STATUS LIKE 'wsrep_provider_version';" | grep -c ${wsrep})" = 1 ]; then
+    echo "wsrep_provider_version is correct" >> ${log}
+  else
+    echo "wsrep_provider_version is incorrect"
     exit 1
   fi
 
