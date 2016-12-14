@@ -35,6 +35,7 @@ elif [ $1 = "pxc57" ]; then
   release=${PXC57_VER#*-}
   revision=${PXC57_REV}
   innodb_ver=${PXC57_INNODB}
+  wsrep=${PXC57_WSREP}
 elif [ $1 = "pt" ]; then
   version=${PT_VER}
 elif [ $1 = "pxb23" ]; then
