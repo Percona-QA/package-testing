@@ -44,6 +44,8 @@ elif [ $1 = "psmdb30" ]; then
   version=${PSMDB30_VER}
 elif [ $1 = "psmdb32" ]; then
   version=${PSMDB32_VER}
+elif [ $1 = "psmdb34" ]; then
+  version=${PSMDB34_VER}
 elif [ $1 = "pmm" ]; then
   version=${PMM_VER}
 else
@@ -206,11 +208,13 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" ]; then
     fi
   fi
 
-elif [ ${product} = "psmdb30" -o ${product} = "psmdb32" ]; then
+elif [ ${product} = "psmdb30" -o ${product} = "psmdb32" -o ${product} = "psmdb34" ]; then
   rpm_num_pkgs="6"
   deb_num_pkgs="6"
   if [ ${product} = "psmdb32" ]; then
     extra_version="-32"
+  elif [ ${product} = "psmdb34" ]; then
+    extra_version="-34"
   else
     extra_version=""
   fi
