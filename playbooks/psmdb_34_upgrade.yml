@@ -1,7 +1,7 @@
 ---
 # This playbook does following:
 #   sets main Percona repo
-#   installs PSMDB 3.0
+#   installs PSMDB 3.4
 #   changes repo to testing
 #   upgrades packages to the new version
 #   does some tests
@@ -20,18 +20,18 @@
   - name: include tasks for enabling main repo
     include: ../tasks/enable_main_repo.yml
 
-  - name: install Percona Server for MongoDB 3.0 deb packages previous version
+  - name: install Percona Server for MongoDB 3.4 deb packages previous version
     apt: name={{item}} update_cache=yes state=latest
     with_items:
-    - percona-server-mongodb
-    - percona-server-mongodb-dbg
+    - percona-server-mongodb-34
+    - percona-server-mongodb-34-dbg
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Server for MongoDB 3.0 new rpm packages previous version
+  - name: install Percona Server for MongoDB 3.4 new rpm packages previous version
     yum: name={{item}} state=latest
     with_items:
-    - Percona-Server-MongoDB
-    - Percona-Server-MongoDB-debuginfo
+    - Percona-Server-MongoDB-34
+    - Percona-Server-MongoDB-34-debuginfo
     when: ansible_os_family == "RedHat"
 
   - name: start mongod with init script
@@ -54,30 +54,30 @@
 #
 # Upgrade packages
 #
-  - name: upgrade Percona Server for MongoDB 3.0 to new deb packages
+  - name: upgrade Percona Server for MongoDB 3.4 to new deb packages
     apt: name={{item}} update_cache=yes state=latest
     with_items:
-    - percona-server-mongodb
-    - percona-server-mongodb-server
-    - percona-server-mongodb-mongos
-    - percona-server-mongodb-shell
-    - percona-server-mongodb-tools
-    - percona-server-mongodb-dbg
+    - percona-server-mongodb-34
+    - percona-server-mongodb-34-server
+    - percona-server-mongodb-34-mongos
+    - percona-server-mongodb-34-shell
+    - percona-server-mongodb-34-tools
+    - percona-server-mongodb-34-dbg
     when: ansible_os_family == "Debian"
 
-  - name: upgrade Percona Server for MongoDB 3.0 to new rpm packages
+  - name: upgrade Percona Server for MongoDB 3.4 to new rpm packages
     yum: name={{item}} state=latest
     with_items:
-    - Percona-Server-MongoDB
-    - Percona-Server-MongoDB-server
-    - Percona-Server-MongoDB-shell
-    - Percona-Server-MongoDB-mongos
-    - Percona-Server-MongoDB-tools
-    - Percona-Server-MongoDB-debuginfo
+    - Percona-Server-MongoDB-34
+    - Percona-Server-MongoDB-34-server
+    - Percona-Server-MongoDB-34-shell
+    - Percona-Server-MongoDB-34-mongos
+    - Percona-Server-MongoDB-34-tools
+    - Percona-Server-MongoDB-34-debuginfo
     when: ansible_os_family == "RedHat"
 
-  - name: check that PSMDB 3.0 package versions are correct
-    command: /package-testing/package_check.sh psmdb30
+  - name: check that PSMDB 3.4 package versions are correct
+    command: /package-testing/package_check.sh psmdb34
 
   - name: test SE change, import data, restart service
-    command: /package-testing/psmdb_test.sh 3.0
+    command: /package-testing/psmdb_test.sh 3.4

@@ -82,20 +82,24 @@ function test_hotbackup {
 }
 
 for engine in mmapv1 PerconaFT rocksdb wiredTiger; do
-	stop_service
-	clean_datadir
-	sed -i "/engine: *${engine}/s/#//g" /etc/mongod.conf
-	echo "testing ${engine}" | tee -a $log
-	start_service
-	echo "importing the sample data"
-	mongo < /package-testing/mongo_insert.js >> $log
-	list_data >> $log
-	echo "testing the hotbackup functionality"
-	if [ ${engine} = "wiredTiger" -o ${engine} = "rocksdb" ]; then
-		test_hotbackup
+	if [ "$1" == "3.4" -a ${engine} == "PerconaFT" ]; then
+		echo "Skipping PerconaFT because version is 3.4"
+	else
+		stop_service
+		clean_datadir
+		sed -i "/engine: *${engine}/s/#//g" /etc/mongod.conf
+		echo "testing ${engine}" | tee -a $log
+		start_service
+		echo "importing the sample data"
+		mongo < /package-testing/mongo_insert.js >> $log
+		list_data >> $log
+		echo "testing the hotbackup functionality"
+		if [ ${engine} = "wiredTiger" -o ${engine} = "rocksdb" ]; then
+			test_hotbackup
+		fi
+		stop_service
+		echo "disable ${engine}"
+		sed -i "/engine: *${engine}/s//#engine: ${engine}/g" /etc/mongod.conf
+		clean_datadir
 	fi
-	stop_service
-	echo "disable ${engine}"
-	sed -i "/engine: *${engine}/s//#engine: ${engine}/g" /etc/mongod.conf
-	clean_datadir
 done
