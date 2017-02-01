@@ -1,0 +1,35 @@
+
+  - name: include playbook for removing Percona repo
+    include: remove_percona_repository.yml
+
+  - name: add an apt signing key
+    apt_key: id=8507EFA5 keyserver=keys.gnupg.net state=present
+    when: ansible_os_family == "Debian"
+
+  - name: add the old apt signing key
+    apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
+    when: ansible_os_family == "Debian"
+
+  - name: add the Percona experimental and deb repo
+    apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_lsb.codename }} main experimental' state=present update_cache=yes
+    when: ansible_os_family == "Debian"
+
+  - name: add the Percona testing yum repos for centos 5
+    command: "{{ item }}"
+    with_items:
+      - curl -o ~/percona-release-0.1-4.noarch.rpm -L --limit-rate 200k https://www.percona.com/redir/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
+      - rpm -ivH ~/percona-release-0.1-4.noarch.rpm
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+
+  - name: add the Percona testing yum repos for centos 6 and 7
+    yum: name=https://www.percona.com/redir/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "5"
+
+  - name: change the default repo in yum repo file to testing
+    command: "{{ item }}"
+    with_items:
+#      - sed -r -i '/^baseurl = http:\/\/repo.percona.com\/release\/\$releasever\/RPMS\/\$basearch$/ { n ; s/^enabled = .*$/enabled = 0/ }' /etc/yum.repos.d/percona-release.repo
+#      - sed -r -i '/^baseurl = http:\/\/repo.percona.com\/release\/\$releasever\/RPMS\/noarch$/ { n ; s/^enabled = .*$/enabled = 0/ }' /etc/yum.repos.d/percona-release.repo
+      - sed -r -i '/^baseurl = http:\/\/repo.percona.com\/experimental\/\$releasever\/RPMS\/\$basearch$/ { n ; s/^enabled = .*$/enabled = 1/ }' /etc/yum.repos.d/percona-release.repo
+      - sed -r -i '/^baseurl = http:\/\/repo.percona.com\/experimental\/\$releasever\/RPMS\/noarch$/ { n ; s/^enabled = .*$/enabled = 1/ }' /etc/yum.repos.d/percona-release.repo
+    when: ansible_os_family == "RedHat"
