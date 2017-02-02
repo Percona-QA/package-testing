@@ -73,12 +73,31 @@ function test_hotbackup {
 	rm -rf /tmp/backup
 	mkdir -p /tmp/backup
 	chown mongod:mongod -R /tmp/backup
-	BACKUP_RET=$(mongo admin --eval 'db.runCommand({createBackup: 1, backupDir: "/tmp/backup"})'|grep -c '"ok" : 1')
+	BACKUP_RET=$(mongo ${AUTH_STRING} admin --eval 'db.runCommand({createBackup: 1, backupDir: "/tmp/backup"})'|grep -c '"ok" : 1')
 	rm -rf /tmp/backup
 	if [ ${BACKUP_RET} = 0 ]; then
 		echo "Backup failed for storage engine: ${engine}"
 		exit 1
 	fi
+}
+
+function setup_authentication {
+	rm -f /tmp/psmdb_auth.txt
+  yes y|percona-server-mongodb-enable-auth.sh > /tmp/psmdb_auth.txt
+  USER=$(grep "^User:" /tmp/psmdb_auth.txt|cut -d ":" -f2)
+  PASSWORD=$(grep "^Password:" /tmp/psmdb_auth.txt|cut -d ":" -f2)
+  AUTH_STRING="--authenticationDatabase admin --username ${USER} --password ${PASSWORD}"
+
+  mongo ${AUTH_STRING} --eval 'db.serverStatus().storageEngine'
+  if [ $? -ne 0 ]; then
+    echo "PSMDB authentication setup with percona-server-mongodb-enable-auth.sh is not working correctly."
+    exit 1
+  fi
+}
+
+function clean_authentication {
+  sed -i 's/^security:/#security:/' /etc/mongod.conf
+  sed -i '/^  authorization: enabled/d' /etc/mongod.conf
 }
 
 for engine in mmapv1 PerconaFT rocksdb wiredTiger; do
@@ -90,8 +109,12 @@ for engine in mmapv1 PerconaFT rocksdb wiredTiger; do
 		sed -i "/engine: *${engine}/s/#//g" /etc/mongod.conf
 		echo "testing ${engine}" | tee -a $log
 		start_service
+    if [ "$1" == "3.4" ]; then
+      echo "setup authentication"
+      setup_authentication
+    fi
 		echo "importing the sample data"
-		mongo < /package-testing/mongo_insert.js >> $log
+		mongo ${AUTH_STRING} < /package-testing/mongo_insert.js >> $log
 		list_data >> $log
 		echo "testing the hotbackup functionality"
 		if [ ${engine} = "wiredTiger" -o ${engine} = "rocksdb" ]; then
@@ -101,5 +124,8 @@ for engine in mmapv1 PerconaFT rocksdb wiredTiger; do
 		echo "disable ${engine}"
 		sed -i "/engine: *${engine}/s//#engine: ${engine}/g" /etc/mongod.conf
 		clean_datadir
+    if [ "$1" == "3.4" ]; then
+      clean_authentication
+    fi
 	fi
 done
