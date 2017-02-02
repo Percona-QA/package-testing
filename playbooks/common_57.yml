@@ -102,7 +102,7 @@
     command: /usr/bin/ps_tokudb_admin --enable --enable-backup
 
   - name: copy group replication settings
-    template: src=/package-testing/templates/group_replication.j2
+    template: src=../templates/group_replication.j2
               dest=/etc/mysql/percona-server.conf.d/gr.cnf
     when: ansible_os_family == "Debian"
 
