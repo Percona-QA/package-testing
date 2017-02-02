@@ -1,0 +1,10 @@
+[mysqld]
+server_id=1
+gtid_mode=ON
+enforce_gtid_consistency=ON
+master_info_repository=TABLE
+relay_log_info_repository=TABLE
+binlog_checksum=NONE
+log_slave_updates=ON
+log_bin=binlog
+binlog_format=ROW
