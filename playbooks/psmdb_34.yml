@@ -45,7 +45,7 @@
     command: /package-testing/package_check.sh psmdb34
 
   - name: setup authentication with percona-server-mongodb-enable-auth.sh
-    shell: yes y|percona-server-mongodb-enable-auth.sh > /tmp/psmdb_auth.txt
+    shell: yes '' | percona-server-mongodb-enable-auth.sh > /tmp/psmdb_auth.txt
 
   - name: test SE change, import data, restart service
     command: /package-testing/psmdb_test.sh 3.4
