@@ -13,6 +13,8 @@ pt-index-usage
 pt-ioprofile
 pt-kill
 pt-mext
+pt-mongodb-query-digest
+pt-mongodb-summary
 pt-mysql-summary
 pt-online-schema-change
 pt-pmp
