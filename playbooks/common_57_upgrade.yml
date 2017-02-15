@@ -207,6 +207,9 @@
 # - name: check that Percona Toolkit version is correct
 #   command: /package-testing/version_check.sh pt
 
+  - name: install GR plugin
+    command: /vagrant/gr.sh
+
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
 

@@ -133,6 +133,9 @@
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb24
 
+  - name: install GR plugin
+    command: /package-testing/gr.sh
+
   - name: install 3rd party packages with apt
     apt: name={{item}}
     with_items:
