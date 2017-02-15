@@ -44,11 +44,11 @@
   - name: include tasks for enabling testing repo
     include: ../tasks/enable_testing_repo.yml
 
-  - name: upgrade Percona Toolkit to the latest deb packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - percona-toolkit
-    when: ansible_os_family == "Debian"
+#  - name: upgrade Percona Toolkit to the latest deb packages
+#    apt: name={{item}} update_cache=yes state=latest
+#    with_items:
+#    - percona-toolkit
+#    when: ansible_os_family == "Debian"
 
   - name: upgrade Percona Toolkit to the latest rpm packages
     yum: name={{item}} state=latest
@@ -68,8 +68,8 @@
     - pmm-client
     when: ansible_os_family == "RedHat"
 
-  - name: check that Percona Toolkit version is correct
-    command: /package-testing/version_check.sh pt
+#  - name: check that Percona Toolkit version is correct
+#    command: /package-testing/version_check.sh pt
 
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm
