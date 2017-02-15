@@ -111,7 +111,6 @@
 
   - name: check that Percona Toolkit version is correct
     command: /package-testing/version_check.sh pt
-    when: ansible_distribution_release != "yakkety"
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb23
