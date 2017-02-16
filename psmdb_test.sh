@@ -83,7 +83,7 @@ function test_hotbackup {
 
 function setup_authentication {
   rm -f /tmp/psmdb_auth.txt
-  yes | percona-server-mongodb-enable-auth.sh > /tmp/psmdb_auth.txt
+  percona-server-mongodb-enable-auth.sh --quiet > /tmp/psmdb_auth.txt
   USER=$(grep "^User:" /tmp/psmdb_auth.txt|cut -d ":" -f2)
   PASSWORD=$(grep "^Password:" /tmp/psmdb_auth.txt|cut -d ":" -f2)
   AUTH_STRING="--authenticationDatabase admin --username ${USER} --password ${PASSWORD}"
