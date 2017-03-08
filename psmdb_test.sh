@@ -81,7 +81,7 @@ function test_hotbackup {
   fi
 }
 
-for engine in mmapv1 PerconaFT rocksdb wiredTiger; do
+for engine in mmapv1 PerconaFT rocksdb wiredTiger inMemory; do
   if [ "$1" == "3.4" -a ${engine} == "PerconaFT" ]; then
     echo "Skipping PerconaFT because version is 3.4"
   else
