@@ -11,7 +11,7 @@ servers=[
   { :hostname => "u-trusty-64-@@hostname@@", :box => "ubuntu/trusty64" },
   { :hostname => "u-xenial-64-@@hostname@@", :box => "geerlingguy/ubuntu1604" },
   { :hostname => "u-yakkety-64-@@hostname@@", :box => "bento/ubuntu-16.10" },
-  { :hostname => "u-zesty-64-@@hostname@@", :box => "ubuntu/zesty64" }
+  { :hostname => "u-zesty-64-@@hostname@@", :box => "percona-zesty-64" }
 ]
 
 Vagrant.configure("2") do |config|
