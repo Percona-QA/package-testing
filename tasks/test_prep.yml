@@ -11,7 +11,7 @@
 
   # Needed because centos5 uses curl for setting up epel repo
   - name: install curl with yum
-    yum: name={{item}} state=present
+    yum: name="{{ item }}" state=present
     with_items:
     - curl
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
@@ -32,23 +32,41 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: install needed packages for running tests with apt
-    apt: name={{item}} update_cache=yes
+    apt: name="{{ item }}" update_cache=yes
     with_items:
-    - git
     - curl
     - pv
     when: ansible_os_family == "Debian"
 
   - name: install needed packages for running tests with yum
-    yum: name={{item}} state=latest
+    yum: name="{{ item }}" state=latest
     with_items:
-    - git
     - curl
     - pv
     - libselinux-python
     when: ansible_os_family == "RedHat"
 
-  - name: clone package-testing repository for test scripts
-    git: repo=https://github.com/Percona-QA/package-testing
-         dest=/package-testing
-         depth=1
+  - name: download package-testing repo with wget
+    command: "{{ item }}"
+    with_items:
+    - wget https://github.com/Percona-QA/package-testing/archive/master.zip
+    - unzip master
+    - rm -f master
+    - mv package-testing-master /package-testing
+
+  - name: register SLES for updates
+    command: suse_register -a email="@@SLES_REG_EMAIL@@" -a regcode-sles=@@SLES_REG_CODE@@
+    when: ansible_os_family == "Suse"
+
+  # - name: setup SDK repo on SLES
+  #   zypper: name="{{ item }}" state=present
+  #   with_items:
+  #   - /package-testing/sle-sdk-release-11.4-1.55.x86_64.rpm
+  #   - /package-testing/sle-sdk-release-SDK-11.4-1.55.x86_64.rpm
+  #   when: ansible_os_family == "Suse"
+
+  - name: install needed packages for running tests with zypper
+    zypper: name="{{ item }}" state=latest
+    with_items:
+    - curl
+    when: ansible_os_family == "Suse"

@@ -11,7 +11,8 @@ servers=[
   { :hostname => "u-trusty-64-@@hostname@@", :box => "ubuntu/trusty64" },
   { :hostname => "u-xenial-64-@@hostname@@", :box => "geerlingguy/ubuntu1604" },
   { :hostname => "u-yakkety-64-@@hostname@@", :box => "bento/ubuntu-16.10" },
-  { :hostname => "u-zesty-64-@@hostname@@", :box => "percona-zesty-64" }
+  { :hostname => "u-zesty-64-@@hostname@@", :box => "percona-zesty-64" },
+  { :hostname => "sles-11-64-@@hostname@@", :box => "wvera/sles11sp4" }
 ]
 
 Vagrant.configure("2") do |config|
@@ -32,7 +33,7 @@ Vagrant.configure("2") do |config|
       config.vm.provision "ansible" do |ansible|
         ansible.playbook = "@@playbook_full@@"
         ansible.sudo = "true"
-        ansible.verbose = "vvvv"
+        # ansible.verbose = "vvvv"
         ansible.host_key_checking = "false"
       end
       config.vm.synced_folder '.', '/vagrant', :disabled => true
