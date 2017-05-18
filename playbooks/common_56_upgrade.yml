@@ -35,11 +35,11 @@
     - percona-server-tokudb-5.6
     when: ansible_os_family == "Debian"
 
-# - name: install Percona Toolkit deb packages previous version
-#   apt: name={{item}} update_cache=yes state=latest
-#   with_items:
-#   - percona-toolkit
-#   when: ansible_os_family == "Debian"
+  - name: install Percona Toolkit deb packages previous version
+    apt: name={{item}} update_cache=yes state=latest
+    with_items:
+    - percona-toolkit
+    when: ansible_os_family == "Debian"
 
   - name: install Percona XtraBackup deb packages previous version
     apt: name={{item}} update_cache=no state=latest
@@ -61,11 +61,11 @@
     - Percona-Server-client-56
     when: ansible_os_family == "RedHat"
 
-# - name: install Percona Toolkit rpm packages previous version
-#   yum: name={{item}} state=latest
-#   with_items:
-#   - percona-toolkit
-#   when: ansible_os_family == "RedHat"
+  - name: install Percona Toolkit rpm packages previous version
+    yum: name={{item}} state=latest
+    with_items:
+    - percona-toolkit
+    when: ansible_os_family == "RedHat"
 
   - name: install Percona XtraBackup rpm packages previous version
     yum: name={{item}} state=latest
@@ -128,11 +128,11 @@
 #
 # Upgrade packages
 #
-# - name: upgrade Percona Toolkit to new deb packages
-#   apt: name={{item}} update_cache=yes state=latest
-#   with_items:
-#   - percona-toolkit
-#   when: ansible_os_family == "Debian"
+  - name: upgrade Percona Toolkit to new deb packages
+    apt: name={{item}} update_cache=yes state=latest
+    with_items:
+    - percona-toolkit
+    when: ansible_os_family == "Debian"
 
   - name: upgrade Percona Server to new deb packages
     apt: name={{item}} update_cache=no state=latest
@@ -152,11 +152,11 @@
     - percona-xtrabackup-dbg
     when: ansible_os_family == "Debian"
 
-# - name: upgrade Percona Toolkit to new rpm packages
-#   yum: name={{item}} state=latest
-#   with_items:
-#   - percona-toolkit
-#   when: ansible_os_family == "RedHat"
+  - name: upgrade Percona Toolkit to new rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - percona-toolkit
+    when: ansible_os_family == "RedHat"
 
   - name: upgrade Percona Server to new rpm packages
     yum: name={{item}} state=latest
@@ -196,8 +196,8 @@
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps56
 
-# - name: check that Percona Toolkit version is correct
-#   command: /package-testing/version_check.sh pt
+  - name: check that Percona Toolkit version is correct
+    command: /package-testing/version_check.sh pt
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb23
