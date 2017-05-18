@@ -36,6 +36,8 @@
     with_items:
     - curl
     - pv
+    - unzip
+    - wget
     when: ansible_os_family == "Debian"
 
   - name: install needed packages for running tests with yum
@@ -44,15 +46,9 @@
     - curl
     - pv
     - libselinux-python
+    - unzip
+    - wget
     when: ansible_os_family == "RedHat"
-
-  - name: download package-testing repo with wget
-    command: "{{ item }}"
-    with_items:
-    - wget https://github.com/Percona-QA/package-testing/archive/master.zip
-    - unzip master
-    - rm -f master
-    - mv package-testing-master /package-testing
 
   - name: register SLES for updates
     command: suse_register -a email="@@SLES_REG_EMAIL@@" -a regcode-sles=@@SLES_REG_CODE@@
@@ -69,4 +65,14 @@
     zypper: name="{{ item }}" state=latest
     with_items:
     - curl
+    - wget
+    - unzip
     when: ansible_os_family == "Suse"
+
+  - name: download package-testing repo with wget
+    command: "{{ item }}"
+    with_items:
+    - wget https://github.com/Percona-QA/package-testing/archive/master.zip
+    - unzip master
+    - rm -f master
+    - mv package-testing-master /package-testing
