@@ -76,3 +76,12 @@
     - unzip master
     - rm -f master
     - mv package-testing-master /package-testing
+
+  - name: install latest bats from github
+    command: "{{ item }}"
+    with_items:
+    - wget https://github.com/sstephenson/bats/archive/master.zip
+    - unzip master
+    - rm -f master
+    - bats-master/install.sh /usr/local
+    - rm -rf bats-master

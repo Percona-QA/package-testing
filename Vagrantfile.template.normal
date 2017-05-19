@@ -33,7 +33,7 @@ Vagrant.configure("2") do |config|
       config.vm.provision "ansible" do |ansible|
         ansible.playbook = "@@playbook_full@@"
         ansible.sudo = "true"
-        ansible.verbose = "vvvv"
+        # ansible.verbose = "vvvv"
         ansible.host_key_checking = "false"
       end
       config.vm.synced_folder '.', '/vagrant', :disabled => true
