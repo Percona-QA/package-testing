@@ -73,15 +73,15 @@
     command: "{{ item }}"
     with_items:
     - wget https://github.com/Percona-QA/package-testing/archive/master.zip
-    - unzip master
-    - rm -f master
+    - unzip master.zip
+    - rm -f master.zip
     - mv package-testing-master /package-testing
 
   - name: install latest bats from github
     command: "{{ item }}"
     with_items:
     - wget https://github.com/sstephenson/bats/archive/master.zip
-    - unzip master
-    - rm -f master
+    - unzip master.zip
+    - rm -f master.zip
     - bats-master/install.sh /usr/local
     - rm -rf bats-master
