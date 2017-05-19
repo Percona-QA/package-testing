@@ -9,17 +9,17 @@
 #          mode=0640 owner=root group=root
 #    when: ansible_os_family == "Debian"
 
-  # Needed because centos5 uses curl for setting up epel repo
-  - name: install curl with yum
+  # Needed because centos5 uses wget for setting up epel repo
+  - name: install wget with yum
     yum: name="{{ item }}" state=present
     with_items:
-    - curl
+    - wget
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
 
   - name: setup epel 5 repo
     command: "{{ item }}"
     with_items:
-    - curl -o ~/epel-release-latest-5.noarch.rpm --limit-rate 200k https://dl.fedoraproject.org/pub/epel/epel-release-latest-5.noarch.rpm
+    - wget -P ~ https://dl.fedoraproject.org/pub/epel/epel-release-latest-5.noarch.rpm
     - rpm -ivH ~/epel-release-latest-5.noarch.rpm
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
 
@@ -34,7 +34,6 @@
   - name: install needed packages for running tests with apt
     apt: name="{{ item }}" update_cache=yes
     with_items:
-    - curl
     - pv
     - unzip
     - wget
@@ -43,7 +42,6 @@
   - name: install needed packages for running tests with yum
     yum: name="{{ item }}" state=latest
     with_items:
-    - curl
     - pv
     - libselinux-python
     - unzip
@@ -64,7 +62,6 @@
   - name: install needed packages for running tests with zypper
     zypper: name="{{ item }}" state=latest
     with_items:
-    - curl
     - wget
     - unzip
     when: ansible_os_family == "Suse"

@@ -18,7 +18,7 @@
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
-    - curl -o /package-testing/world.sql --limit-rate 200k https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+    - wget -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
   - name: install Percona Toolkit new deb packages
     apt: name={{item}} update_cache=yes state=latest

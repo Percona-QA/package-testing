@@ -17,7 +17,7 @@
   - name: add the Percona testing yum repos for centos 5
     command: "{{ item }}"
     with_items:
-      - curl -o ~/percona-release-0.1-4.noarch.rpm -L --limit-rate 200k https://www.percona.com/redir/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
+      - wget -P ~ https://www.percona.com/redir/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
       - rpm -ivH ~/percona-release-0.1-4.noarch.rpm
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
 
