@@ -18,7 +18,7 @@
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
-    - wget -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
   - name: install Percona Toolkit new deb packages
     apt: name={{item}} update_cache=yes state=latest
