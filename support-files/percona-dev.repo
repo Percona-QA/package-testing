@@ -1,0 +1,13 @@
+[percona-dev-$basearch]
+name=Percona internal YUM repository for build slaves $releasever - $basearch
+baseurl=http://jenkins.percona.com/yum-repo/$releasever/RPMS/$basearch
+gpgkey=http://jenkins.percona.com/yum-repo/PERCONA-PACKAGING-KEY
+gpgcheck=0
+enabled=1
+
+[percona-dev-noarch]
+name=Percona internal YUM repository for build slaves $releasever - noarch
+baseurl=http://jenkins.percona.com/yum-repo/$releasever/RPMS/noarch
+gpgkey=http://jenkins.percona.com/yum-repo/PERCONA-PACKAGING-KEY
+gpgcheck=0
+enabled=1
