@@ -22,7 +22,7 @@
     command: "{{ item }}"
     with_items:
     - rm -rf /package-testing
-    - wget https://github.com/Percona-QA/package-testing/archive/master.zip
+    - wget -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
     - unzip master.zip
     - rm -f master.zip
     - mv package-testing-master /package-testing
@@ -72,7 +72,8 @@
     command: "{{ item }}"
     with_items:
     - rm -rf /package-testing
-    - wget https://github.com/Percona-QA/package-testing/archive/master.zip
+    - rm -f master.zip
+    - wget -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
     - unzip master.zip
     - rm -f master.zip
     - mv package-testing-master /package-testing
@@ -80,7 +81,8 @@
   - name: install latest bats from github
     command: "{{ item }}"
     with_items:
-    - wget https://github.com/sstephenson/bats/archive/master.zip
+    - rm -f master.zip
+    - wget -O master.zip https://github.com/sstephenson/bats/archive/master.zip
     - unzip master.zip
     - rm -f master.zip
     - bats-master/install.sh /usr/local
