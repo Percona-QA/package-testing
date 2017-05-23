@@ -220,7 +220,7 @@ elif [ ${product} = "psmdb30" -o ${product} = "psmdb32" -o ${product} = "psmdb34
   fi
   SLES=0
   if [ -f /etc/os-release ]; then
-    SLES=$(cat /etc/os-release | grep -c '^NAME=\"SLES')
+    SLES=$(cat /etc/os-release | grep -c '^NAME=\"SLES' || true)
   fi
   if [ -f /etc/redhat-release -o ${SLES} -eq 1 ]; then
     if [ "$(rpm -qa | grep Percona-Server-MongoDB | grep -c ${version})" == "${rpm_num_pkgs}" ]; then

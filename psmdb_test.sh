@@ -5,7 +5,7 @@ echo -n > /tmp/psmdb_run.log
 
 SLES=0
 if [ -f /etc/os-release ]; then
-  SLES=$(cat /etc/os-release | grep -c '^NAME=\"SLES')
+  SLES=$(cat /etc/os-release | grep -c '^NAME=\"SLES' || true)
 fi
 
 set -e
