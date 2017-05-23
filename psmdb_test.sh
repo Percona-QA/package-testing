@@ -77,10 +77,10 @@ function list_data {
 
 function clean_datadir {
   if [ -f /etc/redhat-release -o ${SLES} -eq 1 ]; then
-    echo "removing the data files (on rhel distros)..."
+    echo -e "removing the data files (on rhel distros)...\n"
     rm -rf /var/lib/mongo/*
   else
-    echo "removing the data files (on debian distros)..."
+    echo -e "removing the data files (on debian distros)...\n"
     rm -rf /var/lib/mongodb/*
   fi
 }
@@ -109,8 +109,8 @@ for engine in mmapv1 PerconaFT rocksdb wiredTiger inMemory; do
     echo "importing the sample data"
     mongo < /package-testing/mongo_insert.js >> $log
     list_data >> $log
-    echo "testing the hotbackup functionality"
-    if [ ${engine} = "wiredTiger" -o ${engine} = "rocksdb" ]; then
+    if [[ ${engine} = "wiredTiger" || ${engine} = "rocksdb" ]] && [[ "$1" != "3.0" ]]; then
+      echo "testing the hotbackup functionality"
       test_hotbackup
     fi
     stop_service
