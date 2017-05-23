@@ -218,7 +218,11 @@ elif [ ${product} = "psmdb30" -o ${product} = "psmdb32" -o ${product} = "psmdb34
   else
     extra_version=""
   fi
-  if [ -f /etc/redhat-release -o $(cat /etc/os-release|grep "^NAME"|grep "SLES") ]; then
+  SLES=0
+  if [ -f /etc/os-release ]; then
+    SLES=$(cat /etc/os-release | grep -c '^NAME=\"SLES')
+  fi
+  if [ -f /etc/redhat-release -o ${SLES} -eq 1 ]; then
     if [ "$(rpm -qa | grep Percona-Server-MongoDB | grep -c ${version})" == "${rpm_num_pkgs}" ]; then
       echo "all packages are installed"
     else

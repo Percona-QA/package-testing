@@ -3,6 +3,11 @@
 log="/tmp/psmdb_run.log"
 echo -n > /tmp/psmdb_run.log
 
+SLES=0
+if [ -f /etc/os-release ]; then
+  SLES=$(cat /etc/os-release | grep -c '^NAME=\"SLES')
+fi
+
 set -e
 
 # Enable auditLog and profiling/rate limit to see if services start with those
@@ -15,16 +20,13 @@ function start_service {
     redhatrelease=$(cat /etc/redhat-release | grep -o '[0-9]' | head -n 1)
   fi
   local lsbrelease=$(lsb_release -sc 2>/dev/null || echo "")
-  if [ $(cat /etc/os-release|grep "^NAME"|grep "SLES") ]; then
-    lsbrelease="SLES"
-  fi
   if [ "${lsbrelease}" != "" -a "${lsbrelease}" = "trusty" ]; then
     echo "starting mongod service directly with init script..."
     /etc/init.d/mongod start
   elif [ "${redhatrelease}" = "5"  ]; then
     echo "starting mongod service directly with init script..."
     /etc/init.d/mongod start
-  elif [ "${lsbrelease}" != "" -a "${lsbrelease}" = "SLES" ]; then
+  elif [ "${lsbrelease}" != "" -a ${SLES} -eq 1 ]; then
     echo "starting mongod with /sbin/service on SLES..."
     /sbin/service mongod start
   else
@@ -41,16 +43,13 @@ function stop_service {
     redhatrelease=$(cat /etc/redhat-release | grep -o '[0-9]' | head -n 1)
   fi
   local lsbrelease=$(lsb_release -sc 2>/dev/null || echo "")
-  if [ $(cat /etc/os-release|grep "^NAME"|grep "SLES") ]; then
-    lsbrelease="SLES"
-  fi
   if [ "${lsbrelease}" != "" -a "${lsbrelease}" = "trusty" ]; then
     echo "stopping mongod service directly with init script..."
     /etc/init.d/mongod stop
   elif [ "${redhatrelease}" = "5"  ]; then
     echo "stopping mongod service directly with init script..."
     /etc/init.d/mongod stop
-  elif [ "${lsbrelease}" != "" -a "${lsbrelease}" = "SLES" ]; then
+  elif [ "${lsbrelease}" != "" -a ${SLES} -eq 1 ]; then
     echo "stopping mongod with /sbin/service on SLES..."
     /sbin/service mongod stop
   else
@@ -62,7 +61,7 @@ function stop_service {
 }
 
 function list_data {
-  if [ -f /etc/redhat-release -o $(cat /etc/os-release|grep "^NAME"|grep "SLES") ]; then
+  if [ -f /etc/redhat-release -o ${SLES} -eq 1 ]; then
     echo "$(date +%Y%m%d%H%M%S): contents of the mongo data dir: " >> $log
     ls /var/lib/mongo/ >> $log
   else
@@ -72,7 +71,7 @@ function list_data {
 }
 
 function clean_datadir {
-  if [ -f /etc/redhat-release -o $(cat /etc/os-release|grep "^NAME"|grep "SLES") ]; then
+  if [ -f /etc/redhat-release -o ${SLES} -eq 1 ]; then
     echo "removing the data files (on rhel distros)..."
     rm -rf /var/lib/mongo/*
   else
