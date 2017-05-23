@@ -11,7 +11,12 @@ fi
 set -e
 
 # Enable auditLog and profiling/rate limit to see if services start with those
-sed -i 's/#operationProfiling:/operationProfiling:\n  mode: all\n  slowOpThresholdMs: 200\n  rateLimit: 100/' /etc/mongod.conf
+if [ "$1" == "3.0" ]; then
+  echo "Skipping usage of profiling rate limit functionality because not available in 3.0"
+  sed -i 's/#operationProfiling:/operationProfiling:\n  mode: all\n  slowOpThresholdMs: 200/' /etc/mongod.conf
+else
+  sed -i 's/#operationProfiling:/operationProfiling:\n  mode: all\n  slowOpThresholdMs: 200\n  rateLimit: 100/' /etc/mongod.conf
+fi
 sed -i 's/#auditLog:/audit:\n  destination: file\n  path: \/tmp\/audit.json/' /etc/mongod.conf
 
 function start_service {
