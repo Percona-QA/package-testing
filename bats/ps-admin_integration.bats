@@ -51,6 +51,8 @@ load ps-admin_helper
 @test "install TokuDB plugin" {
   if [ ${MYSQL_VERSION} = "5.5" ]; then
     skip "MySQL version is not 5.6+"
+  elif [ $(id -u) -ne 0 ]; then
+    skip "This test requires that the current user is root!"
   fi
   install_tokudb
   check_tokudb_exists
@@ -67,6 +69,8 @@ load ps-admin_helper
 @test "install TokuBackup plugin" {
   if [ ${MYSQL_VERSION} = "5.5" ]; then
     skip "MySQL version is not 5.6+"
+  elif [ $(id -u) -ne 0 ]; then
+    skip "This test requires that the current user is root!"
   fi
   install_tokubackup
   check_tokudb_exists
@@ -109,3 +113,4 @@ load ps-admin_helper
     check_mysqlx_notexists
   fi
 }
+
