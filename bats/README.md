@@ -6,6 +6,6 @@ Explanation of files:
 
 Environment variables for testrun customization (if not specified defaults are used):
 * `CONNECTION` - specify a way for mysql client to connect and authorize to mysqld
-             example: export CONNECTION="-S/run/mysqld/mysqld.sock"
+example: `export CONNECTION="-S/run/mysqld/mysqld.sock"`
 * `PS_ADMIN_BIN` - specify full path to ps-admin script
-               example: export PS_ADMIN_BIN="/usr/bin/ps-admin"
+example: `export PS_ADMIN_BIN="/usr/bin/ps-admin"`
