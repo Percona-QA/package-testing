@@ -117,7 +117,7 @@
 
 ### start pmm client integration tests
   - name: configure pmm client to connect to server
-    shell: pmm-admin config --server 10.10.6.251:80 --bind-address $(ip addr show|grep "inet 10."|grep -o "10.*/"|sed 's:/::')
+    shell: pmm-admin config --server 10.10.6.251:80 --bind-address $(ip addr show|grep "inet 10."|grep -o "10.*/"|sed 's:/::') --force
 
   - name: add linux metrics to monitoring
     command: pmm-admin add linux
