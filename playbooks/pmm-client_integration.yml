@@ -124,6 +124,11 @@
 
   - name: add mysql metrics and queries to monitoring
     command: pmm-admin add mysql
+    when: ansible_distribution_release != "zesty"
+
+  - name: add mysql metrics and queries to monitoring with socket auth
+    command: pmm-admin add mysql --socket /var/run/mysqld/mysqld.sock
+    when: ansible_os_family == "Debian" and ansible_distribution_release == "zesty"
 
   - name: add mongodb metrics to monitoring
     command: pmm-admin add mongodb
