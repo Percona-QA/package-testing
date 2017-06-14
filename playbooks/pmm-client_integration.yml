@@ -116,17 +116,17 @@
 ### end PSMDB
 
 ### start pmm client integration tests
-- name: configure pmm client to connect to server
-  command: pmm-admin config --server 10.10.6.251:8080
+  - name: configure pmm client to connect to server
+    command: pmm-admin config --server 10.10.6.251:8080
 
-- name: add linux metrics to monitoring
-  command: pmm-admin add linux:metrics
+  - name: add linux metrics to monitoring
+    command: pmm-admin add linux:metrics
 
-- name: add linux metrics to monitoring
-  command: pmm-admin add mysql:queries
+  - name: add linux metrics to monitoring
+    command: pmm-admin add mysql:queries
 
-- name: add linux metrics to monitoring
-  command: pmm-admin add mongodb:metrics
+  - name: add linux metrics to monitoring
+    command: pmm-admin add mongodb:metrics
 ### end pmm client integration tests
 
   - name: remove PMM client deb packages
