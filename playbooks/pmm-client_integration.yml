@@ -122,10 +122,10 @@
   - name: add linux metrics to monitoring
     command: pmm-admin add linux
 
-  - name: add linux metrics to monitoring
+  - name: add mysql metrics and queries to monitoring
     command: pmm-admin add mysql
 
-  - name: add linux metrics to monitoring
+  - name: add mongodb metrics to monitoring
     command: pmm-admin add mongodb
 ### end pmm client integration tests
 
