@@ -117,16 +117,16 @@
 
 ### start pmm client integration tests
   - name: configure pmm client to connect to server
-    command: pmm-admin config --server 10.10.6.251:8080
+    command: pmm-admin config --server 10.10.6.251:80 --bind-address $(ip addr show|grep "inet 10."|grep -o "10.*/"|sed 's:/::')
 
   - name: add linux metrics to monitoring
-    command: pmm-admin add linux:metrics
+    command: pmm-admin add linux
 
   - name: add linux metrics to monitoring
-    command: pmm-admin add mysql:queries
+    command: pmm-admin add mysql
 
   - name: add linux metrics to monitoring
-    command: pmm-admin add mongodb:metrics
+    command: pmm-admin add mongodb
 ### end pmm client integration tests
 
   - name: remove PMM client deb packages
