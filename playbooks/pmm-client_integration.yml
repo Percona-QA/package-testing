@@ -93,7 +93,7 @@
     with_items:
     - percona-server-mongodb-34
     - percona-server-mongodb-34-dbg
-    when: ansible_os_family == "Debian" and ansible_distribution_release != "precise"
+    when: ansible_os_family == "Debian" and (ansible_distribution_release != "precise" or ansible_distribution_release != "wheezy")
 
   - name: install Percona Server for MongoDB 3.4 new rpm packages
     yum: name={{item}} state=latest
@@ -132,7 +132,7 @@
 
   - name: add mongodb metrics to monitoring
     command: pmm-admin add mongodb
-    when: ansible_distribution_release != "precise"
+    when: ansible_distribution_release != "precise" and ansible_distribution_release != "wheezy"
 ### end pmm client integration tests
 
   - name: remove PMM client deb packages
