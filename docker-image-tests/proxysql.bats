@@ -14,6 +14,16 @@ if [ -z ${ETCD_HOST} ]; then
   exit 1
 fi
 
+if [ -z "$(which jq)" ]; then
+  echo "ERROR: jq is required for proper functioning of these tests (apt-get install jq)!"
+  exit 1
+fi
+
+if [ -z "$(which nslookup)" ]; then
+  echo "ERROR: nslookup is required for proper functioning of these tests (apt-get install dnsutils)!"
+  exit 1
+fi
+
 cleanup(){
   docker stop pxc_node1 >/dev/null 2>&1 || true
   docker stop pxc_node2 >/dev/null 2>&1 || true
