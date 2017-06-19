@@ -4,7 +4,7 @@ WARNINGS_BEFORE=0
 WARNINGS_AFTER=0
 ERROR_LOG=""
 ERROR_LOG=$(mysql -N -s -e "show variables like 'log_error';" | grep -v "Warning:" | grep -o "\/.*$")
-if [ ! -f /var/log/mysql/error.log ]; then
+if [ ! -f ${ERROR_LOG} ]; then
   echo "Error log was not found!"
   exit 1
 fi
@@ -28,7 +28,7 @@ if [ "$(grep -c "\[ERROR\]" ${ERROR_LOG})" != "0" ]; then
 fi
 
 WARNINGS_AFTER=$(grep -c "\[Warning\]" ${ERROR_LOG})
-if [ "${WARNINGS_BEFORE}" == "${WARNINGS_AFTER}" ]; then
+if [ "${WARNINGS_BEFORE}" != "${WARNINGS_AFTER}" ]; then
   echo "There's a difference in number of warnings before installing plugins and after!"
   exit 1
 fi
