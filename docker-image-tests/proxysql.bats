@@ -4,10 +4,7 @@
 export NOCLEANUP=${NOCLEANUP:-0}
 #
 export CLUSTER_NAME=cluster1
-export ETCD_HOST=$(nslookup $(hostname)|grep Address|sed '0,/Address/{//d;}'|tail -n1|sed 's/Address: //')
-if [ -z ${ETCD_HOST} ]; then
-  export ETCD_HOST=$(nslookup "$(hostname).ci.percona.com"|grep Address|sed '0,/Address/{//d;}'|tail -n1|sed 's/Address: //')
-fi
+export ETCD_HOST=$(ip route get 1 | awk '{print $NF;exit}')
 
 if [ -z ${ETCD_HOST} ]; then
   echo "Local IP address was not correctly discovered."
@@ -105,4 +102,3 @@ cleanup(){
     skip
   fi
 }
-
