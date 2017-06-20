@@ -8,7 +8,7 @@ if [ ! -f ${ERROR_LOG} ]; then
   echo "Error log was not found!"
   exit 1
 fi
-WARNINGS_BEFORE=$(grep -c "\[Warning\]" ${ERROR_LOG})
+WARNINGS_BEFORE=$(grep -c "\[Warning\]" ${ERROR_LOG} || true)
 
 mysql -e "CREATE FUNCTION fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so'"
 mysql -e "CREATE FUNCTION fnv_64 RETURNS INTEGER SONAME 'libfnv_udf.so'"
@@ -33,12 +33,12 @@ if [ ! -z "$1" ]; then
   fi
 fi
 
-if [ "$(grep -c "\[ERROR\]" ${ERROR_LOG})" != "0" ]; then
+if [ "$(grep -c "\[ERROR\]" ${ERROR_LOG} || true)" != "0" ]; then
   echo "There's an error in error log!"
   exit 1
 fi
 
-WARNINGS_AFTER=$(grep -c "\[Warning\]" ${ERROR_LOG})
+WARNINGS_AFTER=$(grep -c "\[Warning\]" ${ERROR_LOG} || true)
 if [ "${WARNINGS_BEFORE}" != "${WARNINGS_AFTER}" ]; then
   echo "There's a difference in number of warnings before installing plugins and after!"
   exit 1
