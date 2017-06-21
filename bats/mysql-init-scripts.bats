@@ -44,7 +44,7 @@ function fix_timeout(){
   if [ -f /etc/default/mysql ]; then
     sed -i 's/STARTTIMEOUT=900/STARTTIMEOUT=30/g' /etc/default/mysql
   fi
-  if [ -f /lib/systemd/system/mysql.service ]; then
+  if [ ${SYSTEMCTL} -eq 1 -a -f /lib/systemd/system/mysql.service ]; then
     sed -i 's/TimeoutSec=600/TimeoutSec=30/g' /lib/systemd/system/mysql.service
     systemctl daemon-reload
   fi
@@ -139,8 +139,8 @@ function teardown(){
 
 @test "start mysql with service" {
   if [ ${SERVICE} -eq 1 ]; then
-    run service mysql start
-    [ $status -eq 0 ]
+    service mysql start
+    [ $? -eq 0 ]
     run is_running
     [ $status -eq 0 ]
   else
@@ -161,8 +161,8 @@ function teardown(){
 
 @test "restart mysql with service" {
   if [ ${SERVICE} -eq 1 ]; then
-    run service mysql restart
-    [ $status -eq 0 ]
+    service mysql restart
+    [ $? -eq 0 ]
     run is_running
     [ $status -eq 0 ]
   else
@@ -171,11 +171,11 @@ function teardown(){
 }
 
 @test "add nonexisting option to config file (/etc/mysql/my.cnf) and start with systemctl" {
-  stopit
-  fix_timeout
-  echo "[mysqld]" >> /etc/mysql/my.cnf
-  echo "nonexistingoption=1" >> /etc/mysql/my.cnf
   if [ ${SYSTEMCTL} -eq 1 ]; then
+    stopit
+    fix_timeout
+    echo "[mysqld]" >> /etc/mysql/my.cnf
+    echo "nonexistingoption=1" >> /etc/mysql/my.cnf
     run systemctl start mysql
     [ $status -eq 1 ]
     run is_running
@@ -186,11 +186,11 @@ function teardown(){
 }
 
 @test "add nonexisting option to config file (/etc/mysql/my.cnf) and start with service" {
-  stopit
-  fix_timeout
-  echo "[mysqld]" >> /etc/mysql/my.cnf
-  echo "nonexistingoption=1" >> /etc/mysql/my.cnf
   if [ ${SERVICE} -eq 1 ]; then
+    stopit
+    fix_timeout
+    echo "[mysqld]" >> /etc/mysql/my.cnf
+    echo "nonexistingoption=1" >> /etc/mysql/my.cnf
     run service mysql start
     [ $status -eq 1 ]
     run is_running
