@@ -115,7 +115,7 @@ function teardown(){
       [ $status -eq 1 ]
     fi
     /etc/init.d/mongod start 3>&-
-    [ $status -eq 0 ]
+    [ $? -eq 0 ]
     run is_running
     [ $status -eq 0 ]
     run systemctl stop mongod
@@ -130,7 +130,7 @@ function teardown(){
 @test "start mongo with service" {
   if [ ${SERVICE} -eq 1 ]; then
     service mongod start 3>&-
-    [ $status -eq 0 ]
+    [ $? -eq 0 ]
     run is_running
     [ $status -eq 0 ]
   else
@@ -152,7 +152,7 @@ function teardown(){
 @test "restart mongo with service" {
   if [ ${SERVICE} -eq 1 ]; then
     service mongod restart 3>&-
-    [ $status -eq 0 ]
+    [ $? -eq 0 ]
     run is_running
     [ $status -eq 0 ]
   else
