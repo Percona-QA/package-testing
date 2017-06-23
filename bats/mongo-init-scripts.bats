@@ -161,11 +161,12 @@ function teardown(){
 }
 
 @test "check if mongo service is enabled in systemd" {
-  if [ ${SYSTEMCTL} -eq 1 ]; then
+  if [ ${SYSTEMCTL} -eq 1 -a ! -f /etc/redhat-release ]; then
     result=$(systemctl is-enabled mongod)
     [ $result == "enabled" ]
   else
-    skip "system doesn't have systemctl command"
+    skip "system doesn't have systemctl command or disabled because centos"
+    # https://jira.percona.com/browse/BLD-741
   fi
 }
 
