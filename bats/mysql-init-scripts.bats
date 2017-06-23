@@ -12,6 +12,16 @@ if [ ! -z "$(which sysv-rc-conf)" ]; then
   SYSVCONFIG=1
 fi
 
+if [ ! -z "$(which chkconfig)" ]; then
+  CHKCONFIG=1
+fi
+
+if [ -f /etc/mysql/my.cnf ]; then
+  MYSQLCONF=/etc/mysql/my.cnf
+elif [ -f /etc/my.cnf ]; then
+  MYSQLCONF=/etc/my.cnf
+fi
+
 function is_running(){
   if [ $(ps aux | grep -v grep | grep "mysqld " | wc -l) -eq 0 ]; then
     return 1
@@ -59,8 +69,8 @@ function teardown(){
     systemctl daemon-reload
   fi
   if [ -f /etc/mysql/my.cnf ]; then
-    sed -i '${/nonexistingoption=1/d}' /etc/mysql/my.cnf
-    sed -i '${/\[mysqld\]/d}' /etc/mysql/my.cnf
+    sed -i '${/nonexistingoption=1/d}' ${MYSQLCONF}
+    sed -i '${/\[mysqld\]/d}' ${MYSQLCONF}
   fi
 }
 
@@ -174,8 +184,8 @@ function teardown(){
   if [ ${SYSTEMCTL} -eq 1 ]; then
     stopit
     fix_timeout
-    echo "[mysqld]" >> /etc/mysql/my.cnf
-    echo "nonexistingoption=1" >> /etc/mysql/my.cnf
+    echo "[mysqld]" >> ${MYSQLCONF}
+    echo "nonexistingoption=1" >> ${MYSQLCONF}
     run systemctl start mysql
     [ $status -eq 1 ]
     run is_running
@@ -189,8 +199,8 @@ function teardown(){
   if [ ${SERVICE} -eq 1 ]; then
     stopit
     fix_timeout
-    echo "[mysqld]" >> /etc/mysql/my.cnf
-    echo "nonexistingoption=1" >> /etc/mysql/my.cnf
+    echo "[mysqld]" >> ${MYSQLCONF}
+    echo "nonexistingoption=1" >> ${MYSQLCONF}
     run service mysql start
     [ $status -eq 1 ]
     run is_running
@@ -213,7 +223,10 @@ function teardown(){
   if [ ${SYSVCONFIG} -eq 1 ]; then
     result=$(sysv-rc-conf --list mysql|grep -o ":on"|wc -l)
     [ $result -gt 3 ]
+  elif [ ${CHKCONFIG} -eq 1 ]; then
+    result=$(chkconfig --list mysql|grep -o ":on"|wc -l)
+    [ $result -gt 2 ]
   else
-    skip "system doesn't have sysv-rc-conf command"
+    skip "system doesn't have chkconfig or sysv-rc-conf commands"
   fi
 }
