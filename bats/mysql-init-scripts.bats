@@ -1,18 +1,18 @@
 #!/usr/bin/env bats
 
-if [ ! -z "$(which systemctl)" ]; then
+if [ ! -z "$(which systemctl 2>/dev/null)" ]; then
   SYSTEMCTL=1
 fi
 
-if [ ! -z "$(which service)" ]; then
+if [ ! -z "$(which service 2>/dev/null)" ]; then
   SERVICE=1
 fi
 
-if [ ! -z "$(which sysv-rc-conf)" ]; then
+if [ ! -z "$(which sysv-rc-conf 2>/dev/null)" ]; then
   SYSVCONFIG=1
 fi
 
-if [ ! -z "$(which chkconfig)" ]; then
+if [ ! -z "$(which chkconfig 2>/dev/null)" ]; then
   CHKCONFIG=1
 fi
 
@@ -134,7 +134,7 @@ function teardown(){
       run is_running
       [ $status -eq 1 ]
     fi
-    run /etc/init.d/mysql start
+    run bash -c "/etc/init.d/mysql start" 3>&-
     [ $status -eq 0 ]
     run is_running
     [ $status -eq 0 ]
@@ -149,8 +149,8 @@ function teardown(){
 
 @test "start mysql with service" {
   if [ ${SERVICE} -eq 1 ]; then
-    service mysql start
-    [ $? -eq 0 ]
+    run bash -c "service mysql start" 3>&-
+    [ $status -eq 0 ]
     run is_running
     [ $status -eq 0 ]
   else
@@ -171,8 +171,8 @@ function teardown(){
 
 @test "restart mysql with service" {
   if [ ${SERVICE} -eq 1 ]; then
-    service mysql restart
-    [ $? -eq 0 ]
+    run bash -c "service mysql restart" 3>&-
+    [ $status -eq 0 ]
     run is_running
     [ $status -eq 0 ]
   else
