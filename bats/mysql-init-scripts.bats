@@ -68,7 +68,7 @@ function teardown(){
     sed -i 's/TimeoutSec=30/TimeoutSec=600/g' /lib/systemd/system/mysql.service
     systemctl daemon-reload
   fi
-  if [ -f /etc/mysql/my.cnf ]; then
+  if [ -f ${MYSQLCONF} ]; then
     sed -i '${/nonexistingoption=1/d}' ${MYSQLCONF}
     sed -i '${/\[mysqld\]/d}' ${MYSQLCONF}
   fi
@@ -180,6 +180,27 @@ function teardown(){
   fi
 }
 
+@test "check if mysql service is enabled in systemd" {
+  if [ ${SYSTEMCTL} -eq 1 ]; then
+    result=$(systemctl is-enabled mysql)
+    [ $result == "enabled" ]
+  else
+    skip "system doesn't have systemctl command"
+  fi
+}
+
+@test "check if mysql service is enabled in sysvinit" {
+  if [ ${SYSVCONFIG} -eq 1 ]; then
+    result=$(sysv-rc-conf --list mysql|grep -o ":on"|wc -l)
+    [ $result -gt 3 ]
+  elif [ ${CHKCONFIG} -eq 1 ]; then
+    result=$(chkconfig --list mysql|grep -o ":on"|wc -l)
+    [ $result -gt 2 ]
+  else
+    skip "system doesn't have chkconfig or sysv-rc-conf commands"
+  fi
+}
+
 @test "add nonexisting option to config file (/etc/mysql/my.cnf) and start with systemctl" {
   if [ ${SYSTEMCTL} -eq 1 ]; then
     stopit
@@ -207,26 +228,5 @@ function teardown(){
     [ $status -eq 1 ]
   else
     skip "system doesn't have service command"
-  fi
-}
-
-@test "check if mysql service is enabled in systemd" {
-  if [ ${SYSTEMCTL} -eq 1 ]; then
-    result=$(systemctl is-enabled mysql)
-    [ $result == "enabled" ]
-  else
-    skip "system doesn't have systemctl command"
-  fi
-}
-
-@test "check if mysql service is enabled in sysvinit" {
-  if [ ${SYSVCONFIG} -eq 1 ]; then
-    result=$(sysv-rc-conf --list mysql|grep -o ":on"|wc -l)
-    [ $result -gt 3 ]
-  elif [ ${CHKCONFIG} -eq 1 ]; then
-    result=$(chkconfig --list mysql|grep -o ":on"|wc -l)
-    [ $result -gt 2 ]
-  else
-    skip "system doesn't have chkconfig or sysv-rc-conf commands"
   fi
 }
