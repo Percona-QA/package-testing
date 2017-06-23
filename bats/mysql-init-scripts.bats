@@ -112,7 +112,7 @@ function teardown(){
 }
 
 @test "stop mysql with /etc/init.d/mysql start with systemctl" {
-  if [ ${SYSTEMCTL} -eq 1 ]; then
+  if [ ${SYSTEMCTL} -eq 1 -a -f /etc/init.d/mysql ]; then
     run /etc/init.d/mysql stop
     [ $status -eq 0 ]
     run is_running
@@ -127,7 +127,7 @@ function teardown(){
 }
 
 @test "start mysql with /etc/init.d/mysql stop with systemctl" {
-  if [ ${SYSTEMCTL} -eq 1 ]; then
+  if [ ${SYSTEMCTL} -eq 1 -a -f /etc/init.d/mysql ]; then
     if is_running; then
       run systemctl stop mysql
       [ $status -eq 0 ]
@@ -190,7 +190,9 @@ function teardown(){
 }
 
 @test "check if mysql service is enabled in sysvinit" {
-  if [ ${SYSVCONFIG} -eq 1 ]; then
+  if [ ${SYSTEMCTL} -eq 1 ]; then
+    skip "init system is systemd so other test will do the check"
+  elif [ ${SYSVCONFIG} -eq 1 ]; then
     result=$(sysv-rc-conf --list mysql|grep -o ":on"|wc -l)
     [ $result -gt 3 ]
   elif [ ${CHKCONFIG} -eq 1 ]; then
