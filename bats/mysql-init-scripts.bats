@@ -8,8 +8,8 @@ if [ ! -z "$(which service)" ]; then
   SERVICE=1
 fi
 
-if [ ! -z "$(which chkconfig)" ]; then
-  CHKCONFIG=1
+if [ ! -z "$(which sysv-rc-conf)" ]; then
+  SYSVCONFIG=1
 fi
 
 function is_running(){
@@ -209,3 +209,11 @@ function teardown(){
   fi
 }
 
+@test "check if mysql service is enabled in sysvinit" {
+  if [ ${SYSVCONFIG} -eq 1 ]; then
+    result=$(sysv-rc-conf --list mysql|grep -o ":on"|wc -l)
+    [ $result -gt 3 ]
+  else
+    skip "system doesn't have sysv-rc-conf command"
+  fi
+}
