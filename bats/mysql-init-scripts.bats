@@ -216,17 +216,18 @@ function teardown(){
   fi
 }
 
-@test "add nonexisting option to config file (/etc/mysql/my.cnf) and start with service" {
-  if [ ${SERVICE} -eq 1 ]; then
-    stopit
-    fix_timeout
-    echo "[mysqld]" >> ${MYSQLCONF}
-    echo "nonexistingoption=1" >> ${MYSQLCONF}
-    run service mysql start
-    [ $status -eq 1 ]
-    run is_running
-    [ $status -eq 1 ]
-  else
-    skip "system doesn't have service command"
-  fi
-}
+# disabled until https://jira.percona.com/browse/BLD-737 is fixed
+# @test "add nonexisting option to config file (/etc/mysql/my.cnf) and start with service" {
+#   if [ ${SERVICE} -eq 1 ]; then
+#     stopit
+#     fix_timeout
+#     echo "[mysqld]" >> ${MYSQLCONF}
+#     echo "nonexistingoption=1" >> ${MYSQLCONF}
+#     run service mysql start
+#     [ $status -eq 1 ]
+#     run is_running
+#     [ $status -eq 1 ]
+#   else
+#     skip "system doesn't have service command"
+#   fi
+# }
