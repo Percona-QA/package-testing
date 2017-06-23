@@ -215,3 +215,6 @@
 
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb24
+
+  - name: run bats tests for mysql init scripts
+    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
