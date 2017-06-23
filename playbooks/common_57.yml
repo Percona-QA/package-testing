@@ -146,4 +146,4 @@
     when: ansible_os_family == "RedHat"
 
   - name: run bats tests for mysql init scripts
-    shell: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
