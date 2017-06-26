@@ -1,5 +1,9 @@
 MYSQL_VERSION=$(mysqld --version|grep -o "[0-9]\.[0-9]")
-CONNECTION=${CONNECTION:--S/run/mysqld/mysqld.sock}
+if [ -f /run/mysqld/mysqld.sock ]; then
+  CONNECTION=${CONNECTION:--S/run/mysqld/mysqld.sock}
+else
+  CONNECTION=${CONNECTION:--S/var/lib/mysql/mysql.sock}
+fi
 PS_TOKUDB_ADMIN_BIN=${PS_TOKUDB_ADMIN_BIN:-/usr/bin/ps_tokudb_admin}
 
 install_tokudb() {

@@ -2,6 +2,15 @@
 
 load ps_tokudb_admin_helper
 
+@test "uninstall plugins for cleanup before testing" {
+  if [ ${MYSQL_VERSION} = "5.5" ]; then
+    skip "MySQL version 5.5 doesn't support TokuDB."
+  fi
+  uninstall_all
+  check_tokubackup_notexists
+  check_tokudb_notexists
+}
+
 @test "install TokuDB plugin" {
   if [ ${MYSQL_VERSION} = "5.5" ]; then
     skip "MySQL version is not 5.6+"
