@@ -1,5 +1,5 @@
 MYSQL_VERSION=$(mysqld --version|grep -o "[0-9]\.[0-9]")
-if [ -f /run/mysqld/mysqld.sock ]; then
+if [ -S /run/mysqld/mysqld.sock ]; then
   CONNECTION=${CONNECTION:--S/run/mysqld/mysqld.sock}
 else
   CONNECTION=${CONNECTION:--S/var/lib/mysql/mysql.sock}
