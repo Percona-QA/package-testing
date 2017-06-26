@@ -47,6 +47,12 @@
     - sysv-rc-conf
     when: ansible_os_family == "Debian" and (ansible_distribution_release == "precise" or ansible_distribution_release == "trusty" or ansible_distribution_release == "wheezy")
 
+  - name: update systemd-sysv integration on debian/ubuntu
+    apt: name="{{ item }}" update_cache=no
+    with_items:
+    - systemd-sysv
+    when: ansible_os_family == "Debian" and ansible_distribution_release != "precise" and ansible_distribution_release != "trusty" and ansible_distribution_release != "wheezy"
+
   - name: install needed packages for running tests with yum
     yum: name="{{ item }}" state=latest
     with_items:

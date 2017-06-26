@@ -53,6 +53,7 @@ function stopit(){
 function fix_timeout(){
   if [ -f /etc/default/mysql ]; then
     sed -i 's/STARTTIMEOUT=900/STARTTIMEOUT=30/g' /etc/default/mysql
+    sed -i 's/startup_timeout=900/startup_timeout=30/g' /etc/default/mysql
   fi
   if [ ${SYSTEMCTL} -eq 1 -a -f /lib/systemd/system/mysql.service ]; then
     sed -i 's/TimeoutSec=600/TimeoutSec=30/g' /lib/systemd/system/mysql.service
