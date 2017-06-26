@@ -6,47 +6,50 @@ install_tokudb() {
   run ${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable
   [ $status -eq 0 ]
 
-  run service mysql restart
-  [ $status -eq 0 ]
+  service mysql restart 3>&-
+  [ $? -eq 0 ]
 
   run ${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable
   [ $status -eq 0 ]
 }
 
 check_tokudb_exists() {
-  result="$(mysql ${CONNECTION} -e 'show plugins;' | grep -c 'TokuDB.*ACTIVE')"
-  [ "$result" -eq 8 ]
-
-  result="$(mysql ${CONNECTION} -e 'show engines;' | grep -c 'TokuDB')"
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.ENGINES where ENGINE="TokuDB" and SUPPORT <> "NO";')
   [ "$result" -eq 1 ]
+
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "%tokudb%" and PLUGIN_STATUS like "ACTIVE";')
+  [ "$result" -eq 8 ]
 }
 
 uninstall_tokudb() {
   run ${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --disable
   [ $status -eq 0 ]
+
+  service mysql restart 3>&-
+  [ $? -eq 0 ]
 }
 
 check_tokudb_notexists() {
-  run bash -c "mysql ${CONNECTION} -e 'show plugins;' | grep 'TokuDB'"
-  [ $status -eq 1 ]
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.ENGINES where ENGINE="TokuDB" and SUPPORT <> "NO";')
+  [ "$result" -eq 0 ]
 
-  run bash -c "mysql ${CONNECTION} -e 'show engines;' | grep 'TokuDB'"
-  [ $status -eq 1 ]
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "%tokudb%" and PLUGIN_STATUS like "ACTIVE";')
+  [ "$result" -eq 0 ]
 }
 
 install_tokubackup() {
   run ${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable-backup
   [ $status -eq 0 ]
 
-  run service mysql restart
-  [ $status -eq 0 ]
+  service mysql restart 3>&-
+  [ $? -eq 0 ]
 
   run ${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable-backup
   [ $status -eq 0 ]
 }
 
 check_tokubackup_exists() {
-  result="$(mysql ${CONNECTION} -e 'show plugins;' | grep -c 'tokudb_backup.*ACTIVE')"
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "%tokudb_backup%" and PLUGIN_STATUS like "ACTIVE";')
   [ "$result" -eq 1 ]
 }
 
@@ -56,16 +59,16 @@ uninstall_tokubackup() {
 }
 
 check_tokubackup_notexists() {
-  run bash -c "mysql ${CONNECTION} -e 'show plugins;' | grep 'tokudb_backup'"
-  [ $status -eq 1 ]
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "%tokudb_backup%" and PLUGIN_STATUS like "ACTIVE";')
+  [ "$result" -eq 0 ]
 }
 
 install_all() {
   run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable --enable-backup"
   [ $status -eq 0 ]
 
-  run service mysql restart
-  [ $status -eq 0 ]
+  service mysql restart 3>&-
+  [ $? -eq 0 ]
 
   run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable --enable-backup"
   [ $status -eq 0 ]
@@ -75,8 +78,8 @@ uninstall_all() {
   run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --disable --disable-backup"
   [ $status -eq 0 ]
 
-  run service mysql restart
-  [ $status -eq 0 ]
+  service mysql restart 3>&-
+  [ $? -eq 0 ]
 
   run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --disable --disable-backup"
   [ $status -eq 0 ]
