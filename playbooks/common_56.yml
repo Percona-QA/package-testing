@@ -129,3 +129,6 @@
     with_items:
     - rsyslog-mysql
     when: ansible_os_family == "RedHat"
+
+  - name: run bats tests for mysql init scripts
+    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
