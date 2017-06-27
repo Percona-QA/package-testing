@@ -58,8 +58,8 @@ function fix_timeout(){
   if [ ${SYSTEMCTL} -eq 1 ]; then
     if [ -f /lib/systemd/system/mysql.service ]; then
       sed -i 's/TimeoutSec=600/TimeoutSec=30/g' /lib/systemd/system/mysql.service
-    elif [ -f /etc/systemd/system/mysql.service ]; then
-      sed -i 's/TimeoutSec=600/TimeoutSec=30/g' /etc/systemd/system/mysql.service
+    #elif [ -f /etc/systemd/system/mysql.service ]; then
+    #  sed -i 's/TimeoutSec=600/TimeoutSec=30/g' /etc/systemd/system/mysql.service
     fi
     systemctl daemon-reload
   fi
@@ -72,8 +72,8 @@ function teardown(){
   if [ ${SYSTEMCTL} -eq 1 ]; then
     if [ -f /lib/systemd/system/mysql.service ]; then
       sed -i 's/TimeoutSec=30/TimeoutSec=600/g' /lib/systemd/system/mysql.service
-    elif [ -f /etc/systemd/system/mysql.service ]; then
-      sed -i 's/TimeoutSec=30/TimeoutSec=600/g' /etc/systemd/system/mysql.service
+    #elif [ -f /etc/systemd/system/mysql.service ]; then
+    #  sed -i 's/TimeoutSec=30/TimeoutSec=600/g' /etc/systemd/system/mysql.service
     fi
     systemctl daemon-reload
   fi
