@@ -214,19 +214,17 @@ function teardown(){
 
 @test "add nonexisting option to config file (/etc/mysql/my.cnf) and start with systemctl" {
   if [ ${SYSTEMCTL} -eq 1 ]; then
-    stopit
-    fix_timeout
-    echo "[mysqld]" >> ${MYSQLCONF}
-    echo "nonexistingoption=1" >> ${MYSQLCONF}
-    # centos7 has automatic restart option
+    # TODO: Check if this can be somehow done for centos with systemd
     if [ ! -f /etc/redhat-release ]; then
+      stopit
+      fix_timeout
+      echo "[mysqld]" >> ${MYSQLCONF}
+      echo "nonexistingoption=1" >> ${MYSQLCONF}
       run systemctl start mysql
       [ $status -eq 1 ]
-    else
-      run systemctl start mysql
+      run is_running
+      [ $status -eq 1 ]
     fi
-    run is_running
-    [ $status -eq 1 ]
   else
     skip "system doesn't have systemctl command"
   fi
