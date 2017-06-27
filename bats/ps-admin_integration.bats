@@ -2,6 +2,20 @@
 
 load ps-admin_helper
 
+@test "uninstall plugins for cleanup before testing" {
+  uninstall_all
+  check_qrt_notexists
+  check_audit_notexists
+  check_pam_notexists
+  if [ ${MYSQL_VERSION} != "5.5" ]; then
+    check_tokubackup_notexists
+    check_tokudb_notexists
+  fi
+  if [ ${MYSQL_VERSION} != "5.5" -a ${MYSQL_VERSION} != "5.6" ]; then
+    check_mysqlx_notexists
+  fi
+}
+
 @test "install QRT plugin" {
   install_qrt
   check_qrt_exists
