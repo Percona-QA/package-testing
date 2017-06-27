@@ -7,13 +7,13 @@ fi
 PS_TOKUDB_ADMIN_BIN=${PS_TOKUDB_ADMIN_BIN:-/usr/bin/ps_tokudb_admin}
 
 install_tokudb() {
-  run ${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable
+  run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable"
   [ $status -eq 0 ]
 
-  service mysql restart 3>&-
+  service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
 
-  run ${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable
+  run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable"
   [ $status -eq 0 ]
 }
 
@@ -26,10 +26,10 @@ check_tokudb_exists() {
 }
 
 uninstall_tokudb() {
-  run ${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --disable
+  run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --disable"
   [ $status -eq 0 ]
 
-  service mysql restart 3>&-
+  service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
 }
 
@@ -42,13 +42,13 @@ check_tokudb_notexists() {
 }
 
 install_tokubackup() {
-  run ${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable-backup
+  run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable-backup"
   [ $status -eq 0 ]
 
-  service mysql restart 3>&-
+  service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
 
-  run ${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable-backup
+  run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable-backup"
   [ $status -eq 0 ]
 }
 
@@ -58,7 +58,7 @@ check_tokubackup_exists() {
 }
 
 uninstall_tokubackup() {
-  run ${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --disable-backup
+  run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --disable-backup"
   [ $status -eq 0 ]
 }
 
@@ -71,7 +71,7 @@ install_all() {
   run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable --enable-backup"
   [ $status -eq 0 ]
 
-  service mysql restart 3>&-
+  service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
 
   run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable --enable-backup"
@@ -82,7 +82,7 @@ uninstall_all() {
   run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --disable --disable-backup"
   [ $status -eq 0 ]
 
-  service mysql restart 3>&-
+  service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
 
   run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --disable --disable-backup"

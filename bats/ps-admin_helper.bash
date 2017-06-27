@@ -7,12 +7,12 @@ fi
 PS_ADMIN_BIN=${PS_ADMIN_BIN:-/usr/bin/ps-admin}
 
 install_qrt() {
-  run ${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt"
   [ $status -eq 0 ]
 }
 
 uninstall_qrt() {
-  run ${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt"
   [ $status -eq 0 ]
 }
 
@@ -27,7 +27,7 @@ check_qrt_notexists() {
 }
 
 install_audit() {
-  run ${PS_ADMIN_BIN} ${CONNECTION} --enable-audit
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-audit"
   [ $status -eq 0 ]
 }
 
@@ -37,7 +37,7 @@ check_audit_exists() {
 }
 
 uninstall_audit() {
-  run ${PS_ADMIN_BIN} ${CONNECTION} --disable-audit
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-audit"
   [ $status -eq 0 ]
 }
 
@@ -47,7 +47,7 @@ check_audit_notexists() {
 }
 
 install_pam() {
-  run ${PS_ADMIN_BIN} ${CONNECTION} --enable-pam
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-pam"
   [ $status -eq 0 ]
 }
 
@@ -57,7 +57,7 @@ check_pam_exists() {
 }
 
 uninstall_pam() {
-  run ${PS_ADMIN_BIN} ${CONNECTION} --disable-pam
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-pam"
   [ $status -eq 0 ]
 }
 
@@ -67,7 +67,7 @@ check_pam_notexists() {
 }
 
 install_mysqlx() {
-  run ${PS_ADMIN_BIN} ${CONNECTION} --enable-mysqlx
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-mysqlx"
   [ $status -eq 0 ]
 }
 
@@ -77,7 +77,7 @@ check_mysqlx_exists() {
 }
 
 uninstall_mysqlx() {
-  run ${PS_ADMIN_BIN} ${CONNECTION} --disable-mysqlx
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-mysqlx"
   [ $status -eq 0 ]
 }
 
@@ -87,13 +87,13 @@ check_mysqlx_notexists() {
 }
 
 install_tokudb() {
-  run ${PS_ADMIN_BIN} ${CONNECTION} --enable-tokudb
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-tokudb"
   [ $status -eq 0 ]
 
-  service mysql restart 3>&-
+  service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
 
-  run ${PS_ADMIN_BIN} ${CONNECTION} --enable-tokudb
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-tokudb"
   [ $status -eq 0 ]
 }
 
@@ -106,7 +106,7 @@ check_tokudb_exists() {
 }
 
 uninstall_tokudb() {
-  run ${PS_ADMIN_BIN} ${CONNECTION} --disable-tokudb
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-tokudb"
   [ $status -eq 0 ]
 }
 
@@ -119,13 +119,13 @@ check_tokudb_notexists() {
 }
 
 install_tokubackup() {
-  run ${PS_ADMIN_BIN} ${CONNECTION} --enable-tokubackup
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-tokubackup"
   [ $status -eq 0 ]
 
-  service mysql restart 3>&-
+  service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
 
-  run ${PS_ADMIN_BIN} ${CONNECTION} --enable-tokubackup
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-tokubackup"
   [ $status -eq 0 ]
 }
 
@@ -135,7 +135,7 @@ check_tokubackup_exists() {
 }
 
 uninstall_tokubackup() {
-  run ${PS_ADMIN_BIN} ${CONNECTION} --disable-tokubackup
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-tokubackup"
   [ $status -eq 0 ]
 }
 
@@ -155,7 +155,7 @@ install_all() {
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam ${OPT}"
   [ $status -eq 0 ]
 
-  service mysql restart 3>&-
+  service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
 
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam ${OPT}"
@@ -173,7 +173,7 @@ uninstall_all() {
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam ${OPT}"
   [ $status -eq 0 ]
 
-  service mysql restart 3>&-
+  service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
 
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam ${OPT}"
