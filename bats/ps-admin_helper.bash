@@ -92,6 +92,7 @@ install_tokudb() {
 
   service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
+  sleep 5
 
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-tokudb"
   [ $status -eq 0 ]
@@ -124,6 +125,7 @@ install_tokubackup() {
 
   service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
+  sleep 5
 
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-tokubackup"
   [ $status -eq 0 ]
@@ -157,6 +159,7 @@ install_all() {
 
   service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
+  sleep 5
 
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam ${OPT}"
   [ $status -eq 0 ]
@@ -175,6 +178,7 @@ uninstall_all() {
 
   service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
+  sleep 5
 
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam ${OPT}"
   [ $status -eq 0 ]
