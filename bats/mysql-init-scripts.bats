@@ -218,8 +218,13 @@ function teardown(){
     fix_timeout
     echo "[mysqld]" >> ${MYSQLCONF}
     echo "nonexistingoption=1" >> ${MYSQLCONF}
-    run systemctl start mysql
-    [ $status -eq 1 ]
+    # centos7 has automatic restart option
+    if [ ! -f /etc/redhat-release ]; then
+      run systemctl start mysql
+      [ $status -eq 1 ]
+    else
+      run systemctl start mysql
+    fi
     run is_running
     [ $status -eq 1 ]
   else
