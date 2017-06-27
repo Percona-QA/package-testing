@@ -1,5 +1,9 @@
 MYSQL_VERSION=$(mysqld --version|grep -o "[0-9]\.[0-9]")
-CONNECTION=${CONNECTION:--S/run/mysqld/mysqld.sock}
+if [ -S /run/mysqld/mysqld.sock ]; then
+  CONNECTION=${CONNECTION:--S/run/mysqld/mysqld.sock}
+else
+  CONNECTION=${CONNECTION:--S/var/lib/mysql/mysql.sock}
+fi
 PS_ADMIN_BIN=${PS_ADMIN_BIN:-/usr/bin/ps-admin}
 
 install_qrt() {
@@ -13,13 +17,13 @@ uninstall_qrt() {
 }
 
 check_qrt_exists() {
-  result="$(mysql ${CONNECTION} -e 'show plugins;' | grep -c 'QUERY_RESPONSE_TIME.*ACTIVE')"
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "QUERY_RESPONSE_TIME%" and PLUGIN_STATUS like "ACTIVE";')
   [ "$result" -eq 4 ]
 }
 
 check_qrt_notexists() {
-  run bash -c "mysql ${CONNECTION} -e 'show plugins;' | grep 'QUERY_RESPONSE_TIME'"
-  [ $status -eq 1 ]
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "QUERY_RESPONSE_TIME%" and PLUGIN_STATUS like "ACTIVE";')
+  [ "$result" -eq 0 ]
 }
 
 install_audit() {
@@ -28,7 +32,7 @@ install_audit() {
 }
 
 check_audit_exists() {
-  result="$(mysql ${CONNECTION} -e 'show plugins;' | grep -c 'audit_log.*ACTIVE')"
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "audit_log%" and PLUGIN_STATUS like "ACTIVE";')
   [ "$result" -eq 1 ]
 }
 
@@ -38,8 +42,8 @@ uninstall_audit() {
 }
 
 check_audit_notexists() {
-  run bash -c "mysql ${CONNECTION} -e 'show plugins;' | grep 'audit_log'"
-  [ $status -eq 1 ]
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "audit_log%" and PLUGIN_STATUS like "ACTIVE";')
+  [ "$result" -eq 0 ]
 }
 
 install_pam() {
@@ -48,7 +52,7 @@ install_pam() {
 }
 
 check_pam_exists() {
-  result="$(mysql ${CONNECTION} -e 'show plugins;' | grep -c 'auth_pam.*ACTIVE')"
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "auth_pam%" and PLUGIN_STATUS like "ACTIVE";')
   [ "$result" -eq 1 ]
 }
 
@@ -58,8 +62,8 @@ uninstall_pam() {
 }
 
 check_pam_notexists() {
-  run bash -c "mysql ${CONNECTION} -e 'show plugins;' | grep 'auth_pam'"
-  [ $status -eq 1 ]
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "auth_pam%" and PLUGIN_STATUS like "ACTIVE";')
+  [ "$result" -eq 0 ]
 }
 
 install_mysqlx() {
@@ -68,7 +72,7 @@ install_mysqlx() {
 }
 
 check_mysqlx_exists() {
-  result="$(mysql ${CONNECTION} -e 'show plugins;' | grep -c 'mysqlx.*ACTIVE')"
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "mysqlx%" and PLUGIN_STATUS like "ACTIVE";')
   [ "$result" -eq 1 ]
 }
 
@@ -78,27 +82,27 @@ uninstall_mysqlx() {
 }
 
 check_mysqlx_notexists() {
-  run bash -c "mysql ${CONNECTION} -e 'show plugins;' | grep 'mysqlx'"
-  [ $status -eq 1 ]
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "mysqlx%" and PLUGIN_STATUS like "ACTIVE";')
+  [ "$result" -eq 0 ]
 }
 
 install_tokudb() {
   run ${PS_ADMIN_BIN} ${CONNECTION} --enable-tokudb
   [ $status -eq 0 ]
 
-  run service mysql restart
-  [ $status -eq 0 ]
+  service mysql restart 3>&-
+  [ $? -eq 0 ]
 
   run ${PS_ADMIN_BIN} ${CONNECTION} --enable-tokudb
   [ $status -eq 0 ]
 }
 
 check_tokudb_exists() {
-  result="$(mysql ${CONNECTION} -e 'show plugins;' | grep -c 'TokuDB.*ACTIVE')"
-  [ "$result" -eq 8 ]
-
-  result="$(mysql ${CONNECTION} -e 'show engines;' | grep -c 'TokuDB')"
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.ENGINES where ENGINE="TokuDB" and SUPPORT <> "NO";')
   [ "$result" -eq 1 ]
+
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like BINARY "%TokuDB%" and PLUGIN_STATUS like "ACTIVE";')
+  [ "$result" -eq 8 ]
 }
 
 uninstall_tokudb() {
@@ -107,26 +111,26 @@ uninstall_tokudb() {
 }
 
 check_tokudb_notexists() {
-  run bash -c "mysql ${CONNECTION} -e 'show plugins;' | grep 'TokuDB'"
-  [ $status -eq 1 ]
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.ENGINES where ENGINE="TokuDB" and SUPPORT <> "NO";')
+  [ "$result" -eq 0 ]
 
-  run bash -c "mysql ${CONNECTION} -e 'show engines;' | grep 'TokuDB'"
-  [ $status -eq 1 ]
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "%tokudb%" and PLUGIN_STATUS like "ACTIVE";')
+  [ "$result" -eq 0 ]
 }
 
 install_tokubackup() {
   run ${PS_ADMIN_BIN} ${CONNECTION} --enable-tokubackup
   [ $status -eq 0 ]
 
-  run service mysql restart
-  [ $status -eq 0 ]
+  service mysql restart 3>&-
+  [ $? -eq 0 ]
 
   run ${PS_ADMIN_BIN} ${CONNECTION} --enable-tokubackup
   [ $status -eq 0 ]
 }
 
 check_tokubackup_exists() {
-  result="$(mysql ${CONNECTION} -e 'show plugins;' | grep -c 'tokudb_backup.*ACTIVE')"
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "%tokudb_backup%" and PLUGIN_STATUS like "ACTIVE";')
   [ "$result" -eq 1 ]
 }
 
@@ -136,8 +140,8 @@ uninstall_tokubackup() {
 }
 
 check_tokubackup_notexists() {
-  run bash -c "mysql ${CONNECTION} -e 'show plugins;' | grep 'tokudb_backup'"
-  [ $status -eq 1 ]
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "%tokudb_backup%" and PLUGIN_STATUS like "ACTIVE";')
+  [ "$result" -eq 0 ]
 }
 
 install_all() {
@@ -151,8 +155,8 @@ install_all() {
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam ${OPT}"
   [ $status -eq 0 ]
 
-  run service mysql restart
-  [ $status -eq 0 ]
+  service mysql restart 3>&-
+  [ $? -eq 0 ]
 
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam ${OPT}"
   [ $status -eq 0 ]
@@ -169,8 +173,8 @@ uninstall_all() {
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam ${OPT}"
   [ $status -eq 0 ]
 
-  run service mysql restart
-  [ $status -eq 0 ]
+  service mysql restart 3>&-
+  [ $? -eq 0 ]
 
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam ${OPT}"
   [ $status -eq 0 ]
