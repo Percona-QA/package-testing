@@ -45,6 +45,12 @@
     - pmm-client
     when: ansible_os_family == "RedHat"
 
+  - name: configure pmm client to connect to server
+    shell: pmm-admin config --server 10.10.6.251:80 --bind-address $(ip addr show|grep "inet 10."|grep -o "10.*/"|sed 's:/::') --force
+
+  - name: add linux metrics to monitoring
+    command: pmm-admin add linux:metrics --service-port {{ port_linux }}
+
 ### start PS
   - name: install Percona Server old deb packages
     apt: name={{item}} update_cache=no state=latest
@@ -85,6 +91,14 @@
               dest=/root/.my.cnf
               mode=0640 owner=root group=root
     when: ansible_os_family == "RedHat"
+
+  - name: add mysql metrics and queries to monitoring
+    command: pmm-admin add mysql --service-port {{ port_mysql }}
+    when: ansible_distribution_release != "zesty"
+
+  - name: add mysql metrics and queries to monitoring with socket auth
+    command: pmm-admin add mysql --socket /var/run/mysqld/mysqld.sock --service-port {{ port_mysql }}
+    when: ansible_os_family == "Debian" and ansible_distribution_release == "zesty"
 ### end PS
 
 ### start PSMDB
@@ -113,27 +127,11 @@
   - name: start mongod with systemctl
     command: systemctl start mongod
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-### end PSMDB
-
-### start pmm client integration tests
-  - name: configure pmm client to connect to server
-    shell: pmm-admin config --server 10.10.6.251:80 --bind-address $(ip addr show|grep "inet 10."|grep -o "10.*/"|sed 's:/::') --force
-
-  - name: add linux metrics to monitoring
-    command: pmm-admin add linux:metrics --service-port {{ port_linux }}
-
-  - name: add mysql metrics and queries to monitoring
-    command: pmm-admin add mysql --service-port {{ port_mysql }}
-    when: ansible_distribution_release != "zesty"
-
-  - name: add mysql metrics and queries to monitoring with socket auth
-    command: pmm-admin add mysql --socket /var/run/mysqld/mysqld.sock --service-port {{ port_mysql }}
-    when: ansible_os_family == "Debian" and ansible_distribution_release == "zesty"
 
   - name: add mongodb metrics to monitoring
     command: pmm-admin add mongodb --service-port {{ port_mongo }}
     when: ansible_distribution_release != "precise" and ansible_distribution_release != "wheezy"
-### end pmm client integration tests
+### end PSMDB
 
   - name: include tasks for enabling testing repo
     include: ../tasks/enable_testing_repo.yml
