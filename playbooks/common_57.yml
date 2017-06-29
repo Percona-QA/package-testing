@@ -170,4 +170,4 @@
     when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal
-    command: /package-testing/check_running.sh mysql running
+    command: /package-testing/check_running.sh mysql stopped
