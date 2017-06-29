@@ -36,6 +36,9 @@
   - name: stop proxysql service
     service: name=proxysql state=stopped
 
+  - name: start proxysql service
+    service: name=proxysql state=started
+
   - name: remove proxysql deb packages
     apt: name={{item}} state=absent
     with_items:
@@ -47,3 +50,6 @@
     with_items:
     - proxysql
     when: ansible_os_family == "RedHat"
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh proxysql stopped

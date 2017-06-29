@@ -84,3 +84,21 @@
 
   - name: run bats tests for mongo init scripts
     command: /usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats
+
+  - name: start mongod service
+    service: name=mongod state=started
+
+  - name: remove Percona Server for MongoDB 3.4 deb packages
+    apt: name={{item}} update_cache=no state=absent
+    with_items:
+    - percona-server-mongodb-34
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server for MongoDB 3.4 rpm packages
+    yum: name={{item}} state=absent
+    with_items:
+    - Percona-Server-MongoDB-34
+    when: ansible_os_family == "RedHat"
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mongodb stopped
