@@ -4,6 +4,7 @@
 servers=[
   { :hostname => "d-wheezy-64-@@hostname@@", :box => "debian/wheezy64" },
   { :hostname => "d-jessie-64-@@hostname@@", :box => "bento/debian-8.7" },
+  { :hostname => "d-stretch-64-@@hostname@@", :box => "debian/stretch64" },
   { :hostname => "centos-5-64-@@hostname@@", :box => "percona-centos5-64" },
   { :hostname => "centos-6-64-@@hostname@@", :box => "bento/centos-6.8" },
   { :hostname => "centos-7-64-@@hostname@@", :box => "centos/7" },
@@ -12,7 +13,8 @@ servers=[
   { :hostname => "u-xenial-64-@@hostname@@", :box => "geerlingguy/ubuntu1604" },
   { :hostname => "u-yakkety-64-@@hostname@@", :box => "bento/ubuntu-16.10" },
   { :hostname => "u-zesty-64-@@hostname@@", :box => "percona-zesty-64" },
-  { :hostname => "sles-11-64-@@hostname@@", :box => "wvera/sles11sp4" }
+  { :hostname => "sles-11-64-@@hostname@@", :box => "wvera/sles11sp4" },
+  { :hostname => "sles-12-64-@@hostname@@", :box => "wvera/sles12sp2" }
 ]
 
 Vagrant.configure("2") do |config|
