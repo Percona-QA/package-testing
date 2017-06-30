@@ -56,13 +56,13 @@
   - name: remove Percona Server for MongoDB 3.4 deb packages
     apt: name={{item}} update_cache=no state=absent
     with_items:
-    - percona-server-mongodb-34
+    - percona-server-mongodb-34-server
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server for MongoDB 3.4 rpm packages
     yum: name={{item}} state=absent
     with_items:
-    - Percona-Server-MongoDB-34
+    - Percona-Server-MongoDB-34-server
     when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal
