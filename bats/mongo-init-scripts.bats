@@ -197,6 +197,7 @@ function teardown(){
     [ $status -eq 1 ]
     run is_running
     [ $status -eq 1 ]
+    sleep 10
   else
     skip "system doesn't have systemctl command"
   fi
@@ -210,6 +211,7 @@ function teardown(){
     [ $status -eq 1 ]
     run is_running
     [ $status -eq 1 ]
+    sleep 10
   else
     skip "system doesn't have service command"
   fi
