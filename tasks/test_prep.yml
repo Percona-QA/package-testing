@@ -39,6 +39,7 @@
     - pv
     - unzip
     - wget
+    - dirmngr
     when: ansible_os_family == "Debian"
 
   - name: install sysv-rc-conf package for running tests with apt
@@ -100,14 +101,3 @@
     - bats-master/install.sh /usr/local
     - rm -rf bats-master
 
-  - name: remove gnupg to fix issue with importing key on debian stretch
-    apt: name="{{ item }}" update_cache=no state=absent
-    with_items:
-    - gnupg
-    when: ansible_os_family == "Debian" and ansible_distribution_release == "stretch"
-
-  - name: install gnupg2 to fix issue with importing key on debian stretch
-    apt: name="{{ item }}" update_cache=no
-    with_items:
-    - gnupg2
-    when: ansible_os_family == "Debian" and ansible_distribution_release == "stretch"
