@@ -12,18 +12,18 @@ log="/tmp/${product}_check_running.log"
 echo -n > ${log}
 
 if [ ${product} = "mysql" ]; then
-  process="mysqld"
+  process="bin/mysqld"
 elif [ ${product} = "mongodb" ]; then
-  process="mongod"
+  process="bin/mongod"
 elif [ ${product} = "proxysql" ]; then
-  process="proxysql"
+  process="bin/proxysql"
 else
   echo "Unknown product!"
   exit 1
 fi
 
 ps aux >> ${log}
-psoutput=$(ps aux | grep -v grep | grep -c "${process}")
+psoutput=$(ps aux | grep -v "grep" | grep -v "check_running.sh" | grep -c "${process}")
 echo ${psoutput}
 
 if [ ${psoutput} -eq 0 -a ${status} = "stopped" ]; then
