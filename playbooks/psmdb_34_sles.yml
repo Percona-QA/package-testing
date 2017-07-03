@@ -25,11 +25,14 @@
     - wget "{{ new_dl_link }}{{ psmdb_prefix }}server-{{ psmdb_ver }}{{ psmdb_suffix }}"
     - wget "{{ new_dl_link }}{{ psmdb_prefix }}shell-{{ psmdb_ver }}{{ psmdb_suffix }}"
     - wget "{{ new_dl_link }}{{ psmdb_prefix }}tools-{{ psmdb_ver }}{{ psmdb_suffix }}"
-    - wget "{{ new_dl_link }}{{ psmdb_prefix }}debuginfo-{{ psmdb_ver }}{{ psmdb_suffix }}"
     - wget "{{ new_dl_link }}{{ psmdb_prefix }}debugsource-{{ psmdb_ver }}{{ psmdb_suffix }}"
+    - wget "{{ new_dl_link }}{{ psmdb_prefix }}mongos-debuginfo-{{ psmdb_ver }}{{ psmdb_suffix }}"
+    - wget "{{ new_dl_link }}{{ psmdb_prefix }}server-debuginfo-{{ psmdb_ver }}{{ psmdb_suffix }}"
+    - wget "{{ new_dl_link }}{{ psmdb_prefix }}shell-debuginfo-{{ psmdb_ver }}{{ psmdb_suffix }}"
+    - wget "{{ new_dl_link }}{{ psmdb_prefix }}tools-debuginfo-{{ psmdb_ver }}{{ psmdb_suffix }}"
 
   - name: install Percona Server for MongoDB 3.4 new SLES packages
-    command: zypper -n install "{{ psmdb_prefix }}mongos-{{ psmdb_ver }}{{ psmdb_suffix }}" "{{ psmdb_prefix }}shell-{{ psmdb_ver }}{{ psmdb_suffix }}" "{{ psmdb_prefix }}tools-{{ psmdb_ver }}{{ psmdb_suffix }}" "{{ psmdb_prefix }}server-{{ psmdb_ver }}{{ psmdb_suffix }}" "{{ psmdb_prefix }}debuginfo-{{ psmdb_ver }}{{ psmdb_suffix }}" "{{ psmdb_prefix }}debugsource-{{ psmdb_ver }}{{ psmdb_suffix }}" "{{ psmdb_prefix }}{{ psmdb_ver }}{{ psmdb_suffix }}"
+    command: zypper -n install "{{ psmdb_prefix }}mongos-{{ psmdb_ver }}{{ psmdb_suffix }}" "{{ psmdb_prefix }}shell-{{ psmdb_ver }}{{ psmdb_suffix }}" "{{ psmdb_prefix }}tools-{{ psmdb_ver }}{{ psmdb_suffix }}" "{{ psmdb_prefix }}server-{{ psmdb_ver }}{{ psmdb_suffix }}" "{{ psmdb_prefix }}debugsource-{{ psmdb_ver }}{{ psmdb_suffix }}" "{{ psmdb_prefix }}{{ psmdb_ver }}{{ psmdb_suffix }}" "{{ psmdb_prefix }}mongos-debuginfo-{{ psmdb_ver }}{{ psmdb_suffix }}" "{{ psmdb_prefix }}server-debuginfo-{{ psmdb_ver }}{{ psmdb_suffix }}" "{{ psmdb_prefix }}shell-debuginfo-{{ psmdb_ver }}{{ psmdb_suffix }}" "{{ psmdb_prefix }}tools-debuginfo-{{ psmdb_ver }}{{ psmdb_suffix }}"
 
   - name: start mongod with service
     service: name=mongod state=started
