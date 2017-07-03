@@ -9,9 +9,9 @@
   become_method: sudo
   vars:
     psmdb_prefix: "Percona-Server-MongoDB-34-"
-    psmdb_suffix: ".sles1110.x86_64.rpm"
+    psmdb_suffix: ".sles12.x86_64.rpm"
     psmdb_ver: "3.4.4-1.4"
-    new_dl_link: "https://www.percona.com/redir/downloads/TESTING/Percona-Server-MongoDB-SLES11SP4/"
+    new_dl_link: "https://www.percona.com/redir/downloads/TESTING/sles12/"
 
   tasks:
   - name: include tasks for test env setup
