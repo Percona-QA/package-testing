@@ -78,6 +78,10 @@
   #   - /package-testing/sle-sdk-release-SDK-11.4-1.55.x86_64.rpm
   #   when: ansible_os_family == "Suse"
 
+  - name: update image
+    command: zypper -n update
+    when: ansible_os_family == "Suse" and ansible_distribution_major_version == "12"
+
   - name: install needed packages for running tests with zypper
     zypper: name="{{ item }}" state=latest
     with_items:
