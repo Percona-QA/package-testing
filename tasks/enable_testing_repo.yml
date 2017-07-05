@@ -5,7 +5,7 @@
   - name: add an apt signing key
     apt_key: 
       id: 8507EFA5 
-      keyserver: keys.gnupg.net
+      keyserver: keyserver.ubuntu.com 
       state: present
     when: ansible_os_family == "Debian"
 
