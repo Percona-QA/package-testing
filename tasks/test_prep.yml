@@ -76,6 +76,10 @@
     command: SUSEConnect --email="@@SLES_REG_EMAIL@@" --regcode=@@SLES_REG_CODE@@
     when: ansible_os_family == "Suse" and ansible_distribution_major_version == "12"
 
+  - name: import rpm gpg key on sles12
+    command: rpmkeys --import https://www.percona.com/downloads/RPM-GPG-KEY-percona
+    when: ansible_os_family == "Suse" and ansible_distribution_major_version == "12"
+
   # - name: setup SDK repo on SLES
   #   zypper: name="{{ item }}" state=present
   #   with_items:
