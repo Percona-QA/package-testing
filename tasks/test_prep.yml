@@ -34,7 +34,10 @@
 ### end remove
 
   - name: install needed packages for running tests with apt
-    apt: name="{{ item }}" update_cache=yes state=latest
+    apt: 
+      name: "{{ item }}"
+      update_cache: yes 
+      state: latest
     with_items:
     - pv
     - unzip
