@@ -3,7 +3,10 @@
     include: remove_percona_repository.yml
 
   - name: add an apt signing key
-    apt_key: id=8507EFA5 keyserver=keys.gnupg.net state=present
+    apt_key: 
+      id: 8507EFA5 
+      keyserver: keys.gnupg.net
+      state: present
     when: ansible_os_family == "Debian"
 
   - name: add the old apt signing key
