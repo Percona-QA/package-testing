@@ -225,6 +225,15 @@ elif [ ${product} = "psmdb30" -o ${product} = "psmdb32" -o ${product} = "psmdb34
   if [ -f /etc/redhat-release -o ${SLES} -eq 1 ]; then
     if [ "$(rpm -qa | grep Percona-Server-MongoDB | grep -c ${version})" == "${rpm_num_pkgs}" ]; then
       echo "all packages are installed"
+    elif [ ${SLES} -eq 1 ]; then
+      for package in Percona-Server-MongoDB${extra_version}-debugsource Percona-Server-MongoDB${extra_version}-mongos-debuginfo Percona-Server-MongoDB${extra_version}-server-debuginfo Percona-Server-MongoDB${extra_version}-shell-debuginfo Percona-Server-MongoDB${extra_version}-tools-debuginfo Percona-Server-MongoDB${extra_version} Percona-Server-MongoDB${extra_version}-mongos Percona-Server-MongoDB${extra_version}-server Percona-Server-MongoDB${extra_version}-shell Percona-Server-MongoDB${extra_version}-tools; do
+        if [ "$(rpm -qa | grep -c ${package}-${version})" -gt 0 ]; then
+          echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
+        else
+          echo "WARNING: ${package}-${version} is not installed"
+          exit 1
+        fi
+      done
     else
       for package in Percona-Server-MongoDB${extra_version}-debuginfo Percona-Server-MongoDB${extra_version} Percona-Server-MongoDB${extra_version}-mongos Percona-Server-MongoDB${extra_version}-server Percona-Server-MongoDB${extra_version}-shell Percona-Server-MongoDB${extra_version}-tools; do
         if [ "$(rpm -qa | grep -c ${package}-${version})" -gt 0 ]; then
