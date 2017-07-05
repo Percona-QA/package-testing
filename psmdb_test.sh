@@ -38,8 +38,8 @@ function start_service {
     echo "starting mongod service... "
     service mongod start
   fi
-  echo "waiting 5s for service to boot up"
-  sleep 5
+  echo "waiting 10s for service to boot up"
+  sleep 10
 }
 
 function stop_service {
