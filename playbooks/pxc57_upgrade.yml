@@ -42,3 +42,24 @@
 
   - name: check that PXC package versions are correct
     command: /package-testing/package_check.sh pxc57
+
+  - name: run bats tests for mysql init scripts
+    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+
+  - name: start mysql service
+    service: name=mysql state=started
+
+  - name: remove PXC deb packages
+    apt: name={{item}} update_cache=no state=absent
+    with_items:
+    - percona-xtradb-cluster-server-5.7
+    when: ansible_os_family == "Debian"
+
+  - name: remove PXC rpm packages
+    yum: name={{item}} state=absent
+    with_items:
+    - Percona-XtraDB-Cluster-server-57
+    when: ansible_os_family == "RedHat"
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mysql stopped
