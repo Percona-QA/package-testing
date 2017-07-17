@@ -59,11 +59,10 @@ for se in TokuDB RocksDB; do
         cat ${SCRIPT_PWD}/create_table.sql > /tmp/create_table.sql
         sed -i "s/@@SE_COMP@@/${se}_${comp_lib}/g" /tmp/create_table.sql
         sed -i "s/@@SE@@/${se}/g" /tmp/create_table.sql
-        sed -i "s/ @@ROW_FORMAT_OPT@@//g" /tmp/create_table.sql
         if [ ${se} = "TokuDB" ]; then
           sed -i "s/ @@COMMENT@@//g" /tmp/create_table.sql
           if [ ${comp_lib} = "no" ]; then
-            sed -i "s/ @@ROW_FORMAT_OPT@@//g" /tmp/create_table.sql
+            sed -i "s/ @@ROW_FORMAT_OPT@@/ ROW_FORMAT=TOKUDB_UNCOMPRESSED/g" /tmp/create_table.sql
           elif [ ${comp_lib} = "zlib" ]; then
             sed -i "s/ @@ROW_FORMAT_OPT@@/ ROW_FORMAT=TOKUDB_ZLIB/g" /tmp/create_table.sql
           elif [ ${comp_lib} = "quicklz" ]; then
