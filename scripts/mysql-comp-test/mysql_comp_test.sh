@@ -30,8 +30,8 @@ if [ $1 = "ps57" ]; then
   sleep 10
 fi
 
-tokudb_comp_lib=("no" "zlib" "quicklz" "lzma" "snappy")
-rocksdb_comp_lib=("no" "zlib" "lz4" "zstd")
+tokudb_comp_lib=("no" "zlib" "quicklz" "lzma" "snappy" "dummy")
+rocksdb_comp_lib=("no" "zlib" "lz4" "zstd" "dummy")
 old="no"
 new="no"
 
@@ -46,47 +46,56 @@ secure_file_priv=$(mysql -N -s -e "select @@secure_file_priv;")
 if [ -z ${secure_file_priv} ]; then
   secure_file_priv="/tmp/"
 fi
+rm -f ${secure_file_priv}/t1*.txt
+rm -f ${secure_file_priv}/t2*.txt
+rm -f ${secure_file_priv}/t3*.txt
 
 for se in TokuDB RocksDB; do
-  for comp_lib in no zlib lz4 zstd quicklz lzma snappy; do
+  for comp_lib in no zlib lz4 zstd quicklz lzma snappy dummy; do
 
     if [[ ${se} = "TokuDB" && " ${tokudb_comp_lib[@]} " =~ " ${comp_lib} " ]] || [[ ${se} = "RocksDB" && " ${rocksdb_comp_lib[@]} " =~ " ${comp_lib} " ]]; then
       if [ $1 = "ps56" -a ${se} = "RocksDB" ]; then
         echo "Skipping RocksDB since not supported in PS 5.6"
       else
-        old="${new}"
-        new="${comp_lib}"
-        cat ${SCRIPT_PWD}/create_table.sql > /tmp/create_table.sql
-        sed -i "s/@@SE_COMP@@/${se}_${comp_lib}/g" /tmp/create_table.sql
-        sed -i "s/@@SE@@/${se}/g" /tmp/create_table.sql
-        if [ ${se} = "TokuDB" ]; then
-          sed -i "s/ @@COMMENT@@//g" /tmp/create_table.sql
-          if [ ${comp_lib} = "no" ]; then
-            sed -i "s/ @@ROW_FORMAT_OPT@@/ ROW_FORMAT=TOKUDB_UNCOMPRESSED/g" /tmp/create_table.sql
-          elif [ ${comp_lib} = "zlib" ]; then
-            sed -i "s/ @@ROW_FORMAT_OPT@@/ ROW_FORMAT=TOKUDB_ZLIB/g" /tmp/create_table.sql
-          elif [ ${comp_lib} = "quicklz" ]; then
-            sed -i "s/ @@ROW_FORMAT_OPT@@/ ROW_FORMAT=TOKUDB_QUICKLZ/g" /tmp/create_table.sql
-          elif [ ${comp_lib} = "lzma" ]; then
-            sed -i "s/ @@ROW_FORMAT_OPT@@/ ROW_FORMAT=TOKUDB_LZMA/g" /tmp/create_table.sql
-          elif [ ${comp_lib} = "snappy" ]; then
-            sed -i "s/ @@ROW_FORMAT_OPT@@/ ROW_FORMAT=TOKUDB_SNAPPY/g" /tmp/create_table.sql
-          fi
-        fi
-        if [ ${se} = "RocksDB" ]; then
-          sed -i "s/ @@ROW_FORMAT_OPT@@//g" /tmp/create_table.sql
-          if [ ${comp_lib} = "no" ]; then
+        if [ ${comp_lib} != "dummy" ]; then
+          old="${new}"
+          new="${comp_lib}"
+          cat ${SCRIPT_PWD}/create_table.sql > /tmp/create_table.sql
+          sed -i "s/@@SE_COMP@@/${se}_${comp_lib}/g" /tmp/create_table.sql
+          sed -i "s/@@SE@@/${se}/g" /tmp/create_table.sql
+          if [ ${se} = "TokuDB" ]; then
             sed -i "s/ @@COMMENT@@//g" /tmp/create_table.sql
-          elif [ ${comp_lib} = "zlib" ]; then
-            sed -i "s/ @@COMMENT@@/ COMMENT 'cf1'/g" /tmp/create_table.sql
-          elif [ ${comp_lib} = "lz4" ]; then
-            sed -i "s/ @@COMMENT@@/ COMMENT 'cf2'/g" /tmp/create_table.sql
-          elif [ ${comp_lib} = "zstd" ]; then
-            sed -i "s/ @@COMMENT@@/ COMMENT 'cf3'/g" /tmp/create_table.sql
+            old_row_format="${new_row_format}"
+            if [ ${comp_lib} = "no" ]; then
+              new_row_format="ROW_FORMAT=TOKUDB_UNCOMPRESSED"
+            elif [ ${comp_lib} = "zlib" ]; then
+              new_row_format="ROW_FORMAT=TOKUDB_ZLIB"
+            elif [ ${comp_lib} = "quicklz" ]; then
+              new_row_format="ROW_FORMAT=TOKUDB_QUICKLZ"
+            elif [ ${comp_lib} = "lzma" ]; then
+              new_row_format="ROW_FORMAT=TOKUDB_LZMA"
+            elif [ ${comp_lib} = "snappy" ]; then
+              new_row_format="ROW_FORMAT=TOKUDB_SNAPPY"
+            fi
+              sed -i "s/ @@ROW_FORMAT_OPT@@/ ${new_row_format}/g" /tmp/create_table.sql
           fi
-        fi
+          if [ ${se} = "RocksDB" ]; then
+            sed -i "s/ @@ROW_FORMAT_OPT@@//g" /tmp/create_table.sql
+            old_comment="${new_comment}"
+            if [ ${comp_lib} = "no" ]; then
+              new_comment=""
+            elif [ ${comp_lib} = "zlib" ]; then
+              new_comment="COMMENT 'cf1'"
+            elif [ ${comp_lib} = "lz4" ]; then
+              new_comment="COMMENT 'cf2'"
+            elif [ ${comp_lib} = "zstd" ]; then
+              new_comment="COMMENT 'cf3'"
+            fi
+            sed -i "s/ @@COMMENT@@/ ${new_comment}/g" /tmp/create_table.sql
+          fi
 
-        mysql < /tmp/create_table.sql
+          mysql < /tmp/create_table.sql
+        fi
 
         if [ ${comp_lib} = "no" ]; then
           # insert fresh data into uncompressed tables
@@ -94,12 +103,37 @@ for se in TokuDB RocksDB; do
           sed -i "s/@@SE@@/${se}/g" /tmp/test_data.sql
           mysql < /tmp/test_data.sql
           for table in t1 t2 t3; do
+            mysql -Dcomp_test -e "OPTIMIZE TABLE ${table}_${se}_${new};" >> /tmp/optimize_table.txt
             mysql -Dcomp_test -e "SELECT * FROM ${table}_${se}_${new} INTO OUTFILE '${secure_file_priv}/${table}_${se}_${new}.txt';"
+          done
+        elif [ ${comp_lib} = "dummy" ]; then
+          for table in t1 t2 t3; do
+            mysql -Dcomp_test -e "ALTER TABLE ${table}_${se}_no ENGINE=InnoDB ROW_FORMAT=COMPRESSED;"
+            mysql -Dcomp_test -e "OPTIMIZE TABLE ${table}_${se}_no;" >> /tmp/optimize_table.txt
+            mysql -Dcomp_test -e "SELECT * FROM ${table}_${se}_no INTO OUTFILE '${secure_file_priv}/${table}_${se}_${new}_alter_innodb.txt';"
+            if [ ${se} = "TokuDB" ]; then
+              mysql -Dcomp_test -e "ALTER TABLE ${table}_${se}_no ENGINE=${se} ${new_row_format};"
+            else
+              mysql -Dcomp_test -e "ALTER TABLE ${table}_${se}_no ENGINE=${se};"
+            fi
+            mysql -Dcomp_test -e "OPTIMIZE TABLE ${table}_${se}_no;" >> /tmp/optimize_table.txt
+            mysql -Dcomp_test -e "SELECT * FROM ${table}_${se}_no INTO OUTFILE '${secure_file_priv}/${table}_${se}_${new}_alter_back_${se}.txt';"
           done
         else
           for table in t1 t2 t3; do
             mysql -Dcomp_test -e "INSERT INTO ${table}_${se}_${new} SELECT * FROM ${table}_${se}_${old};"
+            mysql -Dcomp_test -e "OPTIMIZE TABLE ${table}_${se}_${new};" >> /tmp/optimize_table.txt
             mysql -Dcomp_test -e "SELECT * FROM ${table}_${se}_${new} INTO OUTFILE '${secure_file_priv}/${table}_${se}_${new}.txt';"
+            if [ ${se} = "TokuDB" ]; then
+              mysql -Dcomp_test -e "ALTER TABLE ${table}_${se}_no ENGINE=TokuDB ${new_row_format};"
+              mysql -Dcomp_test -e "OPTIMIZE TABLE ${table}_${se}_no;" >> /tmp/optimize_table.txt
+              mysql -Dcomp_test -e "SELECT * FROM ${table}_${se}_no INTO OUTFILE '${secure_file_priv}/${table}_${se}_${new}_alter.txt';"
+            else
+              mysql -Dcomp_test -e "ALTER TABLE ${table}_${se}_no DROP PRIMARY KEY;"
+              mysql -Dcomp_test -e "ALTER TABLE ${table}_${se}_no ADD PRIMARY KEY(a1) ${new_comment};"
+              mysql -Dcomp_test -e "OPTIMIZE TABLE ${table}_${se}_no;" >> /tmp/optimize_table.txt
+              mysql -Dcomp_test -e "SELECT * FROM ${table}_${se}_no INTO OUTFILE '${secure_file_priv}/${table}_${se}_${new}_alter.txt';"
+            fi
           done
         fi
 
@@ -117,7 +151,7 @@ nr1=$(grep -c "e7821682046d961fb2b5ff5d11894491" /tmp/comp_test_md5.sum)
 nr2=$(grep -c "3284a0c3a1f439892f6e07f75408b2c2" /tmp/comp_test_md5.sum)
 nr3=$(grep -c "72f7e51a16c2f0af31e39586b571b902" /tmp/comp_test_md5.sum)
 
-if [ ${nr1} -ne 9 -o ${nr2} -ne 9 -o ${nr3} -ne 9 ]; then
+if [ ${nr1} -ne 20 -o ${nr2} -ne 20 -o ${nr3} -ne 20 ]; then
   echo "md5sums of test files do not match. check files in ${secure_file_priv}"
   exit 1
 else

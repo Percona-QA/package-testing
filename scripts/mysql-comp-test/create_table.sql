@@ -10,19 +10,19 @@ CREATE TABLE t1_@@SE_COMP@@ (
 ) ENGINE=@@SE@@ @@ROW_FORMAT_OPT@@ PARTITION BY HASH(a1) PARTITIONS 4;
 
 CREATE TABLE t2_@@SE_COMP@@ (
-	b1 DATE,
-	b2 TIME,
-	b3 BLOB,
-	b4 varchar(100) COLLATE 'latin1_bin', -- TODO this originally should have been JSON but moved to varchar because of MYR-152
-	b5 float(25,5),
-	PRIMARY KEY (b1) @@COMMENT@@
+	a1 DATE,
+	a2 TIME,
+	a3 BLOB,
+	a4 varchar(100) COLLATE 'latin1_bin', -- TODO this originally should have been JSON but moved to varchar because of MYR-152
+	a5 float(25,5),
+	PRIMARY KEY (a1) @@COMMENT@@
 ) ENGINE=@@SE@@ @@ROW_FORMAT_OPT@@;
 
 CREATE TABLE t3_@@SE_COMP@@ (
-	c1 varchar(255) COLLATE 'binary',
-	c2 BINARY(20),
-	c3 VARBINARY(100),
-	c4 SET('one', 'two', 'three'),
-	c5 ENUM('x-small', 'small', 'medium', 'large', 'x-large'),
-	PRIMARY KEY (c1) @@COMMENT@@
+	a1 varchar(255) COLLATE 'binary',
+	a2 BINARY(20),
+	a3 VARBINARY(100),
+	a4 SET('one', 'two', 'three'),
+	a5 ENUM('x-small', 'small', 'medium', 'large', 'x-large'),
+	PRIMARY KEY (a1) @@COMMENT@@
 ) ENGINE=@@SE@@ @@ROW_FORMAT_OPT@@;
