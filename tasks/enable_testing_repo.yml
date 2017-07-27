@@ -2,17 +2,6 @@
   - name: include playbook for removing Percona repo
     include: remove_percona_repository.yml
 
-  - name: add an apt signing key
-    apt_key: 
-      id: 8507EFA5 
-      keyserver: keyserver.ubuntu.com 
-      state: present
-    when: ansible_os_family == "Debian"
-
-  - name: add the old apt signing key
-    apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
-    when: ansible_os_family == "Debian"
-
   - name: add the Percona testing deb repo
     apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_lsb.codename }} main testing' state=present update_cache=yes
     when: ansible_os_family == "Debian"

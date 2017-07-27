@@ -2,16 +2,9 @@
   - name: include playbook for removing Percona repo
     include: remove_percona_repository.yml
 
-  - name: add an apt signing key
-    apt_key: id=8507EFA5 keyserver=keys.gnupg.net state=present
-    when: ansible_os_family == "Debian"
-
-  - name: add the old apt signing key
-    apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
-    when: ansible_os_family == "Debian"
-
-  - name: add the main Percona deb repo
-    apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_lsb.codename }} main' state=present update_cache=yes
+  - name: Install percona repository package
+    apt:
+      deb: https://repo.percona.com/apt/percona-release_0.1-4.{{ansible_lsb.codename}}_all.deb
     when: ansible_os_family == "Debian"
 
   - name: add the main Percona yum repos for centos 5
