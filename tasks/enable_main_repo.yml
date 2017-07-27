@@ -7,6 +7,10 @@
       deb: https://repo.percona.com/apt/percona-release_0.1-4.{{ansible_lsb.codename}}_all.deb
     when: ansible_os_family == "Debian"
 
+  - name: add the Percona main deb repo
+    apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_lsb.codename }} main' state=present update_cache=yes
+    when: ansible_os_family == "Debian"
+
   - name: add the main Percona yum repos for centos 5
     command: "{{ item }}"
     with_items:
