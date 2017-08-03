@@ -34,6 +34,7 @@
     - percona-server-5.7-dbg
     - percona-server-source-5.7
     - percona-server-tokudb-5.7
+    - percona-server-rocksdb-5.7
     when: ansible_os_family == "Debian"
 
   - name: install Percona XtraBackup new deb packages
@@ -58,6 +59,7 @@
     - Percona-Server-57-debuginfo
     - Percona-Server-devel-57
     - Percona-Server-tokudb-57
+    - Percona-Server-rocksdb-57
     - Percona-Server-shared-57
     - Percona-Server-client-57
     when: ansible_os_family == "RedHat"
@@ -79,6 +81,12 @@
   - name: start mysql service with service command
     command: service mysql start
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+## remove this after BLD-785 is fixed
+  - name: start mysql service with service command
+    command: service mysql start
+    when: ansible_os_family == "Debian" 
+## remove this after BLD-785 is fixed
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
@@ -114,6 +122,9 @@
 
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_57.sh ps
+
+  - name: re-run ps_admin to install rocksdb
+    command: /usr/bin/ps-admin --enable-rocksdb
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps57
