@@ -17,20 +17,6 @@
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: install trickle with yum for limiting network bandwidth
-    yum: name="trickle" state=latest
-    when: ansible_os_family == "RedHat"
-
-  - name: install trickle with apt for limiting network bandwidth
-    apt:
-      name: trickle
-      update_cache: yes
-      state: latest
-    when: ansible_os_family == "Debian"
-
-  - name: limit network bandwidth with trickle
-    command: trickled -d 300 -u 100
-
 ### remove this when centos5 is EOL
   - name: download package-testing repo with wget
     command: "{{ item }}"
