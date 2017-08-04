@@ -1,13 +1,13 @@
 
-#  - name: setup throttling for yum
-#    command: echo "throttle=300k" >> /etc/yum.conf
-#    when: ansible_os_family == "RedHat"
-
-#  - name: setup throttling for apt
-#    copy: src=../apt-throttling
-#          dest=/etc/apt/apt.conf.d/
-#          mode=0640 owner=root group=root
-#    when: ansible_os_family == "Debian"
+  # - name: setup throttling for yum
+  #   command: echo "throttle=300k" >> /etc/yum.conf
+  #   when: ansible_os_family == "RedHat"
+  #
+  # - name: setup throttling for apt
+  #   copy: src=../apt-throttling
+  #         dest=/etc/apt/apt.conf.d/
+  #         mode=0640 owner=root group=root
+  #   when: ansible_os_family == "Debian"
 
   - name: setup epel 6 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm state=present
@@ -16,6 +16,20 @@
   - name: setup epel 7 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: install trickle with yum for limiting network bandwidth
+    yum: name="trickle" state=latest
+    when: ansible_os_family == "RedHat"
+
+  - name: install trickle with apt for limiting network bandwidth
+    apt:
+      name: trickle
+      update_cache: yes
+      state: latest
+    when: ansible_os_family == "Debian"
+
+  - name: limit network bandwidth with trickle
+    command: trickled -d 300 -u 100
 
 ### remove this when centos5 is EOL
   - name: download package-testing repo with wget
@@ -34,9 +48,9 @@
 ### end remove
 
   - name: install needed packages for running tests with apt
-    apt: 
+    apt:
       name: "{{ item }}"
-      update_cache: yes 
+      update_cache: no
       state: latest
     with_items:
     - pv
@@ -44,7 +58,6 @@
     - wget
     - gnupg
     when: ansible_os_family == "Debian"
-
 
   - name: install sysv-rc-conf package for running tests with apt
     apt: name="{{ item }}" update_cache=no
@@ -116,4 +129,3 @@
     - rm -f master.zip
     - bats-master/install.sh /usr/local
     - rm -rf bats-master
-
