@@ -42,7 +42,6 @@
     - pv
     - unzip
     - wget
-    - dirmngr
     - gnupg
     when: ansible_os_family == "Debian"
 

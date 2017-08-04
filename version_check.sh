@@ -46,6 +46,8 @@ elif [ $1 = "pmm" ]; then
   version=${PMM_VER}
 elif [ $1 = "proxysql" ]; then
   version=${PROXYSQL_VER}
+elif [ $1 = "sysbench" ]; then
+  version=${SYSBENCH_VER}
 else
   echo "Illegal product selected!"
   exit 1
@@ -136,6 +138,14 @@ elif [ ${product} = "proxysql" ]; then
     echo "${product} version is correct and ${version}" >> ${log}
   fi
 
-fi
+elif [ ${product} = "sysbench" ]; then
+  version_check=$(sysbench --version 2>&1|grep -c ${version})
+  if [ ${version_check} -eq 0 ]; then
+    echo "${product} version is not good!"
+    exit 1
+  else
+    echo "${product} version is correct and ${version}" >> ${log}
+  fi
 
+fi
 echo "${product} versions are OK"
