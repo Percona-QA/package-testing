@@ -153,6 +153,9 @@
   - name: run bats integration tests for ps_tokudb_admin script
     command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_integration.bats
 
+  - name: run mysql compression tests script
+    command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps57
+
   - name: install 3rd party packages with apt
     apt: name={{item}}
     with_items:
