@@ -26,6 +26,12 @@
     - percona-toolkit
     when: ansible_os_family == "Debian"
 
+  - name: install sysbench new deb packages
+    apt: name={{item}} update_cache=yes state=latest
+    with_items:
+    - sysbench
+    when: ansible_os_family == "Debian"
+
   - name: install Percona Server new deb packages
     apt: name={{item}} update_cache=no state=latest
     with_items:
@@ -60,6 +66,12 @@
     yum: name={{item}} state=latest
     with_items:
     - percona-toolkit
+    when: ansible_os_family == "RedHat"
+
+  - name: install sysbench new rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - sysbench
     when: ansible_os_family == "RedHat"
 
   - name: install Percona XtraBackup new rpm packages
