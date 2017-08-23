@@ -13,6 +13,7 @@ load ps-admin_helper
   fi
   if [ ${MYSQL_VERSION} != "5.5" -a ${MYSQL_VERSION} != "5.6" ]; then
     check_mysqlx_notexists
+    check_rocksdb_notexists
   fi
 }
 
@@ -100,6 +101,22 @@ load ps-admin_helper
   check_tokudb_notexists
 }
 
+@test "install RocksDB plugin" {
+  if [ ${MYSQL_VERSION} = "5.5" -o ${MYSQL_VERSION} = "5.6" ]; then
+    skip "MySQL version is not 5.7+"
+  fi
+  install_rocksdb
+  check_rocksdb_exists
+}
+
+@test "uninstall RocksDB plugin" {
+  if [ ${MYSQL_VERSION} = "5.5" -o ${MYSQL_VERSION} = "5.6" ]; then
+    skip "MySQL version is not 5.7+"
+  fi
+  uninstall_rocksdb
+  check_rocksdb_notexists
+}
+
 @test "install ALL plugins at once" {
   install_all
   check_qrt_exists
@@ -111,6 +128,7 @@ load ps-admin_helper
   fi
   if [ ${MYSQL_VERSION} != "5.5" -a ${MYSQL_VERSION} != "5.6" ]; then
     check_mysqlx_exists
+    check_rocksdb_exists
   fi
 }
 
@@ -125,6 +143,6 @@ load ps-admin_helper
   fi
   if [ ${MYSQL_VERSION} != "5.5" -a ${MYSQL_VERSION} != "5.6" ]; then
     check_mysqlx_notexists
+    check_rocksdb_notexists
   fi
 }
-

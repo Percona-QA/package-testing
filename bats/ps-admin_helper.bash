@@ -146,13 +146,39 @@ check_tokubackup_notexists() {
   [ "$result" -eq 0 ]
 }
 
+install_rocksdb() {
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-rocksdb"
+  [ $status -eq 0 ]
+}
+
+check_rocksdb_exists() {
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.ENGINES where ENGINE="ROCKSDB" and SUPPORT <> "NO";')
+  [ "$result" -eq 1 ]
+
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like BINARY "%ROCKSDB%" and PLUGIN_STATUS like "ACTIVE";')
+  [ "$result" -eq 12 ]
+}
+
+uninstall_rocksdb() {
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-rocksdb"
+  [ $status -eq 0 ]
+}
+
+check_rocksdb_notexists() {
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.ENGINES where ENGINE="ROCKSDB" and SUPPORT <> "NO";')
+  [ "$result" -eq 0 ]
+
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "%ROCKSDB%" and PLUGIN_STATUS like "ACTIVE";')
+  [ "$result" -eq 0 ]
+}
+
 install_all() {
   if [ ${MYSQL_VERSION} = "5.5" ]; then
     OPT=""
   elif [ ${MYSQL_VERSION} = "5.6" ]; then
     OPT="--enable-tokudb --enable-tokubackup"
   else
-    OPT="--enable-mysqlx --enable-tokudb --enable-tokubackup"
+    OPT="--enable-mysqlx --enable-tokudb --enable-tokubackup --enable-rocksdb"
   fi
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam ${OPT}"
   [ $status -eq 0 ]
@@ -171,7 +197,7 @@ uninstall_all() {
   elif [ ${MYSQL_VERSION} = "5.6" ]; then
     OPT="--disable-tokudb --disable-tokubackup"
   else
-    OPT="--disable-mysqlx --disable-tokudb --disable-tokubackup"
+    OPT="--disable-mysqlx --disable-tokudb --disable-tokubackup --disable-rocksdb"
   fi
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam ${OPT}"
   [ $status -eq 0 ]
