@@ -26,7 +26,7 @@
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
   - name: install Percona Server deb packages previous version
-    apt: name={{item}} update_cache=no state=latest
+    apt: name={{item}} update_cache=yes state=latest
     with_items:
     - percona-server-server-5.6
     - percona-server-test-5.6
