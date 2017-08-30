@@ -146,6 +146,8 @@ mysql -e "SET GLOBAL TRANSACTION ISOLATION LEVEL REPEATABLE READ;"
 
 md5sum ${secure_file_priv}/*.txt > /tmp/comp_test_md5.sum
 
+#remove the rocksdb options so the server is able to start once the SE is removed
+sed -i '/^rocksdb/d' ${MYCNF}
 
 nr1=$(grep -c "e7821682046d961fb2b5ff5d11894491" /tmp/comp_test_md5.sum)
 nr2=$(grep -c "3284a0c3a1f439892f6e07f75408b2c2" /tmp/comp_test_md5.sum)
