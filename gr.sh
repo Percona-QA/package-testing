@@ -13,6 +13,7 @@ fi
 
 echo "restart service"
 service mysql restart
+sleep 10
 echo "install plugins"
 mysql -e "INSTALL PLUGIN group_replication SONAME 'group_replication.so';"
 mysql -e "INSTALL PLUGIN connection_control SONAME 'connection_control.so';"
