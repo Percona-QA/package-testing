@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 if [ "$#" -ne 1 ]; then
   echo "This script requires product parameter: ps55, ps56 or ps57 !"
   echo "Usage: ./version_check.sh <prod>"
