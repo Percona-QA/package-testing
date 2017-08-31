@@ -160,6 +160,7 @@ function teardown(){
   if [ ${SERVICE} -eq 1 ]; then
     service mysql start 3>&-
     [ $? -eq 0 ]
+    sleep 10
     run is_running
     [ $status -eq 0 ]
   else
@@ -182,6 +183,7 @@ function teardown(){
   if [ ${SERVICE} -eq 1 ]; then
     service mysql restart 3>&-
     [ $? -eq 0 ]
+    sleep 10
     run is_running
     [ $status -eq 0 ]
   else
