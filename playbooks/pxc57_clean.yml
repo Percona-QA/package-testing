@@ -1,0 +1,127 @@
+---
+# This playbook does following:
+#   enables Percona testing repository
+#   installs latest version of PXC 5.7, PT and PXB 2.4
+#   does some tests
+#   THIS IS NOT A CLUSTER TEST
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+  - name: include tasks for test env setup
+    include: ../tasks/test_prep.yml
+
+  - name: include tasks for enabling test repo
+    include: ../tasks/enable_testing_repo.yml
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: install Percona Toolkit new deb packages
+    apt: name={{item}} update_cache=yes state=latest
+    with_items:
+    - percona-toolkit
+    when: ansible_os_family == "Debian"
+
+  - name: install sysbench new deb packages
+    apt: name={{item}} update_cache=yes state=latest
+    with_items:
+    - sysbench
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona XtraDB Cluster deb meta package
+    apt: name={{item}} update_cache=no state=latest
+    with_items:
+    - percona-xtradb-cluster-full-57
+    when: ansible_os_family == "Debian"
+
+  - name: install sysbench new rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - sysbench
+    when: ansible_os_family == "RedHat"
+
+  - name: install Percona XtraDB Cluster rpm meta package
+    yum: name={{item}} state=latest
+    with_items:
+    - Percona-XtraDB-Cluster-full-57
+    when: ansible_os_family == "RedHat"
+
+  - name: install Percona Toolkit new rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - percona-toolkit
+    when: ansible_os_family == "RedHat"
+
+  - name: start mysql service with service command
+    command: service mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+
+  - name: install plugins, import world database
+    command: /package-testing/pxc_plugins_57.sh
+
+  - name: check that Percona Server version is correct
+    command: /package-testing/version_check.sh pxc57
+
+  - name: check that Percona Server package versions are correct
+    command: /package-testing/package_check.sh pxc57
+
+  - name: check that Percona Toolkit version is correct
+    command: /package-testing/version_check.sh pt
+
+  - name: check that sysbench version is correct
+    command: /package-testing/version_check.sh sysbench
+
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb24
+
+  - name: install 3rd party packages with apt
+    apt: name={{item}}
+    with_items:
+    - rsyslog-mysql
+    when: ansible_os_family == "Debian"
+
+  - name: install 3rd party packages with yum
+    yum: name={{item}}
+    with_items:
+    - rsyslog-mysql
+    when: ansible_os_family == "RedHat"
+
+# - name: run bats tests for mysql init scripts
+#   command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+
+# - name: remove Percona Server deb packages
+#   apt: name={{item}} update_cache=no state=absent
+#   with_items:
+#   - percona-server-server-5.7
+#   when: ansible_os_family == "Debian"
+
+# - name: remove Percona Server rpm packages
+#   yum: name={{item}} state=absent
+#   with_items:
+#   - Percona-Server-server-57
+#   when: ansible_os_family == "RedHat"
+
+# - name: check if process is stopped after package removal
+#   command: /package-testing/check_running.sh mysql stopped
