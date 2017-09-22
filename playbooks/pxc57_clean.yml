@@ -75,9 +75,6 @@
               mode=0640 owner=root group=root
     when: ansible_os_family == "RedHat"
 
-  - name: restart mysql service
-    service: name=mysql state=restarted
-
   - name: install plugins, import world database
     command: /package-testing/pxc_plugins_57.sh
 
@@ -107,6 +104,9 @@
     with_items:
     - rsyslog-mysql
     when: ansible_os_family == "RedHat"
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
 
 # - name: run bats tests for mysql init scripts
 #   command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
