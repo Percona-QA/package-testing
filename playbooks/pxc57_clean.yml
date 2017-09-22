@@ -108,6 +108,9 @@
   - name: restart mysql service
     service: name=mysql state=restarted
 
+  - name: check that Percona Server version is correct
+    command: /package-testing/version_check.sh pxc57
+
 # - name: run bats tests for mysql init scripts
 #   command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
 
