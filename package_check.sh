@@ -155,7 +155,7 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
       echo "all packages are installed"
     else
       # -full and -garbd packages are missing from check currently because they are not installed in all configs
-      for package in percona-xtradb-cluster-${deb_maj_version_nodot} percona-xtradb-cluster-server-debug-${deb_maj_version} percona-xtradb-cluster-server-${deb_maj_version} percona-xtradb-cluster-client-${deb_maj_version} percona-xtradb-cluster-test-${deb_maj_version} percona-xtradb-cluster-${deb_maj_version}-dbg percona-xtradb-cluster-source-${deb_maj_version} percona-xtradb-cluster-common-${deb_maj_version}; do
+      for package in percona-xtradb-cluster-full-${deb_maj_version_nodot} percona-xtradb-cluster-server-debug-${deb_maj_version} percona-xtradb-cluster-server-${deb_maj_version} percona-xtradb-cluster-client-${deb_maj_version} percona-xtradb-cluster-test-${deb_maj_version} percona-xtradb-cluster-${deb_maj_version}-dbg percona-xtradb-cluster-source-${deb_maj_version} percona-xtradb-cluster-common-${deb_maj_version}; do
         if [ "$(dpkg -l | grep ${package} | grep -c ${version})" != 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed"
         else
