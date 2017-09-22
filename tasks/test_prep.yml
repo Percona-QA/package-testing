@@ -17,22 +17,6 @@
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-### remove this when centos5 is EOL
-  - name: download package-testing repo with wget
-    command: "{{ item }}"
-    with_items:
-    - rm -rf /package-testing
-    - wget -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
-    - unzip master.zip
-    - rm -f master.zip
-    - mv package-testing-master /package-testing
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
-
-  - name: fixes for centos5 repositories
-    command: /package-testing/centos5.sh
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
-### end remove
-
   - name: install needed packages for running tests with apt
     apt:
       name: "{{ item }}"

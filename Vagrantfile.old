@@ -7,7 +7,7 @@ deb_distro = "sgallen/wily64"
 deb1_playbook = "playbooks/pxc57.yml"
 deb_common_playbook = "playbooks/pxc57_common.yml"
 deb_garbd_playbook = "playbooks/pxc56_garbd.yml"
-rhel_distro = "bento/centos-5.11"
+rhel_distro = "bento/centos-7"
 rhel1_playbook = "playbooks/percona1.yml"
 rhel_playbook = "playbooks/percona2.yml"
 
@@ -98,17 +98,6 @@ Vagrant.configure("2") do |config|
     centos6_config.vm.host_name = "centos6"
   end
 
-  config.vm.define :centos5 do |centos5_config|
-    centos5_config.vm.box = "bento/centos-5.11"
-    config.vm.provision "shell", path: "centos5.sh"
-    config.vm.provision "ansible" do |ansible|
-      ansible.playbook = playbook
-      ansible.sudo = "true"
-      ansible.host_key_checking = "false"
-    end
-    centos5_config.vm.host_name = "centos5"
-  end
-
   config.vm.define :centos7 do |centos7_config|
     centos7_config.vm.box = "bento/centos-7.2"
     config.vm.provision "ansible" do |ansible|
@@ -181,9 +170,6 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define :percona1 do |percona1_config|
-       if rhel_distro == "bento/centos-5.11" then
-         config.vm.provision "shell", path: "centos5.sh"
-       end   
        config.vm.provision "ansible" do |ansible|
          ansible.playbook = rhel1_playbook
          ansible.sudo = "true"
@@ -194,9 +180,6 @@ Vagrant.configure("2") do |config|
        percona1_config.vm.network :private_network, ip: "192.168.70.71"
   end
   config.vm.define :percona2 do |percona2_config|
-        if rhel_distro == "bento/centos-5.11" then
-          config.vm.provision "shell", path: "centos5.sh"
-        end   
         config.vm.provision "ansible" do |ansible|
           ansible.playbook = rhel_playbook
           ansible.sudo = "true"
@@ -207,9 +190,6 @@ Vagrant.configure("2") do |config|
         percona2_config.vm.network :private_network, ip: "192.168.70.72"
   end
   config.vm.define :percona3 do |percona3_config|
-        if rhel_distro == "bento/centos-5.11" then
-          config.vm.provision "shell", path: "centos5.sh"
-        end   
          config.vm.provision "ansible" do |ansible|
           ansible.playbook = rhel_playbook
           ansible.sudo = "true"
