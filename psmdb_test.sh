@@ -101,9 +101,9 @@ function test_hotbackup {
 
 function check_rocksdb_ver {
   if [ -f /etc/redhat-release -o ${SLES} -eq 1 ]; then
-    ROCKSDB_VERSION=$(grep "RocksDB version" /var/lib/mongo/db/db/LOG|tail -n1|grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)*$")
+    ROCKSDB_VERSION=$(grep "RocksDB version" /var/lib/mongo/db/LOG|tail -n1|grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)*$")
   else
-    ROCKSDB_VERSION=$(grep "RocksDB version" /var/lib/mongodb/db/db/LOG|tail -n1|grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)*$")
+    ROCKSDB_VERSION=$(grep "RocksDB version" /var/lib/mongodb/db/LOG|tail -n1|grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)*$")
   fi
   if [ "$1" == "3.0" ]; then
     ROCKSDB_VERSION_NEEDED=${PSMDB30_ROCKSDB_VER}
