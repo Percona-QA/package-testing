@@ -3,7 +3,7 @@
 log="/tmp/psmdb_run.log"
 echo -n > /tmp/psmdb_run.log
 
-source /package-testing/VERSION
+source /package-testing/VERSIONS
 
 SLES=0
 if [ -f /etc/os-release ]; then
