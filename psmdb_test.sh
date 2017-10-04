@@ -130,6 +130,9 @@ for engine in mmapv1 PerconaFT rocksdb wiredTiger inMemory; do
     sed -i "/engine: *${engine}/s/#//g" /etc/mongod.conf
     echo "testing ${engine}" | tee -a $log
     start_service
+    if [ ${engine} == "rocksdb" ]; then
+      check_rocksdb_ver
+    fi
     echo "importing the sample data"
     mongo < /package-testing/mongo_insert.js >> $log
     list_data >> $log
