@@ -12,8 +12,18 @@ fi
 
 set -e
 
+if [ -z "$1" ]; then
+  echo "This script needs parameter 3.0|3.2|3.4"
+  exit 1
+elif [ "$1" != "3.0" -a "$1" != "3.2" -a "$1" != "3.4" ]; then
+  echo "Version not recognized!"
+  exit 1
+else
+  VERSION="$1"
+fi
+
 # Enable auditLog and profiling/rate limit to see if services start with those
-if [ "$1" == "3.0" ]; then
+if [ "$VERSIONS" == "3.0" ]; then
   echo "Skipping usage of profiling rate limit functionality because not available in 3.0"
   sed -i 's/#operationProfiling:/operationProfiling:\n  mode: all\n  slowOpThresholdMs: 200/' /etc/mongod.conf
 else
@@ -105,11 +115,11 @@ function check_rocksdb_ver {
   else
     ROCKSDB_VERSION=$(grep "RocksDB version" /var/lib/mongodb/db/LOG|tail -n1|grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)*$")
   fi
-  if [ "$1" == "3.0" ]; then
+  if [ "${VERSION}" == "3.0" ]; then
     ROCKSDB_VERSION_NEEDED=${PSMDB30_ROCKSDB_VER}
-  elif [ "$1" == "3.2" ]; then
+  elif [ "${VERSION}" == "3.2" ]; then
     ROCKSDB_VERSION_NEEDED=${PSMDB32_ROCKSDB_VER}
-  elif [ "$1" == "3.4" ]; then
+  elif [ "${VERSION}" == "3.4" ]; then
     ROCKSDB_VERSION_NEEDED=${PSMDB34_ROCKSDB_VER}
   else
     echo "Wrong parameter to script: $1"
