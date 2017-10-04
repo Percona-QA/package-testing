@@ -3,6 +3,8 @@
 log="/tmp/psmdb_run.log"
 echo -n > /tmp/psmdb_run.log
 
+source /package-testing/VERSION
+
 SLES=0
 if [ -f /etc/os-release ]; then
   SLES=$(cat /etc/os-release | grep -c '^NAME=\"SLES' || true)
@@ -93,6 +95,28 @@ function test_hotbackup {
   rm -rf /tmp/backup
   if [ ${BACKUP_RET} = 0 ]; then
     echo "Backup failed for storage engine: ${engine}"
+    exit 1
+  fi
+}
+
+function check_rocksdb_ver {
+  if [ -f /etc/redhat-release -o ${SLES} -eq 1 ]; then
+    ROCKSDB_VERSION=$(grep "RocksDB version" /var/lib/mongo/db/db/LOG|tail -n1|grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)*$")
+  else
+    ROCKSDB_VERSION=$(grep "RocksDB version" /var/lib/mongodb/db/db/LOG|tail -n1|grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)*$")
+  fi
+  if [ "$1" == "3.0" ]; then
+    ROCKSDB_VERSION_NEEDED=${PSMDB30_ROCKSDB_VER}
+  elif [ "$1" == "3.2" ]; then
+    ROCKSDB_VERSION_NEEDED=${PSMDB32_ROCKSDB_VER}
+  elif [ "$1" == "3.4" ]; then
+    ROCKSDB_VERSION_NEEDED=${PSMDB34_ROCKSDB_VER}
+  else
+    echo "Wrong parameter to script: $1"
+    exit 1
+  fi
+  if [ "${ROCKSDB_VERSION}" != "${ROCKSDB_VERSION_NEEDED}" ]; then
+    echo "Wrong version of RocksDB library! Needed: ${ROCKSDB_VERSION_NEEDED} got: ${ROCKSDB_VERSION}"
     exit 1
   fi
 }
