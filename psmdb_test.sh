@@ -143,6 +143,7 @@ function check_rocksdb {
     echo "Zlib: ${COMP_LIB_ZLIB}"
     echo "Bzip: ${COMP_LIB_BZIP}"
     echo "LZ4: ${COMP_LIB_LZ4}"
+    exit 1
   fi
 }
 
