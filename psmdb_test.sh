@@ -109,12 +109,15 @@ function test_hotbackup {
   fi
 }
 
-function check_rocksdb_ver {
+function check_rocksdb {
+  ROCKSDB_LOG_FILE=""
   if [ -f /etc/redhat-release -o ${SLES} -eq 1 ]; then
-    ROCKSDB_VERSION=$(grep "RocksDB version" /var/lib/mongo/db/LOG|tail -n1|grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)*$")
+    ROCKSDB_LOG_FILE="/var/lib/mongo/db/LOG"
   else
-    ROCKSDB_VERSION=$(grep "RocksDB version" /var/lib/mongodb/db/LOG|tail -n1|grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)*$")
+    ROCKSDB_LOG_FILE="/var/lib/mongodb/db/LOG"
   fi
+  # Check RocksDB library version
+  ROCKSDB_VERSION=$(grep "RocksDB version" ${ROCKSDB_LOG_FILE}|tail -n1|grep -Eo "[0-9]+\.[0-9]+(\.[0-9]+)*$")
   if [ "${VERSION}" == "3.0" ]; then
     ROCKSDB_VERSION_NEEDED=${PSMDB30_ROCKSDB_VER}
   elif [ "${VERSION}" == "3.2" ]; then
@@ -129,6 +132,18 @@ function check_rocksdb_ver {
     echo "Wrong version of RocksDB library! Needed: ${ROCKSDB_VERSION_NEEDED} got: ${ROCKSDB_VERSION}"
     exit 1
   fi
+  # Check RocksDB supported compression libraries
+  COMP_LIB_SNAPPY=$(grep "Snappy supported: 1" ${ROCKSDB_LOG_FILE}|wc -l)
+  COMP_LIB_ZLIB=$(grep "Zlib supported: 1" ${ROCKSDB_LOG_FILE}|wc -l)
+  COMP_LIB_BZIP=$(grep "Bzip supported: 1" ${ROCKSDB_LOG_FILE}|wc -l)
+  COMP_LIB_LZ4=$(grep "LZ4 supported: 1" ${ROCKSDB_LOG_FILE}|wc -l)
+  if [ ${COMP_LIB_SNAPPY} -lt 1 -o ${COMP_LIB_ZLIB} -lt 1 -o ${COMP_LIB_BZIP} -lt 1 -o ${COMP_LIB_LZ4} -lt 1 ]; then
+    echo "Error when checking compression libraries in RocksDB."
+    echo "Snappy: ${COMP_LIB_SNAPPY}"
+    echo "Zlib: ${COMP_LIB_ZLIB}"
+    echo "Bzip: ${COMP_LIB_BZIP}"
+    echo "LZ4: ${COMP_LIB_LZ4}"
+  fi
 }
 
 for engine in mmapv1 PerconaFT rocksdb wiredTiger inMemory; do
@@ -141,7 +156,7 @@ for engine in mmapv1 PerconaFT rocksdb wiredTiger inMemory; do
     echo "testing ${engine}" | tee -a $log
     start_service
     if [ ${engine} == "rocksdb" ]; then
-      check_rocksdb_ver
+      check_rocksdb
     fi
     echo "importing the sample data"
     mongo < /package-testing/mongo_insert.js >> $log
