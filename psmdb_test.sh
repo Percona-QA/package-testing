@@ -133,7 +133,7 @@ function check_rocksdb {
     exit 1
   fi
   # Check RocksDB supported compression libraries
-  COMP_LIB_SNAPPY=$(grep "Snappy supported: 0" ${ROCKSDB_LOG_FILE}|wc -l)
+  COMP_LIB_SNAPPY=$(grep "Snappy supported: 1" ${ROCKSDB_LOG_FILE}|wc -l)
   COMP_LIB_ZLIB=$(grep "Zlib supported: 1" ${ROCKSDB_LOG_FILE}|wc -l)
   COMP_LIB_BZIP=$(grep "Bzip supported: 1" ${ROCKSDB_LOG_FILE}|wc -l)
   COMP_LIB_LZ4=$(grep "LZ4 supported: 1" ${ROCKSDB_LOG_FILE}|wc -l)
