@@ -12,6 +12,7 @@ servers=[
   { :hostname => "u-xenial-64-@@hostname@@", :box => "geerlingguy/ubuntu1604" },
   { :hostname => "u-yakkety-64-@@hostname@@", :box => "bento/ubuntu-16.10" },
   { :hostname => "u-zesty-64-@@hostname@@", :box => "percona-zesty-64" },
+  { :hostname => "u-artful-64-@@hostname@@", :box => "ubuntu/artful64" },
   { :hostname => "sles-12-64-@@hostname@@", :box => "wvera/sles12sp2" }
 ]
 
