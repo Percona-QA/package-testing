@@ -9,4 +9,4 @@
   
   tasks:
   - name: install python2
-    raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+    raw: test -e /usr/bin/python || (which apt && apt -y update && apt install -y python-minimal)
