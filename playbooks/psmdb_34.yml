@@ -3,6 +3,7 @@
 #   enables Percona testing repository
 #   installs PSMDB 3.4
 #   does some tests
+- import_playbook: test_prep.yml
 
 - hosts: all
   become: true

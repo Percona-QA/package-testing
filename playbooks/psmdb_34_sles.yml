@@ -3,6 +3,7 @@
 #   downloads PSMDB 3.4 new SLES packages from webpage
 #   installs PSMDB 3.4
 #   does some tests
+- import_playbook: test_prep.yml
 
 - hosts: all
   become: true
