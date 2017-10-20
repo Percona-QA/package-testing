@@ -16,7 +16,7 @@
 
   tasks:
   - name: include tasks for test env setup
-    include: ../tasks/test_prep.yml
+    include_tasks: ../tasks/test_prep.yml
 
   - name: download Percona Server for MongoDB 3.4 SLES packages
     command: "{{ item }}"
