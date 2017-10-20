@@ -1,8 +1,10 @@
 ---
-# Add this snippet to the top of your playbook. 
-# It will install python2 if missing (but checks first so no expensive repeated apt updates)
+# This playbook can be used to setup machine for running tests and ansible
+# Therefore gathering of the facts is disabled
 
 - hosts: all
+  become: true
+  become_method: sudo
   gather_facts: false
   
   tasks:
