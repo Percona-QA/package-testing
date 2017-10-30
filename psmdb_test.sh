@@ -80,10 +80,10 @@ function stop_service {
 function list_data {
   if [ -f /etc/redhat-release -o ${SLES} -eq 1 ]; then
     echo "$(date +%Y%m%d%H%M%S): contents of the mongo data dir: " >> $log
-    ls /var/lib/mongo/ >> $log
+    ls -alh /var/lib/mongo/ >> $log
   else
     echo "$(date +%Y%m%d%H%M%S): contents of the mongodb data dir: " >> $log
-    ls /var/lib/mongodb/ >> $log
+    ls -alh /var/lib/mongodb/ >> $log
   fi
 }
 
@@ -153,9 +153,12 @@ for engine in mmapv1 PerconaFT rocksdb wiredTiger inMemory; do
   else
     stop_service
     clean_datadir
-    sed -i "/engine: *${engine}/s/#//g" /etc/mongod.conf
+    echo "=================" | tee -a $log
     echo "testing ${engine}" | tee -a $log
+    echo "=================" | tee -a $log
+    sed -i "/engine: *${engine}/s/#//g" /etc/mongod.conf
     start_service
+    mongo --eval "db.serverStatus().storageEngine" | tee -a $log
     if [ ${engine} == "rocksdb" ]; then
       check_rocksdb
     fi
