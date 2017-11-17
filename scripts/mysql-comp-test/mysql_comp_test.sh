@@ -25,7 +25,7 @@ if [ $1 = "ps57" ]; then
   sleep 10
   echo -e "\n[mysqld]" >> ${MYCNF}
   echo "rocksdb_default_cf_options=compression_per_level=kNoCompression" >> ${MYCNF}
-  echo "rocksdb_override_cf_options=cf1={compression_per_level=kZlibCompression};cf2={compression_per_level=kLZ4Compression};cf3={compression_per_level=kZSTDNotFinalCompression}" >> ${MYCNF}
+  echo "rocksdb_override_cf_options=cf1={compression=kZlibCompression;bottommost_compression=kZlibCompression};cf2={compression=kLZ4Compression;bottommost_compression=kLZ4Compression};cf3={compression=kZSTDNotFinalCompression;bottommost_compression=kZSTDNotFinalCompression}" >> ${MYCNF}
   service mysql start
   sleep 10
 fi
