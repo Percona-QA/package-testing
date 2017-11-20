@@ -4,12 +4,12 @@ PS_TOKUDB_ADMIN_BIN=${PS_TOKUDB_ADMIN_BIN:-/usr/bin/ps_tokudb_admin}
 
 @test "run ps_tokudb_admin without any arguments" {
   run ${PS_TOKUDB_ADMIN_BIN}
-  [ "${lines[1]}" = "ERROR: You should specify --enable,--disable,--enable-backup or --disable-backup option. Use --help for printing options." ]
+  [ "${lines[0]}" = "ERROR: You should specify --enable,--disable,--enable-backup or --disable-backup option. Use --help for printing options." ]
 }
 
 @test "display ps_tokudb_admin help screen" {
   run ${PS_TOKUDB_ADMIN_BIN} --help
-  [ "${lines[5]}" = "Valid options are:" ]
+  [ "${lines[4]}" = "Valid options are:" ]
 }
 
 @test "run ps_tokudb_admin with wrong option" {
