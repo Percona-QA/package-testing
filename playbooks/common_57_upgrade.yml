@@ -109,6 +109,9 @@
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_57.sh ps
 
+  - name: re-run ps_admin to install rocksdb
+    command: /usr/bin/ps-admin --enable-rocksdb
+
   - name: install 3rd party packages with apt
     apt: name={{item}}
     with_items:
@@ -206,6 +209,9 @@
 
   - name: check that Percona Toolkit version is correct
     command: /package-testing/version_check.sh pt
+
+  - name: run some MyRocks tests
+    command: /package-testing/scripts/ps_myrocks_test.sh
 
   - name: install GR plugin
     command: /package-testing/gr.sh
