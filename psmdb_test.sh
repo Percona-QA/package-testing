@@ -145,6 +145,13 @@ function check_rocksdb {
     echo "LZ4: ${COMP_LIB_LZ4}"
     exit 1
   fi
+  # Check RocksDB support for FastCRC
+  FAST_CRC=$(grep "Fast CRC32 supported: 1" ${ROCKSDB_LOG_FILE}|wc -l)
+  if [ ${FAST_CRC} -lt 1 ]; then
+    echo "FastCRC is not enabled for MongoRocks."
+    echo "$(grep "Fast CRC32 supported" ${ROCKSDB_LOG_FILE})"
+    exit 1
+  fi
 }
 
 for engine in mmapv1 PerconaFT rocksdb wiredTiger inMemory; do
