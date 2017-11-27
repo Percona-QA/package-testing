@@ -51,7 +51,7 @@ function start_service {
     service mongod start
   fi
   echo "waiting 10s for service to boot up"
-  sleep 10
+  sleep 15
 }
 
 function stop_service {
@@ -74,7 +74,7 @@ function stop_service {
     service mongod stop
   fi
   echo "waiting 10s for service to stop"
-  sleep 10
+  sleep 15
 }
 
 function list_data {
