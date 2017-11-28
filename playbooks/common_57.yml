@@ -156,8 +156,8 @@
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb24
 
-  - name: run some MyRocks tests
-    command: /package-testing/scripts/ps_myrocks_test.sh
+# - name: run some MyRocks tests
+#   command: /package-testing/scripts/ps_myrocks_test.sh
 
   - name: install GR plugin
     command: /package-testing/gr.sh
