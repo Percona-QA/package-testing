@@ -24,8 +24,8 @@ if [ $1 = "ps57" ]; then
   service mysql stop
   sleep 10
   echo -e "\n[mysqld]" >> ${MYCNF}
-  echo "rocksdb_default_cf_options=compression_per_level=kNoCompression" >> ${MYCNF}
-  echo "rocksdb_override_cf_options=cf1={compression=kZlibCompression;bottommost_compression=kZlibCompression};cf2={compression=kLZ4Compression;bottommost_compression=kLZ4Compression};cf3={compression=kZSTDNotFinalCompression;bottommost_compression=kZSTDNotFinalCompression}" >> ${MYCNF}
+#  echo "rocksdb_default_cf_options=compression_per_level=kNoCompression" >> ${MYCNF}
+  echo "rocksdb_override_cf_options=cf1={compression=kZlibCompression;bottommost_compression=kZlibCompression};cf2={compression=kLZ4Compression;bottommost_compression=kLZ4Compression};cf3={compression=kZSTDNotFinalCompression;bottommost_compression=kZSTDNotFinalCompression};cf4={compression=kNoCompression;bottommost_compression=kNoCompression}" >> ${MYCNF}
   service mysql start
   sleep 10
 fi
@@ -83,7 +83,7 @@ for se in TokuDB RocksDB; do
             sed -i "s/ @@ROW_FORMAT_OPT@@//g" /tmp/create_table.sql
             old_comment="${new_comment}"
             if [ ${comp_lib} = "no" ]; then
-              new_comment=""
+              new_comment="COMMENT 'cf4'"
             elif [ ${comp_lib} = "zlib" ]; then
               new_comment="COMMENT 'cf1'"
             elif [ ${comp_lib} = "lz4" ]; then
