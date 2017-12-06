@@ -165,7 +165,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
 
   - name: restart mysql service
-    service: name=mysql state=restarted
+    service: name=mysqld state=restarted
     when: ansible_os_family != "RedHat" or ansible_distribution_major_version != "5"
 
   - name: check that Percona Server version is correct
