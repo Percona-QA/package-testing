@@ -6,13 +6,13 @@ ERRORS_BEFORE=0
 ERRORS_AFTER=0
 ERROR_LOG=""
 ERROR_LOG=$(mysql -N -s -e "show variables like 'log_error';" | grep -v "Warning:" | grep -o "\/.*$")
-if [ $(echo ${ERROR_LOG} | grep -c "log") -gt 0 ]; then
-        ERROR_LOG=$(mysql -N -s -e "show variables like 'log_error';" | grep -v "Warning:" | grep -o "\/.*$")
-        echo ${ERROR_LOG}
-  else
-        ERROR_LOG=$(mysql -N -s -e "show variables like 'log_error';" | grep -v "Warning:" | grep -o "\/.*$" | awk '{print "/var/lib/mysql"$1}')
-        echo ${ERROR_LOG}
-fi
+#if [ $(echo ${ERROR_LOG} | grep -c "log") -gt 0 ]; then
+#        ERROR_LOG=$(mysql -N -s -e "show variables like 'log_error';" | grep -v "Warning:" | grep -o "\/.*$")
+#        echo ${ERROR_LOG}
+#  else
+#        ERROR_LOG=$(mysql -N -s -e "show variables like 'log_error';" | grep -v "Warning:" | grep -o "\/.*$" | awk '{print "/var/lib/mysql"$1}')
+#        echo ${ERROR_LOG}
+#fi
 if [ ! -f ${ERROR_LOG} ]; then
   echo "Error log was not found!"
   exit 1
