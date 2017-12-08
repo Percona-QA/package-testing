@@ -126,4 +126,4 @@
     yum: name={{item}}
     with_items:
     - rsyslog-mysql
-    when: ansible_os_family == "RedHat"o
+    when: ansible_os_family == "RedHat"
