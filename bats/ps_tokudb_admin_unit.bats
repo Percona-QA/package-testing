@@ -1,15 +1,25 @@
 #!/usr/bin/env bats
 
+load ps_tokudb_admin_helper
+
 PS_TOKUDB_ADMIN_BIN=${PS_TOKUDB_ADMIN_BIN:-/usr/bin/ps_tokudb_admin}
 
 @test "run ps_tokudb_admin without any arguments" {
   run ${PS_TOKUDB_ADMIN_BIN}
-  [ "${lines[0]}" = "ERROR: You should specify --enable,--disable,--enable-backup or --disable-backup option. Use --help for printing options." ]
+  if [ ${MYSQL_VERSION} = "5.7" ]; then
+    [ "${lines[1]}" = "ERROR: You should specify --enable,--disable,--enable-backup or --disable-backup option. Use --help for printing options." ]
+  else
+    [ "${lines[0]}" = "ERROR: You should specify --enable,--disable,--enable-backup or --disable-backup option. Use --help for printing options." ]
+  fi
 }
 
 @test "display ps_tokudb_admin help screen" {
   run ${PS_TOKUDB_ADMIN_BIN} --help
-  [ "${lines[4]}" = "Valid options are:" ]
+  if [ ${MYSQL_VERSION} = "5.7" ]; then
+    [ "${lines[5]}" = "Valid options are:" ]
+  else
+    [ "${lines[4]}" = "Valid options are:" ]
+  fi
 }
 
 @test "run ps_tokudb_admin with wrong option" {
