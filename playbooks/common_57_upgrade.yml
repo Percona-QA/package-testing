@@ -109,7 +109,7 @@
     command: /usr/bin/ps_tokudb_admin --enable --enable-backup
 
   - name: install plugins, import world database, test tokudb
-    command: /package-testing/plugins_test_57.sh ps
+    command: /package-testing/plugins_test_57u.sh ps
 
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
