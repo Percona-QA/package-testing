@@ -9,6 +9,7 @@ if [ ! -f ${ERROR_LOG} ]; then
   exit 1
 fi
 WARNINGS_BEFORE=$(grep -c "\[Warning\]" ${ERROR_LOG} || true)
+ERRORS_BEFORE=$(grep -c "\[ERROR\]" ${ERROR_LOG} || true)
 
 mysql -e "CREATE FUNCTION fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so'"
 mysql -e "CREATE FUNCTION fnv_64 RETURNS INTEGER SONAME 'libfnv_udf.so'"
@@ -22,6 +23,12 @@ mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME_READ SONAME 'query_response_time.so
 mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME_WRITE SONAME 'query_response_time.so';"
 mysql -e "INSTALL PLUGIN mysqlx SONAME 'mysqlx.so';"
 mysql -e "INSTALL PLUGIN keyring_vault SONAME 'keyring_vault.so';"
+mysql -e "CREATE FUNCTION keyring_key_fetch returns string SONAME 'keyring_udf.so';"
+mysql -e "CREATE FUNCTION keyring_key_type_fetch returns string SONAME 'keyring_udf.so';"
+mysql -e "CREATE FUNCTION keyring_key_length_fetch returns integer SONAME 'keyring_udf.so';"
+mysql -e "CREATE FUNCTION keyring_key_remove returns integer SONAME 'keyring_udf.so';"
+mysql -e "CREATE FUNCTION keyring_key_generate returns integer SONAME 'keyring_udf.so';"
+mysql -e "CREATE FUNCTION keyring_key_store returns integer SONAME 'keyring_udf.so';"
 mysql -e "SHOW PLUGINS;"
 mysql -e "CREATE DATABASE world;"
 sed -i '18,21 s/^/-- /' /package-testing/world.sql
@@ -34,8 +41,9 @@ if [ ! -z "$1" ]; then
   fi
 fi
 
-if [ "$(grep -c "\[ERROR\]" ${ERROR_LOG} || true)" != "0" ]; then
-  echo "There's an error in error log!"
+ERRORS_AFTER=$(grep -c "\[ERROR\]" ${ERROR_LOG} || true)
+if [ "${ERRORS_BEFORE}" != "${ERRORS_AFTER}" ]; then
+  echo "There's a difference in number of errors before installing plugins and after!"
   exit 1
 fi
 
