@@ -53,7 +53,7 @@
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: configure pmm client to connect to server
-    shell: pmm-admin config --server 10.10.6.213:80 --bind-address $(ip addr show|grep "inet 10."|grep -o "10.*/"|sed 's:/::') --force
+    shell: pmm-admin config --server 10.30.6.213:80 --bind-address $(ip addr show|grep "inet 10."|grep -o "10.*/"|sed 's:/::') --force
 
   - name: add linux metrics to monitoring
     command: pmm-admin add linux:metrics --service-port {{ port_linux }}
