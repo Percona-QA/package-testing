@@ -161,10 +161,7 @@ function teardown(){
 }
 
 @test "check if mongo service is enabled in systemd" {
-  if [ -f /etc/redhat-release ]; then
-    skip "disabled because centos (BLD-741)"
-    # https://jira.percona.com/browse/BLD-741
-  elif [ ${SYSTEMCTL} -eq 1 ]; then
+  if [ ${SYSTEMCTL} -eq 1 ]; then
     result=$(systemctl is-enabled mongod)
     [ $result == "enabled" ]
   else
@@ -175,9 +172,6 @@ function teardown(){
 @test "check if mongo service is enabled in sysvinit" {
   if [ ${SYSTEMCTL} -eq 1 ]; then
     skip "init system is systemd so other test will do the check"
-  elif [ -f /etc/redhat-release ]; then
-    skip "disabled for centos (BLD-741)"
-    # https://jira.percona.com/browse/BLD-741
   elif [ ${SYSVCONFIG} -eq 1 ]; then
     result=$(sysv-rc-conf --list mongod|grep -o ":on"|wc -l)
     [ $result -gt 3 ]
