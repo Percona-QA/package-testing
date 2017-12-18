@@ -13,9 +13,9 @@ fi
 set -e
 
 if [ -z "$1" ]; then
-  echo "This script needs parameter 3.0|3.2|3.4"
+  echo "This script needs parameter 3.0|3.2|3.4|3.6"
   exit 1
-elif [ "$1" != "3.0" -a "$1" != "3.2" -a "$1" != "3.4" ]; then
+elif [ "$1" != "3.0" -a "$1" != "3.2" -a "$1" != "3.4" -a "$1" != "3.6" ]; then
   echo "Version not recognized!"
   exit 1
 else
@@ -124,6 +124,8 @@ function check_rocksdb {
     ROCKSDB_VERSION_NEEDED=${PSMDB32_ROCKSDB_VER}
   elif [ "${VERSION}" == "3.4" ]; then
     ROCKSDB_VERSION_NEEDED=${PSMDB34_ROCKSDB_VER}
+  elif [ "${VERSION}" == "3.6" ]; then
+    ROCKSDB_VERSION_NEEDED=${PSMDB36_ROCKSDB_VER}
   else
     echo "Wrong parameter to script: $1"
     exit 1
@@ -156,7 +158,7 @@ function check_rocksdb {
 
 for engine in mmapv1 PerconaFT rocksdb wiredTiger inMemory; do
   if [ "$1" == "3.4" -a ${engine} == "PerconaFT" ]; then
-    echo "Skipping PerconaFT because version is 3.4"
+    echo "Skipping PerconaFT because version is >3.2"
   else
     stop_service
     clean_datadir
