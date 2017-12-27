@@ -1,5 +1,10 @@
 #!/usr/bin/env bats
 
+SYSTEMCTL=0
+SERVICE=0
+SYSVCONFIG=0
+CHKCONFIG=0
+
 if [ ! -z "$(which systemctl 2>/dev/null)" ]; then
   SYSTEMCTL=1
 fi
@@ -177,7 +182,7 @@ function teardown(){
     [ $result -gt 3 ]
   elif [ ${CHKCONFIG} -eq 1 ]; then
     result=$(chkconfig --list mongod|grep -o ":on"|wc -l)
-    [ $result -gt 2 ]
+    [ $result -gt 1 ]
   else
     skip "system doesn't have chkconfig or sysv-rc-conf commands"
   fi

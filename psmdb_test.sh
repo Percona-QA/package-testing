@@ -157,7 +157,7 @@ function check_rocksdb {
 }
 
 for engine in mmapv1 PerconaFT rocksdb wiredTiger inMemory; do
-  if [ "$1" == "3.4" -a ${engine} == "PerconaFT" ]; then
+  if [ "$1" != "3.2" -a ${engine} == "PerconaFT" ]; then
     echo "Skipping PerconaFT because version is >3.2"
   else
     stop_service

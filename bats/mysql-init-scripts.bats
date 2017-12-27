@@ -1,5 +1,10 @@
 #!/usr/bin/env bats
 
+SYSTEMCTL=0
+SERVICE=0
+SYSVCONFIG=0
+CHKCONFIG=0
+
 if [ ! -z "$(which systemctl 2>/dev/null)" ]; then
   SYSTEMCTL=1
 fi
