@@ -38,6 +38,9 @@
   - name: start mongod with service
     service: name=mongod state=started
 
+  - name: set pass and enable auth
+    command: /package-testing/scripts/psmdb_set_auth.sh
+
   - name: check that PSMDB 3.4 package versions are correct
     command: /package-testing/package_check.sh psmdb34
 
