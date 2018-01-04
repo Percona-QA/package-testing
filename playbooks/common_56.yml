@@ -157,8 +157,9 @@
   - name: start mysql service
     service: name=mysql state=started
  
-  - name: check that mysqladmin shutdown works correctly
-    command: /package-testing/madmin_check.sh
+    # temporary commented out for PT tests
+# - name: check that mysqladmin shutdown works correctly
+#   command: /package-testing/madmin_check.sh
 
   - name: remove Percona Server deb packages
     apt: name={{item}} update_cache=no state=absent
