@@ -34,10 +34,6 @@
     - Percona-Server-MongoDB-32-debuginfo
     when: ansible_os_family == "RedHat"
 
-  - name: start mongod with init script
-    command: /etc/init.d/mongod start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
-
   - name: start mongod with service
     command: service mongod start
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
