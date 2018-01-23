@@ -177,7 +177,6 @@ for engine in mmapv1 PerconaFT rocksdb wiredTiger inMemory; do
     if [[ ${engine} = "wiredTiger" || ${engine} = "rocksdb" ]] && [[ "$1" != "3.0" ]]; then
       echo "testing the hotbackup functionality"
       test_hotbackup
-      sleep 10
     fi
     stop_service
     echo "disable ${engine}"
