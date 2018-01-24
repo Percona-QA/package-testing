@@ -183,4 +183,5 @@ for engine in mmapv1 PerconaFT rocksdb wiredTiger inMemory; do
     sed -i "/engine: *${engine}/s//#engine: ${engine}/g" /etc/mongod.conf
     clean_datadir
   fi
+  start_service
 done

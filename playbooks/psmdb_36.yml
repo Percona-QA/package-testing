@@ -38,14 +38,14 @@
     command: systemctl start mongod
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: set pass and enable auth
-    command: /package-testing/scripts/psmdb_set_auth.sh
-
   - name: check that PSMDB 3.6 package versions are correct
     command: /package-testing/package_check.sh psmdb36
 
   - name: test SE change, import data, restart service
     command: /package-testing/psmdb_test.sh 3.6
+
+  - name: set pass and enable auth
+    command: /package-testing/scripts/psmdb_set_auth.sh
 
   - name: run bats tests for mongo init scripts
     command: /usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats
