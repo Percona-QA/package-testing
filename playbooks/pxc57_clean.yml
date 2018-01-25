@@ -108,23 +108,36 @@
   - name: restart mysql service
     service: name=mysql state=restarted
 
-  - name: check that Percona Server version is correct
+  - name: check that Percona XtraDB Cluster version is correct
     command: /package-testing/version_check.sh pxc57
 
-# - name: run bats tests for mysql init scripts
-#   command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+  - name: remove Percona Server deb packages
+    apt: name={{item}} update_cache=no state=absent
+    with_items:
+    - percona-xtradb-cluster-5.7-dbg
+    - percona-xtradb-cluster-client-5.7
+    - percona-xtradb-cluster-common-5.7
+    - percona-xtradb-cluster-full-57
+    - percona-xtradb-cluster-garbd-5.7
+    - percona-xtradb-cluster-garbd-debug-5.7
+    - percona-xtradb-cluster-server-5.7
+    - percona-xtradb-cluster-server-debug-5.7
+    - percona-xtradb-cluster-test-5.7
+    when: ansible_os_family == "Debian"
 
-# - name: remove Percona Server deb packages
-#   apt: name={{item}} update_cache=no state=absent
-#   with_items:
-#   - percona-server-server-5.7
-#   when: ansible_os_family == "Debian"
+  - name: remove Percona Server rpm packages
+    yum: name={{item}} state=absent
+    with_items:
+    - Percona-XtraDB-Cluster-57-debuginfo.x86_64
+    - Percona-XtraDB-Cluster-full-57.x86_64
+    - Percona-XtraDB-Cluster-shared-57.x86_64
+    - Percona-XtraDB-Cluster-client-57.x86_64
+    - Percona-XtraDB-Cluster-garbd-57.x86_64
+    - Percona-XtraDB-Cluster-shared-compat-57.x86_64
+    - Percona-XtraDB-Cluster-devel-57.x86_64
+    - Percona-XtraDB-Cluster-server-57.x86_64
+    - Percona-XtraDB-Cluster-test-57.x86_64
+    when: ansible_os_family == "RedHat"
 
-# - name: remove Percona Server rpm packages
-#   yum: name={{item}} state=absent
-#   with_items:
-#   - Percona-Server-server-57
-#   when: ansible_os_family == "RedHat"
-
-# - name: check if process is stopped after package removal
-#   command: /package-testing/check_running.sh mysql stopped
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mysql stopped
