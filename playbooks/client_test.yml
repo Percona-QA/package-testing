@@ -43,4 +43,4 @@
     - pv
     when: ansible_os_family == "RedHat"
   - name: install PS/PXC client and run the check
-    command: /vagrant/client_check.sh {{ client }}
+    command: /package-testing/client_check.sh {{ client }}
