@@ -1,6 +1,5 @@
-hrvoje.matijakovic@qa-pkg-1:~$ tmux att
 ---
-# This playbook sets up the mongodb-org repo and installs mongodb
+# This playbook installs PS/PXC client package and checks that it works correctly
 
 - hosts: all
   name: Prepare a clean machine with percona (and EPEL) repo(s) installed
