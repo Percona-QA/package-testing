@@ -1,0 +1,47 @@
+hrvoje.matijakovic@qa-pkg-1:~$ tmux att
+---
+# This playbook sets up the mongodb-org repo and installs mongodb
+
+- hosts: all
+  name: Prepare a clean machine with percona (and EPEL) repo(s) installed
+  become: true
+  become_method: sudo
+  vars:
+    client: "{{ lookup('env', 'client_to_test') }}"
+
+  tasks:
+  - name: Install percona repository package
+    apt:
+      deb: https://repo.percona.com/apt/percona-release_0.1-4.{{ansible_lsb.codename}}_all.deb
+    when: ansible_os_family == "Debian"
+
+  - name: add the deb repo
+    apt_repository: repo='deb http://repo.percona.com/apt {{ansible_lsb.codename}} main testing' state=present update_cache=yes
+    when: ansible_os_family == "Debian"
+
+  - name: install deb packages
+    apt: name={{item}} update_cache=yes
+    with_items:
+    - vim
+    when: ansible_os_family == "Debian"
+
+  - name: epel 6 repo
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: epel 7 repo
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: add the yum percona repos
+    yum: name=http://www.percona.com/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 6
+
+  - name: install packages in centos
+    yum: name={{item}} state=present
+    with_items:
+    - libselinux-python
+    - pv
+    when: ansible_os_family == "RedHat"
+  - name: install PS/PXC client and run the check
+    command: /vagrant/client_check.sh {{ client }}
