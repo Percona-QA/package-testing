@@ -1,0 +1,12 @@
+---
+# This playbook can be used to setup machine for running tests and ansible
+# Therefore gathering of the facts is disabled
+
+- hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: false
+
+  tasks:
+  - name: Install python-minimal
+    raw: test -e /usr/bin/python || (which apt && apt -y update && apt install -y python-minimal)

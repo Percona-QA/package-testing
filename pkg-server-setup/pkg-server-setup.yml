@@ -1,0 +1,88 @@
+---
+# This playbook does following:
+#   installs or upgrades
+#   ansible, vagrant, virtualbox, docker and a bunch of other smaller stuff
+- import_playbook: install-python.yml
+
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    vagrant_ver: 2.0.1
+
+  tasks:
+  - name: Add Ansible apt repository
+    apt_repository:
+      repo: "ppa:ansible/ansible"
+    when: ansible_os_family == "Debian"
+
+  - name: Add Oracle VirtualBox repo keys
+    apt_key:
+      url: "{{ item }}"
+      state: present
+    with_items:
+    - https://www.virtualbox.org/download/oracle_vbox_2016.asc
+    - https://www.virtualbox.org/download/oracle_vbox.asc
+    when: ansible_os_family == "Debian"
+
+  - name: Add Docker repo keys
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+    when: ansible_os_family == "Debian"
+
+  - name: Add Oracle VirtualBox apt repository
+    apt_repository:
+      repo: deb https://download.virtualbox.org/virtualbox/debian {{ ansible_distribution_release }} contrib
+      state: present
+    when: ansible_os_family == "Debian"
+
+  - name: Add Docker apt repository
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+      state: present
+    when: ansible_os_family == "Debian"
+
+  - name: Install Ansible
+    apt:
+      name: ansible
+      state: latest
+    when: ansible_os_family == "Debian"
+
+  - name: Remove previous version of VirtualBox
+    apt:
+      name: virtualbox-5.1
+      state: absent
+    when: ansible_os_family == "Debian"
+
+  - name: Install latest VirtualBox
+    apt:
+      name: virtualbox-5.2
+      state: latest
+    when: ansible_os_family == "Debian"
+
+  - name: Install Vagrant
+    apt:
+      deb: https://releases.hashicorp.com/vagrant/{{ vagrant_ver }}/vagrant_{{ vagrant_ver }}_x86_64.deb
+      state: present
+    when: ansible_os_family == "Debian"
+
+  - name: Install Docker
+    apt:
+      name: docker-ce
+      state: latest
+    when: ansible_os_family == "Debian"
+
+  - name: Install utilities
+    apt:
+      name: "{{ item }}"
+      state: latest
+    with_items:
+      - tmux
+      - git
+      - mc
+      - vim
+      - wget
+      - curl
+    when: ansible_os_family == "Debian"
+
