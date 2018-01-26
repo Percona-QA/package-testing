@@ -49,7 +49,13 @@
       state: latest
     when: ansible_os_family == "Debian"
 
-  - name: Install VirtualBox
+  - name: Remove previous version of VirtualBox
+    apt:
+      name: virtualbox-5.1
+      state: absent
+    when: ansible_os_family == "Debian"
+
+  - name: Install latest VirtualBox
     apt:
       name: virtualbox-5.2
       state: latest
