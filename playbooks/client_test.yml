@@ -9,9 +9,8 @@
     client: "{{ lookup('env', 'client_to_test') }}"
 
   tasks:
-
   - name: include tasks for test env setup
-    include: ../tasks/test_prep.yml
+    import_tasks: ../tasks/test_prep.yml
 
   - name: Install percona repository package
     apt:
@@ -38,5 +37,6 @@
     - libselinux-python
     - pv
     when: ansible_os_family == "RedHat"
+
   - name: install PS/PXC client and run the check
     command: /package-testing/client_check.sh {{ client }}
