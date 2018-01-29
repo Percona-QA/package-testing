@@ -218,6 +218,9 @@
   - name: install GR plugin
     command: /package-testing/gr.sh
 
+  - name: keyring_file plugin test
+    command: /package-testing/scripts/ps_keyring_file_test.sh
+
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
 
