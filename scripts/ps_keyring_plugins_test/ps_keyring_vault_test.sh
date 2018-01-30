@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-mysql -e "SET GLOBAL keyring_vault_config='/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf';"
 mysql -e "INSTALL PLUGIN keyring_vault SONAME 'keyring_vault.so';"
+mysql -e "SET GLOBAL keyring_vault_config='/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf';"
 mysql -e "CREATE DATABASE IF NOT EXISTS test;"
 mysql --database=test -e "CREATE TABLE keyring_vault_test (a INT PRIMARY KEY) ENCRYPTION='Y';"
 mysql --database=test -e "INSERT INTO keyring_vault_test VALUES (1),(2),(3);"
