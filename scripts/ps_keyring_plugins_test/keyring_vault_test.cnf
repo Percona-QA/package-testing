@@ -1,4 +1,4 @@
 vault_url = https://10.30.6.213:8200
 secret_mount_point = secret
 token = d52c4638-d2f4-21cb-1c71-a72a895ddebb
-vault_ca = /package-testing/scripts/ps_keyring_plugin_test/test.cer
+vault_ca = /package-testing/scripts/ps_keyring_plugins_test/test.cer

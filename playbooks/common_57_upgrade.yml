@@ -219,10 +219,10 @@
     command: /package-testing/gr.sh
 
   - name: keyring_file plugin test
-    command: /package-testing/scripts/ps_keyring_plugin_test/ps_keyring_file_test.sh
+    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_file_test.sh
 
   - name: keyring_file plugin test
-    command: /package-testing/scripts/ps_keyring_plugin_test/ps_keyring_vault_test.sh
+    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_vault_test.sh
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
