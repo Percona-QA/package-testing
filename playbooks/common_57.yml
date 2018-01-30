@@ -135,11 +135,8 @@
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_57.sh ps
 
-  - name: keyring_file plugin test
-    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_file_test.sh
-
-  - name: keyring_vault plugin test
-    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_vault_test.sh
+  - name: keyring plugins test
+    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh
 
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
