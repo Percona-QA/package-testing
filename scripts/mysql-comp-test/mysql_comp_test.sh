@@ -30,8 +30,8 @@ if [ $1 = "ps57" ]; then
   sleep 10
 fi
 
-tokudb_comp_lib=("no" "zlib" "quicklz" "lzma" "snappy" "dummy")
-rocksdb_comp_lib=("no" "zlib" "lz4" "zstd" "dummy")
+tokudb_comp_lib=("no" "default" "zlib" "quicklz" "lzma" "snappy" "dummy")
+rocksdb_comp_lib=("no" "default" "zlib" "lz4" "zstd" "dummy")
 old="no"
 new="no"
 
@@ -51,7 +51,7 @@ rm -f ${secure_file_priv}/t2*.txt
 rm -f ${secure_file_priv}/t3*.txt
 
 for se in TokuDB RocksDB; do
-  for comp_lib in no zlib lz4 zstd quicklz lzma snappy dummy; do
+  for comp_lib in no default zlib lz4 zstd quicklz lzma snappy dummy; do
 
     if [[ ${se} = "TokuDB" && " ${tokudb_comp_lib[@]} " =~ " ${comp_lib} " ]] || [[ ${se} = "RocksDB" && " ${rocksdb_comp_lib[@]} " =~ " ${comp_lib} " ]]; then
       if [ $1 = "ps56" -a ${se} = "RocksDB" ]; then
@@ -65,9 +65,12 @@ for se in TokuDB RocksDB; do
           sed -i "s/@@SE@@/${se}/g" /tmp/create_table.sql
           if [ ${se} = "TokuDB" ]; then
             sed -i "s/ @@COMMENT@@//g" /tmp/create_table.sql
+            sed -i "s/ @@COMMENT_PARTITIONED@@//g" /tmp/create_table.sql
             old_row_format="${new_row_format}"
             if [ ${comp_lib} = "no" ]; then
               new_row_format="ROW_FORMAT=TOKUDB_UNCOMPRESSED"
+            elif [ ${comp_lib} = "default" ]; then
+              new_row_format=""
             elif [ ${comp_lib} = "zlib" ]; then
               new_row_format="ROW_FORMAT=TOKUDB_ZLIB"
             elif [ ${comp_lib} = "quicklz" ]; then
@@ -84,6 +87,8 @@ for se in TokuDB RocksDB; do
             old_cf="${new_cf}"
             if [ ${comp_lib} = "no" ]; then
               new_cf="cf4"
+            elif [ ${comp_lib} = "default" ]; then
+              new_cf=""
             elif [ ${comp_lib} = "zlib" ]; then
               new_cf="cf1"
             elif [ ${comp_lib} = "lz4" ]; then
@@ -91,8 +96,13 @@ for se in TokuDB RocksDB; do
             elif [ ${comp_lib} = "zstd" ]; then
               new_cf="cf3"
             fi
-            new_comment="COMMENT '${new_cf}'"
-            new_comment_partitioned="COMMENT 'p0_cfname=${new_cf};p1_cfname=${new_cf};p2_cfname=${new_cf};p3_cfname=${new_cf}'"
+            if [ "${new_cf}" = "" ]; then
+              new_comment=""
+              new_comment_partitioned=""
+            else
+              new_comment="COMMENT '${new_cf}'"
+              new_comment_partitioned="COMMENT 'p0_cfname=${new_cf};p1_cfname=${new_cf};p2_cfname=${new_cf};p3_cfname=${new_cf}'"
+            fi
             sed -i "s/ @@COMMENT_PARTITIONED@@/ ${new_comment_partitioned}/g" /tmp/create_table.sql
             sed -i "s/ @@COMMENT@@/ ${new_comment}/g" /tmp/create_table.sql
           fi
@@ -152,6 +162,16 @@ done
 
 mysql -e "SET GLOBAL TRANSACTION ISOLATION LEVEL REPEATABLE READ;"
 
+# check if SST files contain proper compression libraries used
+for file in /var/lib/mysql/.rocksdb/*.sst; do
+  sst_cf=$(sst_dump --show_properties --file=${file} | grep "column family name:" | sed 's/  column family name: //')
+  sst_clib=$(sst_dump --show_properties --file=${file} | grep "SST file compression algo:" | sed 's/  SST file compression algo: //')
+  if [[ "${sst_cf}" = "__system__" && "${sst_clib}" != "LZ4" ]] || [[ "${sst_cf}" = "default" && "${sst_clib}" != "LZ4" ]] || [[ "${sst_cf}" = "cf1" && "${sst_clib}" != "Zlib" ]] || [[ "${sst_cf}" = "cf2" && "${sst_clib}" != "LZ4" ]] || [[ "${sst_cf}" = "cf3" && "${sst_clib}" != "ZSTD" ]] || [[ "${sst_cf}" = "cf4" && "${sst_clib}" != "NoCompression" ]]; then
+    echo "SST file ${file} has column family ${sst_cf} and compression library ${sst_clib} which seems incorrect!"
+    exit 1
+  fi
+done
+
 md5sum ${secure_file_priv}/*.txt > /tmp/comp_test_md5.sum
 
 #remove the rocksdb options so the server is able to start once the SE is removed
@@ -161,7 +181,7 @@ nr1=$(grep -c "e7821682046d961fb2b5ff5d11894491" /tmp/comp_test_md5.sum)
 nr2=$(grep -c "3284a0c3a1f439892f6e07f75408b2c2" /tmp/comp_test_md5.sum)
 nr3=$(grep -c "72f7e51a16c2f0af31e39586b571b902" /tmp/comp_test_md5.sum)
 
-if [ ${nr1} -ne 20 -o ${nr2} -ne 20 -o ${nr3} -ne 20 ]; then
+if [ ${nr1} -ne 24 -o ${nr2} -ne 24 -o ${nr3} -ne 24 ]; then
   echo "md5sums of test files do not match. check files in ${secure_file_priv}"
   exit 1
 else
