@@ -81,16 +81,19 @@ for se in TokuDB RocksDB; do
           fi
           if [ ${se} = "RocksDB" ]; then
             sed -i "s/ @@ROW_FORMAT_OPT@@//g" /tmp/create_table.sql
-            old_comment="${new_comment}"
+            old_cf="${new_cf}"
             if [ ${comp_lib} = "no" ]; then
-              new_comment="COMMENT 'cf4'"
+              new_cf="cf4"
             elif [ ${comp_lib} = "zlib" ]; then
-              new_comment="COMMENT 'cf1'"
+              new_cf="cf1"
             elif [ ${comp_lib} = "lz4" ]; then
-              new_comment="COMMENT 'cf2'"
+              new_cf="cf2"
             elif [ ${comp_lib} = "zstd" ]; then
-              new_comment="COMMENT 'cf3'"
+              new_cf="cf3"
             fi
+            new_comment="COMMENT '${new_cf}'"
+            new_comment_partitioned="COMMENT 'p0_cfname=${new_cf};p1_cfname=${new_cf};p2_cfname=${new_cf};p3_cfname=${new_cf}'"
+            sed -i "s/ @@COMMENT_PARTITIONED@@/ ${new_comment_partitioned}/g" /tmp/create_table.sql
             sed -i "s/ @@COMMENT@@/ ${new_comment}/g" /tmp/create_table.sql
           fi
 
@@ -130,7 +133,12 @@ for se in TokuDB RocksDB; do
               mysql -Dcomp_test -e "SELECT * FROM ${table}_${se}_no INTO OUTFILE '${secure_file_priv}/${table}_${se}_${new}_alter.txt';"
             else
               mysql -Dcomp_test -e "ALTER TABLE ${table}_${se}_no DROP PRIMARY KEY;"
-              mysql -Dcomp_test -e "ALTER TABLE ${table}_${se}_no ADD PRIMARY KEY(a1) ${new_comment};"
+              if [ ${table} = "t1" ]; then
+                alter_comment="${new_comment_partitioned}"
+              else
+                alter_comment="${new_comment}"
+              fi
+              mysql -Dcomp_test -e "ALTER TABLE ${table}_${se}_no ADD PRIMARY KEY(a1) ${alter_comment};"
               mysql -Dcomp_test -e "OPTIMIZE TABLE ${table}_${se}_no;" >> /tmp/optimize_table.txt
               mysql -Dcomp_test -e "SELECT * FROM ${table}_${se}_no INTO OUTFILE '${secure_file_priv}/${table}_${se}_${new}_alter.txt';"
             fi
