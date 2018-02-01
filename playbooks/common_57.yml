@@ -198,8 +198,9 @@
   - name: start mysql service
     service: name=mysql state=started
 
-  - name: check that mysqladmin shutdown works correctly
-    command: /package-testing/madmin_check.sh
+# tempory commented out until BLD-906 is fixed
+# - name: check that mysqladmin shutdown works correctly
+#   command: /package-testing/madmin_check.sh
 
   - name: remove Percona Server deb packages
     apt: name={{item}} update_cache=no state=absent

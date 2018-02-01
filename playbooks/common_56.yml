@@ -157,7 +157,7 @@
   - name: start mysql service
     service: name=mysql state=started
  
-    # temporary commented out for PT tests
+    # temporary commented out until BLD-906 is resolved 
 # - name: check that mysqladmin shutdown works correctly
 #   command: /package-testing/madmin_check.sh
 
