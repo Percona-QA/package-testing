@@ -48,6 +48,12 @@
     - percona-xtrabackup-dbg
     when: ansible_os_family == "Debian"
 
+  - name: install sysbench new deb packages
+    apt: name={{item}} update_cache=yes state=latest
+    with_items:
+    - sysbench
+    when: ansible_os_family == "Debian"
+
   - name: install Percona Server rpm packages previous version
     yum: name={{item}} state=latest
     with_items:
@@ -71,6 +77,12 @@
     - percona-xtrabackup
     - percona-xtrabackup-test
     - percona-xtrabackup-debuginfo
+    when: ansible_os_family == "RedHat"
+
+  - name: install sysbench new rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - sysbench
     when: ansible_os_family == "RedHat"
 
   - name: start mysql service with init script
@@ -126,6 +138,7 @@
     - percona-xtrabackup
     - percona-xtrabackup-test
     - percona-xtrabackup-dbg
+    - sysbench
     when: ansible_os_family == "Debian"
 
   - name: install plugins, import world database
@@ -154,6 +167,7 @@
     - percona-xtrabackup
     - percona-xtrabackup-test
     - percona-xtrabackup-debuginfo
+    - sysbench
     when: ansible_os_family == "RedHat"
 
   - name: run mysql_upgrade
@@ -176,12 +190,12 @@
 
   - name: check that Percona Toolkit version is correct
     command: /package-testing/version_check.sh pt
-    when: ansible_distribution_release != "yakkety"
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb23
-    when: ansible_distribution_release != "yakkety"
 
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb23
-    when: ansible_distribution_release != "yakkety"
+
+  - name: check that sysbench version is correct
+    command: /package-testing/version_check.sh sysbench
