@@ -1,5 +1,6 @@
-  - vars:
-    client: "{{ lookup('env', 'install_repo') }}"
+  - hosts:
+    vars:
+      client: "{{ lookup('env', 'install_repo') }}"
 
   - name: include playbook for removing Percona repo
     include: remove_percona_repository.yml
