@@ -52,7 +52,7 @@ install_pam() {
 }
 
 check_pam_exists() {
-  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "auth_pam%" and PLUGIN_STATUS like "ACTIVE";')
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME="auth_pam" and PLUGIN_STATUS like "ACTIVE";')
   [ "$result" -eq 1 ]
 }
 
@@ -62,7 +62,7 @@ uninstall_pam() {
 }
 
 check_pam_notexists() {
-  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "auth_pam%" and PLUGIN_STATUS like "ACTIVE";')
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME="auth_pam" and PLUGIN_STATUS like "ACTIVE";')
   [ "$result" -eq 0 ]
 }
 
