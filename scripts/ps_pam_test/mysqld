@@ -1,0 +1,3 @@
+auth       required     pam_warn.so
+auth       required     pam_unix.so audit
+account    required     pam_unix.so audit

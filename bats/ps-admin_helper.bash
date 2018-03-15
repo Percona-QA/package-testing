@@ -52,7 +52,7 @@ install_pam() {
 }
 
 check_pam_exists() {
-  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "auth_pam%" and PLUGIN_STATUS like "ACTIVE";')
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME="auth_pam" and PLUGIN_STATUS like "ACTIVE";')
   [ "$result" -eq 1 ]
 }
 
@@ -62,7 +62,27 @@ uninstall_pam() {
 }
 
 check_pam_notexists() {
-  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "auth_pam%" and PLUGIN_STATUS like "ACTIVE";')
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME="auth_pam" and PLUGIN_STATUS like "ACTIVE";')
+  [ "$result" -eq 0 ]
+}
+
+install_pam_compat() {
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-pam-compat"
+  [ $status -eq 0 ]
+}
+
+check_pam_compat_exists() {
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME="auth_pam_compat" and PLUGIN_STATUS like "ACTIVE";')
+  [ "$result" -eq 1 ]
+}
+
+uninstall_pam_compat() {
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-pam-compat"
+  [ $status -eq 0 ]
+}
+
+check_pam_compat_notexists() {
+  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME="auth_pam_compat" and PLUGIN_STATUS like "ACTIVE";')
   [ "$result" -eq 0 ]
 }
 
@@ -180,14 +200,14 @@ install_all() {
   else
     OPT="--enable-mysqlx --enable-tokudb --enable-tokubackup --enable-rocksdb"
   fi
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam ${OPT}"
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam --enable-pam-compat ${OPT}"
   [ $status -eq 0 ]
 
   service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
   sleep 5
 
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam ${OPT}"
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam --enable-pam-compat ${OPT}"
   [ $status -eq 0 ]
 }
 
@@ -199,13 +219,13 @@ uninstall_all() {
   else
     OPT="--disable-mysqlx --disable-tokudb --disable-tokubackup --disable-rocksdb"
   fi
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam ${OPT}"
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam --disable-pam-compat ${OPT}"
   [ $status -eq 0 ]
 
   service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
   sleep 5
 
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam ${OPT}"
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam --disable-pam-compat ${OPT}"
   [ $status -eq 0 ]
 }

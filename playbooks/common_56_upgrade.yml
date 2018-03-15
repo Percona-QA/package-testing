@@ -132,6 +132,67 @@
     - rsyslog-mysql
     when: ansible_os_family == "RedHat"
 
+# Start PAM test
+  - group:
+      name: developer
+      state: present
+
+  - group:
+      name: dbadmin
+      state: present
+
+  - user:
+      name: test_pam
+      shell: /bin/bash
+      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+
+  - user:
+      name: test_pam2
+      shell: /bin/bash
+      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+      groups: developer
+      append: yes
+
+  - user:
+      name: test_pam3
+      shell: /bin/bash
+      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+      groups: dbadmin
+      append: yes
+
+  - user:
+      name: test_pam_compat
+      shell: /bin/bash
+      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+
+  - user:
+      name: mysql
+      groups: shadow
+      append: yes
+    when: ansible_os_family == "Debian"
+
+  - file:
+      path: /etc/shadow
+      group: mysql
+      mode: "g+r"
+    when: ansible_os_family == "RedHat"
+
+  - name: copy config file for mysql PAM into system dir
+    template:
+      src: ../scripts/ps_pam_test/mysqld
+      dest: /etc/pam.d/mysqld
+      owner: root
+      group: root
+      mode: 0644
+      force: yes
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+
+  - name: run mysql setup for PAM
+    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_setup.bats
+# End PAM test
+
 #
 # Enable testing repository
 #
@@ -217,6 +278,9 @@
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb23
 
+  - name: run bats tests for PAM
+    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
+
   - name: run bats unit tests for ps_tokudb_admin scripts
     command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_unit.bats
 
@@ -228,6 +292,9 @@
 
   - name: start mysql service
     service: name=mysql state=started
+
+  - name: uninstall PAM before final package uninstall
+    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
 
   - name: remove Percona Server deb packages
     apt: name={{item}} update_cache=no state=absent
