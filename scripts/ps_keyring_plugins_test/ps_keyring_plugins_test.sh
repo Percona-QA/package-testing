@@ -47,6 +47,8 @@ sleep 10
 sed -i '/early_plugin_load=/d' ${MYCNF}
 sed -i '/\[mysqld\]/a early_plugin_load=keyring_vault.so' ${MYCNF}
 sed -i '/\[mysqld\]/a keyring_vault_config="/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf"' ${MYCNF}
+service mysql start
+sleep 10
 
 # keyring_vault plugin test
 #mysql -e "INSTALL PLUGIN keyring_vault SONAME 'keyring_vault.so';"
