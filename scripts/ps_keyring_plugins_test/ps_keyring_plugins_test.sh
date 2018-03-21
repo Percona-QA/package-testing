@@ -9,13 +9,13 @@ fi
 
 service mysql stop
 sleep 10
-if [ $(grep -c "[mysqld]" ${MYCNF}) -eq 0 ]; then
+if [ $(grep -c "\[mysqld\]" ${MYCNF}) -eq 0 ]; then
   echo -e "\n[mysqld]" >> ${MYCNF}
 fi
-sed -i '/[mysqld]/a early_plugin_load=keyring_file.so' ${MYCNF}
-sed -i '/[mysqld]/a encrypt_binlog=ON' ${MYCNF}
-sed -i '/[mysqld]/a master_verify_checksum=ON' ${MYCNF}
-sed -i '/[mysqld]/a binlog_checksum=CRC32' ${MYCNF}
+sed -i '/\[mysqld\]/a early_plugin_load=keyring_file.so' ${MYCNF}
+sed -i '/\[mysqld\]/a encrypt_binlog=ON' ${MYCNF}
+sed -i '/\[mysqld\]/a master_verify_checksum=ON' ${MYCNF}
+sed -i '/\[mysqld\]/a binlog_checksum=CRC32' ${MYCNF}
 service mysql start
 sleep 10
 
@@ -45,8 +45,8 @@ mysql --database=test -e "DROP TABLE keyring_file_test;"
 service mysql stop
 sleep 10
 sed -i '/early_plugin_load=/d' ${MYCNF}
-sed -i '/[mysqld]/a early_plugin_load=keyring_vault.so' ${MYCNF}
-sed -i '/[mysqld]/a keyring_vault_config="/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf"' ${MYCNF}
+sed -i '/\[mysqld\]/a early_plugin_load=keyring_vault.so' ${MYCNF}
+sed -i '/\[mysqld\]/a keyring_vault_config="/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf"' ${MYCNF}
 
 # keyring_vault plugin test
 #mysql -e "INSTALL PLUGIN keyring_vault SONAME 'keyring_vault.so';"
