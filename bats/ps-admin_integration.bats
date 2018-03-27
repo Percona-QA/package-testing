@@ -6,8 +6,8 @@ load ps-admin_helper
   uninstall_all
   check_qrt_notexists
   check_audit_notexists
-  check_pam_notexists
-  check_pam_compat_notexists
+# check_pam_notexists
+# check_pam_compat_notexists
   if [ ${MYSQL_VERSION} != "5.5" ]; then
     check_tokubackup_notexists
     check_tokudb_notexists
@@ -38,25 +38,25 @@ load ps-admin_helper
   check_audit_notexists
 }
 
-@test "install PAM plugin" {
-  install_pam
-  check_pam_exists
-}
+#test "install PAM plugin" {
+# install_pam
+# check_pam_exists
+#
 
-@test "uninstall PAM plugin" {
-  uninstall_pam
-  check_pam_notexists
-}
+#test "uninstall PAM plugin" {
+# uninstall_pam
+# check_pam_notexists
+#
 
-@test "install PAM compat plugin" {
-  install_pam_compat
-  check_pam_compat_exists
-}
+#test "install PAM compat plugin" {
+# install_pam_compat
+# check_pam_compat_exists
+#
 
-@test "uninstall PAM compat plugin" {
-  uninstall_pam_compat
-  check_pam_compat_notexists
-}
+#test "uninstall PAM compat plugin" {
+# uninstall_pam_compat
+# check_pam_compat_notexists
+#
 
 @test "install MySQL X plugin" {
   if [ ${MYSQL_VERSION} = "5.5" -o ${MYSQL_VERSION} = "5.6" ]; then
@@ -132,8 +132,8 @@ load ps-admin_helper
   install_all
   check_qrt_exists
   check_audit_exists
-  check_pam_exists
-  check_pam_compat_exists
+# check_pam_exists
+# check_pam_compat_exists
   if [ ${MYSQL_VERSION} != "5.5" ]; then
     check_tokudb_exists
     check_tokubackup_exists
@@ -148,8 +148,8 @@ load ps-admin_helper
   uninstall_all
   check_qrt_notexists
   check_audit_notexists
-  check_pam_notexists
-  check_pam_compat_notexists
+# check_pam_notexists
+# check_pam_compat_notexists
   if [ ${MYSQL_VERSION} != "5.5" ]; then
     check_tokubackup_notexists
     check_tokudb_notexists
