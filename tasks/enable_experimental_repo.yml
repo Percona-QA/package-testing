@@ -14,16 +14,9 @@
     apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_lsb.codename }} main experimental' state=present update_cache=yes
     when: ansible_os_family == "Debian"
 
-  - name: add the Percona testing yum repos for centos 5
-    command: "{{ item }}"
-    with_items:
-      - wget -P ~ https://www.percona.com/redir/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
-      - rpm -ivH ~/percona-release-0.1-4.noarch.rpm
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
-
   - name: add the Percona testing yum repos for centos 6 and 7
     yum: name=https://www.percona.com/redir/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "5"
+    when: ansible_os_family == "RedHat" 
 
   - name: change the default repo in yum repo file to testing
     command: "{{ item }}"

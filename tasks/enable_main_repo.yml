@@ -4,20 +4,13 @@
 
   - name: Install percona repository package
     apt:
-      deb: https://repo.percona.com/apt/percona-release_0.1-4.{{ansible_lsb.codename}}_all.deb
+      deb: https://repo.percona.com/apt/percona-release_0.1-5.{{ansible_lsb.codename}}_all.deb
     when: ansible_os_family == "Debian"
 
   - name: add the Percona main deb repo
     apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_lsb.codename }} main' state=present update_cache=yes
     when: ansible_os_family == "Debian"
 
-  - name: add the main Percona yum repos for centos 5
-    command: "{{ item }}"
-    with_items:
-      - wget -P ~ https://www.percona.com/redir/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
-      - rpm -ivH ~/percona-release-0.1-4.noarch.rpm
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
-
   - name: add the main Percona yum repos for centos 6 and 7
     yum: name=https://www.percona.com/redir/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "5"
+    when: ansible_os_family == "RedHat" 
