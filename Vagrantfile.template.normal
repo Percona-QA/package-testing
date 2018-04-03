@@ -10,7 +10,7 @@ servers=[
   { :hostname => "u-trusty-64-@@hostname@@", :box => "bento/ubuntu-14.04" },
   { :hostname => "u-xenial-64-@@hostname@@", :box => "bento/ubuntu-16.04" },
   { :hostname => "u-artful-64-@@hostname@@", :box => "bento/ubuntu-17.10" },
-  { :hostname => "u-bionic-64-@@hostname@@", :box => "ubuntu/bionic64" },
+  { :hostname => "u-bionic-64-@@hostname@@", :box => "bento/ubuntu-18.04" },
   { :hostname => "sles-11-64-@@hostname@@", :box => "wvera/sles11sp4" },
   { :hostname => "sles-12-64-@@hostname@@", :box => "wvera/sles12sp2" }
 ]
