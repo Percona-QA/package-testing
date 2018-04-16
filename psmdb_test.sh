@@ -31,6 +31,12 @@ else
 fi
 sed -i 's/#auditLog:/audit:\n  destination: file\n  path: \/tmp\/audit.json/' /etc/mongod.conf
 
+# Enable --useDeprecatedMongoRocks for 3.6 to be able to start service with mongorocks
+if [ "$VERSIONS" == "3.6" ]; then
+  echo "Adding --useDeprecatedMongoRocks option to mongod.cnf" 
+  sed -i '/engine: rocksdb/a \  useDeprecatedMongoRocks: true' /etc/mongod.conf
+fi
+
 function start_service {
   local redhatrelease=""
   if [ -f /etc/redhat-release ]; then
@@ -39,10 +45,7 @@ function start_service {
   local lsbrelease=$(lsb_release -sc 2>/dev/null || echo "")
   if [ "${lsbrelease}" != "" -a "${lsbrelease}" = "trusty" ]; then
     echo "starting mongod service directly with init script..."
-    if [ "$VERSION" != "3.6" ]; then
       /etc/init.d/mongod start
-    else
-      /etc/init.d/mongod start --useDeprecatedMongoRocks
     fi
   elif [ "${redhatrelease}" = "5"  ]; then
     echo "starting mongod service directly with init script..."
