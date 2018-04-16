@@ -23,7 +23,7 @@ else
 fi
 
 # Enable auditLog and profiling/rate limit to see if services start with those
-if [ "$VERSIONS" == "3.0" ]; then
+if [ "$VERSION" == "3.0" ]; then
   echo "Skipping usage of profiling rate limit functionality because not available in 3.0"
   sed -i 's/#operationProfiling:/operationProfiling:\n  mode: all\n  slowOpThresholdMs: 200/' /etc/mongod.conf
 else
@@ -32,7 +32,7 @@ fi
 sed -i 's/#auditLog:/audit:\n  destination: file\n  path: \/tmp\/audit.json/' /etc/mongod.conf
 
 # Enable --useDeprecatedMongoRocks for 3.6 to be able to start service with mongorocks
-if [ "$VERSIONS" == "3.6" ]; then
+if [ "$VERSION" == "3.6" ]; then
   echo "Adding --useDeprecatedMongoRocks option to mongod.cnf" 
   sed -i '/engine: rocksdb/a \  useDeprecatedMongoRocks: true' /etc/mongod.conf
 fi
@@ -46,7 +46,6 @@ function start_service {
   if [ "${lsbrelease}" != "" -a "${lsbrelease}" = "trusty" ]; then
     echo "starting mongod service directly with init script..."
       /etc/init.d/mongod start
-    fi
   elif [ "${redhatrelease}" = "5"  ]; then
     echo "starting mongod service directly with init script..."
     /etc/init.d/mongod start
