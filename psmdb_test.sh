@@ -45,7 +45,7 @@ function start_service {
   local lsbrelease=$(lsb_release -sc 2>/dev/null || echo "")
   if [ "${lsbrelease}" != "" -a "${lsbrelease}" = "trusty" ]; then
     echo "starting mongod service directly with init script..."
-      /etc/init.d/mongod start
+    /etc/init.d/mongod start
   elif [ "${redhatrelease}" = "5"  ]; then
     echo "starting mongod service directly with init script..."
     /etc/init.d/mongod start
