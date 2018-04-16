@@ -5,6 +5,8 @@ set -e
 
 echo "db.getSiblingDB('admin').auth('dba', '$(grep 'Password:' /tmp/psmdb_auth.txt | awk -F ':' '{print $2}')');" >> ~/.mongorc.js
 
+sleep 5
+
 # check auth
 result=$(mongo admin --eval "$(cat ~/.mongorc.js); db.getUsers()"|grep -c "admin.dba")
 if [ ${result} -ne 1 ]; then
