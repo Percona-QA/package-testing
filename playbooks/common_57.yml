@@ -164,8 +164,8 @@
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb24
 
-# - name: run some MyRocks tests
-#   command: /package-testing/scripts/ps_myrocks_test.sh
+  - name: run some MyRocks tests
+    command: /package-testing/scripts/ps_myrocks_test.sh
 
   - name: install GR plugin
     command: /package-testing/gr.sh
@@ -182,8 +182,8 @@
   - name: run bats unit tests for ps-admin script
     command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
 
-# - name: run bats integration tests for ps-admin script
-#   command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
+  - name: run bats integration tests for ps-admin script
+    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
 
 # Start PAM test
   - group:
@@ -242,11 +242,11 @@
   - name: restart mysql service
     service: name=mysql state=restarted
 
-# - name: run mysql setup for PAM
-#   command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_setup.bats
+  - name: run mysql setup for PAM
+    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_setup.bats
 
-# - name: run bats tests for PAM
-#   command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
+  - name: run bats tests for PAM
+    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
 # End PAM test
 
   - name: install 3rd party packages with apt
@@ -267,10 +267,10 @@
   - name: start mysql service
     service: name=mysql state=started
 
-# - name: uninstall PAM before final package uninstall
-#   command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
+  - name: uninstall PAM before final package uninstall
+    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
 
-# tempory commented out until BLD-906 is fixed
+# temporary commented out until BLD-906 is fixed
 # - name: check that mysqladmin shutdown works correctly
 #   command: /package-testing/madmin_check.sh
 
