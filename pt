@@ -20,6 +20,7 @@ pt-online-schema-change
 pt-pmp
 pt-query-digest
 pt-show-grants
+pt-secure-collect
 pt-sift
 pt-slave-delay
 pt-slave-find
