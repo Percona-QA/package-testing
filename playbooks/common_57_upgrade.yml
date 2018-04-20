@@ -309,8 +309,8 @@
   - name: start mysql service
     service: name=mysql state=started
 
-  - name: uninstall PAM before final package uninstall
-    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
+# - name: uninstall PAM before final package uninstall
+#   command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
 
   - name: remove Percona Server deb packages
     apt: name={{item}} update_cache=no state=absent
