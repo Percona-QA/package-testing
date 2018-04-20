@@ -200,6 +200,14 @@ install_all() {
   else
     OPT="--enable-mysqlx --enable-tokudb --enable-tokubackup --enable-rocksdb"
   fi
+
+  # This first restart is needed only because of these bugs:
+  # https://jira.percona.com/browse/MYR-204
+  # https://jira.percona.com/browse/PS-3817
+  service mysql restart >/dev/null 3>&-
+  [ $? -eq 0 ]
+  sleep 5
+
   #run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam --enable-pam-compat ${OPT}"
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit ${OPT}"
   [ $status -eq 0 ]
