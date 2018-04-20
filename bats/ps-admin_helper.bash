@@ -200,14 +200,16 @@ install_all() {
   else
     OPT="--enable-mysqlx --enable-tokudb --enable-tokubackup --enable-rocksdb"
   fi
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam --enable-pam-compat ${OPT}"
+  #run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam --enable-pam-compat ${OPT}"
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit ${OPT}"
   [ $status -eq 0 ]
 
   service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
   sleep 5
 
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam --enable-pam-compat ${OPT}"
+  #run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam --enable-pam-compat ${OPT}"
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit ${OPT}"
   [ $status -eq 0 ]
 }
 
@@ -219,13 +221,15 @@ uninstall_all() {
   else
     OPT="--disable-mysqlx --disable-tokudb --disable-tokubackup --disable-rocksdb"
   fi
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam --disable-pam-compat ${OPT}"
+  #run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam --disable-pam-compat ${OPT}"
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit ${OPT}"
   [ $status -eq 0 ]
 
   service mysql restart >/dev/null 3>&-
   [ $? -eq 0 ]
   sleep 5
 
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam --disable-pam-compat ${OPT}"
+  #run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam --disable-pam-compat ${OPT}"
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit ${OPT}"
   [ $status -eq 0 ]
 }
