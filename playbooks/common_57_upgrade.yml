@@ -127,64 +127,64 @@
     when: ansible_os_family == "RedHat"
 
 # Start PAM setup
-  - group:
-      name: developer
-      state: present
+# - group:
+#     name: developer
+#     state: present
 
-  - group:
-      name: dbadmin
-      state: present
+# - group:
+#     name: dbadmin
+#     state: present
 
-  - user:
-      name: test_pam
-      shell: /bin/bash
-      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+# - user:
+#     name: test_pam
+#     shell: /bin/bash
+#     password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
 
-  - user:
-      name: test_pam2
-      shell: /bin/bash
-      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
-      groups: developer
-      append: yes
+# - user:
+#     name: test_pam2
+#     shell: /bin/bash
+#     password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+#     groups: developer
+#     append: yes
 
-  - user:
-      name: test_pam3
-      shell: /bin/bash
-      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
-      groups: dbadmin
-      append: yes
+# - user:
+#     name: test_pam3
+#     shell: /bin/bash
+#     password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+#     groups: dbadmin
+#     append: yes
 
-  - user:
-      name: test_pam_compat
-      shell: /bin/bash
-      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+# - user:
+#     name: test_pam_compat
+#     shell: /bin/bash
+#     password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
 
-  - user:
-      name: mysql
-      groups: shadow
-      append: yes
-    when: ansible_os_family == "Debian"
+# - user:
+#     name: mysql
+#     groups: shadow
+#     append: yes
+#   when: ansible_os_family == "Debian"
 
-  - file:
-      path: /etc/shadow
-      group: mysql
-      mode: "g+r"
-    when: ansible_os_family == "RedHat"
+# - file:
+#     path: /etc/shadow
+#     group: mysql
+#     mode: "g+r"
+#   when: ansible_os_family == "RedHat"
 
-  - name: copy config file for mysql PAM into system dir
-    template:
-      src: ../scripts/ps_pam_test/mysqld
-      dest: /etc/pam.d/mysqld
-      owner: root
-      group: root
-      mode: 0644
-      force: yes
+# - name: copy config file for mysql PAM into system dir
+#   template:
+#     src: ../scripts/ps_pam_test/mysqld
+#     dest: /etc/pam.d/mysqld
+#     owner: root
+#     group: root
+#     mode: 0644
+#     force: yes
 
-  - name: restart mysql service
-    service: name=mysql state=restarted
+# - name: restart mysql service
+#   service: name=mysql state=restarted
 
-  - name: run mysql setup for PAM
-    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_setup.bats
+# - name: run mysql setup for PAM
+#   command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_setup.bats
 # End PAM setup
 
 #
