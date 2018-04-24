@@ -277,7 +277,7 @@
     command: /package-testing/version_check.sh pt
 
   - name: finish my.cnf change test
-    command: /vagrant/check_mycnf_post.sh
+    command: /package-testing/check_mycnf_post.sh
 
 # - name: run some MyRocks tests
 #   command: /package-testing/scripts/ps_myrocks_test.sh

@@ -169,7 +169,6 @@
 
   - name: install GR plugin
     command: /package-testing/gr.sh
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "6"
 
   - name: run mysql compression tests script
     command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps57

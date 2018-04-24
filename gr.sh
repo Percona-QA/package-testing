@@ -5,7 +5,7 @@ set -e
 
 if [ -f /etc/redhat-release ]; then
                 echo " RHEL copy gr.cnf"
-                cp /package-testing/templates/group_replication.j2 /etc/percona-server.conf.d/gr.cnf
+                cp /package-testing/templates/group_replication.j2 /etc/my.cnf.d/gr.cnf
         else
                 echo "copy gr.cnf"
                 cp /package-testing/templates/group_replication.j2 /etc/mysql/percona-server.conf.d/gr.cnf
