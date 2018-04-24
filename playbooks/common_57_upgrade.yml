@@ -187,6 +187,9 @@
 #   command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_setup.bats
 # End PAM setup
 
+  - name: start my.cnf change test
+    command: /package-testing/check_mycnf_pre.sh
+
 #
 # Enable testing repository
 #
@@ -272,6 +275,9 @@
 
   - name: check that Percona Toolkit version is correct
     command: /package-testing/version_check.sh pt
+
+  - name: finish my.cnf change test
+    command: /vagrant/check_mycnf_post.sh
 
 # - name: run some MyRocks tests
 #   command: /package-testing/scripts/ps_myrocks_test.sh
