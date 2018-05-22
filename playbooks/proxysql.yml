@@ -16,6 +16,11 @@
 
   - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling main repo
+    include: ../tasks/enable_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
 
   - name: install proxysql new deb packages
     apt: name={{item}} update_cache=yes state=latest
