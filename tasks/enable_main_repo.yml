@@ -12,5 +12,5 @@
     when: ansible_os_family == "Debian"
 
   - name: add the main Percona yum repos for centos 6 and 7
-    yum: name=https://www.percona.com/redir/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
+    yum: name=https://www.percona.com/redir/downloads/percona-release/redhat/0.1-6/percona-release-0.1-6.noarch.rpm
     when: ansible_os_family == "RedHat" 
