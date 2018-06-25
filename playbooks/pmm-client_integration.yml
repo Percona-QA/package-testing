@@ -101,6 +101,9 @@
 
   - name: add mysql metrics and queries to monitoring
     command: pmm-admin add mysql --service-port {{ port_mysql }}
+
+  - name: check if mysql metrics and queries are running
+    command: /package-testing/scripts/pmm_service_check.sh mysql
 ### end PS
 
 ### start PSMDB
@@ -133,6 +136,9 @@
   - name: add mongodb metrics to monitoring
     command: pmm-admin add mongodb --service-port {{ port_mongo }}
     when: ansible_distribution_release != "wheezy"
+
+  - name: check if mongodb metrics and queries are running
+    command: /package-testing/scripts/pmm_service_check.sh mongodb
 ### end PSMDB
 
   - name: run pmm-admin check-network
