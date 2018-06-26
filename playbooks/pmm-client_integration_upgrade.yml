@@ -135,6 +135,11 @@
 
   - name: include tasks for enabling testing repo
     include: ../tasks/enable_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../tasks/enable_experimental_repo.yml
+    when: lookup('env', 'install_repo') == "experimental"
 
   - name: upgrade PMM client to the latest deb packages
     apt: name={{item}} update_cache=yes state=latest
