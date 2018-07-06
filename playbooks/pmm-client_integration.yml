@@ -104,7 +104,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: add mysql metrics and queries to monitoring
-    command: pmm-admin add mysql --service-port {{ port_mysql }}
+    command: pmm-admin add mysql --service-port {{ port_mysql }} --socket /var/run/mysqld/mysqld.sock
 
   - name: check if mysql metrics and queries are running
     command: /package-testing/scripts/pmm_service_check.sh mysql
