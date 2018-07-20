@@ -178,7 +178,7 @@ for engine in mmapv1 PerconaFT rocksdb wiredTiger inMemory; do
       check_rocksdb
     fi
     echo "importing the sample data"
-    mongo < /package-testing/mongo_insert.js >> $log
+    mongo < /package-testing/scripts/mongo_insert.js >> $log
     list_data >> $log
     if [[ ${engine} = "wiredTiger" || ${engine} = "rocksdb" ]] && [[ "$1" != "3.0" ]]; then
       echo "testing the hotbackup functionality"
