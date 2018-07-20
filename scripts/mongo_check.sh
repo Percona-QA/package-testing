@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #checking data after upgrade
-if [ "$(mongo < /vagrant/mongo_check.js | grep -c 14Q3)" -eq 3 ]; then
+if [ "$(mongo < /package-testing/scripts/mongo_check.js | grep -c 14Q3)" -eq 3 ]; then
 	echo "data is here"
 else 
 	echo "data is inconsistent and/or missing after upgrade"
