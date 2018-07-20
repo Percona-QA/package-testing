@@ -77,7 +77,7 @@
     command: /package-testing/package_check.sh psmdb34
 
   - name: test SE change, import data, restart service
-    command: /package-testing/psmdb_test.sh 3.4
+    command: /package-testing/scripts/psmdb_test.sh 3.4
 
   - name: set pass and enable auth
     command: /package-testing/scripts/psmdb_set_auth.sh
