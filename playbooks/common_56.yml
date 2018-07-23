@@ -140,6 +140,12 @@
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb23
 
+  - name: run sysbench prepare script
+    command: sysbench --mysql-user=root --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
+
+  - name: run sysbench benchmart
+    command: sysbench --mysql-user=root --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write run
+
   - name: run sysbench tpcc prepare script
     command: /usr/share/sysbench/tpcc.lua --mysql-user=root --mysql-db=sbt --time=30 --threads=64 --report-interval=1 --tables=3 --scale=5 --db-driver=mysql prepare
 

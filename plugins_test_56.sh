@@ -21,7 +21,10 @@ mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME SONAME 'query_response_time.so';"
 mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME_READ SONAME 'query_response_time.so';"
 mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME_WRITE SONAME 'query_response_time.so';"
 mysql -e "SHOW PLUGINS;"
+# creating sysbench databases
 mysql -e "CREATE DATABASE sbt;"
+mysql -e "CREATE DATABASE sb;"
+# adding world database for SE tests
 mysql -e "CREATE DATABASE world;"
 sed -i '18,21 s/^/-- /' /package-testing/world.sql
 pv /package-testing/world.sql | mysql -D world
