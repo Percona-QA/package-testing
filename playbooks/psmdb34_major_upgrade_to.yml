@@ -58,7 +58,12 @@
   - name: remove Percona Server for MongoDB 3.2 rpm packages
     yum: name={{item}} state=absent
     with_items:
+    - Percona-Server-MongoDB-32
     - Percona-Server-MongoDB-32-server
+    - Percona-Server-MongoDB-32-shell
+    - Percona-Server-MongoDB-32-mongos
+    - Percona-Server-MongoDB-32-tools
+    - Percona-Server-MongoDB-32-debuginfo
     when: ansible_os_family == "RedHat"
 
 #
