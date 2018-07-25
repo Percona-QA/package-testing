@@ -59,6 +59,11 @@
     yum: name={{item}} state=absent
     with_items:
     - Percona-Server-MongoDB-34-server
+    - Percona-Server-MongoDB-34
+    - Percona-Server-MongoDB-34-shell
+    - Percona-Server-MongoDB-34-mongos
+    - Percona-Server-MongoDB-34-tools
+    - Percona-Server-MongoDB-34-debuginfo
     when: ansible_os_family == "RedHat"
 
 #
@@ -90,6 +95,9 @@
     - Percona-Server-MongoDB-36-tools
     - Percona-Server-MongoDB-36-debuginfo
     when: ansible_os_family == "RedHat"
+
+  - name: start mongod service
+    service: name=mongod state=started
 
   - name: check that PSMDB 3.6 package versions are correct
     command: /package-testing/package_check.sh psmdb36
