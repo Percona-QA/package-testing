@@ -94,9 +94,6 @@
   - name: check that PSMDB 3.6 package versions are correct
     command: /package-testing/package_check.sh psmdb36
 
-  - name: test SE change, import data, restart service
-    command: /package-testing/scripts/psmdb_test.sh 3.6
-
   - name: run bats tests for mongo init scripts
     command: /usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats
 
@@ -105,6 +102,9 @@
 
   - name: check that data is still there after upgrade
     command: /package-testing/scripts/mongo_check.sh
+
+  - name: test SE change, import data, restart service
+    command: /package-testing/scripts/psmdb_test.sh 3.6
 
   - name: remove Percona Server for MongoDB 3.6 deb packages
     apt: name={{item}} update_cache=no state=absent
