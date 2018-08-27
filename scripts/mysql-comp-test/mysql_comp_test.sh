@@ -166,7 +166,7 @@ mysql -e "SET GLOBAL TRANSACTION ISOLATION LEVEL REPEATABLE READ;"
 for file in /var/lib/mysql/.rocksdb/*.sst; do
   sst_cf=$(sst_dump --show_properties --file=${file} | grep "column family name:" | sed 's/  column family name: //')
   sst_clib=$(sst_dump --show_properties --file=${file} | grep "SST file compression algo:" | sed 's/  SST file compression algo: //')
-  if [[ "${sst_cf}" = "__system__" && "${sst_clib}" != "LZ4" ]] || [[ "${sst_cf}" = "default" && "${sst_clib}" != "LZ4" ]] || [[ "${sst_cf}" = "cf1" && "${sst_clib}" != "Zlib" ]] || [[ "${sst_cf}" = "cf2" && "${sst_clib}" != "LZ4" ]] || [[ "${sst_cf}" = "cf3" && "${sst_clib}" != "ZSTD" ]] || [[ "${sst_cf}" = "cf4" && "${sst_clib}" != "NoCompression" ]]; then
+  if [[ "${sst_cf}" = "__system__" && "${sst_clib}" != "LZ4" ]] || [[ "${sst_cf}" = "default" && "${sst_clib}" != "LZ4" ]] || [[ "${sst_cf}" = "cf1" && "${sst_clib}" != "Zlib" ]] || [[ "${sst_cf}" = "cf2" && "${sst_clib}" != "LZ4" ]] || [[ "${sst_cf}" = "cf3" && "${sst_clib}" != "ZSTDNotFinal" ]] || [[ "${sst_cf}" = "cf4" && "${sst_clib}" != "NoCompression" ]]; then
     echo "SST file ${file} has column family ${sst_cf} and compression library ${sst_clib} which seems incorrect!"
     exit 1
   fi
