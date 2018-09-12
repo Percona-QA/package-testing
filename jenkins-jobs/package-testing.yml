@@ -28,12 +28,9 @@
     block-downstream: false
     block-upstream: false
     builders:
-    - raw:
-        xml: |
-          <hudson.plugins.descriptionsetter.DescriptionSetterBuilder plugin="description-setter@1.10">
-          <regexp />
-          <description>${product_to_test}</description>
-          </hudson.plugins.descriptionsetter.DescriptionSetterBuilder>
+    - description-setter:
+            regexp: ""
+            description: "${product_to_test}"
     - shell: |-
         # enable console output coloring
         #export ANSIBLE_FORCE_COLOR=true
@@ -235,22 +232,28 @@
         perl -0777 -pi -e 's:<skipped\/>\n</test:<skipped\/><\/testcase>\n</test:g' ${WORKSPACE}/junit.xml
         #
         exit ${exitstatus}
+    - 
+
+    - system-groovy:
+
+
     - raw:
         xml: |
           <hudson.plugins.groovy.SystemGroovy plugin="groovy@2.0">
           <source class="hudson.plugins.groovy.StringSystemScriptSource">
           <script plugin="script-security@1.44">
-          <script>import jenkins.model.*
+              <script>import jenkins.model.*
 
-          def currentBuild = Thread.currentThread().executable
-          def log = currentBuild.log
-          if (log.contains('### WARNING_NODE_SKIPPED_AS_PLATFORM_NOT_SUPPORTED ###')) {
-          currentBuild.result = hudson.model.Result.UNSTABLE
-          }</script>
+                def currentBuild = Thread.currentThread().executable
+                def log = currentBuild.log
+                if (log.contains('### WARNING_NODE_SKIPPED_AS_PLATFORM_NOT_SUPPORTED ###')) {
+                currentBuild.result = hudson.model.Result.UNSTABLE
+                }</script>
           <sandbox>false</sandbox>
           </script>
           </source>
           </hudson.plugins.groovy.SystemGroovy>
+
     concurrent: false
     disabled: false
     execution-strategy:
