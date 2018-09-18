@@ -2,7 +2,7 @@
 
 set -e
 #pgrep on CentOS 6 doesn't support -c so this is a workaround
-if [ "$(grep -c 6 /etc/redhat-release)" -eq 1 ]; then
+if [ -f /etc/redhat-release ] && [ "$(grep -c 6 /etc/redhat-release)" -eq 1 ]; then
         psoutput=$(pgrep proxysql | wc -l)
 else
         psoutput=$(pgrep -c proxysql)
