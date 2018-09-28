@@ -124,13 +124,13 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: install tokudb and restart server
-    command: /usr/bin/ps-admin --enable-tokudb
+    command: /usr/bin/ps-admin --enable-tokudb --enable-tokubackup
 
   - name: restart mysql service
     service: name=mysql state=restarted
 
-  - name: re-run ps_tokudb_admin to finish tokudb install
-    command: /usr/bin/ps-admin --enable-tokubackup
+  - name: re-run ps-admin to finish tokudb install
+    command: /usr/bin/ps-admin --enable-tokudb --enable-tokubackup
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps80
