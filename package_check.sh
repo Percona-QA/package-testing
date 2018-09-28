@@ -3,7 +3,7 @@
 set -e
 
 if [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps55, ps56 or ps57 !"
+  echo "This script requires product parameter: ps55, ps56, ps57 or ps80!"
   echo "Usage: ./package_check.sh <prod>"
   exit 1
 fi
@@ -24,6 +24,10 @@ elif [ $1 = "ps57" ]; then
   version=${PS57_VER}
   release=${PS57_VER#*-}
   revision=${PS57_REV}
+elif [ $1 = "ps80" ]; then
+  version=${PS80_VER}
+  release=${PS80_VER#*-}
+  revision=${PS80_REV}
 elif [ $1 = "pxc56" ]; then
   version=${PXC56_VER}
   release=${PXC56_VER#*-}
@@ -40,6 +44,9 @@ elif [ $1 = "pxb23" ]; then
 elif [ $1 = "pxb24" ]; then
   version=${PXB24_VER}
   pkg_version=${PXB24_PKG_VER}
+elif [ $1 = "pxb80" ]; then
+  version=${PXB80_VER}
+  pkg_version=${PXB80_PKG_VER}
 elif [ $1 = "psmdb30" ]; then
   version=${PSMDB30_VER}
 elif [ $1 = "psmdb32" ]; then
@@ -59,7 +66,7 @@ product=$1
 log="/tmp/${product}_package_check.log"
 echo -n > $log
 
-if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" ]; then
+if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
   if [ -f /etc/redhat-release ]; then
     centos_maj_version=$(cat /etc/redhat-release | grep -oE '[0-9]+' | head -n 1)
     rpm_maj_version=$(echo ${product} | sed 's/^[a-z]*//') # 56
@@ -74,7 +81,7 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" ]; then
     elif [ ${product} = "ps56" ]; then
       rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version}"
       rpm_num_pkgs="7"
-    elif [ ${product} = "ps57" ]; then
+    elif [ ${product} = "ps57" -o ${product} = "ps57" ]; then
       if [ ${centos_maj_version} == "7" ]; then
         rpm_num_pkgs="8"
         rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-shared-compat-${rpm_maj_version}"
@@ -176,9 +183,11 @@ elif [ ${product} = "pmm" ]; then
   echo "Package check for PMM is not implemented!"
   exit 1
 
-elif [ ${product} = "pxb23" -o ${product} = "pxb24" ]; then
+elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; then
   if [ ${product} = "pxb24" ]; then
     extra_version="-24"
+  elif [ ${product} = "pxb80"]; then
+    extra_version="-80"
   else
     extra_version=""
   fi

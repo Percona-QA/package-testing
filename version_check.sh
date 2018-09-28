@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps55, ps56 or ps57 !"
+  echo "This script requires product parameter: ps55, ps56, ps57 or ps80!"
   echo "Usage: ./version_check.sh <prod>"
   exit 1
 fi
@@ -22,6 +22,10 @@ elif [ $1 = "ps57" ]; then
   version=${PS57_VER}
   release=${PS57_VER#*-}
   revision=${PS57_REV}
+elif [ $1 = "ps80" ]; then
+  version=${PS80_VER}
+  release=${PS80_VER#*-}
+  revision=${PS80_REV}
 elif [ $1 = "pxc56" ]; then
   version=${PXC56_VER%-*}
   release=${PXC56_VER#*-}
@@ -40,6 +44,8 @@ elif [ $1 = "pxb23" ]; then
   version=${PXB23_VER}
 elif [ $1 = "pxb24" ]; then
   version=${PXB24_VER}
+elif [ $1 = "pxb80" ]; then
+  version=${PXB80_VER}
 elif [ $1 = "pmm" ]; then
   version=${PMM_VER}
 elif [ $1 = "proxysql" ]; then
@@ -55,7 +61,7 @@ product=$1
 log="/tmp/${product}_version_check.log"
 echo -n > ${log}
 
-if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" ]; then
+if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
   for i in @@INNODB_VERSION @@VERSION @@TOKUDB_VERSION; do
     if [ ${product} = "ps55" -a ${i} = "@@TOKUDB_VERSION" ]; then
       echo "${i} is empty" >> ${log}
@@ -118,7 +124,7 @@ elif [ ${product} = "pmm" ]; then
     echo "${product} version is correct and ${version}" >> ${log}
   fi
 
-elif [ ${product} = "pxb23" -o ${product} = "pxb24" ]; then
+elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; then
   version_check=$(xtrabackup --version 2>&1|grep -c ${version})
     if [ ${version_check} -eq 0 ]; then
       echo "${product} version is not good!"
