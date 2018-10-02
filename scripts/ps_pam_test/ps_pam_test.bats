@@ -23,12 +23,14 @@ fi
 
 @test "check auth_pam_compat successful connect" {
   export LIBMYSQL_ENABLE_CLEARTEXT_PLUGIN=1
+  # notice there's also --enable-cleartext-plugin option for this
   run mysql ${CONNECTION} -N -s -utest_pam_compat -ptest1234 -e "SELECT * FROM test_pam_table;" test_pam
   [ "$status" -eq 0 ]
 }
 
 @test "check auth_pam_compat unsuccessful connect" {
   export LIBMYSQL_ENABLE_CLEARTEXT_PLUGIN=1
+  # notice there's also --enable-cleartext-plugin option for this
   run mysql ${CONNECTION} -N -s -utest_pam_compat -ptest12345 -e "SELECT * FROM test_pam_table;" test_pam
   [ "$status" -eq 1 ]
 }
