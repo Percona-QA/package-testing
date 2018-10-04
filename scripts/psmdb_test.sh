@@ -191,3 +191,36 @@ for engine in mmapv1 PerconaFT rocksdb wiredTiger inMemory; do
   fi
   start_service
 done
+
+if [ "$1" != "3.4" ]; then
+  for cipher in AES256-CBC AES256-GCM; do
+    echo "preparing datadir for testing encryption with ${cipher}"
+    stop_service
+    clean_datadir
+    sed -i "/^  engine: /s/^/#/g" /etc/mongod.conf
+    engine="wiredTiger"
+    sed -i "/engine: *${engine}/s/#//g" /etc/mongod.conf
+    echo "testing encryption with ${cipher}"
+    if [ ${cipher} = "AES256-CBC" ]; then
+      sed -i "s/#security:/security:\n  enableEncryption: true\n  encryptionCipherMode: ${cipher}\n  encryptionKeyFile: \/package-testing\/scripts\/mongodb-keyfile/" /etc/mongod.conf
+    else
+      sed -i "s/encryptionCipherMode: AES256-CBC/encryptionCipherMode: AES256-GCM/" /etc/mongod.conf
+    fi
+    start_service
+    if [ "$(mongo --quiet --eval "db.serverCmdLineOpts().parsed.security.enableEncryption" | tail -n1)" != "true" ]; then
+      echo "ERROR: Encryption is not enabled!"
+      exit 1
+    elif [ "$(mongo --quiet --eval "db.serverCmdLineOpts().parsed.security.encryptionCipherMode" | tail -n1)" != "${cipher}" ]; then
+      echo "ERROR: Cipher mode is not set to: ${cipher}"
+      exit 1
+    elif [ "$(mongo --quiet --eval "db.serverCmdLineOpts().parsed.security.encryptionKeyFile" | tail -n1)" != "/package-testing/scripts/mongodb-keyfile" ]; then
+      echo "ERROR: Encryption key file is not set to: /package-testing/scripts/mongodb-keyfile"
+      exit 1
+    fi
+    echo "adding some data and indexes with cipher ${cipher}"
+    mongo localhost:27017/test --eval "for(i=1; i <= 100000; i++) { db.series.insert( { id: i, name: 'series'+i })}"
+    mongo localhost:27017/test --eval "db.series.ensureIndex({ name: 1 })"
+    echo "testing the hotbackup functionality with ${cipher}"
+    test_hotbackup
+  done
+fi
