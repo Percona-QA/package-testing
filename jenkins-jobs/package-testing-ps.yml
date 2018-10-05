@@ -1,0 +1,238 @@
+- job:
+    axes:
+    - axis:
+        name: vagrant_node
+        type: user-defined
+        values:
+        - d-jessie-64
+        - d-stretch-64
+        - centos-6-64
+        - centos-7-64
+        - u-trusty-64
+        - u-xenial-64
+        - u-bionic-64
+    - axis:
+        name: test_type
+        type: user-defined
+        values:
+        - install
+        - upgrade
+        - maj-upgrade-to
+        - maj-upgrade-from
+    - axis:
+        name: label_exp
+        type: label-expression
+        values:
+        - pkgtest
+    block-downstream: false
+    block-upstream: false
+    builders:
+    - description-setter:
+        description: "${product_to_test}"
+    - shell: |-
+        # enable console output coloring
+        #export ANSIBLE_FORCE_COLOR=true
+        #
+        # select ansible playbook based on the product tested and test type
+        ansible_playbook=""
+        if [ ${product_to_test} = "ps55" ]; then
+        distro_matrix=("d-jessie-64" "d-stretch-64" "centos-6-64" "centos-7-64" "u-trusty-64" "u-xenial-64" "u-bionic-64")
+        if [ ${test_type} = "install" ]; then
+        ansible_playbook="common_55.yml"
+        elif [ ${test_type} = "upgrade" ]; then
+        ansible_playbook="common_55_upgrade.yml"
+        fi
+        elif [ ${product_to_test} = "ps56" ]; then
+        distro_matrix=("d-jessie-64" "d-stretch-64" "centos-6-64" "centos-7-64" "u-trusty-64" "u-xenial-64" "u-bionic-64")
+        if [ ${test_type} = "install" ]; then
+        ansible_playbook="common_56.yml"
+        elif [ ${test_type} = "upgrade" ]; then
+        ansible_playbook="common_56_upgrade.yml"
+        fi
+        elif [ ${product_to_test} = "ps57" ]; then
+        distro_matrix=("d-jessie-64" "d-stretch-64" "centos-6-64" "centos-7-64" "u-trusty-64" "u-xenial-64" "u-bionic-64")
+        if [ ${test_type} = "install" ]; then
+        ansible_playbook="common_57.yml"
+        elif [ ${test_type} = "upgrade" ]; then
+        ansible_playbook="common_57_upgrade.yml"
+        fi
+        elif [ ${product_to_test} = "ps80" ]; then
+        distro_matrix=("d-stretch-64" "centos-6-64" "centos-7-64" "u-xenial-64" "u-bionic-64")
+        if [ ${test_type} = "install" ]; then
+        ansible_playbook="ps_80.yml"
+        elif [ ${test_type} = "upgrade" ]; then
+        ansible_playbook="ps_80_upgrade.yml"
+        fi
+        elif [ ${product_to_test} = "client_test" ]; then
+        distro_matrix=("d-jessie-64" "d-stretch-64" "centos-6-64" "centos-7-64" "u-trusty-64" "u-xenial-64" "u-bionic-64")
+        if [ ${test_type} = "install" ]; then
+        ansible_playbook="client_test.yml"
+        elif [ ${test_type} = "upgrade" ]; then
+        ansible_playbook=""
+        fi
+        fi
+        #
+        if [ -z ${ansible_playbook} ]; then
+        echo "There is no ansible playbook for the specified product!";
+        echo "### WARNING_NODE_SKIPPED_AS_NO_PLAYBOOK_AVAILABLE ###"
+        echo "<testsuite name=\"${product_to_test}-${test_type}\"><testcase name=\"whole suite\"><skipped/></testcase></testsuite>" > junit.xml
+        exit 0
+        fi
+        #
+        # check if for given product we test the current distro/arch
+        if [[ ! " ${distro_matrix[@]} " =~ " ${vagrant_node} " ]]; then
+        echo "### WARNING_NODE_SKIPPED_AS_PLATFORM_NOT_SUPPORTED ###"
+        #echo "<testsuite name=\"${product_to_test}-${test_type}\"><skipped/></testsuite>" > junit.xml
+        echo "<testsuite name=\"${product_to_test}-${test_type}\"><testcase name=\"whole suite\"><skipped/></testcase></testsuite>" > junit.xml
+        exit 0
+        fi
+        #
+        vagrant_machine="${vagrant_node}-${test_type}"
+        ansible_playbook_full="package-testing/playbooks/${ansible_playbook}"
+
+        # seems this is needed for ansible playbook to see this env variable
+        export install_repo="${install_repo}"
+        export client_to_test="${client_to_test}"
+
+        # prepare proper Vagrantfile from template
+        rm -f Vagrantfile
+        rm -f output.txt
+        rm -f junit.xml
+        cp package-testing/Vagrantfile.template.normal Vagrantfile
+        #sed -i "s:@@product@@:${product_to_test}:g" Vagrantfile
+        sed -i "s:@@hostname@@:${test_type}:g" Vagrantfile
+        sed -i "s:@@playbook_full@@:${ansible_playbook_full}:g" Vagrantfile
+        # run tests
+        set +e
+        #sleep $(( 5 + ( RANDOM % 20 ) + 1 ))
+        #NUM_STARTING=1
+        #while [ ${NUM_STARTING} -gt 0 ]; do
+        #  echo "waiting for other vms to start..."
+        #  sleep 1
+        #  NUM_STARTING=$(vboxmanage list vms -l|grep State|grep -c starting)
+        #done
+
+        STARTED=0
+        while [ ${STARTED} -eq 0 ]; do
+        rm -rf ${WORKSPACE}/output.txt
+        # clean previous vm if exists
+        vagrant destroy -f ${vagrant_machine} || true
+        sleep 5
+        vagrant up ${vagrant_machine} 2>&1 | tee ${WORKSPACE}/output.txt
+        exitstatus=${PIPESTATUS[0]}
+        STARTED=$(grep -c -E "PLAY \[.*\*$" ${WORKSPACE}/output.txt)
+        done
+
+        # we want to delete the machine so it doesn't consume resources
+        if [ ${dont_delete} = false ]; then
+        vagrant destroy -f ${vagrant_machine} || true
+        fi
+
+        awk -v suite=test 'BEGIN { print "<testsuite name=\""suite"\">" } /^TASK \[.*\] .*$/ { print "<testcase name=\""$0"\"/>" } /^(failed: |fatal: |unreachable: )(\[(.*?)\])/ { print "<failure>"$0"</failure></testcase>" } /^skipping: \[.*\] .*$/ { print "<skipped/>" } END { print "</testsuite>" }' < ${WORKSPACE}/output.txt > ${WORKSPACE}/junit.xml
+        sed -i 's/TASK\ \[//g' ${WORKSPACE}/junit.xml
+        sed -i 's/\] \**//g' ${WORKSPACE}/junit.xml
+        perl -0777 -pi -e 's:\/>\n<failure>:>\n<failure>:g' ${WORKSPACE}/junit.xml
+        perl -0777 -pi -e 's:(<skipped\/>\n)+:<skipped\/>\n:g' ${WORKSPACE}/junit.xml
+        perl -0777 -pi -e 's:\/>\n<skipped\/>:>\n<skipped\/>:g' ${WORKSPACE}/junit.xml
+        perl -0777 -pi -e 's:<skipped\/>\n<test:<skipped\/><\/testcase>\n<test:g' ${WORKSPACE}/junit.xml
+        perl -0777 -pi -e 's:<skipped\/>\n</test:<skipped\/><\/testcase>\n</test:g' ${WORKSPACE}/junit.xml
+        #
+        exit ${exitstatus}
+    - groovy:
+        version: "Groovy 2.0"
+        command: "
+          import jenkins.model.*
+
+          def currentBuild = Thread.currentThread().executable
+          def log = currentBuild.log
+          if (log.contains('### WARNING_NODE_SKIPPED_AS_PLATFORM_NOT_SUPPORTED ###') || log.contains('### WARNING_NODE_SKIPPED_AS_NO_PLAYBOOK_AVAILABLE ###')) {
+          currentBuild.result = hudson.model.Result.UNSTABLE
+          }"
+    concurrent: false
+    disabled: false
+    execution-strategy:
+      sequential: false
+    name: package-testing-ps
+    parameters:
+    - choice:
+        choices:
+        - ps80
+        - ps57
+        - ps56
+        - ps55
+        - client_test
+        description: |-
+          <b>Product and major version for which the packages will be tested</b><br>
+          <b>Following ansible playbooks are used:</b><br>
+          common_55, common_55_upgrade (ps55, pxb23)<br>
+          common_56, common_56_upgrade (ps56, pxb23)<br>
+          common_57, common_57_upgrade (ps57, pxb24)<br>
+          ps_80, ps_80_upgrade (ps80, pxb80)<br>
+          client_test (client_test)<br>
+        name: product_to_test
+    - choice:
+        choices:
+        - testing
+        - main
+        - experimental
+        description: For playbooks that support chosing another repo in install test
+        name: install_repo
+    - choice:
+        choices:
+        - ps55
+        - ps56
+        - ps57
+        - ps80
+        description: For client_test playbook which checks that only client packages
+          can be installed
+        name: client_to_test
+    - bool:
+        default: false
+        description: use this to leave node on disk after the test finishes so you
+          can start it again and connect
+        name: dont_delete
+    - string:
+        default: https://github.com/Percona-QA/package-testing.git
+        description: ''
+        name: git_repo
+        trim: false
+    - matrix-combinations:
+        name: matrix_param
+        description: "Select matrix combinations"
+    project-type: matrix
+    properties:
+    - build-blocker:
+        use-build-blocker: false
+        block_level: 'GLOBAL'
+        queue-scanning: 'DISABLED'
+    - build-discarder:
+        artifact-days-to-keep: -1
+        artifact-num-to-keep: -1
+        days-to-keep: -1
+        num-to-keep: 15
+    publishers:
+    - archive:
+        allow-empty: false
+        artifacts: junit.xml, output.txt
+        case-sensitive: true
+        default-excludes: true
+        fingerprint: false
+        only-if-success: false
+    - junit: 
+        results: junit.xml
+        keep-long-stdio: false
+        health-scale-factor: 1.0
+        allow-empty-results: false
+    scm:
+    - git:
+        basedir: package-testing
+        branches:
+        - '*/master'
+        clean:
+          after: true
+        url: ${git_repo}
+    triggers: []
+    wrappers:
+    - timestamps
+    - ansicolor:
+        colormap: xterm
