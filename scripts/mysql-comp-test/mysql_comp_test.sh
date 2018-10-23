@@ -3,7 +3,7 @@
 set -e
 
 if [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps56, ps58 or ps80 !"
+  echo "This script requires product parameter: ps56, ps57 or ps80 !"
   echo "Usage: ./comp_test.sh <prod>"
   exit 1
 elif [ $1 != "ps56" -a $1 != "ps57" -a $1 != "ps80" ]; then
