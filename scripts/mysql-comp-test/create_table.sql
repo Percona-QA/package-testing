@@ -7,7 +7,7 @@ CREATE TABLE t1_@@SE_COMP@@ (
 	a4 TIMESTAMP,
 	a5 TEXT CHARACTER SET 'utf8' COLLATE 'utf8_bin',
 	PRIMARY KEY (a1) @@COMMENT_PARTITIONED@@
-) ENGINE=@@SE@@ @@ROW_FORMAT_OPT@@ PARTITION BY HASH(a1) PARTITIONS 4;
+) ENGINE=@@SE@@ PARTITION BY HASH(a1) PARTITIONS 4;
 
 CREATE TABLE t2_@@SE_COMP@@ (
 	a1 DATE,
@@ -16,7 +16,7 @@ CREATE TABLE t2_@@SE_COMP@@ (
 	a4 varchar(100) COLLATE 'latin1_bin', -- TODO this originally should have been JSON but moved to varchar because of MYR-152
 	a5 float(25,5),
 	PRIMARY KEY (a1) @@COMMENT@@
-) ENGINE=@@SE@@ @@ROW_FORMAT_OPT@@;
+) ENGINE=@@SE@@;
 
 CREATE TABLE t3_@@SE_COMP@@ (
 	a1 varchar(255) COLLATE 'binary',
@@ -25,4 +25,4 @@ CREATE TABLE t3_@@SE_COMP@@ (
 	a4 SET('one', 'two', 'three'),
 	a5 ENUM('x-small', 'small', 'medium', 'large', 'x-large'),
 	PRIMARY KEY (a1) @@COMMENT@@
-) ENGINE=@@SE@@ @@ROW_FORMAT_OPT@@;
+) ENGINE=@@SE@@;
