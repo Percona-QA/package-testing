@@ -162,8 +162,8 @@
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
 
-# - name: run mysql compression tests script
-#   command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps57
+  - name: run mysql compression tests script
+    command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps80
 
   - name: run bats unit tests for ps-admin script
     command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats

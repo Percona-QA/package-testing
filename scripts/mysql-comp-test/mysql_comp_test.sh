@@ -20,7 +20,7 @@ else
 fi
 
 # if the server supports RocksDB options for column families need to be specified before running mysql
-if [ $1 = "ps57" ]; then
+if [ $1 != "ps56" ]; then
   service mysql stop
   sleep 10
   echo -e "\n[mysqld]" >> ${MYCNF}
@@ -68,22 +68,20 @@ for se in TokuDB RocksDB; do
             sed -i "s/ @@COMMENT_PARTITIONED@@//g" /tmp/create_table.sql
             old_row_format="${new_row_format}"
             if [ ${comp_lib} = "no" ]; then
-              new_row_format="ROW_FORMAT=TOKUDB_UNCOMPRESSED"
+              new_row_format="tokudb_uncompressed"
             elif [ ${comp_lib} = "default" ]; then
-              new_row_format=""
+              new_row_format="tokudb_quicklz"
             elif [ ${comp_lib} = "zlib" ]; then
-              new_row_format="ROW_FORMAT=TOKUDB_ZLIB"
+              new_row_format="tokudb_zlib"
             elif [ ${comp_lib} = "quicklz" ]; then
-              new_row_format="ROW_FORMAT=TOKUDB_QUICKLZ"
+              new_row_format="tokudb_quicklz"
             elif [ ${comp_lib} = "lzma" ]; then
-              new_row_format="ROW_FORMAT=TOKUDB_LZMA"
+              new_row_format="tokudb_lzma"
             elif [ ${comp_lib} = "snappy" ]; then
-              new_row_format="ROW_FORMAT=TOKUDB_SNAPPY"
+              new_row_format="tokudb_snappy"
             fi
-              sed -i "s/ @@ROW_FORMAT_OPT@@/ ${new_row_format}/g" /tmp/create_table.sql
           fi
           if [ ${se} = "RocksDB" ]; then
-            sed -i "s/ @@ROW_FORMAT_OPT@@//g" /tmp/create_table.sql
             old_cf="${new_cf}"
             if [ ${comp_lib} = "no" ]; then
               new_cf="cf4"
@@ -100,13 +98,14 @@ for se in TokuDB RocksDB; do
               new_comment=""
               new_comment_partitioned=""
             else
-              new_comment="COMMENT '${new_cf}'"
+              new_comment="COMMENT 'cfname=${new_cf}'"
               new_comment_partitioned="COMMENT 'p0_cfname=${new_cf};p1_cfname=${new_cf};p2_cfname=${new_cf};p3_cfname=${new_cf}'"
             fi
             sed -i "s/ @@COMMENT_PARTITIONED@@/ ${new_comment_partitioned}/g" /tmp/create_table.sql
             sed -i "s/ @@COMMENT@@/ ${new_comment}/g" /tmp/create_table.sql
           fi
 
+          mysql -e "set global tokudb_row_format=${new_row_format};"
           mysql < /tmp/create_table.sql
         fi
 
@@ -125,7 +124,8 @@ for se in TokuDB RocksDB; do
             mysql -Dcomp_test -e "OPTIMIZE TABLE ${table}_${se}_no;" >> /tmp/optimize_table.txt
             mysql -Dcomp_test -e "SELECT * FROM ${table}_${se}_no INTO OUTFILE '${secure_file_priv}/${table}_${se}_${new}_alter_innodb.txt';"
             if [ ${se} = "TokuDB" ]; then
-              mysql -Dcomp_test -e "ALTER TABLE ${table}_${se}_no ENGINE=${se} ${new_row_format};"
+              mysql -e "set global tokudb_row_format=${new_row_format};"
+              mysql -Dcomp_test -e "ALTER TABLE ${table}_${se}_no ENGINE=${se};"
             else
               mysql -Dcomp_test -e "ALTER TABLE ${table}_${se}_no ENGINE=${se};"
             fi
@@ -138,7 +138,8 @@ for se in TokuDB RocksDB; do
             mysql -Dcomp_test -e "OPTIMIZE TABLE ${table}_${se}_${new};" >> /tmp/optimize_table.txt
             mysql -Dcomp_test -e "SELECT * FROM ${table}_${se}_${new} INTO OUTFILE '${secure_file_priv}/${table}_${se}_${new}.txt';"
             if [ ${se} = "TokuDB" ]; then
-              mysql -Dcomp_test -e "ALTER TABLE ${table}_${se}_no ENGINE=TokuDB ${new_row_format};"
+              mysql -e "set global tokudb_row_format=${new_row_format};"
+              mysql -Dcomp_test -e "ALTER TABLE ${table}_${se}_no ENGINE=TokuDB;"
               mysql -Dcomp_test -e "OPTIMIZE TABLE ${table}_${se}_no;" >> /tmp/optimize_table.txt
               mysql -Dcomp_test -e "SELECT * FROM ${table}_${se}_no INTO OUTFILE '${secure_file_priv}/${table}_${se}_${new}_alter.txt';"
             else
@@ -169,6 +170,19 @@ for file in /var/lib/mysql/.rocksdb/*.sst; do
   if [[ "${sst_cf}" = "__system__" && "${sst_clib}" != "LZ4" ]] || [[ "${sst_cf}" = "default" && "${sst_clib}" != "LZ4" ]] || [[ "${sst_cf}" = "cf1" && "${sst_clib}" != "Zlib" ]] || [[ "${sst_cf}" = "cf2" && "${sst_clib}" != "LZ4" ]] || [[ "${sst_cf}" = "cf3" && "${sst_clib}" != "ZSTDNotFinal" ]] || [[ "${sst_cf}" = "cf4" && "${sst_clib}" != "NoCompression" ]]; then
     echo "SST file ${file} has column family ${sst_cf} and compression library ${sst_clib} which seems incorrect!"
     exit 1
+  fi
+done
+
+# check if TokuDB files contain proper compression libraries used
+for file in /var/lib/mysql/comp_test/*TokuDB*_main_*.tokudb;
+do
+  filename_comp=$(echo "${file}" | sed "s:/.*/::" | sed "s:.*TokuDB_::" | sed "s:_main_.*::" | sed "s:_P_.*::")
+  file_comp=$(tokuftdump --header ${file}|grep "compression_method"|sed 's/ compression_method=//';)
+  if [ ${filename_comp} != "no"  ]; then
+    if [[ "${filename_comp}" = "quicklz" && "${file_comp}" -ne "9" ]] || [[ "${filename_comp}" = "zlib" && "${file_comp}" -ne "11" ]] || [[ "${filename_comp}" = "lzma" && "${file_comp}" -ne "10" ]] || [[ "${filename_comp}" = "snappy" && "${file_comp}" -ne "7" ]] || [[ "${filename_comp}" = "default" && "${file_comp}" -ne "9" ]]; then
+      echo "TokuDB file ${file} has compression algorithm ${file_comp} and it should be ${filename_comp} which seems incorrect!"
+      exit 1
+    fi
   fi
 done
 
