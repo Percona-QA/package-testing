@@ -3,20 +3,12 @@
 
   - name: Install percona repository package
     apt:
-      deb: https://repo.percona.com/apt/percona-release_0.1-6.{{ansible_lsb.codename}}_all.deb
-    when: ansible_os_family == "Debian" 
-
-  - name: add the Percona testing deb repo
-    apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_lsb.codename }} main testing' state=present update_cache=yes
+      deb: https://repo.percona.com/apt/percona-release_0.1-8.{{ansible_lsb.codename}}_all.deb
     when: ansible_os_family == "Debian"
 
   - name: add the Percona testing yum repos for centos 6 and 7
-    yum: name=https://www.percona.com/redir/downloads/percona-release/redhat/0.1-6/percona-release-0.1-6.noarch.rpm
-    when: ansible_os_family == "RedHat"
+    yum: name=https://repo.percona.com/yum/percona-release-0.1-8.noarch.rpm
+    when: ansible_os_family == "RedHat" 
 
-  - name: change the default repo in yum repo file to testing
-    command: "{{ item }}"
-    with_items:
-      - sed -r -i '/^baseurl = http:\/\/repo.percona.com\/testing\/\$releasever\/RPMS\/\$basearch$/ { n ; s/^enabled = .*$/enabled = 1/ }' /etc/yum.repos.d/percona-release.repo
-      - sed -r -i '/^baseurl = http:\/\/repo.percona.com\/testing\/\$releasever\/RPMS\/noarch$/ { n ; s/^enabled = .*$/enabled = 1/ }' /etc/yum.repos.d/percona-release.repo
-    when: ansible_os_family == "RedHat"
+  - name: change the default repo to experimental
+    command: percona-release enable-only percona testing
