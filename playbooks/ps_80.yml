@@ -41,12 +41,12 @@
   - name: install Percona Server new deb packages
     apt: name={{item}} update_cache=no state=latest
     with_items:
-    - percona-server-server-8.0
-    - percona-server-test-8.0
-    - percona-server-8.0-dbg
-    - percona-server-source-8.0
-    - percona-server-tokudb-8.0
-    - percona-server-rocksdb-8.0
+    - percona-server-server
+    - percona-server-test
+    - percona-server-dbg
+    - percona-server-source
+    - percona-server-tokudb
+    - percona-server-rocksdb
     when: ansible_os_family == "Debian"
 
   - name: install Percona XtraBackup new deb packages
@@ -73,12 +73,12 @@
   - name: install Percona Server new rpm packages
     yum: name={{item}} state=latest
     with_items:
-    - Percona-Server-server-80
-    - Percona-Server-test-80
-    - Percona-Server-80-debuginfo
-    - Percona-Server-devel-80
-    - Percona-Server-tokudb-80
-    - Percona-Server-rocksdb-80
+    - percona-perver-server
+    - percona-perver-test
+    - percona-perver-debuginfo
+    - percona-perver-devel
+    - percona-perver-tokudb
+    - percona-perver-rocksdb
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Toolkit new rpm packages
@@ -98,12 +98,6 @@
   - name: start mysql service with service command
     command: service mysql start
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
-## remove this after BLD-785 is fixed
-  - name: start mysql service with service command
-    command: service mysql start
-    when: ansible_os_family == "Debian" 
-## remove this after BLD-785 is fixed
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
@@ -256,20 +250,19 @@
   - name: uninstall PAM before final package uninstall
     command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
 
-# temporary commented out until BLD-906 is fixed
-# - name: check that mysqladmin shutdown works correctly
-#   command: /package-testing/madmin_check.sh
+  - name: check that mysqladmin shutdown works correctly
+x   command: /package-testing/madmin_check.sh
 
   - name: remove Percona Server deb packages
     apt: name={{item}} update_cache=no state=absent
     with_items:
-    - percona-server-server-8.0
+    - percona-server-server*
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server rpm packages
     yum: name={{item}} state=absent
     with_items:
-    - Percona-Server-server-80
+    - percona-server-server*
     when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal
