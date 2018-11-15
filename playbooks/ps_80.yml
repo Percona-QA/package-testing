@@ -77,12 +77,12 @@
   - name: install Percona Server new rpm packages
     yum: name={{item}} state=latest
     with_items:
-    - percona-perver-server
-    - percona-perver-test
-    - percona-perver-debuginfo
-    - percona-perver-devel
-    - percona-perver-tokudb
-    - percona-perver-rocksdb
+    - percona-server-server
+    - percona-server-test
+    - percona-server-debuginfo
+    - percona-server-devel
+    - percona-server-tokudb
+    - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Toolkit new rpm packages
