@@ -10,5 +10,5 @@
     yum: name=https://repo.percona.com/yum/percona-release-0.1-8.noarch.rpm
     when: ansible_os_family == "RedHat" 
 
-  - name: change the default repo to testing
-    command: percona-release enable percona testing
+  - name: enable the PS-80 testing repo
+    command: percona-release enable ps-80 testing
