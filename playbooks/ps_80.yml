@@ -251,7 +251,7 @@
     command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
 
   - name: check that mysqladmin shutdown works correctly
-x   command: /package-testing/madmin_check.sh
+    command: /package-testing/madmin_check.sh
 
   - name: remove Percona Server deb packages
     apt: name={{item}} update_cache=no state=absent
