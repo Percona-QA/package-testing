@@ -107,7 +107,11 @@ uninstall_mysqlx() {
 
 check_mysqlx_notexists() {
   result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "mysqlx%" and PLUGIN_STATUS like "ACTIVE";')
+  if [ ${MYSQL_VERSION} = "8.0" ]; then
+    [ "$result" -eq 2 ]
+  else
   [ "$result" -eq 0 ]
+  fi
 }
 
 install_tokudb() {
