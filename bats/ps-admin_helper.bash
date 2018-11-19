@@ -194,9 +194,11 @@ check_rocksdb_notexists() {
 
 install_all() {
   if [ ${MYSQL_VERSION} = "5.5" ]; then
-    OPT=""
+    OPT="--enable-qrt"
   elif [ ${MYSQL_VERSION} = "5.6" ]; then
-    OPT="--enable-tokudb --enable-tokubackup"
+    OPT="--enable-qrt --enable-tokudb --enable-tokubackup"
+  elif [ ${MYSQL_VERSION} = "5.6" ]; then
+    OPT="--enable-qrt --enable-mysqlx --enable-tokudb --enable-tokubackup --enable-rocksdb"
   else
     OPT="--enable-mysqlx --enable-tokudb --enable-tokubackup --enable-rocksdb"
   fi
@@ -209,7 +211,7 @@ install_all() {
   sleep 5
 
   #run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam --enable-pam-compat ${OPT}"
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit ${OPT}"
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-audit ${OPT}"
   [ $status -eq 0 ]
 
   service mysql restart >/dev/null 3>&-
@@ -217,20 +219,22 @@ install_all() {
   sleep 5
 
   #run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam --enable-pam-compat ${OPT}"
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit ${OPT}"
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-audit ${OPT}"
   [ $status -eq 0 ]
 }
 
 uninstall_all() {
   if [ ${MYSQL_VERSION} = "5.5" ]; then
-    OPT=""
+    OPT="--disable-qrt"
   elif [ ${MYSQL_VERSION} = "5.6" ]; then
-    OPT="--disable-tokudb --disable-tokubackup"
+    OPT="--disable-qrt --disable-tokudb --disable-tokubackup"
+  elif [ ${MYSQL_VERSION} = "5.7" ]; then
+    OPT="--disable-qrt --disable-mysqlx --disable-tokudb --disable-tokubackup --disable-rocksdb"
   else
     OPT="--disable-mysqlx --disable-tokudb --disable-tokubackup --disable-rocksdb"
   fi
   #run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam --disable-pam-compat ${OPT}"
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit ${OPT}"
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-audit ${OPT}"
   [ $status -eq 0 ]
 
   service mysql restart >/dev/null 3>&-
@@ -238,6 +242,6 @@ uninstall_all() {
   sleep 5
 
   #run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam --disable-pam-compat ${OPT}"
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit ${OPT}"
+  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-audit ${OPT}"
   [ $status -eq 0 ]
 }
