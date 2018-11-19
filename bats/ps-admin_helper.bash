@@ -200,7 +200,7 @@ install_all() {
   elif [ ${MYSQL_VERSION} = "5.6" ]; then
     OPT="--enable-qrt --enable-mysqlx --enable-tokudb --enable-tokubackup --enable-rocksdb"
   else
-    OPT="--enable-mysqlx --enable-tokudb --enable-tokubackup --enable-rocksdb"
+    OPT="--enable-tokudb --enable-tokubackup --enable-rocksdb"
   fi
 
   # This first restart is needed only because of these bugs:
@@ -231,7 +231,7 @@ uninstall_all() {
   elif [ ${MYSQL_VERSION} = "5.7" ]; then
     OPT="--disable-qrt --disable-mysqlx --disable-tokudb --disable-tokubackup --disable-rocksdb"
   else
-    OPT="--disable-mysqlx --disable-tokudb --disable-tokubackup --disable-rocksdb"
+    OPT="--disable-tokudb --disable-tokubackup --disable-rocksdb"
   fi
   #run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam --disable-pam-compat ${OPT}"
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-audit ${OPT}"
