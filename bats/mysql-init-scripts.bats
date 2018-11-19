@@ -28,7 +28,7 @@ elif [ -f /etc/my.cnf ]; then
 fi
 
 function is_running(){
-  if [ $(ps aux | grep -v grep | grep "mysqld " | wc -l) -eq 0 ]; then
+  if [ $(ps aux | grep -v grep | grep "mysqld" | wc -l) -eq 0 ]; then
     return 1
   fi
 
