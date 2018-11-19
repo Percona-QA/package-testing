@@ -4,7 +4,9 @@ load ps-admin_helper
 
 @test "uninstall plugins for cleanup before testing" {
   uninstall_all
-  check_qrt_notexists
+  if [ ${MYSQL_VERSION} != "8.0" ]; then
+    check_qrt_notexists
+  fi
   check_audit_notexists
 # check_pam_notexists
 # check_pam_compat_notexists
@@ -12,18 +14,24 @@ load ps-admin_helper
     check_tokubackup_notexists
     check_tokudb_notexists
   fi
-  if [ ${MYSQL_VERSION} != "5.5" -a ${MYSQL_VERSION} != "5.6" ]; then
+  if [ ${MYSQL_VERSION} != "5.5" -a ${MYSQL_VERSION} != "5.6" -a ${MYSQL_VERSION} != "8.0" ]; then
     check_mysqlx_notexists
     check_rocksdb_notexists
   fi
 }
 
 @test "install QRT plugin" {
+  if [ ${MYSQL_VERSION} = "8.0" ]; then
+    skip "PS 8 doesn't have QRT"
+  fi
   install_qrt
   check_qrt_exists
 }
 
 @test "uninstall QRT plugin" {
+  if [ ${MYSQL_VERSION} = "8.0" ]; then
+    skip "PS 8 doesn't have QRT"
+  fi
   uninstall_qrt
   check_qrt_notexists
 }
@@ -59,16 +67,16 @@ load ps-admin_helper
 #
 
 @test "install MySQL X plugin" {
-  if [ ${MYSQL_VERSION} = "5.5" -o ${MYSQL_VERSION} = "5.6" ]; then
-    skip "MySQL version is not 5.7+"
+  if [ ${MYSQL_VERSION} = "5.5" -o ${MYSQL_VERSION} = "5.6" -o ${MYSQL_VERSION} = "8.0" ]; then
+    skip "MySQL version is not 5.7"
   fi
   install_mysqlx
   check_mysqlx_exists
 }
 
 @test "uninstall MySQL X plugin" {
-  if [ ${MYSQL_VERSION} = "5.5" -o ${MYSQL_VERSION} = "5.6" ]; then
-    skip "MySQL version is not 5.7+"
+  if [ ${MYSQL_VERSION} = "5.5" -o ${MYSQL_VERSION} = "5.6" -o ${MYSQL_VERSION} = "8.0" ]; then
+    skip "MySQL version is not 5.7"
   fi
   uninstall_mysqlx
   check_mysqlx_notexists
@@ -130,7 +138,9 @@ load ps-admin_helper
 
 @test "install ALL plugins at once" {
   install_all
-  check_qrt_exists
+  if [ ${MYSQL_VERSION} != "8.0" ]; then
+    check_qrt_exists
+  fi
   check_audit_exists
 # check_pam_exists
 # check_pam_compat_exists
