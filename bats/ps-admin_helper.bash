@@ -205,7 +205,7 @@ install_all() {
     OPT="--enable-qrt"
   elif [ ${MYSQL_VERSION} = "5.6" ]; then
     OPT="--enable-qrt --enable-tokudb --enable-tokubackup"
-  elif [ ${MYSQL_VERSION} = "5.6" ]; then
+  elif [ ${MYSQL_VERSION} = "5.7" ]; then
     OPT="--enable-qrt --enable-mysqlx --enable-tokudb --enable-tokubackup --enable-rocksdb"
   else
     OPT="--enable-tokudb --enable-tokubackup --enable-rocksdb"
