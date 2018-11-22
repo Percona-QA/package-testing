@@ -186,7 +186,7 @@ elif [ ${product} = "pmm" ]; then
 elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; then
   if [ ${product} = "pxb24" ]; then
     extra_version="-24"
-  elif [ ${product} = "pxb80"]; then
+  elif [ ${product} = "pxb80" ]; then
     extra_version="-80"
   else
     extra_version=""
