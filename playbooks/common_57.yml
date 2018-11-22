@@ -26,34 +26,50 @@
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
   - name: install Percona Toolkit new deb packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - percona-toolkit
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
     when: ansible_os_family == "Debian"
 
   - name: install sysbench new deb packages
     apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - sysbench
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      package:
+      - sysbench
     when: ansible_os_family == "Debian"
 
   - name: install Percona Server new deb packages
-    apt: name={{item}} update_cache=no state=latest
-    with_items:
-    - percona-server-server-5.7
-    - percona-server-test-5.7
-    - percona-server-5.7-dbg
-    - percona-server-source-5.7
-    - percona-server-tokudb-5.7
-    - percona-server-rocksdb-5.7
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: latest
+    vars:
+      packages:
+      - percona-server-server-5.7
+      - percona-server-test-5.7
+      - percona-server-5.7-dbg
+      - percona-server-source-5.7
+      - percona-server-tokudb-5.7
+      - percona-server-rocksdb-5.7
     when: ansible_os_family == "Debian"
 
   - name: install Percona XtraBackup new deb packages
     apt: name={{item}} update_cache=no state=latest
-    with_items:
-    - percona-xtrabackup-24
-    - percona-xtrabackup-test-24
-    - percona-xtrabackup-dbg-24
+      name: "{{ packages }}"
+      update_cache: no
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup-24
+      - percona-xtrabackup-test-24
+      - percona-xtrabackup-dbg-24
     when: ansible_os_family == "Debian"
 
   - name: install Percona Toolkit new rpm packages

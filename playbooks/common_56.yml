@@ -56,16 +56,26 @@
     - percona-xtrabackup-dbg
     when: ansible_os_family == "Debian"
 
+  - name: Make sure SELinux is in enforcing mode on CentOS
+    selinux:
+      policy: targeted
+      state: enforcing
+    when: ansible_os_family == "RedHat"
+
   - name: install Percona Server new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - Percona-Server-server-56
-    - Percona-Server-test-56
-    - Percona-Server-56-debuginfo
-    - Percona-Server-devel-56
-    - Percona-Server-tokudb-56
-    - Percona-Server-shared-56
-    - Percona-Server-client-56
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - Percona-Server-server-56
+      - Percona-Server-test-56
+      - Percona-Server-56-debuginfo
+      - Percona-Server-devel-56
+      - Percona-Server-tokudb-56
+      - Percona-Server-selinux-56
+      - Percona-Server-shared-56
+      - Percona-Server-client-56
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Toolkit new rpm packages
@@ -101,16 +111,12 @@
     command: systemctl start mysql
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: disable selinux on centos7 for TokuDB to work
-    command: setenforce 0
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+# - name: disable selinux on centos7 for TokuDB to work
+#   command: setenforce 0
+#   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: install tokudb and restart server
     command: /usr/bin/ps_tokudb_admin --enable --enable-backup
-
-  - name: restart mysql service on centos 5
-    command: /etc/init.d/mysql restart
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
 
   - name: restart mysql service
     service: name=mysql state=restarted
