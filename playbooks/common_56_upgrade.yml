@@ -65,6 +65,7 @@
     - Percona-Server-tokudb-56
     - Percona-Server-shared-56
     - Percona-Server-client-56
+    - Percona-Server-selinux-56
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Toolkit rpm packages previous version
