@@ -174,7 +174,7 @@
   - name: run sysbench prepare script
     command: sysbench --mysql-user=root --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
 
-  - name: run sysbench benchmart
+  - name: run sysbench benchmark
     command: sysbench --mysql-user=root --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write run
 
   - name: run sysbench tpcc prepare script
