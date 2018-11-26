@@ -19,35 +19,37 @@
 
   - name: install needed packages for running tests with apt
     apt:
-      name: "{{ item }}"
+      name: "{{ packages }}"
       update_cache: no
       state: latest
-    with_items:
-    - pv
-    - unzip
-    - wget
-    - gnupg
+    vars:
+      packages:
+      - pv
+      - unzip
+      - wget
+      - gnupg
     when: ansible_os_family == "Debian"
 
-  - name: install sysv-rc-conf package for running tests with apt
-    apt: name="{{ item }}" update_cache=no
-    with_items:
-    - sysv-rc-conf
-    when: ansible_os_family == "Debian" and (ansible_distribution_release == "precise" or ansible_distribution_release == "trusty" or ansible_distribution_release == "wheezy")
-
   - name: update systemd-sysv integration on debian/ubuntu
-    apt: name="{{ item }}" update_cache=yes state=latest
-    with_items:
-    - systemd-sysv
-    when: ansible_os_family == "Debian" and ansible_distribution_release != "precise" and ansible_distribution_release != "trusty" and ansible_distribution_release != "wheezy"
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - systemd-sysv
+    when: ansible_os_family == "Debian"
 
   - name: install needed packages for running tests with yum
-    yum: name="{{ item }}" state=latest
-    with_items:
-    - pv
-    - libselinux-python
-    - unzip
-    - wget
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - pv
+      - libselinux-python
+      - unzip
+      - wget
     when: ansible_os_family == "RedHat"
 
   - name: register SLES for updates with suse_register
