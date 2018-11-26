@@ -89,7 +89,7 @@
       - Percona-Server-56-debuginfo
       - Percona-Server-devel-56
       - Percona-Server-tokudb-56
-      - Percona-Server-selinux-56
+#     - Percona-Server-selinux-56
       - Percona-Server-shared-56
       - Percona-Server-client-56
     when: ansible_os_family == "RedHat"
