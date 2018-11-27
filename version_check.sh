@@ -57,6 +57,19 @@ else
   exit 1
 fi
 
+# This function checks that pxb 8.0 tools have correct version
+function xbt_test {
+  for i in xbstream xbcloud xbcrypt; do
+    version_check=$($i --help | grep -c ${version})
+    if [ ${version_check} -eq 0 ]; then
+       echo "${i} version is not good!"
+       exit 1
+    else
+       echo "${i} version is correct and ${version}" >> ${log}
+    fi
+  done
+}
+
 product=$1
 log="/tmp/${product}_version_check.log"
 echo -n > ${log}
@@ -131,6 +144,9 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; t
       exit 1
     else
       echo "${product} version is correct and ${version}" >> ${log}
+    fi
+    if [ ${product} = "pxb80" ]; then
+      echo "xbt_test until I get the packages"
     fi
 
 elif [ ${product} = "proxysql" ]; then
