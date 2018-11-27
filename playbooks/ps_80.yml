@@ -34,73 +34,104 @@
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
   - name: install Percona Toolkit new deb packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - percona-toolkit
+    apt: 
+      name: "{{ packages }}"
+      update_cache: yes 
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
     when: ansible_os_family == "Debian"
 
   - name: install sysbench new deb packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - sysbench
-    - sysbench-tpcc
+    apt: 
+      name: "{{ packages }}" 
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - sysbench
+      - sysbench-tpcc
     when: ansible_os_family == "Debian"
 
   - name: install Percona Server new deb packages
-    apt: name={{item}} update_cache=no state=latest
-    with_items:
-    - percona-server-server
-    - percona-server-test
-    - percona-server-dbg
-    - percona-server-source
-    - percona-server-tokudb
-    - percona-server-rocksdb
+    apt: 
+      name: "{{ packages }}"
+      update_cache: no
+      state: latest
+    vars:
+      packages:
+      - percona-server-server
+      - percona-server-test
+      - percona-server-dbg
+      - percona-server-source
+      - percona-server-tokudb
+      - percona-server-rocksdb
     when: ansible_os_family == "Debian"
 
   - name: install Percona XtraBackup new deb packages
-    apt: name={{item}} update_cache=no state=latest
-    with_items:
-    - percona-xtrabackup-80
-    - percona-xtrabackup-test-80
-    - percona-xtrabackup-dbg-80
+    apt: 
+      name: "{{ packages }}"
+      update_cache: no
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup-80
+      - percona-xtrabackup-test-80
+      - percona-xtrabackup-dbg-80
     when: ansible_os_family == "Debian"
 
   - name: install Percona Toolkit new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - percona-toolkit
+    yum: 
+      name: "{{ packages }}" 
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
     when: ansible_os_family == "RedHat"
 
   - name: install sysbench new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - sysbench
-    - sysbench-tpcc
+    yum: 
+      name: "{{ packages }}" 
+      state: latest
+    vars:
+      packages:
+      - sysbench
+      - sysbench-tpcc
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Server new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - percona-server-server
-    - percona-server-test
-    - percona-server-debuginfo
-    - percona-server-devel
-    - percona-server-tokudb
-    - percona-server-rocksdb
+    yum: 
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-server-server
+      - percona-server-test
+      - percona-server-debuginfo
+      - percona-server-devel
+      - percona-server-tokudb
+      - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Toolkit new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - percona-toolkit
+    yum: 
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
     when: ansible_os_family == "RedHat"
 
   - name: install Percona XtraBackup new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - percona-xtrabackup-80
-    - percona-xtrabackup-test-80
-    - percona-xtrabackup-80-debuginfo
+    yum: 
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup-80
+      - percona-xtrabackup-test-80
+      - percona-xtrabackup-80-debuginfo
     when: ansible_os_family == "RedHat"
 
   - name: start mysql service with service command
@@ -238,15 +269,19 @@
 # End PAM test
 
   - name: install 3rd party packages with apt
-    apt: name={{item}}
-    with_items:
-    - rsyslog-mysql
+    apt: 
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
     when: ansible_os_family == "Debian"
 
   - name: install 3rd party packages with yum
-    yum: name={{item}}
-    with_items:
-    - rsyslog-mysql
+    yum: 
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
     when: ansible_os_family == "RedHat"
 
   - name: run bats tests for mysql init scripts
@@ -262,15 +297,22 @@
     command: /package-testing/madmin_check.sh
 
   - name: remove Percona Server deb packages
-    apt: name={{item}} update_cache=no state=absent
-    with_items:
-    - percona-server-server*
+    apt: 
+      name: "{{ packages }}" 
+      update_cache: no 
+      state: absent
+    vars:
+      packages:
+      - percona-server-server*
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server rpm packages
-    yum: name={{item}} state=absent
-    with_items:
-    - percona-server-server*
+    yum: 
+      name: "{{ packages }}"
+      state: absent
+    vars:
+     packages:
+      - percona-server-server*
     when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal
