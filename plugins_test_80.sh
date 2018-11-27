@@ -9,11 +9,6 @@ if [ ! -f ${ERROR_LOG} ]; then
   exit 1
 fi
 
-if [ $(cat /etc/debian_version) == "7.11" ]; then
-        echo "this is wheezy"
-        ERROR_LOG="/var/lib/mysql/wheezy.err"
-fi
-
 WARNINGS_BEFORE=$(grep -c "\[Warning\]" ${ERROR_LOG} || true)
 ERRORS_BEFORE=$(grep -c "\[ERROR\]" ${ERROR_LOG} || true)
 
@@ -32,6 +27,7 @@ if [ ! -z "$1" ]; then
     pv /package-testing/world.sql | mysql -D world2
     pv /package-testing/world.sql | mysql -D world3
     mysql < /package-testing/tokudb_compression.sql
+    mysql < /package-testing/rocksdb_test.sql
   fi
 fi
 
