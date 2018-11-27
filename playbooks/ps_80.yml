@@ -171,14 +171,14 @@
 # - name: check that Percona Server package versions are correct
 #   command: /package-testing/package_check.sh ps80
 
-  - name: install plugins, import world database, test tokudb
-    command: /package-testing/plugins_test_80.sh
-
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh
 
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
+
+  - name: install plugins, import world database, test tokudb
+    command: /package-testing/plugins_test_80.sh ps
 
   - name: check that Percona Toolkit version is correct
     command: /package-testing/version_check.sh pt
