@@ -73,7 +73,7 @@
 
   - name: install Percona Server rpm packages previous version
     yum: 
-      name: " {{ packages }}"
+      name: "{{ packages }}"
       state: latest
     vars:
       packages:
@@ -149,9 +149,11 @@
     when: ansible_os_family == "Debian"
 
   - name: install 3rd party packages with yum
-    yum: name={{item}}
-    with_items:
-    - rsyslog-mysql
+    yum: 
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
     when: ansible_os_family == "RedHat"
 
 # Start PAM test
