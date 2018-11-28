@@ -65,6 +65,7 @@
     - Percona-Server-tokudb-56
     - Percona-Server-shared-56
     - Percona-Server-client-56
+    - Percona-Server-selinux-56
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Toolkit rpm packages previous version
@@ -99,9 +100,9 @@
     command: systemctl start mysql
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: disable selinux on centos7 for TokuDB to work
-    command: setenforce 0
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+# - name: disable selinux on centos7 for TokuDB to work
+#   command: setenforce 0
+#   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: install tokudb and restart server
     command: /usr/bin/ps_tokudb_admin --enable --enable-backup
@@ -256,13 +257,8 @@
     command: mysql_upgrade -uroot
     when: ansible_os_family == "RedHat"
 
-  - name: restart mysql service on centos 5
-    command: /etc/init.d/mysql restart
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
-
   - name: restart mysql service
     service: name=mysql state=restarted
-    when: ansible_os_family != "RedHat" or ansible_distribution_major_version != "5"
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps56
