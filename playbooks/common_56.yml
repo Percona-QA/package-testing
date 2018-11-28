@@ -48,7 +48,7 @@
 
   - name: install Percona Server new deb packages
     apt: 
-      name: "{{ item }}" 
+      name: "{{ packages }}" 
       update_cache: no 
       state: latest
     vars:
