@@ -26,46 +26,65 @@
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
   - name: install Percona Server deb packages previous version
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - percona-server-server-5.6
-    - percona-server-test-5.6
-    - percona-server-5.6-dbg
-    - percona-server-source-5.6
-    - percona-server-tokudb-5.6
+    apt: 
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-server-server-5.6
+      - percona-server-test-5.6
+      - percona-server-5.6-dbg
+      - percona-server-source-5.6
+      - percona-server-tokudb-5.6
     when: ansible_os_family == "Debian"
 
   - name: install Percona Toolkit deb packages previous version
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - percona-toolkit
+    apt: 
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
     when: ansible_os_family == "Debian"
 
   - name: install sysbench deb packages previous version
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - sysbench
+    apt: 
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - sysbench
     when: ansible_os_family == "Debian"
 
   - name: install Percona XtraBackup deb packages previous version
-    apt: name={{item}} update_cache=no state=latest
-    with_items:
-    - percona-xtrabackup
-    - percona-xtrabackup-test
-    - percona-xtrabackup-dbg
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup
+      - percona-xtrabackup-test
+      - percona-xtrabackup-dbg
     when: ansible_os_family == "Debian"
 
   - name: install Percona Server rpm packages previous version
-    yum: name={{item}} state=latest
-    with_items:
-    - Percona-Server-server-56
-    - Percona-Server-test-56
-    - Percona-Server-56-debuginfo
-    - Percona-Server-devel-56
-    - Percona-Server-tokudb-56
-    - Percona-Server-shared-56
-    - Percona-Server-client-56
-    - Percona-Server-selinux-56
+    yum: 
+      name: " {{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - Percona-Server-server-56
+      - Percona-Server-test-56
+      - Percona-Server-56-debuginfo
+      - Percona-Server-devel-56
+      - Percona-Server-tokudb-56
+      - Percona-Server-shared-56
+      - Percona-Server-client-56
+      - Percona-Server-selinux-56
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Toolkit rpm packages previous version
@@ -88,10 +107,6 @@
     - percona-xtrabackup-debuginfo
     when: ansible_os_family == "RedHat"
 
-  - name: start mysql service with init script
-    command: /etc/init.d/mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
-
   - name: start mysql service with service command
     command: service mysql start
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
@@ -105,18 +120,13 @@
 #   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: install tokudb and restart server
-    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
-
-  - name: restart mysql service on centos 5
-    command: /etc/init.d/mysql restart
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+    command: /usr/bin/ps_tokudb_admin --enable 
 
   - name: restart mysql service
     service: name=mysql state=restarted
-    when: ansible_os_family != "RedHat" or ansible_distribution_major_version != "5"
 
   - name: re-run ps_tokudb_admin to finish tokudb install
-    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
+    command: /usr/bin/ps_tokudb_admin --enable 
 
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_56.sh ps
