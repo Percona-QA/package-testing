@@ -88,23 +88,32 @@
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Toolkit rpm packages previous version
-    yum: name={{item}} state=latest
-    with_items:
-    - percona-toolkit
+    yum: 
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
     when: ansible_os_family == "RedHat"
 
   - name: install sysbench rpm packages previous version
-    yum: name={{item}} state=latest
-    with_items:
-    - sysbench
+    yum: 
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - sysbench
     when: ansible_os_family == "RedHat"
 
   - name: install Percona XtraBackup rpm packages previous version
-    yum: name={{item}} state=latest
-    with_items:
-    - percona-xtrabackup
-    - percona-xtrabackup-test
-    - percona-xtrabackup-debuginfo
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup
+      - percona-xtrabackup-test
+      - percona-xtrabackup-debuginfo
     when: ansible_os_family == "RedHat"
 
   - name: start mysql service with service command
@@ -132,9 +141,11 @@
     command: /package-testing/plugins_test_56.sh ps
 
   - name: install 3rd party packages with apt
-    apt: name={{item}}
-    with_items:
-    - rsyslog-mysql
+    apt: 
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
     when: ansible_os_family == "Debian"
 
   - name: install 3rd party packages with yum
