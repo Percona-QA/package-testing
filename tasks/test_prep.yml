@@ -76,10 +76,13 @@
     when: ansible_os_family == "Suse" and ansible_distribution_major_version == "12"
 
   - name: install needed packages for running tests with zypper
-    zypper: name="{{ item }}" state=latest
-    with_items:
-    - wget
-    - unzip
+    zypper: 
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - wget
+      - unzip
     when: ansible_os_family == "Suse"
 
   - name: download package-testing repo with wget
