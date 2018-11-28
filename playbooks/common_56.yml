@@ -136,49 +136,6 @@
     command: setenforce 0
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: install tokudb and restart server
-    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
-
-  - name: restart mysql service
-    command: service mysql restart
-    when: ansible_os_family == "RedHat"
-
-  - name: re-run ps_tokudb_admin to finish tokudb install
-    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
-
-  - name: install plugins, import world database, test tokudb
-    command: /package-testing/plugins_test_56.sh ps
-
-  - name: check that Percona Server version is correct
-    command: /package-testing/version_check.sh ps56
-
-  - name: check that Percona Server package versions are correct
-    command: /package-testing/package_check.sh ps56
-
-  - name: check that Percona Toolkit version is correct
-    command: /package-testing/version_check.sh pt
-
-  - name: check that sysbench version is correct
-    command: /package-testing/version_check.sh sysbench
-
-  - name: check that Percona XtraBackup version is correct
-    command: /package-testing/version_check.sh pxb23
-
-  - name: check that Percona XtraBackup package versions are correct
-    command: /package-testing/package_check.sh pxb23
-
-  - name: run sysbench prepare script
-    command: sysbench --mysql-user=root --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
-
-  - name: run sysbench benchmark
-    command: sysbench --mysql-user=root --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write run
-
-  - name: run sysbench tpcc prepare script
-    command: /usr/share/sysbench/tpcc.lua --mysql-user=root --mysql-db=sbt --time=30 --threads=64 --report-interval=1 --tables=3 --scale=5 --db-driver=mysql prepare
-
-  - name: run sysbench tpcc benchmark
-    command: /usr/share/sysbench/tpcc.lua --mysql-user=root --mysql-db=sbt --time=30 --threads=64 --report-interval=1 --tables=3 --scale=5 --db-driver=mysql run
-
 # Start PAM test
   - group:
       name: developer
@@ -242,6 +199,50 @@
   - name: run bats tests for PAM
     command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
 # End PAM test
+
+  - name: install tokudb and restart server
+    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
+
+  - name: restart mysql service
+    command: service mysql restart
+    when: ansible_os_family == "RedHat"
+
+  - name: re-run ps_tokudb_admin to finish tokudb install
+    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
+
+  - name: install plugins, import world database, test tokudb
+    command: /package-testing/plugins_test_56.sh ps
+
+  - name: check that Percona Server version is correct
+    command: /package-testing/version_check.sh ps56
+
+  - name: check that Percona Server package versions are correct
+    command: /package-testing/package_check.sh ps56
+
+  - name: check that Percona Toolkit version is correct
+    command: /package-testing/version_check.sh pt
+
+  - name: check that sysbench version is correct
+    command: /package-testing/version_check.sh sysbench
+
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb23
+
+  - name: check that Percona XtraBackup package versions are correct
+    command: /package-testing/package_check.sh pxb23
+
+  - name: run sysbench prepare script
+    command: sysbench --mysql-user=root --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
+
+  - name: run sysbench benchmark
+    command: sysbench --mysql-user=root --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write run
+
+  - name: run sysbench tpcc prepare script
+    command: /usr/share/sysbench/tpcc.lua --mysql-user=root --mysql-db=sbt --time=30 --threads=64 --report-interval=1 --tables=3 --scale=5 --db-driver=mysql prepare
+
+  - name: run sysbench tpcc benchmark
+    command: /usr/share/sysbench/tpcc.lua --mysql-user=root --mysql-db=sbt --time=30 --threads=64 --report-interval=1 --tables=3 --scale=5 --db-driver=mysql run
+
 
   - name: install 3rd party packages with apt
     apt: 
