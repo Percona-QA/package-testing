@@ -12,3 +12,6 @@
 
   - name: enable the PS-80 testing repo
     command: percona-release enable ps-80 testing
+
+  - name: enable the tools testing repo
+    command: percona-release enable tools testing
