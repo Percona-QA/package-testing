@@ -36,7 +36,7 @@
     when: ansible_os_family == "Debian"
 
   - name: install sysbench new deb packages
-    apt: name={{item}} update_cache=yes state=latest
+    apt:
       name: "{{ packages }}"
       update_cache: yes
       state: latest
