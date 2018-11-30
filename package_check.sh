@@ -83,10 +83,10 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" -o ${prod
       rpm_num_pkgs="8"
     elif [ ${product} = "ps57" -o ${product} = "ps57" ]; then
       if [ ${centos_maj_version} == "7" ]; then
-        rpm_num_pkgs="8"
+        rpm_num_pkgs="7"
         rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-shared-compat-${rpm_maj_version}"
       else
-        rpm_num_pkgs="7"
+        rpm_num_pkgs="6"
         rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version}"
       fi
     fi
