@@ -81,13 +81,13 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" -o ${prod
     elif [ ${product} = "ps56" ]; then
       rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version}"
       rpm_num_pkgs="8"
-    elif [ ${product} = "ps57" -o ${product} = "ps57" ]; then
+    elif [ ${product} = "ps57" ]; then
       if [ ${centos_maj_version} == "7" ]; then
-        rpm_num_pkgs="7"
-        rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-shared-compat-${rpm_maj_version}"
+        rpm_num_pkgs="9"
+        rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-rocksdb-${rpm_maj_version} Percona-Server-shared-compat-${rpm_maj_version}"
       else
-        rpm_num_pkgs="6"
-        rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version}"
+        rpm_num_pkgs="8"
+        rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-rocksdb-${rpm_maj_version}"
       fi
     fi
     if [ "$(rpm -qa | grep Percona-Server | grep -c ${version})" == "${rpm_num_pkgs}" ]; then
