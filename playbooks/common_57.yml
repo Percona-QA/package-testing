@@ -73,42 +73,57 @@
     when: ansible_os_family == "Debian"
 
   - name: install Percona Toolkit new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - percona-toolkit
+    yum: 
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
     when: ansible_os_family == "RedHat"
 
   - name: install sysbench new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - sysbench
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - sysbench
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Server new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - Percona-Server-server-57
-    - Percona-Server-test-57
-    - Percona-Server-57-debuginfo
-    - Percona-Server-devel-57
-    - Percona-Server-tokudb-57
-    - Percona-Server-rocksdb-57
-    - Percona-Server-shared-57
-    - Percona-Server-client-57
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - Percona-Server-server-57
+      - Percona-Server-test-57
+      - Percona-Server-57-debuginfo
+      - Percona-Server-devel-57
+      - Percona-Server-tokudb-57
+      - Percona-Server-rocksdb-57
+      - Percona-Server-shared-57
+      - Percona-Server-client-57
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Toolkit new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - percona-toolkit
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
     when: ansible_os_family == "RedHat"
 
   - name: install Percona XtraBackup new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - percona-xtrabackup-24
-    - percona-xtrabackup-test-24
-    - percona-xtrabackup-24-debuginfo
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup-24
+      - percona-xtrabackup-test-24
+      - percona-xtrabackup-24-debuginfo
     when: ansible_os_family == "RedHat"
 
   - name: start mysql service with service command
@@ -258,15 +273,19 @@
 # End PAM test
 
   - name: install 3rd party packages with apt
-    apt: name={{item}}
-    with_items:
-    - rsyslog-mysql
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
     when: ansible_os_family == "Debian"
 
   - name: install 3rd party packages with yum
-    yum: name={{item}}
-    with_items:
-    - rsyslog-mysql
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
     when: ansible_os_family == "RedHat"
 
   - name: run bats tests for mysql init scripts
@@ -283,15 +302,22 @@
 #   command: /package-testing/madmin_check.sh
 
   - name: remove Percona Server deb packages
-    apt: name={{item}} update_cache=no state=absent
-    with_items:
-    - percona-server-server-5.7
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server-server-5.7
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server rpm packages
-    yum: name={{item}} state=absent
-    with_items:
-    - Percona-Server-server-57
+    yum: 
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - Percona-Server-server-57
     when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal
