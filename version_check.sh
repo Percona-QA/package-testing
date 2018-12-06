@@ -146,7 +146,7 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; t
       echo "${product} version is correct and ${version}" >> ${log}
     fi
     if [ ${product} = "pxb80" ]; then
-      echo "xbt_test until I get the packages"
+      xbt_test
     fi
 
 elif [ ${product} = "proxysql" ]; then
