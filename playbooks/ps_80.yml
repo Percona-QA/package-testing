@@ -168,8 +168,8 @@
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps80
 
-# - name: check that Percona Server package versions are correct
-#   command: /package-testing/package_check.sh ps80
+  - name: check that Percona Server package versions are correct
+    command: /package-testing/package_check.sh ps80
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh
