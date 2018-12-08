@@ -54,10 +54,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: check that PSMDB 4.0 package versions are correct
-    command: /package-testing/package_check.sh psmdb36
-
-  - name: test SE change, import data, restart service
-    command: /package-testing/scripts/psmdb_test.sh 3.6
+    command: /package-testing/package_check.sh psmdb40
 
   - name: set pass and enable auth
     command: /package-testing/scripts/psmdb_set_auth.sh
@@ -89,6 +86,9 @@
 
   - name: start mongod service
     service: name=mongod state=started
+
+  - name: test SE change, import data, restart service
+    command: /package-testing/scripts/psmdb_test.sh 3.6
 
   - name: remove Percona Server for MongoDB 4.0 deb packages
     apt:
