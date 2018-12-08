@@ -55,6 +55,8 @@ elif [ $1 = "psmdb34" ]; then
   version=${PSMDB34_VER}
 elif [ $1 = "psmdb36" ]; then
   version=${PSMDB36_VER}
+elif [ $1 = "psmdb40" ]; then
+  version=${PSMDB40_VER}
 elif [ $1 = "pmm" ]; then
   version=${PMM_VER}
 else
@@ -227,7 +229,7 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; t
     fi
   fi
 
-elif [ ${product} = "psmdb30" -o ${product} = "psmdb32" -o ${product} = "psmdb34" -o ${product} = "psmdb36" ]; then
+elif [ "${product}" = "psmdb30" -o "${product}" = "psmdb32" -o "${product}" = "psmdb34" -o "${product}" = "psmdb36" -o "${product}" = "psmdb40" ]; then
   rpm_num_pkgs="6"
   deb_num_pkgs="6"
   if [ ${product} = "psmdb32" ]; then
@@ -256,9 +258,14 @@ elif [ ${product} = "psmdb30" -o ${product} = "psmdb32" -o ${product} = "psmdb34
         fi
       done
     else
-      for package in Percona-Server-MongoDB${extra_version}-debuginfo Percona-Server-MongoDB${extra_version} Percona-Server-MongoDB${extra_version}-mongos Percona-Server-MongoDB${extra_version}-server Percona-Server-MongoDB${extra_version}-shell Percona-Server-MongoDB${extra_version}-tools; do
-        if [ "$(rpm -qa | grep -c ${package}-${version})" -gt 0 ]; then
-          echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
+      if [ "${product}" = "psmdb40" ]; then
+        psmdb_name="percona-server-mongodb"
+      else
+        psmdb_name=""
+      fi
+      for package in ${psmdb_name}${extra_version}-debuginfo ${psmdb_name}${extra_version} ${psmdb_name}${extra_version}-mongos ${psmdb_name}${extra_version}-server ${psmdb_name}${extra_version}-shell ${psmdb_name}${extra_version}-tools; do
+        if [ "$(rpm -qa | grep -c "${package}"-"${version}")" -gt 0 ]; then
+          echo "$(date +%Y%m%d%H%M%S): '${package}' is installed" >> "${log}"
         else
           echo "WARNING: ${package}-${version} is not installed"
           exit 1
