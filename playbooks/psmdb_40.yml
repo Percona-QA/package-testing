@@ -81,14 +81,14 @@
       - numactl
     when: ansible_os_family == "RedHat"
 
+  - name: test SE change, import data, restart service
+    command: /package-testing/scripts/psmdb_test.sh 4.0
+
   - name: run bats tests for mongo init scripts after numactl install
     command: /usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats
 
   - name: start mongod service
     service: name=mongod state=started
-
-  - name: test SE change, import data, restart service
-    command: /package-testing/scripts/psmdb_test.sh 4.0
 
   - name: remove Percona Server for MongoDB 4.0 deb packages
     apt:
