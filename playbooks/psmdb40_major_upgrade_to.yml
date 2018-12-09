@@ -147,7 +147,8 @@
 
   - name: remove Percona Server for MongoDB 4.0 rpm packages
     yum:
-      name: "{{ packages }}" state=absent
+      name: "{{ packages }}"
+      state: absent
     vars:
       packages:
       - percona-server-mongodb-server
