@@ -104,7 +104,7 @@
       - percona-server-mongodb-dbg
     when: ansible_os_family == "Debian"
 
-  - name: upgrade Percona Server for MongoDB 3.6 to new rpm packages
+  - name: upgrade Percona Server for MongoDB 4.0 to new rpm packages
     yum:
       name: "{{ packages }}"
       state: latest
@@ -115,6 +115,7 @@
       - percona-server-mongodb-mongos
       - percona-server-mongodb-shell
       - percona-server-mongodb
+      - percona-server-mongodb-debuginfo
     when: ansible_os_family == "RedHat"
 
   - name: start mongod service
