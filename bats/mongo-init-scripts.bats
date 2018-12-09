@@ -5,6 +5,8 @@ SERVICE=0
 SYSVCONFIG=0
 CHKCONFIG=0
 
+MONGO_VERSION=$(mongo --version | grep shell | grep -o "[0-9]\.[0-9]")
+
 if [ ! -z "$(which systemctl 2>/dev/null)" ]; then
   SYSTEMCTL=1
 fi
@@ -166,11 +168,11 @@ function teardown(){
 }
 
 @test "check if mongo service is enabled in systemd" {
-  if [ ${SYSTEMCTL} -eq 1 ]; then
+  if [ ${SYSTEMCTL} -eq 1 -a ${MONGODB_VERSION} != "4.0" ]; then
     result=$(systemctl is-enabled mongod)
     [ $result == "enabled" ]
   else
-    skip "system doesn't have systemctl command"
+    skip "system is 4.0 or doesn't have systemctl command"
   fi
 }
 
