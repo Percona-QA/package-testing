@@ -168,7 +168,7 @@ function teardown(){
 }
 
 @test "check if mongo service is enabled in systemd" {
-  if [ ${SYSTEMCTL} -eq 1 -a ${MONGODB_VERSION} != "4.0" ]; then
+  if [ ${SYSTEMCTL} -eq 1 ]; then
     result=$(systemctl is-enabled mongod)
     [ $result == "enabled" ]
   else
