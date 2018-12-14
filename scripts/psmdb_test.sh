@@ -108,7 +108,7 @@ function test_hotbackup {
   rm -rf ${BACKUPDIR}
   mkdir -p ${BACKUPDIR}
   chown mongod:mongod -R ${BACKUPDIR}
-  BACKUP_RET=$(mongo admin --eval "$(cat ~/.mongorc.js); db.runCommand({createBackup: 1, backupDir: '${BACKUPDIR}'})"|grep -c '"ok" : 1')
+  BACKUP_RET=$(mongo localhost:27017/admin --eval "db.runCommand({createBackup: 1, backupDir: '${BACKUPDIR}'})"|grep -c '"ok" : 1')
   if [ ${BACKUP_RET} = 0 ]; then
     echo "Backup failed for storage engine: ${engine}" | tee -a ${LOG}
     exit 1
