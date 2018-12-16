@@ -24,8 +24,8 @@
     include: ../tasks/enable_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
-  - name: include tasks for enabling experimental repo
-    include: ../tasks/enable_experimental_repo.yml
+  - name: include tasks for enabling PS 8 experimental repo
+    include: ../tasks/enable_ps_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: download and extract world database
