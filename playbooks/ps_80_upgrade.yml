@@ -48,6 +48,7 @@
       packages:
       - percona-server-server
       - percona-server-test
+      - percona-server-client
       - percona-server-dbg
       - percona-server-source
       - percona-server-tokudb
@@ -76,6 +77,7 @@
       - percona-server-test
       - percona-server-debuginfo
       - percona-server-devel
+      - percona-server-client
       - percona-server-tokudb
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
@@ -244,6 +246,7 @@
       packages:
       - percona-server-server
       - percona-server-test
+      - percona-server-client
       - percona-server-dbg
       - percona-server-source
       - percona-server-tokudb
