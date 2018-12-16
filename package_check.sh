@@ -118,9 +118,12 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" -o ${prod
       version=$(echo ${version} | sed 's/-/-rel/') # 5.5.53-rel38.5
       deb_opt_package=""
       deb_num_pkgs="6"
-    else
+    elif [ ${product} = "ps56" ]; then
       deb_opt_package="percona-server-tokudb-${deb_maj_version}"
       deb_num_pkgs="7"
+    else
+      deb_opt_package="percona-server-tokudb-${deb_maj_version} percona-server-rocksdb-${deb_maj_version}"
+      deb_num_pkgs="8"
     fi
     if [ "$(dpkg -l | grep percona-server | grep -c ${version})" == "${deb_num_pkgs}" ]; then
       echo "all packages are installed"
