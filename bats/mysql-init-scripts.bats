@@ -148,7 +148,7 @@ function teardown(){
       run is_running
       [ $status -eq 1 ]
     fi
-    /etc/init.d/mysql start 3>&-
+    /etc/init.d/mysql start 3>- &
     [ $? -eq 0 ]
     run is_running
     [ $status -eq 0 ]
@@ -163,7 +163,7 @@ function teardown(){
 
 @test "start mysql with service" {
   if [ ${SERVICE} -eq 1 ]; then
-    service mysql start 3>&-
+    service mysql start 3>- &
     [ $? -eq 0 ]
     sleep 10
     run is_running
@@ -186,7 +186,7 @@ function teardown(){
 
 @test "restart mysql with service" {
   if [ ${SERVICE} -eq 1 ]; then
-    service mysql restart 3>&-
+    service mysql restart 3>- &
     [ $? -eq 0 ]
     sleep 10
     run is_running
