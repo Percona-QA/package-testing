@@ -167,7 +167,7 @@
     command: /package-testing/plugins_test_57.sh ps
 
   - name: keyring plugins test
-    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh
+    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps57
 
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
