@@ -58,7 +58,6 @@ fi
 mysql --database=test -e "DROP TABLE keyring_file_test;"
 mysql --database=test -e "DROP TABLESPACE ts1;"
 mysql -e "UNINSTALL PLUGIN keyring_file;"
-fi
 
 # service restart so that plugins don't mess with eachother
 service mysql stop
