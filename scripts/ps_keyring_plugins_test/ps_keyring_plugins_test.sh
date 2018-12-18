@@ -85,7 +85,7 @@ fi
 mysql --database=test -e "DROP TABLE keyring_vault_test;"
 mysql --database=test -e "DROP TABLESPACE ts1;"
 #mysql -e "UNINSTALL PLUGIN keyring_vault;"
-fi
+
 # drop keyring udf functions
 mysql -e "DROP FUNCTION keyring_key_fetch;"
 mysql -e "DROP FUNCTION keyring_key_type_fetch;"
