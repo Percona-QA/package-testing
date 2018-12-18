@@ -37,7 +37,7 @@ mysql -e "CREATE FUNCTION keyring_key_remove returns integer SONAME 'keyring_udf
 mysql -e "CREATE FUNCTION keyring_key_generate returns integer SONAME 'keyring_udf.so';"
 mysql -e "CREATE FUNCTION keyring_key_store returns integer SONAME 'keyring_udf.so';"
 
-if ["$VERSION" == "ps57" ]; then
+if [ "$VERSION" == "ps57" ]; then
   # keyring_file plugin test
   #mysql -e "INSTALL PLUGIN keyring_file SONAME 'keyring_file.so';"
   mysql -e "CREATE DATABASE IF NOT EXISTS test;"
