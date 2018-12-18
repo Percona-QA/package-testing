@@ -148,7 +148,7 @@ function teardown(){
       run is_running
       [ $status -eq 1 ]
     fi
-    /etc/init.d/mysql start 3>- &
+    /etc/init.d/mysql start #3>- &
     [ $? -eq 0 ]
     run is_running
     [ $status -eq 0 ]
