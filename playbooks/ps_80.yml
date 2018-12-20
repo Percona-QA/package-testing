@@ -295,6 +295,25 @@
   - name: uninstall PAM before final package uninstall
     command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
 
+  - name: enable tools experimental for mysql-shell package
+    command: percona-release enable tools experimental
+
+  - name: install mysql-shell package for CentOS
+    yum: 
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - percona-mysql-shell
+    when: ansible_os_family == "RedHat"
+
+  - name: install mysql-shell package for Debian/Ubuntu
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - percona-mysql-shell
+    when: ansible_os_family == "Debian"
+
   - name: check that mysqladmin shutdown works correctly
     command: /package-testing/madmin_check.sh
 
