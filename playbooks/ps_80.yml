@@ -308,6 +308,8 @@
 
   - name: install mysql-shell package for Debian/Ubuntu
     apt:
+      update_cache: yes 
+      state: present
       name: "{{ packages }}"
     vars:
       packages:
