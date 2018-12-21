@@ -3,26 +3,32 @@
 set -e
 
 if [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps55, ps56 or ps57 !"
+  echo "This script requires product parameter: ps55, ps56, ps57, ps80, pxc56, or pxc57 !"
   echo "Usage: ./client_check.sh <prod>"
   exit 1
 fi
 
 if [ "$1" = "ps55" ]; then
-  deb_version=5.5
-  rpm_version=55
+  deb_version="-5.5"
+  rpm_version="-55"
 elif [ "$1" = "ps56" ]; then
-  deb_version=5.6
-  rpm_version=56
+  deb_version="-5.6"
+  rpm_version="-56"
 elif [ "$1" = "ps57" ]; then
-  deb_version=5.7
-  rpm_version=57
+  deb_version="-5.7"
+  rpm_version="-57"
+elif [ "$1" = "ps80" ]; then
+  deb_version=""
+  rpm_version=""
 elif [ "$1" = "pxc56" ]; then
-  deb_version=5.6
-  rpm_version=56
+  deb_version="-5.6"
+  rpm_version="-56"
 elif [ "$1" = "pxc57" ]; then
-  deb_version=5.7
-  rpm_version=57
+  deb_version="-5.7"
+  rpm_version="-57"
+else
+  echo "Invalid product selected"
+  exit 1
 fi
 
 product=$1
@@ -39,10 +45,10 @@ if [ -f /etc/redhat-release ]; then
     exit 1
   fi
 else
-  if [ "${product}" = "ps55" -o "${product}" = "ps56" -o "${product}" = "ps57" ]; then
-    apt-get install -y percona-server-client-${deb_version}
+ if [ "${product}" = "ps55" -o "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" ]; then
+    apt-get install -y percona-server-client${deb_version}
   elif [ "${product}" = "pxc56" -o "${product}" = "pxc57" ]; then
-    apt-get install -y percona-xtradb-cluster-client-${deb_version}
+    apt-get install -y percona-xtradb-cluster-client${deb_version}
   else
     echo "client version is incorrect"
     exit 1
@@ -50,5 +56,4 @@ else
 fi
 
 mysql --help
-
 echo $?

@@ -12,30 +12,35 @@
   - name: include tasks for test env setup
     import_tasks: ../tasks/test_prep.yml
 
-  - name: Install percona repository package
-    apt:
-      deb: https://repo.percona.com/apt/percona-release_0.1-5.{{ansible_lsb.codename}}_all.deb
-    when: ansible_os_family == "Debian"
+    - name: include tasks for enabling main repo
+    include: ../tasks/enable_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
 
-  - name: add the deb repo
-    apt_repository: repo='deb http://repo.percona.com/apt {{ansible_lsb.codename}} main testing' state=present update_cache=yes
-    when: ansible_os_family == "Debian"
+  - name: include tasks for enabling PS 8 test repo
+    include: ../tasks/enable_ps8_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling test repo
+    include: ../tasks/enable_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: install deb packages
-    apt: name={{item}} update_cache=yes
-    with_items:
-    - vim
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - vim
     when: ansible_os_family == "Debian"
 
-  - name: add the yum percona repos
-    yum: name=http://www.percona.com/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 6
-
   - name: install packages in centos
-    yum: name={{item}} state=present
-    with_items:
-    - libselinux-python
-    - pv
+    yum:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - libselinux-python
+      - pv
     when: ansible_os_family == "RedHat"
 
   - name: install PS/PXC client and run the check
