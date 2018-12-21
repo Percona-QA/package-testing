@@ -12,7 +12,7 @@
   - name: include tasks for test env setup
     import_tasks: ../tasks/test_prep.yml
 
-    - name: include tasks for enabling main repo
+  - name: include tasks for enabling main repo
     include: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
