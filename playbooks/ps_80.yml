@@ -4,6 +4,9 @@
 #   installs latest version of PS 8.0, PT and PXB 8.0
 #   does some tests
 
+# Cosmic is still missing python 
+- import_playbook: test_prep.yml
+
 - hosts: all
   become: true
   become_method: sudo
