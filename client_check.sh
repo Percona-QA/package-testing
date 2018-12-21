@@ -37,9 +37,11 @@ echo -n > "${log}"
 
 if [ -f /etc/redhat-release ]; then
   if [ "${product}" = "ps55" -o "${product}" = "ps56" -o "${product}" = "ps57" ]; then
-    yum install -y Percona-Server-client-${rpm_version} --enablerepo=percona-testing-x86_64
+    yum install -y Percona-Server-client-${rpm_version}
+  elif [ "${product}" = "ps80" ]; then
+    yum install -y percona-server-client${rpm_version}
   elif [ "${product}" = "pxc56" -o "${product}" = "pxc57" ]; then
-    yum install -y Percona-XtraDB-Cluster-client-${rpm_version} --enablerepo=percona-testing-x86_64
+    yum install -y Percona-XtraDB-Cluster-client-${rpm_version}
   else
     echo "client version is incorrect"
     exit 1
