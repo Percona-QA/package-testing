@@ -136,11 +136,11 @@
   - name: re-run ps_tokudb_admin to finish tokudb install
     command: /usr/bin/ps-admin --enable-tokudb
 
-  - name: install plugins, import world database, test tokudb
-    command: /package-testing/plugins_test_80.sh ps
-
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
+
+  - name: install plugins, import world database, test tokudb
+    command: /package-testing/plugins_test_80.sh ps
 
   - name: install 3rd party packages with apt
     apt:
