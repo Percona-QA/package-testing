@@ -332,7 +332,7 @@
 #   command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
 
   - name: keyring plugins test
-    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh
+    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb80
