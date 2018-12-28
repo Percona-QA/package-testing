@@ -128,13 +128,13 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: install tokudb and restart server
-    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
+    command: /usr/bin/ps-admin --enable-tokudb 
 
   - name: restart mysql service
     service: name=mysql state=restarted
 
   - name: re-run ps_tokudb_admin to finish tokudb install
-    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
+    command: /usr/bin/ps-admin --enable-tokudb
 
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_57u.sh ps
@@ -335,16 +335,16 @@
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh
 
   - name: check that Percona XtraBackup version is correct
-    command: /package-testing/version_check.sh pxb24
+    command: /package-testing/version_check.sh pxb80
 
   - name: check that Percona XtraBackup package versions are correct
-    command: /package-testing/package_check.sh pxb24
+    command: /package-testing/package_check.sh pxb80
 
-  - name: run bats unit tests for ps_tokudb_admin scripts
-    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_unit.bats
+# - name: run bats unit tests for ps_tokudb_admin scripts
+#   command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_unit.bats
 
-  - name: run bats integration tests for ps_tokudb_admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_integration.bats
+# - name: run bats integration tests for ps_tokudb_admin script
+#   command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_integration.bats
 
   - name: run bats unit tests for ps-admin script
     command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
