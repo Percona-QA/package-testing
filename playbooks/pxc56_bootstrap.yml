@@ -38,19 +38,25 @@
     when: ansible_os_family == "RedHat"
 
   - name: install PXC 5.6 previous deb packages
-    apt: name={{item}} update_cache=yes
-    with_items:
-    - percona-xtradb-cluster-full-56
-    - percona-xtradb-cluster-56
-    - python-mysqldb
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes 
+    vars:
+      packages:
+      - percona-xtradb-cluster-full-56
+      - percona-xtradb-cluster-56
+      - python-mysqldb
     when: ansible_os_family == "Debian"
 
   - name: install PXC 5.6 previous rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - Percona-XtraDB-Cluster-full-56
-    - Percona-XtraDB-Cluster-56
-    - MySQL-python
+    yum:
+      name: "{{ packages }}"
+      state: latest 
+    vars:
+      packages:
+      - Percona-XtraDB-Cluster-full-56
+      - Percona-XtraDB-Cluster-56
+      - MySQL-python
     when: ansible_os_family == "RedHat"
 
   - name: stop mysql service with service command

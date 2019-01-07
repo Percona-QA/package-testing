@@ -10,31 +10,37 @@
     include: ../tasks/enable_testing_repo.yml
 
   - name: upgrade PXC 5.7 to new deb packages
-    apt: name={{item}} update_cache=yes
-    with_items:
-    - percona-xtradb-cluster-full-57
-    - percona-xtradb-cluster-test-5.7
-    - percona-xtradb-cluster-source-5.7
-    - percona-xtradb-cluster-server-debug-5.7
-    - percona-xtradb-cluster-server-5.7
-    - percona-xtradb-cluster-common-5.7
-    - percona-xtradb-cluster-5.7-dbg
-    - percona-xtradb-cluster-client-5.7
-    - percona-xtradb-cluster-57
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes 
+    vars:
+      packages:
+      - percona-xtradb-cluster-full-57
+      - percona-xtradb-cluster-test-5.7
+      - percona-xtradb-cluster-source-5.7
+      - percona-xtradb-cluster-server-debug-5.7
+      - percona-xtradb-cluster-server-5.7
+      - percona-xtradb-cluster-common-5.7
+      - percona-xtradb-cluster-5.7-dbg
+      - percona-xtradb-cluster-client-5.7
+      - percona-xtradb-cluster-57
     when: ansible_os_family == "Debian"
 
   - name: upgrade PXC 5.7 to new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - Percona-XtraDB-Cluster-full-57
-    - Percona-XtraDB-Cluster-test-57
-    - Percona-XtraDB-Cluster-shared-57
-    - Percona-XtraDB-Cluster-server-57
-    - Percona-XtraDB-Cluster-garbd-57
-    - Percona-XtraDB-Cluster-devel-57
-    - Percona-XtraDB-Cluster-client-57
-    - Percona-XtraDB-Cluster-57-debuginfo
-    - Percona-XtraDB-Cluster-57
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - Percona-XtraDB-Cluster-full-57
+      - Percona-XtraDB-Cluster-test-57
+      - Percona-XtraDB-Cluster-shared-57
+      - Percona-XtraDB-Cluster-server-57
+      - Percona-XtraDB-Cluster-garbd-57
+      - Percona-XtraDB-Cluster-devel-57
+      - Percona-XtraDB-Cluster-client-57
+      - Percona-XtraDB-Cluster-57-debuginfo
+      - Percona-XtraDB-Cluster-57
     when: ansible_os_family == "RedHat"
 
   - name: check that PXC version is correct
@@ -50,15 +56,22 @@
     service: name=mysql state=started
 
   - name: remove PXC deb packages
-    apt: name={{item}} update_cache=no state=absent
-    with_items:
-    - percona-xtradb-cluster-server-5.7
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-xtradb-cluster-server-5.7
     when: ansible_os_family == "Debian"
 
   - name: remove PXC rpm packages
-    yum: name={{item}} state=absent
-    with_items:
-    - Percona-XtraDB-Cluster-server-57
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - Percona-XtraDB-Cluster-server-57
     when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal
