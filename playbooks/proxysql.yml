@@ -3,6 +3,7 @@
 #   enables Percona testing repository
 #   installs latest version of proxysql
 #   does some tests
+- import_playbook: test_prep.yml
 
 - hosts: all
   become: true
