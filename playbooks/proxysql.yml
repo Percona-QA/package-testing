@@ -23,15 +23,22 @@
     when: lookup('env', 'install_repo') == "main"
 
   - name: install proxysql new deb packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - proxysql
+    apt: 
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - proxysql
     when: ansible_os_family == "Debian"
 
   - name: install proxysql new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - proxysql
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - proxysql
     when: ansible_os_family == "RedHat"
 
   - name: check that proxysql version is correct
@@ -47,15 +54,21 @@
     service: name=proxysql state=started
 
   - name: remove proxysql deb packages
-    apt: name={{item}} state=absent
-    with_items:
-    - proxysql
+    apt:
+      name: "{{ packages }}"
+      state: absent 
+    vars:
+      packages:
+      - proxysql
     when: ansible_os_family == "Debian"
 
   - name: remove proxysql rpm packages
-    yum: name={{item}} state=absent
-    with_items:
-    - proxysql
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - proxysql
     when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal
