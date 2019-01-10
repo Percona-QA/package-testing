@@ -96,6 +96,7 @@
     vars:
       packages:
       - percona-toolkit
+      - proxysql
     when: ansible_os_family == "RedHat"
 
   - name: install sysbench new rpm packages
@@ -130,6 +131,7 @@
     vars:
       packages:
       - percona-toolkit
+      - proxysql
     when: ansible_os_family == "RedHat"
 
   - name: install Percona XtraBackup new rpm packages
@@ -179,6 +181,9 @@
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps80
+
+  - name: check that proxysql version is correct
+    command: /package-testing/version_check.sh proxysql
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
