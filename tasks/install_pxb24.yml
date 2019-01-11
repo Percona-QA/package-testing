@@ -1,0 +1,24 @@
+# This task install Percona XtraBackup 2.4 on CentOS and Debian/Ubuntu
+#
+  - name: install Percona XtraBackup new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup-24
+      - percona-xtrabackup-test-24
+      - percona-xtrabackup-dbg-24
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona XtraBackup new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup-24
+      - percona-xtrabackup-test-24
+      - percona-xtrabackup-24-debuginfo
+    when: ansible_os_family == "RedHat"

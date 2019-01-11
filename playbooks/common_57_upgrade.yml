@@ -25,78 +25,17 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: install Percona Toolkit deb packages previous version
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - percona-toolkit
-    when: ansible_os_family == "Debian"
+  - name: install PS 5.7 packages from main repos
+    include_tasks: ../tasks/install_ps57.yml
 
-  - name: install Percona Server deb packages previous version
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: latest
-    vars:
-      packages:
-      - percona-server-server-5.7
-      - percona-server-test-5.7
-      - percona-server-5.7-dbg
-      - percona-server-source-5.7
-      - percona-server-tokudb-5.7
-      - percona-server-rocksdb-5.7
-    when: ansible_os_family == "Debian"
+  - name: install Percona Toolkit packages from main repos
+    include_tasks: ../tasks/install_pt.yml
 
-  - name: install Percona XtraBackup deb packages previous version
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-24
-      - percona-xtrabackup-test-24
-      - percona-xtrabackup-dbg-24
-    when: ansible_os_family == "Debian"
+  - name: install sysbench packages from main repos
+    include_tasks: ../tasks/install_sysbench.yml
 
-  - name: install Percona Server rpm packages previous version
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - Percona-Server-server-57
-      - Percona-Server-test-57
-      - Percona-Server-57-debuginfo
-      - Percona-Server-devel-57
-      - Percona-Server-tokudb-57
-      - Percona-Server-rocksdb-57
-      - Percona-Server-shared-57
-      - Percona-Server-client-57
-    when: ansible_os_family == "RedHat"
-
-  - name: install Percona Toolkit rpm packages previous version
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-toolkit
-    when: ansible_os_family == "RedHat"
-
-  - name: install Percona XtraBackup rpm packages previous version
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-24
-      - percona-xtrabackup-test-24
-      - percona-xtrabackup-24-debuginfo
-    when: ansible_os_family == "RedHat"
+  - name: install Percona XtraBackup 2.4 packages from main repos
+    include_tasks: ../tasks/install_pxb24.yml
 
   - name: start mysql service with service command
     command: service mysql start
@@ -152,64 +91,64 @@
     when: ansible_os_family == "RedHat"
 
 # Start PAM setup
-# - group:
-#     name: developer
-#     state: present
+  - group:
+      name: developer
+      state: present
 
-# - group:
-#     name: dbadmin
-#     state: present
+  - group:
+      name: dbadmin
+      state: present
 
-# - user:
-#     name: test_pam
-#     shell: /bin/bash
-#     password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+  - user:
+      name: test_pam
+      shell: /bin/bash
+      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
 
-# - user:
-#     name: test_pam2
-#     shell: /bin/bash
-#     password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
-#     groups: developer
-#     append: yes
+  - user:
+      name: test_pam2
+      shell: /bin/bash
+      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+      groups: developer
+      append: yes
 
-# - user:
-#     name: test_pam3
-#     shell: /bin/bash
-#     password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
-#     groups: dbadmin
-#     append: yes
+  - user:
+      name: test_pam3
+      shell: /bin/bash
+      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+      groups: dbadmin
+      append: yes
 
-# - user:
-#     name: test_pam_compat
-#     shell: /bin/bash
-#     password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+  - user:
+      name: test_pam_compat
+      shell: /bin/bash
+      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
 
-# - user:
-#     name: mysql
-#     groups: shadow
-#     append: yes
-#   when: ansible_os_family == "Debian"
+  - user:
+      name: mysql
+      groups: shadow
+      append: yes
+    when: ansible_os_family == "Debian"
 
-# - file:
-#     path: /etc/shadow
-#     group: mysql
-#     mode: "g+r"
-#   when: ansible_os_family == "RedHat"
+  - file:
+      path: /etc/shadow
+      group: mysql
+      mode: "g+r"
+    when: ansible_os_family == "RedHat"
 
-# - name: copy config file for mysql PAM into system dir
-#   template:
-#     src: ../scripts/ps_pam_test/mysqld
-#     dest: /etc/pam.d/mysqld
-#     owner: root
-#     group: root
-#     mode: 0644
-#     force: yes
+  - name: copy config file for mysql PAM into system dir
+    template:
+      src: ../scripts/ps_pam_test/mysqld
+      dest: /etc/pam.d/mysqld
+      owner: root
+      group: root
+      mode: 0644
+      force: yes
 
-# - name: restart mysql service
-#   service: name=mysql state=restarted
+  - name: restart mysql service
+    service: name=mysql state=restarted
 
-# - name: run mysql setup for PAM
-#   command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_setup.bats
+  - name: run mysql setup for PAM
+    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_setup.bats
 # End PAM setup
 
   - name: start my.cnf change test
@@ -223,92 +162,18 @@
 #
 # Upgrade packages
 #
-  - name: upgrade Percona Toolkit to new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - percona-toolkit
-    when: ansible_os_family == "Debian"
 
-  - name: upgrade Percona Server to new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: latest
-    vars:
-      packages:
-      - percona-server-server-5.7
-      - percona-server-test-5.7
-      - percona-server-5.7-dbg
-      - percona-server-source-5.7
-      - percona-server-tokudb-5.7
-    when: ansible_os_family == "Debian"
+  - name: install PS 5.7 packages from main repos
+    include_tasks: ../tasks/install_ps57.yml
 
-  - name: upgrade Percona XtraBackup to new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-24
-      - percona-xtrabackup-test-24
-      - percona-xtrabackup-dbg-24
-    when: ansible_os_family == "Debian"
+  - name: install Percona Toolkit packages from main repos
+    include_tasks: ../tasks/install_pt.yml
 
-  - name: upgrade Percona Toolkit to new rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: latest 
-    vars:
-      packages:
-      - percona-toolkit
-    when: ansible_os_family == "RedHat"
+  - name: install sysbench packages from main repos
+    include_tasks: ../tasks/install_sysbench.yml
 
-  - name: upgrade Percona Server to new rpm packages on centos 5 and 6
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - Percona-Server-server-57
-      - Percona-Server-test-57
-      - Percona-Server-57-debuginfo
-      - Percona-Server-devel-57
-      - Percona-Server-tokudb-57
-      - Percona-Server-shared-57
-      - Percona-Server-client-57
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version < "7"
-
-  - name: upgrade Percona Server to new rpm packages on centos 7
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - Percona-Server-server-57
-      - Percona-Server-test-57
-      - Percona-Server-57-debuginfo
-      - Percona-Server-devel-57
-      - Percona-Server-tokudb-57
-      - Percona-Server-shared-57
-      - Percona-Server-shared-compat-57
-      - Percona-Server-client-57
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version > "6"
-
-  - name: upgrade Percona XtraBackup to new rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-24
-      - percona-xtrabackup-test-24
-      - percona-xtrabackup-24-debuginfo
-    when: ansible_os_family == "RedHat"
+  - name: install Percona XtraBackup 2.4 packages from main repos
+    include_tasks: ../tasks/install_pxb24.yml
 
   - name: run mysql_upgrade
     command: mysql_upgrade -uroot
@@ -328,11 +193,11 @@
   - name: finish my.cnf change test
     command: /package-testing/check_mycnf_post.sh
 
-# - name: run some MyRocks tests
-#   command: /package-testing/scripts/ps_myrocks_test.sh
+  - name: run some MyRocks tests
+    command: /package-testing/scripts/ps_myrocks_test.sh
 
-# - name: run bats tests for PAM
-#   command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
+  - name: run bats tests for PAM
+    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps57
@@ -361,8 +226,8 @@
   - name: start mysql service
     service: name=mysql state=started
 
-# - name: uninstall PAM before final package uninstall
-#   command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
+  - name: uninstall PAM before final package uninstall
+    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
 
   - name: remove Percona Server deb packages
     apt:
