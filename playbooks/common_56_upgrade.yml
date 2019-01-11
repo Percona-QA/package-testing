@@ -25,95 +25,17 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: install Percona Server deb packages previous version
-    apt: 
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - percona-server-server-5.6
-      - percona-server-test-5.6
-      - percona-server-5.6-dbg
-      - percona-server-source-5.6
-      - percona-server-tokudb-5.6
-    when: ansible_os_family == "Debian"
+  - name: install PS 5.6 packages from main repos
+    include_tasks: ../tasks/install_ps56.yml
 
-  - name: install Percona Toolkit deb packages previous version
-    apt: 
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - percona-toolkit
-    when: ansible_os_family == "Debian"
+  - name: install Percona Toolkit packages from main repos
+    include_tasks: ../tasks/install_pt.yml
 
-  - name: install sysbench deb packages previous version
-    apt: 
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - sysbench
-    when: ansible_os_family == "Debian"
+  - name: install sysbench packages from main repos
+    include_tasks: ../tasks/install_sysbench.yml
 
-  - name: install Percona XtraBackup deb packages previous version
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup
-      - percona-xtrabackup-test
-      - percona-xtrabackup-dbg
-    when: ansible_os_family == "Debian"
-
-  - name: install Percona Server rpm packages previous version
-    yum: 
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - Percona-Server-server-56
-      - Percona-Server-test-56
-      - Percona-Server-56-debuginfo
-      - Percona-Server-devel-56
-      - Percona-Server-tokudb-56
-      - Percona-Server-shared-56
-      - Percona-Server-client-56
-    when: ansible_os_family == "RedHat"
-
-  - name: install Percona Toolkit rpm packages previous version
-    yum: 
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-toolkit
-    when: ansible_os_family == "RedHat"
-
-  - name: install sysbench rpm packages previous version
-    yum: 
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - sysbench
-    when: ansible_os_family == "RedHat"
-
-  - name: install Percona XtraBackup rpm packages previous version
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup
-      - percona-xtrabackup-test
-      - percona-xtrabackup-debuginfo
-    when: ansible_os_family == "RedHat"
+  - name: install Percona XtraBackup 2.3 packages from main repos
+    include_tasks: ../tasks/install_pxb23.yml
 
   - name: start mysql service with service command
     command: service mysql start
@@ -224,77 +146,14 @@
 #
 # Upgrade packages
 #
-  - name: upgrade Percona Toolkit to new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - percona-toolkit
-    when: ansible_os_family == "Debian"
+  - name: upgrade Percona Toolkit to latest packages in the testing repos
+    include_tasks: ../tasks/install_pt.yml
 
-  - name: upgrade Percona Server to new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: latest
-    vars:
-      packages:
-      - percona-server-server-5.6
-      - percona-server-test-5.6
-      - percona-server-5.6-dbg
-      - percona-server-source-5.6
-      - percona-server-tokudb-5.6
-    when: ansible_os_family == "Debian"
+  - name: upgrade Percona Server to latest packages in the testing repos
+    include_tasks: ../tasks/install_ps56.yml
 
-  - name: upgrade Percona XtraBackup to new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup
-      - percona-xtrabackup-test
-      - percona-xtrabackup-dbg
-    when: ansible_os_family == "Debian"
-
-  - name: upgrade Percona Toolkit to new rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-toolkit
-    when: ansible_os_family == "RedHat"
-
-  - name: upgrade Percona Server to new rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - Percona-Server-server-56
-      - Percona-Server-test-56
-      - Percona-Server-56-debuginfo
-      - Percona-Server-devel-56
-      - Percona-Server-tokudb-56
-      - Percona-Server-shared-56
-      - Percona-Server-client-56
-      - Percona-Server-selinux-56
-    when: ansible_os_family == "RedHat"
-
-  - name: upgrade Percona XtraBackup to new rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup
-      - percona-xtrabackup-test
-      - percona-xtrabackup-debuginfo
-    when: ansible_os_family == "RedHat"
+  - name: upgrade Percona XtraBackup 2.3 to latest packages in the testing repos
+    include_tasks: ../tasks/install_pxb23.yml
 
   - name: run mysql_upgrade
     command: mysql_upgrade -uroot

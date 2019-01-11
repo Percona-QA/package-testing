@@ -1,0 +1,21 @@
+# This task installs Percona Toolkit
+#
+
+  - name: install Percona Toolkit new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona Toolkit new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
+    when: ansible_os_family == "RedHat"

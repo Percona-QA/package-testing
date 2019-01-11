@@ -25,103 +25,22 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: install Percona Toolkit new deb packages
-    apt: 
-      name: "{{ packages }}" 
-      update_cache: yes 
-      state: latest
-    vars:
-      packages:
-      - percona-toolkit
-    when: ansible_os_family == "Debian"
+  - name: install Percona Toolkit new packages
+    include_tasks: ../tasks/install_pt.yml
 
-  - name: install sysbench new deb packages
-    apt: 
-      name: "{{ packages }}" 
-      update_cache: no 
-      state: latest
-    vars:
-      packages:
-      - sysbench
-      - sysbench-tpcc
-    when: ansible_os_family == "Debian"
+  - name: install sysbench new packages
+    include_tasks: ../tasks/install_sysbench.yml
 
-  - name: install Percona Server new deb packages
-    apt: 
-      name: "{{ packages }}" 
-      update_cache: no 
-      state: latest
-    vars:
-      packages:
-      - percona-server-server-5.6
-      - percona-server-test-5.6
-      - percona-server-5.6-dbg
-      - percona-server-source-5.6
-      - percona-server-tokudb-5.6
-    when: ansible_os_family == "Debian"
-
-  - name: install Percona XtraBackup new deb packages
-    apt: 
-      name: "{{ packages }}" 
-      update_cache: no 
-      state: latest
-    vars:
-      packages:  
-      - percona-xtrabackup
-      - percona-xtrabackup-test
-      - percona-xtrabackup-dbg
-    when: ansible_os_family == "Debian"
+  - name: install PS 5.6 packages
+    include_tasks: ../tasks/install_ps56.yml
+    
+  - name: install PXB 2.3 packages
+    include_tasks: ../tasks/install_pxb23.yml
 
   - name: Make sure SELinux is in enforcing mode on CentOS
     selinux:
       policy: targeted
       state: enforcing
-    when: ansible_os_family == "RedHat"
-
-  - name: install Percona Server new rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - Percona-Server-server-56
-      - Percona-Server-test-56
-      - Percona-Server-56-debuginfo
-      - Percona-Server-devel-56
-      - Percona-Server-tokudb-56
-      - Percona-Server-selinux-56
-      - Percona-Server-shared-56
-      - Percona-Server-client-56
-    when: ansible_os_family == "RedHat"
-
-  - name: install Percona Toolkit new rpm packages
-    yum: 
-      name: "{{ packages }}" 
-      state: latest
-    vars:
-      packages:
-      - percona-toolkit
-    when: ansible_os_family == "RedHat"
-
-  - name: install sysbench new rpm packages
-    yum: 
-      name: "{{ packages }}" 
-      state: latest
-    vars:
-      packages:
-      - sysbench
-      - sysbench-tpcc
-    when: ansible_os_family == "RedHat"
-
-  - name: install Percona XtraBackup new rpm packages
-    yum: 
-      name: "{{ packages }}"  
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup
-      - percona-xtrabackup-test
-      - percona-xtrabackup-debuginfo
     when: ansible_os_family == "RedHat"
 
   - name: start mysql service with service command
@@ -278,7 +197,7 @@
   - name: uninstall PAM before final package uninstall
     command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
 
-  - name: remove Percona Server deb packages
+  - name: remove Percona Server 5.6 deb packages
     apt: 
       name: "{{ packages }}"
       update_cache: no
@@ -288,7 +207,7 @@
       - percona-server-server-5.6
     when: ansible_os_family == "Debian"
 
-  - name: remove Percona Server rpm packages
+  - name: remove Percona Server 5.6 rpm packages
     yum: 
       name: "{{ packages }}"
       state: absent
