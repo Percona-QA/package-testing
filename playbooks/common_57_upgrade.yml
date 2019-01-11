@@ -60,13 +60,13 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: install tokudb and restart server
-    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
+    command: /usr/bin/ps_tokudb_admin --enable
 
   - name: restart mysql service
     service: name=mysql state=restarted
 
   - name: re-run ps_tokudb_admin to finish tokudb install
-    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
+    command: /usr/bin/ps_tokudb_admin --enable 
 
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_57u.sh ps
