@@ -243,9 +243,6 @@
   - name: start mysql service
     service: name=mysql state=started
 
-  - name: uninstall PAM before final package uninstall
-    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
-
   - name: enable tools experimental for mysql-shell package
     command: percona-release enable tools testing
 
