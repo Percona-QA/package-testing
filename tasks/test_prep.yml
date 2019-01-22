@@ -1,14 +1,4 @@
 
-  # - name: setup throttling for yum
-  #   command: echo "throttle=300k" >> /etc/yum.conf
-  #   when: ansible_os_family == "RedHat"
-  #
-  # - name: setup throttling for apt
-  #   copy: src=../apt-throttling
-  #         dest=/etc/apt/apt.conf.d/
-  #         mode=0640 owner=root group=root
-  #   when: ansible_os_family == "Debian"
-
   - name: setup epel 6 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
