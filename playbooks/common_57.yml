@@ -142,7 +142,7 @@
 # - name: check that mysqladmin shutdown works correctly
 #   command: /package-testing/madmin_check.sh
 
-  - name: remove Percona Server deb packages
+  - name: remove Percona Server 5.7 deb packages
     apt:
       name: "{{ packages }}"
       update_cache: no
@@ -152,7 +152,7 @@
       - percona-server-server-5.7
     when: ansible_os_family == "Debian"
 
-  - name: remove Percona Server rpm packages
+  - name: remove Percona Server 5.7 rpm packages
     yum: 
       name: "{{ packages }}"
       state: absent

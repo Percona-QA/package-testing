@@ -1,0 +1,32 @@
+# This task removes Percona Server 5.7 on CentOS and Debian/Ubuntu
+#
+  - name: remove Percona Server 5.7 deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server-server-5.7
+      - percona-server-test-5.7
+      - percona-server-5.7-dbg
+      - percona-server-source-5.7
+      - percona-server-tokudb-5.7
+      - percona-server-rocksdb-5.7
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server 5.7 rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - Percona-Server-server-57
+      - Percona-Server-test-57
+      - Percona-Server-57-debuginfo
+      - Percona-Server-devel-57
+      - Percona-Server-tokudb-57
+      - Percona-Server-rocksdb-57
+      - Percona-Server-shared-57
+      - Percona-Server-client-57
+    when: ansible_os_family == "RedHat"
