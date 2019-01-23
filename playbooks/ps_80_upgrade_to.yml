@@ -1,0 +1,15 @@
+# This playbook install Percona Server 5.7 with TokuDB and MyRocsk
+# It will disable the original repo and upgrade to Percona Server 8.0
+#
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+
+  - name: include tasks for installing PS 5.7
+    include_tasks: ../playbooks/common_57.yml
+
+  - name: include tasks for installing PS 8.0
+    include_tasks: ../playbooks/ps_80.yml
