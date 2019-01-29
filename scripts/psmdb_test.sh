@@ -203,6 +203,7 @@ for engine in mmapv1 PerconaFT rocksdb wiredTiger inMemory; do
 done
 
 if [ "$1" == "3.6" ] || [ "$1" == "4.0" ]; then
+  chmod 600 /package-testing/scripts/mongodb-keyfile
   for cipher in AES256-CBC AES256-GCM; do
     echo "==================================" | tee -a ${LOG}
     echo "testing encryption with ${cipher}" | tee -a ${LOG}
