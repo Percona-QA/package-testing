@@ -96,7 +96,7 @@
 
   - name: remove Percona Server for MongoDB 3.6 rpm packages
     yum:
-      name: "{{ vars }}"
+      name: "{{ packages }}"
       state: absent
     vars:
       packages:
