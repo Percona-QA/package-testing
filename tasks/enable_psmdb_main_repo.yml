@@ -11,4 +11,4 @@
     when: ansible_os_family == "RedHat" 
 
   - name: enable the PSMDB testing repo
-    command: percona-release setup psmdb40
+    command: percona-release enable psmdb40
