@@ -25,12 +25,14 @@
     include_tasks: ../tasks/enable_psmdb_main_repo.yml
 
   - name: install Percona Server for MongoDB 4.0 deb packages previous version
-    apt: name={{item}}
-    update_cache: yes
-    state: latest
-    with_items:
-    - percona-server-mongodb
-    - percona-server-mongodb-dbg
+    apt: 
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:      
+      - percona-server-mongodb
+      - percona-server-mongodb-dbg
     when: ansible_os_family == "Debian"
 
   - name: install Percona Server for MongoDB 4.0 new rpm packages previous version
