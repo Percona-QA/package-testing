@@ -1,0 +1,123 @@
+---
+# This playbook does following:
+#   sets main Percona repo
+#   installs PSMDB 4.0
+#   changes repo to testing
+#   upgrades packages to the new version
+#   does some tests
+- import_playbook: test_prep.yml
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+#
+# Install from main repository
+#
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_main_repo.yml
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_psmdb_main_repo.yml
+
+  - name: install Percona Server for MongoDB 4.0 deb packages previous version
+    apt: name={{item}} update_cache=yes state=latest
+    with_items:
+    - percona-server-mongodb
+    - percona-server-mongodb-dbg
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona Server for MongoDB 4.0 new rpm packages previous version
+    yum: name={{item}} state=latest
+    with_items:
+    - percona-server-mongodb
+    - percona-server-mongodb-dbg
+    when: ansible_os_family == "RedHat"
+
+  - name: start mongod with init script
+    command: /etc/init.d/mongod start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+
+  - name: start mongod with systemctl
+    command: systemctl start mongod
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+#
+# Enable testing repository
+#
+  - name: include tasks for enabling test repo
+    include_tasks: ../tasks/enable_psmdb_testing_repo.yml
+
+#
+# Upgrade packages
+#
+  - name: upgrade Percona Server for MongoDB 4.0 to new deb packages
+    apt: name={{item}} update_cache=yes state=latest
+    with_items:
+    - percona-server-mongodb
+    - percona-server-mongodb-server
+    - percona-server-mongodb-mongos
+    - percona-server-mongodb-shell
+    - percona-server-mongodb-tools
+    - percona-server-mongodb-dbg
+    when: ansible_os_family == "Debian"
+
+  - name: upgrade Percona Server for MongoDB 4.0 to new rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - percona-server-mongodb
+    - percona-server-mongodb-server
+    - percona-server-mongodb-mongos
+    - percona-server-mongodb-shell
+    - percona-server-mongodb-tools
+    - percona-server-mongodb-dbg
+    when: ansible_os_family == "RedHat"
+
+  - name: check that PSMDB 4.0 package versions are correct
+    command: /package-testing/package_check.sh psmdb40
+
+  - name: test SE change, import data, restart service
+    command: /package-testing/scripts/psmdb_test.sh 4.0
+
+  - name: set pass and enable auth
+    command: /package-testing/scripts/psmdb_set_auth.sh
+
+  - name: run bats tests for mongo init scripts
+    command: /usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats
+
+  - name: install numactl package on debian
+    apt: name={{item}} update_cache=no state=latest
+    with_items:
+    - numactl
+    when: ansible_os_family == "Debian"
+
+  - name: install numactl package on centos
+    yum: name={{item}} state=latest
+    with_items:
+    - numactl
+    when: ansible_os_family == "RedHat"
+
+  - name: run bats tests for mongo init scripts
+    command: /usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats
+
+  - name: start mongod service
+    service: name=mongod state=started
+
+  - name: remove Percona Server for MongoDB 4.0 deb packages
+    apt: name={{item}} update_cache=no state=absent
+    with_items:
+    - percona-server-mongodb-server
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server for MongoDB 4.0 rpm packages
+    yum: name={{item}} state=absent
+    with_items:
+    - percona-server-mongodb-server
+    when: ansible_os_family == "RedHat"
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mongodb stopped
