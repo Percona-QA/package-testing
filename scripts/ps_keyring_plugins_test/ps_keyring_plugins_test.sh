@@ -44,7 +44,7 @@ mysql -e "CREATE FUNCTION keyring_key_generate returns integer SONAME 'keyring_u
 mysql -e "CREATE FUNCTION keyring_key_store returns integer SONAME 'keyring_udf.so';"
 
 # keyring_file plugin test
-#mysql -e "INSTALL PLUGIN keyring_file SONAME 'keyring_file.so';"
+mysql -e "INSTALL PLUGIN keyring_file SONAME 'keyring_file.so';"
 mysql -e "CREATE DATABASE IF NOT EXISTS test;"
 mysql --database=test -e "CREATE TABLESPACE ts1 ADD DATAFILE 'ts1.ibd' ENCRYPTION='Y';"
 mysql --database=test -e "CREATE TABLE keyring_file_test (a INT PRIMARY KEY) TABLESPACE ts1 ${opt_enc};"
