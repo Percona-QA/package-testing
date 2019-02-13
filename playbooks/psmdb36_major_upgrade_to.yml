@@ -7,6 +7,8 @@
 #   * uninstalls PSMDB 3.4 and installs 3.6
 #   * does some tests
 
+- import_playbook: test_prep.yml
+
 - hosts: all
   become: true
   become_method: sudo

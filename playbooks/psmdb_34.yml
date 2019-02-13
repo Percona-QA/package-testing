@@ -22,7 +22,7 @@
     when: lookup('env', 'install_repo') == "main"
 
   - name: install Percona Server for MongoDB 3.4 packages
-    tasks: ../tasks/install_psmdb_34.yml
+    include_tasks: ../tasks/install_psmdb_34.yml
 
   - name: start mongod with service
     command: service mongod start
