@@ -21,19 +21,8 @@
     include: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
-  - name: install Percona Server for MongoDB 3.4 new deb packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - percona-server-mongodb-34
-    - percona-server-mongodb-34-dbg
-    when: ansible_os_family == "Debian"
-
-  - name: install Percona Server for MongoDB 3.4 new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - Percona-Server-MongoDB-34
-    - Percona-Server-MongoDB-34-debuginfo
-    when: ansible_os_family == "RedHat"
+  - name: install Percona Server for MongoDB 3.4 packages
+    tasks: ../tasks/install_psmdb_34.yml
 
   - name: start mongod with service
     command: service mongod start
@@ -55,17 +44,8 @@
   - name: run bats tests for mongo init scripts
     command: /usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats
 
-  - name: install numactl package on debian
-    apt: name={{item}} update_cache=no state=latest
-    with_items:
-    - numactl
-    when: ansible_os_family == "Debian"
-
-  - name: install numactl package on centos
-    yum: name={{item}} state=latest
-    with_items:
-    - numactl
-    when: ansible_os_family == "RedHat"
+  - name: install numactl package
+    include_tasks: ../tasks/install_numactl.yml
 
   - name: run bats tests for mongo init scripts after numactl install
     command: /usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats
@@ -74,15 +54,22 @@
     service: name=mongod state=started
 
   - name: remove Percona Server for MongoDB 3.4 deb packages
-    apt: name={{item}} update_cache=no state=absent
-    with_items:
-    - percona-server-mongodb-34-server
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server-mongodb-34-server
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server for MongoDB 3.4 rpm packages
-    yum: name={{item}} state=absent
-    with_items:
-    - Percona-Server-MongoDB-34-server
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - Percona-Server-MongoDB-34-server
     when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal

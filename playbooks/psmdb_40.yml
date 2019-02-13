@@ -26,26 +26,8 @@
     include_tasks: ../tasks/enable_psmdb_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
-  - name: install Percona Server for MongoDB 4.0 new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - percona-server-mongodb
-      - percona-server-mongodb-dbg
-    when: ansible_os_family == "Debian"
-
-  - name: install Percona Server for MongoDB 4.0 new rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-server-mongodb
-      - percona-server-mongodb-debuginfo
-    when: ansible_os_family == "RedHat"
+  - name: install PSMDB packages
+    include_tasks: ../tasks/install_psmdb.yml
 
   - name: start mongod with service
     command: service mongod start
@@ -70,24 +52,8 @@
   - name: run bats tests for mongo init scripts
     command: /usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats
 
-  - name: install numactl package on debian
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: latest
-    vars:
-      packages:
-      - numactl
-    when: ansible_os_family == "Debian"
-
-  - name: install numactl package on centos
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - numactl
-    when: ansible_os_family == "RedHat"
+  - name: install numactl package
+    include_tasks: ../tasks/install_numactl.yml
 
   - name: run bats tests for mongo init scripts after numactl install
     command: /usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats

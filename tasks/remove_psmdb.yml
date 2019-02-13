@@ -1,0 +1,20 @@
+# This task removes the PSMDB packages
+#
+  - name: remove Percona Server for MongoDB deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server-mongodb-server
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server for MongoDB rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-server-mongodb-server
+    when: ansible_os_family == "RedHat"

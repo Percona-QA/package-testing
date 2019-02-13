@@ -1,0 +1,20 @@
+# This task install numactl package
+#
+  - name: install numactl package on debian
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: latest
+    vars:
+      packages:
+      - numactl
+    when: ansible_os_family == "Debian"
+
+  - name: install numactl package on centos
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - numactl
+    when: ansible_os_family == "RedHat"

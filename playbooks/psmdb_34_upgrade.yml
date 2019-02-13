@@ -21,19 +21,8 @@
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_main_repo.yml
 
-  - name: install Percona Server for MongoDB 3.4 deb packages previous version
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - percona-server-mongodb-34
-    - percona-server-mongodb-34-dbg
-    when: ansible_os_family == "Debian"
-
   - name: install Percona Server for MongoDB 3.4 new rpm packages previous version
-    yum: name={{item}} state=latest
-    with_items:
-    - Percona-Server-MongoDB-34
-    - Percona-Server-MongoDB-34-debuginfo
-    when: ansible_os_family == "RedHat"
+    include_tasks: ../tasks/install_psmdb_34.yml
 
   - name: start mongod with service
     command: service mongod start
@@ -51,27 +40,8 @@
 #
 # Upgrade packages
 #
-  - name: upgrade Percona Server for MongoDB 3.4 to new deb packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - percona-server-mongodb-34
-    - percona-server-mongodb-34-server
-    - percona-server-mongodb-34-mongos
-    - percona-server-mongodb-34-shell
-    - percona-server-mongodb-34-tools
-    - percona-server-mongodb-34-dbg
-    when: ansible_os_family == "Debian"
-
-  - name: upgrade Percona Server for MongoDB 3.4 to new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - Percona-Server-MongoDB-34
-    - Percona-Server-MongoDB-34-server
-    - Percona-Server-MongoDB-34-shell
-    - Percona-Server-MongoDB-34-mongos
-    - Percona-Server-MongoDB-34-tools
-    - Percona-Server-MongoDB-34-debuginfo
-    when: ansible_os_family == "RedHat"
+  - name: upgrade Percona Server for MongoDB 3.4 packages
+    include_tasks: ../tasks/install_psmdb_34_full.yml
 
   - name: check that PSMDB 3.4 package versions are correct
     command: /package-testing/package_check.sh psmdb34
@@ -85,17 +55,8 @@
   - name: run bats tests for mongo init scripts
     command: /usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats
 
-  - name: install numactl package on debian
-    apt: name={{item}} update_cache=no state=latest
-    with_items:
-    - numactl
-    when: ansible_os_family == "Debian"
-
-  - name: install numactl package on centos
-    yum: name={{item}} state=latest
-    with_items:
-    - numactl
-    when: ansible_os_family == "RedHat"
+  - name: install numactl package
+    include_tasks: ../tasks/install_numactl.yml
 
   - name: run bats tests for mongo init scripts
     command: /usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats
@@ -104,15 +65,22 @@
     service: name=mongod state=started
 
   - name: remove Percona Server for MongoDB 3.4 deb packages
-    apt: name={{item}} update_cache=no state=absent
-    with_items:
-    - percona-server-mongodb-34-server
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server-mongodb-34-server
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server for MongoDB 3.4 rpm packages
-    yum: name={{item}} state=absent
-    with_items:
-    - Percona-Server-MongoDB-34-server
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - Percona-Server-MongoDB-34-server
     when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal
