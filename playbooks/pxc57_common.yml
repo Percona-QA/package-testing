@@ -49,6 +49,7 @@
       name: "{{ packages }}"
       state: latest 
     vars:
+      packages:
       - Percona-XtraDB-Cluster-full-57
       - Percona-XtraDB-Cluster-57
       - MySQL-python
