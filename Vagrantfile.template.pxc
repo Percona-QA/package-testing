@@ -4,11 +4,10 @@
 servers=[
   { :hostname => "d-jessie-64-@@hostname@@", :box => "bento/debian-8" },
   { :hostname => "d-stretch-64-@@hostname@@", :box => "bento/debian-9" },
-  { :hostname => "centos-6-64-@@hostname@@", :box => "bento/centos-6.9" },
-  { :hostname => "centos-7-64-@@hostname@@", :box => "bento/centos-7.5" },
+  { :hostname => "centos-6-64-@@hostname@@", :box => "bento/centos-6" },
+  { :hostname => "centos-7-64-@@hostname@@", :box => "bento/centos-7" },
   { :hostname => "u-trusty-64-@@hostname@@", :box => "bento/ubuntu-14.04" },
   { :hostname => "u-xenial-64-@@hostname@@", :box => "bento/ubuntu-16.04" },
-  { :hostname => "u-artful-64-@@hostname@@", :box => "bento/ubuntu-17.10" },
   { :hostname => "u-bionic-64-@@hostname@@", :box => "bento/ubuntu-18.04" },
   { :hostname => "sles-12-64-@@hostname@@", :box => "wvera/sles12sp2" }
 ]
