@@ -12,7 +12,8 @@
 #   when: ansible_os_family == "Debian"
 
   - name: add the main Percona yum repos for centos 6 and 7
-    yum: name=https://repo.percona.com/yum/percona-release-0.1-10.noarch.rpm
+    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+#   yum: name=https://repo.percona.com/yum/percona-release-0.1-10.noarch.rpm
     when: ansible_os_family == "RedHat" 
 
   - name: enable main repo
