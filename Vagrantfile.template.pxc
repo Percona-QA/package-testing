@@ -24,9 +24,9 @@ Vagrant.configure("2") do |config|
       node1.vm.provider "virtualbox" do |vb|
           vb.customize ["modifyvm", :id, "--cpus", 2]
           vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on"]
-          vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
-          vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-          vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+#         vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
+#         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+#         vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
       end
       config.vm.provision "ansible" do |ansible|
         ansible.playbook = "@@pxc1-playbook_full@@"
@@ -45,9 +45,9 @@ Vagrant.configure("2") do |config|
       node2.vm.provider "virtualbox" do |vb|
           vb.customize ["modifyvm", :id, "--cpus", 2]
           vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on"]
-          vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
-          vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-          vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+#         vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
+#         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+#         vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
       end
       config.vm.provision "ansible" do |ansible|
         ansible.playbook = "@@pxc2-playbook_full@@"
@@ -66,9 +66,9 @@ Vagrant.configure("2") do |config|
       node3.vm.provider "virtualbox" do |vb|
           vb.customize ["modifyvm", :id, "--cpus", 2]
           vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on"]
-          vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
-          vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-          vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+#         vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
+#         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+#         vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
       end
       config.vm.provision "ansible" do |ansible|
         ansible.playbook = "@@pxc3-playbook_full@@"
