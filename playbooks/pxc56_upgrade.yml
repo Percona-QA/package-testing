@@ -9,6 +9,16 @@
   - name: include tasks for enabling testing repo
     include: ../tasks/enable_testing_repo.yml
 
+# restart the bootstrapped node before upgrading
+#
+  - name: restart the service
+    command: service mysql restart
+    when: ansible_os_family == "Debian"
+
+  - name: restart the service
+    command: service mysql restart
+    when: ansible_os_family == "Debian"
+
   - name: upgrade PXC 5.6 to new deb packages
     apt:
       name: "{{ packages }}"
