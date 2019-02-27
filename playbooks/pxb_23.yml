@@ -53,6 +53,9 @@
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb23
 
+  - name: install plugins, import world database
+    command: /package-testing/plugins_test.sh
+
   - name: run sysbench prepare script
     command: sysbench --mysql-user=root --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
 
