@@ -76,7 +76,7 @@
   - name: run backup
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
 
-  - name: run backup
+  - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
 
   - name: remove Percona Server deb packages

@@ -1,0 +1,118 @@
+---
+# This playbook does following:
+#   enables Percona testing repository
+#   installs latest version of PS 5.6, PT and PXB 2.3
+#   does some tests
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: include tasks for enabling test repo
+    include: ../tasks/enable_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling main repo
+    include: ../tasks/enable_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: install Percona Toolkit new packages
+    include_tasks: ../tasks/install_pt.yml
+
+  - name: install PS 5.6 packages
+    include_tasks: ../tasks/install_ps56.yml
+    
+  - name: install PXB 2.3 packages
+    include_tasks: ../tasks/install_pxb23.yml
+
+  - name: start mysql service with service command
+    command: service mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb23
+
+  - name: check that Percona XtraBackup package versions are correct
+    command: /package-testing/package_check.sh pxb23
+
+  - name: run sysbench prepare script
+    command: sysbench --mysql-user=root --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
+
+  - name: run sysbench benchmark
+    command: sysbench --mysql-user=root --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write run
+
+  - name: run sysbench tpcc prepare script
+    command: /usr/share/sysbench/tpcc.lua --mysql-user=root --mysql-db=sbt --time=30 --threads=64 --report-interval=1 --tables=3 --scale=5 --db-driver=mysql prepare
+
+  - name: run sysbench tpcc benchmark
+    command: /usr/share/sysbench/tpcc.lua --mysql-user=root --mysql-db=sbt --time=30 --threads=64 --report-interval=1 --tables=3 --scale=5 --db-driver=mysql run
+
+  - name: install 3rd party packages with apt
+    apt: 
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "Debian"
+
+  - name: install 3rd party packages with yum
+    yum: 
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "RedHat"
+
+  - name: run bats unit tests for ps_tokudb_admin scripts
+    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_unit.bats
+
+  - name: run bats integration tests for ps_tokudb_admin script
+    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_integration.bats
+
+  - name: run bats tests for mysql init scripts
+    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+
+  - name: start mysql service
+    service: name=mysql state=started
+ 
+    # temporary commented out until BLD-906 is resolved 
+# - name: check that mysqladmin shutdown works correctly
+#   command: /package-testing/madmin_check.sh
+
+  - name: uninstall PAM before final package uninstall
+    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
+
+  - name: remove Percona Server 5.6 deb packages
+    apt: 
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server-server-5.6
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server 5.6 rpm packages
+    yum: 
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - Percona-Server-server-56
+    when: ansible_os_family == "RedHat"
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mysql stopped
