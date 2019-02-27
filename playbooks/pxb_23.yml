@@ -4,6 +4,8 @@
 #   installs latest version of PS 5.6, PT and PXB 2.3
 #   does some tests
 
+- import_playbook: test_prep.yml
+
 - hosts: all
   become: true
   become_method: sudo
