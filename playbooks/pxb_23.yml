@@ -84,24 +84,12 @@
       - rsyslog-mysql
     when: ansible_os_family == "RedHat"
 
-  - name: run bats unit tests for ps_tokudb_admin scripts
-    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_unit.bats
-
-  - name: run bats integration tests for ps_tokudb_admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_integration.bats
-
-  - name: run bats tests for mysql init scripts
-    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
-
   - name: start mysql service
     service: name=mysql state=started
  
     # temporary commented out until BLD-906 is resolved 
 # - name: check that mysqladmin shutdown works correctly
 #   command: /package-testing/madmin_check.sh
-
-  - name: uninstall PAM before final package uninstall
-    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
 
   - name: remove Percona Server 5.6 deb packages
     apt: 
@@ -111,6 +99,7 @@
     vars:
       packages:
       - percona-server-server-5.6
+      - percona-xtrabackup
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server 5.6 rpm packages
@@ -120,6 +109,7 @@
     vars:
       packages:
       - Percona-Server-server-56
+      - percona-xtrabackup
     when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal
