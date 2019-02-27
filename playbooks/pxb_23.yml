@@ -30,6 +30,9 @@
   - name: install Percona Toolkit new packages
     include_tasks: ../tasks/install_pt.yml
 
+  - name: install sysbench packages
+    include_tasks: ../tasks/install_sysbench.yml
+
   - name: install PS 5.6 packages
     include_tasks: ../tasks/install_ps56.yml
     
