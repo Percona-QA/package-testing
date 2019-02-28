@@ -75,6 +75,7 @@
     vars:
       packages:
       - rsyslog-mysql
+      - python-mysqldb
     when: ansible_os_family == "Debian"
 
   - name: install 3rd party packages with yum
@@ -83,6 +84,7 @@
     vars:
       packages:
       - rsyslog-mysql
+      - MySQL-python
     when: ansible_os_family == "RedHat"
 
   - name: add sbt user
