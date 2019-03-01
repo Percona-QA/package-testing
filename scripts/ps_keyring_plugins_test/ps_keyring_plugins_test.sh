@@ -7,6 +7,9 @@ else
   MYCNF="/etc/my.cnf"
 fi
  
+LOG="/tmp/keyring_plugins_test_run.log"
+echo -n > ${LOG}
+
 if [ -z "$1" ]; then
   echo "This script needs parameter ps57|ps80"
   exit 1
@@ -25,7 +28,7 @@ else
   binlog_enc="binlog_encryption=ON"
 fi
 
-echo "Adding the config vars"
+echo "Adding the config vars" | tee -a ${LOG}
 service mysql stop
 sleep 10
 if [ $(grep -c "\[mysqld\]" ${MYCNF}) -eq 0 ]; then
@@ -38,7 +41,7 @@ sed -i '/\[mysqld\]/a binlog_checksum=CRC32' ${MYCNF}
 service mysql start
 sleep 10
 
-echo "install keyring udf functions"
+echo "install keyring udf functions" | tee -a ${LOG}
 # install keyring udf functions
 mysql -e "CREATE FUNCTION keyring_key_fetch returns string SONAME 'keyring_udf.so';"
 mysql -e "CREATE FUNCTION keyring_key_type_fetch returns string SONAME 'keyring_udf.so';"
@@ -47,7 +50,7 @@ mysql -e "CREATE FUNCTION keyring_key_remove returns integer SONAME 'keyring_udf
 mysql -e "CREATE FUNCTION keyring_key_generate returns integer SONAME 'keyring_udf.so';"
 mysql -e "CREATE FUNCTION keyring_key_store returns integer SONAME 'keyring_udf.so';"
 
-echo " keyring_file plugin test"
+echo " keyring_file plugin test" | tee -a ${LOG}
 # keyring_file plugin test
 mysql -e "CREATE DATABASE IF NOT EXISTS test;"
 mysql --database=test -e "CREATE TABLESPACE ts1 ADD DATAFILE 'ts1.ibd' ENCRYPTION='Y';"
@@ -63,7 +66,7 @@ mysql --database=test -e "DROP TABLE keyring_file_test;"
 mysql --database=test -e "DROP TABLESPACE ts1;"
 mysql -e "UNINSTALL PLUGIN keyring_file;"
 
-echo "service restart so that plugins don't mess with eachother"
+echo "service restart so that plugins don't mess with eachother" | tee -a ${LOG}
 # service restart so that plugins don't mess with eachother
 service mysql stop
 sleep 10
@@ -73,7 +76,7 @@ sed -i '/\[mysqld\]/a keyring_vault_config="/package-testing/scripts/ps_keyring_
 service mysql start
 sleep 10
 
-echo "keyring_vault plugin test"
+echo "keyring_vault plugin test" | tee -a ${LOG}
 # keyring_vault plugin test
 #mysql -e "INSTALL PLUGIN keyring_vault SONAME 'keyring_vault.so';"
 #mysql -e "SET GLOBAL keyring_vault_config='/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf';"
@@ -91,7 +94,7 @@ mysql --database=test -e "DROP TABLE keyring_vault_test;"
 mysql --database=test -e "DROP TABLESPACE ts1;"
 #mysql -e "UNINSTALL PLUGIN keyring_vault;"
 
-echo "drop keyring udf functions"
+echo "drop keyring udf functions" | tee -a ${LOG}
 # drop keyring udf functions
 mysql -e "DROP FUNCTION keyring_key_fetch;"
 mysql -e "DROP FUNCTION keyring_key_type_fetch;"
@@ -100,7 +103,7 @@ mysql -e "DROP FUNCTION keyring_key_remove;"
 mysql -e "DROP FUNCTION keyring_key_generate;"
 mysql -e "DROP FUNCTION keyring_key_store;"
 
-echo "remove the config vars"
+echo "remove the config vars" | tee -a ${LOG}
 
 sed -i '/early_plugin_load=/d' ${MYCNF}
 sed -i '/keyring_vault_config=/d' ${MYCNF}
