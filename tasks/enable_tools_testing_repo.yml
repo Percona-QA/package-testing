@@ -1,0 +1,14 @@
+  - name: include playbook for removing Percona repo
+    include: remove_percona_repository.yml
+
+  - name: Install percona repository package
+    apt:
+      deb: https://repo.percona.com/apt/percona-release_latest.{{ansible_lsb.codename}}_all.deb
+    when: ansible_os_family == "Debian"
+
+  - name: add the Percona testing yum repos for centos 6 and 7
+    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    when: ansible_os_family == "RedHat" 
+
+  - name: enable tools testing repo
+    command: percona-release enable tools testing
