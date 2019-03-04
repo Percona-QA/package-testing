@@ -25,8 +25,8 @@ if [ "$VERSION" == "ps57" ]; then
   binlog_enc="encrypt_binlog=ON"
 else
   opt_enc=""
-  binlog_enc="encrypt_binlog=ON"
-# binlog_enc="binlog_encryption=ON"
+# binlog_enc="encrypt_binlog=ON"
+  binlog_enc="binlog_encryption=ON"
 fi
 
 echo "Adding the config vars" | tee -a ${LOG}
@@ -65,6 +65,7 @@ if [ "${result}" != "2050879373" ]; then
 fi
 mysql --database=test -e "DROP TABLE keyring_file_test;"
 mysql --database=test -e "DROP TABLESPACE ts1;"
+mysql -e "DROP DATABASE test;"
 mysql -e "UNINSTALL PLUGIN keyring_file;"
 
 echo "service restart so that plugins don't mess with eachother" | tee -a ${LOG}
