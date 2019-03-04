@@ -26,7 +26,8 @@ if [ "$VERSION" == "ps57" ]; then
 else
   opt_enc=""
 # binlog_enc="encrypt_binlog=ON"
-  binlog_enc="binlog_encryption=ON"
+# binlog_enc="binlog_encryption=ON"
+  binlog_enc=""
 fi
 
 echo "Adding the config vars" | tee -a ${LOG}
