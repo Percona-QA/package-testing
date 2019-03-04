@@ -65,6 +65,7 @@ if [ "${result}" != "2050879373" ]; then
 fi
 mysql --database=test -e "DROP TABLE keyring_file_test;"
 mysql --database=test -e "DROP TABLESPACE ts1;"
+mysql -e "DROP DATABASE test;"
 mysql -e "UNINSTALL PLUGIN keyring_file;"
 
 echo "service restart so that plugins don't mess with eachother" | tee -a ${LOG}
