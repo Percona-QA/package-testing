@@ -27,7 +27,6 @@ else
   opt_enc=""
 # binlog_enc="encrypt_binlog=ON"
 # binlog_enc="binlog_encryption=ON"
-  binlog_enc=" "
 fi
 
 echo "Adding the config vars" | tee -a ${LOG}
@@ -52,7 +51,7 @@ mysql -e "CREATE FUNCTION keyring_key_remove returns integer SONAME 'keyring_udf
 mysql -e "CREATE FUNCTION keyring_key_generate returns integer SONAME 'keyring_udf.so';"
 mysql -e "CREATE FUNCTION keyring_key_store returns integer SONAME 'keyring_udf.so';"
 
-echo " keyring_file plugin test" | tee -a ${LOG}
+echo "keyring_file plugin test" | tee -a ${LOG}
 # keyring_file plugin test
 mysql -e "CREATE DATABASE IF NOT EXISTS test;"
 mysql --database=test -e "CREATE TABLESPACE ts1 ADD DATAFILE 'ts1.ibd' ENCRYPTION='Y';"
@@ -69,7 +68,7 @@ mysql --database=test -e "DROP TABLESPACE ts1;"
 mysql -e "DROP DATABASE test;"
 mysql -e "UNINSTALL PLUGIN keyring_file;"
 
-echo "service restart so that plugins don't mess with eachother" | tee -a ${LOG}
+echo "service restart so that plugins don't mess with each other" | tee -a ${LOG}
 # service restart so that plugins don't mess with eachother
 service mysql stop
 sleep 10
