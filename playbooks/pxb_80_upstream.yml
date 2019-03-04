@@ -1,0 +1,96 @@
+---
+# This playbook sets up the percona repo
+
+- import_playbook: test_prep.yml
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+
+  - name: Install MySQL apt repository package
+    apt:
+      deb: https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
+    when: ansible_os_family == "Debian"
+
+  - name: Install MySQL RHEL 6 yum repository package 
+    yum: name=https://dev.mysql.com/get/mysql80-community-release-el6-1.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: Install MySQL RHEL 7 yum repository package 
+    yum: name=https://dev.mysql.com/get/mysql80-community-release-el7-1.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: epel 6 repo
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: epel 7 repo
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: install deb packages 
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes 
+    vars: 
+      packages:
+      - vim
+      - pv
+      - unzip
+    when: ansible_os_family == "Debian"
+
+  - name: install MySQL Community deb packages 
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes 
+    vars: 
+      packages:
+      - mysql-community-server
+    when: ansible_os_family == "Debian"
+
+  - name: install packages in centos
+    yum:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - libselinux-python
+      - pv
+      - unzip
+      - mysql-community-server
+    when: ansible_os_family == "RedHat"
+
+  - name: Start the MySQL service  
+    service: name=mysql state=started
+    when: ansible_os_family == "Debian"
+
+  - name: Start the MySQL service  
+    service: name=mysqld state=started
+    when: ansible_os_family == "RedHat"
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: include tasks for enabling tools test repo
+    include: ../tasks/enable_tools_testing_repo.yml
+
+  - name: install Percona XtraBackup 8.0 packages
+    include_tasks: ../tasks/install_pxb80.yml
+
+  - name: install plugins, import world database
+    command: /package-testing/plugins_test.sh
+
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb80
+
+  - name: check that Percona XtraBackup package versions are correct
+    command: /package-testing/package_check.sh pxb80
+
+  - name: run backup
+    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
+
+  - name: prepare the backup
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
