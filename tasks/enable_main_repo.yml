@@ -7,13 +7,9 @@
       deb: https://repo.percona.com/apt/percona-release_0.1-10.{{ansible_lsb.codename}}_all.deb
     when: ansible_os_family == "Debian"
 
-# - name: add the Percona main deb repo
-#   apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_lsb.codename }} main' state=present update_cache=yes
-#   when: ansible_os_family == "Debian"
-
   - name: add the main Percona yum repos for centos 6 and 7
-    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-#   yum: name=https://repo.percona.com/yum/percona-release-0.1-10.noarch.rpm
+#   yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    yum: name=https://repo.percona.com/yum/testing/7Server/RPMS/noarch/percona-release-1.0-9.noarch.rpm
     when: ansible_os_family == "RedHat" 
 
   - name: enable main repo

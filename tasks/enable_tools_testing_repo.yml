@@ -7,7 +7,8 @@
     when: ansible_os_family == "Debian"
 
   - name: add the Percona testing yum repos for centos 6 and 7
-    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    yum: name=https://repo.percona.com/yum/testing/7Server/RPMS/noarch/percona-release-1.0-9.noarch.rpm
+#   yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat" 
 
   - name: enable tools testing repo
