@@ -38,6 +38,9 @@
     - pmm2-client
     when: ansible_os_family == "RedHat"
 
+  - name: check that PMM client version is correct
+    command: /package-testing/version_check.sh pmm2
+
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
     with_items:

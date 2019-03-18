@@ -48,6 +48,8 @@ elif [ $1 = "pxb80" ]; then
   version=${PXB80_VER}
 elif [ $1 = "pmm" ]; then
   version=${PMM_VER}
+elif [ $1 = "pmm2" ]; then
+  version=${PMM2_VER}
 elif [ $1 = "proxysql" ]; then
   version=${PROXYSQL_VER}
 elif [ $1 = "sysbench" ]; then
@@ -130,6 +132,15 @@ elif [ ${product} = "pt" ]; then
 
 elif [ ${product} = "pmm" ]; then
   version_check=$(pmm-admin --version 2>&1|grep -c ${version})
+  if [ ${version_check} -eq 0 ]; then
+    echo "${product} version is not good!"
+    exit 1
+  else
+    echo "${product} version is correct and ${version}" >> ${log}
+  fi
+
+elif [ ${product} = "pmm2" ]; then
+  version_check=$(pmm-agent --version 2>&1|grep -c ${version})
   if [ ${version_check} -eq 0 ]; then
     echo "${product} version is not good!"
     exit 1
