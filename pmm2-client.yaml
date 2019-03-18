@@ -44,11 +44,11 @@
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
     with_items:
-    - pmm-client
+    - pmm2-client
     when: ansible_os_family == "Debian"
 
   - name: remove PMM client rpm packages
     yum: name={{item}} state=absent
     with_items:
-    - pmm-client
+    - pmm2-client
     when: ansible_os_family == "RedHat"
