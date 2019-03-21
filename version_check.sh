@@ -48,10 +48,15 @@ elif [ $1 = "pxb80" ]; then
   version=${PXB80_VER}
 elif [ $1 = "pmm" ]; then
   version=${PMM_VER}
+elif [ $1 = "pmm2" ]; then
+  version=${PMM2_VER}
 elif [ $1 = "proxysql" ]; then
   version=${PROXYSQL_VER}
 elif [ $1 = "sysbench" ]; then
   version=${SYSBENCH_VER}
+elif [ $1 = "pbm" ]; then
+  version=${PBM_VER}
+  revision=${PBM_REV}
 else
   echo "Illegal product selected!"
   exit 1
@@ -137,6 +142,15 @@ elif [ ${product} = "pmm" ]; then
     echo "${product} version is correct and ${version}" >> ${log}
   fi
 
+elif [ ${product} = "pmm2" ]; then
+  version_check=$(pmm-agent --version 2>&1|grep -c ${version})
+  if [ ${version_check} -eq 0 ]; then
+    echo "${product} version is not good!"
+    exit 1
+  else
+    echo "${product} version is correct and ${version}" >> ${log}
+  fi
+
 elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; then
   version_check=$(xtrabackup --version 2>&1|grep -c ${version})
     if [ ${version_check} -eq 0 ]; then
@@ -165,6 +179,26 @@ elif [ ${product} = "sysbench" ]; then
     exit 1
   else
     echo "${product} version is correct and ${version}" >> ${log}
+  fi
+
+elif [ ${product} = "pbm" ]; then
+  agent_version_check=$(pbm-agent --version 2>&1|head -n1|grep -oE "[0-9]*\.[0-9]*\.[0-9]*"|grep -c ${version})
+  agent_revision_check=$(pbm-agent --version 2>&1|head -n1|grep -oE "commit .*$"|sed 's/commit //'|grep -c ${revision})
+  coordinator_version_check=$(pbm-coordinator --version 2>&1|head -n1|grep -oE "[0-9]*\.[0-9]*\.[0-9]*"|grep -c ${version})
+  coordinator_revision_check=$(pbm-coordinator --version 2>&1|head -n1|grep -oE "commit .*$"|sed 's/commit //'|grep -c ${revision})
+  control_version_check=$(pbmctl --version 2>&1|head -n1|grep -oE "[0-9]*\.[0-9]*\.[0-9]*"|grep -c ${version})
+  control_revision_check=$(pbmctl --version 2>&1|head -n1|grep -oE "commit .*$"|sed 's/commit //'|grep -c ${revision})
+  if [ ${agent_version_check} -eq 0 -o ${coordinator_version_check} -eq 0 -o ${control_version_check} -eq 0 ]; then
+    echo "${product} version is not good!"
+    exit 1
+  else
+    echo "${product} version is correct and ${version}" >> ${log}
+  fi
+  if [ ${agent_revision_check} -eq 0 -o ${coordinator_revision_check} -eq 0 -o ${control_revision_check} -eq 0 ]; then
+    echo "${product} revision is not good!"
+    exit 1
+  else
+    echo "${product} revision is correct and ${revision}" >> ${log}
   fi
 
 fi

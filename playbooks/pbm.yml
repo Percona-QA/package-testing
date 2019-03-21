@@ -1,0 +1,59 @@
+---
+# This playbook does following:
+#   enables Percona testing repository (or some other if specified)
+#   installs latest version of PBM
+#   installs selected version of PSMDB
+#   does some tests
+
+- import_playbook: test_prep.yml
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: include tasks for enabling test repo
+    include_tasks: ../tasks/enable_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling tools testing repo
+    include_tasks: ../tasks/enable_tools_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../tasks/enable_experimental_repo.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: install PBM new deb packages
+    apt: name={{item}} update_cache=yes state=latest
+    with_items:
+    - percona-backup-mongodb
+    when: ansible_os_family == "Debian"
+
+  - name: install PBM new rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - percona-backup-mongodb
+    when: ansible_os_family == "RedHat"
+
+  - name: check that PBM client version is correct
+    command: /package-testing/version_check.sh pbm
+
+  - name: remove PBM client deb packages
+    apt: name={{item}} state=absent
+    with_items:
+    - percona-backup-mongodb
+    when: ansible_os_family == "Debian"
+
+  - name: remove PBM client rpm packages
+    yum: name={{item}} state=absent
+    with_items:
+    - percona-backup-mongodb
+    when: ansible_os_family == "RedHat"
