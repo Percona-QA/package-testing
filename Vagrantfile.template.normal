@@ -6,6 +6,7 @@ servers=[
   { :hostname => "d-stretch-64-@@hostname@@", :box => "bento/debian-9" },
   { :hostname => "centos-6-64-@@hostname@@", :box => "bento/centos-6" },
   { :hostname => "centos-7-64-@@hostname@@", :box => "bento/centos-7" },
+  { :hostname => "rhel-8-64-@@hostname@@", :box => "generic/rhel8" },
   { :hostname => "u-trusty-64-@@hostname@@", :box => "bento/ubuntu-14.04" },
   { :hostname => "u-xenial-64-@@hostname@@", :box => "bento/ubuntu-16.04" },
   { :hostname => "u-bionic-64-@@hostname@@", :box => "bento/ubuntu-18.04" },
@@ -30,6 +31,7 @@ Vagrant.configure("2") do |config|
 #         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
 #         vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
       end
+      config.vm.provision "shell", path: "rhel8.sh"
       config.vm.provision "ansible" do |ansible|
         ansible.playbook = "@@playbook_full@@"
         ansible.become = "true"
