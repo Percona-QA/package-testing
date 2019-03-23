@@ -12,3 +12,6 @@
 
   - name: change the default repo to experimental
     command: percona-release enable-only original experimental
+
+  - name: add the experimental tools repo 
+    command: percona-release enable tools experimental
