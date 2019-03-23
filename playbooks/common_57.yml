@@ -23,6 +23,10 @@
     include: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
+  - name: include tasks for enabling main repo
+    include: ../tasks/enable_experimental_repo.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
@@ -33,6 +37,10 @@
 
   - name: install sysbench packages
     include_tasks: ../tasks/install_sysbench.yml
+
+  - name: disable the repo on RHEL8
+    command: dnf config-manager --set-disabled percona-rhel8-AppStream
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: install Percona Server 5.7 packages
     include_tasks: ../tasks/install_ps57.yml
