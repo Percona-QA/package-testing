@@ -35,9 +35,9 @@
     include: ../tasks/enable_ps8_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
-  - name: include tasks for enabling tools experimental repo
-    include: ../tasks/enable_tools_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+# - name: include tasks for enabling tools experimental repo
+#   include: ../tasks/enable_tools_experimental_repo.yml
+#   when: lookup('env', 'install_repo') == "experimental"
 
   - name: download and extract world database
     command: "{{ item }}"
