@@ -133,6 +133,9 @@
   - name: start mysql service
     service: name=mysql state=started
 
+  - name: check that mysqladmin shutdown works correctly
+    command: /package-testing/madmin_check.sh
+
   - name: enable tools experimental for mysql-shell package
     command: percona-release enable tools testing
 
@@ -153,9 +156,6 @@
       packages:
       - percona-mysql-shell
     when: ansible_os_family == "Debian"
-
-  - name: check that mysqladmin shutdown works correctly
-    command: /package-testing/madmin_check.sh
 
   - name: remove Percona Server deb packages
     apt: 
