@@ -35,7 +35,7 @@
 
   - name: start mongod with systemctl
     command: systemctl start mongod
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 6
 
   - name: check that PSMDB 4.0 package versions are correct
     command: /package-testing/package_check.sh psmdb40
