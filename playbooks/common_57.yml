@@ -32,10 +32,6 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-# - name: disable the repo on RHEL8
-#   command: dnf config-manager --set-disabled percona-rhel8-AppStream
-#   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
   - name: install Percona Server 5.7 packages
     include_tasks: ../tasks/install_ps57.yml
 
@@ -87,7 +83,8 @@
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps57
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "8"
+#   when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "8"
+    when: ansible_os_family == "Debian" and ansible_distribution_release != "cosmic"
 
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
@@ -104,11 +101,11 @@
   - name: check that sysbench version is correct
     command: /package-testing/version_check.sh sysbench
 
-# - name: check that Percona XtraBackup version is correct
-#   command: /package-testing/version_check.sh pxb24
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb24
 
-# - name: check that Percona XtraBackup package versions are correct
-#   command: /package-testing/package_check.sh pxb24
+  - name: check that Percona XtraBackup package versions are correct
+    command: /package-testing/package_check.sh pxb24
 
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
