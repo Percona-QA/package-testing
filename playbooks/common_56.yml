@@ -134,8 +134,8 @@
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_56.sh ps
 
-  - name: check that Percona Server version is correct
-    command: /package-testing/version_check.sh ps56
+# - name: check that Percona Server version is correct
+#   command: /package-testing/version_check.sh ps56
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps56
