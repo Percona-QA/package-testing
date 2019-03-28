@@ -134,8 +134,9 @@
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_56.sh ps
 
-# - name: check that Percona Server version is correct
-#   command: /package-testing/version_check.sh ps56
+  - name: check that Percona Server version is correct
+    command: /package-testing/version_check.sh ps56
+    when: ansible_os_family == "Debian" and ansible_distribution_release != "cosmic"
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps56
@@ -148,9 +149,11 @@
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb23
+    when: ansible_os_family == "Debian" and ansible_distribution_release != "cosmic"
 
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb23
+    when: ansible_os_family == "Debian" and ansible_distribution_release != "cosmic"
 
   - name: run sysbench prepare script
     command: sysbench --mysql-user=root --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
