@@ -23,7 +23,7 @@
     include: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
-  - name: include tasks for enabling main repo
+  - name: include tasks for enabling experimental repo
     include: ../tasks/enable_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
