@@ -16,7 +16,7 @@
   - name: install needed packages for running tests with apt
     apt:
       name: "{{ packages }}"
-      update_cache: no
+      update_cache: yes
       state: latest
     vars:
       packages:
