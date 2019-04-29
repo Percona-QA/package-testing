@@ -34,13 +34,17 @@
   - name: install PBM new deb packages
     apt: name={{item}} update_cache=yes state=latest
     with_items:
-    - percona-backup-mongodb
+    - percona-backup-mongodb-coordinator
+    - percona-backup-mongodb-agent
+    - percona-backup-mongodb-pbmctl
     when: ansible_os_family == "Debian"
 
   - name: install PBM new rpm packages
     yum: name={{item}} state=latest
     with_items:
-    - percona-backup-mongodb
+    - percona-backup-mongodb-coordinator
+    - percona-backup-mongodb-agent
+    - percona-backup-mongodb-pbmctl
     when: ansible_os_family == "RedHat"
 
   - name: check that PBM client version is correct
@@ -49,11 +53,15 @@
   - name: remove PBM client deb packages
     apt: name={{item}} state=absent
     with_items:
-    - percona-backup-mongodb
+    - percona-backup-mongodb-coordinator
+    - percona-backup-mongodb-agent
+    - percona-backup-mongodb-pbmctl
     when: ansible_os_family == "Debian"
 
   - name: remove PBM client rpm packages
     yum: name={{item}} state=absent
     with_items:
-    - percona-backup-mongodb
+    - percona-backup-mongodb-coordinator
+    - percona-backup-mongodb-agent
+    - percona-backup-mongodb-pbmctl
     when: ansible_os_family == "RedHat"
