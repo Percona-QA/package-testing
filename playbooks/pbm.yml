@@ -27,17 +27,21 @@
     include_tasks: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
-  - name: include tasks for enabling PSMDB 4.0 main repo
-    include_tasks: ../tasks/enable_psmdb40_main_repo.yml
-    when: lookup('env', 'psmdb_to_test') == "psmdb40"
-
   - name: include tasks for enabling tools testing repo
-    include_tasks: ../tasks/enable_tools_testing_repo.yml
+    command: percona-release enable tools testing
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling tools main repo
-    include_tasks: ../tasks/enable_tools_main_repo.yml
+    command: percona-release enable tools release
     when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling tools main repo
+    command: percona-release enable tools experimental
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: enable the PSMDB testing repo
+    command: percona-release enable psmdb-40
+    when: lookup('env', 'psmdb_to_test') == "psmdb40"
 
   - name: include tasks for PSMDB 4.0 install
     include_tasks: ../tasks/install_psmdb_full.yml
