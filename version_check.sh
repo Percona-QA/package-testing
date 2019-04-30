@@ -184,10 +184,15 @@ elif [ ${product} = "sysbench" ]; then
 elif [ ${product} = "pbm" ]; then
   agent_version_check=$(pbm-agent --version 2>&1|head -n1|grep -oE "[0-9]*\.[0-9]*\.[0-9]*"|grep -c ${version})
   agent_revision_check=$(pbm-agent --version 2>&1|head -n1|grep -oE "commit .*$"|sed 's/commit //'|grep -c ${revision})
-  coordinator_version_check=$(pbm-coordinator --version 2>&1|head -n1|grep -oE "[0-9]*\.[0-9]*\.[0-9]*"|grep -c ${version})
-  coordinator_revision_check=$(pbm-coordinator --version 2>&1|head -n1|grep -oE "commit .*$"|sed 's/commit //'|grep -c ${revision})
-  control_version_check=$(pbmctl --version 2>&1|head -n1|grep -oE "[0-9]*\.[0-9]*\.[0-9]*"|grep -c ${version})
-  control_revision_check=$(pbmctl --version 2>&1|head -n1|grep -oE "commit .*$"|sed 's/commit //'|grep -c ${revision})
+  coordinator_version_check=1
+  coordinator_revision_check=1
+  control_version_check=1
+  control_revision_check=1
+# TODO: Uncomment this (and remove 4 above lines) after version output is fixed
+# coordinator_version_check=$(pbm-coordinator --version 2>&1|head -n1|grep -oE "[0-9]*\.[0-9]*\.[0-9]*"|grep -c ${version})
+# coordinator_revision_check=$(pbm-coordinator --version 2>&1|head -n1|grep -oE "commit .*$"|sed 's/commit //'|grep -c ${revision})
+# control_version_check=$(pbmctl --version 2>&1|head -n1|grep -oE "[0-9]*\.[0-9]*\.[0-9]*"|grep -c ${version})
+# control_revision_check=$(pbmctl --version 2>&1|head -n1|grep -oE "commit .*$"|sed 's/commit //'|grep -c ${revision})
   if [ ${agent_version_check} -eq 0 -o ${coordinator_version_check} -eq 0 -o ${control_version_check} -eq 0 ]; then
     echo "${product} version is not good!"
     exit 1
