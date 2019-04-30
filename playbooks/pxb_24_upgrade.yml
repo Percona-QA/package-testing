@@ -92,6 +92,13 @@
       - MySQL-python
     when: ansible_os_family == "RedHat"
 
+  - name: add sbt user
+    mysql_user:
+      name: sbt
+      password: s3cret!Pass
+      priv: '*.*:ALL'
+      state: present
+      
 #
 # Enable testing repository
 #
@@ -133,9 +140,6 @@
 
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb24
-
-  - name: start mysql service
-    service: name=mysql state=started
 
   - name: run sysbench prepare script
     command: sysbench --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
