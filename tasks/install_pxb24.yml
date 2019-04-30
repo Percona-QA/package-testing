@@ -3,7 +3,7 @@
   - name: install Percona XtraBackup new deb packages
     apt:
       name: "{{ packages }}"
-      update_cache: no
+      update_cache: yes
       state: latest
     vars:
       packages:

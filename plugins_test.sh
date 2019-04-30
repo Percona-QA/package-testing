@@ -6,4 +6,4 @@ mysql -e "CREATE DATABASE world;"
 mysql -e "CREATE DATABASE sbt;"
 mysql -e "CREATE DATABASE sb;"
 sed -i '18,21 s/^/-- /' /package-testing/world.sql
-pv /package-testing/world.sql | mysql -D world
+cat /package-testing/world.sql | mysql -D world
