@@ -128,9 +128,6 @@
   - name: check that Percona Toolkit version is correct
     command: /package-testing/version_check.sh pt
 
-  - name: finish my.cnf change test
-    command: /package-testing/check_mycnf_post.sh
-
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
 
