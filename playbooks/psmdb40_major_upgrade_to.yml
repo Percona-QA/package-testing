@@ -86,7 +86,7 @@
 #
 # Enable testing repository
 #
-  - include: ../tasks/enable_psmdb_testing_repo.yml
+  - include: ../tasks/enable_psmdb40_testing_repo.yml
 
 #
 # Upgrade packages
