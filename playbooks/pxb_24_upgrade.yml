@@ -1,0 +1,181 @@
+---
+# This playbook does following:
+#   sets main Percona repo
+#   installs PS 5.7, PT and PXB 2.4
+#   changes repo to testing
+#   upgrades packages to the new version
+#   does some tests
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+  - name: include tasks for test env setup
+    include: ../tasks/test_prep.yml
+
+#
+# Install from main repository
+#
+  - name: include tasks for enabling main repo
+    include: ../tasks/enable_main_repo.yml
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: install PS 5.7 packages from main repos
+    include_tasks: ../tasks/install_ps57.yml
+
+  - name: install Percona Toolkit packages from main repos
+    include_tasks: ../tasks/install_pt.yml
+
+  - name: install sysbench packages from main repos
+    include_tasks: ../tasks/install_sysbench.yml
+
+  - name: install Percona XtraBackup 2.4 packages from main repos
+    include_tasks: ../tasks/install_pxb24.yml
+
+  - name: start mysql service with service command
+    command: service mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
+
+  - name: disable selinux on centos7 for TokuDB to work
+    command: setenforce 0
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: install tokudb and restart server
+    command: /usr/bin/ps_tokudb_admin --enable
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+
+  - name: re-run ps_tokudb_admin to finish tokudb install
+    command: /usr/bin/ps_tokudb_admin --enable 
+
+  - name: install plugins, import world database, test tokudb
+    command: /package-testing/plugins_test.sh
+
+  - name: re-run ps_admin to install rocksdb
+    command: /usr/bin/ps-admin --enable-rocksdb
+
+  - name: install 3rd party packages with apt
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+      - python-mysqldb
+    when: ansible_os_family == "Debian"
+
+  - name: install 3rd party packages with yum
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+      - MySQL-python
+    when: ansible_os_family == "RedHat"
+
+#
+# Enable testing repository
+#
+  - include: ../tasks/enable_testing_repo.yml
+
+#
+# Upgrade packages
+#
+
+  - name: install PS 5.7 packages from main repos
+    include_tasks: ../tasks/install_ps57.yml
+
+  - name: install Percona Toolkit packages from main repos
+    include_tasks: ../tasks/install_pt.yml
+
+  - name: install sysbench packages from main repos
+    include_tasks: ../tasks/install_sysbench.yml
+
+  - name: install Percona XtraBackup 2.4 packages from main repos
+    include_tasks: ../tasks/install_pxb24.yml
+
+  - name: run mysql_upgrade
+    command: mysql_upgrade -uroot
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+
+  - name: check that Percona Server version is correct
+    command: /package-testing/version_check.sh ps57
+
+  - name: check that Percona Server package versions are correct
+    command: /package-testing/package_check.sh ps57
+
+  - name: check that Percona Toolkit version is correct
+    command: /package-testing/version_check.sh pt
+
+  - name: finish my.cnf change test
+    command: /package-testing/check_mycnf_post.sh
+
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb24
+
+  - name: check that Percona XtraBackup package versions are correct
+    command: /package-testing/package_check.sh pxb24
+
+  - name: start mysql service
+    service: name=mysql state=started
+
+  - name: run sysbench prepare script
+    command: sysbench --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
+
+  - name: run sysbench benchmark
+    command: sysbench --mysql-user=sbt --mysql-db=sb --mysql-password=s3cret!Pass --time=30 --threads=64 --tables=3 oltp_read_write run
+
+  - name: run sysbench tpcc prepare script
+    command: /usr/share/sysbench/tpcc.lua --mysql-user=sbt --mysql-password=s3cret!Pass  --mysql-db=sbt --time=30 --threads=64 --report-interval=1 --tables=3 --scale=5 --db-driver=mysql prepare
+
+  - name: run sysbench tpcc benchmark
+    command: /usr/share/sysbench/tpcc.lua --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sbt --time=30 --threads=64 --report-interval=1 --tables=3 --scale=5 --db-driver=mysql run
+
+  - name: run backup
+    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
+
+  - name: prepare backup
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
+
+  - name: remove Percona Server deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server-server-5.7
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - Percona-Server-server-57
+    when: ansible_os_family == "RedHat"
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mysql stopped
