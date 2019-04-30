@@ -27,6 +27,10 @@
     include_tasks: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
+  - name: include tasks for enabling PSMDB 4.0 main repo
+    include_tasks: ../tasks/enable_psmdb40_main_repo.yml
+    when: lookup('env', 'psmdb_to_test') == "psmdb40"
+
   - name: include tasks for enabling tools testing repo
     include_tasks: ../tasks/enable_tools_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
@@ -34,10 +38,6 @@
   - name: include tasks for enabling tools main repo
     include_tasks: ../tasks/enable_tools_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
-
-  - name: include tasks for enabling PSMDB 4.0 main repo
-    include_tasks: ../tasks/enable_psmdb40_main_repo.yml
-    when: lookup('env', 'psmdb_to_test') == "psmdb40"
 
   - name: include tasks for PSMDB 4.0 install
     include_tasks: ../tasks/install_psmdb_full.yml
