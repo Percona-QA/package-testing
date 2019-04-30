@@ -19,21 +19,40 @@
     include_tasks: ../tasks/enable_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
-  - name: include tasks for enabling tools testing repo
-    include_tasks: ../tasks/enable_tools_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-
-  - name: include tasks for enabling tools main repo
-    include_tasks: ../tasks/enable_tools_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../tasks/enable_experimental_repo.yml
+    when: lookup('env', 'install_repo') == "experimental"
 
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
-  - name: include tasks for enabling experimental repo
-    include_tasks: ../tasks/enable_experimental_repo.yml
+  - name: include tasks for enabling tools testing repo
+    command: percona-release enable tools testing
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling tools main repo
+    command: percona-release enable tools release
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling tools main repo
+    command: percona-release enable tools experimental
     when: lookup('env', 'install_repo') == "experimental"
+
+  - name: enable the PSMDB testing repo
+    command: percona-release enable psmdb-40
+    when: lookup('env', 'psmdb_to_test') == "psmdb40"
+
+  - name: include tasks for PSMDB 4.0 install
+    include_tasks: ../tasks/install_psmdb_full.yml
+    when: lookup('env', 'psmdb_to_test') == "psmdb40"
+
+  - name: include tasks for PSMDB 3.6 install
+    include_tasks: ../tasks/install_psmdb_36_full.yml
+    when: lookup('env', 'psmdb_to_test') == "psmdb36"
+
+  - name: start mongod service
+    service: name=mongod state=started
 
   - name: install PBM new deb packages
     apt: name={{item}} update_cache=yes state=latest
