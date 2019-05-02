@@ -174,12 +174,6 @@
   - name: check that Percona Toolkit version is correct
     command: /package-testing/version_check.sh pt
 
-  - name: check that Percona XtraBackup version is correct
-    command: /package-testing/version_check.sh pxb23
-
-  - name: check that Percona XtraBackup package versions are correct
-    command: /package-testing/package_check.sh pxb23
-
   - name: run bats tests for PAM
     command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
 
