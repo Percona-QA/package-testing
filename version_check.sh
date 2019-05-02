@@ -52,6 +52,8 @@ elif [ $1 = "pmm2" ]; then
   version=${PMM2_VER}
 elif [ $1 = "proxysql" ]; then
   version=${PROXYSQL_VER}
+elif [ $1 = "proxysql2" ]; then
+  version=${PROXYSQL2_VER}
 elif [ $1 = "sysbench" ]; then
   version=${SYSBENCH_VER}
 elif [ $1 = "pbm" ]; then
@@ -163,7 +165,7 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; t
       xbt_test
     fi
 
-elif [ ${product} = "proxysql" ]; then
+elif [ ${product} = "proxysql" -o ${product} = "proxysql2" ]; then
   version_check=$(proxysql --version 2>&1|grep -c ${version})
   if [ ${version_check} -eq 0 ]; then
     echo "${product} version is not good!"
