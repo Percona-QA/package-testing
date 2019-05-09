@@ -5,6 +5,10 @@
 #   changes repo to testing
 #   upgrades packages to the new version
 #   does some tests
+#
+
+# Cosmic is still missing python
+- import_playbook: test_prep.yml
 
 - hosts: all
   become: true
