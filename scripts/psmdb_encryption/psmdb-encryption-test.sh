@@ -35,7 +35,7 @@ if [ "$1" == "keyfile" ]; then
     engine="wiredTiger"
     sed -i "/engine: *${engine}/s/#//g" ${CONFIGFILE}
     if [ ${cipher} = "AES256-CBC" ]; then
-      sed -i "s/#security:/security:\n  enableEncryption: true\n  encryptionCipherMode: ${cipher}\n  encryptionKeyFile: ${KEY_FILE}/" ${CONFIGFILE}
+      sed -i "s|#security:|security:\n  enableEncryption: true\n  encryptionCipherMode: ${cipher}\n  encryptionKeyFile: ${KEY_FILE}|" ${CONFIGFILE}
     else
       sed -i "s/encryptionCipherMode: AES256-CBC/encryptionCipherMode: AES256-GCM/" ${CONFIGFILE}
     fi
@@ -76,7 +76,7 @@ if [ "$1" == "vault" ]; then
     engine="wiredTiger"
     sed -i "/engine: *${engine}/s/#//g" ${CONFIGFILE}
     if [ ${cipher} = "AES256-CBC" ]; then
-      sed -i "s/#security:/security:\n  enableEncryption: true\n  encryptionCipherMode: ${cipher}\n  vault:\n    serverName: 10.30.6.213\n    port: 8200\n    tokenFile: ${TOKEN_FILE}\n    serverCAFile: ${CA_FILE}\n    secret: secret_v2\/data\/psmdb-test\/package-test/" ${CONFIGFILE}
+      sed -i "s|#security:|security:\n  enableEncryption: true\n  encryptionCipherMode: ${cipher}\n  vault:\n    serverName: 10.30.6.213\n    port: 8200\n    tokenFile: ${TOKEN_FILE}\n    serverCAFile: ${CA_FILE}\n    secret: secret_v2/data/psmdb-test/package-test|" ${CONFIGFILE}
     else
       sed -i "s/encryptionCipherMode: AES256-CBC/encryptionCipherMode: AES256-GCM/" ${CONFIGFILE}
     fi
