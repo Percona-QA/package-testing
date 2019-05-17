@@ -1,6 +1,9 @@
 ---
 # This playbook installs PS/PXC client package and checks that it works correctly
 
+# Cosmic is still missing python
+- import_playbook: test_prep.yml
+
 - hosts: all
   name: Prepare a clean machine with percona (and EPEL) repo(s) installed
   become: true
