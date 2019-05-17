@@ -41,7 +41,10 @@
     command: /package-testing/package_check.sh psmdb40
 
   - name: test perconadecrypt
-    command: /package-testing/scripts/psmdb_perconadecrypt/perconadecrypt-test.sh 4.0
+    command: /package-testing/scripts/psmdb_encryption/perconadecrypt-test.sh 4.0 keyfile
+
+  - name: test perconadecrypt with vault
+    command: /package-testing/scripts/psmdb_encryption/perconadecrypt-test.sh 4.0 vault
 
   - name: test SE change, import data, restart service
     command: /package-testing/scripts/psmdb_test.sh 4.0
