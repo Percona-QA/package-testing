@@ -148,16 +148,16 @@
   - name: check that Percona Toolkit version is correct
     command: /package-testing/version_check.sh pt
 
-  - name: check that sysbench version is correct
-    command: /package-testing/version_check.sh sysbench
+# - name: check that sysbench version is correct
+#   command: /package-testing/version_check.sh sysbench
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb23
-    when: ansible_os_family == "Debian" and ansible_distribution_release != "cosmic"
+    when: ansible_os_family == "Debian" 
 
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb23
-    when: ansible_os_family == "Debian" and ansible_distribution_release != "cosmic"
+    when: ansible_os_family == "Debian"
 
   - name: run sysbench prepare script
     command: sysbench --mysql-user=root --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
