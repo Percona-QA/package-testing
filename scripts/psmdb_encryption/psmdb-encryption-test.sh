@@ -10,7 +10,7 @@ set -e
 if [ -z "$1" ]; then
   echo "This script needs parameter keyring or vault"
   exit 1
-elif [ "$1" != "keyring" -a "$1" != "vault" ]; then
+elif [ "$1" != "keyfile" -a "$1" != "vault" ]; then
   echo "Key store not recognized!"
   exit 1
 else
