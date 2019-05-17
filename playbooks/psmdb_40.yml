@@ -49,6 +49,9 @@
   - name: test SE change, import data, restart service
     command: /package-testing/scripts/psmdb_test.sh 4.0
 
+  - name: test encryption with keyfile
+    command: /package-testing/scripts/psmdb_encryption/psmdb-encryption-test.sh keyfile
+
   - name: set pass and enable auth
     command: /package-testing/scripts/psmdb_set_auth.sh
 
