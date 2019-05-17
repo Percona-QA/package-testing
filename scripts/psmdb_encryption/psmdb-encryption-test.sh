@@ -2,9 +2,9 @@
 
 source /package-testing/VERSIONS
 source /package-testing/scripts/psmdb_common.sh
-KEY_FILE="\/package-testing\/scripts\/psmdb_encryption\/mongodb-keyfile"
-TOKEN_FILE="\/package-testing\/scripts\/psmdb_encryption\/mongodb-test-vault-token"
-CA_FILE="\/package-testing\/scripts\/psmdb_encryption\/test.cer"
+KEY_FILE="/package-testing/scripts/psmdb_encryption/mongodb-keyfile"
+TOKEN_FILE="/package-testing/scripts/psmdb_encryption/mongodb-test-vault-token"
+CA_FILE="/package-testing/scripts/psmdb_encryption/test.cer"
 
 echo -n > ${LOG}
 
