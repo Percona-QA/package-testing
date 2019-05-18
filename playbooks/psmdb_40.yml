@@ -52,6 +52,9 @@
   - name: test encryption with keyfile
     command: /package-testing/scripts/psmdb_encryption/psmdb-encryption-test.sh keyfile
 
+  - name: test encryption with vault
+    command: /package-testing/scripts/psmdb_encryption/psmdb-encryption-test.sh vault
+
   - name: set pass and enable auth
     command: /package-testing/scripts/psmdb_set_auth.sh
 
