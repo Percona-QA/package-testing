@@ -58,6 +58,13 @@
       - Percona-XtraDB-Cluster-56
     when: ansible_os_family == "RedHat"
 
+  - name: run mysql_upgrade
+    command: /usr/bin/mysql_upgrade
+ 
+  - name: restart the service
+    command: service mysql restart
+    when: ansible_os_family == "Debian"
+
   - name: check that PXC version is correct
     command: /package-testing/version_check.sh pxc56
 
