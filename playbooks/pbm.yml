@@ -70,10 +70,10 @@
     - percona-backup-mongodb-pbmctl
     when: ansible_os_family == "RedHat"
 
-  - name: check that PBM client version is correct
+  - name: check that PBM version is correct
     command: /package-testing/version_check.sh pbm
 
-  - name: remove PBM client deb packages
+  - name: remove PBM deb packages
     apt: name={{item}} state=absent
     with_items:
     - percona-backup-mongodb-coordinator
@@ -81,7 +81,7 @@
     - percona-backup-mongodb-pbmctl
     when: ansible_os_family == "Debian"
 
-  - name: remove PBM client rpm packages
+  - name: remove PBM rpm packages
     yum: name={{item}} state=absent
     with_items:
     - percona-backup-mongodb-coordinator
