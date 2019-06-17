@@ -54,6 +54,12 @@
       - Percona-XtraDB-Cluster-57
     when: ansible_os_family == "RedHat"
 
+# PXC-2317 workaround
+  - name: start mysql service
+    service: name=mysql state=started
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+# PXC-2317 workaround
+
   - name: run mysql_upgrade
     command: /usr/bin/mysql_upgrade
 
