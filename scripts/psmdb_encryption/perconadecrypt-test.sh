@@ -56,7 +56,7 @@ if [ "${VERSION}" == "3.6" -a "${KEY_STORE}" == "vault" ]; then
   # 3.6 CBC
   rm -f ${ROLLBACK_DIR}/36-cbc/ycsb_test.usertable.2019-02-07T17-26-07.0.bson.aes256-cbc-decrypted
   rm -f ${ROLLBACK_DIR}/36-cbc/ycsb_test.usertable.2019-02-07T17-26-07.0.bson.aes256-cbc-json
-  perconadecrypt --encryptionCipherMode AES256-CBC --vaultServerName 10.30.6.213 --vaultPort 8200 --vaultTokenFile ${TOKEN_FILE} --vaultSecret ${VAULT_SECRET}-36 --vaultServerCAFile ${CA_FILE} --inputPath ${ROLLBACK_DIR}/36-cbc/ycsb_test.usertable.2019-02-07T17-26-07.0.bson.aes256-cbc --outputPath ${ROLLBACK_DIR}/36-cbc/ycsb_test.usertable.2019-02-07T17-26-07.0.bson.aes256-cbc-decrypted
+  perconadecrypt --encryptionCipherMode AES256-CBC --vaultServerName 10.30.6.213 --vaultPort 8200 --vaultTokenFile ${TOKEN_FILE} --vaultSecret ${VAULT_SECRET} --vaultServerCAFile ${CA_FILE} --inputPath ${ROLLBACK_DIR}/36-cbc/ycsb_test.usertable.2019-02-07T17-26-07.0.bson.aes256-cbc --outputPath ${ROLLBACK_DIR}/36-cbc/ycsb_test.usertable.2019-02-07T17-26-07.0.bson.aes256-cbc-decrypted
 
   bsondump --bsonFile ${ROLLBACK_DIR}/36-cbc/ycsb_test.usertable.2019-02-07T17-26-07.0.bson.aes256-cbc-decrypted --outFile ${ROLLBACK_DIR}/36-cbc/ycsb_test.usertable.2019-02-07T17-26-07.0.bson.aes256-cbc-json
 
@@ -67,7 +67,7 @@ if [ "${VERSION}" == "3.6" -a "${KEY_STORE}" == "vault" ]; then
   # 3.6 GCM
   rm -f ${ROLLBACK_DIR}/36-gcm/ycsb_test.usertable.2019-02-07T17-31-46.0.bson.aes256-gcm-decrypted
   rm -f ${ROLLBACK_DIR}/36-gcm/ycsb_test.usertable.2019-02-07T17-31-46.0.bson.aes256-gcm-json
-  perconadecrypt --encryptionCipherMode AES256-GCM --vaultServerName 10.30.6.213 --vaultPort 8200 --vaultTokenFile ${TOKEN_FILE} --vaultSecret ${VAULT_SECRET}-36 --vaultServerCAFile ${CA_FILE} --inputPath ${ROLLBACK_DIR}/36-gcm/ycsb_test.usertable.2019-02-07T17-31-46.0.bson.aes256-gcm --outputPath ${ROLLBACK_DIR}/36-gcm/ycsb_test.usertable.2019-02-07T17-31-46.0.bson.aes256-gcm-decrypted
+  perconadecrypt --encryptionCipherMode AES256-GCM --vaultServerName 10.30.6.213 --vaultPort 8200 --vaultTokenFile ${TOKEN_FILE} --vaultSecret ${VAULT_SECRET} --vaultServerCAFile ${CA_FILE} --inputPath ${ROLLBACK_DIR}/36-gcm/ycsb_test.usertable.2019-02-07T17-31-46.0.bson.aes256-gcm --outputPath ${ROLLBACK_DIR}/36-gcm/ycsb_test.usertable.2019-02-07T17-31-46.0.bson.aes256-gcm-decrypted
 
   bsondump --bsonFile ${ROLLBACK_DIR}/36-gcm/ycsb_test.usertable.2019-02-07T17-31-46.0.bson.aes256-gcm-decrypted --outFile ${ROLLBACK_DIR}/36-gcm/ycsb_test.usertable.2019-02-07T17-31-46.0.bson.aes256-gcm-json
 
@@ -104,7 +104,7 @@ if [ "${VERSION}" == "4.0" -a "${KEY_STORE}" == "vault" ]; then
   # 4.0 CBC
   rm -f ${ROLLBACK_DIR}/40-cbc/ycsb_test.usertable/removed.2019-02-07T17-41-17.0.bson.aes256-cbc-decrypted
   rm -f ${ROLLBACK_DIR}/40-cbc/ycsb_test.usertable/removed.2019-02-07T17-41-17.0.bson.aes256-cbc-json
-  perconadecrypt --encryptionCipherMode AES256-CBC --vaultServerName 10.30.6.213 --vaultPort 8200 --vaultTokenFile ${TOKEN_FILE} --vaultSecret ${VAULT_SECRET}-40 --vaultServerCAFile ${CA_FILE} --inputPath ${ROLLBACK_DIR}/40-cbc/ycsb_test.usertable/removed.2019-02-07T17-41-17.0.bson.aes256-cbc --outputPath ${ROLLBACK_DIR}/40-cbc/ycsb_test.usertable/removed.2019-02-07T17-41-17.0.bson.aes256-cbc-decrypted
+  perconadecrypt --encryptionCipherMode AES256-CBC --vaultServerName 10.30.6.213 --vaultPort 8200 --vaultTokenFile ${TOKEN_FILE} --vaultSecret ${VAULT_SECRET} --vaultServerCAFile ${CA_FILE} --inputPath ${ROLLBACK_DIR}/40-cbc/ycsb_test.usertable/removed.2019-02-07T17-41-17.0.bson.aes256-cbc --outputPath ${ROLLBACK_DIR}/40-cbc/ycsb_test.usertable/removed.2019-02-07T17-41-17.0.bson.aes256-cbc-decrypted
 
   bsondump --bsonFile ${ROLLBACK_DIR}/40-cbc/ycsb_test.usertable/removed.2019-02-07T17-41-17.0.bson.aes256-cbc-decrypted --outFile ${ROLLBACK_DIR}/40-cbc/ycsb_test.usertable/removed.2019-02-07T17-41-17.0.bson.aes256-cbc-json
 
@@ -115,7 +115,7 @@ if [ "${VERSION}" == "4.0" -a "${KEY_STORE}" == "vault" ]; then
   # 4.0 GCM
   rm -f ${ROLLBACK_DIR}/40-gcm/ycsb_test.usertable/removed.2019-02-07T17-44-42.0.bson.aes256-gcm-decrypted
   rm -f ${ROLLBACK_DIR}/40-gcm/ycsb_test.usertable/removed.2019-02-07T17-44-42.0.bson.aes256-gcm-json
-  perconadecrypt --encryptionCipherMode AES256-GCM --vaultServerName 10.30.6.213 --vaultPort 8200 --vaultTokenFile ${TOKEN_FILE} --vaultSecret ${VAULT_SECRET}-40 --vaultServerCAFile ${CA_FILE} --inputPath ${ROLLBACK_DIR}/40-gcm/ycsb_test.usertable/removed.2019-02-07T17-44-42.0.bson.aes256-gcm --outputPath ${ROLLBACK_DIR}/40-gcm/ycsb_test.usertable/removed.2019-02-07T17-44-42.0.bson.aes256-gcm-decrypted
+  perconadecrypt --encryptionCipherMode AES256-GCM --vaultServerName 10.30.6.213 --vaultPort 8200 --vaultTokenFile ${TOKEN_FILE} --vaultSecret ${VAULT_SECRET} --vaultServerCAFile ${CA_FILE} --inputPath ${ROLLBACK_DIR}/40-gcm/ycsb_test.usertable/removed.2019-02-07T17-44-42.0.bson.aes256-gcm --outputPath ${ROLLBACK_DIR}/40-gcm/ycsb_test.usertable/removed.2019-02-07T17-44-42.0.bson.aes256-gcm-decrypted
 
   bsondump --bsonFile ${ROLLBACK_DIR}/40-gcm/ycsb_test.usertable/removed.2019-02-07T17-44-42.0.bson.aes256-gcm-decrypted --outFile ${ROLLBACK_DIR}/40-gcm/ycsb_test.usertable/removed.2019-02-07T17-44-42.0.bson.aes256-gcm-json
 
