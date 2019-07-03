@@ -1,4 +1,4 @@
-#/usr/bin/env bash
+#!/usr/bin/env bash
 set -e
 
 if [ $(pbmctl list storage 2>&1|grep -c "local-filesystem") != "1" ]; then
