@@ -73,6 +73,9 @@
   - name: check that PBM version is correct
     command: /package-testing/version_check.sh pbm
 
+  - name: check that PBM packages correct versions are installed
+    command: /package-testing/package_check.sh pbm
+
   - name: remove PBM deb packages
     apt: name={{item}} state=absent
     with_items:

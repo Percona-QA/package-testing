@@ -59,6 +59,9 @@ elif [ $1 = "psmdb40" ]; then
   version=${PSMDB40_VER}
 elif [ $1 = "pmm" ]; then
   version=${PMM_VER}
+elif [ $1 = "pbm" ]; then
+  version=${PBM_VER}
+  pkg_version=${PBM_PKG_VER}
 else
   echo "Illegal product selected!"
   exit 1
@@ -294,6 +297,35 @@ elif [ "${product}" = "psmdb30" -o "${product}" = "psmdb32" -o "${product}" = "p
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
         else
           echo "WARNING: ${package}-${version} is not installed"
+          exit 1
+        fi
+      done
+    fi
+  fi
+
+elif [ "${product}" == "pbm" ]; then
+  if [ -f /etc/redhat-release ]; then
+    if [ "$(rpm -qa | grep percona-backup-mongodb | grep -c ${version}-${pkg_version})" == "3" ]; then
+      echo "all packages are installed"
+    else
+      for package in percona-backup-mongodb-coordinator percona-backup-mongodb-agent percona-backup-mongodb-pbmctl; do
+        if [ "$(rpm -qa | grep -c ${package}-${version}-${pkg_version})" -gt 0 ]; then
+          echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
+        else
+          echo "WARNING: ${package}-${version}-${pkg_version} is not installed"
+          exit 1
+        fi
+      done
+    fi
+  else
+    if [ "$(dpkg -l | grep percona-backup-mongodb | grep -c ${version}-${pkg_version})" == "3" ]; then
+      echo "all packages are installed"
+    else
+      for package in percona-backup-mongodb-coordinator percona-backup-mongodb-agent percona-backup-mongodb-pbmctl; do
+        if [ "$(dpkg -l | grep -c ${package})" -gt 0 ] && [ "$(dpkg -l | grep ${package} | awk '{$print $3}')" == "${version}-${pkg_version}.$(lsb_release -sc)" ] ; then
+          echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
+        else
+          echo "WARNING: ${package}-${version}-${pkg_version} is not installed"
           exit 1
         fi
       done
