@@ -51,8 +51,20 @@
     include_tasks: ../tasks/install_psmdb_36_full.yml
     when: lookup('env', 'psmdb_to_test') == "psmdb36"
 
+  - name: stop mongod service
+    service: name=mongod state=stopped
+
+  - name: add replica set name into mongod config
+    replace:
+      path: /etc/mongod.conf
+      regexp: '^#replication:'
+      replace: 'replication:\n  replSetName: "rs1"'
+
   - name: start mongod service
     service: name=mongod state=started
+
+  - name: initiate mongod replica set
+    command: mongo --eval 'rs.initiate()'
 
   - name: install PBM new deb packages
     apt:
@@ -82,6 +94,21 @@
 
   - name: check PBM packages and version
     command: /package-testing/package_check.sh pbm
+
+  - name: add storage for pbm-agent
+    blockinfile:
+      path: /etc/pbm-agent-storage.conf
+      block: |
+        local-filesystem:
+          type: filesystem
+          filesystem:
+            path: /tmp
+
+  - name: start pbm-coordinator service
+    service: name=pbm-coordinator state=started
+
+  - name: start pbm-agent service
+    service: name=pbm-agent state=started
 
   - name: remove PBM deb packages
     apt:
