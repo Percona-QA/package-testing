@@ -107,8 +107,23 @@
   - name: start pbm-coordinator service
     service: name=pbm-coordinator state=started
 
+  - pause:
+      seconds: 3
+
   - name: start pbm-agent service
     service: name=pbm-agent state=started
+
+  - pause:
+      seconds: 5
+
+  - name: run pbm test script
+    command: /package-testing/scripts/pbm_test.sh
+
+  - name: stop pbm-agent service
+    service: name=pbm-agent state=stopped
+
+  - name: stop pbm-coordinator service
+    service: name=pbm-coordinator state=stopped
 
   - name: remove PBM deb packages
     apt:
