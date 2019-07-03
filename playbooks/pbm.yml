@@ -55,39 +55,52 @@
     service: name=mongod state=started
 
   - name: install PBM new deb packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - percona-backup-mongodb-coordinator
-    - percona-backup-mongodb-agent
-    - percona-backup-mongodb-pbmctl
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-backup-mongodb-coordinator
+      - percona-backup-mongodb-agent
+      - percona-backup-mongodb-pbmctl
     when: ansible_os_family == "Debian"
 
   - name: install PBM new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - percona-backup-mongodb-coordinator
-    - percona-backup-mongodb-agent
-    - percona-backup-mongodb-pbmctl
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-backup-mongodb-coordinator
+      - percona-backup-mongodb-agent
+      - percona-backup-mongodb-pbmctl
     when: ansible_os_family == "RedHat"
 
-  - name: check that PBM version is correct
+  - name: check PBM binaries version
     command: /package-testing/version_check.sh pbm
 
-  - name: check that PBM packages correct versions are installed
+  - name: check PBM packages and version
     command: /package-testing/package_check.sh pbm
 
   - name: remove PBM deb packages
-    apt: name={{item}} state=absent
-    with_items:
-    - percona-backup-mongodb-coordinator
-    - percona-backup-mongodb-agent
-    - percona-backup-mongodb-pbmctl
+    apt:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-backup-mongodb-coordinator
+      - percona-backup-mongodb-agent
+      - percona-backup-mongodb-pbmctl
     when: ansible_os_family == "Debian"
 
   - name: remove PBM rpm packages
-    yum: name={{item}} state=absent
-    with_items:
-    - percona-backup-mongodb-coordinator
-    - percona-backup-mongodb-agent
-    - percona-backup-mongodb-pbmctl
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-backup-mongodb-coordinator
+      - percona-backup-mongodb-agent
+      - percona-backup-mongodb-pbmctl
     when: ansible_os_family == "RedHat"
