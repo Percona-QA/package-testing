@@ -126,7 +126,7 @@
       seconds: 5
 
   - name: check that pbm-agent is not listed any more
-    command: pbmctl list nodes 2>&1|grep -c "127.0.0.1:27017"
+    shell: pbmctl list nodes 2>&1|grep -c "127.0.0.1:27017"
     register: pbm_nodes
     failed_when: "'0' not in pbm_nodes.stdout"
 
