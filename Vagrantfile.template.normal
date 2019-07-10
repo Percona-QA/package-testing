@@ -4,7 +4,7 @@
 servers=[
   { :hostname => "d-jessie-64-@@hostname@@", :box => "bento/debian-8" },
   { :hostname => "d-stretch-64-@@hostname@@", :box => "bento/debian-9" },
-  { :hostname => "d-buster-64-@@hostname@@", :box => "generic/debian10" },
+  { :hostname => "d-buster-64-@@hostname@@", :box => "bento/debian-10" },
   { :hostname => "centos-6-64-@@hostname@@", :box => "bento/centos-6" },
   { :hostname => "centos-7-64-@@hostname@@", :box => "bento/centos-7" },
   { :hostname => "rhel-8-64-@@hostname@@", :box => "generic/rhel8" },
