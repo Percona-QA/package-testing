@@ -1,0 +1,35 @@
+---
+# This playbook does following:
+#   enables Percona repository
+#   installs Percona Platform for PostgreSQL packages
+#   does some tests
+
+# Cosmic is still missing python
+- import_playbook: test_prep.yml
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+    #  - name: include tasks for enabling main repo
+    #include: ../tasks/enable_main_repo.yml
+    #when: lookup('env', 'install_repo') == "main"
+
+    #- name: include tasks for enabling PS 8 test repo
+    #include: ../tasks/enable_ps8_main_repo.yml
+    #when: lookup('env', 'install_repo') == "main"
+
+    #- name: include tasks for enabling PS 8 test repo
+    #include: ../tasks/enable_ps8_testing_repo.yml
+    #when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+    #- name: include tasks for enabling PS 8 experimental repo
+    #include: ../tasks/enable_ps8_experimental_repo.yml
+    #when: lookup('env', 'install_repo') == "experimental"
+
+  - name: install Percona Platform for PostgreSQL 11 packages
+    include_tasks: ../tasks/install_ppg11.yml
