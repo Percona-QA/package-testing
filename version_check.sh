@@ -145,7 +145,7 @@ elif [ ${product} = "pmm" ]; then
   fi
 
 elif [ ${product} = "pmm2" ]; then
-  version_check=$(pmm-agent --version 2>&1|grep -c ${version})
+  version_check=$(pmm-admin --version 2>&1|grep -c ${version})
   if [ ${version_check} -eq 0 ]; then
     echo "${product} version is not good!"
     exit 1
