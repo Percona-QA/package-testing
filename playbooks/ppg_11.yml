@@ -40,6 +40,7 @@
       url: https://raw.githubusercontent.com/percona/percona-repositories/master/scripts/percona-release.sh
       dest: /usr/bin/percona-release
       mode: '755'
+      force: true
 
   - name: setup temporary experimental repo until percona-release is updated
     command: percona-release enable ppg-11 experimental
