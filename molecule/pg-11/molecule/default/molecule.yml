@@ -1,0 +1,37 @@
+---
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+lint:
+    name: yamllint
+    enabled: False
+platforms:
+  - name: dbuster
+    box: bento/debian-10
+  - name: u-bionic-64
+    box: bento/ubuntu-18.04
+provisioner:
+  name: ansible
+  log: True
+  lint:
+    name: ansible-lint
+    enabled: False
+instances:
+  - name: pg-11
+verifier:
+  name: testinfra
+  lint:
+    name: flake8
+    enabled: False
+scenario:
+  name: default
+  test_sequence:
+    - lint
+    - destroy
+    - dependency
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy
