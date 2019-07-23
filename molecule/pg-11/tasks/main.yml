@@ -4,9 +4,6 @@
 #   installs Percona Platform for PostgreSQL packages
 #   does some tests
 
-# Cosmic is still missing python
-- import_playbook: ./../../tasks/test_prep.yml
-
 - hosts: all
   become: true
   become_method: sudo
