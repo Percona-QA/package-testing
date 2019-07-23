@@ -3,9 +3,9 @@
 #   enables Percona repository
 #   installs Percona Platform for PostgreSQL packages
 #   does some tests
-  tasks:
-  - name: include tasks for test env setup
-    include_tasks: ../../../tasks/test_prep.yml
+tasks:
+ - name: include tasks for test env setup
+   include_tasks: ../../../tasks/test_prep.yml
 
     #  - name: include tasks for enabling main repo
     #include: ../tasks/enable_main_repo.yml
@@ -24,19 +24,19 @@
     #when: lookup('env', 'install_repo') == "experimental"
 
   ### temp part until percona-release is updated for PPG project
-  - name: include tasks for enabling main repo (do this just for GPG key)
-    include: ../../../tasks/enable_main_repo.yml
+- name: include tasks for enabling main repo (do this just for GPG key)
+  include: ../../../tasks/enable_main_repo.yml
 
-  - name: download newer percona-release script
-    get_url:
-      url: https://raw.githubusercontent.com/percona/percona-repositories/master/scripts/percona-release.sh
-      dest: /usr/bin/percona-release
-      mode: '755'
-      force: true
+- name: download newer percona-release script
+  get_url:
+    url: https://raw.githubusercontent.com/percona/percona-repositories/master/scripts/percona-release.sh
+    dest: /usr/bin/percona-release
+    mode: '755'
+    force: true
 
-  - name: setup temporary experimental repo until percona-release is updated
-    command: percona-release enable ppg-11 experimental
+- name: setup temporary experimental repo until percona-release is updated
+  command: percona-release enable ppg-11 experimental
   ###
 
-  - name: install Percona Platform for PostgreSQL 11 packages
-    include_tasks: ../../../tasks/install_ppg11.yml
+- name: install Percona Platform for PostgreSQL 11 packages
+  include_tasks: ../../../tasks/install_ppg11.yml
