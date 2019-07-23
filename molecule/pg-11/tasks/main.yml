@@ -3,7 +3,6 @@
 #   enables Percona repository
 #   installs Percona Platform for PostgreSQL packages
 #   does some tests
-tasks:
  - name: include tasks for test env setup
    include_tasks: ../../../tasks/test_prep.yml
 
