@@ -21,6 +21,8 @@ instances:
   - name: pg-11
 verifier:
   name: testinfra
+  options:
+    verbose: true
   lint:
     name: flake8
     enabled: False
