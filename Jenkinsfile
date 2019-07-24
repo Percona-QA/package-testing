@@ -33,8 +33,6 @@ pipeline {
       steps {
         sh '''
           source virtenv/bin/activate
-          cd package-testing
-          git checkout pg_roles_testing
           cd molecule/pg-11
           molecule test
         '''
