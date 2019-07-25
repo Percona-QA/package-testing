@@ -22,6 +22,21 @@ RPM_PACKAGES = ["percona-platform-postgresql11", "percona-platform-postgresql11-
                 "percona-platform-postgresql11-test"]
 
 
+@pytest.fixture()
+def start_postgresql(host):
+    pass
+
+
+@pytest.fixture()
+def stop_postgresql(host):
+    pass
+
+
+@pytest.fixture()
+def restart_postgresql():
+    pass
+
+
 @pytest.mark.parametrize("package", DEB_PACKAGES)
 def test_deb_package_is_installed(host, package):
     os = host.system_info.distribution
@@ -47,27 +62,27 @@ def test_postgresql_is_running_and_enabled(host):
     assert postgresql.is_running
     assert postgresql.is_enabled
 
+
 def test_postgres_binary(host):
     pass
 
+
 def test_postgres_server_version(host):
     pass
+
 
 def test_postgres_client_version(host):
     pass
 
 
-# def test_command_output(host):
-#     if os == "RedHat":
-#         pytest.skip("This test only for Debian based platforms")
-#     command = host.command('pg_config')
-#     assert "PostgreSQL 11.4 (Ubuntu 1:11-4.bionic)" in command.stdout.rstrip()
-#     assert command.rc == 0
+def test_start_postgresql(host, start_postgresql):
+    pass
 
 
-def test_hosts_file(host):
-    f = host.file('/etc/hosts')
+def test_stop_postgresql(host, stop_postgresql):
+    pass
 
-    assert f.exists
-    assert f.user == 'root'
-    assert f.group == 'root'
+
+def test_restart_service(host, restart_postgresql):
+    pass
+
