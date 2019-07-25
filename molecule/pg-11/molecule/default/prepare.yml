@@ -7,7 +7,7 @@
       raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
       become: true
       changed_when: false
-  when: ansible_os_family == "Debian"
+      when: ansible_os_family == "Debian"
 
 - name: Prepare RHEL based
   hosts: all
@@ -17,6 +17,6 @@
       raw: test -e /usr/bin/python || (yum update && yum install -y python-minimal)
       become: true
       changed_when: false
-  when: ansible_os_family == "Debian"
+      when: ansible_os_family == "Debian"
 
 
