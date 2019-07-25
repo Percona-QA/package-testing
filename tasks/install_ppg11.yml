@@ -9,7 +9,7 @@
     vars:
       packages:
       - percona-platform-postgresql
-      - percona-platform-postgresql-11
+#      - percona-platform-postgresql-11
         #- percona-platform-postgresql-all
       - percona-platform-postgresql-client
       - percona-platform-postgresql-client-11
