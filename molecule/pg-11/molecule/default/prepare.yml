@@ -1,7 +1,7 @@
 ---
 - name: Prepare Debian based
   hosts: all
-  gather_facts: false
+  gather_facts: true
   tasks:
     - name: Install python for Ansible
       raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
@@ -11,7 +11,7 @@
 
 - name: Prepare RHEL based
   hosts: all
-  gather_facts: false
+  gather_facts: true
   tasks:
     - name: Install python for Ansible
       raw: test -e /usr/bin/python || (yum update && yum install -y python-minimal)
