@@ -54,7 +54,7 @@ def postgresql_binary(host):
 @pytest.fixture()
 def postgresql_query_version(host):
     with host.sudo("postgres"):
-        return host.check_output("psql -c 'SELECT version()'")
+        return host.run("psql -c 'SELECT version()' | awk 'NR==3{print $2}")
 
 
 @pytest.fixture()
@@ -69,7 +69,7 @@ def restart_postgresql(host):
 @pytest.fixture()
 def extension_list(host):
     with host.sudo("postgres"):
-        return host.check_output("psql -c 'SELECT * FROM pg_available_extensions;'")
+        return host.check_output("psql -c 'SELECT * FROM pg_available_extensions;' | awk 'NR>=3{print $1}'")
 
 
 @pytest.mark.parametrize("package", DEB_PACKAGES)
@@ -134,7 +134,7 @@ def test_pg_config_server_version(host):
 
 def test_postgresql_query_version(postgresql_query_version):
     assert postgresql_query_version.rc == 0
-    print(postgresql_query_version.stdout)
+    assert postgresql_query_version.stdout == "11.4"
 
 
 def test_postgres_client_version(host):
