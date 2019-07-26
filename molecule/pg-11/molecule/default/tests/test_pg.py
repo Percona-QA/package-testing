@@ -21,7 +21,15 @@ RPM_PACKAGES = ["percona-platform-postgresql11", "percona-platform-postgresql11-
                 "percona-platform-postgresql11-pltcl", "percona-platform-postgresql11-server",
                 "percona-platform-postgresql11-test"]
 
-EXTENSIONS = []
+EXTENSIONS = ['xml2', 'tcn', 'plpythonu', 'plpython3u', 'hstore_plperlu', 'dict_xsyn', 'autoinc', 'hstore_plpython3u',
+              'insert_username', 'intagg', 'adminpack', 'intarray', 'cube', 'lo', 'jsonb_plpython2u', 'jsonb_plperl',
+              'jsonb_plperlu', 'btree_gin', 'pgrowlocks', 'bloom', 'seg', 'pageinspect', 'btree_gist', 'sslinfo',
+              'pg_visibility', 'ltree_plpython2u', 'refint', 'jsonb_plpython3u', 'jsonb_plpythonu', 'moddatetime',
+              'ltree_plpythonu', 'dict_int', 'pg_freespacemap', 'pgstattuple', 'hstore_plpythonu', 'uuid-ossp',
+              'tsm_system_time', 'tsm_system_rows', 'hstore', 'pltcl', 'unaccent', 'tablefunc', 'pgcrypto',
+              'pg_buffercache', 'amcheck', 'citext', 'plpython2u', 'timetravel', 'ltree', 'isn', 'hstore_plpython2u',
+              'ltree_plpython3u', 'plpgsql', 'fuzzystrmatch', 'earthdistance', 'hstore_plperl', 'plperlu', 'pg_prewarm',
+              'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'plperl', 'postgres_fdw']
 
 
 @pytest.fixture()
@@ -156,10 +164,14 @@ def test_restart_postgresql(restart_postgresql):
 
 
 def test_extenstions_list(extension_list):
-    print(extension_list)
+    assert set(EXTENSIONS) in set(extension_list.split())
 
 
 @pytest.mark.parametrize("extension", EXTENSIONS)
 def test_enable_extension(host, extension):
-    pass
-
+    with host.sudo("postgres"):
+        install_extension = host.run("psql -c 'CREATE EXTENSION {};'").format(extension)
+        assert install_extension.rc == 0
+        assert install_extension.stdout == "CREATE EXTENSION"
+        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+        assert extension in set(extensions.split())
