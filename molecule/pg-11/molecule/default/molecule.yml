@@ -29,6 +29,7 @@ verifier:
   name: testinfra
   options:
     verbose: true
+    s: 1
   lint:
     name: flake8
     enabled: False

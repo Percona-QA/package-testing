@@ -53,6 +53,7 @@ def restart_postgresql(host):
 def test_deb_package_is_installed(host, package):
     os = host.system_info.distribution
     if os == "RedHat":
+        print(os)
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
@@ -62,6 +63,7 @@ def test_deb_package_is_installed(host, package):
 def test_rpm_package_is_installed(host, package):
     os = host.system_info.distribution
     if os == "Debian":
+        print(os)
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
