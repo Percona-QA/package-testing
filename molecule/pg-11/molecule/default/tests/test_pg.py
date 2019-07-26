@@ -23,18 +23,30 @@ RPM_PACKAGES = ["percona-platform-postgresql11", "percona-platform-postgresql11-
 
 
 @pytest.fixture()
-def start_postgresql(host):
-    pass
+def postgres_unit_file(host):
+    cmd = "systemctl list-units| grep postgresql"
+    return host.check_output(cmd)
 
 
 @pytest.fixture()
-def stop_postgresql(host):
-    pass
+def start_stop_postgresql(host):
+    cmd = "sudo systemctl stop postgresql"
+    result = host.run(cmd)
+    assert result.rc == 0
+    cmd = "sudo systemctl start postgresql"
+    result = host.run(cmd)
+    assert result.rc == 0
+    cmd = "sudo systemctl status postgresql"
+    return host.run(cmd)
 
 
 @pytest.fixture()
-def restart_postgresql():
-    pass
+def restart_postgresql(host):
+    cmd = "sudo systemctl restart postgresql"
+    result = host.run(cmd)
+    assert result.rc == 0
+    cmd = "sudo systemctl status postgresql"
+    return host.run(cmd)
 
 
 @pytest.mark.parametrize("package", DEB_PACKAGES)
@@ -47,12 +59,28 @@ def test_deb_package_is_installed(host, package):
 
 
 @pytest.mark.parametrize("package", RPM_PACKAGES)
-def test_deb_package_is_installed(host, package):
+def test_rpm_package_is_installed(host, package):
     os = host.system_info.distribution
-    if os == "RedHat":
-        pytest.skip("This test only for Debian based platforms")
+    if os == "Debian":
+        pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
+
+
+def test_postgresql_client_version(host):
+    pkg = "percona-platform-postgresql-11"
+    if os == "RedHat":
+        pytest.skip("This test only for Debian based platforms")
+    pkg = host.package(pkg)
+    assert "11" in pkg.version
+
+
+def test_postgresql_version(host):
+    pkg = "percona-platform-postgresql-client-11"
+    if os == "RedHat":
+        pkg = "percona-platform-postgresql11"
+    pkg = host.package(pkg)
+    assert "11" in pkg.version
 
 
 def test_postgresql_is_running_and_enabled(host):
@@ -63,26 +91,34 @@ def test_postgresql_is_running_and_enabled(host):
     assert postgresql.is_enabled
 
 
+def test_postgres_unit_file(postgres_unit_file):
+    assert "postgresql" in postgres_unit_file
+
+
 def test_postgres_binary(host):
     pass
 
 
 def test_postgres_server_version(host):
-    pass
+    cmd = "pg_config --version"
+    result = host.check_output(cmd)
+    assert "11" in result
 
 
 def test_postgres_client_version(host):
-    pass
+    cmd = "psql --version"
+    result = host.check_output(cmd)
+    assert "11" in result
 
 
-def test_start_postgresql(host, start_postgresql):
-    pass
+def test_start_stop_postgresql(start_stop_postgresql):
+    assert start_stop_postgresql.rc == 0
+    assert "active" in start_stop_postgresql.stdout
+    assert not start_stop_postgresql.stderr
 
 
-def test_stop_postgresql(host, stop_postgresql):
-    pass
-
-
-def test_restart_service(host, restart_postgresql):
-    pass
+def test_restart_postgresql(restart_postgresql):
+    assert restart_postgresql.rc == 0
+    assert "active" in restart_postgresql.stdout
+    assert not restart_postgresql.stderr
 
