@@ -66,6 +66,12 @@ def restart_postgresql(host):
     return host.run(cmd)
 
 
+@pytest.fixture()
+def extension_list(host):
+    with host.sudo("postgres"):
+        return host.check_output("psql -c 'SELECT * FROM pg_available_extensions;'")
+
+
 @pytest.mark.parametrize("package", DEB_PACKAGES)
 def test_deb_package_is_installed(host, package):
     os = host.system_info.distribution
@@ -149,8 +155,8 @@ def test_restart_postgresql(restart_postgresql):
     assert not restart_postgresql.stderr
 
 
-def test_extenstions_list(host):
-    pass
+def test_extenstions_list(extension_list):
+    print(extension_list)
 
 
 @pytest.mark.parametrize("extension", EXTENSIONS)
