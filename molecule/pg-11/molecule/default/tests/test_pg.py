@@ -69,7 +69,7 @@ def restart_postgresql(host):
 @pytest.fixture()
 def extension_list(host):
     with host.sudo("postgres"):
-        return host.check_output("psql -c 'SELECT * FROM pg_available_extensions;' | awk 'NR>=3{print $1}'")
+        return host.check_output("psql -c 'SELECT * FROM pg_available_extensions;' | awk \'NR>=3{print $1}\'")
 
 
 @pytest.mark.parametrize("package", DEB_PACKAGES)
