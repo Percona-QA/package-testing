@@ -148,7 +148,7 @@ def test_postgresql_query_version(postgresql_query_version):
 def test_postgres_client_version(host):
     cmd = "psql --version"
     result = host.check_output(cmd)
-    assert "11" in result
+    assert "11" in result.strip("\n")
 
 
 def test_start_stop_postgresql(start_stop_postgresql):
@@ -170,7 +170,7 @@ def test_extenstions_list(extension_list):
 @pytest.mark.parametrize("extension", EXTENSIONS)
 def test_enable_extension(host, extension):
     with host.sudo("postgres"):
-        install_extension = host.run("psql -c 'CREATE EXTENSION {};'").format(extension)
+        install_extension = host.run("psql -c 'CREATE EXTENSION {};'".format(extension))
         assert install_extension.rc == 0
         assert install_extension.stdout == "CREATE EXTENSION"
         extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
