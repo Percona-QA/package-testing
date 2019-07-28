@@ -142,7 +142,7 @@ def test_pg_config_server_version(host):
 
 def test_postgresql_query_version(postgresql_query_version):
     assert postgresql_query_version.rc == 0
-    assert postgresql_query_version.stdout == "11.4"
+    assert postgresql_query_version.stdout.strip("\n") == "11.4"
 
 
 def test_postgres_client_version(host):
@@ -171,7 +171,17 @@ def test_extenstions_list(extension_list):
 def test_enable_extension(host, extension):
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION {};'".format(extension))
-        assert install_extension.rc == 0
-        assert install_extension.stdout == "CREATE EXTENSION"
-        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
-        assert extension in set(extensions.split())
+        try:
+            assert install_extension.rc == 0
+            assert install_extension.stdout.strip("\n") == "CREATE EXTENSION"
+        except AssertionError:
+            pytest.fail("Return code {}. Stderror: {}. Stdout {}".format(install_extension.rc,
+                                                                         install_extension.stderr,
+                                                                         install_extension.stdout))
+
+        try:
+            extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+            assert extension in set(extensions.split())
+        except AssertionError:
+            pytest.fail("Return code {}. Stderror: {}. Stdout {}").format(extension.rc, extension.stderr,
+                                                                          extension.stdout)
