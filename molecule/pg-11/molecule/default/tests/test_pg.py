@@ -28,8 +28,8 @@ EXTENSIONS = ['xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', '
               'jsonb_plpython3u', 'jsonb_plpythonu', 'moddatetime', 'ltree_plpythonu', 'dict_int', 'pg_freespacemap',
               'pgstattuple', 'hstore_plpythonu', 'uuid-ossp','tsm_system_time', 'tsm_system_rows', 'unaccent',
               'tablefunc', 'pgcrypto', 'pg_buffercache', 'amcheck', 'citext',  'timetravel',  'isn',
-              'hstore_plpython2u', 'ltree_plpython3u', 'plpgsql', 'fuzzystrmatch', 'earthdistance', 'hstore_plperl',
-              'pg_prewarm', 'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'postgres_fdw']
+              'hstore_plpython2u', 'ltree_plpython3u', 'fuzzystrmatch', 'earthdistance', 'hstore_plperl', 'pg_prewarm',
+              'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'postgres_fdw']
 
 
 @pytest.fixture()
@@ -190,3 +190,11 @@ def test_enable_extension(host, extension):
         except AssertionError:
             pytest.fail("Return code {}. Stderror: {}. Stdout {}").format(extension.rc, extension.stderr,
                                                                           extension.stdout)
+
+
+def test_plpgsql_extension(host):
+
+    with host.sudo("postgres"):
+        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+        assert extensions.rc == 0
+        assert "plpgsql" in set(extensions.stdout.split())
