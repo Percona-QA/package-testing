@@ -77,7 +77,9 @@ def restart_postgresql(host):
 @pytest.fixture()
 def extension_list(host):
     with host.sudo("postgres"):
-        return host.check_output("psql -c 'SELECT * FROM pg_available_extensions;' | awk 'NR>=3{print $1}'")
+        result = host.check_output("psql -c 'SELECT * FROM pg_available_extensions;' | awk 'NR>=3{print $1}'")
+        print(result)
+        return result
 
 
 @pytest.mark.parametrize("package", DEB_PACKAGES)
@@ -181,7 +183,8 @@ def test_enable_extension(host, extension):
 
         try:
             extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
-            assert extension in set(extensions.split())
+            assert extensions.rc == 0
+            assert extension in set(extensions.stdout.split())
         except AssertionError:
             pytest.fail("Return code {}. Stderror: {}. Stdout {}").format(extension.rc, extension.stderr,
                                                                           extension.stdout)
