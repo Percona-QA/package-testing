@@ -78,6 +78,7 @@ def restart_postgresql(host):
 def extension_list(host):
     with host.sudo("postgres"):
         result = host.check_output("psql -c 'SELECT * FROM pg_available_extensions;' | awk 'NR>=3{print $1}'")
+        result = result.split()
         print(result)
         return result
 
@@ -166,8 +167,8 @@ def test_restart_postgresql(restart_postgresql):
 
 
 def test_extenstions_list(extension_list):
-    print(extension_list)
-    assert set(EXTENSIONS) in set(extension_list.split())
+    for extension in EXTENSIONS:
+        assert extension in extension_list
 
 
 @pytest.mark.parametrize("extension", EXTENSIONS)
