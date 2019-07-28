@@ -174,7 +174,7 @@ def test_extenstions_list(extension_list):
 @pytest.mark.parametrize("extension", EXTENSIONS)
 def test_enable_extension(host, extension):
     with host.sudo("postgres"):
-        install_extension = host.run("psql -c 'CREATE EXTENSION {};'".format(extension))
+        install_extension = host.run("psql -c 'CREATE EXTENSION \'{}\';'".format(extension))
         try:
             assert install_extension.rc == 0
             assert install_extension.stdout.strip("\n") == "CREATE EXTENSION"
