@@ -5,7 +5,7 @@ pipeline {
         choice(
         choices: ['pg-11', 'pbm'],
          description: 'Role for testing',
-         name: 'region')
+         name: 'role')
      ])
    ])
   stages {
