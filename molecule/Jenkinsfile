@@ -5,7 +5,7 @@ pipeline {
         choice(
         choices: ['pg-11', 'pbm'],
          description: 'Role for testing',
-         name: 'role')
+         name: 'ROLE')
      ])
    ])
   stages {
@@ -40,7 +40,7 @@ pipeline {
     stage ('Molecule test') {
       steps {
         script {
-            if  (params.role == 'pg-11') {
+            if  (params.ROLE == 'pg-11') {
                  sh '''
                       source virtenv/bin/activate
                       cd molecule/pg-11
