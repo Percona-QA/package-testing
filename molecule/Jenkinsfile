@@ -46,8 +46,8 @@ pipeline {
              }
              else if (params.ROLE == 'pbm') {
                    sh '''
-                      export PSMDB_TO_TEST=${params.PSMDB_TO_TEST}
-                      export INSTALL_REPO=${params.INSTALL_REPO}
+                      export PSMDB_TO_TEST=$params.PSMDB_TO_TEST
+                      export INSTALL_REPO=$params.INSTALL_REPO
                       source virtenv/bin/activate
                       cd molecule/pbm
                       molecule test
