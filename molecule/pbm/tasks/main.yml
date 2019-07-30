@@ -1,145 +1,144 @@
 ---
 # tasks file for pbm
----
-  - name: include tasks for test env setup
-    include_tasks: ../../../tasks/test_prep.yml
+- name: include tasks for test env setup
+  include_tasks: ../../../tasks/test_prep.yml
 
-  - name: include tasks for enabling test repo
-    include_tasks: ../../../tasks/enable_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+- name: include tasks for enabling test repo
+  include_tasks: ../../../tasks/enable_testing_repo.yml
+  when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
-  - name: include tasks for enabling experimental repo
-    include_tasks: ../../../tasks/enable_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+- name: include tasks for enabling experimental repo
+  include_tasks: ../../../tasks/enable_experimental_repo.yml
+  when: lookup('env', 'install_repo') == "experimental"
 
-  - name: include tasks for enabling main repo
-    include_tasks: ../../../tasks/enable_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+- name: include tasks for enabling main repo
+  include_tasks: ../../../tasks/enable_main_repo.yml
+  when: lookup('env', 'install_repo') == "main"
 
-  - name: include tasks for enabling tools testing repo
-    command: percona-release enable tools testing
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+- name: include tasks for enabling tools testing repo
+  command: percona-release enable tools testing
+  when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
-  - name: include tasks for enabling tools main repo
-    command: percona-release enable tools release
-    when: lookup('env', 'install_repo') == "main"
+- name: include tasks for enabling tools main repo
+  command: percona-release enable tools release
+  when: lookup('env', 'install_repo') == "main"
 
-  - name: include tasks for enabling tools main repo
-    command: percona-release enable tools experimental
-    when: lookup('env', 'install_repo') == "experimental"
+- name: include tasks for enabling tools main repo
+  command: percona-release enable tools experimental
+  when: lookup('env', 'install_repo') == "experimental"
 
-  - name: enable the PSMDB testing repo
-    command: percona-release enable psmdb-40
-    when: lookup('env', 'psmdb_to_test') == "psmdb40"
+- name: enable the PSMDB testing repo
+  command: percona-release enable psmdb-40
+  when: lookup('env', 'psmdb_to_test') == "psmdb40"
 
-  - name: include tasks for PSMDB 4.0 install
-    include_tasks: ../../../tasks/install_psmdb_full.yml
-    when: lookup('env', 'psmdb_to_test') == "psmdb40"
+- name: include tasks for PSMDB 4.0 install
+  include_tasks: ../../../tasks/install_psmdb_full.yml
+  when: lookup('env', 'psmdb_to_test') == "psmdb40"
 
-  - name: include tasks for PSMDB 3.6 install
-    include_tasks: ../../../tasks/install_psmdb_36_full.yml
-    when: lookup('env', 'psmdb_to_test') == "psmdb36"
+- name: include tasks for PSMDB 3.6 install
+  include_tasks: ../../../tasks/install_psmdb_36_full.yml
+  when: lookup('env', 'psmdb_to_test') == "psmdb36"
 
-  - name: stop mongod service
-    service: name=mongod state=stopped
+- name: stop mongod service
+  service: name=mongod state=stopped
 
-  - name: add replica set name into mongod config
-    replace:
-      path: /etc/mongod.conf
-      regexp: '^#replication:'
-      replace: 'replication:\n  replSetName: "rs1"'
+- name: add replica set name into mongod config
+  replace:
+    path: /etc/mongod.conf
+    regexp: '^#replication:'
+    replace: 'replication:\n  replSetName: "rs1"'
 
-  - name: start mongod service
-    service: name=mongod state=started
+- name: start mongod service
+  service: name=mongod state=started
 
-  - name: initiate mongod replica set
-    command: mongo --eval 'rs.initiate()'
+- name: initiate mongod replica set
+  command: mongo --eval 'rs.initiate()'
 
-  - name: install PBM new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - percona-backup-mongodb-coordinator
-      - percona-backup-mongodb-agent
-      - percona-backup-mongodb-pbmctl
-    when: ansible_os_family == "Debian"
+- name: install PBM new deb packages
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+    state: latest
+  vars:
+    packages:
+    - percona-backup-mongodb-coordinator
+    - percona-backup-mongodb-agent
+    - percona-backup-mongodb-pbmctl
+  when: ansible_os_family == "Debian"
 
-  - name: install PBM new rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-backup-mongodb-coordinator
-      - percona-backup-mongodb-agent
-      - percona-backup-mongodb-pbmctl
-    when: ansible_os_family == "RedHat"
+- name: install PBM new rpm packages
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+    - percona-backup-mongodb-coordinator
+    - percona-backup-mongodb-agent
+    - percona-backup-mongodb-pbmctl
+  when: ansible_os_family == "RedHat"
 
-  - name: check PBM binaries version
-    command: /package-testing/version_check.sh pbm
+- name: check PBM binaries version
+  command: /package-testing/version_check.sh pbm
 
-  - name: check PBM packages and version
-    command: /package-testing/package_check.sh pbm
+- name: check PBM packages and version
+  command: /package-testing/package_check.sh pbm
 
-  - name: add storage for pbm-agent
-    blockinfile:
-      path: /etc/pbm-agent-storage.conf
-      block: |
-        local-filesystem:
-          type: filesystem
-          filesystem:
-            path: /tmp
+- name: add storage for pbm-agent
+  blockinfile:
+    path: /etc/pbm-agent-storage.conf
+    block: |
+      local-filesystem:
+        type: filesystem
+        filesystem:
+          path: /tmp
 
-  - name: start pbm-coordinator service
-    service: name=pbm-coordinator state=started
+#- name: start pbm-coordinator service
+#  service: name=pbm-coordinator state=started
+#
+#- pause:
+#    seconds: 3
+#
+#- name: start pbm-agent service
+#  service: name=pbm-agent state=started
+#
+#- pause:
+#    seconds: 5
 
-  - pause:
-      seconds: 3
+#- name: run pbm test script
+#  command: /package-testing/scripts/pbm_test.sh
 
-  - name: start pbm-agent service
-    service: name=pbm-agent state=started
+#- name: stop pbm-agent service
+#  service: name=pbm-agent state=stopped
+#
+#- pause:
+#    seconds: 5
 
-  - pause:
-      seconds: 5
-
-  - name: run pbm test script
-    command: /package-testing/scripts/pbm_test.sh
-
-  - name: stop pbm-agent service
-    service: name=pbm-agent state=stopped
-
-  - pause:
-      seconds: 5
-
-  - name: check that pbm-agent is not listed any more
-    shell: pbmctl list nodes 2>&1|grep -c "127.0.0.1:27017"
-    register: pbm_nodes
-    failed_when: "'0' not in pbm_nodes.stdout"
-
-  - name: stop pbm-coordinator service
-    service: name=pbm-coordinator state=stopped
-
-  - name: remove PBM deb packages
-    apt:
-      name: "{{ packages }}"
-      state: absent
-    vars:
-      packages:
-      - percona-backup-mongodb-coordinator
-      - percona-backup-mongodb-agent
-      - percona-backup-mongodb-pbmctl
-    when: ansible_os_family == "Debian"
-
-  - name: remove PBM rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: absent
-    vars:
-      packages:
-      - percona-backup-mongodb-coordinator
-      - percona-backup-mongodb-agent
-      - percona-backup-mongodb-pbmctl
-    when: ansible_os_family == "RedHat"
+#- name: check that pbm-agent is not listed any more
+#  shell: pbmctl list nodes 2>&1|grep -c "127.0.0.1:27017"
+#  register: pbm_nodes
+#  failed_when: "'0' not in pbm_nodes.stdout"
+#
+#- name: stop pbm-coordinator service
+#  service: name=pbm-coordinator state=stopped
+#
+#- name: remove PBM deb packages
+#  apt:
+#    name: "{{ packages }}"
+#    state: absent
+#  vars:
+#    packages:
+#    - percona-backup-mongodb-coordinator
+#    - percona-backup-mongodb-agent
+#    - percona-backup-mongodb-pbmctl
+#  when: ansible_os_family == "Debian"
+#
+#- name: remove PBM rpm packages
+#  yum:
+#    name: "{{ packages }}"
+#    state: absent
+#  vars:
+#    packages:
+#    - percona-backup-mongodb-coordinator
+#    - percona-backup-mongodb-agent
+#    - percona-backup-mongodb-pbmctl
+#  when: ansible_os_family == "RedHat"
