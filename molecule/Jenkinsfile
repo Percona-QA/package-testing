@@ -40,10 +40,20 @@ pipeline {
     stage ('Molecule test') {
       steps {
         sh '''
-          source virtenv/bin/activate
-          cd molecule/pg-11
-          molecule test
+            source virtenv/bin/activate
         '''
+        if  (params.role == 'pg-11') {
+             sh '''
+                  cd molecule/pg-11
+                  molecule test
+             '''
+         }  
+         elif (params.role == 'pbm)' {
+               sh '''
+                  cd molecule/pbm
+                  molecule test
+             '''
+         }
       }
     }
 
