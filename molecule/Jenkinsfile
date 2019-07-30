@@ -5,10 +5,6 @@ pipeline {
         choice(name: 'PSMDB_TO_TEST', choices: ['psmdb40', 'psmdb36'], description: 'PSMDB to test. Make sense only for pbm testing')
         choice(name: 'INSTALL_REPO', choices: ['testing', 'main', 'experimental'], description: 'For playbooks that support chosing another repo in install test. Make sense only for pbm testing.')
     }
-  environment {
-       psmdb_to_test = params.PSMDB_TO_TEST
-       install_repo = params.INSTALL_REPO
-   }
   stages {
     stage ('Get latest code') {
       steps {
@@ -50,6 +46,8 @@ pipeline {
              }
              else if (params.ROLE == 'pbm') {
                    sh '''
+                      export PSMDB_TO_TEST=params.PSMDB_TO_TEST
+                      export INSTALL_REPO=params.INSTALL_REPO
                       source virtenv/bin/activate
                       cd molecule/pbm
                       molecule test
