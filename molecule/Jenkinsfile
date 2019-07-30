@@ -1,6 +1,6 @@
 pipeline {
   agent { label 'qaserver-03' }
-  properties([
+  options([
      parameters([
         choice(
         choices: ['pg-11', 'pbm'],
