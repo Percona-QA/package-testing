@@ -1,13 +1,8 @@
 pipeline {
   agent { label 'qaserver-03' }
-  options([
-     parameters([
-        choice(
-        choices: ['pg-11', 'pbm'],
-         description: 'Role for testing',
-         name: 'ROLE')
-     ])
-   ])
+  parameters {
+        choice(name: 'ROLE', choices: ['pg-11', 'pbm', 'pbm-upgrade'], description: 'Role for testing.')
+    }
   stages {
     stage ('Get latest code') {
       steps {
