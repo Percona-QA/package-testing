@@ -1,0 +1,46 @@
+---
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+lint:
+    name: yamllint
+    enabled: False
+platforms:
+  - name: d-buster-64
+    box: bento/debian-10
+#  - name: u-bionic-64
+#    box: bento/ubuntu-18.04
+#  - name: d-stretch-64
+#    box: bento/debian-9
+#  - name: centos-7-64
+#    box: bento/centos-7
+#  - name: rhel-8-64
+#    box: generic/rhel8
+provisioner:
+  name: ansible
+  log: True
+  lint:
+    name: ansible-lint
+    enabled: False
+instances:
+  - name: pbm
+verifier:
+  name: testinfra
+  options:
+    verbose: true
+    s: true
+  lint:
+    name: flake8
+    enabled: False
+scenario:
+  name: default
+  test_sequence:
+    - lint
+    - destroy
+    - dependency
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy
