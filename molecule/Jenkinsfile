@@ -47,7 +47,7 @@ pipeline {
                       molecule test
                  '''
              }
-             else if (params.role == 'pbm)' {
+             else if (params.role == 'pbm') {
                    sh '''
                       source virtenv/bin/activate
                       cd molecule/pbm
