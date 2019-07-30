@@ -2,7 +2,13 @@ pipeline {
   agent { label 'qaserver-03' }
   parameters {
         choice(name: 'ROLE', choices: ['pg-11', 'pbm', 'pbm-upgrade', 'pgaudit', 'pgbackrest'], description: 'Role for testing.')
+        choice(name: 'PSMDB_TO_TEST', choices: ['psmdb40', 'psmdb36'], description: 'PSMDB to test. Make sense only for pbm testing')
+        choice(name: 'INSTALL_REPO', choices: ['testing', 'main', 'experimental'], description: 'For playbooks that support chosing another repo in install test. Make sense only for pbm testing.')
     }
+  environment {
+       psmdb_to_test = params.PSMDB_TO_TEST
+       install_repo = params.INSTALL_REPO
+   }
   stages {
     stage ('Get latest code') {
       steps {
