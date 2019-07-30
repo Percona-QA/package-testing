@@ -1,7 +1,7 @@
 pipeline {
   agent { label 'qaserver-03' }
   parameters {
-        choice(name: 'ROLE', choices: ['pg-11', 'pbm', 'pbm-upgrade'], description: 'Role for testing.')
+        choice(name: 'ROLE', choices: ['pg-11', 'pbm', 'pbm-upgrade', 'pgaudit', 'pgbackrest'], description: 'Role for testing.')
     }
   stages {
     stage ('Get latest code') {
@@ -42,7 +42,7 @@ pipeline {
                       molecule test
                  '''
              }
-             else if (params.role == 'pbm') {
+             else if (params.ROLE == 'pbm') {
                    sh '''
                       source virtenv/bin/activate
                       cd molecule/pbm
