@@ -7,19 +7,19 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-DEB_PACKAGES = ["percona-platform-postgresql-11", "percona-platform-postgresql-client", "percona-platform-postgresql",
-                "percona-platform-postgresql-client-11", "percona-platform-postgresql-client-common",
-                "percona-platform-postgresql-contrib", "percona-platform-postgresql-doc",
-                "percona-platform-postgresql-doc-11", "percona-platform-postgresql-plperl-11",
-                "percona-platform-postgresql-plpython-11", "percona-platform-postgresql-plpython3-11",
-                "percona-platform-postgresql-pltcl-11", "percona-platform-postgresql-all"]
+DEB_PACKAGES = ["percona-postgresql-11", "percona-postgresql-client", "percona-postgresql",
+                "percona-postgresql-client-11", "percona-platform-postgresql-client-common",
+                "percona-postgresql-contrib", "percona-postgresql-doc",
+                "percona-postgresql-doc-11", "percona-postgresql-plperl-11",
+                "percona-postgresql-plpython-11", "percona-postgresql-plpython3-11",
+                "percona-postgresql-pltcl-11", "percona-postgresql-all"]
 
-RPM_PACKAGES = ["percona-platform-postgresql11", "percona-platform-postgresql11-contrib",
-                "percona-platform-postgresql11-debuginfo", "percona-platform-postgresql11-devel",
-                "percona-platform-postgresql11-docs", "percona-platform-postgresql11-libs",
-                "percona-platform-postgresql11-plperl", "percona-platform-postgresql11-plpython",
-                "percona-platform-postgresql11-pltcl", "percona-platform-postgresql11-server",
-                "percona-platform-postgresql11-test"]
+RPM_PACKAGES = ["percona-postgresql11", "percona-postgresql11-contrib",
+                "percona-postgresql11-debuginfo", "percona-postgresql11-devel",
+                "percona-postgresql11-docs", "percona-postgresql11-libs",
+                "percona-postgresql11-plperl", "percona-postgresql11-plpython",
+                "percona-postgresql11-pltcl", "percona-postgresql11-server",
+                "percona-postgresql11-test"]
 
 DEF_FILES = []
 RHEL_FILES = []
