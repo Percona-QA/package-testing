@@ -21,6 +21,9 @@ RPM_PACKAGES = ["percona-platform-postgresql11", "percona-platform-postgresql11-
                 "percona-platform-postgresql11-pltcl", "percona-platform-postgresql11-server",
                 "percona-platform-postgresql11-test"]
 
+DEF_FILES = []
+RHEL_FILES = []
+
 EXTENSIONS = ['xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', 'hstore', 'plperlu', 'plperl', 'ltree',
               'hstore_plperlu', 'dict_xsyn', 'autoinc', 'hstore_plpython3u','insert_username', 'intagg', 'adminpack',
               'intarray', 'cube', 'lo', 'jsonb_plpython2u', 'jsonb_plperl', 'jsonb_plperlu', 'btree_gin', 'pgrowlocks',
@@ -90,7 +93,7 @@ def insert_data(host):
         pgbench = "pgbench -i -s 1"
         result = host.run(pgbench)
         assert result.rc == 0
-        select = "psql -c 'SELECT COUNT(*) FROM pgbench_account;' | awk 'NR==3{print $1}"
+        select = "psql -c 'SELECT COUNT(*) FROM pgbench_account;' | awk 'NR==3{print $1}'"
         result = host.check_output(select)
     yield result.strip("\n")
 
