@@ -90,7 +90,7 @@ def insert_data(host):
         create_table = "psql -c 'CREATE TABLE test (name text);'"
         result = host.check_output(create_table)
         assert result.strip("\n") == "CREATE TABLE"
-        insert = "psql -c 'INSERT INTO \"test\" (\"name\")  VALUES (\"name\");'"
+        insert = "psql -c 'INSERT INTO \"test\" (\"name\")  VALUES (\"12345\");'"
         result = host.check_output(insert)
         assert result.strip("\n") == "INSERT 0 1"
         select = "psql -c 'SELECT * FROM test;' | awk 'NR==3{print $1}"
