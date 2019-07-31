@@ -122,6 +122,8 @@ def test_deb_package_is_installed(host, package):
     os = host.system_info.distribution
     if os == "RedHat":
         pytest.skip("This test only for Debian based platforms")
+    if package == "percona-platform-postgresql-all":
+        pytest.xfail(reason="Bug for this package")
     pkg = host.package(package)
     assert pkg.is_installed
 
