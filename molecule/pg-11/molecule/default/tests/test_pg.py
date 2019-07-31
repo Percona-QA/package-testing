@@ -8,7 +8,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
 DEB_PACKAGES = ["percona-postgresql-11", "percona-postgresql-client", "percona-postgresql",
-                "percona-postgresql-client-11", "percona-platform-postgresql-client-common",
+                "percona-postgresql-client-11", "percona-postgresql-client-common",
                 "percona-postgresql-contrib", "percona-postgresql-doc",
                 "percona-postgresql-doc-11", "percona-postgresql-plperl-11",
                 "percona-postgresql-plpython-11", "percona-postgresql-plpython3-11",
@@ -103,7 +103,7 @@ def test_deb_package_is_installed(host, package):
     os = host.system_info.distribution
     if os == "RedHat":
         pytest.skip("This test only for Debian based platforms")
-    if package == "percona-platform-postgresql-all":
+    if package == "percona-postgresql-all":
         pytest.xfail(reason="Bug for this package")
     pkg = host.package(package)
     assert pkg.is_installed
@@ -119,7 +119,7 @@ def test_rpm_package_is_installed(host, package):
 
 
 def test_postgresql_client_version(host):
-    pkg = "percona-platform-postgresql-11"
+    pkg = "percona-postgresql-11"
     if os == "RedHat":
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(pkg)
@@ -127,9 +127,9 @@ def test_postgresql_client_version(host):
 
 
 def test_postgresql_version(host):
-    pkg = "percona-platform-postgresql-client-11"
+    pkg = "percona-postgresql-client-11"
     if os == "RedHat":
-        pkg = "percona-platform-postgresql11"
+        pkg = "percona-postgresql11"
     pkg = host.package(pkg)
     assert "11" in pkg.version
 
