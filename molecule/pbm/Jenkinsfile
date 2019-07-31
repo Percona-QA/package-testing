@@ -1,7 +1,6 @@
 pipeline {
   agent { label 'qaserver-03' }
   parameters {
-        choice(name: 'ROLE', choices: ['pg-11', 'pbm', 'pbm-upgrade', 'pgaudit', 'pgbackrest'], description: 'Role for testing.')
         choice(name: 'PSMDB_TO_TEST', choices: ['psmdb40', 'psmdb36'], description: 'PSMDB to test. Make sense only for pbm testing')
         choice(name: 'INSTALL_REPO', choices: ['testing', 'main', 'experimental'], description: 'For playbooks that support chosing another repo in install test. Make sense only for pbm testing.')
     }
@@ -37,24 +36,15 @@ pipeline {
     stage ('Molecule test') {
       steps {
         script {
-            if  (params.ROLE == 'pg-11') {
-                 sh '''
-                      source virtenv/bin/activate
-                      cd molecule/pg-11
-                      molecule test
-                 '''
-             }
-             else if (params.ROLE == 'pbm') {
-                   sh '''
-                      export psmdb_to_test=${PSMDB_TO_TEST}
-                      export install_repo=${INSTALL_REPO}
-                      source virtenv/bin/activate
-                      cd molecule/pbm
-                      molecule test
-                 '''
+               sh '''
+                  export psmdb_to_test=${PSMDB_TO_TEST}
+                  export install_repo=${INSTALL_REPO}
+                  source virtenv/bin/activate
+                  cd molecule/pbm
+                  molecule test
+             '''
                  }
             }
-        }
-    }
+      }
   }
 }
