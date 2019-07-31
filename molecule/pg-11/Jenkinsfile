@@ -37,11 +37,10 @@ pipeline {
            molecule destroy
            molecule dependency
            molecule create
-           moleculeprepare
+           molecule prepare
            molecule converge
            molecule verify
            molecule side-effect
-           molecule cleanup
            molecule destroy
          '''
         }
