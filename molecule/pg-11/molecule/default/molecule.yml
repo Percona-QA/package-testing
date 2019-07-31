@@ -21,8 +21,7 @@ provisioner:
   name: ansible
   log: True
   playbooks:
-    cleanup: cleanup.yml
-    side_effect: cleanup.yml
+    side_effect: side-effect.yml
   lint:
     name: ansible-lint
     enabled: False
@@ -38,9 +37,6 @@ verifier:
     enabled: False
 scenario:
   name: default
-  destroy_sequence:
-    - cleanup
-    - destroy
   test_sequence:
     - lint
     - destroy
@@ -50,5 +46,4 @@ scenario:
     - converge
     - verify
     - side-effect
-    - cleanup
     - destroy
