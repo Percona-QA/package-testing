@@ -31,6 +31,8 @@ EXTENSIONS = ['xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', '
               'hstore_plpython2u', 'ltree_plpython3u', 'fuzzystrmatch', 'earthdistance', 'hstore_plperl', 'pg_prewarm',
               'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'postgres_fdw']
 
+LANGUAGES = ["plpgsql", "pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", "plpython3u"]
+
 
 @pytest.fixture()
 def postgres_unit_file(host):
@@ -85,7 +87,7 @@ def extension_list(host):
 @pytest.fixture()
 def insert_data(host):
     with host.sudo("postgres"):
-        create_table = "psql-c 'CREATE TABLE test (name text);'"
+        create_table = "psql -c 'CREATE TABLE test (name text);'"
         result = host.check_output(create_table)
         assert result.strip("\n") == "CREATE TABLE"
         insert = "psql -c 'INSERT INTO \"test\" (\"name\")  VALUES (\"name\");'"
@@ -99,22 +101,6 @@ def insert_data(host):
         drop = "psql-c 'DROP TABLE test;'"
         result = host.check_output(drop)
         assert result.strip("\n") == "DROP TABLE"
-
-
-@pytest.fixture()
-def plperl_function():
-    pass
-    "write functions with different programming language extensions which we package"
-
-
-@pytest.fixture()
-def plpython2_function():
-    pass
-
-
-@pytest.fixture()
-def plpython3_function():
-    pass
 
 
 @pytest.mark.parametrize("package", DEB_PACKAGES)
@@ -273,13 +259,9 @@ def test_package_metadata(host):
     pass
 
 
-def test_plperl(host):
-    pass
-
-
-def test_plpython3(host):
-    pass
-
-
-def test_plpython2(host):
-    pass
+@pytest.mark.parametrize("language", LANGUAGES)
+def test_language(host, language):
+    with host.sudo("postgres"):
+        lang = host.run("psql -c 'CREATE LANGUAGE {};'".format(language))
+        assert lang.rc == 0
+        assert lang.stdout.strip("\n") == "CREATE LANGUAGE"
