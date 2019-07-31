@@ -230,7 +230,7 @@ def test_enable_extension(host, extension):
                                                                           extension.stdout)
 
 
-@pytest.mark.parametrize("extension", EXTENSIONS)
+@pytest.mark.parametrize("extension", EXTENSIONS[::-1])
 def test_drop_extension(host, extension):
     with host.sudo("postgres"):
         drop_extension = host.run("psql -c 'DROP EXTENSION \"{}\";'".format(extension))
