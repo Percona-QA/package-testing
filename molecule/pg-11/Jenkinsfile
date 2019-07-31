@@ -33,15 +33,7 @@ pipeline {
          sh '''
            source virtenv/bin/activate
            cd molecule/pg-11
-           molecule lint
-           molecule destroy
-           molecule dependency
-           molecule create
-           molecule prepare
-           molecule converge
-           molecule verify
-           molecule side-effect
-           molecule destroy
+           molecule test
          '''
         }
     }
