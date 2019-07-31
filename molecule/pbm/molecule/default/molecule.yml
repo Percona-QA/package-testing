@@ -43,4 +43,5 @@ scenario:
     - prepare
     - converge
     - verify
+    - uninstall
     - destroy
