@@ -21,7 +21,7 @@ provisioner:
   name: ansible
   log: True
   playbooks:
-    uninstall: ../default/uninstall.yml
+    cleanup: cleanup.yml
   lint:
     name: ansible-lint
     enabled: False
@@ -45,5 +45,5 @@ scenario:
     - prepare
     - converge
     - verify
-    - uninstall
+    - cleanup
     - destroy

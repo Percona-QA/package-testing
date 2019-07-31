@@ -1,12 +1,12 @@
 ---
-- name: Uninstall
+- name: Cleanup
   hosts: all
   become: true
   become_method: sudo
   roles:
-    - role: pbm
+    - role: pg-11
   tasks:
-    - name: remove PBM deb packages
+    - name: remove Postgresql deb packages
         apt:
           name: "{{ packages }}"
           state: absent
@@ -15,7 +15,7 @@
           - percona-platform-postgresql
         when: ansible_os_family == "Debian"
 
-    - name: remove PBM rpm packages
+    - name: remove Postgresql rpm packages
         yum:
           name: "{{ packages }}"
           state: absent
