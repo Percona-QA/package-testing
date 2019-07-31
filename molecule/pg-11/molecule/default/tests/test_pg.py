@@ -31,7 +31,7 @@ EXTENSIONS = ['xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', '
               'hstore_plpython2u', 'ltree_plpython3u', 'fuzzystrmatch', 'earthdistance', 'hstore_plperl', 'pg_prewarm',
               'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'postgres_fdw']
 
-LANGUAGES = ["plpgsql", "pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", "plpython3u"]
+LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", "plpython3u"]
 
 
 @pytest.fixture()
