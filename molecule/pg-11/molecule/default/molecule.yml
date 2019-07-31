@@ -22,7 +22,7 @@ provisioner:
   log: True
   playbooks:
     cleanup: cleanup.yml
-    enabled: True
+    side_effect: cleanup.yml
   lint:
     name: ansible-lint
     enabled: False
@@ -49,5 +49,6 @@ scenario:
     - prepare
     - converge
     - verify
+    - side-effect
     - cleanup
     - destroy

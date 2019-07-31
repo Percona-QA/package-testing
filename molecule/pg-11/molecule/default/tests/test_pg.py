@@ -22,11 +22,11 @@ RPM_PACKAGES = ["percona-platform-postgresql11", "percona-platform-postgresql11-
                 "percona-platform-postgresql11-test"]
 
 EXTENSIONS = ['xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', 'hstore', 'plperlu', 'plperl', 'ltree',
-              'hstore_plperlu', 'dict_xsyn','autoinc', 'hstore_plpython3u','insert_username', 'intagg', 'adminpack',
+              'hstore_plperlu', 'dict_xsyn', 'autoinc', 'hstore_plpython3u','insert_username', 'intagg', 'adminpack',
               'intarray', 'cube', 'lo', 'jsonb_plpython2u', 'jsonb_plperl', 'jsonb_plperlu', 'btree_gin', 'pgrowlocks',
               'bloom', 'seg', 'pageinspect', 'btree_gist', 'sslinfo', 'pg_visibility', 'ltree_plpython2u', 'refint',
               'jsonb_plpython3u', 'jsonb_plpythonu', 'moddatetime', 'ltree_plpythonu', 'dict_int', 'pg_freespacemap',
-              'pgstattuple', 'hstore_plpythonu', 'uuid-ossp','tsm_system_time', 'tsm_system_rows', 'unaccent',
+              'pgstattuple', 'hstore_plpythonu', 'uuid-ossp', 'tsm_system_time', 'tsm_system_rows', 'unaccent',
               'tablefunc', 'pgcrypto', 'pg_buffercache', 'amcheck', 'citext',  'timetravel',  'isn',
               'hstore_plpython2u', 'ltree_plpython3u', 'fuzzystrmatch', 'earthdistance', 'hstore_plperl', 'pg_prewarm',
               'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'postgres_fdw']
@@ -81,6 +81,29 @@ def extension_list(host):
         result = result.split()
         print(result)
         return result
+
+
+@pytest.fixture()
+def insert_date():
+    pass
+
+
+@pytest.fixture()
+def plperl_function():
+    pass
+    "write functions with different programming language extensions which we package"
+
+
+@pytest.fixture()
+def plpython2_function():
+    pass
+
+
+@pytest.fixture()
+def plpython3_function():
+    pass
+
+
 
 
 @pytest.mark.parametrize("package", DEB_PACKAGES)
@@ -190,6 +213,26 @@ def test_enable_extension(host, extension):
         except AssertionError:
             pytest.fail("Return code {}. Stderror: {}. Stdout {}").format(extension.rc, extension.stderr,
                                                                           extension.stdout)
+
+
+@pytest.mark.parametrize("extension", EXTENSIONS)
+def test_drop_extension(host, extension):
+    drop_extension = host.run("psql -c 'DROP EXTENSION \"{}\";'".format(extension))
+    try:
+        assert drop_extension.rc == 0
+        assert drop_extension.stdout.strip("\n") == "DROP EXTENSION"
+    except AssertionError:
+        pytest.fail("Return code {}. Stderror: {}. Stdout {}".format(drop_extension.rc,
+                                                                     drop_extension.stderr,
+                                                                     drop_extension.stdout))
+
+    try:
+        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+        assert extensions.rc == 0
+        assert extension not in set(extensions.stdout.split())
+    except AssertionError:
+        pytest.fail("Return code {}. Stderror: {}. Stdout {}").format(extension.rc, extension.stderr,
+                                                                      extension.stdout)
 
 
 def test_plpgsql_extension(host):
