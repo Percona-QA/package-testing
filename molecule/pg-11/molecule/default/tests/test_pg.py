@@ -79,13 +79,26 @@ def extension_list(host):
     with host.sudo("postgres"):
         result = host.check_output("psql -c 'SELECT * FROM pg_available_extensions;' | awk 'NR>=3{print $1}'")
         result = result.split()
-        print(result)
         return result
 
 
 @pytest.fixture()
-def insert_date():
-    pass
+def insert_date(host):
+    with host.sudo("postgres"):
+        create_table = "psql-c 'CREATE TABLE test (name text);'"
+        result = host.check_output(create_table)
+        assert result.strip("\n") == "CREATE TABLE"
+        insert = "psql -c 'INSERT INTO \"test\" (\"name\")  VALUES (\"name\");'"
+        result = host.check_output(insert)
+        assert result.strip("\n") == "INSERT 0 1"
+        select = "psql -c 'SELECT * FROM test;' | awk 'NR==3{print $1}"
+        result = host.check_output(select)
+
+    yield result.strip("\n")
+    with host.sudo("postgres"):
+        drop = "psql-c 'DROP TABLE test;'"
+        result = host.check_output(drop)
+        assert result.strip("\n") == "DROP TABLE"
 
 
 @pytest.fixture()
@@ -102,8 +115,6 @@ def plpython2_function():
 @pytest.fixture()
 def plpython3_function():
     pass
-
-
 
 
 @pytest.mark.parametrize("package", DEB_PACKAGES)
@@ -187,6 +198,10 @@ def test_restart_postgresql(restart_postgresql):
     assert restart_postgresql.rc == 0
     assert "active" in restart_postgresql.stdout
     assert not restart_postgresql.stderr
+
+
+def test_insert_data(insert_data):
+    assert insert_data == "12345"
 
 
 def test_extenstions_list(extension_list):
