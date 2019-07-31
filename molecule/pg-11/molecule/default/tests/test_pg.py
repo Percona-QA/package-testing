@@ -83,7 +83,7 @@ def extension_list(host):
 
 
 @pytest.fixture()
-def insert_date(host):
+def insert_data(host):
     with host.sudo("postgres"):
         create_table = "psql-c 'CREATE TABLE test (name text);'"
         result = host.check_output(create_table)
@@ -257,3 +257,27 @@ def test_plpgsql_extension(host):
         extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
         assert extensions.rc == 0
         assert "plpgsql" in set(extensions.stdout.split())
+
+
+def test_files(host):
+    pass
+
+
+def test_package_content(host):
+    pass
+
+
+def test_package_metadata(host):
+    pass
+
+
+def test_plperl(host):
+    pass
+
+
+def test_plpython3(host):
+    pass
+
+
+def test_plpython2(host):
+    pass
