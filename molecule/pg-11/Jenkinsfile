@@ -41,7 +41,7 @@ pipeline {
   }
    post {
         always {
-            junit 'molecule/pg-11/*.xml'
+            junit 'molecule/pg-11/molecule/default/*.xml'
         }
     }
 }
