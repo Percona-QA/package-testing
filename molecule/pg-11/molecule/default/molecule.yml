@@ -38,6 +38,9 @@ verifier:
     enabled: False
 scenario:
   name: default
+  destroy_sequence:
+    - cleanup
+    - destroy
   test_sequence:
     - lint
     - destroy
