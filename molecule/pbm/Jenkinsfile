@@ -35,16 +35,14 @@ pipeline {
 
     stage ('Molecule test') {
       steps {
-        script {
-               sh '''
-                  export psmdb_to_test=${PSMDB_TO_TEST}
-                  export install_repo=${INSTALL_REPO}
-                  source virtenv/bin/activate
-                  cd molecule/pbm
-                  molecule test
-             '''
-                 }
-            }
+        sh '''
+          export psmdb_to_test=${PSMDB_TO_TEST}
+          export install_repo=${INSTALL_REPO}
+          source virtenv/bin/activate
+          cd molecule/pbm
+          molecule test
+         '''
       }
+    }
   }
 }
