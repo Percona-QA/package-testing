@@ -20,6 +20,8 @@ platforms:
 provisioner:
   name: ansible
   log: True
+  playbooks:
+    uninstall: ../default/uninstall.yml
   lint:
     name: ansible-lint
     enabled: False
@@ -43,4 +45,5 @@ scenario:
     - prepare
     - converge
     - verify
+    - uninstall
     - destroy

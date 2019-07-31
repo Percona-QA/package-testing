@@ -1,0 +1,25 @@
+---
+- name: Uninstall
+  hosts: all
+  become: true
+  become_method: sudo
+  roles:
+    - role: pbm
+  tasks:
+    - name: remove PBM deb packages
+        apt:
+          name: "{{ packages }}"
+          state: absent
+        vars:
+          packages:
+          - percona-platform-postgresql
+        when: ansible_os_family == "Debian"
+
+    - name: remove PBM rpm packages
+        yum:
+          name: "{{ packages }}"
+          state: absent
+        vars:
+          packages:
+        - percona-platform-postgresql11
+        when: ansible_os_family == "RedHat"
