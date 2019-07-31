@@ -87,20 +87,12 @@ def extension_list(host):
 @pytest.fixture()
 def insert_data(host):
     with host.sudo("postgres"):
-        create_table = "psql -c 'CREATE TABLE test (name text);'"
-        result = host.check_output(create_table)
-        assert result.strip("\n") == "CREATE TABLE"
-        insert = "psql -c 'INSERT INTO \"test\" (\"name\")  VALUES (\"12345\");'"
-        result = host.check_output(insert)
-        assert result.strip("\n") == "INSERT 0 1"
-        select = "psql -c 'SELECT * FROM test;' | awk 'NR==3{print $1}"
+        pgbench = "pgbench -i -s 1"
+        result = host.run(pgbench)
+        assert result.rc == 0
+        select = "psql -c 'SELECT COUNT(*) FROM pgbench_account;' | awk 'NR==3{print $1}"
         result = host.check_output(select)
-
     yield result.strip("\n")
-    with host.sudo("postgres"):
-        drop = "psql-c 'DROP TABLE test;'"
-        result = host.check_output(drop)
-        assert result.strip("\n") == "DROP TABLE"
 
 
 @pytest.mark.parametrize("package", DEB_PACKAGES)
@@ -189,7 +181,7 @@ def test_restart_postgresql(restart_postgresql):
 
 
 def test_insert_data(insert_data):
-    assert insert_data == "12345"
+    assert insert_data == "100000"
 
 
 def test_extenstions_list(extension_list):
