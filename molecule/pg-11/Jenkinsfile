@@ -28,14 +28,13 @@ pipeline {
         '''
       }
     }
-
     stage ('Molecule test') {
       steps {
          sh '''
-              source virtenv/bin/activate
-              cd molecule/pg-11
-              molecule test
-             '''
+           source virtenv/bin/activate
+           cd molecule/pg-11
+           molecule test
+         '''
         }
     }
   }

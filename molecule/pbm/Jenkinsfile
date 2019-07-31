@@ -1,8 +1,8 @@
 pipeline {
   agent { label 'qaserver-03' }
   parameters {
-        choice(name: 'PSMDB_TO_TEST', choices: ['psmdb40', 'psmdb36'], description: 'PSMDB to test. Make sense only for pbm testing')
-        choice(name: 'INSTALL_REPO', choices: ['testing', 'main', 'experimental'], description: 'For playbooks that support chosing another repo in install test. Make sense only for pbm testing.')
+        choice(name: 'PSMDB_TO_TEST', choices: ['psmdb40', 'psmdb36'], description: 'PSMDB to test.')
+        choice(name: 'INSTALL_REPO', choices: ['testing', 'main', 'experimental'], description: 'For playbooks that support chosing another repo in install test.')
     }
   stages {
     stage ('Get latest code') {
@@ -32,7 +32,6 @@ pipeline {
         '''
       }
     }
-
     stage ('Molecule test') {
       steps {
         sh '''
