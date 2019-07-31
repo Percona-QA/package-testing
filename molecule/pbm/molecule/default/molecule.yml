@@ -21,7 +21,7 @@ provisioner:
   name: ansible
   log: True
   playbooks:
-    side-effect: ../default/side-effect.yml
+    side-effect: side-effect.yml
   lint:
     name: ansible-lint
     enabled: False
@@ -45,5 +45,5 @@ scenario:
     - prepare
     - converge
     - verify
-    - uninstall
+    - side-effect
     - destroy
