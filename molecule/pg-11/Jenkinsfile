@@ -34,14 +34,14 @@ pipeline {
            source virtenv/bin/activate
            cd molecule/pg-11
            molecule test
-           ls -la
          '''
         }
-      post {
+
+    }
+  }
+   post {
         always {
             junit 'molecule/pg-11/*.xml'
         }
     }
-  }
- }
 }
