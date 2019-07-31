@@ -9,14 +9,14 @@
       changed_when: false
       when: ansible_os_family == "Debian"
 
-    - name: Prepare RHEL based
-      hosts: all
-      gather_facts: true
-      tasks:
-        - name: Install python for Ansible
-          raw: test -e /usr/bin/python || (yum update && yum install -y python-minimal)
-          become: true
-          changed_when: false
-          when: ansible_os_family == "RedHat"
+- name: Prepare RHEL based
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Install python for Ansible
+      raw: test -e /usr/bin/python || (yum update && yum install -y python-minimal)
+      become: true
+      changed_when: false
+      when: ansible_os_family == "RedHat"
 
 
