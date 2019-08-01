@@ -1,8 +1,5 @@
 pipeline {
   agent { label 'qaserver-03' }
-  parameters {
-        booleanParam(name: 'PGAUDIT', defaultValue: false, description: 'Install and test pgaudit package.')
-    }
   stages {
     stage ('Get latest code') {
       steps {
@@ -29,24 +26,13 @@ pipeline {
     }
     stage ('Create virtual machines and run playbook for test.') {
       steps {
-       script {
-            if (params.PGAUDIT) {
-                 sh '''
-                      export PGAUDIT="true"
-                      source virtenv/bin/activate
-                      cd molecule/pg-11
-                      molecule converge
-                 '''
-             }
-           else {
-                  sh '''
-                       source virtenv/bin/activate
-                       cd molecule/pg-11
-                       molecule converge
-                 '''
-         }
-        }
-    }
+          sh '''
+              export PGAUDIT="true"
+              source virtenv/bin/activate
+              cd molecule/pg-11
+              molecule converge
+           '''
+     }
     }
     stage ('Start testinfra tests') {
       steps {
