@@ -37,14 +37,14 @@
       when: ansible_os_family == "RedHat"
 
     - name: remove pg_repack deb packages
-        apt:
-          name: "{{ packages }}"
-          state: absent
-        vars:
-          packages:
-            - percona-postgresql-11-repack
-            - percona-postgresql-11-repack-dbgsym
-        when: ansible_os_family == "Debian"
+      apt:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+          - percona-postgresql-11-repack
+          - percona-postgresql-11-repack-dbgsym
+      when: ansible_os_family == "Debian"
 
     - name: remove pg_repack rpm packages
       yum:
@@ -54,9 +54,12 @@
 
     - name: remove pgbackrest deb packages
       apt:
-        name: percona-pgbackrest
+        name: "{{ packages }}"
         state: absent
-
+      vars:
+        packages:
+          - percona-pgbackrest
+          - percona-pgbackrest-doc
       when: ansible_os_family == "Debian"
 
     - name: remove pgbackrest rpm packages
