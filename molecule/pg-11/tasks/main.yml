@@ -47,7 +47,11 @@
 
 - name: Install pgbackrest Debian
   apt:
-    name: percona-postgresql-11-pgbackrest
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - percona-pgbackrest
+      - percona-pgbackrest-doc
   when: ansible_os_family == "Debian"
 
 - name: Install pgbackrest RHEL

@@ -61,11 +61,15 @@ def test_pgrepack_package(host):
 def test_pgbackrest_package(host):
     os = host.system_info.distribution
     pkgn = ""
+    doc_pkgn = ""
     if os == "RedHat":
         pkgn = "percona-pgbackrest"
     elif os == "debian":
-        pkgn = "percona-postgresql-11-pgbackrest"
+        pkgn = "percona-pgbackrest"
+        doc_pkgn = "percona-pgbackrest-doc"
     if pkgn == "":
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
+    docs_pkg = host.package(doc_pkgn)
+    assert docs_pkg.is_installed
