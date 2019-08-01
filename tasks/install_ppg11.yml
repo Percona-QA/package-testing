@@ -9,12 +9,12 @@
     vars:
       packages:
       - percona-postgresql
-#      - percona-postgresql-11
-        #- percona-postgresql-all
+      - percona-postgresql-11
+      - percona-postgresql-all
       - percona-postgresql-client
       - percona-postgresql-client-11
       - percona-postgresql-client-common
-        #- percona-postgresql-common
+      - percona-postgresql-common
       - percona-postgresql-contrib
       - percona-postgresql-doc
       - percona-postgresql-doc-11
@@ -22,8 +22,8 @@
       - percona-postgresql-plpython-11
       - percona-postgresql-plpython3-11
       - percona-postgresql-pltcl-11
-        #- percona-postgresql-server-dev-11
-        #- percona-postgresql-server-dev-all
+      - percona-postgresql-server-dev-11
+      - percona-postgresql-server-dev-all
     when: ansible_os_family == "Debian"
 
   - name: install Percona Platform for PostgreSQL rpm packages

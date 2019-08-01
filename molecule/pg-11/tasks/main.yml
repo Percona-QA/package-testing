@@ -58,3 +58,20 @@
     name: percona-pgbackrest
     state: absent
   when: ansible_os_family == "RedHat"
+
+- name: Install pgrepack Debian
+  apt:
+    name: "{{ packages }}"
+    state: absent
+  vars:
+    packages:
+      - percona-postgresql-11-repack
+      - percona-postgresql-11-repack-dbgsym
+
+  when: ansible_os_family == "Debian"
+
+- name: Install pgrepack RHEL
+  yum:
+    name: percona-pg_repack11
+    state: absent
+  when: ansible_os_family == "RedHat"
