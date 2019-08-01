@@ -29,6 +29,7 @@ def patroni(host):
 
 
 def test_pgaudit_package(host):
+    os = host.system_info.distribution
     pkgn = ""
     if os == "RedHat":
         pkgn = "percona-pgaudit"
@@ -41,6 +42,7 @@ def test_pgaudit_package(host):
 
 
 def test_pgrepack_package(host):
+    os = host.system_info.distribution
     pkgn = ""
     if os == "RedHat":
         pkgn = "percona-pg_repack11"
@@ -55,6 +57,7 @@ def test_pgrepack_package(host):
 
 
 def test_pgbackrest_package(host):
+    os = host.system_info.distribution
     pkgn = ""
     if os == "RedHat":
         pkgn = "percona-pgbackrest"
