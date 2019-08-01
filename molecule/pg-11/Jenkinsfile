@@ -1,12 +1,14 @@
 pipeline {
   agent { label 'qaserver-03' }
+  parameters {
+        booleanParam(name: 'PGAUDIT', defaultValue: false, description: 'Install and test pgaudit package.')
+    }
   stages {
     stage ('Get latest code') {
       steps {
         checkout scm
       }
     }
-
     stage ('Setup Python virtual environment') {
       steps {
         sh '''
@@ -16,27 +18,62 @@ pipeline {
         '''
       }
     }
-
-    stage ('Display versions') {
-      steps {
-        sh '''
-          source virtenv/bin/activate
-          docker -v
-          python -V
-          ansible --version
-          molecule --version
-        '''
-      }
-    }
-    stage ('Molecule test') {
+    stage ('Destroy previous environment') {
       steps {
          sh '''
            source virtenv/bin/activate
            cd molecule/pg-11
-           molecule test
+           molecule destroy
          '''
         }
-
+    }
+    stage ('Create virtual machines and run playbook for test.') {
+      steps {
+       script {
+            if (params.PGAUDIT) {
+                 sh '''
+                      export PGAUDIT="true"
+                      source virtenv/bin/activate
+                      cd molecule/pg-11
+                      molecule test
+                 '''
+             }
+           else {
+                  sh '''
+                       source virtenv/bin/activate
+                       cd molecule/pg-11
+                       molecule converge
+                 '''
+         }
+        }
+    }
+    }
+    stage ('Start testinfra tests') {
+      steps {
+         sh '''
+           source virtenv/bin/activate
+           cd molecule/pg-11
+           molecule verify
+         '''
+        }
+    }
+    stage ('Start packages deletion') {
+      steps {
+         sh '''
+           source virtenv/bin/activate
+           cd molecule/pg-11
+           molecule side-effect
+         '''
+        }
+    }
+    stage ('Destroy environment') {
+      steps {
+         sh '''
+           source virtenv/bin/activate
+           cd molecule/pg-11
+           molecule destroy
+         '''
+        }
     }
   }
    post {

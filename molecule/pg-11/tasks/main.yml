@@ -18,10 +18,6 @@
     #include: ../tasks/enable_ps8_testing_repo.yml
     #when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
-    #- name: include tasks for enabling PS 8 experimental repo
-    #include: ../tasks/enable_ps8_experimental_repo.yml
-    #when: lookup('env', 'install_repo') == "experimental"
-
   ### temp part until percona-release is updated for PPG project
 - name: include tasks for enabling main repo (do this just for GPG key)
   include: ../../../tasks/enable_main_repo.yml
@@ -35,7 +31,21 @@
 
 - name: setup temporary experimental repo until percona-release is updated
   command: percona-release enable ppg-11 experimental
-  ###
 
 - name: install Percona Platform for PostgreSQL 11 packages
   include_tasks: ../../../tasks/install_ppg11.yml
+
+- name: Install pgaudit Debian
+  apt:
+    name: percona-postgresql-11-pgaudit
+    state: absent
+    vars:
+      packages:
+        - percona-postgresql-11-pgaudit
+  when: lookup('env', 'PGAUDIT') == "true" and ansible_os_family == "Debian"
+
+- name: Install pgaudit RHEL
+  yum:
+    name: percona-pgaudit
+    state: absent
+  when: lookup('env', 'PGAUDIT') == "true" and ansible_os_family == "RedHat"
