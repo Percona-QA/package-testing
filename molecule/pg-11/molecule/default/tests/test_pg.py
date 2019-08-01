@@ -9,12 +9,12 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 DEB_PACKAGES = ["percona-postgresql-11", "percona-postgresql-client", "percona-postgresql",
                 "percona-postgresql-client-11", "percona-postgresql-client-common",
-                "percona-postgresql-contrib", "percona-postgresql-doc",
-                "percona-postgresql-doc-11", "percona-postgresql-plperl-11",
+                "percona-postgresql-contrib", "percona-postgresql-doc", "percona-postgresql-server-dev-all",
+                "percona-postgresql-doc-11", "percona-postgresql-plperl-11", "percona-postgresql-common",
                 "percona-postgresql-plpython-11", "percona-postgresql-plpython3-11",
-                "percona-postgresql-pltcl-11", "percona-postgresql-all"]
+                "percona-postgresql-pltcl-11", "percona-postgresql-all", "percona-postgresql-server-dev-11"]
 
-RPM_PACKAGES = ["percona-postgresql11", "percona-postgresql11-contrib",
+RPM_PACKAGES = ["percona-postgresql11", "percona-postgresql11-contrib", "percona-postgresql-common",
                 "percona-postgresql11-debuginfo", "percona-postgresql11-devel",
                 "percona-postgresql11-docs", "percona-postgresql11-libs",
                 "percona-postgresql11-plperl", "percona-postgresql11-plpython",
