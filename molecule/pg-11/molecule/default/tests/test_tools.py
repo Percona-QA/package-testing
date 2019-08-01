@@ -43,7 +43,6 @@ def test_pgaudit_package(host):
 
 def test_pgrepack_package(host):
     os = host.system_info.distribution
-    print(os)
     pkgn = ""
     if os == "RedHat":
         pkgn = "percona-pg_repack11"
@@ -53,7 +52,6 @@ def test_pgrepack_package(host):
         assert pkg_dbgsym.is_installed
     if pkgn == "":
         pytest.fail("Unsupported operating system")
-    print(pkgn)
     pkg = host.package(pkgn)
     assert pkg.is_installed
 
