@@ -39,9 +39,6 @@
   apt:
     name: percona-postgresql-11-pgaudit
     state: absent
-    vars:
-      packages:
-        - percona-postgresql-11-pgaudit
   when: lookup('env', 'PGAUDIT') == "true" and ansible_os_family == "Debian"
 
 - name: Install pgaudit RHEL
