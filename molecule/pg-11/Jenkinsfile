@@ -35,7 +35,7 @@ pipeline {
                       export PGAUDIT="true"
                       source virtenv/bin/activate
                       cd molecule/pg-11
-                      molecule test
+                      molecule converge
                  '''
              }
            else {
