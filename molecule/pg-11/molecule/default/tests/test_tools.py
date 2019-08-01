@@ -1,4 +1,5 @@
 import os
+import pytest
 
 import testinfra.utils.ansible_runner
 
@@ -7,29 +8,59 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
 
+@pytest.fixture()
+def pgaudit(host):
+    pass
+
+
+@pytest.fixture()
+def pgbackrest(host):
+    pass
+
+
+@pytest.fixture()
+def ptrack(host):
+    pass
+
+
+@pytest.fixture()
+def patroni(host):
+    pass
+
+
 def test_pgaudit_package(host):
+    pkgn = ""
     if os == "RedHat":
-        pkg = host.package("percona-pgaudit")
+        pkgn = "percona-pgaudit"
     elif os == "debian":
-        pkg = "percona-postgresql-11-pgaudit"
+        pkgn = "percona-postgresql-11-pgaudit"
+    if pkgn == "":
+        pytest.fail("Unsupported operating system")
+    pkg = host.package(pkgn)
     assert pkg.is_installed
 
 
 def test_pgrepack_package(host):
+    pkgn = ""
     if os == "RedHat":
-        pkg = host.package("percona-pg_repack11")
-        assert pkg.is_installed
+        pkgn = "percona-pg_repack11"
     elif os == "debian":
-        pkg = host.package("percona-postgresql-11-repack")
-        assert pkg.is_installed
+        pkgn = "percona-postgresql-11-repack"
         pkg_dbgsym = host.package("percona-postgresql-11-repack-dbgsym")
-        assert pkg_dbgsym
+        assert pkg_dbgsym.is_installed
+    if pkgn == "":
+        pytest.fail("Unsupported operating system")
+    pkg = host.package(pkgn)
+    assert pkg.is_installed
 
 
 def test_pgbackrest_package(host):
+    pkgn = ""
     if os == "RedHat":
-        pkg = host.package("percona-pgbackrest")
-        assert pkg.is_installed
+        pkgn = "percona-pgbackrest"
     elif os == "debian":
-        pkg = host.package("percona-postgresql-11-pgbackrest")
+        pkgn = "percona-postgresql-11-pgbackrest"
+    if pkgn == "":
+        pytest.fail("Unsupported operating system")
+    pkg = host.package(pkgn)
     assert pkg.is_installed

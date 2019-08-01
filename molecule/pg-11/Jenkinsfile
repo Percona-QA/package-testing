@@ -24,7 +24,7 @@ pipeline {
          '''
         }
     }
-    stage ('Create virtual machines and run playbook for test.') {
+    stage ('Create virtual machines and run playbook for test') {
       steps {
           sh '''
               export PGAUDIT="true"
