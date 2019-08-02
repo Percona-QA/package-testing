@@ -10,7 +10,34 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 @pytest.fixture()
 def pgaudit(host):
-    pass
+    cmd = "sudo systemctl restart postgresql"
+    result = host.run(cmd)
+    assert result.rc == 0
+    with host.sudo("postgres"):
+        enable_pgaudit = "psql -c 'CREATE EXTENSION pgaudit;'"
+        result = host.check_output(enable_pgaudit)
+        assert result.strip("\n") == "CREATE EXTENSION"
+        assert result.rc == 0
+        cmd = """"SELECT setting FROM pg_settings WHERE name='shared_preload_libraries';" | awk 'NR==3{print $3}'"""
+        result = host.run(cmd)
+        assert result.strip("\n") == "pgaudit"
+        enable_ddl = """psql -c \"ALTER SYSTEM SET pgaudit.log = 'read, write, user, ddl';\""""
+        result = host.run(enable_ddl)
+        assert result.rc == 0
+        assert result.stdout.strip("\n") == "ALTER SYSTEM"
+        create_table = "psql -c \"CREATE TABLE t1 (id int,name varchar(30));\""
+        result = host.run(create_table)
+        assert result.rc == 0
+        assert result.stdout.strip("\n") == "CREATE TABLE"
+    os = host.system_info.distribution
+    log_file = "/var/log/postgresql/postgresql-11-main.log"
+    if os.lower() == "debian":
+        log_file = "/var/log/postgresql/postgresql-11-main.log"
+    elif os.lower() == "redhat":
+        log_file = "/var/log/postgresql/postgresql-11-main.log"
+    file = host.file(log_file)
+    print(file.content_string)
+    yield file
 
 
 @pytest.fixture()
@@ -39,6 +66,10 @@ def test_pgaudit_package(host):
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
+
+
+def test_pgaudit(pgaudit):
+    assert "AUDIT" in pgaudit.content_string
 
 
 def test_pgrepack_package(host):

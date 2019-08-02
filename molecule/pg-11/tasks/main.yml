@@ -10,14 +10,6 @@
     #include: ../tasks/enable_main_repo.yml
     #when: lookup('env', 'install_repo') == "main"
 
-    #- name: include tasks for enabling PS 8 test repo
-    #include: ../tasks/enable_ps8_main_repo.yml
-    #when: lookup('env', 'install_repo') == "main"
-
-    #- name: include tasks for enabling PS 8 test repo
-    #include: ../tasks/enable_ps8_testing_repo.yml
-    #when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-
   ### temp part until percona-release is updated for PPG project
 - name: include tasks for enabling main repo (do this just for GPG key)
   include: ../../../tasks/enable_main_repo.yml
@@ -38,6 +30,12 @@
 - name: Install pgaudit Debian
   apt:
     name: percona-postgresql-11-pgaudit
+  when: ansible_os_family == "Debian"
+
+- name: Enable pgaudit for Debian
+  lineinfile:
+    path: /etc/postgresql/11/main/postgresql.conf
+    line: shared_preload_libraries = 'pgaudit'
   when: ansible_os_family == "Debian"
 
 - name: Install pgaudit RHEL
