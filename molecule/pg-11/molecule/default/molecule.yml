@@ -22,7 +22,7 @@ provisioner:
   log: True
   playbooks:
     side_effect: side-effect.yml
-    cleanup: cleanup,yml
+    cleanup: cleanup.yml
   lint:
     name: ansible-lint
     enabled: False
