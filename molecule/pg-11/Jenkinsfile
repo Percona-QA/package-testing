@@ -48,7 +48,7 @@ pipeline {
          sh '''
            source virtenv/bin/activate
            cd molecule/pg-11
-           molecule side-effect
+           molecule cleanup
          '''
         }
     }
