@@ -17,14 +17,12 @@ def pgaudit(host):
         enable_pgaudit = "psql -c 'CREATE EXTENSION pgaudit;'"
         result = host.check_output(enable_pgaudit)
         assert result.strip("\n") == "CREATE EXTENSION"
-        assert result.rc == 0
         cmd = """"SELECT setting FROM pg_settings WHERE name='shared_preload_libraries';" | awk 'NR==3{print $3}'"""
-        result = host.run(cmd)
+        result = host.check_output(cmd)
         assert result.strip("\n") == "pgaudit"
         enable_ddl = """psql -c \"ALTER SYSTEM SET pgaudit.log = 'read, write, user, ddl';\""""
-        result = host.run(enable_ddl)
-        assert result.rc == 0
-        assert result.stdout.strip("\n") == "ALTER SYSTEM"
+        result = host.check_output(enable_ddl)
+        assert result.strip("\n") == "ALTER SYSTEM"
         create_table = "psql -c \"CREATE TABLE t1 (id int,name varchar(30));\""
         result = host.run(create_table)
         assert result.rc == 0
