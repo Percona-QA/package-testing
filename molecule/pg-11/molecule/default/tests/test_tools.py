@@ -29,6 +29,9 @@ def pgaudit(host):
         enable_ddl = """psql -c \"ALTER SYSTEM SET pgaudit.log = 'all';\""""
         result = host.check_output(enable_ddl)
         assert result.strip("\n") == "ALTER SYSTEM"
+        reload_conf = "psql -c 'SELECT pg_reload_conf();'"
+        result = host.run(reload_conf)
+        assert result.rc == 0
         create_table = "psql -c \"CREATE TABLE t1 (id int,name varchar(30));\""
         result = host.run(create_table)
         assert result.rc == 0
