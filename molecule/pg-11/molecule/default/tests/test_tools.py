@@ -43,14 +43,26 @@ def pgaudit(host):
         elif os.lower() == "redhat":
             log_file = "/var/log/postgresql/postgresql-11-main.log"
         file = host.file(log_file)
-        print(file.content_string)
-        yield file
+    yield file
+    with host.sudo("postgres"):
+        drop_pgaudit = "psql -c 'DROP EXTENSION pgaudit;'"
+        result = host.check_output(drop_pgaudit)
+        assert result.strip("\n") == "DROP EXTENSION"
+    cmd = "sudo systemctl restart postgresql"
+    result = host.run(cmd)
+    assert result.rc == 0
+
     # TODO add drop extension and restart nginx
 
 
 @pytest.fixture()
 def pgbackrest(host):
-    pass
+    """
+    $ file /usr/bin/pgbackrest
+/usr/bin/pgbackrest: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.32, BuildID[sha1]=5e3f6123d02e0013b53f6568f99409378d43ad89, not stripped
+    :param host:
+    :return:
+    """
 
 
 @pytest.fixture()
