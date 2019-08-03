@@ -249,7 +249,7 @@ def test_deb_files(host, file):
     f = host.file(file)
     assert f.exists
     assert f.size > 0
-    assert f.content_strint != ""
+    assert f.content_string != ""
     assert f.user == "postgres"
 
 
