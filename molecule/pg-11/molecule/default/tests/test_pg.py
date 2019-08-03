@@ -21,7 +21,8 @@ RPM_PACKAGES = ["percona-postgresql11", "percona-postgresql11-contrib", "percona
                 "percona-postgresql11-pltcl", "percona-postgresql11-server",
                 "percona-postgresql11-test"]
 
-DEF_FILES = []
+DEB_FILES = ["/etc/postgresql/11/main/postgresql.conf", "/etc/postgresql/11/main/pg_hba.conf",
+             "/etc/postgresql/11/main/pg_ctl.conf", "/etc/postgresql/11/main/pg_ident.conf"]
 RHEL_FILES = []
 
 EXTENSIONS = ['xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', 'hstore', 'plperlu', 'plperl', 'ltree',
@@ -240,8 +241,28 @@ def test_plpgsql_extension(host):
         assert "plpgsql" in set(extensions.stdout.split())
 
 
-def test_files(host):
-    pass
+@pytest.mark.parametrize("file", DEB_FILES)
+def test_deb_files(host, file):
+    os = host.system_info.distribution
+    if os == "RedHat":
+        pytest.skip("This test only for Debian based platforms")
+    f = host.file(file)
+    assert f.exists
+    assert f.size > 0
+    assert f.content_strint != ""
+    assert f.user == "postgres"
+
+
+@pytest.mark.parametrize("file", RHEL_FILES)
+def test_rpm_files(file, host):
+    os = host.system_info.distribution
+    if os == "debian":
+        pytest.skip("This test only for Debian based platforms")
+    f = host.file(file)
+    assert f.exists
+    assert f.size > 0
+    assert f.content_strint != ""
+    assert f.user == "postgres"
 
 
 def test_package_content(host):

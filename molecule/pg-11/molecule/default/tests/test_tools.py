@@ -87,6 +87,10 @@ def test_pgrepack_package(host):
     assert pkg.is_installed
 
 
+def test_pgrepack(host):
+    pass
+
+
 def test_pgbackrest_package(host):
     os = host.system_info.distribution
     pkgn = ""
@@ -102,3 +106,11 @@ def test_pgbackrest_package(host):
     assert pkg.is_installed
     docs_pkg = host.package(doc_pkgn)
     assert docs_pkg.is_installed
+
+
+def test_pgbackrest_version(host):
+    pass
+
+
+def test_pgbackrest(host):
+    pass
