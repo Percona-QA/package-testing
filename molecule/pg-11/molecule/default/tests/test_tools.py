@@ -20,7 +20,7 @@ def pgaudit(host):
         enable_pgaudit = "psql -c 'CREATE EXTENSION pgaudit;'"
         result = host.check_output(enable_pgaudit)
         assert result.strip("\n") == "CREATE EXTENSION"
-        cmd = """"
+        cmd = """
         psql -c \"SELECT setting FROM pg_settings WHERE name='shared_preload_libraries';\" | awk 'NR==3{print $3}'
         """
         result = host.check_output(cmd)
