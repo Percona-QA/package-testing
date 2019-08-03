@@ -10,7 +10,9 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 @pytest.fixture()
 def pgaudit(host):
-    print(host.check_output("cat /etc/postgresql/11/main/postgresql.conf"))
+    cmd = "sudo systemctl restart postgresql"
+    result = host.run(cmd)
+    assert result.rc == 0
     with host.sudo("postgres"):
         enable_library = "psql -c \'ALTER SYSTEM SET shared_preload_libraries=\'pgaudit\'\';"
         result = host.check_output(enable_library)
@@ -18,11 +20,9 @@ def pgaudit(host):
         enable_pgaudit = "psql -c 'CREATE EXTENSION pgaudit;'"
         result = host.check_output(enable_pgaudit)
         assert result.strip("\n") == "CREATE EXTENSION"
-    cmd = "sudo systemctl restart postgresql"
-    result = host.run(cmd)
-    assert result.rc == 0
-    with host.sudo("postgres"):
-        cmd = """"SELECT setting FROM pg_settings WHERE name='shared_preload_libraries';" | awk 'NR==3{print $3}'"""
+        cmd = """"
+        psql -c "SELECT setting FROM pg_settings WHERE name='shared_preload_libraries';" | awk 'NR==3{print $3}'
+        """
         result = host.check_output(cmd)
         assert result.strip("\n") == "pgaudit"
         enable_ddl = """psql -c \"ALTER SYSTEM SET pgaudit.log = 'read, write, user, ddl';\""""
