@@ -33,15 +33,15 @@ def pgaudit(host):
         result = host.run(create_table)
         assert result.rc == 0
         assert result.stdout.strip("\n") == "CREATE TABLE"
-    os = host.system_info.distribution
-    log_file = "/var/log/postgresql/postgresql-11-main.log"
-    if os.lower() == "debian":
+        os = host.system_info.distribution
         log_file = "/var/log/postgresql/postgresql-11-main.log"
-    elif os.lower() == "redhat":
-        log_file = "/var/log/postgresql/postgresql-11-main.log"
-    file = host.file(log_file)
-    print(file.content_string)
-    yield file
+        if os.lower() == "debian":
+            log_file = "/var/log/postgresql/postgresql-11-main.log"
+        elif os.lower() == "redhat":
+            log_file = "/var/log/postgresql/postgresql-11-main.log"
+        file = host.file(log_file)
+        print(file.content_string)
+        yield file
 
 
 @pytest.fixture()
