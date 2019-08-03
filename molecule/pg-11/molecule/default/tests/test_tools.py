@@ -21,7 +21,7 @@ def pgaudit(host):
         result = host.check_output(enable_pgaudit)
         assert result.strip("\n") == "CREATE EXTENSION"
         cmd = """"
-        psql -c "SELECT setting FROM pg_settings WHERE name='shared_preload_libraries';" | awk 'NR==3{print $3}'
+        psql -c \"SELECT setting FROM pg_settings WHERE name=\'shared_preload_libraries\';\" | awk \'NR==3{print $3}\'
         """
         result = host.check_output(cmd)
         assert result.strip("\n") == "pgaudit"
