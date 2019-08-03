@@ -14,7 +14,7 @@ def pgaudit(host):
     result = host.run(cmd)
     assert result.rc == 0
     with host.sudo("postgres"):
-        enable_library = "psql -c 'ALTER SYSTEM SET shared_preload_libraries='pgaudit';"
+        enable_library = "psql -c \'ALTER SYSTEM SET shared_preload_libraries=\'pgaudit\'\';"
         result = host.check_output(enable_library)
         assert result.strip("\n") == "ALTER SYSTEM"
         enable_pgaudit = "psql -c 'CREATE EXTENSION pgaudit;'"
@@ -67,6 +67,10 @@ def test_pgaudit_package(host):
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
+
+
+def test_pgaudit_version(host):
+    pass
 
 
 def test_pgaudit(pgaudit):
