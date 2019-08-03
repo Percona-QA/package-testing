@@ -14,6 +14,9 @@ def pgaudit(host):
     result = host.run(cmd)
     assert result.rc == 0
     with host.sudo("postgres"):
+        enable_library = "psql -c 'ALTER SYSTEM SET shared_preload_libraries='pgaudit';"
+        result = host.check_output(enable_library)
+        assert result.strip("\n") == "ALTER SYSTEM"
         enable_pgaudit = "psql -c 'CREATE EXTENSION pgaudit;'"
         result = host.check_output(enable_pgaudit)
         assert result.strip("\n") == "CREATE EXTENSION"

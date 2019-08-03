@@ -246,11 +246,12 @@ def test_deb_files(host, file):
     os = host.system_info.distribution
     if os == "RedHat":
         pytest.skip("This test only for Debian based platforms")
-    f = host.file(file)
-    assert f.exists
-    assert f.size > 0
-    assert f.content_string != ""
-    assert f.user == "postgres"
+    with host.sudo("postgres"):
+        f = host.file(file)
+        assert f.exists
+        assert f.size > 0
+        assert f.content_string != ""
+        assert f.user == "postgres"
 
 
 @pytest.mark.parametrize("file", RHEL_FILES)
@@ -258,11 +259,12 @@ def test_rpm_files(file, host):
     os = host.system_info.distribution
     if os == "debian":
         pytest.skip("This test only for Debian based platforms")
-    f = host.file(file)
-    assert f.exists
-    assert f.size > 0
-    assert f.content_string != ""
-    assert f.user == "postgres"
+    with host.sudo("postgres"):
+        f = host.file(file)
+        assert f.exists
+        assert f.size > 0
+        assert f.content_string != ""
+        assert f.user == "postgres"
 
 
 def test_package_content(host):
