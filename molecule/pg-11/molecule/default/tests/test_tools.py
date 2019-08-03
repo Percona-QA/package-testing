@@ -26,7 +26,7 @@ def pgaudit(host):
         result = host.check_output(cmd)
         print(result)
         assert result.strip("\n") == "pgaudit"
-        enable_ddl = """psql -c \"ALTER SYSTEM SET pgaudit.log = 'ddl';\""""
+        enable_ddl = """psql -c \"ALTER SYSTEM SET pgaudit.log = 'all';\""""
         result = host.check_output(enable_ddl)
         assert result.strip("\n") == "ALTER SYSTEM"
         create_table = "psql -c \"CREATE TABLE t1 (id int,name varchar(30));\""
@@ -42,6 +42,7 @@ def pgaudit(host):
         file = host.file(log_file)
         print(file.content_string)
         yield file
+    # TODO add drop extension and restart nginx
 
 
 @pytest.fixture()
