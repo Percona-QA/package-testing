@@ -43,7 +43,7 @@ def pgaudit(host):
         elif os.lower() == "redhat":
             log_file = "/var/log/postgresql/postgresql-11-main.log"
         file = host.file(log_file)
-        file_content = file.content_strip
+        file_content = file.content_string
     yield file_content
     with host.sudo("postgres"):
         drop_pgaudit = "psql -c 'DROP EXTENSION pgaudit;'"
