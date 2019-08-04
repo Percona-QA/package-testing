@@ -43,7 +43,8 @@ def pgaudit(host):
         elif os.lower() == "redhat":
             log_file = "/var/log/postgresql/postgresql-11-main.log"
         file = host.file(log_file)
-    yield file
+        file_content = file.content_strip
+    yield file_content
     with host.sudo("postgres"):
         drop_pgaudit = "psql -c 'DROP EXTENSION pgaudit;'"
         result = host.check_output(drop_pgaudit)
@@ -93,7 +94,7 @@ def test_pgaudit_version(host):
 
 
 def test_pgaudit(pgaudit):
-    assert "AUDIT" in pgaudit.content_string
+    assert "AUDIT" in pgaudit
 
 
 def test_pgrepack_package(host):
