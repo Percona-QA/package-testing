@@ -4,7 +4,6 @@ pipeline {
         choice(
             name: 'PLATFORM',
             description: 'For what platform (OS) need to test',
-            defaultValue: 'debian10',
             choices: [
                 'centos7',
                 'debian9',
