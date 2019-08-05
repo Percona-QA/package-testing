@@ -29,10 +29,12 @@ pipeline {
     }
     stage ('Setup Python virtual environment') {
       steps {
+       step {
         sh '''
           export PLATFORM_NAME=$PLATFORM"
         '''
-
+        }
+       step {
         if (params.PLATFORM=='centos7'){
         sh '''
           export PLATFORM_BOX=bento/centos-7"
@@ -47,6 +49,7 @@ pipeline {
         sh '''
           export PLATFORM_BOX=bento/debian-10"
         '''
+         }
         }
        }
       }
