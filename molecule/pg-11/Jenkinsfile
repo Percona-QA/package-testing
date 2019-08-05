@@ -63,9 +63,11 @@ pipeline {
     }
     stage ('Destroy previous environment') {
       steps {
+         echo "${env.PLATFORM}"
          echo "${env.PLATFORM_NAME}"
          echo "${env.PLATFORM_BOX}"
          sh '''
+           echo $PLATFORM
            echo $PLATFORM_NAME
            echo $PLATFORM_BOX
            source virtenv/bin/activate
