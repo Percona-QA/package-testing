@@ -73,6 +73,8 @@ pipeline {
     }
     stage ('Create virtual machines and run playbook for test') {
       steps {
+          echo "${env.PLATFORM_NAME}"
+          echo "${env.PLATFORM_BOX}"
           sh '''
               echo $PLATFORM_NAME
               echo $PLATFORM_BOx
