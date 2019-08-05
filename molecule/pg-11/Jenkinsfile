@@ -11,6 +11,7 @@ pipeline {
                 'rhel8',
                 'rhel9',
                 'ubuntu-bionic'
+             default: 'debian10'
             ]
         )
   stages {
@@ -40,6 +41,11 @@ pipeline {
         else if (params.PLATFORM=='debian9'){
         sh '''
           export PLATFORM_BOX=bento/debian-9"
+        '''
+        }
+        else if (params.PLATFORM=='debian10'){
+        sh '''
+          export PLATFORM_BOX=bento/debian-10"
         '''
         }
       }
