@@ -29,8 +29,10 @@ pipeline {
     }
     stage ('Setup Python virtual environment') {
       steps {
-        env.PLATFORM_NAME = params.PLATFORM
-
+        env.PLATFORM_NAME = ${params.PLATFORM}
+        sh '''
+          export PLATFORM_NAME=$PLATFORM
+        '''
        script {
         if (params.PLATFORM=='centos7'){
         sh '''
