@@ -4,7 +4,7 @@ pipeline {
         choice(
             name: 'PLATFORM',
             description: 'For what platform (OS) need to test',
-            default: 'debian10',
+            defaultValue: 'debian10',
             choices: [
                 'centos7',
                 'debian9',
@@ -16,7 +16,7 @@ pipeline {
         )
   stages {
     stage('Set build name'){
-            steps {
+      steps {
                 script {
                     currentBuild.displayName = "${env.PLATFORM}"
                 }
