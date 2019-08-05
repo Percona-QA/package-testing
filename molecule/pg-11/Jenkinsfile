@@ -30,7 +30,7 @@ pipeline {
     stage ('Setup Environment Variables') {
       steps {
         sh '''
-          export PLATFORM_NAME=$params.PLATFORM
+          export PLATFORM_NAME=$PLATFORM
         '''
        script {
         if (params.PLATFORM=='centos7'){
