@@ -29,10 +29,10 @@ pipeline {
     }
     stage ('Setup Environment Variables') {
       steps {
+       script {
         sh '''
           export PLATFORM_NAME=$PLATFORM
         '''
-       script {
         if (params.PLATFORM=='centos7'){
         sh '''
           export PLATFORM_BOX=bento/centos-7
