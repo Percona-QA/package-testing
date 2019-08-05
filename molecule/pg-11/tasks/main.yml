@@ -71,16 +71,16 @@
     name: percona-pg_repack11
   when: ansible_os_family == "RedHat"
 
-- name: Install patroni Debian
-  apt:
-    name: "{{ packages }}"
-  vars:
-    packages:
-      - percona-patroni
-      - percona-patroni-dbgsym
-  when: ansible_os_family == "Debian"
-
-- name: Install patroni RHEL
-  yum:
-    name: percona-patroni
-  when: ansible_os_family == "RedHat"
+#- name: Install patroni Debian
+#  apt:
+#    name: "{{ packages }}"
+#  vars:
+#    packages:
+#      - percona-patroni
+#      - percona-patroni-dbgsym
+#  when: ansible_os_family == "Debian"
+#
+#- name: Install patroni RHEL
+#  yum:
+#    name: percona-patroni
+#  when: ansible_os_family == "RedHat"
