@@ -13,6 +13,7 @@ pipeline {
                 'ubuntu-bionic'
             ]
         )
+  }
   stages {
     stage('Set build name'){
       steps {
