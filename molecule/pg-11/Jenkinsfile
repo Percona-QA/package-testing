@@ -110,5 +110,4 @@ pipeline {
             junit 'molecule/pg-11/molecule/default/*.xml'
         }
     }
- }
 }
