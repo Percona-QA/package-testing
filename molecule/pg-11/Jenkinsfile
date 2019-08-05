@@ -35,17 +35,17 @@ pipeline {
        script {
         if (params.PLATFORM=='centos7'){
         sh '''
-          export PLATFORM_BOX=bento/centos-7"
+          export PLATFORM_BOX=bento/centos-7
         '''
         }
         else if (params.PLATFORM=='debian9'){
         sh '''
-          export PLATFORM_BOX=bento/debian-9"
+          export PLATFORM_BOX=bento/debian-9
         '''
         }
         else if (params.PLATFORM=='debian10'){
         sh '''
-          export PLATFORM_BOX=bento/debian-10"
+          export PLATFORM_BOX=bento/debian-10
         '''
          }
         }
