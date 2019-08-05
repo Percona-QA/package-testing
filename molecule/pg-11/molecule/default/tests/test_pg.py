@@ -102,7 +102,6 @@ def insert_data(host):
 @pytest.mark.parametrize("package", DEB_PACKAGES)
 def test_deb_package_is_installed(host, package):
     os = host.system_info.distribution
-    print(os)
     if os in ["RedHat", "centos"]:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
@@ -115,6 +114,7 @@ def test_rpm_package_is_installed(host, package):
     if os == "debian":
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
+    print(pkg.version)
     assert pkg.is_installed
 
 
@@ -123,6 +123,7 @@ def test_postgresql_client_version(host):
     if os in ["RedHat", "centos"]:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(pkg)
+    print(pkg.version)
     assert "11" in pkg.version
 
 
@@ -131,6 +132,7 @@ def test_postgresql_version(host):
     if os in ["RedHat", "centos"]:
         pkg = "percona-postgresql11"
     pkg = host.package(pkg)
+    print(pkg.version)
     assert "11" in pkg.version
 
 

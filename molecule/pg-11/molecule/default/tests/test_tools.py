@@ -24,7 +24,6 @@ def pgaudit(host):
         psql -c \"SELECT setting FROM pg_settings WHERE name='shared_preload_libraries';\" | awk 'NR==3{print $1}'
         """
         result = host.check_output(cmd)
-        print(result)
         assert result.strip("\n") == "pgaudit"
         enable_ddl = """psql -c \"ALTER SYSTEM SET pgaudit.log = 'all';\""""
         result = host.check_output(enable_ddl)
