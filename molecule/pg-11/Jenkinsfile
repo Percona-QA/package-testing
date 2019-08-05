@@ -30,9 +30,6 @@ pipeline {
     stage ('Setup Environment Variables') {
       steps {
        script {
-        sh '''
-          export PLATFORM_NAME=$PLATFORM
-        '''
         if (params.PLATFORM=='centos7'){
         sh '''
           export PLATFORM_BOX=bento/centos-7
@@ -64,11 +61,9 @@ pipeline {
     stage ('Destroy previous environment') {
       steps {
          echo "${env.PLATFORM}"
-         echo "${env.PLATFORM_NAME}"
          echo "${env.PLATFORM_BOX}"
          sh '''
            echo $PLATFORM
-           echo $PLATFORM_NAME
            echo $PLATFORM_BOX
            source virtenv/bin/activate
            cd molecule/pg-11
@@ -78,10 +73,10 @@ pipeline {
     }
     stage ('Create virtual machines and run playbook for test') {
       steps {
-          echo "${env.PLATFORM_NAME}"
+          echo "${env.PLATFORM}"
           echo "${env.PLATFORM_BOX}"
           sh '''
-              echo $PLATFORM_NAME
+              echo $PLATFORM
               echo $PLATFORM_BOX
               source virtenv/bin/activate
               cd molecule/pg-11
