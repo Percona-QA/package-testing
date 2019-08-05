@@ -9,7 +9,7 @@ lint:
 platforms:
 #  - name: d-buster-64
 #    box: bento/debian-10
-  - name: ${PLATFORM_NAME}
+  - name: ${PLATFORM}
     box: ${PLATFORM_BOX}
 #  - name: u-bionic-64
 #    box: bento/ubuntu-18.04
