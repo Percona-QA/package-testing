@@ -87,10 +87,7 @@ def test_pgaudit_package(host):
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
-
-
-def test_pgaudit_version(host):
-    pass
+    assert "1.3" in pkg.version
 
 
 def test_pgaudit(pgaudit):
@@ -110,6 +107,7 @@ def test_pgrepack_package(host):
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
+    assert "1.4" in pkg.version
 
 
 def test_pgrepack(host):
@@ -119,23 +117,36 @@ def test_pgrepack(host):
 def test_pgbackrest_package(host):
     os = host.system_info.distribution
     pkgn = ""
-    doc_pkgn = ""
     if os == "RedHat":
         pkgn = "percona-pgbackrest"
     elif os == "debian":
         pkgn = "percona-pgbackrest"
         doc_pkgn = "percona-pgbackrest-doc"
+        docs_pkg = host.package(doc_pkgn)
+        assert docs_pkg.is_installed
     if pkgn == "":
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
-    docs_pkg = host.package(doc_pkgn)
-    assert docs_pkg.is_installed
-
-
-def test_pgbackrest_version(host):
-    pass
+    assert "2.15" in pkg.version
 
 
 def test_pgbackrest(host):
     pass
+
+
+def test_patroni_package(host):
+    os = host.system_info.distribution
+    pkgn = ""
+    if os == "RedHat":
+        pkgn = "percona-patroni"
+    elif os == "debian":
+        pkgn = "percona-patroni"
+        dbgsym_pkgn = "percona-patroni-dbgsym"
+        dbgsym_pkg = host.package(dbgsym_pkgn)
+        assert dbgsym_pkg.is_installed
+    if pkgn == "":
+        pytest.fail("Unsupported operating system")
+    pkg = host.package(pkgn)
+    assert pkg.is_installed
+    assert "2.15" in pkg.version
