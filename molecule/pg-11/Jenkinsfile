@@ -18,7 +18,7 @@ pipeline {
     stage('Set build name'){
       steps {
                 script {
-                    currentBuild.displayName = "${env.PLATFORM}"
+                    currentBuild.displayName = "${env.BUILD_NUMBER}-${env.PLATFORM}"
                 }
             }
         }
@@ -30,7 +30,7 @@ pipeline {
     stage ('Setup Environment Variables') {
       steps {
         sh '''
-          export PLATFORM_NAME=params.PLATFORM
+          export PLATFORM_NAME=${params.PLATFORM}
         '''
        script {
         if (params.PLATFORM=='centos7'){
