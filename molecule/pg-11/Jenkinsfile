@@ -39,6 +39,15 @@ pipeline {
         else if (params.PLATFORM=='debian10'){
           env.PLATFORM_BOX='bento/debian-10'
          }
+        else if (params.PLATFORM=='ubuntu-bionic'){
+          env.PLATFORM_BOX='bento/ubuntu-18.04'
+         }
+        else if (params.PLATFORM=='rhel8'){
+          env.PLATFORM_BOX='generic/rhel8'
+         }
+        else if (params.PLATFORM=='rhel9'){
+          env.PLATFORM_BOX='generic/rhel9'
+         }
         }
        }
       }
