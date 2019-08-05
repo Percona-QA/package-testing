@@ -102,6 +102,7 @@ def insert_data(host):
 @pytest.mark.parametrize("package", DEB_PACKAGES)
 def test_deb_package_is_installed(host, package):
     os = host.system_info.distribution
+    print(os)
     if os == "RedHat":
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
