@@ -37,13 +37,12 @@ pipeline {
           export PLATFORM_BOX=bento/centos-7"
         '''
         }
-        else if (params.PLATFORM=='debian9'{
+        else if (params.PLATFORM=='debian9'){
         sh '''
           export PLATFORM_BOX=bento/debian-9"
         '''
         }
       }
-    }
     stage ('Setup Environment Variables') {
       steps {
         sh '''
