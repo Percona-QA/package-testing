@@ -12,10 +12,10 @@
     when: ansible_distribution == "Debian" and ansible_distribution_major_version == '9'
 
   - name: install llvm repos for debian9
-      apt_repository:
-        repo: deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch main
-        state: present
-      when: ansible_distribution == "Debian" and ansible_distribution_major_version == '9'
+    apt_repository:
+      repo: deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch main
+      state: present
+    when: ansible_distribution == "Debian" and ansible_distribution_major_version == '9'
 
   - name: APT get update for llvm repos for debian9
     apt:
