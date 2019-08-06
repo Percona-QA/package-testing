@@ -23,9 +23,9 @@
       update_cache: yes
     vars:
       packages:
-       - clang-7
-       - libllvm7
-       - llvm-7-dev
+       - clang
+       - libllvm
+       - llvm-dev
     when: ansible_distribution == "Debian" and ansible_distribution_major_version == '9'
 
   - name: install Percona Platform for PostgreSQL deb packages
