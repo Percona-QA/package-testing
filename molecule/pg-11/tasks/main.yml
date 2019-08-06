@@ -30,7 +30,7 @@
 - name: Install pgaudit Debian
   apt:
     name: "{{ packages }}"
-  var:
+  vars:
     packages:
       - percona-postgresql-11-pgaudit
       - percona-postgresql-11-pgaudit-dbgsym
