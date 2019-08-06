@@ -19,7 +19,7 @@ RPM_PACKAGES = ["percona-postgresql11", "percona-postgresql11-contrib", "percona
                 "percona-postgresql11-docs", "percona-postgresql11-libs", "percona-postgresql11-llvmjit",
                 "percona-postgresql11-plperl", "percona-postgresql11-plpython",
                 "percona-postgresql11-pltcl", "percona-postgresql11-server",
-                "percona-postgresql11-test"]
+                "percona-postgresql11-test", "percona-postgresql-client-common"]
 
 DEB_FILES = ["/etc/postgresql/11/main/postgresql.conf", "/etc/postgresql/11/main/pg_hba.conf",
              "/etc/postgresql/11/main/pg_ctl.conf", "/etc/postgresql/11/main/pg_ident.conf"]
@@ -61,7 +61,7 @@ def start_stop_postgresql(host):
 def postgresql_binary(host):
     os = host.system_info.distribution
     if os == "RedHat":
-        return
+        return host.file("v/usr/pgsql-11/bin/postgres")
     elif os == "debian":
         return host.file("/usr/lib/postgresql/11/bin/postgres")
 
@@ -120,15 +120,16 @@ def test_rpm_package_is_installed(host, package):
 
 
 def test_postgresql_client_version(host):
+    os = host.system_info.distribution
     pkg = "percona-postgresql-11"
     if os in ["RedHat", "centos"]:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(pkg)
-    print(pkg.version)
     assert "11" in pkg.version
 
 
 def test_postgresql_version(host):
+    os = host.system_info.distribution
     pkg = "percona-postgresql-client-11"
     if os in ["RedHat", "centos"]:
         pkg = "percona-postgresql11"
@@ -138,6 +139,7 @@ def test_postgresql_version(host):
 
 
 def test_postgresql_is_running_and_enabled(host):
+    os = host.system_info.distribution
     if os in ["RedHat", "centos"]:
         pytest.skip("This test only for Debian based platforms")
     postgresql = host.service("postgresql")
