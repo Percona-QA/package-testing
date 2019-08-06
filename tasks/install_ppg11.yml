@@ -1,5 +1,9 @@
 # This task installs Percona Platform for PostgreSQL on CentOS and Debian/Ubuntu
 #
+  - name: Add GPG key for llvm repos for debian9
+    command: wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
+    when: ansible_distribution == "Debian" and ansible_distribution_major_version == '9'
+
   - name: install llvm repos for debian9
     apt_repository:
       repo: deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch main
