@@ -82,6 +82,10 @@ def test_pgaudit_package(host):
         pkgn = "percona-pgaudit"
     elif os == "debian":
         pkgn = "percona-postgresql-11-pgaudit"
+        dbgsym_pkgn = "percona-postgresql-11-pgaudit-dbgsym"
+        dbgsym_pkg = host.package(dbgsym_pkgn)
+        assert dbgsym_pkg.is_installed
+        assert "1.3" in dbgsym_pkg.version
     if pkgn == "":
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)

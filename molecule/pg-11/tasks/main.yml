@@ -29,7 +29,11 @@
 
 - name: Install pgaudit Debian
   apt:
-    name: percona-postgresql-11-pgaudit
+    name: "{{ packages }}"
+  var:
+    packages:
+      - percona-postgresql-11-pgaudit
+      - percona-postgresql-11-pgaudit-dbgsym
   when: ansible_os_family == "Debian"
 
 - name: Enable pgaudit for Debian
