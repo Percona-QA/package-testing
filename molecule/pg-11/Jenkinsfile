@@ -9,7 +9,6 @@ pipeline {
                 'debian9',
                 'debian10',
                 'rhel8',
-                'rhel9',
                 'ubuntu-bionic'
             ]
         )
@@ -44,9 +43,6 @@ pipeline {
          }
         else if (params.PLATFORM=='rhel8'){
           env.PLATFORM_BOX='generic/rhel8'
-         }
-        else if (params.PLATFORM=='rhel9'){
-          env.PLATFORM_BOX='generic/rhel9'
          }
         }
        }
