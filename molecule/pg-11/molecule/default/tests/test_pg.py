@@ -16,13 +16,14 @@ DEB_PACKAGES = ["percona-postgresql-11", "percona-postgresql-client", "percona-p
 
 RPM_PACKAGES = ["percona-postgresql11", "percona-postgresql11-contrib", "percona-postgresql-common",
                 "percona-postgresql11-debuginfo", "percona-postgresql11-devel",
-                "percona-postgresql11-docs", "percona-postgresql11-libs",
+                "percona-postgresql11-docs", "percona-postgresql11-libs", "percona-postgresql11-llvmjit",
                 "percona-postgresql11-plperl", "percona-postgresql11-plpython",
                 "percona-postgresql11-pltcl", "percona-postgresql11-server",
                 "percona-postgresql11-test"]
 
 DEB_FILES = ["/etc/postgresql/11/main/postgresql.conf", "/etc/postgresql/11/main/pg_hba.conf",
              "/etc/postgresql/11/main/pg_ctl.conf", "/etc/postgresql/11/main/pg_ident.conf"]
+
 RHEL_FILES = []
 
 EXTENSIONS = ['xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', 'hstore', 'plperlu', 'plperl', 'ltree',
