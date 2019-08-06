@@ -61,7 +61,7 @@ def start_stop_postgresql(host):
 def postgresql_binary(host):
     os = host.system_info.distribution
     if os == "RedHat":
-        return host.file("v/usr/pgsql-11/bin/postgres")
+        return host.file("/usr/pgsql-11/bin/postgres")
     elif os == "debian":
         return host.file("/usr/lib/postgresql/11/bin/postgres")
 
@@ -106,7 +106,9 @@ def test_deb_package_is_installed(host, package):
     if os in ["RedHat", "centos"]:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
+    print(pkg.version)
     assert pkg.is_installed
+    assert pkg.version == "11.4"
 
 
 @pytest.mark.parametrize("package", RPM_PACKAGES)
@@ -117,6 +119,10 @@ def test_rpm_package_is_installed(host, package):
     pkg = host.package(package)
     print(pkg.version)
     assert pkg.is_installed
+    if package != "percona-postgresql-client-common":
+        assert pkg.version == "11.4"
+    else:
+        assert pkg.version == "202"
 
 
 def test_postgresql_client_version(host):
@@ -141,8 +147,12 @@ def test_postgresql_version(host):
 def test_postgresql_is_running_and_enabled(host):
     os = host.system_info.distribution
     if os in ["RedHat", "centos"]:
-        pytest.skip("This test only for Debian based platforms")
-    postgresql = host.service("postgresql")
+        result = host.run("/usr/pgsql-11/bin/percona-postgresql-11-setup initdb")
+        assert result.rc == 0
+        assert result.stdout.strip("\n") == "Initializing database ... OK"
+        postgresql = host.service("postgresql-11")
+    else:
+        postgresql = host.service("postgresql")
     assert postgresql.is_running
     assert postgresql.is_enabled
 
