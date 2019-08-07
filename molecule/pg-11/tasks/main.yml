@@ -59,7 +59,7 @@
 
 - name: Enable pgaudit for RHEL
   lineinfile:
-    path: /etc/postgresql/11/main/postgresql.conf
+    path: /var/lib/pgsql/11/data/postgresql.conf
     line: shared_preload_libraries = 'pgaudit'
   when: ansible_os_family == "RedHat"
 
