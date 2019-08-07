@@ -78,7 +78,7 @@ def patroni(host):
 def test_pgaudit_package(host):
     os = host.system_info.distribution
     pkgn = ""
-    if os in ["RedHat", "centos"]:
+    if os.lower() in ["redhat", "centos"]:
         pkgn = "percona-pgaudit"
     elif os == "debian":
         pkgn = "percona-postgresql-11-pgaudit"
@@ -100,7 +100,7 @@ def test_pgaudit(pgaudit):
 def test_pgrepack_package(host):
     os = host.system_info.distribution
     pkgn = ""
-    if os in ["RedHat", "centos"]:
+    if os.lower() in ["redhat", "centos"]:
         pkgn = "percona-pg_repack11"
     elif os == "debian":
         pkgn = "percona-postgresql-11-repack"
@@ -120,7 +120,7 @@ def test_pgrepack(host):
 def test_pgbackrest_package(host):
     os = host.system_info.distribution
     pkgn = ""
-    if os in ["RedHat", "centos"]:
+    if os.lower() in ["redhat", "centos"]:
         pkgn = "percona-pgbackrest"
     elif os == "debian":
         pkgn = "percona-pgbackrest"
@@ -141,7 +141,7 @@ def test_pgbackrest(host):
 def test_patroni_package(host):
     os = host.system_info.distribution
     pkgn = ""
-    if os == "RedHat":
+    if os.lower() in  ["redhat", "centos"]:
         pkgn = "percona-patroni"
     elif os == "debian":
         pkgn = "percona-patroni"

@@ -117,7 +117,6 @@ def test_rpm_package_is_installed(host, package):
     if os == "debian":
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
-    print(pkg.version)
     assert pkg.is_installed
     if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
         assert pkg.version == "11.4"
@@ -302,7 +301,11 @@ def test_package_metadata(host):
 
 @pytest.mark.parametrize("language", LANGUAGES)
 def test_language(host, language):
+    os = host.system_info.distribution
     with host.sudo("postgres"):
+        if os.lower() in ['centos', 'redhat']:
+            if "python3" in language:
+                pytest.skip("Skipping python3 language for Centos or RHEL")
         lang = host.run("psql -c 'CREATE LANGUAGE {};'".format(language))
         assert lang.rc == 0
         assert lang.stdout.strip("\n") == "CREATE LANGUAGE"
