@@ -24,7 +24,8 @@ RPM_PACKAGES = ["percona-postgresql11", "percona-postgresql11-contrib", "percona
 DEB_FILES = ["/etc/postgresql/11/main/postgresql.conf", "/etc/postgresql/11/main/pg_hba.conf",
              "/etc/postgresql/11/main/pg_ctl.conf", "/etc/postgresql/11/main/pg_ident.conf"]
 
-RHEL_FILES = []
+RHEL_FILES = ["/var/lib/pgsql/11/data/postgresql.conf", "/var/lib/pgsql/11/data/pg_hba.conf",
+              "/var/lib/pgsql/11/data/pg_ctl.conf", "/var/lib/pgsql/11/data/pg_ident.conf"]
 
 EXTENSIONS = ['xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', 'hstore', 'plperlu', 'plperl', 'ltree',
               'hstore_plperlu', 'dict_xsyn', 'autoinc', 'hstore_plpython3u','insert_username', 'intagg', 'adminpack',
@@ -106,7 +107,6 @@ def test_deb_package_is_installed(host, package):
     if os in ["RedHat", "centos"]:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
-    print(pkg.version)
     assert pkg.is_installed
     assert pkg.version == "11.4"
 
@@ -147,12 +147,6 @@ def test_postgresql_version(host):
 def test_postgresql_is_running_and_enabled(host):
     os = host.system_info.distribution
     if os in ["RedHat", "centos"]:
-        result = host.run("/usr/pgsql-11/bin/percona-postgresql-11-setup initdb")
-        print(result.stdout)
-        result = host.run("cat /var/lib/pgsql/11/initdb.log")
-        print(result.stdout)
-        assert result.rc == 0
-        assert result.stdout.strip("\n") == "Initializing database ... OK"
         postgresql = host.service("postgresql-11")
     else:
         postgresql = host.service("postgresql")
@@ -277,7 +271,7 @@ def test_deb_files(host, file):
 def test_rpm_files(file, host):
     os = host.system_info.distribution
     if os == "debian":
-        pytest.skip("This test only for Debian based platforms")
+        pytest.skip("This test only for RHEL based platforms")
     with host.sudo("postgres"):
         f = host.file(file)
         assert f.exists
