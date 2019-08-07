@@ -148,6 +148,7 @@ def test_postgresql_is_running_and_enabled(host):
     os = host.system_info.distribution
     if os in ["RedHat", "centos"]:
         result = host.run("/usr/pgsql-11/bin/percona-postgresql-11-setup initdb")
+        print(result.stdout)
         assert result.rc == 0
         assert result.stdout.strip("\n") == "Initializing database ... OK"
         postgresql = host.service("postgresql-11")
