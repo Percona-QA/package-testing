@@ -119,7 +119,7 @@ def test_rpm_package_is_installed(host, package):
     pkg = host.package(package)
     print(pkg.version)
     assert pkg.is_installed
-    if package != "percona-postgresql-client-common":
+    if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
         assert pkg.version == "11.4"
     else:
         assert pkg.version == "202"
@@ -148,6 +148,8 @@ def test_postgresql_is_running_and_enabled(host):
     os = host.system_info.distribution
     if os in ["RedHat", "centos"]:
         result = host.run("/usr/pgsql-11/bin/percona-postgresql-11-setup initdb")
+        print(result.stdout)
+        result = host.run("cat /var/lib/pgsql/11/initdb.log")
         print(result.stdout)
         assert result.rc == 0
         assert result.stdout.strip("\n") == "Initializing database ... OK"
