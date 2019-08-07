@@ -57,6 +57,12 @@
     line: shared_preload_libraries = 'pgaudit'
   when: ansible_os_family == "Debian"
 
+- name: Enable pgaudit for RHEL
+  lineinfile:
+    path: /etc/postgresql/11/main/postgresql.conf
+    line: shared_preload_libraries = 'pgaudit'
+  when: ansible_os_family == "RedHat"
+
 - name: Install pgaudit RHEL
   yum:
     name: percona-pgaudit

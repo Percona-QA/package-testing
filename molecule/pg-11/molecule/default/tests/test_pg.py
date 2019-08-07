@@ -199,13 +199,21 @@ def test_insert_data(insert_data):
     assert insert_data == "100000"
 
 
-def test_extenstions_list(extension_list):
+def test_extenstions_list(extension_list, host):
+    os = host.system_info.distribution
     for extension in EXTENSIONS:
+        if os.lower() in ['centos', 'redhat']:
+            if "python3" in extension:
+                pytest.skip("Skipping python3 extensions for Centos or RHEL")
         assert extension in extension_list
 
 
 @pytest.mark.parametrize("extension", EXTENSIONS)
 def test_enable_extension(host, extension):
+    os = host.system_info.distribution
+    if os.lower() in ['centos', 'redhat']:
+        if "python3" in extension:
+            pytest.skip("Skipping python3 extensions for Centos or RHEL")
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION \"{}\";'".format(extension))
         try:
@@ -227,6 +235,10 @@ def test_enable_extension(host, extension):
 
 @pytest.mark.parametrize("extension", EXTENSIONS[::-1])
 def test_drop_extension(host, extension):
+    os = host.system_info.distribution
+    if os.lower() in ['centos', 'redhat']:
+        if "python3" in extension:
+            pytest.skip("Skipping python3 extensions for Centos or RHEL")
     with host.sudo("postgres"):
         drop_extension = host.run("psql -c 'DROP EXTENSION \"{}\";'".format(extension))
         try:
