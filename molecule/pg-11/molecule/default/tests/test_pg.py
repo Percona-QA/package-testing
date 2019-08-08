@@ -25,7 +25,7 @@ DEB_FILES = ["/etc/postgresql/11/main/postgresql.conf", "/etc/postgresql/11/main
              "/etc/postgresql/11/main/pg_ctl.conf", "/etc/postgresql/11/main/pg_ident.conf"]
 
 RHEL_FILES = ["/var/lib/pgsql/11/data/postgresql.conf", "/var/lib/pgsql/11/data/pg_hba.conf",
-              "/var/lib/pgsql/11/data/pg_ctl.conf", "/var/lib/pgsql/11/data/pg_ident.conf"]
+              "/var/lib/pgsql/11/data/pg_ident.conf"]
 
 EXTENSIONS = ['xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', 'hstore', 'plperlu', 'plperl', 'ltree',
               'hstore_plperlu', 'dict_xsyn', 'autoinc', 'hstore_plpython3u','insert_username', 'intagg', 'adminpack',
@@ -139,7 +139,6 @@ def test_postgresql_version(host):
     if os in ["RedHat", "centos"]:
         pkg = "percona-postgresql11"
     pkg = host.package(pkg)
-    print(pkg.version)
     assert "11" in pkg.version
 
 
@@ -284,7 +283,6 @@ def test_rpm_files(file, host):
     if os == "debian":
         pytest.skip("This test only for RHEL based platforms")
     with host.sudo("postgres"):
-        print(host.check_output("ls -la /var/lib/pgsql/11/data/"))
         f = host.file(file)
         assert f.exists
         assert f.size > 0
