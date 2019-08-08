@@ -1,6 +1,5 @@
 import os
 import pytest
-import time
 
 import testinfra.utils.ansible_runner
 
@@ -12,9 +11,6 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 @pytest.fixture()
 def pgaudit(host):
     os = host.system_info.distribution
-    # cmd = "sudo systemctl restart postgresql"
-    # result = host.run(cmd)
-    # assert result.rc == 0
     with host.sudo("postgres"):
         enable_library = "psql -c \'ALTER SYSTEM SET shared_preload_libraries=\'pgaudit\'\';"
         result = host.check_output(enable_library)
@@ -117,7 +113,18 @@ def test_pgrepack_package(host):
 
 
 def test_pgrepack(host):
-    pass
+    with host.sudo("postgres"):
+        install_extension = host.run("psql -c 'CREATE EXTENSION \"pg_repack\";'")
+        try:
+            assert install_extension.rc == 0
+            assert install_extension.stdout.strip("\n") == "CREATE EXTENSION"
+        except AssertionError:
+            pytest.fail("Return code {}. Stderror: {}. Stdout {}".format(install_extension.rc,
+                                                                         install_extension.stderr,
+                                                                         install_extension.stdout))
+            extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+            assert extensions.rc == 0
+            assert "pg_repack" in set(extensions.stdout.split())
 
 
 def test_pgbackrest_package(host):
