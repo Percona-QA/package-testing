@@ -284,6 +284,7 @@ def test_rpm_files(file, host):
     if os == "debian":
         pytest.skip("This test only for RHEL based platforms")
     with host.sudo("postgres"):
+        print(host.check_output("ls -la /var/lib/pgsql/11/data/"))
         f = host.file(file)
         assert f.exists
         assert f.size > 0
