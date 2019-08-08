@@ -13,7 +13,10 @@ def pgaudit(host):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos"]:
         with host.sudo("postgres"):
-            cmd = "/usr/pgsql-11/bin/pg_ctl restart"
+            cmd = "/usr/pgsql-11/bin/pg_ctl -D /var/lib/pgsql/11/data/ stop"
+            result = host.check_output(cmd)
+            assert result.rc == 0
+            cmd = "/usr/pgsql-11/bin/pg_ctl -D /var/lib/pgsql/11/data/ start"
             result = host.check_output(cmd)
     elif os.lower() == "debian":
         cmd = "sudo systemctl restart postgresql"
