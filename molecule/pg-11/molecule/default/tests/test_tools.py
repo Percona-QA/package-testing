@@ -1,5 +1,6 @@
 import os
 import pytest
+import time
 
 import testinfra.utils.ansible_runner
 
@@ -17,6 +18,7 @@ def pgaudit(host):
             result = host.run(cmd)
             assert result.rc == 0
             print(result.stdout)
+            time.sleep(15)
             cmd = "/usr/pgsql-11/bin/pg_ctl -D /var/lib/pgsql/11/data/ start"
             result = host.run(cmd)
             print(result.stdout)
