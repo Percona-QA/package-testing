@@ -10,6 +10,11 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 @pytest.fixture()
 def pgaudit(host):
+    os = host.system_info.distribution
+    if os.lower() in ["redhat", "centos"]:
+        cmd = "cat /etc/postgresql/11/main/postgresql.conf"
+        result = host.check_output(cmd)
+        print(result)
     cmd = "sudo systemctl restart postgresql"
     result = host.run(cmd)
     assert result.rc == 0
