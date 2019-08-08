@@ -108,7 +108,7 @@ def test_deb_package_is_installed(host, package):
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert pkg.version == "11.4"
+    assert pkg.version == "11.5"
 
 
 @pytest.mark.parametrize("package", RPM_PACKAGES)
@@ -119,7 +119,7 @@ def test_rpm_package_is_installed(host, package):
     pkg = host.package(package)
     assert pkg.is_installed
     if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
-        assert pkg.version == "11.4"
+        assert pkg.version == "11.5"
     else:
         assert pkg.version == "202"
 
@@ -172,7 +172,7 @@ def test_pg_config_server_version(host):
 
 def test_postgresql_query_version(postgresql_query_version):
     assert postgresql_query_version.rc == 0
-    assert postgresql_query_version.stdout.strip("\n") == "11.4"
+    assert postgresql_query_version.stdout.strip("\n") == "11.5"
 
 
 def test_postgres_client_version(host):
