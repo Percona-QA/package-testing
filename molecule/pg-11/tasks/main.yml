@@ -37,8 +37,8 @@
   service:
     name: postgresql-11
     state: started
+    enabled: yes
   when: ansible_os_family == "RedHat"
-
 
 - name: Install pgaudit Debian
   apt:
