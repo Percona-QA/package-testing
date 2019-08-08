@@ -14,6 +14,9 @@ DEB_PACKAGES = ["percona-postgresql-11", "percona-postgresql-client", "percona-p
                 "percona-postgresql-plpython-11", "percona-postgresql-plpython3-11",
                 "percona-postgresql-pltcl-11", "percona-postgresql-all", "percona-postgresql-server-dev-11"]
 
+DEB_PKG_VERSIONS = ["11+202-1.buster", "202-1.buster", "1:11-5.buster", "1:11-5.stretch", "202-1.stretch",
+                    "11+202-1.stretch"]
+
 RPM_PACKAGES = ["percona-postgresql11", "percona-postgresql11-contrib", "percona-postgresql-common",
                 "percona-postgresql11-debuginfo", "percona-postgresql11-devel",
                 "percona-postgresql11-docs", "percona-postgresql11-libs", "percona-postgresql11-llvmjit",
@@ -108,7 +111,7 @@ def test_deb_package_is_installed(host, package):
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert "1:11-5" in pkg.version
+    assert pkg.version in DEB_PKG_VERSIONS
 
 
 @pytest.mark.parametrize("package", RPM_PACKAGES)
