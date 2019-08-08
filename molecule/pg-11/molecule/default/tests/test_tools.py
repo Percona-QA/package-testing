@@ -12,11 +12,14 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 def pgaudit(host):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos"]:
-        cmd = "cat /etc/postgresql/11/main/postgresql.conf"
+        cmd = "cat /var/lib/pgsql/11/data/postgresql.conf"
         result = host.check_output(cmd)
         print(result)
-    cmd = "sudo systemctl restart postgresql"
-    result = host.run(cmd)
+        cmd = "/usr/pgsql-11/bin/pg_ctl -D /var/lib/pgsql/11/data/ restart"
+        result = host.check_output(cmd)
+    elif os.lower() == "debian":
+        cmd = "sudo systemctl restart postgresql"
+        result = host.run(cmd)
     assert result.rc == 0
     with host.sudo("postgres"):
         enable_library = "psql -c \'ALTER SYSTEM SET shared_preload_libraries=\'pgaudit\'\';"
@@ -57,7 +60,7 @@ def pgaudit(host):
     result = host.run(cmd)
     assert result.rc == 0
 
-    # TODO add drop extension and restart nginx
+    # TODO add drop extension and restart postgres
 
 
 @pytest.fixture()

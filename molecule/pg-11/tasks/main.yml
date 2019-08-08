@@ -51,6 +51,11 @@
       - percona-postgresql-11-pgaudit-dbgsym
   when: ansible_os_family == "Debian"
 
+- name: Install pgaudit RHEL
+  yum:
+    name: percona-pgaudit
+  when: ansible_os_family == "RedHat"
+
 - name: Enable pgaudit for Debian
   lineinfile:
     path: /etc/postgresql/11/main/postgresql.conf
@@ -61,11 +66,6 @@
   lineinfile:
     path: /var/lib/pgsql/11/data/postgresql.conf
     line: shared_preload_libraries = 'pgaudit'
-  when: ansible_os_family == "RedHat"
-
-- name: Install pgaudit RHEL
-  yum:
-    name: percona-pgaudit
   when: ansible_os_family == "RedHat"
 
 - name: Install pgbackrest Debian
