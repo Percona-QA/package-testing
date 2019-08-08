@@ -41,9 +41,9 @@ def pgaudit(host):
         if os.lower() == "debian":
             log_file = "/var/log/postgresql/postgresql-11-main.log"
         elif os.lower() in ["redhat", "centos"]:
-            log_files = "ls  /var/lib/pgsql/11/data/log/"
-            r = host.check_output(log_files)
-            print(r)
+            log_files = "ls /var/lib/pgsql/11/data/log/"
+            log_file = host.check_output(log_files).strip("\n")
+            print(log_file)
         file = host.file(log_file)
         file_content = file.content_string
     yield file_content
