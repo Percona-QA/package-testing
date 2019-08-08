@@ -12,15 +12,9 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 @pytest.fixture()
 def pgaudit(host):
     os = host.system_info.distribution
-    # if os.lower() in ["redhat", "centos"]:
-    #     cmd = "sudo systemctl restart postgresql-11"
-    #     result = host.run(cmd)
-    #     print(result.stdout)
-    #     assert result.rc == 0
-    # elif os.lower() == "debian":
-    cmd = "sudo systemctl restart postgresql"
-    result = host.run(cmd)
-    assert result.rc == 0
+    # cmd = "sudo systemctl restart postgresql"
+    # result = host.run(cmd)
+    # assert result.rc == 0
     with host.sudo("postgres"):
         enable_library = "psql -c \'ALTER SYSTEM SET shared_preload_libraries=\'pgaudit\'\';"
         result = host.check_output(enable_library)
@@ -43,12 +37,13 @@ def pgaudit(host):
         result = host.run(create_table)
         assert result.rc == 0
         assert result.stdout.strip("\n") == "CREATE TABLE"
-        os = host.system_info.distribution
         log_file = "/var/log/postgresql/postgresql-11-main.log"
         if os.lower() == "debian":
             log_file = "/var/log/postgresql/postgresql-11-main.log"
         elif os.lower() in ["redhat", "centos"]:
-            log_file = "/var/lib/pgsql/11/data/log/*"
+            log_files = "ll /var/lib/pgsql/11/data/log/* | awk '{print $9}'"
+            log_file = host.check_output(log_files).split("\n")
+            print(log_file)
         file = host.file(log_file)
         file_content = file.content_string
     yield file_content

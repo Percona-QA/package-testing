@@ -67,11 +67,9 @@
   when: ansible_os_family == "RedHat"
 
 - name: Restart Postgres RHEL
-  become: yes
-  become_user: postgres
-  command: /usr/pgsql-11/bin/pg_ctl -D /var/lib/pgsql/11/data/  restart
-  environment:
-    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  service:
+    name: postgresql-11
+    state: restarted
   when: ansible_os_family == "RedHat"
 
 - name: Retart Postgres Debian

@@ -42,7 +42,7 @@ LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", 
 
 @pytest.fixture()
 def postgres_unit_file(host):
-    cmd = "systemctl list-units| grep postgresql"
+    cmd = "sudo systemctl list-units| grep postgresql"
     return host.check_output(cmd)
 
 
