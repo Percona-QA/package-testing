@@ -108,7 +108,7 @@ def test_deb_package_is_installed(host, package):
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert pkg.version == "11.5"
+    assert "1:11-5" in pkg.version
 
 
 @pytest.mark.parametrize("package", RPM_PACKAGES)
