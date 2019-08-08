@@ -61,7 +61,7 @@ def start_stop_postgresql(host):
 @pytest.fixture()
 def postgresql_binary(host):
     os = host.system_info.distribution
-    if os == "RedHat":
+    if os.lower() in ["redhat", "centos"]:
         return host.file("/usr/pgsql-11/bin/postgres")
     elif os == "debian":
         return host.file("/usr/lib/postgresql/11/bin/postgres")
