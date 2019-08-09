@@ -52,22 +52,15 @@ def pgaudit(host):
     result = host.run(cmd)
     assert result.rc == 0
 
-    # TODO add drop extension and restart postgres
-
 
 @pytest.fixture()
 def pgbackrest(host):
     """
-    $ file /usr/bin/pgbackrest
 /usr/bin/pgbackrest: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.32, BuildID[sha1]=5e3f6123d02e0013b53f6568f99409378d43ad89, not stripped
     :param host:
     :return:
     """
-
-
-@pytest.fixture()
-def ptrack(host):
-    pass
+    return host.run("file /usr/bin/pgbackrest")
 
 
 @pytest.fixture()
@@ -145,8 +138,9 @@ def test_pgbackrest_package(host):
     assert "2.15" in pkg.version
 
 
-def test_pgbackrest(host):
-    pass
+def test_pgbackrest(pgbackrest):
+    print(pgbackrest.rc)
+    print(pgbackrest.stdout)
 
 
 def test_patroni_package(host):
