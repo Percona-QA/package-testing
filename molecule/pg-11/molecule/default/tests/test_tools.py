@@ -131,6 +131,11 @@ def test_pgbackrest_package(host):
         doc_pkgn = "percona-pgbackrest-doc"
         docs_pkg = host.package(doc_pkgn)
         assert docs_pkg.is_installed
+        assert "2.15" in docs_pkg.version
+        dbg_pkg = "percona-pgbackrest-dbgsym"
+        dbg = host.package(dbg_pkg)
+        assert dbg.installed
+        assert "2.15" in dbg.version
     if pkgn == "":
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
@@ -153,6 +158,7 @@ def test_patroni_package(host):
         dbgsym_pkgn = "percona-patroni-dbgsym"
         dbgsym_pkg = host.package(dbgsym_pkgn)
         assert dbgsym_pkg.is_installed
+        assert "1.5" in dbgsym_pkg.version
     if pkgn == "":
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
