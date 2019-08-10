@@ -101,7 +101,7 @@ def pg_repack_client_version(host, operating_system):
         if operating_system.lower() in ["redhat", "centos"]:
             return host.run("/usr/pgsql-11/bin/pg_repack --version")
         elif operating_system.lower() in ["debian", "ubuntu"]:
-            return host.run("/usr/bin/pg_repack --version")
+            return host.run("/usr/lib/postgresql/11/bin/pg_repack --version")
 
 
 @pytest.fixture()
@@ -168,7 +168,8 @@ def test_pg_repack_client_version(pg_repack_client_version):
 
 
 def test_pg_repack_functional(pg_repack_functional):
-    print(pg_repack_functional)
+    assert pg_repack_functional.rc == 0
+    print(pg_repack_functional.split("\n"))
 
 
 def test_pg_repack_dry_run(pg_repack_dry_run):
