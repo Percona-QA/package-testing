@@ -8,6 +8,11 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
 
+@pytest.fixture(scope="session")
+def operating_system(host):
+    return host.system_info.distribution
+
+
 @pytest.fixture()
 def pgaudit(host):
     os = host.system_info.distribution
@@ -55,12 +60,47 @@ def pgaudit(host):
 
 @pytest.fixture()
 def pgbackrest(host):
-    """
-/usr/bin/pgbackrest: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.32, BuildID[sha1]=5e3f6123d02e0013b53f6568f99409378d43ad89, not stripped
-    :param host:
-    :return:
-    """
     return host.run("file /usr/bin/pgbackrest")
+
+
+@pytest.fixture()
+def pg_repack_functional(host):
+    with host.sudo("postgres"):
+        pgbench = "pgbench -i -s 1"
+        result = host.run(pgbench)
+        assert result.rc == 0
+        if operating_system.lower() in ["redhat", "centos"]:
+            cmd = "/usr/pgsql-11/bin/pg_repack -t pgbench_accounts -j 4"
+        else:
+            cmd = "pg_repack -t pgbench_accounts -j 4"
+        result = host.run(cmd)
+        print(result.stdout)
+        print(result.rc)
+    yield result
+
+
+@pytest.fixture()
+def pg_repack_dry_run(host, operating_system):
+    with host.sudo("postgres"):
+        pgbench = "pgbench -i -s 1"
+        result = host.run(pgbench)
+        assert result.rc == 0
+        if operating_system.lower() in ["redhat", "centos"]:
+            cmd = "/usr/pgsql-11/bin/pg_repack --dry-run -d postgres"
+        else:
+            cmd = "pg_repack --dry-run -d postgres"
+        result = host.run(cmd)
+        print(result.stdout)
+        print(result.rc)
+    yield result
+
+
+@pytest.fixture()
+def pg_repack_client_version(host, operating_system):
+    if operating_system.lower() in ["redhat", "centos"]:
+        return host.run("/usr/pgsql-11/bin/pg_repack")
+    elif operating_system.lower() == "debian":
+        return host.run("pg_repack")
 
 
 @pytest.fixture()
@@ -121,6 +161,19 @@ def test_pgrepack(host):
             assert "pg_repack" in set(extensions.stdout.split())
 
 
+def test_pg_repack_client_version(pg_repack_client_version):
+    assert pg_repack_client_version.rc == 0
+    assert pg_repack_client_version.stdout.strip("\n") == "pg_repack 1.4.4"
+
+
+def test_pg_repack_functional(host, pg_repack_functional):
+    print(pg_repack_functional)
+
+
+def test_pg_repack_dry_run(host, pg_repack_dry_run):
+    print(pg_repack_dry_run)
+
+
 def test_pgbackrest_package(host):
     os = host.system_info.distribution
     pkgn = ""
@@ -144,8 +197,12 @@ def test_pgbackrest_package(host):
 
 
 def test_pgbackrest(pgbackrest):
-    print(pgbackrest.rc)
-    print(pgbackrest.stdout)
+    assert pgbackrest.rc == 0
+    assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object," \
+                                            " x86-64, version 1 (SYSV), dynamically linked," \
+                                            " interpreter /lib64/ld-linux-x86-64.so.2," \
+                                            " for GNU/Linux 3.2.0," \
+                                            " BuildID[sha1]=f5c70a44673be44c1838641a17e72eca9e1a13e4, stripped"
 
 
 def test_patroni_package(host):

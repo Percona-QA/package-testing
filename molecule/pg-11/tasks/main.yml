@@ -114,7 +114,12 @@
     packages:
       - percona-patroni
       - percona-patroni-dbgsym
-  when: ansible_os_family == "Debian"
+  when: ansible_distribution == "Debian"
+
+- name: Install patroni Ubuntu
+  apt:
+    name: percona-patroni
+  when: ansible_distribution == "Ubuntu"
 
 - name: Install patroni RHEL
   yum:
