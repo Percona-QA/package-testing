@@ -66,7 +66,7 @@ def postgresql_binary(host):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos"]:
         return host.file("/usr/pgsql-11/bin/postgres")
-    elif os == "debian":
+    elif os in ["debian", "ubuntu"]:
         return host.file("/usr/lib/postgresql/11/bin/postgres")
 
 
@@ -117,7 +117,7 @@ def test_deb_package_is_installed(host, package):
 @pytest.mark.parametrize("package", RPM_PACKAGES)
 def test_rpm_package_is_installed(host, package):
     os = host.system_info.distribution
-    if os == "debian":
+    if os in ["debian", "ubuntu"]:
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
@@ -283,7 +283,7 @@ def test_deb_files(host, file):
 @pytest.mark.parametrize("file", RHEL_FILES)
 def test_rpm_files(file, host):
     os = host.system_info.distribution
-    if os == "debian":
+    if os in ["debian", "ubuntu"]:
         pytest.skip("This test only for RHEL based platforms")
     with host.sudo("postgres"):
         f = host.file(file)

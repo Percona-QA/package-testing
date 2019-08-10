@@ -39,7 +39,7 @@ def pgaudit(host):
         assert result.rc == 0
         assert result.stdout.strip("\n") == "CREATE TABLE"
         log_file = "/var/log/postgresql/postgresql-11-main.log"
-        if os.lower() == "debian":
+        if os.lower() in ["debian", "ubuntu"]:
             log_file = "/var/log/postgresql/postgresql-11-main.log"
         elif os.lower() in ["redhat", "centos"]:
             log_files = "ls /var/lib/pgsql/11/data/log/"
@@ -99,7 +99,7 @@ def pg_repack_dry_run(host, operating_system):
 def pg_repack_client_version(host, operating_system):
     if operating_system.lower() in ["redhat", "centos"]:
         return host.run("/usr/pgsql-11/bin/pg_repack")
-    elif operating_system.lower() == "debian":
+    elif operating_system.lower() in ["debian", "ubuntu"]:
         return host.run("pg_repack")
 
 
@@ -113,7 +113,7 @@ def test_pgaudit_package(host):
     pkgn = ""
     if os.lower() in ["redhat", "centos"]:
         pkgn = "percona-pgaudit"
-    elif os == "debian":
+    elif os in ["debian", "ubuntu"]:
         pkgn = "percona-postgresql-11-pgaudit"
         dbgsym_pkgn = "percona-postgresql-11-pgaudit-dbgsym"
         dbgsym_pkg = host.package(dbgsym_pkgn)
@@ -135,7 +135,7 @@ def test_pgrepack_package(host):
     pkgn = ""
     if os.lower() in ["redhat", "centos"]:
         pkgn = "percona-pg_repack11"
-    elif os == "debian":
+    elif os in ["debian", "ubuntu"]:
         pkgn = "percona-postgresql-11-repack"
         pkg_dbgsym = host.package("percona-postgresql-11-repack-dbgsym")
         assert pkg_dbgsym.is_installed
@@ -166,11 +166,11 @@ def test_pg_repack_client_version(pg_repack_client_version):
     assert pg_repack_client_version.stdout.strip("\n") == "pg_repack 1.4.4"
 
 
-def test_pg_repack_functional(host, pg_repack_functional):
+def test_pg_repack_functional(pg_repack_functional):
     print(pg_repack_functional)
 
 
-def test_pg_repack_dry_run(host, pg_repack_dry_run):
+def test_pg_repack_dry_run(pg_repack_dry_run):
     print(pg_repack_dry_run)
 
 
@@ -179,7 +179,7 @@ def test_pgbackrest_package(host):
     pkgn = ""
     if os.lower() in ["redhat", "centos"]:
         pkgn = "percona-pgbackrest"
-    elif os == "debian":
+    elif os in ["debian", "ubuntu"]:
         pkgn = "percona-pgbackrest"
         doc_pkgn = "percona-pgbackrest-doc"
         docs_pkg = host.package(doc_pkgn)
@@ -210,7 +210,7 @@ def test_patroni_package(host):
     pkgn = ""
     if os.lower() in  ["redhat", "centos"]:
         pkgn = "percona-patroni"
-    elif os == "debian":
+    elif os in ["debian", "ubuntu"]:
         pkgn = "percona-patroni"
         dbgsym_pkgn = "percona-patroni-dbgsym"
         dbgsym_pkg = host.package(dbgsym_pkgn)
