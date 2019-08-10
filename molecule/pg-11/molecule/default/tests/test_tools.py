@@ -63,6 +63,17 @@ def pgbackrest(host):
 
 
 @pytest.fixture()
+def pgrepack(host):
+    os = host.system_info.distribution
+    if os.lower() in ["redhat", "centos"]:
+        cmd = "file /usr/pgsql-11/bin/pg_repack "
+    else:
+        # TODO need to be in PATH?
+        cmd = "file /usr/lib/postgresql/11/bin/pg_repack"
+    return host.check_output(cmd)
+
+
+@pytest.fixture()
 def pg_repack_functional(host):
     os = host.system_info.distribution
     with host.sudo("postgres"):
@@ -148,6 +159,10 @@ def test_pgrepack_package(host):
     pkg = host.package(pkgn)
     assert pkg.is_installed
     assert "1.4" in pkg.version
+
+
+def test_pgrepack_binary(pgrepack):
+    print(pgrepack)
 
 
 def test_pgrepack(host):
