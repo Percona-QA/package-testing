@@ -72,7 +72,8 @@ def pg_repack_functional(host):
         if os.lower() in ["redhat", "centos"]:
             cmd = "/usr/pgsql-11/bin/pg_repack -t pgbench_accounts -j 4"
         else:
-            cmd = "pg_repack -t pgbench_accounts -j 4"
+            # TODO need to be in PATH?
+            cmd = "/usr/lib/postgresql/11/bin/pg_repack -t pgbench_accounts -j 4"
         result = host.run(cmd)
         print(result.stdout)
         print(result.rc)
