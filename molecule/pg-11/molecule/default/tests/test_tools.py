@@ -69,6 +69,7 @@ def pg_repack_functional(host):
         pgbench = "pgbench -i -s 1"
         result = host.run(pgbench)
         assert result.rc == 0
+        print(result.stdout)
         if os.lower() in ["redhat", "centos"]:
             cmd = "/usr/pgsql-11/bin/pg_repack -t pgbench_accounts -j 4"
         else:
@@ -89,7 +90,7 @@ def pg_repack_dry_run(host, operating_system):
         if operating_system.lower() in ["redhat", "centos"]:
             cmd = "/usr/pgsql-11/bin/pg_repack --dry-run -d postgres"
         else:
-            cmd = "pg_repack --dry-run -d postgres"
+            cmd = "/usr/lib/postgresql/11/bin/pg_repack --dry-run -d postgres"
         result = host.run(cmd)
     yield result
 
