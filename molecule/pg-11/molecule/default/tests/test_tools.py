@@ -97,10 +97,11 @@ def pg_repack_dry_run(host, operating_system):
 
 @pytest.fixture()
 def pg_repack_client_version(host, operating_system):
-    if operating_system.lower() in ["redhat", "centos"]:
-        return host.run("/usr/pgsql-11/bin/pg_repack")
-    elif operating_system.lower() in ["debian", "ubuntu"]:
-        return host.run("pg_repack")
+    with host.sudo("postgres"):
+        if operating_system.lower() in ["redhat", "centos"]:
+            return host.run("/usr/pgsql-11/bin/pg_repack")
+        elif operating_system.lower() in ["debian", "ubuntu"]:
+            return host.run("pg_repack")
 
 
 @pytest.fixture()
@@ -199,7 +200,7 @@ def test_pgbackrest_package(host):
 def test_pgbackrest(pgbackrest, operating_system):
     assert pgbackrest.rc == 0
     if operating_system.lower() in ["redhat", "centos"]:
-        assert pgbackrest.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB executable," \
+        assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB executable," \
                                          " x86-64, version 1 (SYSV), dynamically linked (uses shared libs)," \
                                          " for GNU/Linux 2.6.32," \
                                          " BuildID[sha1]=524db768c09d913aec12cf909d0c431c7e2f3f53, not stripped"
