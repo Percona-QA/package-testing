@@ -69,7 +69,7 @@ def pg_repack_functional(host):
         pgbench = "pgbench -i -s 1"
         result = host.run(pgbench)
         assert result.rc == 0
-        print(result.stdout)
+        print("Pgbench out {}".format(result.stdout))
         if os.lower() in ["redhat", "centos"]:
             cmd = "/usr/pgsql-11/bin/pg_repack -t pgbench_accounts -j 4"
         else:
@@ -169,12 +169,12 @@ def test_pg_repack_client_version(pg_repack_client_version):
 
 def test_pg_repack_functional(pg_repack_functional):
     assert pg_repack_functional.rc == 0
-    print(pg_repack_functional.stdout.split("\n"))
+    print(pg_repack_functional.stdout)
 
 
 def test_pg_repack_dry_run(pg_repack_dry_run):
     assert pg_repack_dry_run.rc == 0
-    print(pg_repack_dry_run.stdout.split("\n"))
+    print(pg_repack_dry_run.stdout)
 
 
 def test_pgbackrest_package(host):
