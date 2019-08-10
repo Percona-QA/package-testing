@@ -172,7 +172,7 @@ def test_pg_repack_functional(pg_repack_functional):
 
 def test_pg_repack_dry_run(pg_repack_dry_run):
     assert pg_repack_dry_run.rc == 0
-    print(pg_repack_dry_run.stdout.split("\n")
+    print(pg_repack_dry_run.stdout.split("\n"))
 
 
 def test_pgbackrest_package(host):
