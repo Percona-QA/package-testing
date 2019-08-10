@@ -90,8 +90,6 @@ def pg_repack_dry_run(host, operating_system):
         else:
             cmd = "pg_repack --dry-run -d postgres"
         result = host.run(cmd)
-        print(result.stdout)
-        print(result.rc)
     yield result
 
 
@@ -173,7 +171,8 @@ def test_pg_repack_functional(pg_repack_functional):
 
 
 def test_pg_repack_dry_run(pg_repack_dry_run):
-    print(pg_repack_dry_run)
+    assert pg_repack_dry_run.rc == 0
+    print(pg_repack_dry_run.stdout.split("\n")
 
 
 def test_pgbackrest_package(host):
