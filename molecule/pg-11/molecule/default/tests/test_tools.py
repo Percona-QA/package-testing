@@ -8,7 +8,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def operating_system(host):
     return host.system_info.distribution
 
