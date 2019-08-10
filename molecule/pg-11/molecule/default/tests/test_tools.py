@@ -99,9 +99,9 @@ def pg_repack_dry_run(host, operating_system):
 def pg_repack_client_version(host, operating_system):
     with host.sudo("postgres"):
         if operating_system.lower() in ["redhat", "centos"]:
-            return host.run("/usr/pgsql-11/bin/pg_repack")
+            return host.run("/usr/pgsql-11/bin/pg_repack --version")
         elif operating_system.lower() in ["debian", "ubuntu"]:
-            return host.run("pg_repack")
+            return host.run("pg_repack --version")
 
 
 @pytest.fixture()
@@ -207,17 +207,16 @@ def test_pgbackrest(pgbackrest, operating_system):
     elif operating_system.lower() in ['debian', 'ubuntu']:
         assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object," \
                                                 " x86-64, version 1 (SYSV), dynamically linked," \
-                                                " interpreter /lib64/ld-linux-x86-64.so.2," \
-                                                " for GNU/Linux 2.6.32," \
-                                                " BuildID[sha1]=837c86bf3cc34677b67acc6e8ca9635b49ba44b5, stripped"
+                                                " interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0," \
+                                                " BuildID[sha1]=f5c70a44673be44c1838641a17e72eca9e1a13e4, stripped"
 
 
 def test_patroni_package(host):
     os = host.system_info.distribution
     pkgn = ""
-    if os.lower() in  ["redhat", "centos"]:
+    if os.lower() in ["ubuntu", "redhat", "centos"]:
         pkgn = "percona-patroni"
-    elif os in ["debian", "ubuntu"]:
+    elif os == "debian":
         pkgn = "percona-patroni"
         dbgsym_pkgn = "percona-patroni-dbgsym"
         dbgsym_pkg = host.package(dbgsym_pkgn)
