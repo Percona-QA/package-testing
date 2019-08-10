@@ -65,11 +65,12 @@ def pgbackrest(host):
 
 @pytest.fixture()
 def pg_repack_functional(host):
+    os = host.system_info.distribution
     with host.sudo("postgres"):
         pgbench = "pgbench -i -s 1"
         result = host.run(pgbench)
         assert result.rc == 0
-        if operating_system.lower() in ["redhat", "centos"]:
+        if os.lower() in ["redhat", "centos"]:
             cmd = "/usr/pgsql-11/bin/pg_repack -t pgbench_accounts -j 4"
         else:
             cmd = "pg_repack -t pgbench_accounts -j 4"
