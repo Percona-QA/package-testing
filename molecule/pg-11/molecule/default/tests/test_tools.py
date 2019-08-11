@@ -78,18 +78,15 @@ def pg_repack_functional(host):
     os = host.system_info.distribution
     with host.sudo("postgres"):
         pgbench = "pgbench -i -s 1"
-        result = host.check_output(pgbench)
-        print("Pgbench out {}".format(result))
+        assert host.run(pgbench).rc == 0
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
-        print(host.check_output(select))
+        assert host.run(select).rc == 0
         if os.lower() in ["redhat", "centos"]:
             cmd = "/usr/pgsql-11/bin/pg_repack -t pgbench_accounts -j 4"
         else:
             # TODO need to be in PATH?
             cmd = "/usr/lib/postgresql/11/bin/pg_repack -t pgbench_accounts -j 4"
         pg_repack_result = host.run(cmd)
-        print(pg_repack_result.stdout)
-        print(pg_repack_result.rc)
     yield pg_repack_result
 
 
@@ -97,10 +94,9 @@ def pg_repack_functional(host):
 def pg_repack_dry_run(host, operating_system):
     with host.sudo("postgres"):
         pgbench = "pgbench -i -s 1"
-        result = host.check_output(pgbench)
-        print("Pgbench out {}".format(result))
+        assert host.run(pgbench).rc == 0
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
-        print(host.check_output(select))
+        assert host.run(select).rc == 0
         if operating_system.lower() in ["redhat", "centos"]:
             cmd = "/usr/pgsql-11/bin/pg_repack --dry-run -d postgres"
         else:
@@ -161,8 +157,16 @@ def test_pgrepack_package(host):
     assert "1.4" in pkg.version
 
 
-def test_pgrepack_binary(pgrepack):
-    print(pgrepack)
+def test_pgrepack_binary(host, pgrepack):
+    os = host.system_info.distribution
+    if os.lower() in ["redhat", "centos"]:
+        assert pgrepack == "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable, x86-64," \
+                           " version 1 (SYSV), dynamically linked (uses shared libs)," \
+                           " for GNU/Linux 2.6.32, BuildID[sha1]=b76f53a7d4ffe7dfab0d9bd5868e99bdfcfe48e9, not stripped"
+    elif os.lower() in ["debian", "ubuntu"]:
+        assert pgrepack == "/usr/lib/postgresql/11/bin/pg_repack: ELF 64-bit LSB shared object," \
+                       " x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2," \
+                       " for GNU/Linux 2.6.32, BuildID[sha1]=0f89ea7cb7dcbe4435aefd2c74be0505a818614b, stripped"
 
 
 def test_pgrepack(host):
@@ -187,12 +191,12 @@ def test_pg_repack_client_version(pg_repack_client_version):
 
 def test_pg_repack_functional(pg_repack_functional):
     assert pg_repack_functional.rc == 0
-    print(pg_repack_functional.stdout)
+    print(dir(pg_repack_functional))
 
 
 def test_pg_repack_dry_run(pg_repack_dry_run):
     assert pg_repack_dry_run.rc == 0
-    print(pg_repack_dry_run.stdout)
+    print(dir(pg_repack_dry_run))
 
 
 def test_pgbackrest_package(host):
