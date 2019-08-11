@@ -245,6 +245,7 @@ def test_pgbackrest(pgbackrest, operating_system, host):
                                          " for GNU/Linux 2.6.32," \
                                          " BuildID[sha1]=524db768c09d913aec12cf909d0c431c7e2f3f53, not stripped"
     elif operating_system.lower() == 'debian':
+        print(host.system_info.release)
         if host.system_info.release == "9":
             assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object," \
                                                     " x86-64, version 1 (SYSV), dynamically linked," \
