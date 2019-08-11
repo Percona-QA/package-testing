@@ -164,9 +164,15 @@ def test_pgrepack_binary(host, pgrepack):
                            " version 1 (SYSV), dynamically linked (uses shared libs)," \
                            " for GNU/Linux 2.6.32, BuildID[sha1]=b76f53a7d4ffe7dfab0d9bd5868e99bdfcfe48e9, not stripped"
     elif os.lower() in ["debian", "ubuntu"]:
-        assert pgrepack == "/usr/lib/postgresql/11/bin/pg_repack: ELF 64-bit LSB shared object," \
-                       " x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2," \
-                       " for GNU/Linux 2.6.32, BuildID[sha1]=0f89ea7cb7dcbe4435aefd2c74be0505a818614b, stripped"
+        if host.system_info.release == '9':
+            assert pgrepack == "/usr/lib/postgresql/11/bin/pg_repack: ELF 64-bit LSB shared object," \
+                           " x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2," \
+                           " for GNU/Linux 2.6.32, BuildID[sha1]=0f89ea7cb7dcbe4435aefd2c74be0505a818614b, stripped"
+        else:
+            assert pgrepack == "/usr/lib/postgresql/11/bin/pg_repack: ELF 64-bit LSB shared object," \
+                               " x86-64, version 1 (SYSV), dynamically linked," \
+                               " interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0," \
+                               " BuildID[sha1]=9aef45d1e9a16645857aba84473dd8f150998d90, stripped"
 
 
 def test_pgrepack(host):
@@ -227,7 +233,7 @@ def test_pgbackrest_package(host):
     assert "2.15" in pkg.version
 
 
-def test_pgbackrest(pgbackrest, operating_system):
+def test_pgbackrest(pgbackrest, operating_system, host):
     assert pgbackrest.rc == 0
     if operating_system.lower() in ["redhat", "centos"]:
         assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB executable," \
@@ -235,10 +241,16 @@ def test_pgbackrest(pgbackrest, operating_system):
                                          " for GNU/Linux 2.6.32," \
                                          " BuildID[sha1]=524db768c09d913aec12cf909d0c431c7e2f3f53, not stripped"
     elif operating_system.lower() in ['debian', 'ubuntu']:
-        assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object," \
-                                                " x86-64, version 1 (SYSV), dynamically linked," \
-                                                " interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32," \
-                                                " BuildID[sha1]=837c86bf3cc34677b67acc6e8ca9635b49ba44b5, stripped"
+        if host.system_info.release == "9":
+            assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object," \
+                                                    " x86-64, version 1 (SYSV), dynamically linked," \
+                                                    " interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32," \
+                                                    " BuildID[sha1]=837c86bf3cc34677b67acc6e8ca9635b49ba44b5, stripped"
+        else:
+            assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object," \
+                                                    " x86-64, version 1 (SYSV), dynamically linked, interpreter" \
+                                                    " /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0," \
+                                                    " BuildID[sha1]=f5c70a44673be44c1838641a17e72eca9e1a13e4, stripped"
 
 
 def test_patroni_package(host):
