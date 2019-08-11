@@ -191,14 +191,12 @@ def test_pg_repack_client_version(pg_repack_client_version):
 
 def test_pg_repack_functional(pg_repack_functional):
     assert pg_repack_functional.rc == 0
-    print(pg_repack_functional.stdout)
-    print(pg_repack_functional.stderr)
+    print(pg_repack_functional.stdout.split())
 
 
 def test_pg_repack_dry_run(pg_repack_dry_run):
     assert pg_repack_dry_run.rc == 0
-    print(pg_repack_dry_run.stdout)
-    print(pg_repack_dry_run.stderr)
+    print(pg_repack_dry_run.stdout.split())
 
 
 def test_pgbackrest_package(host):
