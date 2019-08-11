@@ -191,12 +191,18 @@ def test_pg_repack_client_version(pg_repack_client_version):
 
 def test_pg_repack_functional(pg_repack_functional):
     assert pg_repack_functional.rc == 0
-    print(pg_repack_functional.stderr.split("\n"))
+    messages = pg_repack_functional.stderr.split("\n")
+    assert 'NOTICE: Setting up workers.conns' in messages
+    assert 'NOTICE: Setting up workers.conns', 'INFO: repacking table "public.pgbench_accounts"' in messages
 
 
 def test_pg_repack_dry_run(pg_repack_dry_run):
     assert pg_repack_dry_run.rc == 0
-    print(pg_repack_dry_run.stderr.split("\n"))
+    messages = pg_repack_dry_run.stderr.split("\n")
+    assert 'INFO: Dry run enabled, not executing repack' in messages
+    assert 'INFO: repacking table "public.pgbench_accounts"' in messages
+    assert 'INFO: repacking table "public.pgbench_branches"' in messages
+    assert 'INFO: repacking table "public.pgbench_tellers"' in messages
 
 
 def test_pgbackrest_package(host):
