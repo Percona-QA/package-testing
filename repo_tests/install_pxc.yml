@@ -1,0 +1,135 @@
+# This playbook installs the pxc packages on CentOS and Debian/Ubuntu
+
+#
+# Install PXC 5.7 packages
+#
+
+  - name: Install PXC 5.7 packages in debian
+    apt:
+      name: "{{ packages }}"
+      state: latest
+    vars: 
+      packages:
+      - percona-xtradb-cluster-full-57
+      - percona-xtradb-cluster-57
+      - percona-xtradb-cluster-source-5.7
+      - python-mysqldb
+    when: ansible_os_family == "Debian"
+
+  - name: Uninstall PXC 5.7 packages in debian
+    apt:
+      name: "{{ packages }}"
+      state: absent
+    vars: 
+      packages:
+      - percona-xtradb-cluster-full-57
+      - percona-xtradb-cluster-57
+      - percona-xtradb-cluster-source-5.7
+      - python-mysqldb
+    when: ansible_os_family == "Debian"
+
+  - name: Remove unused packages from the cache for debian
+    apt:
+      autoclean: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Remove dependencies that are no longer required for debian
+    apt:
+      autoremove: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Install PXC 5.7 packages in centos
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - Percona-XtraDB-Cluster-full-57
+      - Percona-XtraDB-Cluster-57
+      - MySQL-python
+    when: ansible_os_family == "RedHat"
+
+  - name: Uninstall PXC 5.7 packages in centos
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - Percona-XtraDB-Cluster-full-57
+      - Percona-XtraDB-Cluster-57
+      - MySQL-python
+    when: ansible_os_family == "RedHat"
+
+  - name: Remove dependencies that are not required in centos
+    command: yum -y autoremove
+    when: ansible_os_family == "RedHat"
+
+  - name: Remove mysql directories
+    shell: rm -rf /var/lib/mysql*
+
+#
+# Install PXC 5.6 packages
+#
+
+  - name: Install PXC 5.6 packages in debian
+    apt:
+      name: "{{ packages }}"
+      state: latest
+    vars: 
+      packages:
+      - percona-xtradb-cluster-full-56
+      - percona-xtradb-cluster-56
+      - percona-xtradb-cluster-source-5.6
+      - python-mysqldb
+    when: ansible_os_family == "Debian"
+
+  - name: Uninstall PXC 5.6 packages in debian
+    apt:
+      name: "{{ packages }}"
+      state: absent
+    vars: 
+      packages:
+      - percona-xtradb-cluster-full-56
+      - percona-xtradb-cluster-56
+      - percona-xtradb-cluster-source-5.6
+      - python-mysqldb
+    when: ansible_os_family == "Debian"
+
+  - name: Remove unused packages from the cache for debian
+    apt:
+      autoclean: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Remove dependencies that are no longer required for debian
+    apt:
+      autoremove: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Install PXC 5.6 packages in centos
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - Percona-XtraDB-Cluster-full-56
+      - Percona-XtraDB-Cluster-56
+      - MySQL-python
+    when: ansible_os_family == "RedHat"
+
+  - name: Uninstall PXC 5.6 packages in centos
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - Percona-XtraDB-Cluster-full-56
+      - Percona-XtraDB-Cluster-56
+      - MySQL-python
+    when: ansible_os_family == "RedHat"
+
+  - name: Remove dependencies that are not required in centos
+    command: yum -y autoremove
+    when: ansible_os_family == "RedHat"
+
+  - name: Remove mysql directories
+    shell: rm -rf /var/lib/mysql*

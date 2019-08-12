@@ -1,0 +1,124 @@
+# This playbook installs the percona monitoring plugins packages on CentOS and Debian/Ubuntu
+
+  #
+  # Install percona-nagios-plugins packages
+  #
+  - name: Install percona-nagios-plugins packages in debian
+    apt:
+      name: percona-nagios-plugins
+      state: latest
+    when: ansible_os_family == "Debian"
+
+  - name: Uninstall percona-nagios-plugins packages in debian
+    apt:
+      name: percona-nagios-plugins
+      state: absent
+    when: ansible_os_family == "Debian"
+
+  - name: Remove unused packages from the cache for debian
+    apt:
+      autoclean: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Remove dependencies that are no longer required for debian
+    apt:
+      autoremove: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Install percona-nagios-plugins packages in centos
+    yum:
+      name: percona-nagios-plugins
+      state: latest
+    when: ansible_os_family == "RedHat"
+
+  - name: Uninstall percona-nagios-plugins packages in centos
+    yum:
+      name: percona-nagios-plugins
+      state: absent
+    when: ansible_os_family == "RedHat"
+
+  - name: Remove dependencies that are not required in centos
+    command: yum -y autoremove
+    when: ansible_os_family == "RedHat"
+
+  #
+  # Install percona-cacti-templates packages
+  #
+  - name: Install percona-cacti-templates packages in debian
+    apt:
+      name: percona-cacti-templates
+      state: latest
+    when: ansible_os_family == "Debian"
+
+  - name: Uninstall percona-cacti-templates packages in debian
+    apt:
+      name: percona-cacti-templates
+      state: absent
+    when: ansible_os_family == "Debian"
+
+  - name: Remove unused packages from the cache for debian
+    apt:
+      autoclean: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Remove dependencies that are no longer required for debian
+    apt:
+      autoremove: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Install percona-cacti-templates packages in centos
+    yum:
+      name: percona-cacti-templates
+      state: latest
+    when: ansible_os_family == "RedHat"
+
+  - name: Uninstall percona-cacti-templates packages in centos
+    yum:
+      name: percona-cacti-templates
+      state: absent
+    when: ansible_os_family == "RedHat"
+
+  - name: Remove dependencies that are not required in centos
+    command: yum -y autoremove
+    when: ansible_os_family == "RedHat"
+
+  #
+  # Install percona-zabbix-templates packages
+  #
+  - name: Install percona-zabbix-templates packages in debian
+    apt:
+      name: percona-zabbix-templates
+      state: latest
+    when: ansible_os_family == "Debian"
+
+  - name: Uninstall percona-zabbix-templates packages in debian
+    apt:
+      name: percona-zabbix-templates
+      state: absent
+    when: ansible_os_family == "Debian"
+
+  - name: Remove unused packages from the cache for debian
+    apt:
+      autoclean: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Remove dependencies that are no longer required for debian
+    apt:
+      autoremove: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Install percona-zabbix-templates packages in centos
+    yum:
+      name: percona-zabbix-templates
+      state: latest
+    when: ansible_os_family == "RedHat"
+
+  - name: Uninstall percona-zabbix-templates packages in centos
+    yum:
+      name: percona-zabbix-templates
+      state: absent
+    when: ansible_os_family == "RedHat"
+
+  - name: Remove dependencies that are not required in centos
+    command: yum -y autoremove
+    when: ansible_os_family == "RedHat"
