@@ -124,7 +124,7 @@ def test_rpm_package_is_installed(host, package):
     if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
         assert pkg.version == "11.5"
     else:
-        assert pkg.version == "202"
+        assert pkg.version == "204"
 
 
 def test_postgresql_client_version(host):
