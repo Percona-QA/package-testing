@@ -1,0 +1,39 @@
+# This playbook installs percona toolkit on CentOS and Debian/Ubuntu
+
+  - name: Install percona-toolkit package in debian
+    apt:
+      name: percona-toolkit
+      state: latest
+    when: ansible_os_family == "Debian"
+
+  - name: Uninstall percona-toolkit package in debian
+    apt:
+      name: percona-toolkit
+      state: absent
+    when: ansible_os_family == "Debian"
+
+  - name: Remove unused packages from the cache for debian
+    apt:
+      autoclean: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Remove dependencies that are no longer required for debian
+    apt:
+      autoremove: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Install percona-toolkit package in centos
+    yum:
+      name: percona-toolkit
+      state: latest
+    when: ansible_os_family == "RedHat"
+
+  - name: Uninstall percona-toolkit package in centos
+    yum:
+      name: percona-toolkit
+      state: absent
+    when: ansible_os_family == "RedHat"
+
+  - name: Remove dependencies that are not required in centos
+    command: yum -y autoremove
+    when: ansible_os_family == "RedHat"

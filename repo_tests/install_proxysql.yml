@@ -1,0 +1,83 @@
+# This playbook installs the proxysql packages on CentOS and Debian/Ubuntu
+
+  #
+  # Install proxysql2 packages
+  #
+  - name: Install proxysql2 packages in debian
+    apt:
+      name: proxysql2
+      state: latest
+    when: ansible_os_family == "Debian"
+
+  - name: Uninstall proxysql2 packages in debian
+    apt:
+      name: proxysql2
+      state: absent
+    when: ansible_os_family == "Debian"
+
+  - name: Remove unused packages from the cache for debian
+    apt:
+      autoclean: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Remove dependencies that are no longer required for debian
+    apt:
+      autoremove: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Install proxysql2 packages in centos
+    yum:
+      name: proxysql2
+      state: latest
+    when: ansible_os_family == "RedHat"
+
+  - name: Uninstall proxysql2 packages in centos
+    yum:
+      name: proxysql2
+      state: absent
+    when: ansible_os_family == "RedHat"
+
+  - name: Remove dependencies that are not required in centos
+    command: yum -y autoremove
+    when: ansible_os_family == "RedHat"
+
+  #
+  # Install proxysql packages
+  #
+  - name: Install proxysql packages in debian
+    apt:
+      name: proxysql
+      state: latest
+    when: ansible_os_family == "Debian"
+
+  - name: Uninstall proxysql packages in debian
+    apt:
+      name: proxysql
+      state: absent
+    when: ansible_os_family == "Debian"
+
+  - name: Remove unused packages from the cache for debian
+    apt:
+      autoclean: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Remove dependencies that are no longer required for debian
+    apt:
+      autoremove: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Install proxysql packages in centos
+    yum:
+      name: proxysql
+      state: latest
+    when: ansible_os_family == "RedHat"
+
+  - name: Uninstall proxysql packages in centos
+    yum:
+      name: proxysql
+      state: absent
+    when: ansible_os_family == "RedHat"
+
+  - name: Remove dependencies that are not required in centos
+    command: yum -y autoremove
+    when: ansible_os_family == "RedHat"

@@ -1,0 +1,55 @@
+---
+# This playbook enables the percona repo and installs packages for all products
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+  - name: Install percona repository package for debian
+    apt:
+      deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+    when: ansible_os_family == "Debian"
+
+  - name: Install percona repository package for redhat/centos
+    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 6
+
+  - name: Install epel 7 repo
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: enable ps80 repo
+    command: percona-release enable ps-80 
+
+  - name: enable testing repo
+    command: percona-release enable original testing
+
+  - name: Update cache for debian
+    apt:
+      update_cache: yes
+    when: ansible_os_family == "Debian"
+
+# Install PXB packages
+  - include_tasks: install_pxb.yml
+
+# Install PS packages
+  - include_tasks: install_ps.yml
+
+# Install PXC packages
+  - include_tasks: install_pxc.yml
+
+# Install PT packages
+  - include_tasks: install_pt.yml
+
+# Install Proxysql packages
+  - include_tasks: install_proxysql.yml
+
+# Install PMM packages
+  - include_tasks: install_pmm.yml
+
+# Install Plugins packages
+  - include_tasks: install_plugins.yml
+
+# Install PSMDB packages
+  - include_tasks: install_psmdb.yml
