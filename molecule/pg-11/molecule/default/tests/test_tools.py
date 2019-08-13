@@ -14,6 +14,14 @@ def operating_system(host):
 
 
 @pytest.fixture()
+def load_data(host):
+    pgbench = "pgbench -i -s 1"
+    assert host.run(pgbench).rc == 0
+    select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
+    assert host.run(select).rc == 0
+
+
+@pytest.fixture()
 def pgaudit(host):
     os = host.system_info.distribution
     with host.sudo("postgres"):
@@ -64,14 +72,74 @@ def pgbackrest(host):
 
 @pytest.fixture()
 def pgbackrest_version(host, operating_system):
-    print(host.check_output("pgbackrest version").strip("\n"))
-    print(host.run("pgbackrest version").stderr)
     return host.check_output("pgbackrest version").strip("\n")
 
 
+@pytest.fixture(scope="module")
+def configure_postgres_pgbackrest(host):
+    with host.sudo("postgres"):
+        wal_senders = """psql -c \"ALTER SYSTEM SET max_wal_senders=3;\""""
+        assert host.check_output(wal_senders).strip("\n") == "ALTER SYSTEM"
+        wal_level = """psql -c \"ALTER SYSTEM SET wal_level='replica';\""""
+        assert host.check_output(wal_level).strip("\n") == "ALTER SYSTEM"
+        archive = """psql -c \"ALTER SYSTEM SET archive_mode='on';\""""
+        assert host.check_output(archive).strip("\n") == "ALTER SYSTEM"
+        archive_command = """
+        psql -c \"ALTER SYSTEM SET archive_command = 'pgbackrest --stanza=db01 archive-push %p';\"
+        """
+        assert host.check_output(archive_command).strip("\n") == "ALTER SYSTEM"
+        reload_conf = "psql -c 'SELECT pg_reload_conf();'"
+        result = host.run(reload_conf)
+        assert result.rc == 0
+
+
+@pytest.mark.usefixtures("configure_postgres_pgbackrest")
 @pytest.fixture()
-def pgbackrest_backup(host, operating_system):
-    pass
+def pgbackrest_create_stanza(host):
+    with host.sudo("postgres"):
+        cmd = "pgbackrest stanza-create --stanza=testing --log-level-console=info"
+        return host.run(cmd)
+
+
+@pytest.mark.usefixtures("configure_postgres_pgbackrest")
+@pytest.fixture()
+def pgbackrest_check(host):
+    with host.sudo("postgres"):
+        cmd = "pgbackrest check --stanza=testing --log-level-console=info"
+        return host.run(cmd)
+
+
+@pytest.mark.usefixtures("load_data")
+@pytest.mark.usefixtures("configure_postgres_pgbackrest")
+@pytest.fixture()
+def pgbackrest_full_backup(host):
+    with host.sudo("postgres"):
+        cmd = "pgbackrest backup --stanza=testing --log-level-console=info"
+        return host.run(cmd)
+
+
+@pytest.mark.usefixtures("configure_postgres_pgbackrest")
+@pytest.fixture()
+def pgbackrest_delete_data(host):
+    os = host.system_info.distribution
+    if os.lower() in ["redhat", "centos"]:
+        data_dir = "/var/lib/pgsql/11/data/*"
+        service_name = "postgresql-11"
+    else:
+        data_dir = "/var/lib/postgresql/11/main/*"
+        service_name = "postgres"
+    stop_postgresql = 'systemctl stop {}'.format(service_name)
+    assert host.run(stop_postgresql).rc == 0
+    with host.sudo("postgres"):
+        cmd = "rm -rf {}".format(data_dir)
+        result = host.run(cmd)
+        assert result.rc == 0
+
+
+@pytest.mark.usefixtures("configure_postgres_pgbackrest")
+@pytest.fixture()
+def pgbackrest_restore(pgbackrest_delete_data, host):
+    return host.run("pgbackrest --stanza=testing --log-level-stderr=info restore")
 
 
 @pytest.fixture()
@@ -276,6 +344,34 @@ def test_pgbackrest_binary(pgbackrest, operating_system, host):
                                                 " version 1 (SYSV), dynamically linked, interpreter /lib64/l," \
                                                 " for GNU/Linux 3.2.0," \
                                                 " BuildID[sha1]=ce50eadfcbe1b0e170df51ec85aebb96db44b420, stripped"
+
+
+def test_pgbackrest_create_stanza(create_stanza):
+    print(create_stanza.stdout)
+
+
+def test_pgbackrest_check(pgbackrest_check):
+    print(pgbackrest_check.stdout)
+
+
+def test_pgbackrest_full_backup(pgbackrest_full_backup):
+    print(pgbackrest_full_backup.stdout)
+
+
+def test_pgbackrest_restore(pgbackrest_restore, os, host):
+    assert pgbackrest_restore.rc == 0
+    print(pgbackrest_restore.stdout)
+    os = host.system_info.distribution
+    if os.lower() in ["redhat", "centos"]:
+        service_name = "postgresql-11"
+    else:
+        service_name = "postgres"
+    stop_postgresql = 'systemctl start {}'.format(service_name)
+    assert host.run(stop_postgresql).rc == 0
+    select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
+    result = host.run(select)
+    assert result.rc == 0
+    assert result.stdout.strip("\n") == "1000"
 
 
 def test_patroni_package(host):

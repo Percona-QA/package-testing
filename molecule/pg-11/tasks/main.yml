@@ -93,6 +93,30 @@
     name: percona-pgbackrest
   when: ansible_os_family == "RedHat"
 
+- name: Create pgbackrest configuration Debian
+  blockinfile:
+    path: /etc/pgbackrest/pgbackrest.conf
+    block: |
+      [global]
+      repo1-path=/var/lib/pgbackrest
+
+      [testing]
+      pg1-path=/var/lib/postgresql/11/main
+      pg1-port=5432
+  when: ansible_os_family == "Debian"
+
+- name: Create pgbackrest configuration RHEL
+  blockinfile:
+    path: /etc/pgbackrest/pgbackrest.conf
+    block: |
+      [global]
+      repo1-path=/var/lib/pgbackrest
+
+      [testing]
+      pg1-path=/var/lib/pgsql/11/data
+      pg1-port=5432
+  when: ansible_os_family == "RedHat"
+
 - name: Install pgrepack Debian
   apt:
     name: "{{ packages }}"
