@@ -64,9 +64,9 @@ def pgbackrest(host):
 
 @pytest.fixture()
 def pgbackrest_version(host, operating_system):
-    print(host.check_output("pgbackrest version").split("\n"))
+    print(host.check_output("pgbackrest version").strip("\n"))
     print(host.run("pgbackrest version").stderr)
-    return host.check_output("pgbackrest version").split("\n")
+    return host.check_output("pgbackrest version").strip("\n")
 
 
 @pytest.fixture()
