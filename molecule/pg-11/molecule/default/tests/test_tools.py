@@ -64,10 +64,7 @@ def pgbackrest(host):
 
 @pytest.fixture()
 def pgbackrest_version(host, operating_system):
-    if operating_system.lower() in ["redhat", "centos"]:
-        ""
-    else:
-        return host.check_output("pgbackrest version").split("\n")
+    return host.check_output("pgbackrest version").split("\n")
 
 
 @pytest.fixture()
