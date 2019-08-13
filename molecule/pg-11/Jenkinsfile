@@ -71,6 +71,7 @@ pipeline {
     }
     stage ('Create virtual machines and run playbook for test') {
       steps {
+        withCredentials([string(credentialsId: 'RHEL_EMAIL', variable: 'RHEL_USER'), string(credentialsId: 'RHEL_PASSWORD', variable: 'RHEL_PASS')]) {
           echo "${env.PLATFORM}"
           echo "${env.PLATFORM_BOX}"
           sh '''
@@ -80,6 +81,7 @@ pipeline {
               cd molecule/pg-11
               molecule converge
            '''
+      }
      }
     }
     stage ('Start testinfra tests') {
