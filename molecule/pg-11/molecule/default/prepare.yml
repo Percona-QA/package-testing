@@ -14,6 +14,7 @@
   gather_facts: true
   tasks:
     - name: subscribe to RHSM
+      become: true
       redhat_subscription:
         state: present
         username: lookup('env','RHEL_USER')
