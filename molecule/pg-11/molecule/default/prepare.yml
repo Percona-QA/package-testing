@@ -13,12 +13,14 @@
   hosts: all
   gather_facts: true
   tasks:
+    - name: Echo password
+
     - name: subscribe to RHSM
       become: true
       redhat_subscription:
         state: present
-        username: lookup('env','RHEL_USER')
-        password: lookup('env','RHEL_PASS')
+        username: "{{ lookup('env','RHEL_USER') }}"
+        password: "{{ lookup('env','RHEL_PASS') }}"
         autosubscribe: true
         force_register: yes
       when: ansible_distribution == "RedHat"
