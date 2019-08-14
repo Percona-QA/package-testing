@@ -26,6 +26,7 @@ provisioner:
   playbooks:
     side_effect: side-effect.yml
     cleanup: cleanup.yml
+    destroy: destroy.yml
   lint:
     name: ansible-lint
     enabled: False
