@@ -115,7 +115,10 @@ def pgbackrest_check(host):
 def pgbackrest_full_backup(host):
     with host.sudo("postgres"):
         cmd = "pgbackrest backup --stanza=testing --log-level-console=info"
-        return host.run(cmd)
+        result = host.run(cmd)
+        print(result.stderr)
+        print(result.stdout)
+        return result
 
 
 @pytest.mark.usefixtures("configure_postgres_pgbackrest")
@@ -141,7 +144,10 @@ def pgbackrest_delete_data(host):
 @pytest.fixture()
 def pgbackrest_restore(pgbackrest_delete_data, host):
     with host.sudo("postgres"):
-        return host.run("pgbackrest --stanza=testing --log-level-stderr=info restore")
+        result = host.run("pgbackrest --stanza=testing --log-level-stderr=info restore")
+        print(result.stderr)
+        print(result.stdout)
+        return result
 
 
 @pytest.fixture()
@@ -349,7 +355,7 @@ def test_pgbackrest_binary(pgbackrest, operating_system, host):
 
 
 def test_pgbackrest_create_stanza(create_stanza):
-    print(create_stanza.stdout)
+    assert "INFO: stanza-create command end: completed successfully" in create_stanza.stdout
 
 
 def test_pgbackrest_check(pgbackrest_check):
@@ -361,8 +367,8 @@ def test_pgbackrest_full_backup(pgbackrest_full_backup):
 
 
 def test_pgbackrest_restore(pgbackrest_restore, host):
-    assert pgbackrest_restore.rc == 0
     print(pgbackrest_restore.stdout)
+    assert pgbackrest_restore.rc == 0
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos"]:
         service_name = "postgresql-11"
