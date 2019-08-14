@@ -95,7 +95,7 @@ def configure_postgres_pgbackrest(host):
 
 @pytest.mark.usefixtures("configure_postgres_pgbackrest")
 @pytest.fixture()
-def pgbackrest_create_stanza(host):
+def create_stanza(host):
     with host.sudo("postgres"):
         cmd = "pgbackrest stanza-create --stanza=testing --log-level-console=info"
         return host.run(cmd)
@@ -128,8 +128,9 @@ def pgbackrest_delete_data(host):
     else:
         data_dir = "/var/lib/postgresql/11/main/*"
         service_name = "postgres"
-    stop_postgresql = 'systemctl stop {}'.format(service_name)
-    assert host.run(stop_postgresql).rc == 0
+    with host.sudo("root"):
+        stop_postgresql = 'systemctl stop {}'.format(service_name)
+        assert host.run(stop_postgresql).rc == 0
     with host.sudo("postgres"):
         cmd = "rm -rf {}".format(data_dir)
         result = host.run(cmd)
@@ -139,7 +140,8 @@ def pgbackrest_delete_data(host):
 @pytest.mark.usefixtures("configure_postgres_pgbackrest")
 @pytest.fixture()
 def pgbackrest_restore(pgbackrest_delete_data, host):
-    return host.run("pgbackrest --stanza=testing --log-level-stderr=info restore")
+    with host.sudo("postgres"):
+        return host.run("pgbackrest --stanza=testing --log-level-stderr=info restore")
 
 
 @pytest.fixture()
@@ -366,12 +368,14 @@ def test_pgbackrest_restore(pgbackrest_restore, os, host):
         service_name = "postgresql-11"
     else:
         service_name = "postgres"
-    stop_postgresql = 'systemctl start {}'.format(service_name)
-    assert host.run(stop_postgresql).rc == 0
-    select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
-    result = host.run(select)
-    assert result.rc == 0
-    assert result.stdout.strip("\n") == "1000"
+    with host.sudo("root"):
+        stop_postgresql = 'systemctl start {}'.format(service_name)
+        assert host.run(stop_postgresql).rc == 0
+    with host.sudo("postgres"):
+        select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
+        result = host.run(select)
+        assert result.rc == 0
+        assert result.stdout.strip("\n") == "1000"
 
 
 def test_patroni_package(host):

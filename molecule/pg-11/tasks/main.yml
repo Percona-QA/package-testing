@@ -97,7 +97,7 @@
   file:
     path: /etc/pgbackrest/
     state: directory
-    
+
 
 - name: Create pgbackrest configuration Debian
   blockinfile:
