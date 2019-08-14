@@ -85,7 +85,7 @@ def configure_postgres_pgbackrest(host):
         archive = """psql -c \"ALTER SYSTEM SET archive_mode='on';\""""
         assert host.check_output(archive).strip("\n") == "ALTER SYSTEM"
         archive_command = """
-        psql -c \"ALTER SYSTEM SET archive_command = 'pgbackrest --stanza=db01 archive-push %p';\"
+        psql -c \"ALTER SYSTEM SET archive_command = 'pgbackrest --stanza=testing archive-push %p';\"
         """
         assert host.check_output(archive_command).strip("\n") == "ALTER SYSTEM"
         reload_conf = "psql -c 'SELECT pg_reload_conf();'"
