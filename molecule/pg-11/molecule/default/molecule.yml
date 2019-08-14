@@ -9,8 +9,9 @@ lint:
 platforms:
 #  - name: d-buster-64
 #    box: bento/debian-10
-  - name: ppg11_${PLATFORM}
+  - name: ${PLATFORM}
     box: ${PLATFORM_BOX}
+    instance_name: ppg11_${PLATFORM}
 #  - name: u-bionic-64
 #    box: bento/ubuntu-18.04
 #  - name: d-stretch-64
