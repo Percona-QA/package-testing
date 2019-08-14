@@ -63,7 +63,7 @@ pipeline {
            echo $PLATFORM_BOX
            source virtenv/bin/activate
            cd molecule/pg-11
-           molecule --debug destroy
+           molecule destroy
          '''
         }
     }
@@ -98,18 +98,14 @@ pipeline {
          '''
         }
     }
-    stage ('Destroy environment') {
-      steps {
-         sh '''
-           source virtenv/bin/activate
-           cd molecule/pg-11
-           molecule --debug destroy
-         '''
-        }
-    }
   }
    post {
         always {
+            sh '''
+               source virtenv/bin/activate
+               cd molecule/pg-11
+               molecule --debug destroy
+             '''
             junit 'molecule/pg-11/molecule/default/*.xml'
             cleanWs()
         }
