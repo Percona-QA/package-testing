@@ -93,9 +93,16 @@
     name: percona-pgbackrest
   when: ansible_os_family == "RedHat"
 
+- name: Create pgbackrest directory
+  file:
+    path: /etc/pgbackrest/
+    state: directory
+    
+
 - name: Create pgbackrest configuration Debian
   blockinfile:
     path: /etc/pgbackrest/pgbackrest.conf
+    create: yes
     block: |
       [global]
       repo1-path=/var/lib/pgbackrest
@@ -108,6 +115,7 @@
 - name: Create pgbackrest configuration RHEL
   blockinfile:
     path: /etc/pgbackrest/pgbackrest.conf
+    create: yes
     block: |
       [global]
       repo1-path=/var/lib/pgbackrest
