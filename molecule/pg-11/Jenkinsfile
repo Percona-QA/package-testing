@@ -58,28 +58,24 @@ pipeline {
     }
     stage ('Destroy previous environment') {
       steps {
-         echo "${env.PLATFORM}"
-         echo "${env.PLATFORM_BOX}"
          sh '''
            echo $PLATFORM
            echo $PLATFORM_BOX
            source virtenv/bin/activate
            cd molecule/pg-11
-           molecule destroy
+           molecule --debug destroy
          '''
         }
     }
     stage ('Create virtual machines and run playbook for test') {
       steps {
         withCredentials([string(credentialsId: 'RHEL_EMAIL', variable: 'RHEL_USER'), string(credentialsId: 'RHEL_PASSWORD', variable: 'RHEL_PASS')]) {
-          echo "${env.PLATFORM}"
-          echo "${env.PLATFORM_BOX}"
           sh '''
               echo $PLATFORM
               echo $PLATFORM_BOX
               source virtenv/bin/activate
               cd molecule/pg-11
-              molecule converge
+              molecule --debug converge
            '''
       }
      }
@@ -107,7 +103,7 @@ pipeline {
          sh '''
            source virtenv/bin/activate
            cd molecule/pg-11
-           molecule destroy
+           molecule --debug destroy
          '''
         }
     }
