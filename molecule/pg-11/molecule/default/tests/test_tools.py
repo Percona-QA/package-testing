@@ -360,7 +360,7 @@ def test_pgbackrest_full_backup(pgbackrest_full_backup):
     print(pgbackrest_full_backup.stdout)
 
 
-def test_pgbackrest_restore(pgbackrest_restore, os, host):
+def test_pgbackrest_restore(pgbackrest_restore, host):
     assert pgbackrest_restore.rc == 0
     print(pgbackrest_restore.stdout)
     os = host.system_info.distribution
