@@ -24,7 +24,7 @@
       when: ansible_distribution == "RedHat"
 
     - name: Install python for Ansible
-      raw: test -e /usr/bin/python || (yum update && yum install -y python-minimal)
+      raw: test -e /usr/bin/python || (yum update && yum install -y python)
       become: true
       changed_when: false
       when: ansible_os_family == "RedHat"
