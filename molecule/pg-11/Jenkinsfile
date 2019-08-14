@@ -86,7 +86,9 @@ pipeline {
            source virtenv/bin/activate
            cd molecule/pg-11
            molecule verify
+
          '''
+         junit 'molecule/pg-11/molecule/default/*.xml'
         }
     }
     stage ('Start packages deletion') {
@@ -104,9 +106,8 @@ pipeline {
             sh '''
                source virtenv/bin/activate
                cd molecule/pg-11
-               molecule --debug destroy
+               molecule destroy
              '''
-            junit 'molecule/pg-11/molecule/default/*.xml'
             cleanWs()
         }
     }
