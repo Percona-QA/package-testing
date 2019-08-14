@@ -13,8 +13,6 @@
   hosts: all
   gather_facts: true
   tasks:
-    - name: Echo password
-
     - name: subscribe to RHSM
       become: true
       redhat_subscription:
