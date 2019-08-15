@@ -106,7 +106,9 @@ def create_stanza(host):
 def pgbackrest_check(host):
     with host.sudo("postgres"):
         cmd = "pgbackrest check --stanza=testing --log-level-console=info"
-        return host.run(cmd)
+        result = host.run(cmd)
+        assert result.rc == 0
+        return [l.split("INFO:")[-1] for l in result.stdout.split("\n") if "INFO" in l]
 
 
 @pytest.mark.usefixtures("load_data")
@@ -116,7 +118,8 @@ def pgbackrest_full_backup(host):
     with host.sudo("postgres"):
         cmd = "pgbackrest backup --stanza=testing --log-level-console=info"
         result = host.run(cmd)
-        return result
+        assert result.rc == 0
+        return [l.split("INFO:")[-1] for l in result.stdout.split("\n") if "INFO" in l]
 
 
 @pytest.mark.usefixtures("configure_postgres_pgbackrest")
@@ -144,8 +147,9 @@ def pgbackrest_restore(pgbackrest_delete_data, host):
     with host.sudo("postgres"):
         result = host.run("pgbackrest --stanza=testing --log-level-stderr=info restore")
         print(result.stderr.split("\n"))
-        # print(result.stdout.split("\n"))
+        assert result.rc == 0
         return result
+        # print(result.stdout.split("\n"))
 
 
 @pytest.fixture()
@@ -357,12 +361,11 @@ def test_pgbackrest_create_stanza(create_stanza):
 
 
 def test_pgbackrest_check(pgbackrest_check):
-    assert "successfully stored in the archive" in pgbackrest_check.stdout.split("\n")
-    assert "INFO: check command end: completed successfully" in pgbackrest_check.stdout.split("\n")
+    assert "check command end: completed successfully" in pgbackrest_check
 
 
 def test_pgbackrest_full_backup(pgbackrest_full_backup):
-    assert "INFO: restore command end: completed successfully" in pgbackrest_full_backup.stdout.split("\n")
+    assert "INFO: restore command end: completed successfully" in pgbackrest_full_backup
 
 
 def test_pgbackrest_restore(pgbackrest_restore, host):
