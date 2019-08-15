@@ -117,3 +117,8 @@
         name: percona-patroni
         state: absent
       when: ansible_distribution == "Ubuntu"
+
+    - name: Unregister RedHat
+      redhat_subscription:
+        state: absent
+      when: ansible_distribution == "RedHat" and ansible_distribution_major_version == "8"

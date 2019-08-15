@@ -23,8 +23,18 @@
         force_register: yes
       when: ansible_distribution == "RedHat"
 
+    - name: Remove beta repository RHEL  (and clean up left-over metadata)
+      yum_repository:
+          name: rhel-8-server-rt-beta-rpms
+          state: absent
+          notify: yum-clean-metadata
+      become_method: su
+      become: true
+      when: ansible_distribution == "RedHat" and ansible_distribution_major_version == "8"
+
+
     - name: Install python for Ansible
-      raw: test -e /usr/bin/python || (yum update && yum install -y python)
+      raw: test -e /usr/bin/python || (yum update -y && yum install -y python-minimal)
       become: true
       changed_when: false
       when: ansible_os_family == "RedHat"
