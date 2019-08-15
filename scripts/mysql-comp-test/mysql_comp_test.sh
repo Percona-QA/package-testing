@@ -50,7 +50,7 @@ rm -f ${secure_file_priv}/t1*.txt
 rm -f ${secure_file_priv}/t2*.txt
 rm -f ${secure_file_priv}/t3*.txt
 
-for se in TokuDB RocksDB; do
+for se in TokuDB; do
   for comp_lib in no default zlib lz4 zstd quicklz lzma snappy dummy; do
 
     if [[ ${se} = "TokuDB" && " ${tokudb_comp_lib[@]} " =~ " ${comp_lib} " ]] || [[ ${se} = "RocksDB" && " ${rocksdb_comp_lib[@]} " =~ " ${comp_lib} " ]]; then
