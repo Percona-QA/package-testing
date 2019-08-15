@@ -19,6 +19,8 @@ platforms:
 #    box: bento/centos-7
 #  - name: rhel-8-64
 #    box: generic/rhel8
+#    provider_override_args:
+#      - 'vm.box_download_insecure = true'
 provisioner:
   name: ansible
   log: True

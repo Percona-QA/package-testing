@@ -125,6 +125,39 @@
       pg1-port=5432
   when: ansible_os_family == "RedHat"
 
+
+- name: Configure backup config for Debian
+  blockinfile:
+    path: /etc/postgresql/11/main/postgresql.conf
+    block: |
+      archive_mode = on
+      archive_command = 'pgbackrest --stanza=testing archive-push %p'
+      max_wal_senders = 3
+      wal_level = replica
+  when: ansible_os_family == "Debian"
+
+- name: Configure backup config for RHEL
+  blockinfile:
+    path: /var/lib/pgsql/11/data/postgresql.conf
+    block: |
+      archive_mode = on
+      archive_command = 'pgbackrest --stanza=testing archive-push %p'
+      max_wal_senders = 3
+      wal_level = replica
+  when: ansible_os_family == "RedHat"
+
+- name: Restart Postgres RHEL
+  service:
+    name: postgresql-11
+    state: restarted
+  when: ansible_os_family == "RedHat"
+
+- name: Retart Postgres Debian
+  command: sudo systemctl restart postgresql
+  environment:
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  when: ansible_os_family == "Debian"
+
 - name: Install pgrepack Debian
   apt:
     name: "{{ packages }}"
