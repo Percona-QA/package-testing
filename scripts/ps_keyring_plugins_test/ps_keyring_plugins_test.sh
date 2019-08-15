@@ -16,18 +16,18 @@ if [ -z "$1" ]; then
 elif [ "$1" != "ps57" -a "$1" != "ps80" ]; then
   echo "Version not recognized!"
   exit 1
-else
-  VERSION="$1"
+#else
+#  VERSION="$1"
 fi
 
-if [ "$VERSION" == "ps57" ]; then
-  opt_enc="ENCRYPTION='Y'"
-  binlog_enc="encrypt_binlog=ON"
-else
-  opt_enc=""
+#if [ "$VERSION" == "ps57" ]; then
+opt_enc="ENCRYPTION='Y'"
+#  binlog_enc="encrypt_binlog=ON"
+#else
+#  opt_enc=""
 # binlog_enc="encrypt_binlog=ON"
 # binlog_enc="binlog_encryption=ON"
-fi
+#fi
 
 echo "Adding the config vars" | tee -a ${LOG}
 service mysql stop
