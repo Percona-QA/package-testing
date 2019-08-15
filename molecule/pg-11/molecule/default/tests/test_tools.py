@@ -116,8 +116,6 @@ def pgbackrest_full_backup(host):
     with host.sudo("postgres"):
         cmd = "pgbackrest backup --stanza=testing --log-level-console=info"
         result = host.run(cmd)
-        print(result.stderr)
-        print(result.stdout)
         return result
 
 
@@ -145,8 +143,8 @@ def pgbackrest_delete_data(host):
 def pgbackrest_restore(pgbackrest_delete_data, host):
     with host.sudo("postgres"):
         result = host.run("pgbackrest --stanza=testing --log-level-stderr=info restore")
-        print(result.stderr)
-        print(result.stdout)
+        print(result.stderr.split("\n"))
+        # print(result.stdout.split("\n"))
         return result
 
 
@@ -359,18 +357,20 @@ def test_pgbackrest_create_stanza(create_stanza):
 
 
 def test_pgbackrest_check(pgbackrest_check):
-    assert "successfully stored in the archive" in pgbackrest_check.stdout
-    assert "INFO: check command end: completed successfully" in pgbackrest_check.stdout
+    assert "successfully stored in the archive" in pgbackrest_check.stdout.split("\n")
+    assert "INFO: check command end: completed successfully" in pgbackrest_check.stdout.split("\n")
 
 
 def test_pgbackrest_full_backup(pgbackrest_full_backup):
-    assert "INFO: restore command end: completed successfully" in pgbackrest_full_backup.stdout
+    assert "INFO: restore command end: completed successfully" in pgbackrest_full_backup.stdout.split("\n")
 
 
 def test_pgbackrest_restore(pgbackrest_restore, host):
     assert pgbackrest_restore.rc == 0
-    assert "backup command end: completed successfully" in pgbackrest_restore.stdout
-    assert "expire command end: completed successfully" in pgbackrest_restore.stdout
+    assert "backup command end: completed successfully" in pgbackrest_restore.stderr.split("\n")
+    assert "expire command end: completed successfully" in pgbackrest_restore.stderr.split("\n")
+    assert "backup command end: completed successfully" in pgbackrest_restore.stdout.split("\n")
+    assert "expire command end: completed successfully" in pgbackrest_restore.stdout.split("\n")
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos"]:
         service_name = "postgresql-11"
