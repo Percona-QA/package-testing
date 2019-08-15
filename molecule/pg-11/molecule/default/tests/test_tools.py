@@ -146,7 +146,6 @@ def pgbackrest_delete_data(host):
 def pgbackrest_restore(pgbackrest_delete_data, host):
     with host.sudo("postgres"):
         result = host.run("pgbackrest --stanza=testing --log-level-stderr=info restore")
-        print(result.stderr.split("\n"))
         assert result.rc == 0
         return [l.split("INFO:")[-1] for l in result.stdout.split("\n") if "INFO" in l]
 
@@ -364,11 +363,10 @@ def test_pgbackrest_check(pgbackrest_check):
 
 
 def test_pgbackrest_full_backup(pgbackrest_full_backup):
-    assert "backup command end: completed successfully" in pgbackrest_full_backup[-1]
+    assert "backup command end: completed successfully" in pgbackrest_full_backup[-2]
 
 
 def test_pgbackrest_restore(pgbackrest_restore, host):
-    assert pgbackrest_restore.rc == 0
     assert "restore command end: completed successfully" in pgbackrest_restore[-1]
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos"]:
