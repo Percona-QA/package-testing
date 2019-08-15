@@ -359,16 +359,18 @@ def test_pgbackrest_create_stanza(create_stanza):
 
 
 def test_pgbackrest_check(pgbackrest_check):
-    print(pgbackrest_check.stdout)
+    assert "successfully stored in the archive" in pgbackrest_check.stdout
+    assert "INFO: check command end: completed successfully" in pgbackrest_check.stdout
 
 
 def test_pgbackrest_full_backup(pgbackrest_full_backup):
-    print(pgbackrest_full_backup.stdout)
+    assert "INFO: restore command end: completed successfully" in pgbackrest_full_backup.stdout
 
 
 def test_pgbackrest_restore(pgbackrest_restore, host):
-    print(pgbackrest_restore.stdout)
     assert pgbackrest_restore.rc == 0
+    assert "backup command end: completed successfully" in pgbackrest_restore.stdout
+    assert "expire command end: completed successfully" in pgbackrest_restore.stdout
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos"]:
         service_name = "postgresql-11"
@@ -381,7 +383,7 @@ def test_pgbackrest_restore(pgbackrest_restore, host):
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
         result = host.run(select)
         assert result.rc == 0
-        assert result.stdout.strip("\n") == "1000"
+        assert result.stdout.strip("\n") == "100000"
 
 
 def test_patroni_package(host):
