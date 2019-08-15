@@ -148,8 +148,7 @@ def pgbackrest_restore(pgbackrest_delete_data, host):
         result = host.run("pgbackrest --stanza=testing --log-level-stderr=info restore")
         print(result.stderr.split("\n"))
         assert result.rc == 0
-        return result
-        # print(result.stdout.split("\n"))
+        return [l.split("INFO:")[-1] for l in result.stdout.split("\n") if "INFO" in l]
 
 
 @pytest.fixture()
@@ -361,19 +360,16 @@ def test_pgbackrest_create_stanza(create_stanza):
 
 
 def test_pgbackrest_check(pgbackrest_check):
-    assert "check command end: completed successfully" in pgbackrest_check
+    assert "check command end: completed successfully" in pgbackrest_check[-1]
 
 
 def test_pgbackrest_full_backup(pgbackrest_full_backup):
-    assert "INFO: restore command end: completed successfully" in pgbackrest_full_backup
+    assert "backup command end: completed successfully" in pgbackrest_full_backup[-1]
 
 
 def test_pgbackrest_restore(pgbackrest_restore, host):
     assert pgbackrest_restore.rc == 0
-    assert "backup command end: completed successfully" in pgbackrest_restore.stderr.split("\n")
-    assert "expire command end: completed successfully" in pgbackrest_restore.stderr.split("\n")
-    assert "backup command end: completed successfully" in pgbackrest_restore.stdout.split("\n")
-    assert "expire command end: completed successfully" in pgbackrest_restore.stdout.split("\n")
+    assert "restore command end: completed successfully" in pgbackrest_restore[-1]
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos"]:
         service_name = "postgresql-11"
