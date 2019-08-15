@@ -55,7 +55,7 @@ echo "keyring_file plugin test" | tee -a ${LOG}
 # keyring_file plugin test
 mysql -e "CREATE DATABASE IF NOT EXISTS test;"
 mysql --database=test -e "CREATE TABLESPACE ts1 ADD DATAFILE 'ts1.ibd' ENCRYPTION='Y';"
-mysql --database=test -e "CREATE TABLE keyring_file_test (a INT PRIMARY KEY) TABLESPACE ts1 ${opt_enc};"
+mysql --database=test -e "CREATE TABLE keyring_file_test (a INT PRIMARY KEY) TABLESPACE ts1 ENCRYPTION='Y';"
 mysql --database=test -e "INSERT INTO keyring_file_test VALUES (1),(2),(3);"
 mysql --database=test -e "ALTER INSTANCE ROTATE INNODB MASTER KEY;"
 result=$(mysql --database=test -N -s -e "CHECKSUM TABLE keyring_file_test;" | awk -F' ' '{print $2}')
@@ -84,7 +84,7 @@ echo "keyring_vault plugin test" | tee -a ${LOG}
 #mysql -e "SET GLOBAL keyring_vault_config='/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf';"
 mysql -e "CREATE DATABASE IF NOT EXISTS test;"
 mysql --database=test -e "CREATE TABLESPACE ts1 ADD DATAFILE 'ts1.ibd' ENCRYPTION='Y';"
-mysql --database=test -e "CREATE TABLE keyring_vault_test (a INT PRIMARY KEY) TABLESPACE ts1 ${opt_enc};"
+mysql --database=test -e "CREATE TABLE keyring_vault_test (a INT PRIMARY KEY) TABLESPACE ts1 ENCRYPTION='Y';"
 mysql --database=test -e "INSERT INTO keyring_vault_test VALUES (1),(2),(3);"
 mysql --database=test -e "ALTER INSTANCE ROTATE INNODB MASTER KEY;"
 result=$(mysql --database=test -N -s -e "CHECKSUM TABLE keyring_vault_test;" | awk -F' ' '{print $2}')
