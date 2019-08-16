@@ -7,10 +7,11 @@ lint:
     name: yamllint
     enabled: False
 platforms:
-#  - name: d-buster-64
+  - name: d-buster-64
+    box: debian/jessie64
 #    box: bento/debian-10
-  - name: ${PLATFORM}
-    box: ${PLATFORM_BOX}
+#  - name: ${PLATFORM}
+#    box: ${PLATFORM_BOX}
 #  - name: u-bionic-64
 #    box: bento/ubuntu-18.04
 #  - name: d-stretch-64
@@ -19,8 +20,8 @@ platforms:
 #    box: bento/centos-7
 #  - name: rhel-8-64
 #    box: generic/rhel8
-#    provider_override_args:
-#      - 'vm.box_download_insecure = true'
+    provider_override_args:
+      - 'vm.box_download_insecure = true'
 provisioner:
   name: ansible
   log: True
