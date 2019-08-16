@@ -8,9 +8,9 @@ echo -n > ${LOG}
 set -e
 
 if [ -z "$1" ]; then
-  echo "This script needs parameter 3.0|3.2|3.4|3.6|4.0"
+  echo "This script needs parameter 3.0|3.2|3.4|3.6|4.0|4.2"
   exit 1
-elif [ "$1" != "3.0" -a "$1" != "3.2" -a "$1" != "3.4" -a "$1" != "3.6" -a "$1" != "4.0" ]; then
+elif [ "$1" != "3.0" -a "$1" != "3.2" -a "$1" != "3.4" -a "$1" != "3.6" -a "$1" != "4.0" -a "$1" != "4.2" ]; then
   echo "Version not recognized!"
   exit 1
 else
@@ -38,8 +38,10 @@ cp ${CONFIGFILE} ${BACKUP_CONFIGFILE}
 for engine in mmapv1 PerconaFT rocksdb inMemory wiredTiger; do
   if [ "$1" != "3.2" -a "${engine}" == "PerconaFT" ]; then
     echo "Skipping PerconaFT because version is >3.2"
-  elif [ "$1" = "4.0" -a "${engine}" == "rocksdb" ]; then
-      echo "Skipping rocksdb because version is 4.0"
+  elif [ "$1" = "4.0" -o "$1" = "4.2" ] && [ "${engine}" == "rocksdb" ]; then
+    echo "Skipping rocksdb because version is >3.6"
+  elif [ "$1" = "4.2" -a "${engine}" == "mmapv1" ]; then
+    echo "Skipping mmapv1 because version is 4.2"
   else
     stop_service
     clean_datadir

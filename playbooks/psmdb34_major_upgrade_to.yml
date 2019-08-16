@@ -104,9 +104,11 @@
     command: systemctl start mongod
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-
   - name: check that PSMDB 3.4 package versions are correct
     command: /package-testing/package_check.sh psmdb34
+
+  - name: check that PSMDB 3.4 version is correct
+    command: /package-testing/version_check.sh psmdb34
 
   - name: check that data is still there after upgrade
     command: /package-testing/scripts/mongo_check.sh

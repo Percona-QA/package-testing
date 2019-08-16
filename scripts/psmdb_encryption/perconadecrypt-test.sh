@@ -7,9 +7,9 @@ CA_FILE="${ROLLBACK_DIR}/test.cer"
 VAULT_SECRET="secret_v2/data/psmdb-test/perconadecrypt-test"
 
 if [ -z "$1" ]; then
-  echo "This script needs parameter 3.6|4.0 and keyfile|vault"
+  echo "This script needs parameter 3.6|4.0|4.2 and keyfile|vault"
   exit 1
-elif [ "$1" != "3.6" -a "$1" != "4.0" ]; then
+elif [ "$1" != "3.6" -a "$1" != "4.0" -a "$1" != "4.2" ]; then
   echo "Version not recognized!"
   exit 1
 elif [ "$2" != "keyfile" -a "$2" != "vault" ]; then
@@ -122,4 +122,14 @@ if [ "${VERSION}" == "4.0" -a "${KEY_STORE}" == "vault" ]; then
   pushd ${ROLLBACK_DIR}/40-gcm/ycsb_test.usertable
   md5sum -c ${ROLLBACK_DIR}/40-gcm/ycsb_test.usertable/removed.2019-02-07T17-44-42.0.bson.aes256-gcm-json.md5
   popd
+fi
+
+if [ "${VERSION}" == "4.2" -a "${KEY_STORE}" == "keyfile" ]; then
+  echo "This is not yet implemented!"
+  exit 1
+fi
+
+if [ "${VERSION}" == "4.2" -a "${KEY_STORE}" == "vault" ]; then
+  echo "This is not yet implemented!"
+  exit 1
 fi

@@ -59,6 +59,14 @@ elif [ $1 = "sysbench" ]; then
 elif [ $1 = "pbm" ]; then
   version=${PBM_VER}
   revision=${PBM_REV}
+elif [ $1 = "psmdb34" ]; then
+  version=${PSMDB34_VER}
+elif [ $1 = "psmdb36" ]; then
+  version=${PSMDB36_VER}
+elif [ $1 = "psmdb40" ]; then
+  version=${PSMDB40_VER}
+elif [ $1 = "psmdb42" ]; then
+  version=${PSMDB42_VER}
 else
   echo "Illegal product selected!"
   exit 1
@@ -202,6 +210,15 @@ elif [ ${product} = "pbm" ]; then
   else
     echo "${product} revision is correct and ${revision}" >> ${log}
   fi
+
+elif [ ${product} = "psmdb34" -o ${product} = "psmdb36" -o ${product} = "psmdb40" -o ${product} = "psmdb42" ]; then
+  for binary in mongo mongod mongos bsondump mongoexport mongofiles mongoimport mongorestore mongotop mongostat; do
+    binary_version_check=$(${binary} --version|head -n1|grep -c "${version}")
+    if [ ${binary_version_check} -eq 0  ]; then
+      echo "${product} version is not good for binary ${binary}!"
+      exit 1
+    fi
+  done
 
 fi
 echo "${product} versions are OK"
