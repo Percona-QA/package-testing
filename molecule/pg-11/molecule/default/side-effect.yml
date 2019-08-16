@@ -1,0 +1,69 @@
+---
+- name: SideEffect
+  hosts: all
+  become: true
+  become_method: sudo
+#  roles:
+#    - role: pg-11
+  tasks:
+    - name: remove Postgresql deb packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+        - percona-postgresql
+      when: ansible_os_family == "Debian"
+
+    - name: remove Postgresql rpm packages
+      yum:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+        - percona-postgresql11
+      when: ansible_os_family == "RedHat"
+
+    - name: remove pgaudit deb packages
+      apt:
+        name: percona-postgresql-11-pgaudit
+        state: absent
+      when: ansible_os_family == "Debian"
+
+    - name: remove pgaudit rpm packages
+      yum:
+        name: percona-pgaudit
+        state: absent
+      when: ansible_os_family == "RedHat"
+
+    - name: remove pg_repack deb packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+          - percona-postgresql-11-repack
+          - percona-postgresql-11-repack-dbgsym
+      when: ansible_os_family == "Debian"
+
+    - name: remove pg_repack rpm packages
+      yum:
+        name: percona-pg_repack11
+        state: absent
+      when: ansible_os_family == "RedHat"
+
+    - name: remove pgbackrest deb packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+          - percona-pgbackrest
+          - percona-pgbackrest-doc
+      when: ansible_os_family == "Debian"
+
+    - name: remove pgbackrest rpm packages
+      yum:
+        name: percona-pgbackrest
+        state: absent
+      when: ansible_os_family == "RedHat"
