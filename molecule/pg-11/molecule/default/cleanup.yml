@@ -10,22 +10,22 @@
         state: absent
       vars:
         packages:
-        - percona-postgresql
-        - percona-postgresql-11
-        - percona-postgresql-all
-        - percona-postgresql-client
-        - percona-postgresql-client-11
-        - percona-postgresql-client-common
-        - percona-postgresql-common
-        - percona-postgresql-contrib
-        - percona-postgresql-doc
-        - percona-postgresql-doc-11
-        - percona-postgresql-plperl-11
-        - percona-postgresql-plpython-11
-        - percona-postgresql-plpython3-11
-        - percona-postgresql-pltcl-11
-        - percona-postgresql-server-dev-11
-        - percona-postgresql-server-dev-all
+          - percona-postgresql
+          - percona-postgresql-11
+          - percona-postgresql-all
+          - percona-postgresql-client
+          - percona-postgresql-client-11
+          - percona-postgresql-client-common
+          - percona-postgresql-common
+          - percona-postgresql-contrib
+          - percona-postgresql-doc
+          - percona-postgresql-doc-11
+          - percona-postgresql-plperl-11
+          - percona-postgresql-plpython-11
+          - percona-postgresql-plpython3-11
+          - percona-postgresql-pltcl-11
+          - percona-postgresql-server-dev-11
+          - percona-postgresql-server-dev-all
       when: ansible_os_family == "Debian"
 
     - name: remove Postgresql rpm packages
@@ -34,22 +34,22 @@
         state: absent
       vars:
         packages:
-        - percona-postgresql11
-        - percona-postgresql-client-common
-        - percona-postgresql-common
-        - percona-postgresql-server-dev-all
-        - percona-postgresql11
-        - percona-postgresql11-contrib
-        - percona-postgresql11-debuginfo
-        - percona-postgresql11-devel
-        - percona-postgresql11-docs
-        - percona-postgresql11-libs
-        - percona-postgresql11-llvmjit
-        - percona-postgresql11-plperl
-        - percona-postgresql11-plpython
-        - percona-postgresql11-pltcl
-        - percona-postgresql11-server
-        - percona-postgresql11-test
+          - percona-postgresql11
+          - percona-postgresql-client-common
+          - percona-postgresql-common
+          - percona-postgresql-server-dev-all
+          - percona-postgresql11
+          - percona-postgresql11-contrib
+          - percona-postgresql11-debuginfo
+          - percona-postgresql11-devel
+          - percona-postgresql11-docs
+          - percona-postgresql11-libs
+          - percona-postgresql11-llvmjit
+          - percona-postgresql11-plperl
+          - percona-postgresql11-plpython
+          - percona-postgresql11-pltcl
+          - percona-postgresql11-server
+          - percona-postgresql11-test
       when: ansible_os_family == "RedHat"
 
     - name: remove pgaudit deb packages
@@ -102,8 +102,8 @@
         state: absent
       vars:
         packages:
-            - percona-patroni
-            - percona-patroni-dbgsym
+          - percona-patroni
+          - percona-patroni-dbgsym
       when: ansible_distribution == "Debian"
 
     - name: remove patroni rpm packages

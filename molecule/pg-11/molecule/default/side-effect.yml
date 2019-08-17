@@ -3,8 +3,8 @@
   hosts: all
   become: true
   become_method: sudo
-#  roles:
-#    - role: pg-11
+  # roles:
+  #   - role: pg-11
   tasks:
     - name: remove Postgresql deb packages
       apt:
@@ -12,7 +12,7 @@
         state: absent
       vars:
         packages:
-        - percona-postgresql
+          - percona-postgresql
       when: ansible_os_family == "Debian"
 
     - name: remove Postgresql rpm packages
@@ -21,7 +21,7 @@
         state: absent
       vars:
         packages:
-        - percona-postgresql11
+          - percona-postgresql11
       when: ansible_os_family == "RedHat"
 
     - name: remove pgaudit deb packages

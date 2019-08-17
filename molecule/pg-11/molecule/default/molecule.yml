@@ -4,8 +4,8 @@ driver:
   provider:
     name: virtualbox
 lint:
-    name: yamllint
-    enabled: False
+  name: yamllint
+  enabled: False
 platforms:
   - name: centos-7
     box: centos/7
@@ -58,5 +58,5 @@ scenario:
     - converge
     - verify
     - cleanup
-#    - side_effect
+    # - side_effect
     - destroy
