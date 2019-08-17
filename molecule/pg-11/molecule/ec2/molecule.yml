@@ -1,0 +1,98 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+lint:
+  name: yamllint
+platforms:
+  - name: centos-7
+    region: eu-central-1
+    image: ami-0837950ffca9ae6e8
+    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    instance_type: t3.micro
+    ssh_user: centos
+    instance_tags:
+      iit-billing-tag: jenkins-pg-worker
+  - name: centos-8
+    # region: us-east-1
+    image: ami-098bb5d92c8886ca1
+    vpc_subnet_id: subnet-cb700493
+    instance_type: t2.micro
+    ssh_user: ec2-user
+    instance_tags:
+      iit-billing-tag: jenkins-pg-worker
+  - name: debian-9   # Stretch
+    region: eu-central-1
+    image: ami-006c08e13f35edce0
+    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    instance_type: t3.micro
+    ssh_user: admin
+    instance_tags:
+      iit-billing-tag: jenkins-pg-worker
+  # - name: debian-10   # Buster
+  #   region: eu-central-1
+  #   image: ami-02275c6f59ad23898
+  #   vpc_subnet_id: subnet-085deaca8c1c59a4f
+  #   instance_type: t3.micro
+  #   ssh_user: admin
+  #   instance_tags:
+  #     iit-billing-tag: jenkins-pg-worker
+  - name: ubuntu-18.04   # Bionic
+    region: eu-central-1
+    image: ami-0a8561d8c5a4f098a
+    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    instance_type: t3.micro
+    instance_tags:
+      iit-billing-tag: jenkins-pg-worker
+  - name: ubuntu-18.10   # Cosmic
+    region: eu-central-1
+    image: ami-0db9d4ca4d313a5a3
+    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    instance_type: t3.micro
+    instance_tags:
+      iit-billing-tag: jenkins-pg-worker
+  - name: ubuntu-19.04   # Disco
+    region: eu-central-1
+    image: ami-0ab90cfc77b5604a5
+    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    instance_type: t3.micro
+    instance_tags:
+      iit-billing-tag: jenkins-pg-worker
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    side_effect: ../default/side-effect.yml
+    cleanup: ../default/cleanup.yml
+  lint:
+    name: ansible-lint
+    enabled: False
+instances:
+  - name: pg-11
+verifier:
+  name: testinfra
+  options:
+    verbose: true
+    s: true
+    junitxml: report.xml
+  lint:
+    name: flake8
+    enabled: False
+scenario:
+  name: ec2
+  destroy_sequence:
+    - destroy
+  clenup_sequence:
+    - cleanup
+  test_sequence:
+    - lint
+    - destroy
+    - dependency
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+    # - side_effect
+    - destroy
