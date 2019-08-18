@@ -38,13 +38,13 @@ platforms:
     ssh_user: admin
     instance_tags:
       iit-billing-tag: jenkins-pg-worker
-  - name: ubuntu-18.04   # Bionic
-    region: eu-central-1
-    image: ami-0a8561d8c5a4f098a
-    vpc_subnet_id: subnet-085deaca8c1c59a4f
-    instance_type: t3.micro
-    instance_tags:
-      iit-billing-tag: jenkins-pg-worker
+  # - name: ubuntu-18.04   # Bionic
+  #   region: eu-central-1
+  #   image: ami-0a8561d8c5a4f098a
+  #   vpc_subnet_id: subnet-085deaca8c1c59a4f
+  #   instance_type: t3.micro
+  #   instance_tags:
+  #     iit-billing-tag: jenkins-pg-worker
   - name: ubuntu-18.10   # Cosmic
     region: eu-central-1
     image: ami-0db9d4ca4d313a5a3
