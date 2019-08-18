@@ -8,8 +8,10 @@ pipeline {
       steps {
         checkout scm
         sh '''
-            sudo yum install -y gcc python-pip python-devel libselinux-python openssl-devel
-            pip install --user pytest molecule ansible wheel boto boto3 paramiko selinux 'molecule[ec2]'
+            sudo yum install -y gcc python3-pip python3-devel libselinux-python openssl-devel
+            sudo mkdir -p /usr/local/lib64/python3.7/site-packages
+            sudo rsync -aHv /usr/lib64/python2.7/site-packages/*selinux* /usr/local/lib64/python3.7/site-packages/
+            pip3 install --user pytest molecule ansible wheel boto boto3 paramiko selinux 'molecule[ec2]'
         '''
       }
     }
@@ -18,7 +20,7 @@ pipeline {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
           sh '''
               cd molecule/pg-11
-              python2 -m molecule create -s ec2
+              python3 -m molecule create -s ec2
           '''
         }
       }
@@ -27,7 +29,7 @@ pipeline {
       steps {
         sh '''
             cd molecule/pg-11
-            python2 -m molecule --debug converge -s ec2
+            python3 -m molecule --debug converge -s ec2
         '''
       }
     }
@@ -35,7 +37,7 @@ pipeline {
       steps {
         sh '''
             cd molecule/pg-11
-            python2 -m molecule verify -s ec2
+            python3 -m molecule verify -s ec2
         '''
         junit 'molecule/pg-11/molecule/default/*.xml'
       }
@@ -44,7 +46,7 @@ pipeline {
       steps {
         sh '''
             cd molecule/pg-11
-            python2 -m molecule cleanup -s ec2
+            python3 -m molecule cleanup -s ec2
         '''
       }
     }
@@ -54,7 +56,7 @@ pipeline {
       withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
             cd molecule/pg-11
-            python2 -m molecule destroy -s ec2
+            python3 -m molecule destroy -s ec2
         '''
       }
     }
