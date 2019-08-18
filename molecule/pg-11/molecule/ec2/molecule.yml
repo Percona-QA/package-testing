@@ -14,14 +14,14 @@ platforms:
     ssh_user: centos
     instance_tags:
       iit-billing-tag: jenkins-pg-worker
-  - name: centos-8
-    region: us-east-1
-    image: ami-098bb5d92c8886ca1
-    vpc_subnet_id: subnet-cb700493
-    instance_type: t2.micro
-    ssh_user: ec2-user
-    instance_tags:
-      iit-billing-tag: jenkins-pg-worker
+  # - name: centos-8
+  #   region: us-east-1
+  #   image: ami-098bb5d92c8886ca1
+  #   vpc_subnet_id: subnet-cb700493
+  #   instance_type: t2.micro
+  #   ssh_user: ec2-user
+  #   instance_tags:
+  #     iit-billing-tag: jenkins-pg-worker
   - name: debian-9   # Stretch
     region: eu-central-1
     image: ami-006c08e13f35edce0
