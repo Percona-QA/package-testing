@@ -1,52 +1,10 @@
 pipeline {
-  agent { label 'qaserver-03' }
-  parameters {
-        choice(
-            name: 'PLATFORM',
-            description: 'For what platform (OS) need to test',
-            choices: [
-                'centos7',
-                'debian9',
-                'debian10',
-                'rhel8',
-                'ubuntu-bionic'
-            ]
-        )
-  }
   stages {
-    stage('Set build name'){
-      steps {
-                script {
-                    currentBuild.displayName = "${env.BUILD_NUMBER}-${env.PLATFORM}"
-                }
-            }
-        }
     stage ('Get latest code') {
       steps {
         checkout scm
       }
     }
-    stage ('Setup Environment Variables') {
-      steps {
-       script {
-        if (params.PLATFORM=='centos7'){
-         env.PLATFORM_BOX='bento/centos-7'
-        }
-        else if (params.PLATFORM=='debian9'){
-          env.PLATFORM_BOX='bento/debian-9'
-        }
-        else if (params.PLATFORM=='debian10'){
-          env.PLATFORM_BOX='bento/debian-10'
-         }
-        else if (params.PLATFORM=='ubuntu-bionic'){
-          env.PLATFORM_BOX='bento/ubuntu-18.04'
-         }
-        else if (params.PLATFORM=='rhel8'){
-          env.PLATFORM_BOX='generic/rhel8'
-         }
-        }
-       }
-      }
     stage ('Setup Python virtual environment') {
       steps {
         sh '''
@@ -56,28 +14,13 @@ pipeline {
         '''
       }
     }
-    stage ('Destroy previous environment') {
-      steps {
-         sh '''
-           echo $PLATFORM
-           echo $PLATFORM_BOX
-           source virtenv/bin/activate
-           cd molecule/pg-11
-           molecule destroy
-         '''
-        }
-    }
     stage ('Create virtual machines and run playbook for test') {
       steps {
-        withCredentials([string(credentialsId: 'RHEL_EMAIL', variable: 'RHEL_USER'), string(credentialsId: 'RHEL_PASSWORD', variable: 'RHEL_PASS')]) {
           sh '''
-              echo $PLATFORM
-              echo $PLATFORM_BOX
               source virtenv/bin/activate
               cd molecule/pg-11
-              molecule --debug converge
+              molecule --debug converge -s ec2
            '''
-      }
      }
     }
     stage ('Start testinfra tests') {
@@ -85,7 +28,7 @@ pipeline {
          sh '''
            source virtenv/bin/activate
            cd molecule/pg-11
-           molecule verify
+           molecule verify -s ec2
 
          '''
          junit 'molecule/pg-11/molecule/default/*.xml'
@@ -96,7 +39,7 @@ pipeline {
          sh '''
            source virtenv/bin/activate
            cd molecule/pg-11
-           molecule cleanup
+           molecule cleanup -s ec2
          '''
         }
     }
@@ -106,9 +49,8 @@ pipeline {
             sh '''
                source virtenv/bin/activate
                cd molecule/pg-11
-               molecule destroy
+               molecule destroy -s ec2
              '''
-            cleanWs()
         }
     }
 }
