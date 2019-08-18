@@ -15,7 +15,8 @@ DEB_PACKAGES = ["percona-postgresql-11", "percona-postgresql-client", "percona-p
                 "percona-postgresql-pltcl-11", "percona-postgresql-all", "percona-postgresql-server-dev-11"]
 
 DEB_PKG_VERSIONS = ["11+204-1.buster", "204-1.buster", "1:11-5.buster", "1:11-5.stretch", "204-1.stretch",
-                    "11+204-1.stretch", "1:11-5.bionic", '11+204-1.bionic', "204-1.bionic"]
+                    "11+204-1.stretch", "1:11-5.bionic", '11+204-1.bionic', "204-1.bionic", "1:11-5.cosmic",
+                    "11+204-1.cosmic", "204-1.cosmic", "1:11-5.disco", "11+204-1.disco", "204-1.disco"]
 
 RPM_PACKAGES = ["percona-postgresql11", "percona-postgresql11-contrib", "percona-postgresql-common",
                 "percona-postgresql11-debuginfo", "percona-postgresql11-devel",
