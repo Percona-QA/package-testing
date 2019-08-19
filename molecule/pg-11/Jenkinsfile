@@ -3,7 +3,45 @@ pipeline {
   environment {
       PATH = '/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/ec2-user/.local/bin'
   }
+  parameters {
+        choice(
+            name: 'PLATFORM',
+            description: 'For what platform (OS) need to test',
+            choices: [
+                'centos7',
+                'debian9',
+                'debian10',
+                'ubuntu-bionic',
+                'rhel8'
+            ]
+        )
+  }
   stages {
+    stage('Set build name'){
+      steps {
+                script {
+                    currentBuild.displayName = "${env.BUILD_NUMBER}-${env.PLATFORM}"
+                }
+            }
+        }
+    stage ('Setup Environment Variables') {
+      steps {
+       script {
+        if (params.PLATFORM=='centos7'){
+         env.IMAGE='ami-0837950ffca9ae6e8'
+        }
+        else if (params.PLATFORM=='debian9'){
+          env.IMAGE='ami-006c08e13f35edce0'
+        }
+        else if (params.PLATFORM=='debian10'){
+          env.IMAGE='ami-0be88f8d647409e61'
+         }
+        else if (params.PLATFORM=='ubuntu-bionic'){
+          env.IMAGE='ami-0a8561d8c5a4f098a'
+         }
+        }
+       }
+      }
     stage ('Prepare') {
       steps {
         checkout scm
