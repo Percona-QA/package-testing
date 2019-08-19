@@ -29,7 +29,11 @@
 
 - name: Install libpq-dev
   apt:
-    name: libpq-dev
+    name: "{{ packages }}"
+  var:
+    packages:
+      - libpq-dev
+      - libdbd-pg-per
   when: ansible_os_family == "Debian"
 
 - name: Initialize Postgres RHEL
