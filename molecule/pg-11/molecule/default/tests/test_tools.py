@@ -136,7 +136,7 @@ def pgbackrest_delete_data(host):
         service_name = "postgres"
     with host.sudo("root"):
         stop_postgresql = 'systemctl stop {}'.format(service_name)
-        s = host.run(stop_postgresql).rc == 0
+        s = host.run(stop_postgresql)
         print(s.stderr)
         print(s.stdout)
         assert s.rc == 0
