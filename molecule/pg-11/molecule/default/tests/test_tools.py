@@ -107,6 +107,8 @@ def pgbackrest_check(host):
     with host.sudo("postgres"):
         cmd = "pgbackrest check --stanza=testing --log-level-console=info"
         result = host.run(cmd)
+        print(result.stdout)
+        print(result.stderr)
         assert result.rc == 0
         return [l.split("INFO:")[-1] for l in result.stdout.split("\n") if "INFO" in l]
 
@@ -356,6 +358,8 @@ def test_pgbackrest_binary(pgbackrest, operating_system, host):
 
 
 def test_pgbackrest_create_stanza(create_stanza):
+    print(create_stanza.stdout)
+    print(create_stanza.stderr)
     assert "INFO: stanza-create command end: completed successfully" in create_stanza.stdout
 
 
