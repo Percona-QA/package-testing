@@ -33,7 +33,7 @@
   vars:
     packages:
       - libpq-dev
-      - libdbd-pg-per
+      - libdbd-pg-perl
   when: ansible_os_family == "Debian"
 
 - name: Initialize Postgres RHEL
