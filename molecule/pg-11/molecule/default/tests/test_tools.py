@@ -361,8 +361,6 @@ def test_pgbackrest_binary(pgbackrest, operating_system, host):
 
 
 def test_pgbackrest_create_stanza(create_stanza):
-    print(create_stanza.stdout)
-    print(create_stanza.stderr)
     assert "INFO: stanza-create command end: completed successfully" in create_stanza.stdout
 
 
@@ -371,8 +369,8 @@ def test_pgbackrest_check(pgbackrest_check):
 
 
 def test_pgbackrest_full_backup(pgbackrest_full_backup):
-    print(pgbackrest_full_backup)
-    # assert "backup command end: completed successfully" in pgbackrest_full_backup[-2]
+    print(pgbackrest_full_backup[-1])
+    assert "expire command end: completed successfully" in pgbackrest_full_backup[-1]
 
 
 def test_pgbackrest_restore(pgbackrest_restore, host):
