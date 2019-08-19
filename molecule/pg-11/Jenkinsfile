@@ -77,7 +77,8 @@ pipeline {
             cd molecule/pg-11
             python3 -m molecule verify -s ec2
         '''
-        junit 'molecule/pg-11/molecule/default/*.xml'
+
+        junit './molecule/ec2/*.xml'
       }
     }
     stage ('Start packages deletion') {
