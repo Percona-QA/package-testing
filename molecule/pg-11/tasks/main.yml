@@ -30,7 +30,7 @@
 - name: Install libpq-dev
   apt:
     name: "{{ packages }}"
-  var:
+  vars:
     packages:
       - libpq-dev
       - libdbd-pg-per
