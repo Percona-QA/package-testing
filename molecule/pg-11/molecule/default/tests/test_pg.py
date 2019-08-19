@@ -188,13 +188,11 @@ def test_postgres_client_version(host):
 def test_start_stop_postgresql(start_stop_postgresql):
     assert start_stop_postgresql.rc == 0
     assert "active" in start_stop_postgresql.stdout
-    assert not start_stop_postgresql.stderr
 
 
 def test_restart_postgresql(restart_postgresql):
     assert restart_postgresql.rc == 0
     assert "active" in restart_postgresql.stdout
-    assert not restart_postgresql.stderr
 
 
 def test_insert_data(insert_data):
