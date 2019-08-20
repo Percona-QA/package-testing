@@ -379,7 +379,7 @@ def test_pgbackrest_restore(pgbackrest_restore, host):
     if os.lower() in ["redhat", "centos"]:
         service_name = "postgresql-11"
     else:
-        service_name = "postgres"
+        service_name = "postgresql"
     with host.sudo("root"):
         stop_postgresql = 'systemctl start {}'.format(service_name)
         assert host.run(stop_postgresql).rc == 0
