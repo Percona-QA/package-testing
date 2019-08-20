@@ -6,14 +6,14 @@ driver:
 lint:
   name: yamllint
 platforms:
-#  - name: ${PLATFORM}
-#    region: eu-central-1
-#    image: ${IMAGE}
-#    vpc_subnet_id: subnet-085deaca8c1c59a4f
-#    instance_type: t3.micro
-#    ssh_user: admin
-#    instance_tags:
-#      iit-billing-tag: jenkins-pg-worker
+  - name: ${PLATFORM}
+    region: ${REGION}
+    image: ${IMAGE}
+    vpc_subnet_id: ${SUBNET}
+    instance_type: t3.micro
+    ssh_user: ${USER}
+    instance_tags:
+      iit-billing-tag: jenkins-pg-worker
 #  - name: centos-7
 #    region: eu-central-1
 #    image: ami-0837950ffca9ae6e8
@@ -30,14 +30,14 @@ platforms:
   #   ssh_user: ec2-user
   #   instance_tags:
   #     iit-billing-tag: jenkins-pg-worker
-  - name: debian-9   # Stretch
-    region: eu-central-1
-    image: ami-006c08e13f35edce0
-    vpc_subnet_id: subnet-085deaca8c1c59a4f
-    instance_type: t3.micro
-    ssh_user: admin
-    instance_tags:
-      iit-billing-tag: jenkins-pg-worker
+#  - name: debian-9   # Stretch
+#    region: eu-central-1
+#    image: ami-006c08e13f35edce0
+#    vpc_subnet_id: subnet-085deaca8c1c59a4f
+#    instance_type: t3.micro
+#    ssh_user: admin
+#    instance_tags:
+#      iit-billing-tag: jenkins-pg-worker
 #  - name: debian-10   # Buster
 #    region: eu-central-1
 #    image: ami-0be88f8d647409e61

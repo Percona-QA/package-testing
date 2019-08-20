@@ -29,15 +29,28 @@ pipeline {
        script {
         if (params.PLATFORM=='centos7'){
          env.IMAGE='ami-0837950ffca9ae6e8'
+         env.USER='centos'
+         env.SUBNET='subnet-085deaca8c1c59a4f'
+         env.REGION='eu-central-1'
+
         }
         else if (params.PLATFORM=='debian9'){
           env.IMAGE='ami-006c08e13f35edce0'
+          env.USER='admin'
+          env.SUBNET='subnet-085deaca8c1c59a4f'
+          env.REGION='eu-central-1'
         }
         else if (params.PLATFORM=='debian10'){
           env.IMAGE='ami-0be88f8d647409e61'
+          env.USER='admin'
+          env.SUBNET='subnet-085deaca8c1c59a4f'
+          env.REGION='eu-central-1'
          }
         else if (params.PLATFORM=='ubuntu-bionic'){
           env.IMAGE='ami-0a8561d8c5a4f098a'
+          env.USER='ubuntu'
+          env.SUBNET='subnet-085deaca8c1c59a4f'
+          env.REGION='eu-central-1'
          }
         }
        }
