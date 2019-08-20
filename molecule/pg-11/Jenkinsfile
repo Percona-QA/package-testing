@@ -70,6 +70,11 @@ pipeline {
       steps {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
           sh '''
+              echo $USER
+              echo $REGION
+              echo $SUBNET
+              echo $IMAGE
+              echo $PLATFORM
               cd molecule/pg-11
               python3 -m molecule create -s ec2
           '''
@@ -88,11 +93,7 @@ pipeline {
       steps {
         sh '''
             cd molecule/pg-11
-            echo $USER
-            echo $REGION
-            echo $SUBNET
-            echo $IMAGE
-            echo $PLATFORM
+
             python3 -m molecule verify -s ec2
         '''
         junit 'molecule/pg-11/molecule/ec2/*.xml'
