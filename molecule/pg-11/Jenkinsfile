@@ -8,10 +8,10 @@ pipeline {
             name: 'PLATFORM',
             description: 'For what platform (OS) need to test',
             choices: [
-                'centos7',
-                'debian9',
-                'debian10',
-                'ubuntu-bionic',
+                'centos-7',
+                'debian-9',
+                'debian-10',
+                'ubuntu-18.04',
                 'rhel8'
             ]
         )
@@ -27,26 +27,26 @@ pipeline {
     stage ('Setup Environment Variables') {
       steps {
        script {
-        if (params.PLATFORM=='centos7'){
+        if (params.PLATFORM=='centos-7'){
          env.IMAGE='ami-0837950ffca9ae6e8'
          env.USER='centos'
          env.SUBNET='subnet-085deaca8c1c59a4f'
          env.REGION='eu-central-1'
 
         }
-        else if (params.PLATFORM=='debian9'){
+        else if (params.PLATFORM=='debian-9'){
           env.IMAGE='ami-006c08e13f35edce0'
           env.USER='admin'
           env.SUBNET='subnet-085deaca8c1c59a4f'
           env.REGION='eu-central-1'
         }
-        else if (params.PLATFORM=='debian10'){
+        else if (params.PLATFORM=='debian-10'){
           env.IMAGE='ami-0be88f8d647409e61'
           env.USER='admin'
           env.SUBNET='subnet-085deaca8c1c59a4f'
           env.REGION='eu-central-1'
          }
-        else if (params.PLATFORM=='ubuntu-bionic'){
+        else if (params.PLATFORM=='ubuntu-18.04'){
           env.IMAGE='ami-0a8561d8c5a4f098a'
           env.USER='ubuntu'
           env.SUBNET='subnet-085deaca8c1c59a4f'
@@ -88,6 +88,11 @@ pipeline {
       steps {
         sh '''
             cd molecule/pg-11
+            echo $USER
+            echo $REGION
+            echo $SUBNET
+            echo $IMAGE
+            echo $PLATFORM
             python3 -m molecule verify -s ec2
         '''
         junit 'molecule/pg-11/molecule/ec2/*.xml'
