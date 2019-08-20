@@ -133,7 +133,7 @@ def pgbackrest_delete_data(host):
         service_name = "postgresql-11"
     else:
         data_dir = "/var/lib/postgresql/11/main/*"
-        service_name = "postgres"
+        service_name = "postgresql"
     with host.sudo("root"):
         stop_postgresql = 'systemctl stop {}'.format(service_name)
         s = host.run(stop_postgresql)
