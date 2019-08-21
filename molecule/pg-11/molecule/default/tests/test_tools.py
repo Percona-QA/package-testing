@@ -407,5 +407,6 @@ def test_patroni_package(host):
     assert pkg.is_installed
     assert "1.6" in pkg.version
 
+
 def test_patroni_service(host):
     pass

@@ -84,7 +84,7 @@ pipeline {
               echo $IMAGE
               echo $PLATFORM
               cd molecule/pg-11
-              python3 -m molecule --debug create -s ec2
+              python3 -m molecule create -s ec2
           '''
         }
       }
