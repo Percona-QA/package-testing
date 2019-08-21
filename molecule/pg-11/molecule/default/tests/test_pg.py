@@ -28,7 +28,7 @@ RPM_PACKAGES = ["percona-postgresql11", "percona-postgresql11-contrib", "percona
                 "percona-postgresql11-plperl", "percona-postgresql11-plpython",
                 "percona-postgresql11-pltcl", "percona-postgresql11-server",
                 "percona-postgresql11-test", "percona-postgresql-client-common",
-                "percona-postgresql11-contrib-debuginfo", "percona-postgresql11-debuginfo",
+                "percona-postgresql11-debuginfo",
                 "percona-postgresql11-debugsource", "percona-postgresql11-devel-debuginfo",
                 "percona-postgresql11-libs-debuginfo", "percona-postgresql11-plperl-debuginfo",
                 "percona-postgresql11-plpython-debuginfo", "percona-postgresql11-plpython3-debuginfo",

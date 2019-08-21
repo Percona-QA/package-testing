@@ -85,7 +85,7 @@
       - percona-postgresql11-pltcl
       - percona-postgresql11-server
       - percona-postgresql11-test
-      - percona-postgresql11-contrib-debuginfo
+#      - percona-postgresql11-contrib-debuginfo
       - percona-postgresql11-debuginfo
       - percona-postgresql11-debugsource
       - percona-postgresql11-devel-debuginfo
