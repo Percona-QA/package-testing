@@ -332,7 +332,7 @@ def test_pgbackrest_package(host):
 
 
 def test_pgbackrest_version(pgbackrest_version):
-    assert pgbackrest_version == "pgBackRest 2.15"
+    assert pgbackrest_version == "pgBackRest 2.16"
 
 
 def test_pgbackrest_binary(pgbackrest, operating_system, host):
