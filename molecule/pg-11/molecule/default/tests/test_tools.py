@@ -397,10 +397,6 @@ def test_patroni_package(host):
         pkgn = "percona-patroni"
     elif os == "debian":
         pkgn = "percona-patroni"
-        dbgsym_pkgn = "percona-patroni-dbgsym"
-        dbgsym_pkg = host.package(dbgsym_pkgn)
-        assert dbgsym_pkg.is_installed
-        assert "1.5" in dbgsym_pkg.version
     if pkgn == "":
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
