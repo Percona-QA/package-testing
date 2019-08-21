@@ -26,6 +26,13 @@
           - percona-postgresql-pltcl-11
           - percona-postgresql-server-dev-11
           - percona-postgresql-server-dev-all
+          - percona-postgresql-11-dbgsym
+          - percona-postgresql-client-11-dbgsym
+          - percona-postgresql-plperl-11-dbgsym
+          - percona-postgresql-plpython-11-dbgsym
+          - percona-postgresql-plpython3-11-dbgsym
+          - percona-postgresql-pltcl-11-dbgsym
+          - percona-postgresql-server-dev-11-dbgsym
       when: ansible_os_family == "Debian"
 
     - name: remove Postgresql rpm packages
@@ -50,6 +57,17 @@
           - percona-postgresql11-pltcl
           - percona-postgresql11-server
           - percona-postgresql11-test
+          - percona-postgresql11-contrib-debuginfo
+          - percona-postgresql11-debuginfo
+          - percona-postgresql11-debugsource
+          - percona-postgresql11-devel-debuginfo
+          - percona-postgresql11-libs-debuginfo
+          - percona-postgresql11-plperl-debuginfo
+          - percona-postgresql11-plpython-debuginfo
+          - percona-postgresql11-plpython3-debuginfo
+          - percona-postgresql11-pltcl-debuginfo
+          - percona-postgresql11-server-debuginfo
+          - percona-postgresql11-test-debuginfo
       when: ansible_os_family == "RedHat"
 
     - name: remove pgaudit deb packages

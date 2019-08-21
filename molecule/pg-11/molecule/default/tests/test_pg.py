@@ -12,7 +12,11 @@ DEB_PACKAGES = ["percona-postgresql-11", "percona-postgresql-client", "percona-p
                 "percona-postgresql-contrib", "percona-postgresql-doc", "percona-postgresql-server-dev-all",
                 "percona-postgresql-doc-11", "percona-postgresql-plperl-11", "percona-postgresql-common",
                 "percona-postgresql-plpython-11", "percona-postgresql-plpython3-11",
-                "percona-postgresql-pltcl-11", "percona-postgresql-all", "percona-postgresql-server-dev-11"]
+                "percona-postgresql-pltcl-11", "percona-postgresql-all", "percona-postgresql-server-dev-11",
+                "percona-postgresql-11-dbgsym", "percona-postgresql-client-11-dbgsym",
+                "percona-postgresql-plperl-11-dbgsym", "percona-postgresql-plpython-11-dbgsym",
+                "percona-postgresql-plpython3-11-dbgsym", "percona-postgresql-pltcl-11-dbgsym",
+                "percona-postgresql-server-dev-11-dbgsym"]
 
 DEB_PKG_VERSIONS = ["11+204-1.buster", "204-1.buster", "1:11-5.buster", "1:11-5.stretch", "204-1.stretch",
                     "11+204-1.stretch", "1:11-5.bionic", '11+204-1.bionic', "204-1.bionic", "1:11-5.cosmic",
@@ -23,7 +27,13 @@ RPM_PACKAGES = ["percona-postgresql11", "percona-postgresql11-contrib", "percona
                 "percona-postgresql11-docs", "percona-postgresql11-libs", "percona-postgresql11-llvmjit",
                 "percona-postgresql11-plperl", "percona-postgresql11-plpython",
                 "percona-postgresql11-pltcl", "percona-postgresql11-server",
-                "percona-postgresql11-test", "percona-postgresql-client-common"]
+                "percona-postgresql11-test", "percona-postgresql-client-common",
+                "percona-postgresql11-contrib-debuginfo", "percona-postgresql11-debuginfo",
+                "percona-postgresql11-debugsource", "percona-postgresql11-devel-debuginfo",
+                "percona-postgresql11-libs-debuginfo", "percona-postgresql11-plperl-debuginfo",
+                "percona-postgresql11-plpython-debuginfo", "percona-postgresql11-plpython3-debuginfo",
+                "percona-postgresql11-pltcl-debuginfo", "percona-postgresql11-server-debuginfo",
+                "percona-postgresql11-test-debuginfo"]
 
 DEB_FILES = ["/etc/postgresql/11/main/postgresql.conf", "/etc/postgresql/11/main/pg_hba.conf",
              "/etc/postgresql/11/main/pg_ctl.conf", "/etc/postgresql/11/main/pg_ident.conf"]
