@@ -54,6 +54,12 @@ pipeline {
           env.SUBNET='subnet-085deaca8c1c59a4f'
           env.REGION='eu-central-1'
          }
+         else if (params.PLATFORM=='rhel8'){
+          env.IMAGE='ami-0badcc5b522737046'
+          env.USER='ec2-user'
+          env.SUBNET='subnet-085deaca8c1c59a4f'
+          env.REGION='eu-central-1'
+         }
         }
        }
       }
