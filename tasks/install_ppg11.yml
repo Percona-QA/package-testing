@@ -28,6 +28,10 @@
        - llvm-7-dev
     when: ansible_distribution == "Debian" and ansible_distribution_major_version == '9'
 
+  - name: Disable dnf module for RHEL8
+    command: dnf module disable postgresql
+    when: ansible_distribution == "RedHat" and ansible_distribution_major_version == "8"
+
   - name: install Percona Platform for PostgreSQL deb packages
     apt:
       name: "{{ packages }}"
