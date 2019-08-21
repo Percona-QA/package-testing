@@ -405,4 +405,7 @@ def test_patroni_package(host):
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
-    assert "1.5" in pkg.version
+    assert "1.6" in pkg.version
+
+def test_patroni_service(host):
+    pass
