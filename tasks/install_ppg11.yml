@@ -103,11 +103,11 @@
     when: ansible_distribution == "RedHat"
 
 - name: install Percona Platform for PostgreSQL rpm packages for RHEL
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
       - percona-postgresql-client-common
       - percona-postgresql-common
       - percona-postgresql-server-dev-all
@@ -134,4 +134,4 @@
       - percona-postgresql11-pltcl-debuginfo
       - percona-postgresql11-server-debuginfo
       - percona-postgresql11-test-debuginfo
-    when: ansible_os_family == "RedHat"
+  when: ansible_os_family == "RedHat"
