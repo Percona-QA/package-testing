@@ -339,9 +339,10 @@ def test_pgbackrest_binary(pgbackrest, operating_system, host):
     assert pgbackrest.rc == 0
     if operating_system.lower() in ["redhat", "centos"]:
         assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB executable," \
-                                         " x86-64, version 1 (SYSV), dynamically linked (uses shared libs)," \
-                                         " for GNU/Linux 2.6.32," \
-                                         " BuildID[sha1]=524db768c09d913aec12cf909d0c431c7e2f3f53, not stripped"
+                                                " x86-64, version 1 (SYSV)," \
+                                                " dynamically linked (uses shared libs)," \
+                                                " for GNU/Linux 2.6.32," \
+                                                " BuildID[sha1]=ee740c6f97b0910ac912eec89030c56fb28f77aa, not stripped"
     elif operating_system.lower() == 'debian':
         if host.system_info.release == "9.9":
             assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object," \

@@ -134,6 +134,9 @@ def test_rpm_package_is_installed(host, package):
     os = host.system_info.distribution
     if os in ["debian", "ubuntu"]:
         pytest.skip("This test only for RHEL based platforms")
+    print(host.system_info.release)
+    if host.system_info.release == "7":
+        pytest.skip("Only for RHEL8 tests")
     pkg = host.package(package)
     assert pkg.is_installed
     if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
@@ -147,6 +150,9 @@ def test_rpm7_package_is_installed(host, package):
     os = host.system_info.distribution
     if os in ["debian", "ubuntu"]:
         pytest.skip("This test only for RHEL based platforms")
+    print(host.system_info.release)
+    if host.system_info.release == "8":
+        pytest.skip("Only for centos7 tests")
     pkg = host.package(package)
     assert pkg.is_installed
     if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
