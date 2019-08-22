@@ -93,7 +93,7 @@ pipeline {
       steps {
         sh '''
             cd molecule/pg-11
-            python3 -m molecule converge -s ec2
+            python3 -m molecule --debug converge -s ec2
         '''
       }
     }
