@@ -102,36 +102,36 @@
     command: sudo dnf module disable postgresql
     when: ansible_distribution == "RedHat"
 
-- name: install Percona Platform for PostgreSQL rpm packages for RHEL
-  yum:
-    name: "{{ packages }}"
-    state: latest
-  vars:
-    packages:
-      - percona-postgresql-client-common
-      - percona-postgresql-common
-      - percona-postgresql-server-dev-all
-      - percona-postgresql11
-      - percona-postgresql11-contrib
-      - percona-postgresql11-debuginfo
-      - percona-postgresql11-devel
-      - percona-postgresql11-docs
-      - percona-postgresql11-libs
-      - percona-postgresql11-llvmjit
-      - percona-postgresql11-plperl
-      - percona-postgresql11-plpython
-      - percona-postgresql11-pltcl
-      - percona-postgresql11-server
-      - percona-postgresql11-test
-      - percona-postgresql11-contrib-debuginfo
-      - percona-postgresql11-debuginfo
-      - percona-postgresql11-debugsource
-      - percona-postgresql11-devel-debuginfo
-      - percona-postgresql11-libs-debuginfo
-      - percona-postgresql11-plperl-debuginfo
-      - percona-postgresql11-plpython-debuginfo
-      - percona-postgresql11-plpython3-debuginfo
-      - percona-postgresql11-pltcl-debuginfo
-      - percona-postgresql11-server-debuginfo
-      - percona-postgresql11-test-debuginfo
-  when: ansible_os_family == "RedHat"
+  - name: install Percona Platform for PostgreSQL rpm packages for RHEL
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+        - percona-postgresql-client-common
+        - percona-postgresql-common
+        - percona-postgresql-server-dev-all
+        - percona-postgresql11
+        - percona-postgresql11-contrib
+        - percona-postgresql11-debuginfo
+        - percona-postgresql11-devel
+        - percona-postgresql11-docs
+        - percona-postgresql11-libs
+        - percona-postgresql11-llvmjit
+        - percona-postgresql11-plperl
+        - percona-postgresql11-plpython
+        - percona-postgresql11-pltcl
+        - percona-postgresql11-server
+        - percona-postgresql11-test
+        - percona-postgresql11-contrib-debuginfo
+        - percona-postgresql11-debuginfo
+        - percona-postgresql11-debugsource
+        - percona-postgresql11-devel-debuginfo
+        - percona-postgresql11-libs-debuginfo
+        - percona-postgresql11-plperl-debuginfo
+        - percona-postgresql11-plpython-debuginfo
+        - percona-postgresql11-plpython3-debuginfo
+        - percona-postgresql11-pltcl-debuginfo
+        - percona-postgresql11-server-debuginfo
+        - percona-postgresql11-test-debuginfo
+    when: ansible_os_family == "RedHat"
