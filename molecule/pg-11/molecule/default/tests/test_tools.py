@@ -344,9 +344,9 @@ def test_pgbackrest_binary(pgbackrest, operating_system, host):
                                          " BuildID[sha1]=524db768c09d913aec12cf909d0c431c7e2f3f53, not stripped"
     elif operating_system.lower() == 'debian':
         if host.system_info.release == "9.9":
-            assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object, x86-64," \
-                                                    " version 1 (SYSV), dynamically linked," \
-                                                    " interpreter /lib64/ld-linux-x86-64.so.2," \
+            assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object," \
+                                                    " x86-64, version 1 (SYSV)," \
+                                                    " dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2," \
                                                     " for GNU/Linux 2.6.32," \
                                                     " BuildID[sha1]=b2e1c41d6e6b6c26e6f6371348799e39fbd4cae1, stripped"
         else:
