@@ -79,7 +79,7 @@ def start_stop_postgresql(host):
 @pytest.fixture()
 def postgresql_binary(host):
     os = host.system_info.distribution
-    if os.lower() in ["redhat", "centos"]:
+    if os.lower() in ["redhat", "centos", 'rhel']:
         return host.file("/usr/pgsql-11/bin/postgres")
     elif os in ["debian", "ubuntu"]:
         return host.file("/usr/lib/postgresql/11/bin/postgres")
@@ -122,7 +122,8 @@ def insert_data(host):
 @pytest.mark.parametrize("package", DEB_PACKAGES)
 def test_deb_package_is_installed(host, package):
     os = host.system_info.distribution
-    if os in ["RedHat", "centos"]:
+    print(os)
+    if os.lower() in ["redhat", "centos", 'rhel']:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
@@ -134,7 +135,6 @@ def test_rpm_package_is_installed(host, package):
     os = host.system_info.distribution
     if os in ["debian", "ubuntu"]:
         pytest.skip("This test only for RHEL based platforms")
-    print(host.system_info.release)
     if host.system_info.release == "7":
         pytest.skip("Only for RHEL8 tests")
     pkg = host.package(package)
@@ -150,8 +150,7 @@ def test_rpm7_package_is_installed(host, package):
     os = host.system_info.distribution
     if os in ["debian", "ubuntu"]:
         pytest.skip("This test only for RHEL based platforms")
-    print(host.system_info.release)
-    if host.system_info.release == "8":
+    if host.system_info.release == "8.0":
         pytest.skip("Only for centos7 tests")
     pkg = host.package(package)
     assert pkg.is_installed
@@ -164,7 +163,7 @@ def test_rpm7_package_is_installed(host, package):
 def test_postgresql_client_version(host):
     os = host.system_info.distribution
     pkg = "percona-postgresql-11"
-    if os in ["RedHat", "centos"]:
+    if os.lower() in ["redhat", "centos", 'rhel']:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(pkg)
     assert "11" in pkg.version
@@ -173,7 +172,7 @@ def test_postgresql_client_version(host):
 def test_postgresql_version(host):
     os = host.system_info.distribution
     pkg = "percona-postgresql-client-11"
-    if os in ["RedHat", "centos"]:
+    if os.lower() in ["redhat", "centos", 'rhel']:
         pkg = "percona-postgresql11"
     pkg = host.package(pkg)
     assert "11" in pkg.version
@@ -181,7 +180,7 @@ def test_postgresql_version(host):
 
 def test_postgresql_is_running_and_enabled(host):
     os = host.system_info.distribution
-    if os in ["RedHat", "centos"]:
+    if os.lower() in ["redhat", "centos", 'rhel']:
         postgresql = host.service("postgresql-11")
     else:
         postgresql = host.service("postgresql")
@@ -244,7 +243,7 @@ def test_extenstions_list(extension_list, host):
 @pytest.mark.parametrize("extension", EXTENSIONS)
 def test_enable_extension(host, extension):
     os = host.system_info.distribution
-    if os.lower() in ['centos', 'redhat']:
+    if os.lower() in ["redhat", "centos", 'rhel']:
         if "python3" in extension:
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
     with host.sudo("postgres"):
@@ -269,7 +268,7 @@ def test_enable_extension(host, extension):
 @pytest.mark.parametrize("extension", EXTENSIONS[::-1])
 def test_drop_extension(host, extension):
     os = host.system_info.distribution
-    if os.lower() in ['centos', 'redhat']:
+    if os.lower() in ["redhat", "centos", 'rhel']:
         if "python3" in extension:
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
     with host.sudo("postgres"):
@@ -302,7 +301,7 @@ def test_plpgsql_extension(host):
 @pytest.mark.parametrize("file", DEB_FILES)
 def test_deb_files(host, file):
     os = host.system_info.distribution
-    if os in ["RedHat", "centos"]:
+    if os.lower() in ["redhat", "centos", 'rhel']:
         pytest.skip("This test only for Debian based platforms")
     with host.sudo("postgres"):
         f = host.file(file)
@@ -337,7 +336,7 @@ def test_package_metadata(host):
 def test_language(host, language):
     os = host.system_info.distribution
     with host.sudo("postgres"):
-        if os.lower() in ['centos', 'redhat']:
+        if os.lower() in ["redhat", "centos", 'rhel']:
             if "python3" in language:
                 pytest.skip("Skipping python3 language for Centos or RHEL")
         lang = host.run("psql -c 'CREATE LANGUAGE {};'".format(language))

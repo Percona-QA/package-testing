@@ -107,8 +107,6 @@ def pgbackrest_check(host):
     with host.sudo("postgres"):
         cmd = "pgbackrest check --stanza=testing --log-level-console=info"
         result = host.run(cmd)
-        print(result.stdout)
-        print(result.stderr)
         assert result.rc == 0
         return [l.split("INFO:")[-1] for l in result.stdout.split("\n") if "INFO" in l]
 
@@ -128,7 +126,7 @@ def pgbackrest_full_backup(host):
 @pytest.fixture()
 def pgbackrest_delete_data(host):
     os = host.system_info.distribution
-    if os.lower() in ["redhat", "centos"]:
+    if os.lower() in ["redhat", "centos", 'rhel']:
         data_dir = "/var/lib/pgsql/11/data/*"
         service_name = "postgresql-11"
     else:
@@ -137,8 +135,6 @@ def pgbackrest_delete_data(host):
     with host.sudo("root"):
         stop_postgresql = 'systemctl stop {}'.format(service_name)
         s = host.run(stop_postgresql)
-        print(s.stderr)
-        print(s.stdout)
         assert s.rc == 0
     with host.sudo("postgres"):
         cmd = "rm -rf {}".format(data_dir)
@@ -152,14 +148,13 @@ def pgbackrest_restore(pgbackrest_delete_data, host):
     with host.sudo("postgres"):
         result = host.run("pgbackrest --stanza=testing --log-level-stderr=info restore")
         assert result.rc == 0
-        print(result.stdout)
         return [l.split("INFO:")[-1] for l in result.stdout.split("\n") if "INFO" in l]
 
 
 @pytest.fixture()
 def pgrepack(host):
     os = host.system_info.distribution
-    if os.lower() in ["redhat", "centos"]:
+    if os.lower() in ["redhat", "centos", 'rhel']:
         cmd = "file /usr/pgsql-11/bin/pg_repack "
     else:
         # TODO need to be in PATH?
@@ -191,7 +186,7 @@ def pg_repack_dry_run(host, operating_system):
         assert host.run(pgbench).rc == 0
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
         assert host.run(select).rc == 0
-        if operating_system.lower() in ["redhat", "centos"]:
+        if operating_system.lower() in ["redhat", "centos", 'rhel']:
             cmd = "/usr/pgsql-11/bin/pg_repack --dry-run -d postgres"
         else:
             cmd = "/usr/lib/postgresql/11/bin/pg_repack --dry-run -d postgres"
@@ -202,7 +197,7 @@ def pg_repack_dry_run(host, operating_system):
 @pytest.fixture()
 def pg_repack_client_version(host, operating_system):
     with host.sudo("postgres"):
-        if operating_system.lower() in ["redhat", "centos"]:
+        if operating_system.lower() in ["redhat", "centos", 'rhel']:
             return host.run("/usr/pgsql-11/bin/pg_repack --version")
         elif operating_system.lower() in ["debian", "ubuntu"]:
             return host.run("/usr/lib/postgresql/11/bin/pg_repack --version")
@@ -216,7 +211,7 @@ def patroni(host):
 def test_pgaudit_package(host):
     os = host.system_info.distribution
     pkgn = ""
-    if os.lower() in ["redhat", "centos"]:
+    if os.lower() in ["redhat", "centos", 'rhel']:
         pkgn = "percona-pgaudit"
     elif os in ["debian", "ubuntu"]:
         pkgn = "percona-postgresql-11-pgaudit"
@@ -238,7 +233,7 @@ def test_pgaudit(pgaudit):
 def test_pgrepack_package(host):
     os = host.system_info.distribution
     pkgn = ""
-    if os.lower() in ["redhat", "centos"]:
+    if os.lower() in ["redhat", "centos", 'rhel']:
         pkgn = "percona-pg_repack11"
     elif os in ["debian", "ubuntu"]:
         pkgn = "percona-postgresql-11-repack"
@@ -253,7 +248,7 @@ def test_pgrepack_package(host):
 
 def test_pgrepack_binary(host, pgrepack):
     os = host.system_info.distribution
-    if os.lower() in ["redhat", "centos"]:
+    if os.lower() in ["redhat", "centos", 'rhel']:
         assert pgrepack == "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable, x86-64," \
                            " version 1 (SYSV), dynamically linked (uses shared libs)," \
                            " for GNU/Linux 2.6.32, BuildID[sha1]=b76f53a7d4ffe7dfab0d9bd5868e99bdfcfe48e9, not stripped"
@@ -312,7 +307,7 @@ def test_pg_repack_dry_run(pg_repack_dry_run):
 def test_pgbackrest_package(host):
     os = host.system_info.distribution
     pkgn = ""
-    if os.lower() in ["redhat", "centos"]:
+    if os.lower() in ["redhat", "centos", 'rhel']:
         pkgn = "percona-pgbackrest"
     elif os in ["debian", "ubuntu"]:
         pkgn = "percona-pgbackrest"
@@ -337,7 +332,8 @@ def test_pgbackrest_version(pgbackrest_version):
 
 def test_pgbackrest_binary(pgbackrest, operating_system, host):
     assert pgbackrest.rc == 0
-    if operating_system.lower() in ["redhat", "centos"]:
+    print(operating_system.lower())
+    if operating_system.lower() in ["redhat", "centos", 'rhel']:
         assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB executable," \
                                                 " x86-64, version 1 (SYSV)," \
                                                 " dynamically linked (uses shared libs)," \
