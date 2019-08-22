@@ -319,16 +319,16 @@ def test_pgbackrest_package(host):
         doc_pkgn = "percona-pgbackrest-doc"
         docs_pkg = host.package(doc_pkgn)
         assert docs_pkg.is_installed
-        assert "2.15" in docs_pkg.version
+        assert "2.16" in docs_pkg.version
         dbg_pkg = "percona-pgbackrest-dbgsym"
         dbg = host.package(dbg_pkg)
         assert dbg.is_installed
-        assert "2.15" in dbg.version
+        assert "2.16" in dbg.version
     if pkgn == "":
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
-    assert "2.15" in pkg.version
+    assert "2.16" in pkg.version
 
 
 def test_pgbackrest_version(pgbackrest_version):
@@ -344,15 +344,17 @@ def test_pgbackrest_binary(pgbackrest, operating_system, host):
                                          " BuildID[sha1]=524db768c09d913aec12cf909d0c431c7e2f3f53, not stripped"
     elif operating_system.lower() == 'debian':
         if host.system_info.release == "9.9":
-            assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object," \
-                                                    " x86-64, version 1 (SYSV), dynamically linked," \
-                                                    " interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32," \
-                                                    " BuildID[sha1]=837c86bf3cc34677b67acc6e8ca9635b49ba44b5, stripped"
+            assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object, x86-64," \
+                                                    " version 1 (SYSV), dynamically linked," \
+                                                    " interpreter /lib64/ld-linux-x86-64.so.2," \
+                                                    " for GNU/Linux 2.6.32," \
+                                                    " BuildID[sha1]=b2e1c41d6e6b6c26e6f6371348799e39fbd4cae1, stripped"
         else:
             assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object," \
-                                                    " x86-64, version 1 (SYSV), dynamically linked, interpreter" \
-                                                    " /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0," \
-                                                    " BuildID[sha1]=f5c70a44673be44c1838641a17e72eca9e1a13e4, stripped"
+                                                    " x86-64, version 1 (SYSV)," \
+                                                    " dynamically linked," \
+                                                    " interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0," \
+                                                    " BuildID[sha1]=1d374746b869cd054bd13bc59a3984500bd4018d, stripped"
     elif operating_system.lower == "ubuntu":
         assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object, x86-64," \
                                                 " version 1 (SYSV), dynamically linked, interpreter /lib64/l," \
