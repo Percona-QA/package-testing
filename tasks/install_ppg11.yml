@@ -28,6 +28,11 @@
        - llvm-7-dev
     when: ansible_distribution == "Debian" and ansible_distribution_major_version == '9'
 
+  - name: Clean DNF RHEL8
+    become: true
+    command: dnf clean all && dnf update
+    when: ansible_distribution == "RedHat" and ansible_distribution_major_version == "8"
+
   - name: Disable dnf module for RHEL8
     become: true
     command: dnf module disable postgresql
@@ -89,6 +94,10 @@
       - percona-postgresql11-debuginfo
     when: ansible_distribution == "RedHat" and ansible_distribution_major_version == "7"
 
+  - name: DNF clean RHEL
+    command: sudo dnf module disable postgresql
+    when: ansible_distribution == "RedHat"
+
   - name: Disable dnf module for RHEL
     command: sudo dnf module disable postgresql
     when: ansible_distribution == "RedHat"
@@ -126,7 +135,3 @@
       - percona-postgresql11-server-debuginfo
       - percona-postgresql11-test-debuginfo
     when: ansible_os_family == "RedHat"
-
-  - name: Disable dnf module for RHEL
-    command: sudo dnf module disable postgresql
-    when: when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
