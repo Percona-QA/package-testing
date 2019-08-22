@@ -30,12 +30,12 @@
 
   - name: Clean dnf RHEL8
     become: true
-    command: dnf clean all
+    command: dnf clean all -y
     when: ansible_distribution == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: Disable dnf module for RHEL8
     become: true
-    command: dnf module disable postgresql
+    command: dnf module disable postgresql -y
     when: ansible_distribution == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: install Percona Platform for PostgreSQL deb packages
