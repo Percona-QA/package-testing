@@ -64,7 +64,7 @@
       - percona-postgresql-server-dev-11-dbgsym
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Platform for PostgreSQL rpm packages
+  - name: install Percona Platform for PostgreSQL rpm packages for RHEL
     yum:
       name: "{{ packages }}"
       state: latest
@@ -85,7 +85,35 @@
       - percona-postgresql11-pltcl
       - percona-postgresql11-server
       - percona-postgresql11-test
-#      - percona-postgresql11-contrib-debuginfo
+      - percona-postgresql11-debuginfo
+    when: ansible_distribution == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: Disable dnf module for RHEL
+    command: sudo dnf module disable postgresql
+    when: ansible_distribution == "RedHat"
+
+- name: install Percona Platform for PostgreSQL rpm packages for RHEL
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-postgresql-client-common
+      - percona-postgresql-common
+      - percona-postgresql-server-dev-all
+      - percona-postgresql11
+      - percona-postgresql11-contrib
+      - percona-postgresql11-debuginfo
+      - percona-postgresql11-devel
+      - percona-postgresql11-docs
+      - percona-postgresql11-libs
+      - percona-postgresql11-llvmjit
+      - percona-postgresql11-plperl
+      - percona-postgresql11-plpython
+      - percona-postgresql11-pltcl
+      - percona-postgresql11-server
+      - percona-postgresql11-test
+      - percona-postgresql11-contrib-debuginfo
       - percona-postgresql11-debuginfo
       - percona-postgresql11-debugsource
       - percona-postgresql11-devel-debuginfo
@@ -100,4 +128,4 @@
 
   - name: Disable dnf module for RHEL
     command: sudo dnf module disable postgresql
-    when: ansible_distribution == "RedHat"
+    when: when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"

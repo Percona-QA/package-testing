@@ -23,17 +23,21 @@ DEB_PKG_VERSIONS = ["11+204-1.buster", "204-1.buster", "1:11-5.buster", "1:11-5.
                     "11+204-1.cosmic", "204-1.cosmic", "1:11-5.disco", "11+204-1.disco", "204-1.disco"]
 
 RPM_PACKAGES = ["percona-postgresql11", "percona-postgresql11-contrib", "percona-postgresql-common",
-                "percona-postgresql11-debuginfo", "percona-postgresql11-devel",
-                "percona-postgresql11-docs", "percona-postgresql11-libs", "percona-postgresql11-llvmjit",
-                "percona-postgresql11-plperl", "percona-postgresql11-plpython",
-                "percona-postgresql11-pltcl", "percona-postgresql11-server",
-                "percona-postgresql11-test", "percona-postgresql-client-common",
-                "percona-postgresql11-debuginfo",
+                "percona-postgresql11-debuginfo", "percona-postgresql11-devel", "percona-postgresql11-docs",
+                "percona-postgresql11-libs", "percona-postgresql11-llvmjit", "percona-postgresql11-plperl",
+                "percona-postgresql11-plpython", "percona-postgresql11-pltcl", "percona-postgresql11-server",
+                "percona-postgresql11-test", "percona-postgresql-client-common", "percona-postgresql11-debuginfo",
                 "percona-postgresql11-debugsource", "percona-postgresql11-devel-debuginfo",
                 "percona-postgresql11-libs-debuginfo", "percona-postgresql11-plperl-debuginfo",
                 "percona-postgresql11-plpython-debuginfo", "percona-postgresql11-plpython3-debuginfo",
                 "percona-postgresql11-pltcl-debuginfo", "percona-postgresql11-server-debuginfo",
                 "percona-postgresql11-test-debuginfo"]
+
+RPM7_PACKAGES = ["percona-postgresql11", "percona-postgresql11-contrib", "percona-postgresql-common",
+                 "percona-postgresql11-debuginfo", "percona-postgresql11-devel", "percona-postgresql11-docs",
+                 "percona-postgresql11-libs", "percona-postgresql11-llvmjit", "percona-postgresql11-plperl",
+                 "percona-postgresql11-plpython", "percona-postgresql11-pltcl", "percona-postgresql11-server",
+                 "percona-postgresql11-test", "percona-postgresql-client-common"]
 
 DEB_FILES = ["/etc/postgresql/11/main/postgresql.conf", "/etc/postgresql/11/main/pg_hba.conf",
              "/etc/postgresql/11/main/pg_ctl.conf", "/etc/postgresql/11/main/pg_ident.conf"]
@@ -127,6 +131,19 @@ def test_deb_package_is_installed(host, package):
 
 @pytest.mark.parametrize("package", RPM_PACKAGES)
 def test_rpm_package_is_installed(host, package):
+    os = host.system_info.distribution
+    if os in ["debian", "ubuntu"]:
+        pytest.skip("This test only for RHEL based platforms")
+    pkg = host.package(package)
+    assert pkg.is_installed
+    if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
+        assert pkg.version == "11.5"
+    else:
+        assert pkg.version == "204"
+
+
+@pytest.mark.parametrize("package", RPM7_PACKAGES)
+def test_rpm7_package_is_installed(host, package):
     os = host.system_info.distribution
     if os in ["debian", "ubuntu"]:
         pytest.skip("This test only for RHEL based platforms")
