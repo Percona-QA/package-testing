@@ -122,7 +122,6 @@ def insert_data(host):
 @pytest.mark.parametrize("package", DEB_PACKAGES)
 def test_deb_package_is_installed(host, package):
     os = host.system_info.distribution
-    print(os)
     if os.lower() in ["redhat", "centos", 'rhel']:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
@@ -234,7 +233,7 @@ def test_insert_data(insert_data):
 def test_extenstions_list(extension_list, host):
     os = host.system_info.distribution
     for extension in EXTENSIONS:
-        if os.lower() in ['centos', 'redhat']:
+        if os.lower() in ['centos', 'redhat', 'rhel']:
             if "python3" in extension:
                 pytest.skip("Skipping python3 extensions for Centos or RHEL")
         assert extension in extension_list
