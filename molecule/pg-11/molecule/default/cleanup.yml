@@ -136,6 +136,25 @@
         state: absent
       when: ansible_distribution == "Ubuntu"
 
+    - name: Remove postgresql Debian developer packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+        - libecpg-compat3
+        - libecpg-compat3-dbgsym
+        - libecpg-dev-dbgsym
+        - libecpg-dev
+        - libecpg6-dbgsym
+        - libecpg6
+        - libpgtypes3
+        - libpgtypes3-dbgsym
+        - libpq-dev
+        - libpq5-dbgsym
+        - libpq5
+      when: ansible_os_family == "Debian"
+  
 #    - name: Unregister RedHat
 #      redhat_subscription:
 #        state: absent

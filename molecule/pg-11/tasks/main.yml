@@ -184,3 +184,21 @@
 - name: Install patroni
   yum:
     name: percona-patroni
+
+- name: Install libpq with libraries
+  apt:
+    name: "{{ packages }}"
+    vars:
+      packages:
+        - libecpg-compat3
+        - libecpg-compat3-dbgsym
+        - libecpg-dev-dbgsym
+        - libecpg-dev
+        - libecpg6-dbgsym
+        - libecpg6
+        - libpgtypes3
+        - libpgtypes3-dbgsym
+        - libpq-dev
+        - libpq5-dbgsym
+        - libpq5
+  when: ansible_os_family == "Debian"
