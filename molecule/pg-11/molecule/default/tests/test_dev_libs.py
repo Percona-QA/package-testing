@@ -65,7 +65,6 @@ def test_build_libpq_programm(build_libpq_programm):
     print(build_libpq_programm.stderr)
 
 
-
 # def test_fdw_extenstion(fdw_extension):
 #     pass
 #
