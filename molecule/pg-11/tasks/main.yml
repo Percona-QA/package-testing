@@ -202,3 +202,12 @@
       - libpq5-dbgsym
       - libpq5
   when: ansible_os_family == "Debian"
+
+- name: Create temporary directory for compilation
+  command: mktemp -d /tmp/libpq_command_temp_dir
+  register: libpq_command_temp_dir
+
+- name: Copy libpq source file
+  copy:
+    src: lib_version.c
+    dest: {{ libpq_command_temp_dir.stdout }}
