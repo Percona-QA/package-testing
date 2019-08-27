@@ -203,6 +203,16 @@
       - libpq5
   when: ansible_os_family == "Debian"
 
+- name: Install GCC Deb
+  apt:
+    name: gcc
+  when: ansible_os_family == "Debian"
+
+- name: Install GCC RHEL
+  yum:
+    name: gcc
+  when: ansible_os_family == "RedHat"
+
 - name: Create temporary directory for compilation
   command: mkdir /tmp/libpq_command_temp_dir
 
