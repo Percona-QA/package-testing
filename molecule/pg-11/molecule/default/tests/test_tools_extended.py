@@ -45,6 +45,9 @@ def build_libpq_programm(host):
     pg_include = host.check_output(pg_include_cmd)
     lib_dir_cmd = "pg_config --libdir"
     lib_dir = host.check_output(lib_dir_cmd)
+    if os in ["centos", 'rhel']:
+        host.run("export LIBPQ_DIR=/usr/pgsql-11/")
+        host.run("export LIBRARY_PATH=/usr/pgsql-11/lib/")
     return host.run(
         "gcc -o lib_version /tmp/libpq_command_temp_dir/lib_version.c -I{} -lpq -std=c99".format(pg_include))
 

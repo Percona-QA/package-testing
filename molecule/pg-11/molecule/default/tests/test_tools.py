@@ -205,7 +205,7 @@ def pg_repack_client_version(host, operating_system):
 
 @pytest.fixture()
 def patroni(host):
-    pass
+    return host.run("/opt/patroni/bin/patroni")
 
 
 def test_pgaudit_package(host):
@@ -378,12 +378,10 @@ def test_pgbackrest_check(pgbackrest_check):
 
 
 def test_pgbackrest_full_backup(pgbackrest_full_backup):
-    print(pgbackrest_full_backup[-1])
     assert "expire command end: completed successfully" in pgbackrest_full_backup[-1]
 
 
-def test_pgbackrest_restore(pgbackrest_restore, host):
-    print(pgbackrest_restore)
+def test_pgbackrest_restore(host):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
         service_name = "postgresql-11"
@@ -413,5 +411,5 @@ def test_patroni_package(host):
     assert "1.6" in pkg.version
 
 
-def test_patroni_service(host):
-    pass
+def test_patroni(patroni):
+    print(patroni.stderr)
