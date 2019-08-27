@@ -62,8 +62,26 @@ def test_deb_package_is_installed(host, package):
 def test_build_libpq_programm(host, build_libpq_programm):
     assert build_libpq_programm.rc == 0
     libpq_version = host.run("./lib_version ")
-    assert libpq_version.stdout == "Version of libpq: 110005"
+    assert libpq_version.stdout.strip("\n") == "Version of libpq: 110005"
     assert libpq_version.rc == 0
+
+
+def test_python_function():
+    pass
+
+
+def test_perl_function():
+    pass
+
+
+def test_tcl_function():
+    pass
+
+
+def test_python3(host):
+    os = host.system_info.distribution
+    if os.lower() in ['centos', 'redhat', 'rhel']:
+        pytest.skip("Skipping python3 extensions for Centos or RHEL")
 
 
 # def test_fdw_extenstion(fdw_extension):
