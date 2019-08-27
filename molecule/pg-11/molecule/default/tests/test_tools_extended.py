@@ -45,7 +45,6 @@ def build_libpq_programm(host):
     pg_include = host.check_output(pg_include_cmd)
     lib_dir_cmd = "pg_config --libdir"
     lib_dir = host.check_output(lib_dir_cmd)
-    print(lib_dir)
     return host.run(
         "gcc -o lib_version /tmp/libpq_command_temp_dir/lib_version.c -I{} -lpq -std=c99".format(pg_include))
 
@@ -60,9 +59,14 @@ def test_deb_package_is_installed(host, package):
     assert pkg.version in DEB_PKG_VERSIONS
 
 
-def test_build_libpq_programm(build_libpq_programm):
+def test_build_libpq_programm(host, build_libpq_programm):
+    assert build_libpq_programm.rc == 0
+    libpq_version = host.run("./lib_version ")
     print(build_libpq_programm.stdout)
     print(build_libpq_programm.stderr)
+    print(libpq_version.stdout)
+    print(libpq_version.stderr)
+    assert libpq_version.rc == 0
 
 
 # def test_fdw_extenstion(fdw_extension):
