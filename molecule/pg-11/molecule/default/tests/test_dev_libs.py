@@ -46,7 +46,8 @@ def build_libpq_programm(host):
     lib_dir_cmd = "pg_config --libdir"
     lib_dir = host.check_output(lib_dir_cmd)
     print(lib_dir)
-    return host.run("gcc -o lib_version /tmp/libpq_command_temp_dir/lib_version.c -I{} -lpq -std=c99".format(pg_include)
+    return host.run(
+        "gcc -o lib_version /tmp/libpq_command_temp_dir/lib_version.c -I{} -lpq -std=c99".format(pg_include))
 
 
 @pytest.mark.parametrize("package", PACKAGES)

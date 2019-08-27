@@ -210,4 +210,4 @@
 - name: Copy libpq source file
   copy:
     src: lib_version.c
-    dest: {{ libpq_command_temp_dir.stdout }}
+    dest: "{{ libpq_command_temp_dir.stdout }}"
