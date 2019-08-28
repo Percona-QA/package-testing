@@ -47,10 +47,12 @@ def build_libpq_programm(host):
     lib_dir_cmd = "pg_config --libdir"
     lib_dir = host.check_output(lib_dir_cmd)
     if os in ["centos", 'rhel', "redhat"]:
-        host.run("export LIBPQ_DIR=/usr/pgsql-11/")
-        host.run("export LIBRARY_PATH=/usr/pgsql-11/lib/")
+        return host.run(
+            "export LIBPQ_DIR=/usr/pgsql-11/  && export LIBRARY_PATH=/usr/pgsql-11/lib/ &&"
+            "gcc -o lib_version /tmp/libpq_command_temp_dir/lib_version.c -I{} -lpq -std=c99".format(pg_include))
     return host.run(
         "gcc -o lib_version /tmp/libpq_command_temp_dir/lib_version.c -I{} -lpq -std=c99".format(pg_include))
+
 
 
 @pytest.mark.parametrize("package", PACKAGES)
