@@ -412,6 +412,6 @@ def test_patroni_package(host):
 
 
 def test_patroni(patroni):
-    print(patroni.stdout)
-    print(patroni.stderr)
-    print(patroni.rc)
+    assert "Usage: /opt/patroni/bin/patroni config.yml" in patroni.stdout
+    assert "Patroni may also read the configuration" \
+           " from the PATRONI_CONFIGURATION environment variable" in patroni.stdout
