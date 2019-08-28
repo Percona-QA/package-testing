@@ -412,4 +412,6 @@ def test_patroni_package(host):
 
 
 def test_patroni(patroni):
+    print(patroni.stdout)
     print(patroni.stderr)
+    print(patroni.rc)
