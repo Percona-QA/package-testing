@@ -41,11 +41,12 @@ PACKAGES = ["libecpg-compat3", "libecpg-compat3-dbgsym", "libecpg-dev-dbgsym", "
 
 @pytest.fixture()
 def build_libpq_programm(host):
+    os = host.system_info.distribution
     pg_include_cmd = "pg_config --includedir"
     pg_include = host.check_output(pg_include_cmd)
     lib_dir_cmd = "pg_config --libdir"
     lib_dir = host.check_output(lib_dir_cmd)
-    if os in ["centos", 'rhel']:
+    if os in ["centos", 'rhel', "redhat"]:
         host.run("export LIBPQ_DIR=/usr/pgsql-11/")
         host.run("export LIBRARY_PATH=/usr/pgsql-11/lib/")
     return host.run(
