@@ -39,16 +39,32 @@ PACKAGES = ["libecpg-compat3", "libecpg-compat3-dbgsym", "libecpg-dev-dbgsym", "
 #     pass
 
 @pytest.fixture()
-def python_function(host):
+def pythonu_function(host):
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION \"plpythonu\";'")
+        print(install_extension.stderr)
+        print(install_extension.stdout)
         assert install_extension.rc == 0
+        create_function = """CREATE FUNCTION pymax (a integer, b integer)
+          RETURNS integer
+        AS $$
+          if a > b:
+            return a
+          return b
+        $$ LANGUAGE plpythonu;
+                """
+        execute_psql = host.run("psql -c \'{}\'".format(create_function))
+        print(execute_psql.stdout)
+        print(execute_psql.stderr)
+        return execute_psql
 
 
 @pytest.fixture()
 def perl_function(host):
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION \"plperl\";'")
+        print(install_extension.stderr)
+        print(install_extension.stdout)
         assert install_extension.rc == 0
         create_function = """CREATE FUNCTION perl_max (integer, integer) RETURNS integer AS $$
     if ($_[0] > $_[1]) { return $_[0]; }
@@ -68,7 +84,21 @@ def python3_function(host):
         pytest.skip("Skipping python3 extensions for Centos or RHEL")
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION \"plpython3u\";'")
+        print(install_extension.stderr)
+        print(install_extension.stdout)
         assert install_extension.rc == 0
+        create_function = """CREATE FUNCTION pymax (a integer, b integer)
+                  RETURNS integer
+                AS $$
+                  if a > b:
+                    return a
+                  return b
+                $$ LANGUAGE plpython3u;
+                        """
+        execute_psql = host.run("psql -c \'{}\'".format(create_function))
+        print(execute_psql.stdout)
+        print(execute_psql.stderr)
+        return execute_psql
 
 
 @pytest.fixture()
@@ -76,6 +106,15 @@ def tcl_function(host):
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION \"pltcl\";'")
         assert install_extension.rc == 0
+        create_function = """CREATE FUNCTION tcl_max(integer, integer) RETURNS integer AS $$
+    if {$1 > $2} {return $1}
+    return $2
+$$ LANGUAGE pltcl STRICT;
+        """
+        execute_psql = host.run("psql -c \'{}\'".format(create_function))
+        print(execute_psql.stdout)
+        print(execute_psql.stderr)
+        return execute_psql
 
 
 @pytest.fixture()
@@ -91,7 +130,6 @@ def build_libpq_programm(host):
             "gcc -o lib_version /tmp/libpq_command_temp_dir/lib_version.c -I{} -lpq -std=c99".format(pg_include))
     return host.run(
         "gcc -o lib_version /tmp/libpq_command_temp_dir/lib_version.c -I{} -lpq -std=c99".format(pg_include))
-
 
 
 @pytest.mark.parametrize("package", PACKAGES)
@@ -111,7 +149,7 @@ def test_build_libpq_programm(host, build_libpq_programm):
     assert libpq_version.rc == 0
 
 
-def test_python_function(python_function):
+def test_pythonu_function(pythonu_function):
     pass
 
 
