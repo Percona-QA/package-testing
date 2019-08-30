@@ -38,6 +38,44 @@ PACKAGES = ["libecpg-compat3", "libecpg-compat3-dbgsym", "libecpg-dev-dbgsym", "
 # def fdw_functional(host):
 #     pass
 
+@pytest.fixture()
+def python_function(host):
+    with host.sudo("postgres"):
+        install_extension = host.run("psql -c 'CREATE EXTENSION \"plpythonu\";'")
+        assert install_extension.rc == 0
+
+
+@pytest.fixture()
+def perl_function(host):
+    with host.sudo("postgres"):
+        install_extension = host.run("psql -c 'CREATE EXTENSION \"plperl\";'")
+        assert install_extension.rc == 0
+        create_function = """CREATE FUNCTION perl_max (integer, integer) RETURNS integer AS $$
+    if ($_[0] > $_[1]) { return $_[0]; }
+    return $_[1];
+$$ LANGUAGE plperl;
+        """
+        execute_psql = host.run("psql -c \'{}\'".format(create_function))
+        print(execute_psql.stdout)
+        print(execute_psql.stderr)
+
+
+@pytest.fixture()
+def python3_function(host):
+    os = host.system_info.distribution
+    if os.lower() in ['centos', 'redhat', 'rhel']:
+        pytest.skip("Skipping python3 extensions for Centos or RHEL")
+    with host.sudo("postgres"):
+        install_extension = host.run("psql -c 'CREATE EXTENSION \"plpython3u\";'")
+        assert install_extension.rc == 0
+
+
+@pytest.fixture()
+def tcl_function(host):
+    with host.sudo("postgres"):
+        install_extension = host.run("psql -c 'CREATE EXTENSION \"pltcl\";'")
+        assert install_extension.rc == 0
+
 
 @pytest.fixture()
 def build_libpq_programm(host):
@@ -85,9 +123,7 @@ def test_tcl_function():
 
 
 def test_python3(host):
-    os = host.system_info.distribution
-    if os.lower() in ['centos', 'redhat', 'rhel']:
-        pytest.skip("Skipping python3 extensions for Centos or RHEL")
+    pass
 
 
 # def test_fdw_extenstion(fdw_extension):
