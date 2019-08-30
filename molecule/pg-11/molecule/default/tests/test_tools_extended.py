@@ -41,7 +41,7 @@ PACKAGES = ["libecpg-compat3", "libecpg-compat3-dbgsym", "libecpg-dev-dbgsym", "
 @pytest.fixture()
 def pythonu_function(host):
     with host.sudo("postgres"):
-        install_extension = host.run("psql -c 'CREATE EXTENSION \"plpythonu\" IF NOT EXISTS;'")
+        install_extension = host.run("psql -c 'CREATE EXTENSION IF NOT EXISTS\"plpythonu\";'")
         print(install_extension.stderr)
         print(install_extension.stdout)
         assert install_extension.rc == 0
@@ -62,7 +62,7 @@ def pythonu_function(host):
 @pytest.fixture()
 def perl_function(host):
     with host.sudo("postgres"):
-        install_extension = host.run("psql -c 'CREATE EXTENSION \"plperl\" IF NOT EXISTS;'")
+        install_extension = host.run("psql -c 'CREATE EXTENSION IF NOT EXISTS \"plperl\";'")
         print(install_extension.stderr)
         print(install_extension.stdout)
         assert install_extension.rc == 0
@@ -83,7 +83,7 @@ def python3_function(host):
     if os.lower() in ['centos', 'redhat', 'rhel']:
         pytest.skip("Skipping python3 extensions for Centos or RHEL")
     with host.sudo("postgres"):
-        install_extension = host.run("psql -c 'CREATE EXTENSION \"plpython3u\" IF NOT EXISTS;'")
+        install_extension = host.run("psql -c 'CREATE EXTENSION IF NOT EXISTS \"plpython3u\";'")
         print(install_extension.stderr)
         print(install_extension.stdout)
         assert install_extension.rc == 0
@@ -104,7 +104,7 @@ def python3_function(host):
 @pytest.fixture()
 def tcl_function(host):
     with host.sudo("postgres"):
-        install_extension = host.run("psql -c 'CREATE EXTENSION \"pltcl\";'")
+        install_extension = host.run("psql -c 'CREATE EXTENSION IF NOT EXISTS \"pltcl\";'")
         assert install_extension.rc == 0
         create_function = """CREATE FUNCTION tcl_max(integer, integer) RETURNS integer AS $$
     if {$1 > $2} {return $1}
