@@ -58,6 +58,7 @@ $$ LANGUAGE plperl;
         execute_psql = host.run("psql -c \'{}\'".format(create_function))
         print(execute_psql.stdout)
         print(execute_psql.stderr)
+        return execute_psql
 
 
 @pytest.fixture()
@@ -110,15 +111,15 @@ def test_build_libpq_programm(host, build_libpq_programm):
     assert libpq_version.rc == 0
 
 
-def test_python_function():
+def test_python_function(python_function):
     pass
 
 
-def test_perl_function():
-    pass
+def test_perl_function(perl_function):
+    print(perl_function)
 
 
-def test_tcl_function():
+def test_tcl_function(tcl_function):
     pass
 
 
