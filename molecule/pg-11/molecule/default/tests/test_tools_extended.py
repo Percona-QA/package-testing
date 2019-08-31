@@ -105,6 +105,8 @@ def python3_function(host):
 def tcl_function(host):
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION IF NOT EXISTS \"pltcl\";'")
+        print(install_extension.stderr)
+        print(install_extension.stdout)
         assert install_extension.rc == 0
         create_function = """CREATE FUNCTION tcl_max(integer, integer) RETURNS integer AS $$
     if {$1 > $2} {return $1}

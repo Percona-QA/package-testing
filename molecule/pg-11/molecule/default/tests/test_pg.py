@@ -293,3 +293,6 @@ def test_language(host, language):
         lang = host.run("psql -c 'CREATE LANGUAGE {};'".format(language))
         assert lang.rc == 0
         assert lang.stdout.strip("\n") == "CREATE LANGUAGE"
+        drop_lang = host.run("psql -c 'DROP LANGUAGE {};'".format(language))
+        assert drop_lang.rc == 0
+        assert drop_lang.stdout.strip("\n") == "DROP LANGUAGE"
