@@ -42,8 +42,6 @@ PACKAGES = ["libecpg-compat3", "libecpg-compat3-dbgsym", "libecpg-dev-dbgsym", "
 def pythonu_function(host):
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION IF NOT EXISTS\"plpythonu\";'")
-        print(install_extension.stderr)
-        print(install_extension.stdout)
         assert install_extension.rc == 0
         create_function = """CREATE FUNCTION pymax (a integer, b integer)
           RETURNS integer
@@ -54,8 +52,8 @@ def pythonu_function(host):
         $$ LANGUAGE plpythonu;
                 """
         execute_psql = host.run("psql -c \'{}\'".format(create_function))
-        print(execute_psql.stdout)
-        print(execute_psql.stderr)
+        assert execute_psql.rc == 0
+        assert execute_psql.stdout.strip("\n") == "CREATE FUNCTION"
         return execute_psql
 
 
@@ -63,8 +61,6 @@ def pythonu_function(host):
 def perl_function(host):
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION IF NOT EXISTS \"plperl\";'")
-        print(install_extension.stderr)
-        print(install_extension.stdout)
         assert install_extension.rc == 0
         create_function = """CREATE FUNCTION perl_max (integer, integer) RETURNS integer AS $$
     if ($_[0] > $_[1]) { return $_[0]; }
@@ -72,8 +68,8 @@ def perl_function(host):
 $$ LANGUAGE plperl;
         """
         execute_psql = host.run("psql -c \'{}\'".format(create_function))
-        print(execute_psql.stdout)
-        print(execute_psql.stderr)
+        assert execute_psql.rc == 0
+        assert execute_psql.stdout.strip("\n") == "CREATE FUNCTION"
         return execute_psql
 
 
@@ -84,8 +80,6 @@ def python3_function(host):
         pytest.skip("Skipping python3 extensions for Centos or RHEL")
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION IF NOT EXISTS \"plpython3u\";'")
-        print(install_extension.stderr)
-        print(install_extension.stdout)
         assert install_extension.rc == 0
         create_function = """CREATE FUNCTION pymax (a integer, b integer)
                   RETURNS integer
@@ -96,8 +90,8 @@ def python3_function(host):
                 $$ LANGUAGE plpython3u;
                         """
         execute_psql = host.run("psql -c \'{}\'".format(create_function))
-        print(execute_psql.stdout)
-        print(execute_psql.stderr)
+        assert execute_psql.rc == 0
+        assert execute_psql.stdout.strip("\n") == "CREATE FUNCTION"
         return execute_psql
 
 
@@ -105,8 +99,6 @@ def python3_function(host):
 def tcl_function(host):
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION IF NOT EXISTS \"pltcl\";'")
-        print(install_extension.stderr)
-        print(install_extension.stdout)
         assert install_extension.rc == 0
         create_function = """CREATE FUNCTION tcl_max(integer, integer) RETURNS integer AS $$
     if {$1 > $2} {return $1}
@@ -114,8 +106,8 @@ def tcl_function(host):
 $$ LANGUAGE pltcl STRICT;
         """
         execute_psql = host.run("psql -c \'{}\'".format(create_function))
-        print(execute_psql.stdout)
-        print(execute_psql.stderr)
+        assert execute_psql.rc == 0
+        assert execute_psql.stdout.strip("\n") == "CREATE FUNCTION"
         return execute_psql
 
 
@@ -151,20 +143,27 @@ def test_build_libpq_programm(host, build_libpq_programm):
     assert libpq_version.rc == 0
 
 
-def test_pythonu_function(pythonu_function):
-    pass
+def test_pythonu_function(host, pythonu_function):
+    query = """SELECT pymax(1, 2);"""
+    result = host.run("psql -c \'{}\'".format(query))
+    print(result.stdout)
 
 
-def test_perl_function(perl_function):
-    print(perl_function)
+def test_perl_function(host, perl_function):
+    query = """SELECT perl_max(1, 2);"""
+    result = host.run("psql -c \'{}\'".format(query))
+    print(result.stdout)
 
 
-def test_tcl_function(tcl_function):
-    pass
+def test_tcl_function(host, tcl_function):
+    result = host.run("psql -c \'SELECT tcl_max(1, 2);\' | awk 'NR>=3{print $1}'")
+    print(result.stdout)
 
 
-def test_python3(host):
-    pass
+def test_python3(host, python3_function):
+    query = """SELECT pymax(1, 2);"""
+    result = host.run("psql -c \'{}\'".format(query))
+    print(result.stdout)
 
 
 # def test_fdw_extenstion(fdw_extension):
