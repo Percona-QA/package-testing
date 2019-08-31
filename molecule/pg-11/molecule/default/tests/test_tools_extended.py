@@ -81,7 +81,7 @@ def python3_function(host):
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION IF NOT EXISTS \"plpython3u\";'")
         assert install_extension.rc == 0
-        create_function = """CREATE FUNCTION pymax (a integer, b integer)
+        create_function = """CREATE FUNCTION pymax3 (a integer, b integer)
                   RETURNS integer
                 AS $$
                   if a > b:
@@ -168,7 +168,7 @@ def test_tcl_function(host, tcl_function):
 
 def test_python3(host, python3_function):
     with host.sudo("postgres"):
-        result = host.run("psql -c \'SELECT pymax(1, 2);\' | awk 'NR>=3{print $1}'")
+        result = host.run("psql -c \'SELECT pymax3(1, 2);\' | awk 'NR>=3{print $1}'")
         assert result.rc == 0
         assert result.stdout.strip("\n(1") == "2"
 
