@@ -147,28 +147,28 @@ def test_pythonu_function(host, pythonu_function):
     with host.sudo("postgres"):
         result = host.run("psql -c \'SELECT pymax(1, 2);\' | awk 'NR>=3{print $1}'")
         assert result.rc == 0
-        assert result.stdout.strip("\n") == 2
+        assert result.stdout.strip("\n(1") == 2
 
 
 def test_perl_function(host, perl_function):
     with host.sudo("postgres"):
         result = host.run("psql -c \'SELECT perl_max(1, 2);\' | awk 'NR>=3{print $1}'")
         assert result.rc == 0
-        assert result.stdout.strip("\n") == 2
+        assert result.stdout.strip("\n(1") == 2
 
 
 def test_tcl_function(host, tcl_function):
     with host.sudo("postgres"):
         result = host.run("psql -c \'SELECT tcl_max(1, 2);\' | awk 'NR>=3{print $1}'")
         assert result.rc == 0
-        assert result.stdout.strip("\n") == 2
+        assert result.stdout.strip("\n(1") == 2
 
 
 def test_python3(host, python3_function):
     with host.sudo("postgres"):
         result = host.run("psql -c \'SELECT pymax(1, 2);\' | awk 'NR>=3{print $1}'")
         assert result.rc == 0
-        assert result.stdout.strip("\n") == 2
+        assert result.stdout.strip("\n(1") == 2
 
 
 # def test_fdw_extenstion(fdw_extension):
