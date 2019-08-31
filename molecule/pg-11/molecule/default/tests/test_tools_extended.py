@@ -145,25 +145,29 @@ def test_build_libpq_programm(host, build_libpq_programm):
 
 def test_pythonu_function(host, pythonu_function):
     query = """SELECT pymax(1, 2);"""
-    result = host.run("psql -c \'{}\'".format(query))
-    print(result.stdout)
+    with host.sudo("postgres"):
+        result = host.run("psql -c \'{}\'".format(query))
+        print(result.stdout)
 
 
 def test_perl_function(host, perl_function):
     query = """SELECT perl_max(1, 2);"""
-    result = host.run("psql -c \'{}\'".format(query))
-    print(result.stdout)
+    with host.sudo("postgres"):
+        result = host.run("psql -c \'{}\'".format(query))
+        print(result.stdout)
 
 
 def test_tcl_function(host, tcl_function):
-    result = host.run("psql -c \'SELECT tcl_max(1, 2);\' | awk 'NR>=3{print $1}'")
-    print(result.stdout)
+    with host.sudo("postgres"):
+        result = host.run("psql -c \'SELECT tcl_max(1, 2);\' | awk 'NR>=3{print $1}'")
+        print(result.stdout)
 
 
 def test_python3(host, python3_function):
     query = """SELECT pymax(1, 2);"""
-    result = host.run("psql -c \'{}\'".format(query))
-    print(result.stdout)
+    with host.sudo("postgres"):
+        result = host.run("psql -c \'{}\'".format(query))
+        print(result.stdout)
 
 
 # def test_fdw_extenstion(fdw_extension):
