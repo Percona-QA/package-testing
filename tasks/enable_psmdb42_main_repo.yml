@@ -10,5 +10,12 @@
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat" 
 
+  - name: TEMP - install new script with support for 4.2 repo
+    command: "{{ item }}"
+    with_items:
+    - wget -O percona-release https://raw.githubusercontent.com/EvgeniyPatlan/percona-repositories/master/scripts/percona-release.sh
+    - chmod +x percona-release
+    - sudo mv percona-release /usr/bin
+
   - name: enable the PSMDB 4.2 main repo
     command: percona-release enable psmdb-42
