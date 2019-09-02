@@ -7,7 +7,7 @@ lint:
   name: yamllint
 platforms:
   - name: ${PLATFORM}
-    region: ${REGION}
+    region: ${AWS_DEFAULT_REGION}
     image: ${IMAGE}
     vpc_subnet_id: ${SUBNET}
     instance_type: t3.micro
