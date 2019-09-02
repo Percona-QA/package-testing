@@ -7,7 +7,7 @@
   vars:
     ssh_user: ubuntu
     ssh_port: 22
-    default_region: "{{ lookup('env', 'REGION') | default('us-east-1', true) }}"
+    default_region: "{{ lookup('env', 'AWS_DEFAULT_REGION') | default('us-east-1', true) }}"
 
     security_group_name_prefix: molecule
     security_group_description: Security group for testing Molecule
@@ -31,8 +31,9 @@
   tasks:
     - name: Check subnet
       ec2_vpc_subnet_facts:
-        subnet_ids: "{{ item.vpc_subnet_id }}"
         region: "{{ item.region|default(default_region) }}"
+        filters:
+          subnet-id: "{{ item.vpc_subnet_id }}"
       with_items: "{{ molecule_yml.platforms }}"
       register: subnet_facts
 
@@ -71,9 +72,6 @@
         region: "{{ item.region|default(default_region) }}"
       with_items: "{{ molecule_yml.platforms }}"
       register: keypair
-
-    - debug:
-        var: keypair
 
     - name: Persist the keypair
       copy:
