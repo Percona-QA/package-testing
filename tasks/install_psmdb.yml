@@ -1,6 +1,6 @@
 # This task installs PSMDB packages
 #
-  - name: install Percona Server for MongoDB 4.0 new deb packages
+  - name: install Percona Server for MongoDB 4.x new deb packages
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -11,7 +11,7 @@
       - percona-server-mongodb-dbg
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Server for MongoDB 4.0 new rpm packages
+  - name: install Percona Server for MongoDB 4.x new rpm packages
     yum:
       name: "{{ packages }}"
       state: latest
@@ -21,7 +21,7 @@
       - percona-server-mongodb-debuginfo
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int < 8
 
-  - name: install Percona Server for MongoDB 4.0 new rpm packages on Centos8 and greater
+  - name: install Percona Server for MongoDB 4.x new rpm packages on Centos8 and greater
     yum:
       name: "{{ packages }}"
       state: latest
