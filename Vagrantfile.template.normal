@@ -57,6 +57,7 @@ Vagrant.configure("2") do |config|
       config.trigger.before :destroy, :halt do |trigger|
         trigger.info = "Unregisterring rhel8 subscription"
         trigger.run_remote = {inline: "/package-testing/rhel8-unregister.sh"}
+        trigger.on_error = :continue
       end
     end
   end
