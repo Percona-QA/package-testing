@@ -88,7 +88,7 @@
     command: /package-testing/package_check.sh pxc57
 
   - name: run bats tests for mysql init scripts
-    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+    command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
 
   - name: start mysql service
     service: name=mysql state=started
