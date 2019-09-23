@@ -25,7 +25,7 @@
   command: percona-release enable ppg-11 experimental
 
 - name: install Percona Platform for PostgreSQL 11 packages
-  include_tasks: ../../../tasks/install_ppg11.yml
+  include_tasks: ../../../tasks/^)install_ppg11.yml
 
 - name: Install libpq-dev
   apt:
