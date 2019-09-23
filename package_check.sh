@@ -57,6 +57,8 @@ elif [ $1 = "psmdb36" ]; then
   version=${PSMDB36_VER}
 elif [ $1 = "psmdb40" ]; then
   version=${PSMDB40_VER}
+elif [ $1 = "psmdb42" ]; then
+  version=${PSMDB42_VER}
 elif [ $1 = "pmm" ]; then
   version=${PMM_VER}
 elif [ $1 = "pbm" ]; then
@@ -150,6 +152,7 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
     if [ ${product} = "pxc56" ]; then
       rpm_opt_package=""
       rpm_num_pkgs="11"
+	  garbd_maj_version=3
     elif [ ${product} = "pxc57" ]; then
       if [ ${centos_maj_version} == "7" ]; then
         rpm_num_pkgs="10"
@@ -158,11 +161,12 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
         rpm_num_pkgs="9"
         rpm_opt_package=""
       fi
+	  garbd_maj_version=$(echo ${product} | sed 's/^[a-z]*//')
     fi
     if [ "$(rpm -qa | grep Percona-XtraDB-Cluster | grep -c ${version})" == "${rpm_num_pkgs}" ]; then
       echo "all packages are installed"
     else
-      for package in Percona-XtraDB-Cluster-server-${rpm_maj_version} Percona-XtraDB-Cluster-test-${rpm_maj_version} Percona-XtraDB-Cluster-${rpm_maj_version}-debuginfo Percona-XtraDB-Cluster-devel-${rpm_maj_version} Percona-XtraDB-Cluster-shared-${rpm_maj_version} Percona-XtraDB-Cluster-client-${rpm_maj_version} Percona-XtraDB-Cluster-full-${rpm_maj_version} Percona-XtraDB-Cluster-garbd-${rpm_maj_version} ${rpm_opt_package}; do
+      for package in Percona-XtraDB-Cluster-server-${rpm_maj_version} Percona-XtraDB-Cluster-test-${rpm_maj_version} Percona-XtraDB-Cluster-${rpm_maj_version}-debuginfo Percona-XtraDB-Cluster-devel-${rpm_maj_version} Percona-XtraDB-Cluster-shared-${rpm_maj_version} Percona-XtraDB-Cluster-client-${rpm_maj_version} Percona-XtraDB-Cluster-full-${rpm_maj_version} ${rpm_opt_package}; do
         if [ "$(rpm -qa | grep -c ${package}-${version})" -gt 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
         else
@@ -170,6 +174,12 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
           exit 1
         fi
       done
+      if [ "$(rpm -qa | grep -c Percona-XtraDB-Cluster-garbd-${garbd_maj_version})" -gt 0 ]; then
+        echo "$(date +%Y%m%d%H%M%S): Percona-XtraDB-Cluster-garbd-${garbd_maj_version} is installed" >> ${log}
+      else
+        echo "WARNING: Percona-XtraDB-Cluster-garbd-${garbd_maj_version} is not installed"
+        exit 1
+      fi
     fi
   else
     deb_maj_version=$(echo ${product} | sed 's/^[a-z]*//' | sed 's/./&\./') # 5.6
@@ -269,7 +279,7 @@ elif [ "${product}" = "psmdb30" -o "${product}" = "psmdb32" -o "${product}" = "p
         fi
       done
     else
-      if [ "${product}" = "psmdb40" ]; then
+      if [ "${product}" = "psmdb40" -o "${product}" = "psmdb42" ]; then
         psmdb_name="percona-server-mongodb"
       else
         psmdb_name=""

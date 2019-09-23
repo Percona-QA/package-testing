@@ -1,0 +1,34 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+playbook = "install_all_packages.yml"
+
+Vagrant.configure("2") do |config|
+  # All Vagrant configuration is done here. The most pxb configuration
+  # options are documented and commented below. For a complete reference,
+  # please see the online documentation at vagrantup.com.
+
+  config.vm.define :xenial do |xenial_config|
+    xenial_config.vm.box = "bento/ubuntu-16.04"
+    config.vm.provision "ansible" do |ansible|
+      ansible.playbook = playbook
+      ansible.host_key_checking = "false"
+    end
+    xenial_config.vm.provider :virtualbox do |vb|
+      vb.customize ["modifyvm", :id, "--memory", "4096", "--ioapic", "on" ]
+    end
+    xenial_config.vm.host_name = "xenial"
+    xenial_config.vm.network :private_network, ip: "192.168.70.31"
+  end
+
+  config.vm.define :centos7 do |centos7_config|
+    centos7_config.vm.box = "bento/centos-7"
+    config.vm.provision "ansible" do |ansible|
+      ansible.playbook = playbook
+      ansible.host_key_checking = "false"
+    end
+    centos7_config.vm.host_name = "centos7"
+  end
+
+
+end

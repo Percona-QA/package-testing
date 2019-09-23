@@ -96,6 +96,9 @@
   - name: check that PSMDB 3.6 package versions are correct
     command: /package-testing/package_check.sh psmdb36
 
+  - name: check that PSMDB 3.6 version is correct
+    command: /package-testing/version_check.sh psmdb36
+
   - name: run bats tests for mongo init scripts
     command: /usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats
 

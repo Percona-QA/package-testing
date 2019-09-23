@@ -12,7 +12,7 @@ servers=[
   { :hostname => "u-xenial-64-@@hostname@@", :box => "bento/ubuntu-16.04" },
   { :hostname => "u-bionic-64-@@hostname@@", :box => "bento/ubuntu-18.04" },
   { :hostname => "u-cosmic-64-@@hostname@@", :box => "bento/ubuntu-18.10" },
-  { :hostname => "u-disco-64-@@hostname@@", :box => "generic/ubuntu1904" },
+  { :hostname => "u-disco-64-@@hostname@@", :box => "bento/ubuntu-19.04" },
   { :hostname => "sles-11-64-@@hostname@@", :box => "wvera/sles11sp4" },
   { :hostname => "sles-12-64-@@hostname@@", :box => "wvera/sles12sp2" }
 ]
@@ -20,6 +20,7 @@ servers=[
 $script = <<-SCRIPT
 if [ -f /etc/redhat-release ] && [ "$(grep -c Red /etc/redhat-release)" == 1 ]; then
   echo "This is RHEL8"
+  subscription-manager register --username=$RHEL_EMAIL --password=$RHEL_PASSWORD --auto-attach
   curl -o /etc/yum.repos.d/percona-dev.repo https://jenkins.percona.com/yum-repo/rhel8/rhel8-beta.repo
   yum install python3 python3-dnf -y
   ln -s /usr/bin/python3 /usr/bin/python
@@ -53,6 +54,11 @@ Vagrant.configure("2") do |config|
       end
       config.vm.synced_folder '.', '/vagrant', :disabled => true
       config.vm.synced_folder '.', '/home/vagrant/sync', :disabled => true
+      config.trigger.before :destroy, :halt do |trigger|
+        trigger.info = "Unregisterring rhel8 subscription"
+        trigger.run_remote = {inline: "/package-testing/rhel8-unregister.sh"}
+        trigger.on_error = :continue
+      end
     end
   end
 

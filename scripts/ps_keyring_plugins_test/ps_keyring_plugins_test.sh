@@ -16,18 +16,18 @@ if [ -z "$1" ]; then
 elif [ "$1" != "ps57" -a "$1" != "ps80" ]; then
   echo "Version not recognized!"
   exit 1
-else
-  VERSION="$1"
+#else
+#  VERSION="$1"
 fi
 
-if [ "$VERSION" == "ps57" ]; then
-  opt_enc="ENCRYPTION='Y'"
-  binlog_enc="encrypt_binlog=ON"
-else
-  opt_enc=""
+#if [ "$VERSION" == "ps57" ]; then
+opt_enc="ENCRYPTION='Y'"
+#  binlog_enc="encrypt_binlog=ON"
+#else
+#  opt_enc=""
 # binlog_enc="encrypt_binlog=ON"
 # binlog_enc="binlog_encryption=ON"
-fi
+#fi
 
 echo "Adding the config vars" | tee -a ${LOG}
 service mysql stop
@@ -55,7 +55,7 @@ echo "keyring_file plugin test" | tee -a ${LOG}
 # keyring_file plugin test
 mysql -e "CREATE DATABASE IF NOT EXISTS test;"
 mysql --database=test -e "CREATE TABLESPACE ts1 ADD DATAFILE 'ts1.ibd' ENCRYPTION='Y';"
-mysql --database=test -e "CREATE TABLE keyring_file_test (a INT PRIMARY KEY) TABLESPACE ts1 ${opt_enc};"
+mysql --database=test -e "CREATE TABLE keyring_file_test (a INT PRIMARY KEY) TABLESPACE ts1 ENCRYPTION='Y';"
 mysql --database=test -e "INSERT INTO keyring_file_test VALUES (1),(2),(3);"
 mysql --database=test -e "ALTER INSTANCE ROTATE INNODB MASTER KEY;"
 result=$(mysql --database=test -N -s -e "CHECKSUM TABLE keyring_file_test;" | awk -F' ' '{print $2}')
@@ -84,7 +84,7 @@ echo "keyring_vault plugin test" | tee -a ${LOG}
 #mysql -e "SET GLOBAL keyring_vault_config='/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf';"
 mysql -e "CREATE DATABASE IF NOT EXISTS test;"
 mysql --database=test -e "CREATE TABLESPACE ts1 ADD DATAFILE 'ts1.ibd' ENCRYPTION='Y';"
-mysql --database=test -e "CREATE TABLE keyring_vault_test (a INT PRIMARY KEY) TABLESPACE ts1 ${opt_enc};"
+mysql --database=test -e "CREATE TABLE keyring_vault_test (a INT PRIMARY KEY) TABLESPACE ts1 ENCRYPTION='Y';"
 mysql --database=test -e "INSERT INTO keyring_vault_test VALUES (1),(2),(3);"
 mysql --database=test -e "ALTER INSTANCE ROTATE INNODB MASTER KEY;"
 result=$(mysql --database=test -N -s -e "CHECKSUM TABLE keyring_vault_test;" | awk -F' ' '{print $2}')

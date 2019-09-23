@@ -39,6 +39,9 @@
   - name: check that PSMDB 3.6 package versions are correct
     command: /package-testing/package_check.sh psmdb36
 
+  - name: check that PSMDB 3.6 version is correct
+    command: /package-testing/version_check.sh psmdb36
+
   - name: test perconadecrypt with keyfile
     command: /package-testing/scripts/psmdb_encryption/perconadecrypt-test.sh 3.6 keyfile
 

@@ -1,0 +1,83 @@
+# This playbook installs the pmm packages on CentOS and Debian/Ubuntu
+
+  #
+  # Install PMM 2 packages
+  #
+  - name: Install pmm2-client packages in debian
+    apt:
+      name: pmm2-client
+      state: latest
+    when: ansible_os_family == "Debian"
+
+  - name: Uninstall pmm2-client packages in debian
+    apt:
+      name: pmm2-client
+      state: absent
+    when: ansible_os_family == "Debian"
+
+  - name: Remove unused packages from the cache for debian
+    apt:
+      autoclean: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Remove dependencies that are no longer required for debian
+    apt:
+      autoremove: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Install pmm2-client packages in centos
+    yum:
+      name: pmm2-client
+      state: latest
+    when: ansible_os_family == "RedHat"
+
+  - name: Uninstall pmm2-client packages in centos
+    yum:
+      name: pmm2-client
+      state: absent
+    when: ansible_os_family == "RedHat"
+
+  - name: Remove dependencies that are not required in centos
+    command: yum -y autoremove
+    when: ansible_os_family == "RedHat"
+
+  #
+  # Install PMM packages
+  #
+  - name: Install pmm-client packages in debian
+    apt:
+      name: pmm-client
+      state: latest
+    when: ansible_os_family == "Debian"
+
+  - name: Uninstall pmm-client packages in debian
+    apt:
+      name: pmm-client
+      state: absent
+    when: ansible_os_family == "Debian"
+
+  - name: Remove unused packages from the cache for debian
+    apt:
+      autoclean: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Remove dependencies that are no longer required for debian
+    apt:
+      autoremove: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Install pmm-client packages in centos
+    yum:
+      name: pmm-client
+      state: latest
+    when: ansible_os_family == "RedHat"
+
+  - name: Uninstall pmm-client packages in centos
+    yum:
+      name: pmm-client
+      state: absent
+    when: ansible_os_family == "RedHat"
+
+  - name: Remove dependencies that are not required in centos
+    command: yum -y autoremove
+    when: ansible_os_family == "RedHat"

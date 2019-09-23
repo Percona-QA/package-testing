@@ -1,0 +1,162 @@
+# This playbook installs percona xtrabackup packages on CentOS and Debian/Ubuntu
+
+#
+# Install PXB 8.0 packages
+# 
+
+  - name: Install percona-xtrabackup-80 packages in debian
+    apt:
+      name: "{{ packages }}"
+      state: latest
+    vars: 
+      packages:
+      - percona-xtrabackup-80
+      - percona-xtrabackup-test-80
+      - percona-xtrabackup-dbg-80
+    when: ansible_os_family == "Debian"
+
+  - name: Uninstall percona-xtrabackup-80 packages in debian
+    apt:
+      name: "{{ packages }}"
+      state: absent
+    vars: 
+      packages:
+      - percona-xtrabackup-80
+      - percona-xtrabackup-test-80
+      - percona-xtrabackup-dbg-80
+    when: ansible_os_family == "Debian"
+
+  - name: Install percona-xtrabackup-80 packages in centos
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup-80
+      - percona-xtrabackup-test-80
+      - percona-xtrabackup-80-debuginfo
+    when: ansible_os_family == "RedHat"
+
+  - name: Uninstall percona-xtrabackup-80 packages in centos
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-xtrabackup-80
+      - percona-xtrabackup-test-80
+      - percona-xtrabackup-80-debuginfo
+      - percona-server-client.x86_64
+      - percona-server-shared.x86_64
+      - percona-server-shared-compat.x86_64
+    when: ansible_os_family == "RedHat"
+
+#
+# Install PXB2.4 packages
+#
+
+  - name: Install percona-xtrabackup-24 packages in debian
+    apt:
+      name: "{{ packages }}"
+      state: latest
+    vars: 
+      packages:
+      - percona-xtrabackup-24
+      - percona-xtrabackup-test-24
+      - percona-xtrabackup-dbg-24
+    when: ansible_os_family == "Debian"
+
+  - name: Uninstall percona-xtrabackup-24 packages in debian
+    apt:
+      name: "{{ packages }}"
+      state: absent
+    vars: 
+      packages:
+      - percona-xtrabackup-24
+      - percona-xtrabackup-test-24
+      - percona-xtrabackup-dbg-24
+    when: ansible_os_family == "Debian"
+
+  - name: Install percona-xtrabackup-24 packages in centos
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup-24
+      - percona-xtrabackup-test-24
+      - percona-xtrabackup-24-debuginfo
+    when: ansible_os_family == "RedHat"
+
+  - name: Uninstall percona-xtrabackup-24 packages in centos
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-xtrabackup-24
+      - percona-xtrabackup-test-24
+      - percona-xtrabackup-24-debuginfo
+    when: ansible_os_family == "RedHat"
+
+#
+# Install PXB2.3 packages
+#
+
+  - name: Install percona-xtrabackup packages in debian
+    apt:
+      name: "{{ packages }}"
+      state: latest
+    vars: 
+      packages:
+      - percona-xtrabackup
+      - percona-xtrabackup-test
+      - percona-xtrabackup-dbg
+    when: ansible_os_family == "Debian"
+
+  - name: Uninstall percona-xtrabackup packages in debian
+    apt:
+      name: "{{ packages }}"
+      state: absent
+    vars: 
+      packages:
+      - percona-xtrabackup
+      - percona-xtrabackup-test
+      - percona-xtrabackup-dbg
+    when: ansible_os_family == "Debian"
+
+  - name: Remove unused packages from the cache for debian
+    apt:
+      autoclean: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Remove dependencies that are no longer required for debian
+    apt:
+      autoremove: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Install percona-xtrabackup packages in centos
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup
+      - percona-xtrabackup-test
+      - percona-xtrabackup-debuginfo
+    when: ansible_os_family == "RedHat"
+
+  - name: Uninstall percona-xtrabackup packages in centos
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-xtrabackup
+      - percona-xtrabackup-test
+      - percona-xtrabackup-debuginfo
+    when: ansible_os_family == "RedHat"
+
+  - name: Remove dependencies that are not required in centos
+    command: yum -y autoremove
+    when: ansible_os_family == "RedHat"
