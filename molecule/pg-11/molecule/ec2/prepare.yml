@@ -9,6 +9,13 @@
       changed_when: false
       when: ansible_os_family == "Debian"
 
+    - name: Delete apt lock file
+      file:
+        state: absent
+        path: "/var/lib/dpkg/lock-frontend"
+      become: true
+      when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
+
 - name: Prepare RHEL based
   hosts: all
   gather_facts: true
