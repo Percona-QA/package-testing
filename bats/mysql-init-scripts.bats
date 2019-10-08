@@ -222,7 +222,7 @@ function teardown(){
 @test "add nonexisting option to config file (/etc/mysql/my.cnf) and start with systemctl" {
   if [ ${SYSTEMCTL} -eq 1 ]; then
     # TODO: Check if this can be somehow done for centos with systemd
-    if [ ! -f /etc/redhat-release ]; then
+    if [ ! -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
       stopit
       fix_timeout
       echo "[mysqld]" >> ${MYSQLCONF}
