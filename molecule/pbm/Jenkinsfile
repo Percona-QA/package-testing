@@ -1,0 +1,47 @@
+pipeline {
+  agent { label 'qaserver-03' }
+  parameters {
+        choice(name: 'PSMDB_TO_TEST', choices: ['psmdb40', 'psmdb36'], description: 'PSMDB to test.')
+        choice(name: 'INSTALL_REPO', choices: ['testing', 'main', 'experimental'], description: 'For playbooks that support chosing another repo in install test.')
+    }
+  stages {
+    stage ('Get latest code') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage ('Setup Python virtual environment') {
+      steps {
+        sh '''
+        python3 -m venv virtenv
+        source virtenv/bin/activate
+        pip install pytest molecule ansible wheel  python-vagrant paramiko
+        '''
+      }
+    }
+
+    stage ('Display versions') {
+      steps {
+        sh '''
+          source virtenv/bin/activate
+          docker -v
+          python -V
+          ansible --version
+          molecule --version
+        '''
+      }
+    }
+    stage ('Molecule test') {
+      steps {
+        sh '''
+          export psmdb_to_test=${PSMDB_TO_TEST}
+          export install_repo=${INSTALL_REPO}
+          source virtenv/bin/activate
+          cd molecule/pbm
+          molecule test
+         '''
+      }
+    }
+  }
+}
