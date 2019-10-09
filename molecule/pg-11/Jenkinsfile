@@ -17,6 +17,15 @@ pipeline {
                 'rhel8'
             ]
         )
+        choice(
+            name: 'REPO',
+            description: 'Repo for testing',
+            choices: [
+                'testing',
+                'experimental',
+                'main',
+            ]
+        )
   }
   stages {
     stage('Set build name'){

@@ -11,6 +11,7 @@
 #   when: lookup('env', 'install_repo') == "main"
 
 ### temp part until percona-release is updated for PPG project
+
 - name: include tasks for enabling main repo (do this just for GPG key)
   include: ../../../tasks/enable_main_repo.yml
 
@@ -21,8 +22,10 @@
     mode: '755'
     force: true
 
-- name: setup temporary experimental repo until percona-release is updated
-  command: percona-release enable ppg-11 experimental
+- name: setup temporary repo until percona-release is updated
+  command: percona-release enable ppg-11 {{ repo }}
+  vars:
+    repo: "{{ lookup('env', 'REPO') }}"
 
 - name: install Percona Platform for PostgreSQL 11 packages
   include_tasks: ../../../tasks/install_ppg11.yml
