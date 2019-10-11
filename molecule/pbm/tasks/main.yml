@@ -56,25 +56,15 @@
 
 - name: install PBM new deb packages
   apt:
-    name: "{{ packages }}"
+    name: percona-backup-mongodb
     update_cache: yes
     state: latest
-  vars:
-    packages:
-    - percona-backup-mongodb-coordinator
-    - percona-backup-mongodb-agent
-    - percona-backup-mongodb-pbmctl
   when: ansible_os_family == "Debian"
 
 - name: install PBM new rpm packages
   yum:
-    name: "{{ packages }}"
+    name: percona-backup-mongodb
     state: latest
-  vars:
-    packages:
-    - percona-backup-mongodb-coordinator
-    - percona-backup-mongodb-agent
-    - percona-backup-mongodb-pbmctl
   when: ansible_os_family == "RedHat"
 
 - name: check PBM binaries version
@@ -92,53 +82,48 @@
         filesystem:
           path: /tmp
 
-#- name: start pbm-coordinator service
-#  service: name=pbm-coordinator state=started
-#
-#- pause:
-#    seconds: 3
-#
-#- name: start pbm-agent service
-#  service: name=pbm-agent state=started
-#
-#- pause:
-#    seconds: 5
+- name: start pbm-coordinator service
+  service: name=pbm-coordinator state=started
 
-#- name: run pbm test script
-#  command: /package-testing/scripts/pbm_test.sh
+- pause:
+    seconds: 3
 
-#- name: stop pbm-agent service
-#  service: name=pbm-agent state=stopped
-#
-#- pause:
-#    seconds: 5
+- name: start pbm-agent service
+  service: name=pbm-agent state=started
 
-#- name: check that pbm-agent is not listed any more
-#  shell: pbmctl list nodes 2>&1|grep -c "127.0.0.1:27017"
-#  register: pbm_nodes
-#  failed_when: "'0' not in pbm_nodes.stdout"
-#
-#- name: stop pbm-coordinator service
-#  service: name=pbm-coordinator state=stopped
-#
-#- name: remove PBM deb packages
-#  apt:
-#    name: "{{ packages }}"
-#    state: absent
-#  vars:
-#    packages:
-#    - percona-backup-mongodb-coordinator
-#    - percona-backup-mongodb-agent
-#    - percona-backup-mongodb-pbmctl
-#  when: ansible_os_family == "Debian"
-#
-#- name: remove PBM rpm packages
-#  yum:
-#    name: "{{ packages }}"
-#    state: absent
-#  vars:
-#    packages:
-#    - percona-backup-mongodb-coordinator
-#    - percona-backup-mongodb-agent
-#    - percona-backup-mongodb-pbmctl
-#  when: ansible_os_family == "RedHat"
+- pause:
+    seconds: 5
+
+- name: run pbm test script
+  command: /package-testing/scripts/pbm_test.sh
+
+- name: stop pbm-agent service
+  service: name=pbm-agent state=stopped
+
+- pause:
+    seconds: 5
+
+- name: check that pbm-agent is not listed any more
+  shell: pbmctl list nodes 2>&1|grep -c "127.0.0.1:27017"
+  register: pbm_nodes
+  failed_when: "'0' not in pbm_nodes.stdout"
+
+- name: stop pbm-coordinator service
+  service: name=pbm-coordinator state=stopped
+
+- name: remove PBM deb packages
+  apt:
+    name: percona-backup-mongodb
+    state: absent
+  when: ansible_os_family == "Debian"
+
+- name: remove PBM rpm packages
+  yum:
+    name: percona-backup-mongodb
+    state: absent
+  vars:
+    packages:
+    - percona-backup-mongodb-coordinator
+    - percona-backup-mongodb-agent
+    - percona-backup-mongodb-pbmctl
+  when: ansible_os_family == "RedHat"
