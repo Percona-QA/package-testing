@@ -47,7 +47,7 @@ pipeline {
     stage ('Setup Environment Variables') {
       steps {
        script {
-       vms = readYaml (file: 'scripts/molecule/configuration.yml')
+       vms = readYaml (file: 'molecule/configuration.yml')
        env.IMAGE = vms."${PLATFORM}".image
        env.USER = vms."${PLATFORM}".user
        env.SUBNET = vms."${PLATFORM}".subnet
