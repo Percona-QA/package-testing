@@ -36,6 +36,10 @@ pipeline {
             ]
         )
   }
+  environment {
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+  }
   stages {
     stage('Set build name'){
       steps {
@@ -69,7 +73,6 @@ pipeline {
     }
     stage ('Create virtual machines') {
       steps {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
           sh '''
               echo $USER
               echo $REGION
@@ -79,7 +82,6 @@ pipeline {
               cd molecule/pbm
               python3 -m molecule create
           '''
-        }
       }
     }
     stage ('Run playbook for test') {
@@ -111,12 +113,10 @@ pipeline {
   }
   post {
     always {
-      withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
             cd molecule/pbm
             python3 -m molecule destroy
         '''
-      }
     }
   }
 }
