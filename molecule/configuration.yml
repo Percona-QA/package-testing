@@ -1,16 +1,16 @@
-centos7:
+centos-7:
   image: ami-0837950ffca9ae6e8
   user: centos
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
-debian9:
+debian-9:
   image: ami-006c08e13f35edce0
   user: admin
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
-debian10:
+debian-10:
   image: ami-0be88f8d647409e61
   user: admin
   subnet: subnet-085deaca8c1c59a4f
