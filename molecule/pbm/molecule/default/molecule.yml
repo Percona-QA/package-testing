@@ -38,7 +38,7 @@ verifier:
     name: flake8
     enabled: False
 scenario:
-  name: ec2
+  name: default
   destroy_sequence:
     - destroy
   clenup_sequence:
@@ -52,5 +52,4 @@ scenario:
     - converge
     - verify
     - cleanup
-    # - side_effect
     - destroy

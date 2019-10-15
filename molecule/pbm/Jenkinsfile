@@ -70,11 +70,6 @@ pipeline {
     stage ('Create virtual machines') {
       steps {
           sh '''
-              echo $USER
-              echo $REGION
-              echo $SUBNET
-              echo $IMAGE
-              echo $PLATFORM
               cd molecule/pbm
               python3 -m molecule create
           '''
@@ -92,7 +87,6 @@ pipeline {
       steps {
         sh '''
             cd molecule/pbm
-
             python3 -m molecule verify
         '''
         junit 'molecule/pbm/molecule/default/*.xml'
