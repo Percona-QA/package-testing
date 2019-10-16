@@ -48,6 +48,7 @@
 
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
+    when: lookup('env', 'install_repo') != "experimental"
 
   - name: start mysql service with service command
     command: service mysql start
