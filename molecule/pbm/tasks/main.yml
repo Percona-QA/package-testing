@@ -67,63 +67,21 @@
     state: latest
   when: ansible_os_family == "RedHat"
 
-- name: check PBM binaries version
-  command: /package-testing/version_check.sh pbm
-
-- name: check PBM packages and version
-  command: /package-testing/package_check.sh pbm
-
 - name: add storage for pbm-agent
   blockinfile:
     path: /etc/pbm-agent-storage.conf
     block: |
-      local-filesystem:
-        type: filesystem
-        filesystem:
-          path: /tmp
-
-- name: start pbm-coordinator service
-  service: name=pbm-coordinator state=started
-
-- pause:
-    seconds: 3
+      type: s3
+      s3:
+         region: us-west
+         endpointUrl: http://localhost:9000
+         bucket: pbm
+         credentials:
+           access-key-id: "{{ lookup('env', 'AWS_ACCESS_KEY') }}"
+           secret-access-key: "{{ lookup('env', 'AWS_SECRET_KEY') }}"
 
 - name: start pbm-agent service
-  service: name=pbm-agent state=started
-
-- pause:
-    seconds: 5
-
-- name: run pbm test script
-  command: /package-testing/scripts/pbm_test.sh
-
-- name: stop pbm-agent service
-  service: name=pbm-agent state=stopped
-
-- pause:
-    seconds: 5
-
-- name: check that pbm-agent is not listed any more
-  shell: pbmctl list nodes 2>&1|grep -c "127.0.0.1:27017"
-  register: pbm_nodes
-  failed_when: "'0' not in pbm_nodes.stdout"
-
-- name: stop pbm-coordinator service
-  service: name=pbm-coordinator state=stopped
-
-- name: remove PBM deb packages
-  apt:
-    name: percona-backup-mongodb
-    state: absent
-  when: ansible_os_family == "Debian"
-
-- name: remove PBM rpm packages
-  yum:
-    name: percona-backup-mongodb
-    state: absent
-  vars:
-    packages:
-    - percona-backup-mongodb-coordinator
-    - percona-backup-mongodb-agent
-    - percona-backup-mongodb-pbmctl
-  when: ansible_os_family == "RedHat"
+  service:
+    name: pbm-agent
+    state: started
+    args: mongodb://localhost:27017
