@@ -107,7 +107,6 @@ pipeline {
     always {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
-
             cd molecule/pbm
             python3 -m molecule destroy
         '''

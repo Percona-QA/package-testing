@@ -70,6 +70,7 @@
 - name: add storage for pbm-agent
   blockinfile:
     path: /etc/pbm-agent-storage.conf
+    create: true
     block: |
       type: s3
       s3:
