@@ -80,6 +80,13 @@
            access-key-id: "{{ lookup('env', 'AWS_ACCESS_KEY') }}"
            secret-access-key: "{{ lookup('env', 'AWS_SECRET_KEY') }}"
 
+- name: edit pbm-agent service config
+  blockinfile:
+    path: /etc/default/pbm-agent
+    block: |
+      PBM_MONGODB_URI="mongodb://localhost:27017/?authSource=admin&replicaSet=rs1"
+  when: ansible_os_family == "Debian"
+
 - name: start pbm-agent service
   service:
     name: pbm-agent
