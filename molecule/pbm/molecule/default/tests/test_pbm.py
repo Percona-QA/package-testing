@@ -60,7 +60,7 @@ def set_store(host):
     """
     command = "pbm store set --config=/etc/pbm-agent-storage.conf --mongodb-uri=mongodb://localhost:27017"
     result = host.run(command)
-    assert result.rc == 0
+    assert result.rc == 0, result.stdout
     return result
 
 
@@ -74,7 +74,7 @@ def show_store(host, set_store):
     """
     command = "pbm store show --mongodb-uri=mongodb://localhost:27017"
     result = host.run(command)
-    assert result.rc == 0
+    assert result.rc == 0, result.stdout
     print(result.stdout)
     return parse_yaml_string(result.stdout)
 
@@ -146,8 +146,8 @@ def test_start_stop_service(start_stop_pbm):
 
     :param start_stop_pbm:
     """
-    assert start_stop_pbm.rc == 0
-    assert "active" in start_stop_pbm.stdout
+    assert start_stop_pbm.rc == 0, restart_pbm_agent.stdout
+    assert "active" in start_stop_pbm.stdout, restart_pbm_agent.stdout
 
 
 def test_restart_service(restart_pbm_agent):
@@ -155,7 +155,7 @@ def test_restart_service(restart_pbm_agent):
 
     :param restart_pbm_agent:
     """
-    assert restart_pbm_agent.rc == 0
+    assert restart_pbm_agent.rc == 0, restart_pbm_agent.stdout
     assert "active" in restart_pbm_agent.stdout
 
 
@@ -166,7 +166,8 @@ def test_pbm_version(host):
     :return:
     """
     result = host.run("pbm version")
-    assert result.rc == 0
+    print(result.stdout)
+    assert result.rc == 0, result.stdout
     lines = result.stdout.split("\n")
     parsed_config = {line.split(":")[0]: line.split(":")[1].strip() for line in lines}
     assert "1.0" in parsed_config['Version']

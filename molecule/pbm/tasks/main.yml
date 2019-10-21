@@ -78,8 +78,11 @@
          endpointUrl: http://localhost:9000
          bucket: pbm
          credentials:
-           access-key-id: "{{ lookup('env', 'AWS_ACCESS_KEY') }}"
-           secret-access-key: "{{ lookup('env', 'AWS_SECRET_KEY') }}"
+           access-key-id: {{ access_key }}
+           secret-access-key: {{ access_key_secret }}
+    vars:
+      access_key_id: {{ lookup('env', 'AWS_ACCESS_KEY') }}
+      acess_key_secret: {{ lookup('env', 'AWS_SECRET_KEY') }}
 
 - name: edit pbm-agent service config
   blockinfile:
