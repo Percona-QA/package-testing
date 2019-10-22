@@ -22,7 +22,7 @@ def install_plugin(host, pname, soname):
     assert cmd.succeeded
     assert 'ACTIVE' in cmd.stdout
 
-@pytest.fixture(scope='class')
+@pytest.fixture(scope='module')
 def host(request):
     # run a container
     docker_id = subprocess.check_output(
@@ -34,15 +34,14 @@ def host(request):
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
 
 def test_rocksdb_installed(host):
-    #cmd = host.run('ps-admin --enable-rocksdb --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock')
-    #assert cmd.succeeded
-    cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "select SUPPORT from information_schema.ENGINES where ENGINE = \'ROCKSDB\';"')
-    assert cmd.succeeded
-    assert 'YES' in cmd.stdout
+    if ps_version_major not in ['5.6']:
+        cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "select SUPPORT from information_schema.ENGINES where ENGINE = \'ROCKSDB\';"')
+        assert cmd.succeeded
+        assert 'YES' in cmd.stdout
+    else:
+        pytest.skip('RocksDB is available from 5.7!')
 
 def test_tokudb_installed(host):
-    #cmd = host.run('ps-admin --enable-tokudb --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock')
-    #assert cmd.succeeded
     cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "select SUPPORT from information_schema.ENGINES where ENGINE = \'TokuDB\';"')
     assert cmd.succeeded
     assert 'YES' in cmd.stdout

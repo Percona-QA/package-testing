@@ -8,14 +8,15 @@ from settings import *
 
 container_name = 'ps-docker-test-static'
 
-@pytest.fixture(scope='class')
+@pytest.fixture(scope='module')
 def host(request):
     # run a container
     docker_id = subprocess.check_output(
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-d', docker_image]).decode().strip()
+    subprocess.check_call(['docker','exec','--user','root',container_name,'yum','install','-y','net-tools'])
     time.sleep(20)
     # return a testinfra connection to the container
-    yield testinfra.get_host("docker://" + docker_id)
+    yield testinfra.get_host("docker://root@" + docker_id)
     # at the end of the test suite, destroy the container
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
 
@@ -58,6 +59,16 @@ def test_mysql_socket_mysqlx(host):
     else:
         assert host.socket('unix:///var/lib/mysql/mysqlx.sock').is_listening
 
+def test_mysql_user(host):
+    assert host.user('mysql').exists
+    assert host.user('mysql').uid == 1001
+    assert host.user('mysql').gid == 1001
+    assert 'mysql' in host.user('mysql').groups
+
+def test_mysql_group(host):
+    assert host.group('mysql').exists
+    assert host.group('mysql').gid == 1001
+
 def test_datadir_permissions(host):
     assert host.file('/var/lib/mysql').user == 'mysql'
     assert host.file('/var/lib/mysql').group == 'root'
@@ -69,6 +80,9 @@ def test_mysql_files_permissions(host):
     assert oct(host.file('/var/lib/mysql-files').mode) == '0o750'
 
 def test_mysql_keyring_permissions(host):
-    assert host.file('/var/lib/mysql-keyring').user == 'mysql'
-    assert host.file('/var/lib/mysql-keyring').group == 'mysql'
-    assert oct(host.file('/var/lib/mysql-keyring').mode) == '0o750'
+    if ps_version_major == '5.6':
+        pytest.skip('mysql-keyring not available in 5.6')
+    else:
+        assert host.file('/var/lib/mysql-keyring').user == 'mysql'
+        assert host.file('/var/lib/mysql-keyring').group == 'mysql'
+        assert oct(host.file('/var/lib/mysql-keyring').mode) == '0o750'

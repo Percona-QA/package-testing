@@ -8,7 +8,7 @@ from settings import *
 
 container_name = 'ps-docker-test-inspect'
 
-@pytest.fixture(scope='class')
+@pytest.fixture(scope='module')
 def inspect_data():
     # run a container
     docker_id = subprocess.check_output(
