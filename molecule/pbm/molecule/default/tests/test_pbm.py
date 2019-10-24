@@ -32,10 +32,10 @@ def start_stop_pbm(host):
     """
     cmd = "sudo systemctl stop pbm-agent"
     result = host.run(cmd)
-    assert result.rc == 0
+    assert result.rc == 0, result.stdout
     cmd = "sudo systemctl start pbm-agent"
     result = host.run(cmd)
-    assert result.rc == 0
+    assert result.rc == 0, result.stdout
     cmd = "sudo systemctl status pbm-agent"
     return host.run(cmd)
 
@@ -46,7 +46,7 @@ def restart_pbm_agent(host):
     """
     cmd = "sudo systemctl restart pbm-agent"
     result = host.run(cmd)
-    assert result.rc == 0
+    assert result.rc == 0, result.stdout
     cmd = "sudo systemctl status pbm-agent"
     return host.run(cmd)
 
@@ -58,6 +58,7 @@ def set_store(host):
     :param host:
     :return:
     """
+    print(host.file("/etc/pbm-agent-storage.conf").content_string)
     command = "pbm store set --config=/etc/pbm-agent-storage.conf --mongodb-uri=mongodb://localhost:27017"
     result = host.run(command)
     assert result.rc == 0, result.stdout
@@ -76,7 +77,7 @@ def show_store(host, set_store):
     result = host.run(command)
     assert result.rc == 0, result.stdout
     print(result.stdout)
-    return parse_yaml_string(result.stdout)
+    return parse_yaml_string(result.stdout.split("\n", 2)[2].strip())
 
 
 @pytest.fixture(scope="module")
@@ -103,7 +104,7 @@ def test_package(host):
     """
     package = host.package("percona-backup-mongodb")
     assert package.is_installed
-    assert "1.0-1" in package.version
+    assert "1.0-1" in package.version, package.version
 
 
 def test_service(host):

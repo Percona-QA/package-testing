@@ -92,4 +92,4 @@
   service:
     name: pbm-agent
     state: started
-    args: mongodb://localhost:27017
+    enabled: yes
