@@ -170,7 +170,7 @@ def test_pbm_version(host):
     print(result.stdout)
     assert result.rc == 0, result.stdout
     lines = result.stdout.split("\n")
-    parsed_config = {line.split(":")[0]: line.split(":")[1].strip() for line in lines}
+    parsed_config = {line.split(":")[0]: line.split(":")[1].strip() for line in lines[0:-1]}
     assert "1.0" in parsed_config['Version']
     assert parsed_config['Platform']
     assert parsed_config['GitCommit']
