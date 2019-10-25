@@ -261,8 +261,8 @@
   - name: finish my.cnf change test
     command: /package-testing/check_mycnf_post.sh
 
-# - name: run some MyRocks tests
-#   command: /package-testing/scripts/ps_myrocks_test.sh
+  - name: run some MyRocks tests
+    command: /package-testing/scripts/ps_myrocks_test.sh
 
 # - name: run bats tests for PAM
 #   command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
