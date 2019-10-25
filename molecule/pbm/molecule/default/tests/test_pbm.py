@@ -53,21 +53,19 @@ def restart_pbm_agent(host):
 
 @pytest.fixture()
 def set_store(host):
-    """
+    """Set store for pbm
 
     :param host:
     :return:
     """
-    print(host.file("/etc/pbm-agent-storage.conf").content_string)
     command = "pbm store set --config=/etc/pbm-agent-storage.conf --mongodb-uri=mongodb://localhost:27017"
     result = host.run(command)
-    assert result.rc == 0, result.stdout
     return result
 
 
 @pytest.fixture()
 def show_store(host, set_store):
-    """
+    """Show pbm store
 
     :param host:
     :param set_store:
@@ -76,27 +74,52 @@ def show_store(host, set_store):
     command = "pbm store show --mongodb-uri=mongodb://localhost:27017"
     result = host.run(command)
     assert result.rc == 0, result.stdout
-    print(result.stdout)
     return parse_yaml_string(result.stdout.split("\n", 2)[2].strip())
 
 
 @pytest.fixture(scope="module")
 def backup(host):
-    """
+    """Insert data and create backup.
 
     :param host:
     :return:
     """
-    pass
+    insert_data = """mongo --quiet --eval 'for(
+    i=1; i <= 100000; i++) { db.test.insert( {_id: i, name: "Test_"+i })}' test"""
+    insert_data_result = host.run(insert_data)
+    assert insert_data_result.rc == 0, insert_data_result.stdout
+    assert insert_data_result.stdout.strip("\n") == """WriteResult({ "nInserted" : 1 })""", insert_data_result.stdout
+    save_hash = """mongo - -quiet - -eval 'db.runCommand({ dbHash: 1 }).md5' test | tail -n1"""
+    save_hash_result = host.run(save_hash)
+    assert save_hash_result.rc == 0, save_hash_result.stdout
+    hash = save_hash_result.stdout.strip("\n")
+    backup = """pbm backup --mongodb-uri=mongodb://localhost:27017"""
+    backup_result = host.run(backup)
+    assert backup_result.rc == 0, backup_result.stdout
+    backup_name = backup_result.stdout.split()[2].strip("\'")
+    drop_data = """mongo --quiet --eval 'db.dropDatabase()' test"""
+    drop_data_result = host.run(drop_data)
+    assert drop_data_result.rc == 0, drop_data_result.stdout
+    documents_after_drop = """mongo --quiet --eval 'db.test.count()' test|tail -n1)"""
+    result = host.run(documents_after_drop)
+    assert result.rc == 0, result.stdout
+    assert result.stdout.split("\n") == "0"
+    return hash, backup_name
 
 
 @pytest.fixture()
-def restore():
-    """
+def restore(backup, host):
+    """Restore database from backup and get hash restored db
 
     :return:
     """
-    pass
+    restore = """pbm restore --mongodb-uri=mongodb://localhost:27017 {}""".format(backup[1])
+    restore_result = host.run(restore)
+    assert restore_result.rc == 0, restore_result.stdout
+    db_hash_after = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
+    db_hash_after_result = host.run(db_hash_after)
+    assert db_hash_after_result.rc == 0, db_hash_after_result.stdout
+    return db_hash_after_result.stdout.strip("\n")
 
 
 def test_package(host):
@@ -167,7 +190,6 @@ def test_pbm_version(host):
     :return:
     """
     result = host.run("pbm version")
-    print(result.stdout)
     assert result.rc == 0, result.stdout
     lines = result.stdout.split("\n")
     parsed_config = {line.split(":")[0]: line.split(":")[1].strip() for line in lines[0:-1]}
@@ -195,16 +217,23 @@ def test_set_store(set_store):
     :param host:
     :return:
     """
-    pass
+    assert set_store.rc == 0, set_store.stdout
+    assert "Done" in set_store.stdout
 
 
 def test_show_store(show_store):
-    """
+    """Check that all store configuration paramateres presented
 
     :param show_store:
     :return:
     """
-    pass
+    assert show_store['type'] == 's3'
+    assert show_store['s3']
+    assert show_store['s3']['region'] == 'us-west'
+    assert show_store['s3']['bucket'] == 'pbm'
+    assert show_store['s3']['credentials']
+    assert show_store['s3']['credentials']['access-key-id']
+    assert show_store['s3']['credentials']['secret-access-key']
 
 
 def test_backup(backup):
@@ -213,16 +242,27 @@ def test_backup(backup):
     :param backup:
     :return:
     """
-    pass
+    assert backup[0]
+    assert backup[1]
 
 
-def test_backup_list(backup):
+def test_backup_list(host, backup):
     """Show backup list
 
     :param backup:
     :return:
     """
+    cmd = "pbm list --mongodb-uri=mongodb://localhost:27017"
+    result = host.run(cmd)
+    assert result.rc == 0, result.stdout
+    assert backup[1] in result.stdout
 
 
-def test_restore(restore):
-    pass
+def test_restore(restore, backup):
+    """Compare hashes after restore
+
+    :param restore:
+    :param backup:
+    :return:
+    """
+    assert backup[0] == restore
