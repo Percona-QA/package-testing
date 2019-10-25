@@ -100,7 +100,7 @@ def backup(host):
     drop_data = """mongo --quiet --eval 'db.dropDatabase()' test"""
     drop_data_result = host.run(drop_data)
     assert drop_data_result.rc == 0, drop_data_result.stdout
-    documents_after_drop = """mongo --quiet --eval 'db.test.count()' test|tail -n1)"""
+    documents_after_drop = """mongo --quiet --eval 'db.test.count()' test|tail -n1"""
     result = host.run(documents_after_drop)
     assert result.rc == 0, result.stdout
     assert result.stdout.split("\n") == "0"
