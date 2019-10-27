@@ -16,7 +16,7 @@ debian-10:
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
-ubuntu-bionic:
+ubuntu-18.04:
   image: ami-0a8561d8c5a4f098a
   user: ubuntu
   subnet: subnet-085deaca8c1c59a4f
