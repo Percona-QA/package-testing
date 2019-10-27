@@ -103,7 +103,7 @@ def backup(host):
     documents_after_drop = """mongo --quiet --eval 'db.test.count()' test|tail -n1"""
     result = host.run(documents_after_drop)
     assert result.rc == 0, result.stdout
-    assert result.stdout.split("\n") == "0"
+    assert result.stdout.split("\n")[0] == "0"
     return hash, backup_name
 
 
