@@ -31,19 +31,6 @@ mysql -e "INSTALL PLUGIN validate_password SONAME 'validate_password.so';"
 mysql -e "INSTALL PLUGIN version_tokens SONAME 'version_token.so';"
 mysql -e "INSTALL PLUGIN rpl_semi_sync_master SONAME 'semisync_master.so';"
 mysql -e "INSTALL PLUGIN rpl_semi_sync_slave SONAME 'semisync_slave.so';"
-mysql -e "INSTALL PLUGIN data_masking SONAME 'data_masking.so';"
-mysql -e "INSTALL PLUGIN clone SONAME 'mysql_clone.so';"
-
-
-# make sure clone plugin is active
-CLONE_PLUGIN=$(mysql -e "SELECT PLUGIN_NAME, PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS WHERE PLUGIN_NAME = 'clone';" | grep -c ACTIVE)
-
-if [ ${CLONE_PLUGIN} == 1 ]; then
-   echo "Clone plugin is installed and active"
-else
-   echo "ERROR: Clone plugin isn't installed or active"
-   exit 1
-fi
 
 mysql -e "SHOW PLUGINS;"
 mysql -e "CREATE DATABASE world;"
