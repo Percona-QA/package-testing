@@ -17,7 +17,7 @@
   - name: include tasks for test env setup
     include: ../tasks/test_prep.yml
 
-# Install from testing repository
+# Install from main repository
 
   - name: include tasks for enabling main repo
     include: ../tasks/enable_main_repo.yml
