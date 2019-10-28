@@ -90,6 +90,9 @@
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_80.sh ps
 
+  - name: check the clone and data masking plugins
+    command: /package-testing/clone_dm_plugin_test.sh
+
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
 

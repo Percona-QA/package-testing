@@ -109,7 +109,7 @@
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7) 
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
@@ -257,6 +257,9 @@
 
   - name: check that Percona Toolkit version is correct
     command: /package-testing/version_check.sh pt
+
+  - name: check the clone and data masking plugins
+    command: /package-testing/clone_dm_plugin_test.sh
 
   - name: finish my.cnf change test
     command: /package-testing/check_mycnf_post.sh
