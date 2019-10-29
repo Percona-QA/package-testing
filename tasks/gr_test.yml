@@ -7,7 +7,7 @@
 
   - name: copy the GR config file on RHEL/CentOS/Amazon
     template: src=../templates/group_replication.j2 dest=/etc/my.cnf.d/gr.cnf
-    when: ansible_os_family == "Redhat"
+    when: ansible_os_family == "RedHat"
 
   - name: restart mysql service
     service: name=mysql state=restarted
@@ -25,7 +25,7 @@
     file:
       path: /etc/my.cnf.d/gr.cnf
       state: absent
-    when: ansible_os_family == "Redhat"
+    when: ansible_os_family == "RedHat"
 
   - name: restart mysql service
     service: name=mysql state=restarted
