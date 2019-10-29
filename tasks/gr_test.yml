@@ -1,0 +1,22 @@
+# This playbook sets up and tests the Group Replication
+#
+
+  - name: copy the GR config file on Debian/Ubuntu
+    template: src=../templates/group_replication.j2 dest=/etc/mysql/conf.d/gr.cnf
+    when: ansible_os_family == "Debian"
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+    
+  - name: run the test script
+    command: /package-testing/scripts/gr_test.sh
+
+  - name: remove the config file
+    file:
+      path: /etc/mysql/conf.d/gr.cnf
+      state: absent
+    when: ansible_os_family == "Debian"
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+    

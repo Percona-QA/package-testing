@@ -1,12 +1,15 @@
 [mysqld]
+
 server_id=1
 gtid_mode=ON
 enforce_gtid_consistency=ON
-master_info_repository=TABLE
-relay_log_info_repository=TABLE
 binlog_checksum=NONE
-log_slave_updates=ON
-log_bin=binlog
-binlog_format=ROW
-transaction_write_set_extraction=XXHASH64
-loose-group_replication_group_name="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+
+
+plugin_load_add='group_replication.so'
+group_replication_group_name="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+group_replication_start_on_boot=off
+group_replication_local_address= "{{ ansible_all_ipv4_addresses }}:33061"
+group_replication_group_seeds= "{{ ansible_all_ipv4_addresses }}:33061"
+group_replication_bootstrap_group=off
+
