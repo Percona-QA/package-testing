@@ -15,6 +15,8 @@ fi
 mysql -e "SET GLOBAL group_replication_bootstrap_group=ON;"
 mysql -e "START GROUP_REPLICATION;"
 
+# wait for GR to initialize 
+sleep 5
 
 # check that the member is on-line
 GR_STATUS=$(mysql -e "SELECT MEMBER_STATE FROM performance_schema.replication_group_members;" | grep -c ONLINE)
@@ -26,4 +28,5 @@ else
    echo "ERROR: GR MEMBER isn't ONLINE or ACTIVE"
    exit 1
 fi
+
 
