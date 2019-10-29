@@ -8,7 +8,7 @@
   - name: append include for RedHat
     lineinfile:
         path: /etc/my.cnf
-        line: !includedir /etc/my.cnf.d
+        line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
 
   - name: copy the GR config file on RHEL/CentOS/Amazon
