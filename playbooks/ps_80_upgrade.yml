@@ -259,7 +259,7 @@
     command: /package-testing/version_check.sh pt
 
   - name: check the clone and data masking plugins
-    command: /package-testing/clone_dm_plugin_test.sh
+    command: /package-testing/scripts/ps_clone_dm_plugin_test.sh
 
   - name: finish my.cnf change test
     command: /package-testing/check_mycnf_post.sh
