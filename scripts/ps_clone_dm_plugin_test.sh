@@ -15,6 +15,9 @@ else
    exit 1
 fi
 
+# run the clone command
+mysql -e "CLONE LOCAL DATA DIRECTORY = '/tmp/bak';"
+
 #install the data masking plugin
 mysql -e "INSTALL PLUGIN data_masking SONAME 'data_masking.so';"
 
