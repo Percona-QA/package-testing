@@ -5,6 +5,12 @@
     template: src=../templates/group_replication.j2 dest=/etc/mysql/conf.d/gr.cnf
     when: ansible_os_family == "Debian"
 
+  - name: append include for RedHat
+    lineinfile:
+        path: /etc/my.cnf
+        line: !includedir /etc/my.cnf.d
+    when: ansible_os_family == "RedHat"
+
   - name: copy the GR config file on RHEL/CentOS/Amazon
     template: src=../templates/group_replication.j2 dest=/etc/my.cnf.d/gr.cnf
     when: ansible_os_family == "RedHat"
