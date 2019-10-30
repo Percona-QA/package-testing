@@ -21,6 +21,7 @@
     yum:
       name: "{{ packages }}"
       state: latest
+      disablerepo: "epel"
     vars:
       packages:
       - percona-server-server
