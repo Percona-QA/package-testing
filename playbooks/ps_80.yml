@@ -5,7 +5,7 @@
 #   does some tests
 
 # Cosmic is still missing python 
-- import_playbook: test_prep.yml
+# import_playbook: test_prep.yml
 
 - hosts: all
   become: true
