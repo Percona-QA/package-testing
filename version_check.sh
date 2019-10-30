@@ -109,7 +109,7 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" -o ${prod
   fi
 
   if [ ${product} = "ps80" ]; then
-    if [ "$(mysqlsh --version | grep -c ${version})" = 1 ];
+    if [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
       echo "mysql-shell version is correct" >> ${log}
     else
       echo "ERROR: mysql-shell version is incorrect" >> ${log}
