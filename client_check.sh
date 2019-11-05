@@ -39,7 +39,7 @@ if [ -f /etc/redhat-release ]; then
   if [ "${product}" = "ps55" -o "${product}" = "ps56" -o "${product}" = "ps57" ]; then
     yum install -y Percona-Server-client${rpm_version}
   elif [ "${product}" = "ps80" ]; then
-    yum install -y percona-server-client${rpm_version}
+    yum install -y percona-server-client percona-mysql-router
   elif [ "${product}" = "pxc56" -o "${product}" = "pxc57" ]; then
     yum install -y Percona-XtraDB-Cluster-client-${rpm_version}
   else
@@ -47,8 +47,10 @@ if [ -f /etc/redhat-release ]; then
     exit 1
   fi
 else
- if [ "${product}" = "ps55" -o "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" ]; then
+ if [ "${product}" = "ps55" -o "${product}" = "ps56" -o "${product}" = "ps57" ]; then
     apt-get install -y percona-server-client${deb_version}
+  elif [ "${product}" = "ps80" ]; then
+    apt-get install -y percona-server-client percona-mysql-router
   elif [ "${product}" = "pxc56" -o "${product}" = "pxc57" ]; then
     apt-get install -y percona-xtradb-cluster-client${deb_version}
   else
