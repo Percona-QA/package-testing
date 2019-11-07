@@ -31,6 +31,8 @@ mysql -e "INSTALL PLUGIN validate_password SONAME 'validate_password.so';"
 mysql -e "INSTALL PLUGIN version_tokens SONAME 'version_token.so';"
 mysql -e "INSTALL PLUGIN rpl_semi_sync_master SONAME 'semisync_master.so';"
 mysql -e "INSTALL PLUGIN rpl_semi_sync_slave SONAME 'semisync_slave.so';"
+mysql -e "INSTALL PLUGIN connection_control SONAME 'connection_control.so';"
+mysql -e "INSTALL PLUGIN connection_control_failed_login_attempts SONAME 'connection_control.so';"
 
 for component in component_validate_password component_log_sink_syseventlog component_log_sink_json component_log_filter_dragnet component_audit_api_message_emit; do
   mysql -e "INSTALL COMPONENT \"file://${component}\";"

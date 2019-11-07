@@ -27,6 +27,8 @@ mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME SONAME 'query_response_time.so';"
 mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME_READ SONAME 'query_response_time.so';"
 mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME_WRITE SONAME 'query_response_time.so';"
 mysql -e "INSTALL PLUGIN mysqlx SONAME 'mysqlx.so';"
+mysql -e "INSTALL PLUGIN connection_control SONAME 'connection_control.so';"
+mysql -e "INSTALL PLUGIN connection_control_failed_login_attempts SONAME 'connection_control.so';"
 mysql -e "SHOW PLUGINS;"
 mysql -e "CREATE DATABASE world;"
 sed -i '18,21 s/^/-- /' /package-testing/world.sql
