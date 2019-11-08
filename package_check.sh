@@ -221,7 +221,7 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; t
   else
     extra_version=""
   fi
-  if [ -f /etc/redhat-release ]; then
+  if [ -f /etc/redhat-release ] || [ -f /etc/system-release ] ; then
     if [ "$(rpm -qa | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" == "3" ]; then
       echo "all packages are installed"
     else
