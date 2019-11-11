@@ -7,6 +7,14 @@
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
+  - name: setup epel 7 repo for Amazon Linux 2
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
+    when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2"
+
+  - name: setup epel 8 repo
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
   - name: fix jessie repos
     template: src=../templates/jessie.repo
               dest=/etc/apt/sources.list

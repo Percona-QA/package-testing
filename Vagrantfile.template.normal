@@ -7,6 +7,8 @@ servers=[
   { :hostname => "d-buster-64-@@hostname@@", :box => "bento/debian-10" },
   { :hostname => "centos-6-64-@@hostname@@", :box => "bento/centos-6" },
   { :hostname => "centos-7-64-@@hostname@@", :box => "bento/centos-7" },
+  { :hostname => "centos-8-64-@@hostname@@", :box => "bento/centos-8" },
+  { :hostname => "amazonlinux-2-64-@@hostname@@", :box => "bento/amazonlinux-2" },
   { :hostname => "rhel-8-64-@@hostname@@", :box => "generic/rhel8" },
   { :hostname => "u-trusty-64-@@hostname@@", :box => "bento/ubuntu-14.04" },
   { :hostname => "u-xenial-64-@@hostname@@", :box => "bento/ubuntu-16.04" },

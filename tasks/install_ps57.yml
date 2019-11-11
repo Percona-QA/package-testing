@@ -15,7 +15,7 @@
       - percona-server-rocksdb-5.7
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Server new rpm packages
+  - name: install Percona Server rpm packages
     yum:
       name: "{{ packages }}"
       state: latest
@@ -31,7 +31,7 @@
       - Percona-Server-client-57
     when: ansible_os_family == "RedHat"
 
-  - name: install Percona Server new rpm packages
+  - name: install Percona Server shared-compat-57 rpm package
     yum:
       name: "{{ packages }}"
       state: latest

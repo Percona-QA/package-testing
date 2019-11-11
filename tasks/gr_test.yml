@@ -1,0 +1,38 @@
+# This playbook sets up and tests the Group Replication
+#
+
+  - name: copy the GR config file on Debian/Ubuntu
+    template: src=../templates/group_replication.j2 dest=/etc/mysql/conf.d/gr.cnf
+    when: ansible_os_family == "Debian"
+
+  - name: append include for RedHat
+    lineinfile:
+        path: /etc/my.cnf
+        line: '!includedir /etc/my.cnf.d'
+    when: ansible_os_family == "RedHat"
+
+  - name: copy the GR config file on RHEL/CentOS/Amazon
+    template: src=../templates/group_replication.j2 dest=/etc/my.cnf.d/gr.cnf
+    when: ansible_os_family == "RedHat"
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+    
+  - name: run the test script
+    command: /package-testing/scripts/gr_test.sh
+
+  - name: remove the config file
+    file:
+      path: /etc/mysql/conf.d/gr.cnf
+      state: absent
+    when: ansible_os_family == "Debian"
+
+  - name: remove the config file
+    file:
+      path: /etc/my.cnf.d/gr.cnf
+      state: absent
+    when: ansible_os_family == "RedHat"
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+    

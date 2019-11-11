@@ -1,0 +1,98 @@
+---
+# tasks file for pbm
+- name: include tasks for test env setup
+  include_tasks: ../../../tasks/test_prep.yml
+
+- name: include tasks for enabling test repo
+  include_tasks: ../../../tasks/enable_testing_repo.yml
+  when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+- name: include tasks for enabling experimental repo
+  include_tasks: ../../../tasks/enable_experimental_repo.yml
+  when: lookup('env', 'install_repo') == "experimental"
+
+- name: include tasks for enabling main repo
+  include_tasks: ../../../tasks/enable_main_repo.yml
+  when: lookup('env', 'install_repo') == "main"
+
+- name: include tasks for enabling tools testing repo
+  command: percona-release enable tools testing
+  when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+- name: include tasks for enabling tools main repo
+  command: percona-release enable tools release
+  when: lookup('env', 'install_repo') == "main"
+
+- name: include tasks for enabling tools main repo
+  command: percona-release enable tools experimental
+  when: lookup('env', 'install_repo') == "experimental"
+
+- name: enable the PSMDB testing repo
+  command: percona-release enable psmdb-40
+  when: lookup('env', 'psmdb_to_test') == "psmdb40"
+
+- name: include tasks for PSMDB 4.0 install
+  include_tasks: ../../../tasks/install_psmdb_full.yml
+  when: lookup('env', 'psmdb_to_test') == "psmdb40"
+
+- name: include tasks for PSMDB 3.6 install
+  include_tasks: ../../../tasks/install_psmdb_36_full.yml
+  when: lookup('env', 'psmdb_to_test') == "psmdb36"
+
+- name: stop mongod service
+  service: name=mongod state=stopped
+
+- name: add replica set name into mongod config
+  replace:
+    path: /etc/mongod.conf
+    regexp: '^#replication:'
+    replace: 'replication:\n  replSetName: "rs1"'
+
+- name: start mongod service
+  service: name=mongod state=started
+
+- name: initiate mongod replica set
+  command: mongo --eval 'rs.initiate()'
+
+- name: install PBM new deb packages
+  apt:
+    name: percona-backup-mongodb
+    update_cache: yes
+    state: latest
+  when: ansible_os_family == "Debian"
+
+- name: install PBM new rpm packages
+  yum:
+    name: percona-backup-mongodb
+    state: latest
+  when: ansible_os_family == "RedHat"
+
+- name: add storage for pbm-agent
+  blockinfile:
+    path: /etc/pbm-agent-storage.conf
+    create: true
+    block: |
+      type: s3
+      s3:
+         region: us-west
+         endpointUrl: http://localhost:9000
+         bucket: pbm
+         credentials:
+           access-key-id: {{ access_key }}
+           secret-access-key: {{ access_secret }}
+  vars:
+    access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+    access_secret: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+
+- name: edit pbm-agent service config
+  blockinfile:
+    path: /etc/default/pbm-agent
+    block: |
+      PBM_MONGODB_URI="mongodb://localhost:27017/"
+  when: ansible_os_family == "Debian"
+
+- name: start pbm-agent service
+  service:
+    name: pbm-agent
+    state: started
+    enabled: yes

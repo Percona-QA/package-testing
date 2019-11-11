@@ -1,7 +1,7 @@
 # This task installs Percona Server 8.0 on CentOS and Debian/Ubuntu
 #
 
-  - name: install Percona Server new deb packages
+  - name: install Percona Server deb packages
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -17,10 +17,11 @@
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Server new rpm packages
+  - name: install Percona Server rpm packages
     yum:
       name: "{{ packages }}"
       state: latest
+      disablerepo: "epel"
     vars:
       packages:
       - percona-server-server
