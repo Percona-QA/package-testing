@@ -99,9 +99,9 @@
     command: /package-testing/version_check.sh pt
     when: lookup('env', 'install_repo') != "experimental"
 
-  - name: check that sysbench version is correct
-    command: /package-testing/version_check.sh sysbench
-    when: lookup('env', 'install_repo') != "experimental"
+# - name: check that sysbench version is correct
+#   command: /package-testing/version_check.sh sysbench
+#   when: lookup('env', 'install_repo') != "experimental"
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
