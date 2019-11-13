@@ -17,7 +17,7 @@
 
   - name: disable the mysql module on RHEL/CentOS 8
     command: yum module disable mysql
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: install Percona Server rpm packages
     yum:
