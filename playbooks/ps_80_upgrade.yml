@@ -30,78 +30,23 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: install Percona Toolkit deb packages previous version
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - percona-toolkit
-    when: ansible_os_family == "Debian"
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: /usr/bin/dnf module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: install Percona Server deb packages previous version
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: latest
-    vars:
-      packages:
-      - percona-server-server
-      - percona-server-test
-      - percona-server-client
-      - percona-server-dbg
-      - percona-server-source
-      - percona-server-tokudb
-      - percona-server-rocksdb
-    when: ansible_os_family == "Debian"
+  - name: install Percona Toolkit new deb packages
+    include_tasks: ../tasks/install_pt.yml
 
-  - name: install Percona XtraBackup deb packages previous version
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-80
-      - percona-xtrabackup-test-80
-      - percona-xtrabackup-dbg-80
-    when: ansible_os_family == "Debian"
+  - name: install Percona Server 8.0 packages
+    include_tasks: ../tasks/install_ps80.yml
 
-  - name: install Percona Server rpm packages previous version
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-server-server
-      - percona-server-test
-      - percona-server-debuginfo
-      - percona-server-devel
-      - percona-server-client
-      - percona-server-tokudb
-      - percona-server-rocksdb
-    when: ansible_os_family == "RedHat"
+  - name: install sysbench new deb packages
+    include_tasks: ../tasks/install_sysbench.yml
+    when: lookup('env', 'install_repo') != "experimental"
 
-  - name: install Percona Toolkit rpm packages previous version
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-toolkit
-    when: ansible_os_family == "RedHat"
-
-  - name: install Percona XtraBackup rpm packages previous version
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-80
-      - percona-xtrabackup-test-80
-      - percona-xtrabackup-80-debuginfo
-    when: ansible_os_family == "RedHat"
+  - name: install Percona XtraBackup 8.0 packages
+    include_tasks: ../tasks/install_pxb80.yml
+    when: lookup('env', 'install_repo') != "experimental"
 
   - name: start mysql service with service command
     command: service mysql start
