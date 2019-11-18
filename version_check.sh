@@ -6,66 +6,66 @@ if [ "$#" -ne 1 ]; then
   exit 1
 fi
 
-SCRIPT_PWD=$(cd `dirname $0` && pwd)
+SCRIPT_PWD=$(cd $(dirname "$0") && pwd)
 
-source ${SCRIPT_PWD}/VERSIONS
+source "${SCRIPT_PWD}"/VERSIONS
 
-if [ $1 = "ps55" ]; then
+if [ "$1" = "ps55" ]; then
   version=${PS55_VER}
   release=${PS55_VER#*-}
   revision=${PS55_REV}
-elif [ $1 = "ps56" ]; then
+elif [ "$1" = "ps56" ]; then
   version=${PS56_VER}
   release=${PS56_VER#*-}
   revision=${PS56_REV}
-elif [ $1 = "ps57" ]; then
+elif [ "$1" = "ps57" ]; then
   version=${PS57_VER}
   release=${PS57_VER#*-}
   revision=${PS57_REV}
-elif [ $1 = "ps80" ]; then
+elif [ "$1" = "ps80" ]; then
   version=${PS80_VER}
   release=${PS80_VER#*-}
   revision=${PS80_REV}
-elif [ $1 = "pxc56" ]; then
+elif [ "$1" = "pxc56" ]; then
   version=${PXC56_VER%-*}
   release=${PXC56_VER#*-}
   revision=${PXC56_REV}
   innodb_ver=${PXC56_INNODB}
   wsrep=${PXC56_WSREP}
-elif [ $1 = "pxc57" ]; then
+elif [ "$1" = "pxc57" ]; then
   version=${PXC57_VER%-*}
   release=${PXC57_VER#*-}
   revision=${PXC57_REV}
   innodb_ver=${PXC57_INNODB}
   wsrep=${PXC57_WSREP}
-elif [ $1 = "pt" ]; then
+elif [ "$1" = "pt" ]; then
   version=${PT_VER}
-elif [ $1 = "pxb23" ]; then
+elif [ "$1" = "pxb23" ]; then
   version=${PXB23_VER}
-elif [ $1 = "pxb24" ]; then
+elif [ "$1" = "pxb24" ]; then
   version=${PXB24_VER}
-elif [ $1 = "pxb80" ]; then
+elif [ "$1" = "pxb80" ]; then
   version=${PXB80_VER}
-elif [ $1 = "pmm" ]; then
+elif [ "$1" = "pmm" ]; then
   version=${PMM_VER}
-elif [ $1 = "pmm2" ]; then
+elif [ "$1" = "pmm2" ]; then
   version=${PMM2_VER}
-elif [ $1 = "proxysql" ]; then
+elif [ "$1" = "proxysql" ]; then
   version=${PROXYSQL_VER}
-elif [ $1 = "proxysql2" ]; then
+elif [ "$1" = "proxysql2" ]; then
   version=${PROXYSQL2_VER}
-elif [ $1 = "sysbench" ]; then
+elif [ "$1" = "sysbench" ]; then
   version=${SYSBENCH_VER}
-elif [ $1 = "pbm" ]; then
+elif [ "$1" = "pbm" ]; then
   version=${PBM_VER}
   revision=${PBM_REV}
-elif [ $1 = "psmdb34" ]; then
+elif [ "$1" = "psmdb34" ]; then
   version=${PSMDB34_VER}
-elif [ $1 = "psmdb36" ]; then
+elif [ "$1" = "psmdb36" ]; then
   version=${PSMDB36_VER}
-elif [ $1 = "psmdb40" ]; then
+elif [ "$1" = "psmdb40" ]; then
   version=${PSMDB40_VER}
-elif [ $1 = "psmdb42" ]; then
+elif [ "$1" = "psmdb42" ]; then
   version=${PSMDB42_VER}
 else
   echo "Illegal product selected!"
@@ -75,26 +75,26 @@ fi
 # This function checks that pxb 8.0 tools have correct version
 function xbt_test {
   for i in xbstream xbcloud xbcrypt; do
-    version_check=$($i --help | grep -c ${version})
-    if [ ${version_check} -eq 0 ]; then
+    version_check=$($i --help | grep -c "${version}")
+    if [ "${version_check}" -eq 0 ]; then
        echo "${i} version is not good!"
        exit 1
     else
-       echo "${i} version is correct and ${version}" >> ${log}
+       echo "${i} version is correct and ${version}" >> "${log}"
     fi
   done
 }
 
 product=$1
 log="/tmp/${product}_version_check.log"
-echo -n > ${log}
+echo -n > "${log}"
 
-if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
+if [ "${product}" = "ps55" -o "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" ]; then
   for i in @@INNODB_VERSION @@VERSION @@TOKUDB_VERSION; do
-    if [ ${product} = "ps55" -a ${i} = "@@TOKUDB_VERSION" ]; then
-      echo "${i} is empty" >> ${log}
-    elif [ "$(mysql -e "SELECT ${i}; "| grep -c ${version})" = 1 ]; then
-      echo "${i} is correct" >> ${log}
+    if [ "${product}" = "ps55" -a ${i} = "@@TOKUDB_VERSION" ]; then
+      echo "${i} is empty" >> "${log}"
+    elif [ "$(mysql -e "SELECT ${i}; "| grep -c "${version}")" = 1 ]; then
+      echo "${i} is correct" >> "${log}"
     else
       echo "${i} is incorrect"
       exit 1
@@ -102,25 +102,25 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" -o ${prod
  done
 
   if [ "$(mysql -e "SELECT @@VERSION_COMMENT;" | grep ${revision} | grep -c ${release})" = 1 ]; then
-    echo "@@VERSION COMMENT is correct" >> ${log}
+    echo "@@VERSION COMMENT is correct" >> "${log}"
   else
     echo "@@VERSION_COMMENT is incorrect"
     exit 1
   fi
 
-# if [ ${product} = "ps80" ]; then
-#   if [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
-#     echo "mysql-shell version is correct" >> ${log}
-#   else
-#     echo "ERROR: mysql-shell version is incorrect" >> ${log}
-#     exit 1
-#   fi
-# fi
+  if [ ${product} = "ps80" ]; then
+    if [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
+      echo "mysql-shell version is correct" >> "${log}"
+    else
+      echo "ERROR: mysql-shell version is incorrect"
+      exit 1
+    fi
+  fi
  
 elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
   for i in @@INNODB_VERSION @@VERSION; do
     if [ "$(mysql -e "SELECT ${i}; "| grep -c ${version}-${innodb_ver})" = 1 ]; then
-      echo "${i} is correct" >> ${log}
+      echo "${i} is correct" >> "${log}"
     else
       echo "${i} is incorrect"
       exit 1
@@ -128,14 +128,14 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
   done
 
   if [ "$(mysql -e "SELECT @@VERSION_COMMENT;" | grep ${revision} | grep rel${innodb_ver} | grep -c ${release})" = 1 ]; then
-    echo "@@VERSION COMMENT is correct" >> ${log}
+    echo "@@VERSION COMMENT is correct" >> "${log}"
   else
     echo "@@VERSION_COMMENT is incorrect"
     exit 1
   fi
 
   if [ "$(mysql -e "SHOW STATUS LIKE 'wsrep_provider_version';" | grep -c ${wsrep})" = 1 ]; then
-    echo "wsrep_provider_version is correct" >> ${log}
+    echo "wsrep_provider_version is correct" >> "${log}"
   else
     echo "wsrep_provider_version is incorrect"
     exit 1
@@ -148,7 +148,7 @@ elif [ ${product} = "pt" ]; then
       echo "${i} version is not good!"
       exit 1
     else
-      echo "${i} version is correct and ${version}" >> ${log}
+      echo "${i} version is correct and ${version}" >> "${log}"
     fi
   done
 
@@ -158,7 +158,7 @@ elif [ ${product} = "pmm" ]; then
     echo "${product} version is not good!"
     exit 1
   else
-    echo "${product} version is correct and ${version}" >> ${log}
+    echo "${product} version is correct and ${version}" >> "${log}"
   fi
 
 elif [ ${product} = "pmm2" ]; then
@@ -167,7 +167,7 @@ elif [ ${product} = "pmm2" ]; then
     echo "${product} version is not good!"
     exit 1
   else
-    echo "${product} version is correct and ${version}" >> ${log}
+    echo "${product} version is correct and ${version}" >> "${log}"
   fi
 
 elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; then
@@ -176,7 +176,7 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; t
       echo "${product} version is not good!"
       exit 1
     else
-      echo "${product} version is correct and ${version}" >> ${log}
+      echo "${product} version is correct and ${version}" >> "${log}"
     fi
     if [ ${product} = "pxb80" ]; then
       xbt_test
@@ -188,7 +188,7 @@ elif [ ${product} = "proxysql" -o ${product} = "proxysql2" ]; then
     echo "${product} version is not good!"
     exit 1
   else
-    echo "${product} version is correct and ${version}" >> ${log}
+    echo "${product} version is correct and ${version}" >> "${log}"
   fi
 
 elif [ ${product} = "sysbench" ]; then
@@ -197,7 +197,7 @@ elif [ ${product} = "sysbench" ]; then
     echo "${product} version is not good!"
     exit 1
   else
-    echo "${product} version is correct and ${version}" >> ${log}
+    echo "${product} version is correct and ${version}" >> "${log}"
   fi
 
 elif [ ${product} = "pbm" ]; then
@@ -211,13 +211,13 @@ elif [ ${product} = "pbm" ]; then
     echo "${product} version is not good!"
     exit 1
   else
-    echo "${product} version is correct and ${version}" >> ${log}
+    echo "${product} version is correct and ${version}" >> "${log}"
   fi
   if [ ${agent_revision_check} -eq 0 -o ${coordinator_revision_check} -eq 0 -o ${control_revision_check} -eq 0 ]; then
     echo "${product} revision is not good!"
     exit 1
   else
-    echo "${product} revision is correct and ${revision}" >> ${log}
+    echo "${product} revision is correct and ${revision}" >> "${log}"
   fi
 
 elif [ ${product} = "psmdb34" -o ${product} = "psmdb36" -o ${product} = "psmdb40" -o ${product} = "psmdb42" ]; then
