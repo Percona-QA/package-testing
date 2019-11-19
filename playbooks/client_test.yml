@@ -17,11 +17,11 @@
 
   - name: include tasks for enabling main repo
     include: ../tasks/enable_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+    when: lookup('env', 'install_repo') == "main" and lookup('env', 'install_repo') != "ps80"
 
   - name: include tasks for enabling PS 8 test repo
     include: ../tasks/enable_ps8_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when: lookup('env', 'install_repo') == "testing" and lookup('env', 'install_repo') == "ps80"
 
   - name: include tasks for enabling test repo
     include: ../tasks/enable_testing_repo.yml
