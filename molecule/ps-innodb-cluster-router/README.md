@@ -1,5 +1,5 @@
-Role Name
-=========
+ps-innodb-cluster-router
+========================
 
 This role installs mysql shell and router into vagrant instance and then does
 setup and verification of InnoDB cluster.

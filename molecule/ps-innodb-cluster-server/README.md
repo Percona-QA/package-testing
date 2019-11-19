@@ -1,5 +1,5 @@
-Role Name
-=========
+ps-innodb-cluster-server
+========================
 
 This role creates 3 PS server instances and configures them for group replication.
 Dependant role "ps-innodb-cluster-router" is used to install mysql router and shell

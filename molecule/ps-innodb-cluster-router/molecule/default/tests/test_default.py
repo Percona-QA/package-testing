@@ -24,8 +24,11 @@ def test_mysqlrouter_ports(host):
     host.socket("tcp://64470").is_listening
 
 def test_mysqlrouter_service(host):
-    assert host.service("mysqlrouter").is_running
-    assert host.service("mysqlrouter").is_enabled
+    if host.system_info.distribution in ["redhat", "centos", 'rhel']:
+        pytest.skip('Service not enabled on Centos.')
+    else:
+        assert host.service("mysqlrouter").is_running
+        assert host.service("mysqlrouter").is_enabled
 
 def test_mysqlrouter_config(host):
     assert host.file("/etc/mysqlrouter/mysqlrouter.conf").exists
