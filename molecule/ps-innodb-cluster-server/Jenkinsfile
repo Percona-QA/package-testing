@@ -1,0 +1,94 @@
+pipeline {
+  agent {
+      label "pkgtest"
+  }
+  parameters {
+    string(name: 'UPSTREAM_VERSION', defaultValue: '8.0.17', description: 'Upstream MySQL version')
+    string(name: 'PS_VERSION', defaultValue: '8', description: 'Percona part of version')
+    string(name: 'PS_REVISION', defaultValue: '868a4ef', description: 'Short git hash for release')
+    choice(name: 'TEST_DIST', choices: ['bento/ubuntu-18.04','bento/debian-10','bento/centos-8','bento/centos-7'], description: 'On which image to run test.')
+    choice(name: 'INSTALL_REPO', choices: ['testing','main','experimental'], description: 'Repo to install packages from.')
+  }
+  stages {
+    stage('Prepare') {
+      steps {
+          script {
+            currentBuild.description = "${UPSTREAM_VERSION}-${PS_VERSION}-${PS_REVISION}-${TEST_DIST}"
+            env['PS_NODE1_IP'] = "192.168.33.50"
+            env['PS_NODE2_IP'] = "192.168.33.51"
+            env['PS_NODE3_IP'] = "192.168.33.52"
+            env['MYSQL_ROUTER_IP'] = "192.168.33.53"
+          }
+          sh '''
+            export PATH=${PATH}:~/.local/bin
+            python3 -m venv ${WORKSPACE}/python-venv-molecule
+            source ${WORKSPACE}/python-venv-molecule/bin/activate
+            pip3 install wheel
+            pip3 install molecule ansible python-vagrant testinfra pytest
+            rm -rf package-testing
+            git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+          '''
+      } //end steps
+    } //end Prepare stage
+    stage('Create instances') {
+      steps {
+          sh '''
+            source ${WORKSPACE}/python-venv-molecule/bin/activate
+            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-server
+            molecule create
+            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-router
+            molecule create
+          '''
+      } //end steps
+    } //end Create instances stage
+    stage('Install PS servers') {
+      steps {
+          sh '''
+            source ${WORKSPACE}/python-venv-molecule/bin/activate
+            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-server
+            molecule converge
+          '''
+      } //end steps
+    } //end Install PS servers
+    stage('Install router/shell and setup cluster') {
+      steps {
+          sh '''
+            source ${WORKSPACE}/python-venv-molecule/bin/activate
+            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-router
+            molecule converge
+          '''
+      } //end steps
+    } //end Install router/shell and setup cluster
+    stage('Verify PS setup') {
+      steps {
+          sh '''
+            source ${WORKSPACE}/python-venv-molecule/bin/activate
+            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-server
+            molecule verify
+          '''
+          junit 'package-testing/molecule/ps-innodb-cluster-server/molecule/default/report.xml'
+      } //end steps
+    } //end Install router/shell and setup cluster
+    stage('Verify router and cluster setup') {
+      steps {
+          sh '''
+            source ${WORKSPACE}/python-venv-molecule/bin/activate
+            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-router
+            molecule verify
+          '''
+          junit 'package-testing/molecule/ps-innodb-cluster-router/molecule/default/report.xml'
+      } //end steps
+    } //end Install router/shell and setup cluster
+  } //end stages
+  post {
+    always {
+      sh '''
+        source ${WORKSPACE}/python-venv-molecule/bin/activate
+        cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-server
+        molecule destroy
+        cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-router
+        molecule destroy
+      '''
+    }
+  } //end post
+} //end pipeline
