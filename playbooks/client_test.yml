@@ -45,3 +45,4 @@
 
   - name: install PS/PXC client and run the check
     command: /package-testing/client_check.sh {{ client }}
+    when: (lookup('env', 'client_to_test') == "ps80") and (ansible_os_family == "Debian" and ansible_distribution_release != "jessie")
