@@ -26,7 +26,7 @@
   - name: include tasks for enabling test repo
     include: ../tasks/enable_testing_repo.yml
     when: (lookup('env', 'install_repo') == "testing") and ({{ client }} != "ps80")
- `
+  
   - name: install deb packages
     apt:
       name: "{{ packages }}"
