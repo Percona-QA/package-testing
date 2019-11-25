@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-pytest --junit-xml report.xml $@
+pytest -v --junit-xml report.xml $@
