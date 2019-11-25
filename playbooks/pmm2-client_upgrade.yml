@@ -29,6 +29,11 @@
     - pmm2-client
     when: ansible_os_family == "RedHat"
 
+  - name: Print PMM2-Client Version before upgrade
+    command: pmm-admin --version
+    register: version
+  - debug: var=version.stdout_lines
+
   - name: include tasks for enabling testing repo
     include: ../tasks/enable_testing_repo.yml
 
@@ -46,6 +51,11 @@
 
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2
+
+  - name: Print PMM2-Client Version After upgrade
+    command: pmm-admin --version
+    register: version_new
+  - debug: var=version_new.stdout_lines
 
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
