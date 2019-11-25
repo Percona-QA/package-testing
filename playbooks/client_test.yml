@@ -1,9 +1,6 @@
 ---
 # This playbook installs PS/PXC client package and checks that it works correctly
 
-# Cosmic is still missing python
-- import_playbook: test_prep.yml
-
 - hosts: all
   name: Prepare a clean machine with percona (and EPEL) repo(s) installed
   become: true
@@ -17,16 +14,16 @@
 
   - name: include tasks for enabling main repo
     include: ../tasks/enable_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+    when: (lookup('env', 'install_repo') == "main") and (lookup('env', 'client_to_test') != "ps80")
 
   - name: include tasks for enabling PS 8 test repo
     include: ../tasks/enable_ps8_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when: (lookup('env', 'install_repo') == "testing") and (lookup('env', 'client_to_test') == "ps80")
 
   - name: include tasks for enabling test repo
     include: ../tasks/enable_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-
+    when: (lookup('env', 'install_repo') == "testing") and (lookup('env', 'client_to_test') != "ps80")
+  
   - name: install deb packages
     apt:
       name: "{{ packages }}"
@@ -42,9 +39,9 @@
       state: present
     vars:
       packages:
-      - libselinux-python
       - pv
     when: ansible_os_family == "RedHat"
 
   - name: install PS/PXC client and run the check
     command: /package-testing/client_check.sh {{ client }}
+    when: (lookup('env', 'client_to_test') == "ps80") and (ansible_os_family == "Debian" and ansible_distribution_release != "jessie")
