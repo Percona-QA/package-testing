@@ -17,13 +17,13 @@
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_main_repo.yml
 
-  - name: install PMM client old deb packages
+  - name: install PMM2 client old deb packages
     apt: name={{item}} update_cache=yes state=latest
     with_items:
     - pmm2-client
     when: ansible_os_family == "Debian"
 
-  - name: install PMM client old rpm packages
+  - name: install PMM2 client old rpm packages
     yum: name={{item}} state=latest
     with_items:
     - pmm2-client
