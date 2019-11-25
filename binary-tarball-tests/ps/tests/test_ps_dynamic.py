@@ -6,7 +6,6 @@ import mysql
 
 from settings import *
 
-
 @pytest.fixture(scope='module')
 def mysql_server(request):
     mysql_server = mysql.MySQL(base_dir)

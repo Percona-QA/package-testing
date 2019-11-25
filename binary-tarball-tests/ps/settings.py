@@ -1,4 +1,4 @@
-#!bin/env python3
+#!/usr/bin/env python3
 import os
 
 base_dir = os.getenv('BASE_DIR')
@@ -63,23 +63,20 @@ ps57_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 ps57_files = (
-  'lib/libHotBackup.so', 'lib/libmysqlharness.a', 'lib/libmysqlharness.so.1',
-  'lib/libmysqlrouter_http.so.1', 'lib/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.1.17' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libHotBackup.so', 'lib/libmysqlservices.a',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.20.3.15' ,'lib/mysql/libjemalloc.so.1',
   'lib/mysql/plugin/ha_tokudb.so', 'lib/mysql/plugin/ha_rocksdb.so', 'lib/mysql/plugin/audit_log.so',
-  'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so', 'lib/mysql/plugin/data_masking.so',
-  'lib/mysql/plugin/data_masking.ini', 'lib/mysql/plugin/tokudb_backup.so','lib/mysql/plugin/keyring_file.so',
-  'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
+  'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so', 'lib/mysql/plugin/tokudb_backup.so',
+  'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
 ps57_symlinks = (
-  ('lib/libmysqlharness.so','lib/libmysqlharness.so.1'),('lib/libmysqlrouter_http.so','lib/libmysqlrouter_http.so.1'),
-  ('lib/libmysqlrouter.so','lib/libmysqlrouter.so.1'),('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.1.17'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.1.17')
+  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.15'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.15')
 )
 
 # 5.6
 ps56_binaries = (
-  'bin/mysql', 'sbin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog', 'bin/mysqldump',
+  'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog', 'bin/mysqldump',
   'bin/mysqldumpslow', 'bin/mysqlimport', 'bin/mysqlshow', 'bin/mysqlslap', 'bin/mysqlcheck',
   'bin/mysql_config_editor', 'bin/mysql_secure_installation', 'bin/mysql_upgrade', 'bin/mysql_tzinfo_to_sql')
 ps56_plugins = (
@@ -90,18 +87,15 @@ ps56_functions = (
   ('fnv1a_64', 'libfnv1a_udf.so', 'INTEGER'),('fnv_64', 'libfnv_udf.so', 'INTEGER'),('murmur_hash', 'libmurmur_udf.so', 'INTEGER')
 )
 ps56_files = (
-  'lib/libHotBackup.so', 'lib/libmysqlharness.a', 'lib/libmysqlharness.so.1',
-  'lib/libmysqlrouter_http.so.1', 'lib/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.1.17' ,'lib/mysql/libjemalloc.so.1',
-  'lib/mysql/plugin/ha_tokudb.so', 'lib/mysql/plugin/ha_rocksdb.so', 'lib/mysql/plugin/audit_log.so',
-  'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so', 'lib/mysql/plugin/data_masking.so',
-  'lib/mysql/plugin/data_masking.ini', 'lib/mysql/plugin/tokudb_backup.so','lib/mysql/plugin/keyring_file.so',
-  'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
+  'lib/libHotBackup.so', 'lib/libmysqlservices.a',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.18.1.0' ,'lib/mysql/libjemalloc.so.1',
+  'lib/mysql/plugin/ha_tokudb.so', 'lib/mysql/plugin/audit_log.so',
+  'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so', 'lib/mysql/plugin/tokudb_backup.so'
 )
 ps56_symlinks = (
-  ('lib/libmysqlharness.so','lib/libmysqlharness.so.1'),('lib/libmysqlrouter_http.so','lib/libmysqlrouter_http.so.1'),
-  ('lib/libmysqlrouter.so','lib/libmysqlrouter.so.1'),('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.1.17'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.1.17')
+  ('lib/libperconaserverclient.so.18','lib/libperconaserverclient.so.18.1.0'),('lib/libperconaserverclient.so','lib/libperconaserverclient.so.18.1.0'),
+  ('lib/libperconaserverclient_r.a','lib/libperconaserverclient.a'),('lib/libperconaserverclient_r.so','lib/libperconaserverclient.so.18.1.0'),
+  ('lib/libperconaserverclient_r.so.18','lib/libperconaserverclient.so.18.1.0'),('lib/libperconaserverclient_r.so.18.1.0','lib/libperconaserverclient.so.18.1.0')
 )
 #####
 
