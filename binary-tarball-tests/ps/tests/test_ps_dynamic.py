@@ -26,9 +26,9 @@ def test_tokudb_install(host, mysql_server):
         mysql_server.restart()
         host.run('sudo '+mysql_server.psadmin+' --user=root -S'+mysql_server.socket+' --enable --enable-backup')
     else:
-        host.run('sudo '+mysql_server.psadmin+' --user=root -S'+mysql_server.socket+' --enable-tokudb-backup')
+        host.run('sudo '+mysql_server.psadmin+' --user=root -S'+mysql_server.socket+' --enable-tokudb --enable-tokubackup')
         mysql_server.restart()
-        host.run('sudo '+mysql_server.psadmin+' --user=root -S'+mysql_server.socket+' --enable-tokudb-backup')
+        host.run('sudo '+mysql_server.psadmin+' --user=root -S'+mysql_server.socket+' --enable-tokudb --enable-tokubackup')
     assert mysql_server.check_engine_active('TokuDB')
 
 def test_install_functions(mysql_server):
