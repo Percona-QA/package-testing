@@ -5,7 +5,7 @@ echo "Installing dependencies..."
 if [ -f /etc/redhat-release ]; then
   sudo yum install -y libaio numactl openssl
   # below needed for 5.6 mysql_install_db
-  sudo yum install perl-Data-Dumper
+  sudo yum install -y perl-Data-Dumper
   if [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
     sudo yum install -y epel-release centos-release-scl
     sudo yum install -y rh-python36 rh-python36-python-pip
