@@ -32,7 +32,7 @@
   - name: Print PMM2-Client Version before upgrade
     command: pmm-admin --version
     register: version
-  - debug: var=version.stdout_lines
+  - debug: var=version.stderr_lines
 
   - name: include tasks for enabling testing repo
     include: ../tasks/enable_testing_repo.yml
@@ -55,7 +55,7 @@
   - name: Print PMM2-Client Version After upgrade
     command: pmm-admin --version
     register: version_new
-  - debug: var=version_new.stdout_lines
+  - debug: var=version_new.stderr_lines
 
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
