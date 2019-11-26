@@ -12,6 +12,9 @@
 - hosts: all
   become: true
   become_method: sudo
+  vars:
+    vault_token: "{{ lookup('env', 'VAULT_TEST_TOKEN') }}"
+    vault_cert: "{{ lookup('env', 'VAULT_TEST_CERT') }}"
 
   tasks:
   - name: include tasks for test env setup
@@ -22,6 +25,16 @@
 #
   - name: include tasks for enabling main repo
     include: ../tasks/enable_main_repo.yml
+
+  - name: setup config file for keyring vault
+    template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test.j2
+              dest=/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
+              mode=0664 owner=root group=root
+
+  - name: copy certificate for keyring vault
+    copy:
+      src: "{{ vault_cert }}"
+      dest: /package-testing/scripts/ps_keyring_plugins_test/test.cer
 
   - name: download and extract world database
     command: "{{ item }}"
