@@ -4,7 +4,7 @@
 #   installs latest version of PS 5.7, PT and PXB 2.4
 #   does some tests
 
-- import_playbook: test_prep.yml
+#- import_playbook: test_prep.yml
 
 - hosts: all
   become: true
@@ -45,7 +45,7 @@
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
@@ -85,7 +85,16 @@
       packages:
       - rsyslog-mysql
       - MySQL-python
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+
+# Since Centos8 is recently released, currently there is no MySQL-python package for this distribution
+  - name: install 3rd party packages with yum on RHEL/Centos8
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: add sbt user
     mysql_user:
@@ -93,6 +102,11 @@
       password: s3cret!Pass
       priv: '*.*:ALL'
       state: present
+    when: (ansible_os_family == "Debian") or (ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7")
+
+  - name: add sbt user on RHEL/Centos8
+    command: mysql -e "CREATE USER 'sbt'@'localhost' IDENTIFIED BY 's3cret!Pass'; GRANT ALL ON *.* TO 'sbt'@'localhost'; FLUSH PRIVILEGES;"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
     
   - name: run sysbench prepare script
     command: sysbench --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
