@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import subprocess
+import re
+import os
 
 class MySQL:
     def __init__(self, base_dir):
@@ -11,16 +13,26 @@ class MySQL:
         self.mysql = base_dir+'/bin/mysql'
         self.mysqld = base_dir+'/bin/mysqld'
         self.mysqladmin = base_dir+'/bin/mysqladmin'
-        self.psadmin = base_dir+'/bin/ps-admin'
         self.pidfile = base_dir+'/mysql.pid'
-  
+        self.mysql_install_db = base_dir+'/scripts/mysql_install_db'
+
         subprocess.call(['rm','-Rf',self.datadir])
         subprocess.call(['rm','-f',self.logfile])
         subprocess.call(['mkdir','-p',self.basedir+'/log'])
-        subprocess.check_call([self.mysqld, '--no-defaults', '--initialize-insecure','--basedir='+self.basedir,'--datadir='+self.datadir])
-  
+        output = subprocess.check_output([self.mysqld, '--version'],universal_newlines=True)
+        x = re.search(r"[0-9]+\.[0-9]+", output)
+        self.major_version = x.group()
+        if self.major_version == "5.6":
+            os.environ['LD_PRELOAD'] = self.basedir+'/lib/mysql/libjemalloc.so.1 '+self.basedir+'/lib/libHotBackup.so'
+            self.psadmin = base_dir+'/bin/ps_tokudb_admin'
+            subprocess.check_call([self.mysql_install_db, '--no-defaults', '--basedir='+self.basedir,'--datadir='+self.datadir])
+        else:
+            os.environ['LD_PRELOAD'] = self.basedir+'/lib/mysql/libjemalloc.so.1 '+self.basedir+'/lib/libHotBackup.so'
+            self.psadmin = base_dir+'/bin/ps-admin'
+            subprocess.check_call([self.mysqld, '--no-defaults', '--initialize-insecure','--basedir='+self.basedir,'--datadir='+self.datadir])
+
     def start(self):
-        subprocess.Popen([self.mysqld,'--no-defaults','--basedir='+self.basedir,'--datadir='+self.datadir,'--tmpdir='+self.datadir,'--socket='+self.socket,'--port='+self.port,'--log-error='+self.logfile,'--pid-file='+self.pidfile])
+        subprocess.Popen([self.mysqld,'--no-defaults','--basedir='+self.basedir,'--datadir='+self.datadir,'--tmpdir='+self.datadir,'--socket='+self.socket,'--port='+self.port,'--log-error='+self.logfile,'--pid-file='+self.pidfile,'--server-id=1','--master-info-repository=table','--relay-log-info-repository=table'], env=os.environ)
         subprocess.call(['sleep','5'])
   
     def stop(self):
