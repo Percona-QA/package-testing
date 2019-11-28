@@ -34,11 +34,11 @@ class MySQL:
     def start(self):
         subprocess.Popen([self.mysqld,'--no-defaults','--basedir='+self.basedir,'--datadir='+self.datadir,'--tmpdir='+self.datadir,'--socket='+self.socket,'--port='+self.port,'--log-error='+self.logfile,'--pid-file='+self.pidfile,'--server-id=1','--master-info-repository=table','--relay-log-info-repository=table'], env=os.environ)
         subprocess.call(['sleep','5'])
-  
+
     def stop(self):
         subprocess.check_call([self.mysqladmin,'-uroot','-S'+self.socket,'shutdown'])
         subprocess.call(['sleep','5'])
-  
+
     def restart(self):
         self.stop()
         self.start()
@@ -47,7 +47,7 @@ class MySQL:
         self.stop()
         subprocess.call(['rm','-Rf',self.datadir])
         subprocess.call(['rm','-f',self.logfile])
-  
+
     def run_query(self,query):
         command = self.mysql+' --user=root -S'+self.socket+' -s -N -e '+query
         return subprocess.check_output(command,shell=True,universal_newlines=True)
@@ -58,7 +58,7 @@ class MySQL:
         query = '"SELECT name FROM mysql.func WHERE dl = \\\"{}\\\";"'.format(soname)
         output = self.run_query(query)
         assert fname in output
-  
+
     def install_plugin(self, pname, soname):
         query = '"INSTALL PLUGIN {} SONAME \\\"{}\\\";"'.format(pname,soname)
         self.run_query(query)
