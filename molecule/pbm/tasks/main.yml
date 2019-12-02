@@ -88,7 +88,7 @@
   blockinfile:
     path: /etc/default/pbm-agent
     block: |
-      PBM_MONGODB_URI="mongodb://localhost:27017/"
+      PBM_MONGODB_URI="mongodb://localhost:27017/?replicaSet=rs1"
   when: ansible_os_family == "Debian"
 
 - name: start pbm-agent service
