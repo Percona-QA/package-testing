@@ -18,6 +18,7 @@ def parse_yaml_string(ys):
     :param ys:
     :return:
     """
+    print(ys)
     fd = StringIO(ys)
     dct = yaml.load(fd)
     return dct
@@ -215,7 +216,7 @@ def test_pbm_help(host):
 def test_set_store(set_store):
     """Set and show storage test
 
-    :param host:
+    :param set_store:
     :return:
     """
     assert set_store.rc == 0, set_store.stdout
