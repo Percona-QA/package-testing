@@ -59,7 +59,7 @@ def set_store(host):
     :param host:
     :return:
     """
-    command = "pbm config --file=/etc/pbm-agent-storage.conf --mongodb-uri=mongodb://localhost:27017"
+    command = "pbm config --file=/etc/pbm-agent-storage.conf --mongodb-uri=mongodb://localhost:27017/?replicaSet=rs1"
     result = host.run(command)
     print(result.stdout)
     print(result.stderr)
@@ -74,7 +74,7 @@ def show_store(host, set_store):
     :param set_store:
     :return:
     """
-    command = "pbm config --list --mongodb-uri=mongodb://localhost:27017"
+    command = "pbm config --list --mongodb-uri=mongodb://localhost:27017/?replicaSet=rs1"
     result = host.run(command)
     print(result.stdout)
     print(result.stderr)
@@ -171,6 +171,7 @@ def test_pbm_storage_default_config(host):
     assert file.mode == 0o644
 
 
+# TODO add correct start/stop test
 def test_start_stop_service(start_stop_pbm):
     """Start and stop pbm agent
 
