@@ -62,6 +62,7 @@ def set_store(host):
     command = "pbm store set --config=/etc/pbm-agent-storage.conf --mongodb-uri=mongodb://localhost:27017"
     result = host.run(command)
     print(result.stdout)
+    print(result.stderr)
     return result
 
 
@@ -76,6 +77,8 @@ def show_store(host, set_store):
     command = "pbm store show --mongodb-uri=mongodb://localhost:27017"
     result = host.run(command)
     print(result.stdout)
+    print(result.stderr)
+
     assert result.rc == 0, result.stdout
     return parse_yaml_string(result.stdout.split("\n", 2)[2].strip())
 
@@ -196,8 +199,7 @@ def test_pbm_version(host):
     assert result.rc == 0, result.stdout
     lines = result.stdout.split("\n")
     parsed_config = {line.split(":")[0]: line.split(":")[1].strip() for line in lines[0:-1]}
-    print(parsed_config)
-    assert "1.0" in parsed_config['Version']
+    assert parsed_config['Version'] == '1.1.0'
     assert parsed_config['Platform']
     assert parsed_config['GitCommit']
     assert parsed_config['GitBranch']
