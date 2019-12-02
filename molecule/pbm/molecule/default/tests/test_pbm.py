@@ -61,6 +61,7 @@ def set_store(host):
     """
     command = "pbm store set --config=/etc/pbm-agent-storage.conf --mongodb-uri=mongodb://localhost:27017"
     result = host.run(command)
+    print(result.stdout)
     return result
 
 
@@ -74,6 +75,7 @@ def show_store(host, set_store):
     """
     command = "pbm store show --mongodb-uri=mongodb://localhost:27017"
     result = host.run(command)
+    print(result.stdout)
     assert result.rc == 0, result.stdout
     return parse_yaml_string(result.stdout.split("\n", 2)[2].strip())
 
