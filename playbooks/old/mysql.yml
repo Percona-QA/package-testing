@@ -6,7 +6,7 @@
 
   tasks:
   - name: Download the deb repo package from oracle
-    command: wget http://dev.mysql.com/get/mysql-apt-config_0.5.3-1_all.deb 
+    command: wget http://dev.mysql.com/get/mysql-apt-config_0.5.3-1_all.deb
     when: ansible_os_family == "Debian"
   - name: Download the rpm repo package from oracle
     command: wget http://dev.mysql.com/get/mysql57-community-release-el5-7.noarch.rpm

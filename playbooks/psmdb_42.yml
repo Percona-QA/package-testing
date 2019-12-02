@@ -56,7 +56,7 @@
 
   - name: check that PSMDB 4.2 version is correct
     command: /package-testing/version_check.sh psmdb42
-    
+
   - name: test perconadecrypt with keyfile
     command: /package-testing/scripts/psmdb_encryption/perconadecrypt-test.sh 4.2 keyfile
 

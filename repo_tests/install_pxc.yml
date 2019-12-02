@@ -8,7 +8,7 @@
     apt:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - percona-xtradb-cluster-full-57
       - percona-xtradb-cluster-57
@@ -20,7 +20,7 @@
     apt:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - percona-xtradb-cluster-full-57
       - percona-xtradb-cluster-57
@@ -75,7 +75,7 @@
     apt:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - percona-xtradb-cluster-full-56
       - percona-xtradb-cluster-56
@@ -87,7 +87,7 @@
     apt:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - percona-xtradb-cluster-full-56
       - percona-xtradb-cluster-56

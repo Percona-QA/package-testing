@@ -17,15 +17,15 @@
       deb: https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
     when: ansible_os_family == "Debian"
 
-  - name: Install MySQL RHEL 6 yum repository package 
+  - name: Install MySQL RHEL 6 yum repository package
     yum: name=https://dev.mysql.com/get/mysql80-community-release-el6-1.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
-  - name: Install MySQL RHEL 7 yum repository package 
+  - name: Install MySQL RHEL 7 yum repository package
     yum: name=https://dev.mysql.com/get/mysql80-community-release-el7-1.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: Install MySQL RHEL 8 yum repository package 
+  - name: Install MySQL RHEL 8 yum repository package
     yum: name=https://dev.mysql.com/get/mysql80-community-release-el8-1.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
@@ -46,22 +46,22 @@
     command: /usr/bin/dnf module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: install deb packages 
+  - name: install deb packages
     apt:
       name: "{{ packages }}"
-      update_cache: yes 
-    vars: 
+      update_cache: yes
+    vars:
       packages:
       - vim
       - pv
       - unzip
     when: ansible_os_family == "Debian"
 
-  - name: install MySQL Community deb packages 
+  - name: install MySQL Community deb packages
     apt:
       name: "{{ packages }}"
-      update_cache: yes 
-    vars: 
+      update_cache: yes
+    vars:
       packages:
       - mysql-community-server
     when: ansible_os_family == "Debian"
@@ -88,11 +88,11 @@
       - mysql-community-server
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: Start the MySQL service  
+  - name: Start the MySQL service
     service: name=mysql state=started
     when: ansible_os_family == "Debian"
 
-  - name: Start the MySQL service  
+  - name: Start the MySQL service
     service: name=mysqld state=started
     when: ansible_os_family == "RedHat"
 

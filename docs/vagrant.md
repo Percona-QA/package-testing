@@ -2,7 +2,7 @@
 ```
 vagrant init <base box>
 vagrant up
-vagrant ssh 
+vagrant ssh
 sudo apt-get update
 sudo apt-get upgrade
 sudo apt-get clean

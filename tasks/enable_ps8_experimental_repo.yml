@@ -12,7 +12,7 @@
 
   - name: add the Percona testing yum repos for CentOS
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-    when: ansible_os_family == "RedHat" 
+    when: ansible_os_family == "RedHat"
 
   - name: enable the PS-80 experimental repo
     command: percona-release enable-only ps-80 experimental

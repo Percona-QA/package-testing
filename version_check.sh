@@ -116,7 +116,7 @@ if [ "${product}" = "ps55" -o "${product}" = "ps56" -o "${product}" = "ps57" -o 
       exit 1
     fi
   fi
- 
+
 elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
   for i in @@INNODB_VERSION @@VERSION; do
     if [ "$(mysql -e "SELECT ${i}; "| grep -c ${version}-${innodb_ver})" = 1 ]; then

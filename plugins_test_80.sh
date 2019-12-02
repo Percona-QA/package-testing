@@ -60,7 +60,7 @@ if [ ! -z "$1" ]; then
 fi
 
 #ERRORS_AFTER=$(grep -c "\[ERROR\]" ${ERROR_LOG} || true)
-ERRORS_AFTER=$(grep "\[ERROR\]" ${ERROR_LOG} | grep -v "keyring_vault" -c || true) 
+ERRORS_AFTER=$(grep "\[ERROR\]" ${ERROR_LOG} | grep -v "keyring_vault" -c || true)
 if [ "${ERRORS_BEFORE}" != "${ERRORS_AFTER}" ]; then
   echo "There's a difference in number of errors before installing plugins and after!"
   exit 1

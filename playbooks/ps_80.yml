@@ -4,7 +4,7 @@
 #   installs latest version of PS 8.0, PT and PXB 8.0
 #   does some tests
 
-# Cosmic is still missing python 
+# Cosmic is still missing python
 # import_playbook: test_prep.yml
 
 - hosts: all
@@ -83,25 +83,25 @@
     include_tasks: ../tasks/gr_test.yml
 
   - name: install tokudb and restart server
-    command: /usr/bin/ps-admin --enable-tokudb 
+    command: /usr/bin/ps-admin --enable-tokudb
 
   - name: restart mysql service
     service: name=mysql state=restarted
 
   - name: re-run ps-admin to finish tokudb install
-    command: /usr/bin/ps-admin --enable-tokudb 
+    command: /usr/bin/ps-admin --enable-tokudb
 
   - name: install percona-mysql-shell package for CentOS
-    yum: 
+    yum:
       name: "{{ packages }}"
     vars:
       packages:
       - percona-mysql-shell
-    when: ansible_os_family == "RedHat" 
+    when: ansible_os_family == "RedHat"
 
   - name: install percona-mysql-shell package for Debian/Ubuntu
     apt:
-      update_cache: yes 
+      update_cache: yes
       state: present
       name: "{{ packages }}"
     vars:
@@ -143,7 +143,7 @@
     include_tasks: ../tasks/pam_test.yml
 
   - name: install 3rd party packages with apt
-    apt: 
+    apt:
       name: "{{ packages }}"
     vars:
       packages:
@@ -151,7 +151,7 @@
     when: ansible_os_family == "Debian"
 
   - name: install 3rd party packages with yum
-    yum: 
+    yum:
       name: "{{ packages }}"
     vars:
       packages:
@@ -169,9 +169,9 @@
 
 
   - name: remove Percona Server deb packages
-    apt: 
-      name: "{{ packages }}" 
-      update_cache: no 
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
       state: absent
     vars:
       packages:
@@ -179,7 +179,7 @@
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server rpm packages
-    yum: 
+    yum:
       name: "{{ packages }}"
       state: absent
     vars:

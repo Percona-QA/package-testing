@@ -17,7 +17,7 @@
 
   - name: restart mysql service
     service: name=mysql state=restarted
-    
+
   - name: run the test script
     command: /package-testing/scripts/gr_test.sh
 
@@ -35,4 +35,4 @@
 
   - name: restart mysql service
     service: name=mysql state=restarted
-    
+

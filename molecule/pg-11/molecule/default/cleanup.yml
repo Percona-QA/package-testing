@@ -154,7 +154,7 @@
         - libpq5-dbgsym
         - libpq5
       when: ansible_os_family == "Debian"
-  
+
 #    - name: Unregister RedHat
 #      redhat_subscription:
 #        state: absent

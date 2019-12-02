@@ -4,7 +4,7 @@
 #   installs latest version of PS 8.0, PT and PXB 8.0
 #   does some tests
 
-# Cosmic is still missing python 
+# Cosmic is still missing python
 # - import_playbook: test_prep.yml
 
 - hosts: all
@@ -76,9 +76,9 @@
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
 
   - name: remove Percona Server deb packages
-    apt: 
-      name: "{{ packages }}" 
-      update_cache: no 
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
       state: absent
     vars:
       packages:
@@ -87,7 +87,7 @@
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server rpm packages
-    yum: 
+    yum:
       name: "{{ packages }}"
       state: absent
     vars:

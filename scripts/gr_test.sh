@@ -15,7 +15,7 @@ fi
 mysql -e "SET GLOBAL group_replication_bootstrap_group=ON;"
 mysql -e "START GROUP_REPLICATION;"
 
-# wait for GR to initialize 
+# wait for GR to initialize
 sleep 5
 
 # check that the member is on-line

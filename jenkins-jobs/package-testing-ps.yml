@@ -218,7 +218,7 @@
         default-excludes: true
         fingerprint: false
         only-if-success: false
-    - junit: 
+    - junit:
         results: junit.xml
         keep-long-stdio: false
         health-scale-factor: 1.0

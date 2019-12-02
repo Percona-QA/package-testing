@@ -87,7 +87,7 @@
     service: name=mongod state=started
 
   - name: remove Percona Server for MongoDB 3.6 deb packages
-    apt: 
+    apt:
       name: "{{ packages }}"
       update_cache: no
       state: absent

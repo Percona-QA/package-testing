@@ -232,10 +232,6 @@
         perl -0777 -pi -e 's:<skipped\/>\n</test:<skipped\/><\/testcase>\n</test:g' ${WORKSPACE}/junit.xml
         #
         exit ${exitstatus}
-    - 
-
-    - system-groovy:
-
 
     - raw:
         xml: |

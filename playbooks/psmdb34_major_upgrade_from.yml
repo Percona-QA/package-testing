@@ -1,7 +1,7 @@
 ---
 # This playbook does following:
 #   * sets main Percona repo
-#   * installs PSMDB 3.4 
+#   * installs PSMDB 3.4
 #   * inserts some data
 #   * changes repo to testing
 #   * uninstalls PSMDB 3.4 and installs 3.6

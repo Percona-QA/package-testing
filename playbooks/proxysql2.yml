@@ -24,7 +24,7 @@
     when: lookup('env', 'install_repo') == "main"
 
   - name: install proxysql new deb packages
-    apt: 
+    apt:
       name: "{{ packages }}"
       update_cache: yes
       state: latest
@@ -57,7 +57,7 @@
   - name: remove proxysql deb packages
     apt:
       name: "{{ packages }}"
-      state: absent 
+      state: absent
     vars:
       packages:
       - proxysql2

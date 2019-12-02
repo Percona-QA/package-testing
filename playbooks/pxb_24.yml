@@ -107,7 +107,7 @@
   - name: add sbt user on RHEL/Centos8
     command: mysql -e "CREATE USER 'sbt'@'localhost' IDENTIFIED BY 's3cret!Pass'; GRANT ALL ON *.* TO 'sbt'@'localhost'; FLUSH PRIVILEGES;"
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-    
+
   - name: run sysbench prepare script
     command: sysbench --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
 
@@ -138,7 +138,7 @@
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server 5.7 rpm packages
-    yum: 
+    yum:
       name: "{{ packages }}"
       state: absent
     vars:

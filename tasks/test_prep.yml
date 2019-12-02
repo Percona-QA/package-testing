@@ -89,7 +89,7 @@
     when: ansible_os_family == "Suse" and ansible_distribution_major_version == "12"
 
   - name: install needed packages for running tests with zypper
-    zypper: 
+    zypper:
       name: "{{ packages }}"
       state: latest
     vars:

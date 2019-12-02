@@ -6,7 +6,7 @@ if [ -f /etc/mysql/my.cnf ]; then
 else
   MYCNF="/etc/my.cnf"
 fi
- 
+
 LOG="/tmp/keyring_plugins_test_run.log"
 echo -n > ${LOG}
 

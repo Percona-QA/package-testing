@@ -2,13 +2,13 @@
 
 #
 # Install PXB 8.0 packages
-# 
+#
 
   - name: Install percona-xtrabackup-80 packages in debian
     apt:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - percona-xtrabackup-80
       - percona-xtrabackup-test-80
@@ -19,7 +19,7 @@
     apt:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - percona-xtrabackup-80
       - percona-xtrabackup-test-80
@@ -59,7 +59,7 @@
     apt:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - percona-xtrabackup-24
       - percona-xtrabackup-test-24
@@ -70,7 +70,7 @@
     apt:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - percona-xtrabackup-24
       - percona-xtrabackup-test-24
@@ -107,7 +107,7 @@
     apt:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - percona-xtrabackup
       - percona-xtrabackup-test
@@ -118,7 +118,7 @@
     apt:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - percona-xtrabackup
       - percona-xtrabackup-test

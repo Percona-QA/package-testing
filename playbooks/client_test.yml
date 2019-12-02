@@ -23,7 +23,7 @@
   - name: include tasks for enabling test repo
     include: ../tasks/enable_testing_repo.yml
     when: (lookup('env', 'install_repo') == "testing") and (lookup('env', 'client_to_test') != "ps80")
-  
+
   - name: install deb packages
     apt:
       name: "{{ packages }}"
