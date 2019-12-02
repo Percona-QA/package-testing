@@ -133,7 +133,7 @@ def test_package(host):
     """
     package = host.package("percona-backup-mongodb")
     assert package.is_installed
-    assert "1.0-1" in package.version, package.version
+    assert "1.1.0" in package.version, package.version
 
 
 def test_service(host):
