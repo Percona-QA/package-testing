@@ -30,7 +30,7 @@ pipeline {
             name: 'psmdb_to_test',
             description: 'PSMDB for testing',
             choices: [
-                'psmdb36',
+                'psmdb42',
                 'psmdb40',
                 'psmdb36',
             ]
