@@ -75,9 +75,8 @@
       storage:
         type: s3
         s3:
-           region: us-west-1
-           endpointUrl: http://localhost:9000
-           bucket: pbm
+           region: us-east-1
+           bucket: operator-testing
            credentials:
              access-key-id: {{ access_key }}
              secret-access-key: {{ access_secret }}
