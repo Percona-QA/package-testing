@@ -18,7 +18,6 @@ def parse_yaml_string(ys):
     :param ys:
     :return:
     """
-    print(ys)
     fd = StringIO(ys)
     dct = yaml.load(fd)
     return dct
@@ -220,7 +219,13 @@ def test_set_store(set_store):
     :return:
     """
     assert set_store.rc == 0, set_store.stdout
-    assert "Done" in set_store.stdout
+    store_out = parse_yaml_string(set_store.stdout.split("\n", 2)[2].strip())
+    assert store_out['s3']
+    assert store_out['s3']['region'] == 'us-east-1'
+    assert store_out['s3']['bucket'] == 'operator-testing'
+    assert store_out['s3']['credentials']
+    assert store_out['s3']['credentials']['access-key-id']
+    assert store_out['s3']['credentials']['secret-access-key']
 
 
 def test_show_store(show_store):
@@ -231,8 +236,8 @@ def test_show_store(show_store):
     """
     print(show_store)
     assert show_store['s3']
-    assert show_store['s3']['region'] == 'us-west-1'
-    assert show_store['s3']['bucket'] == 'pbm'
+    assert show_store['s3']['region'] == 'us-east-1'
+    assert show_store['s3']['bucket'] == 'operator-testing'
     assert show_store['s3']['credentials']
     assert show_store['s3']['credentials']['access-key-id']
     assert show_store['s3']['credentials']['secret-access-key']
