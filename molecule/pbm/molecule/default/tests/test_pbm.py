@@ -61,8 +61,6 @@ def set_store(host):
     """
     command = "pbm config --file=/etc/pbm-agent-storage.conf --mongodb-uri=mongodb://localhost:27017/?replicaSet=rs1"
     result = host.run(command)
-    print(result.stdout)
-    print(result.stderr)
     return result
 
 
@@ -76,9 +74,6 @@ def show_store(host, set_store):
     """
     command = "pbm config --list --mongodb-uri=mongodb://localhost:27017/?replicaSet=rs1"
     result = host.run(command)
-    print(result.stdout)
-    print(result.stderr)
-
     assert result.rc == 0, result.stdout
     return parse_yaml_string(result.stdout.split("\n", 2)[2].strip())
 
@@ -234,13 +229,14 @@ def test_show_store(show_store):
     :param show_store:
     :return:
     """
-    assert show_store['type'] == 's3'
-    assert show_store['s3']
-    assert show_store['s3']['region'] == 'us-west'
-    assert show_store['s3']['bucket'] == 'pbm'
-    assert show_store['s3']['credentials']
-    assert show_store['s3']['credentials']['access-key-id']
-    assert show_store['s3']['credentials']['secret-access-key']
+    print(show_store)
+    assert show_store['storage']['type'] == 's3'
+    assert show_store['storage']['s3']
+    assert show_store['storage']['s3']['region'] == 'us-west-1'
+    assert show_store['storage']['s3']['bucket'] == 'pbm'
+    assert show_store['storage']['s3']['credentials']
+    assert show_store['storage']['s3']['credentials']['access-key-id']
+    assert show_store['storage']['s3']['credentials']['secret-access-key']
 
 
 def test_backup(backup):
