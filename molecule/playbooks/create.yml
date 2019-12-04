@@ -73,22 +73,20 @@
         mode: 0600
       with_items: "{{ molecule_yml.platforms }}"
 
-    - name: Get the ec2 ami(s) by owner and name, if image not set
-      ec2_ami_facts:
-        owners: "{{ item.image_owner }}"
-        filters:
-          name: "{{ item.image_name }}"
-        region: "{{ item.region|default(default_region) }}"
-      loop: "{{ molecule_yml.platforms }}"
-      when: item.image is not defined
-      register: ami_facts
+#    - name: Get the ec2 ami(s) by owner and name, if image not set
+#      ec2_ami_facts:
+#        owners: "{{ item.image_owner }}"
+#        filters:
+#          name: "{{ item.image_name }}"
+#        region: "{{ item.region|default(default_region) }}"
+#      loop: "{{ molecule_yml.platforms }}"
+#      when: item.image is not defined
+#      register: ami_facts
 
     - name: Create molecule instance(s)
       ec2:
         key_name: "{{ keypair_name }}"
-        image: "{{ item.image
-          if item.image is defined
-          else (ami_facts.results[index].images | sort(attribute='creation_date', reverse=True))[0].image_id }}"
+        image: "{{ item.image }}"
         instance_type: "{{ item.instance_type }}"
         vpc_subnet_id: "{{ item.vpc_subnet_id }}"
         group: "{{ security_group_name_prefix }}-{{ subnet_dict[item.vpc_subnet_id] }}"
@@ -110,7 +108,7 @@
           Name: "{{ item.name }}"
         region: "{{ item.region|default(default_region) }}"
         volumes:
-          - device_name: /dev/sda1
+          - device_name: "{{ item.root_device_name }}"
             volume_type: gp2
             volume_size: 16
             delete_on_termination: true

@@ -4,57 +4,67 @@ centos-6:
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
+  root_device_name: /dev/sda1
 centos-7:
   image: ami-7cbc6e13
   user: centos
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
+  root_device_name: /dev/sda1
 debian-8:
   image: ami-abff2ac4
   user: admin
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
+  root_device_name: xvda
 debian-9:
   image: ami-006c08e13f35edce0
   user: admin
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
+  root_device_name: xvda
 debian-10:
   image: ami-0be88f8d647409e61
   user: admin
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
+  root_device_name: xvda
 ubuntu-cosmic:
   image: ami-0ead033d778487b37
   user: ubuntu
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
+  root_device_name: /dev/sda1
 ubuntu-disco:
   image: ami-084a12ae4a0c27ea7
   user: ubuntu
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
+  root_device_name: /dev/sda1
 ubuntu-bionic:
   image: ami-0a8561d8c5a4f098a
   user: ubuntu
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
+  root_device_name: /dev/sda1
 ubuntu-xenial:
   image: ami-44182caf
   user: ubuntu
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
+  root_device_name: /dev/sda1
 rhel8:
   image: ami-0badcc5b522737046
   user: ec2-user
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
+  root_device_name: /dev/sda1

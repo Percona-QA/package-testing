@@ -1,0 +1,54 @@
+---
+scenario:
+  name: ec2
+  destroy_sequence:
+    - destroy
+  cleanup_sequence:
+    - cleanup
+  test_sequence:
+    - lint
+    - destroy
+    - dependency
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+    - destroy
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+lint:
+  name: yamllint
+platforms:
+  - name: ps57-pkg-upgrade-${PLATFORM}
+    region: ${AWS_DEFAULT_REGION}
+    image: ${IMAGE}
+    vpc_subnet_id: ${SUBNET}
+    instance_type: ${INSTANCE_TYPE}
+    root_device_name: ${ROOT_DEVICE_NAME}
+    ssh_user: ${USER}
+    instance_tags:
+      iit-billing-tag: jenkins-ps-pkg-worker
+provisioner:
+  name: ansible
+  env:
+    MOLECULE_KEY_NAME: molecule-${ROLE_NAME}
+  playbooks:
+    create: ../../../playbooks/create.yml
+    cleanup: ../../../ps-57-install/molecule/default/cleanup.yml
+    destroy: ../../../playbooks/destroy.yml
+    prepare: ../../../playbooks/prepare.yml
+  lint:
+    name: ansible-lint
+    enabled: False
+verifier:
+  name: testinfra
+  directory: ../../../ps-57-install/molecule/default/tests
+  options:
+    verbose: true
+    s: true
+    junitxml: report.xml
+  lint:
+    name: flake8
