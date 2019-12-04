@@ -92,12 +92,19 @@
     access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
     access_secret: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
 
-- name: edit pbm-agent service config
+- name: edit pbm-agent service config for deb
   blockinfile:
     path: /etc/default/pbm-agent
     block: |
       PBM_MONGODB_URI="mongodb://localhost:27017/?replicaSet=rs1"
   when: ansible_os_family == "Debian"
+
+- name: edit pbm-agent service config for rhel based
+  blockinfile:
+    path: /etc/sysconfig/pbm-agent
+    block: |
+      PBM_MONGODB_URI="mongodb://localhost:27017/?replicaSet=rs1"
+  when: ansible_os_family == "RedHat"
 
 - name: start pbm-agent service
   service:
