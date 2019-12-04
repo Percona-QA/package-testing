@@ -96,7 +96,7 @@ def backup(host):
     backup = """pbm backup --mongodb-uri=mongodb://localhost:27017"""
     backup_result = host.run(backup)
     assert backup_result.rc == 0, backup_result.stdout
-    backup_name = backup_result.stdout.split()[2].strip("\'")
+    backup_name = backup_result.stdout.split()[2].strip("\'").rstrip("'...")
     drop_data = """mongo --quiet --eval 'db.dropDatabase()' test"""
     drop_data_result = host.run(drop_data)
     assert drop_data_result.rc == 0, drop_data_result.stdout
