@@ -3,7 +3,7 @@ centos-7:
   user: centos
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
-  instance_type: t2.micro
+  instance_type: t3.micro
 debian-9:
   image: ami-006c08e13f35edce0
   user: admin
