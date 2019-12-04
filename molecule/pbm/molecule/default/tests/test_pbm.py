@@ -89,7 +89,7 @@ def backup(host):
     insert_data_result = host.run(insert_data)
     assert insert_data_result.rc == 0, insert_data_result.stdout
     assert insert_data_result.stdout.strip("\n") == """WriteResult({ "nInserted" : 1 })""", insert_data_result.stdout
-    save_hash = """mongo - -quiet - -eval 'db.runCommand({ dbHash: 1 }).md5' test | tail -n1"""
+    save_hash = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
     save_hash_result = host.run(save_hash)
     assert save_hash_result.rc == 0, save_hash_result.stdout
     hash = save_hash_result.stdout.strip("\n")
@@ -104,7 +104,6 @@ def backup(host):
     result = host.run(documents_after_drop)
     assert result.rc == 0, result.stdout
     assert result.stdout.split("\n")[0] == "0"
-    print(backup_name)
     return hash, backup_name
 
 
