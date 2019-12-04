@@ -261,6 +261,7 @@ def test_backup_list(host, backup):
     """
     cmd = "pbm list --mongodb-uri=mongodb://localhost:27017"
     result = host.run(cmd)
+    print(result.stdout)
     assert result.rc == 0, result.stdout
     assert backup[1] in result.stdout
 
