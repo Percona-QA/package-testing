@@ -1,5 +1,5 @@
 centos-7:
-  image: ami-01f2583795bd74f9e
+  image: ami-bc7548a1
   user: centos
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
