@@ -19,7 +19,6 @@ provisioner:
   log: True
   playbooks:
     create: ../../../playbooks/create.yml
-    cleanup: ../../../playbooks/cleanup.yml
     destroy: ../../../playbooks/destroy.yml
     prepare: ../../../playbooks/prepare.yml
   lint:
