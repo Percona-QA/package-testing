@@ -104,6 +104,7 @@ def backup(host):
     result = host.run(documents_after_drop)
     assert result.rc == 0, result.stdout
     assert result.stdout.split("\n")[0] == "0"
+    print(backup_name)
     return hash, backup_name
 
 
@@ -271,4 +272,5 @@ def test_restore(restore, backup):
     :param backup:
     :return:
     """
+    print(restore)
     assert backup[0] == restore
