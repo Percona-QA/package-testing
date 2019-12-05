@@ -1,5 +1,6 @@
 import os
 import pytest
+import time
 import yaml
 try:
     from StringIO import StringIO
@@ -96,6 +97,7 @@ def backup(host):
     backup = """pbm backup --mongodb-uri=mongodb://localhost:27017"""
     backup_result = host.run(backup)
     assert backup_result.rc == 0, backup_result.stdout
+    time.sleep(120)
     backup_name = backup_result.stdout.split()[2].strip("\'").rstrip("'...")
     drop_data = """mongo --quiet --eval 'db.dropDatabase()' test"""
     drop_data_result = host.run(drop_data)
@@ -116,6 +118,7 @@ def restore(backup, host):
     restore = """pbm restore --mongodb-uri=mongodb://localhost:27017 {}""".format(backup[1])
     restore_result = host.run(restore)
     assert restore_result.rc == 0, restore_result.stdout
+    time.sleep(120)
     db_hash_after = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
     db_hash_after_result = host.run(db_hash_after)
     assert db_hash_after_result.rc == 0, db_hash_after_result.stdout
