@@ -1,5 +1,6 @@
 import os
 import pytest
+import time
 import yaml
 try:
     from StringIO import StringIO
@@ -58,7 +59,7 @@ def set_store(host):
     :param host:
     :return:
     """
-    command = "pbm store set --config=/etc/pbm-agent-storage.conf --mongodb-uri=mongodb://localhost:27017"
+    command = "pbm config --file=/etc/pbm-agent-storage.conf --mongodb-uri=mongodb://localhost:27017/?replicaSet=rs1"
     result = host.run(command)
     return result
 
@@ -71,7 +72,7 @@ def show_store(host, set_store):
     :param set_store:
     :return:
     """
-    command = "pbm store show --mongodb-uri=mongodb://localhost:27017"
+    command = "pbm config --list --mongodb-uri=mongodb://localhost:27017/?replicaSet=rs1"
     result = host.run(command)
     assert result.rc == 0, result.stdout
     return parse_yaml_string(result.stdout.split("\n", 2)[2].strip())
@@ -89,14 +90,15 @@ def backup(host):
     insert_data_result = host.run(insert_data)
     assert insert_data_result.rc == 0, insert_data_result.stdout
     assert insert_data_result.stdout.strip("\n") == """WriteResult({ "nInserted" : 1 })""", insert_data_result.stdout
-    save_hash = """mongo - -quiet - -eval 'db.runCommand({ dbHash: 1 }).md5' test | tail -n1"""
+    save_hash = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
     save_hash_result = host.run(save_hash)
     assert save_hash_result.rc == 0, save_hash_result.stdout
     hash = save_hash_result.stdout.strip("\n")
     backup = """pbm backup --mongodb-uri=mongodb://localhost:27017"""
     backup_result = host.run(backup)
     assert backup_result.rc == 0, backup_result.stdout
-    backup_name = backup_result.stdout.split()[2].strip("\'")
+    time.sleep(120)
+    backup_name = backup_result.stdout.split()[2].strip("\'").rstrip("'...")
     drop_data = """mongo --quiet --eval 'db.dropDatabase()' test"""
     drop_data_result = host.run(drop_data)
     assert drop_data_result.rc == 0, drop_data_result.stdout
@@ -116,6 +118,7 @@ def restore(backup, host):
     restore = """pbm restore --mongodb-uri=mongodb://localhost:27017 {}""".format(backup[1])
     restore_result = host.run(restore)
     assert restore_result.rc == 0, restore_result.stdout
+    time.sleep(120)
     db_hash_after = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
     db_hash_after_result = host.run(db_hash_after)
     assert db_hash_after_result.rc == 0, db_hash_after_result.stdout
@@ -127,7 +130,7 @@ def test_package(host):
     """
     package = host.package("percona-backup-mongodb")
     assert package.is_installed
-    assert "1.0-1" in package.version, package.version
+    assert "1.1.0" in package.version, package.version
 
 
 def test_service(host):
@@ -165,6 +168,7 @@ def test_pbm_storage_default_config(host):
     assert file.mode == 0o644
 
 
+# TODO add correct start/stop test
 def test_start_stop_service(start_stop_pbm):
     """Start and stop pbm agent
 
@@ -193,7 +197,8 @@ def test_pbm_version(host):
     assert result.rc == 0, result.stdout
     lines = result.stdout.split("\n")
     parsed_config = {line.split(":")[0]: line.split(":")[1].strip() for line in lines[0:-1]}
-    assert "1.0" in parsed_config['Version']
+    print(parsed_config)
+    assert parsed_config['Version'] == '1.1.0'
     assert parsed_config['Platform']
     assert parsed_config['GitCommit']
     assert parsed_config['GitBranch']
@@ -214,11 +219,17 @@ def test_pbm_help(host):
 def test_set_store(set_store):
     """Set and show storage test
 
-    :param host:
+    :param set_store:
     :return:
     """
     assert set_store.rc == 0, set_store.stdout
-    assert "Done" in set_store.stdout
+    store_out = parse_yaml_string(set_store.stdout.split("\n", 2)[2].strip())
+    assert store_out['storage']['type'] == 's3'
+    assert store_out['storage']['s3']['region'] == 'us-east-1'
+    assert store_out['storage']['s3']['bucket'] == 'operator-testing'
+    assert store_out['storage']['s3']['credentials']
+    assert store_out['storage']['s3']['credentials']['access-key-id']
+    assert store_out['storage']['s3']['credentials']['secret-access-key']
 
 
 def test_show_store(show_store):
@@ -227,10 +238,9 @@ def test_show_store(show_store):
     :param show_store:
     :return:
     """
-    assert show_store['type'] == 's3'
     assert show_store['s3']
-    assert show_store['s3']['region'] == 'us-west'
-    assert show_store['s3']['bucket'] == 'pbm'
+    assert show_store['s3']['region'] == 'us-east-1'
+    assert show_store['s3']['bucket'] == 'operator-testing'
     assert show_store['s3']['credentials']
     assert show_store['s3']['credentials']['access-key-id']
     assert show_store['s3']['credentials']['secret-access-key']
@@ -254,6 +264,7 @@ def test_backup_list(host, backup):
     """
     cmd = "pbm list --mongodb-uri=mongodb://localhost:27017"
     result = host.run(cmd)
+    print(result.stdout)
     assert result.rc == 0, result.stdout
     assert backup[1] in result.stdout
 
@@ -265,4 +276,5 @@ def test_restore(restore, backup):
     :param backup:
     :return:
     """
+    print(restore)
     assert backup[0] == restore
