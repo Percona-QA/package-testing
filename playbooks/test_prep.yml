@@ -10,3 +10,9 @@
   tasks:
   - name: install python2
     raw: test -e /usr/bin/python || (which apt && apt -y update && apt install -y python-minimal)
+    when: ansible_os_family == "Debian"
+  - name: Install python2 for Ansible rhel based distros
+    raw: test -e /usr/bin/python || (yum update -y && yum install -y python-minimal python-libselinux)
+    become: true
+    changed_when: false
+    when: ansible_os_family == "RedHat"
