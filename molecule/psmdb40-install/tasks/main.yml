@@ -15,19 +15,19 @@
       {{ vault_token }}
 
 - name: include tasks for enabling test repo
-  include_tasks: ../tasks/enable_psmdb40_testing_repo.yml
+  include_tasks: ../../../tasks/enable_psmdb40_testing_repo.yml
   when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
 - name: include tasks for enabling main repo
-  include_tasks: ../tasks/enable_psmdb40_main_repo.yml
+  include_tasks: ../../../tasks/enable_psmdb40_main_repo.yml
   when: lookup('env', 'install_repo') == "main"
 
 - name: include tasks for enabling experimental repo
-  include_tasks: ../tasks/enable_psmdb40_experimental_repo.yml
+  include_tasks: ../../../tasks/enable_psmdb40_experimental_repo.yml
   when: lookup('env', 'install_repo') == "experimental"
 
 - name: install PSMDB packages
-  include_tasks: ../tasks/install_psmdb.yml
+  include_tasks: ../../../tasks/install_psmdb.yml
 
 - name: start mongod with service
   command: service mongod start

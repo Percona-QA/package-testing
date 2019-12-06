@@ -6,7 +6,7 @@
 
 
 - name: Enable testing repository
-  include: ../tasks/enable_testing_repo.yml
+  include: ../../../tasks/enable_testing_repo.yml
 
 - name: install Percona Server for MongoDB 3.6 deb packages previous version
   apt: name={{item}} update_cache=yes state=latest
@@ -64,7 +64,7 @@
 #
 
 - name: include tasks for enabling main PSMDB 4.0 repo
-  include_tasks: ../tasks/enable_psmdb40_main_repo.yml
+  include_tasks: ../../../tasks/enable_psmdb40_main_repo.yml
 
 - name: upgrade Percona Server for MongoDB to 4.0 deb packages
   apt: name={{item}} update_cache=yes state=latest

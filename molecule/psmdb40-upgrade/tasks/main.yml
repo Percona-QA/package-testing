@@ -7,7 +7,7 @@
 #   upgrades packages to the new version
 #   does some tests
 - name: include tasks for test env setup
-  include_tasks: ../tasks/test_prep.yml
+  include_tasks: ../../../tasks/test_prep.yml
 
 - name: copy certificate for keyring vault
   copy:
@@ -24,13 +24,13 @@
 # Install from main repository
 #
 - name: include tasks for enabling main repo
-  include_tasks: ../tasks/enable_main_repo.yml
+  include_tasks: ../../../tasks/enable_main_repo.yml
 
 - name: include tasks for enabling main repo
-  include_tasks: ../tasks/enable_psmdb40_main_repo.yml
+  include_tasks: ../../../tasks/enable_psmdb40_main_repo.yml
 
 - name: install Percona Server for MongoDB 4.0 packages from main repos
-  include_tasks: ../tasks/install_psmdb.yml
+  include_tasks: ../../../tasks/install_psmdb.yml
 
 - name: start mongod with init script
   command: /etc/init.d/mongod start
@@ -44,13 +44,13 @@
 # Enable testing repository
 #
 - name: include tasks for enabling test repo
-  include_tasks: ../tasks/enable_psmdb40_testing_repo.yml
+  include_tasks: ../../../../tasks/enable_psmdb40_testing_repo.yml
 
 #
 # Upgrade packages
 #
 - name: upgrade Percona Server for MongoDB 4.0 to new deb packages
-  include_tasks: ../tasks/install_psmdb_full.yml
+  include_tasks: ../../../tasks/install_psmdb_full.yml
 
 #- name: check that PSMDB 4.0 package versions are correct
 #  command: /package-testing/package_check.sh psmdb40
