@@ -47,7 +47,7 @@
   - name: install PXC 5.7 new rpm packages
     yum:
       name: "{{ packages }}"
-      state: latest 
+      state: latest
     vars:
       packages:
       - Percona-XtraDB-Cluster-full-57

@@ -5,15 +5,28 @@
 #   does some tests
 
 # Cosmic is still missing python
-- import_playbook: test_prep.yml
+# import_playbook: test_prep.yml
 
 - hosts: all
   become: true
   become_method: sudo
+  vars:
+    vault_token: "{{ lookup('env', 'VAULT_TEST_TOKEN') }}"
+    vault_cert: "{{ lookup('env', 'VAULT_TEST_CERT') }}"
 
   tasks:
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
+
+  - name: setup config file for keyring vault
+    template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test.j2
+              dest=/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
+              mode=0664 owner=root group=root
+
+  - name: copy certificate for keyring vault
+    copy:
+      src: "{{ vault_cert }}"
+      dest: /package-testing/scripts/ps_keyring_plugins_test/test.cer
 
   - name: include tasks for enabling test repo
     include: ../tasks/enable_testing_repo.yml
@@ -99,9 +112,9 @@
     command: /package-testing/version_check.sh pt
     when: lookup('env', 'install_repo') != "experimental"
 
-  - name: check that sysbench version is correct
-    command: /package-testing/version_check.sh sysbench
-    when: lookup('env', 'install_repo') != "experimental"
+# - name: check that sysbench version is correct
+#   command: /package-testing/version_check.sh sysbench
+#   when: lookup('env', 'install_repo') != "experimental"
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
@@ -166,7 +179,7 @@
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server 5.7 rpm packages
-    yum: 
+    yum:
       name: "{{ packages }}"
       state: absent
     vars:

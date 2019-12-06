@@ -42,7 +42,7 @@
   - name: upgrade PXC 5.6 to new rpm packages
     yum:
       name: "{{ packages }}"
-      state: latest 
+      state: latest
     vars:
       packages:
       - Percona-XtraDB-Cluster-full-56
@@ -61,7 +61,7 @@
 
   - name: run mysql_upgrade
     command: /usr/bin/mysql_upgrade
- 
+
   - name: restart the service
     command: service mysql restart
     when: ansible_os_family == "Debian"
@@ -72,8 +72,8 @@
   - name: check that PXC package versions are correct
     command: /package-testing/package_check.sh pxc56
 
-  - name: run bats tests for mysql init scripts
-    command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
+# - name: run bats tests for mysql init scripts
+#   command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
 
   - name: start mysql service
     service: name=mysql state=started

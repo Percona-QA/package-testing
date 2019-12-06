@@ -17,17 +17,22 @@
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_main_repo.yml
 
-  - name: install PMM client old deb packages
+  - name: install PMM2 client old deb packages
     apt: name={{item}} update_cache=yes state=latest
     with_items:
     - pmm2-client
     when: ansible_os_family == "Debian"
 
-  - name: install PMM client old rpm packages
+  - name: install PMM2 client old rpm packages
     yum: name={{item}} state=latest
     with_items:
     - pmm2-client
     when: ansible_os_family == "RedHat"
+
+  - name: Print PMM2-Client Version before upgrade
+    command: pmm-admin --version
+    register: version
+  - debug: var=version.stderr_lines
 
   - name: include tasks for enabling testing repo
     include: ../tasks/enable_testing_repo.yml
@@ -46,6 +51,11 @@
 
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2
+
+  - name: Print PMM2-Client Version After upgrade
+    command: pmm-admin --version
+    register: version_new
+  - debug: var=version_new.stderr_lines
 
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent

@@ -18,7 +18,7 @@
 
   - name: include tasks for enabling test repo
     include: ../tasks/enable_testing_repo.yml
-    when: repo == "testing" 
+    when: repo == "testing"
 
   - name: download and extract world database
     command: "{{ item }}"

@@ -20,7 +20,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: enable ps80 repo
-    command: percona-release enable ps-80 
+    command: percona-release enable ps-80
 
   - name: enable testing repo
     command: percona-release enable original testing

@@ -24,18 +24,18 @@
     - percona-xtradb-cluster-full-56
     - python-mysqldb
   # stop mysql service
-  - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped 
+  - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped
   - name: configure PXC
-    template: src=/home/hrvoje/worktable/package-testing/templates/my.j2 
+    template: src=/home/hrvoje/worktable/package-testing/templates/my.j2
               dest=/etc/mysql/my.cnf
               mode=0640 owner=mysql group=root
   #bootstrap the cluster
   - command: service mysql bootstrap-pxc
   #add sstuser
   - mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,LOCK TABLES,REPLICATION CLIENT" state=present
-  - command: /vagrant/plugins_test_56.sh 
+  - command: /vagrant/plugins_test_56.sh
   - name: install 3rd party packages
-    apt: name={{item}} 
+    apt: name={{item}}
     with_items:
     - cacti
     - rsyslog-mysql

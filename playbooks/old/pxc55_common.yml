@@ -13,7 +13,7 @@
     sudo: yes
   - name: install galera, vim, pv, python-mysqldb, pxc-55
     apt: name={{ item }} update_cache=yes
-    with_items: 
+    with_items:
     - percona-xtradb-cluster-galera-2.x
     - vim
     - pv
@@ -30,14 +30,14 @@
     sudo: yes
     copy: src=/home/hrvoje/worktable/percona-cluster/version_check.sh dest=/home/vagrant/
   # stop mysql service
-  - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped 
+  - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped
     sudo: yes
   - name: configure PXC
-    template: src=/home/hrvoje/worktable/percona-cluster/templates/my.j2 
+    template: src=/home/hrvoje/worktable/percona-cluster/templates/my.j2
               dest=/etc/mysql/my.cnf
               mode=0640 owner=mysql group=root
     sudo: yes
   # start mysql service
   - command: service mysql start
     sudo: yes
-  
+

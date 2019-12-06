@@ -30,7 +30,7 @@ pipeline {
             name: 'psmdb_to_test',
             description: 'PSMDB for testing',
             choices: [
-                'psmdb36',
+                'psmdb42',
                 'psmdb40',
                 'psmdb36',
             ]
@@ -79,7 +79,7 @@ pipeline {
     }
     stage ('Run playbook for test') {
       steps {
-             withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+             withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '2a84aea7-32a0-4598-9e8d-5153179097a9', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
             cd molecule/pbm
             python3 -m molecule converge
@@ -89,6 +89,7 @@ pipeline {
     }
     stage ('Start testinfra tests') {
       steps {
+
         sh '''
             cd molecule/pbm
             python3 -m molecule verify

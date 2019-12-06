@@ -1,44 +1,52 @@
 # This playbook runs the PAM test
 #
-  - group:
+  - name: add group developer
+    group:
       name: developer
       state: present
 
-  - group:
+  - name: add group dbadmin
+    group:
       name: dbadmin
       state: present
 
-  - user:
+  - name: add user test_pam
+    user:
       name: test_pam
       shell: /bin/bash
       password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
 
-  - user:
+  - name: add user test_pam2
+    user:
       name: test_pam2
       shell: /bin/bash
       password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
       groups: developer
       append: yes
 
-  - user:
+  - name: add user test_pam3
+    user:
       name: test_pam3
       shell: /bin/bash
       password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
       groups: dbadmin
       append: yes
 
-  - user:
+  - name: add user test_pam_compat
+    user:
       name: test_pam_compat
       shell: /bin/bash
       password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
 
-  - user:
+  - name: add shadow group to user mysql
+    user:
       name: mysql
       groups: shadow
       append: yes
     when: ansible_os_family == "Debian"
 
-  - file:
+  - name: change group for shadow file on RedHat
+    file:
       path: /etc/shadow
       group: mysql
       mode: "g+r"

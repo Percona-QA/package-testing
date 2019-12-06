@@ -15,10 +15,15 @@
       - percona-server-rocksdb-5.7
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Server new rpm packages
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: yum module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: install Percona Server rpm packages
     yum:
       name: "{{ packages }}"
       state: latest
+      disablerepo: "epel"
     vars:
       packages:
       - Percona-Server-server-57
@@ -31,12 +36,12 @@
       - Percona-Server-client-57
     when: ansible_os_family == "RedHat"
 
-  - name: install Percona Server new rpm packages
+  - name: install Percona Server shared-compat-57 rpm package
     yum:
       name: "{{ packages }}"
       state: latest
     vars:
       packages:
        - Percona-Server-shared-compat-57
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
- 
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+

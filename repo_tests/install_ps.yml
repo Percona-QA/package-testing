@@ -8,7 +8,7 @@
     apt:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - percona-server-server
       - percona-server-test
@@ -21,7 +21,7 @@
     apt:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - percona-server-server
       - percona-server-test
@@ -44,7 +44,7 @@
     yum:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - percona-server-server
       - percona-server-client
@@ -59,7 +59,7 @@
     yum:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - percona-server-server
       - percona-server-client
@@ -87,7 +87,7 @@
     apt:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - percona-server-server-5.7
       - percona-server-test-5.7
@@ -101,7 +101,7 @@
     apt:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - percona-server-server-5.7
       - percona-server-test-5.7
@@ -125,7 +125,7 @@
     yum:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - Percona-Server-server-57
       - Percona-Server-test-57
@@ -147,7 +147,7 @@
     yum:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - Percona-Server-server-57
       - Percona-Server-test-57
@@ -176,7 +176,7 @@
     apt:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - percona-server-server-5.6
       - percona-server-test-5.6
@@ -189,7 +189,7 @@
     apt:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - percona-server-server-5.6
       - percona-server-test-5.6
@@ -202,7 +202,7 @@
     yum:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - Percona-Server-server-56
       - Percona-Server-test-56
@@ -218,7 +218,7 @@
     yum:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - Percona-Server-server-56
       - Percona-Server-test-56
@@ -241,7 +241,7 @@
     apt:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - percona-server-server-5.5
       - percona-server-test-5.5
@@ -253,7 +253,7 @@
     apt:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - percona-server-server-5.5
       - percona-server-test-5.5
@@ -275,7 +275,7 @@
     yum:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - Percona-Server-server-55
       - Percona-Server-test-55
@@ -289,7 +289,7 @@
     yum:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - Percona-Server-server-55
       - Percona-Server-test-55

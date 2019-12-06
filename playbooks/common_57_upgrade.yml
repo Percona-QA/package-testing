@@ -7,11 +7,14 @@
 #   does some tests
 
 # Cosmic is still missing python
-- import_playbook: test_prep.yml
+# import_playbook: test_prep.yml
 
 - hosts: all
   become: true
   become_method: sudo
+  vars:
+    vault_token: "{{ lookup('env', 'VAULT_TEST_TOKEN') }}"
+    vault_cert: "{{ lookup('env', 'VAULT_TEST_CERT') }}"
 
   tasks:
   - name: include tasks for test env setup
@@ -22,6 +25,16 @@
 #
   - name: include tasks for enabling main repo
     include: ../tasks/enable_main_repo.yml
+
+  - name: setup config file for keyring vault
+    template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test.j2
+              dest=/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
+              mode=0664 owner=root group=root
+
+  - name: copy certificate for keyring vault
+    copy:
+      src: "{{ vault_cert }}"
+      dest: /package-testing/scripts/ps_keyring_plugins_test/test.cer
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -46,7 +59,7 @@
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
@@ -69,7 +82,7 @@
     service: name=mysql state=restarted
 
   - name: re-run ps_tokudb_admin to finish tokudb install
-    command: /usr/bin/ps_tokudb_admin --enable 
+    command: /usr/bin/ps_tokudb_admin --enable
 
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_57u.sh ps

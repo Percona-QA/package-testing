@@ -11,7 +11,7 @@ fi
 
 if [ "${psoutput}" -gt 1 ]; then
 	echo "proxysql is running"
-   else 
+   else
 	echo "NOT RUNNING!!!!"
 	exit 1
 fi

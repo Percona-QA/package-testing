@@ -15,9 +15,9 @@
     apt_repository: repo='deb http://repo.mongodb.org/apt/debian {{ansible_lsb.codename}}/mongodb-org/3.2 main' state=present update_cache=yes
     when: ansible_distribution == "Debian"
   # Add the Percona apt signing key, will not download if present
-  - name: install deb packages 
+  - name: install deb packages
     apt: name={{item}} update_cache=yes
-    with_items: 
+    with_items:
     - vim
     - pv
     - mongodb-org
@@ -42,7 +42,7 @@
   - name: add the mongo rpm repo
     copy: src=/home/hrvoje/worktable/package-testing/mongodb-org-3.0.repo dest=/etc/yum.repos.d/
     when: ansible_os_family == "RedHat"
-  - name: install mongodb-org 
+  - name: install mongodb-org
     yum: name=mongodb-org state=present
     when: ansible_os_family == "RedHat"
 # - name: remove the deb repo

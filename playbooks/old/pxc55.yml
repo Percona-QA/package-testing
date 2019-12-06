@@ -24,10 +24,10 @@
     - python-mysqldb
     sudo: yes
   # stop mysql service
-  - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped 
+  - service: name=mysql pattern=/usr/bin/mysqld_safe state=stopped
     sudo: yes
   - name: configure PXC
-    template: src=/home/hrvoje/worktable/percona-cluster/templates/my.j2 
+    template: src=/home/hrvoje/worktable/percona-cluster/templates/my.j2
               dest=/etc/mysql/my.cnf
               mode=0640 owner=mysql group=root
     sudo: yes

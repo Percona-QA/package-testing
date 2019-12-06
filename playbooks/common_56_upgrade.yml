@@ -46,26 +46,26 @@
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
 
 # - name: disable selinux on centos7 for TokuDB to work
 #   command: setenforce 0
 #   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: install tokudb and restart server
-    command: /usr/bin/ps_tokudb_admin --enable 
+    command: /usr/bin/ps_tokudb_admin --enable
 
   - name: restart mysql service
     service: name=mysql state=restarted
 
   - name: re-run ps_tokudb_admin to finish tokudb install
-    command: /usr/bin/ps_tokudb_admin --enable 
+    command: /usr/bin/ps_tokudb_admin --enable
 
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_56.sh ps
 
   - name: install 3rd party packages with apt
-    apt: 
+    apt:
       name: "{{ packages }}"
     vars:
       packages:
@@ -73,7 +73,7 @@
     when: ansible_os_family == "Debian"
 
   - name: install 3rd party packages with yum
-    yum: 
+    yum:
       name: "{{ packages }}"
     vars:
       packages:
@@ -193,7 +193,7 @@
     command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
 
   - name: remove Percona Server deb packages
-    apt: 
+    apt:
       name: "{{ packages }}"
       update_cache: no
       state: absent
@@ -203,7 +203,7 @@
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server rpm packages
-    yum: 
+    yum:
       name: "{{ packages }}"
       state: absent
     vars:

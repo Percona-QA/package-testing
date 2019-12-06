@@ -69,7 +69,7 @@
     service: name=mysql state=restarted
 
   - name: re-run ps_tokudb_admin to finish tokudb install
-    command: /usr/bin/ps_tokudb_admin --enable 
+    command: /usr/bin/ps_tokudb_admin --enable
 
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test.sh
@@ -101,7 +101,7 @@
       password: s3cret!Pass
       priv: '*.*:ALL'
       state: present
-      
+
 #
 # Enable testing repository
 #

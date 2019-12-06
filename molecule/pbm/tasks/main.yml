@@ -27,9 +27,13 @@
   command: percona-release enable tools experimental
   when: lookup('env', 'install_repo') == "experimental"
 
-- name: enable the PSMDB testing repo
+- name: enable the PSMDB 4.0 testing repo
   command: percona-release enable psmdb-40
   when: lookup('env', 'psmdb_to_test') == "psmdb40"
+
+- name: enable the PSMDB 4.2 testing repo
+  command: percona-release enable psmdb-42
+  when: lookup('env', 'psmdb_to_test') == "psmdb42"
 
 - name: include tasks for PSMDB 4.0 install
   include_tasks: ../../../tasks/install_psmdb_full.yml
@@ -38,6 +42,10 @@
 - name: include tasks for PSMDB 3.6 install
   include_tasks: ../../../tasks/install_psmdb_36_full.yml
   when: lookup('env', 'psmdb_to_test') == "psmdb36"
+
+- name: include tasks for PSMDB 4.2 install
+  include_tasks: ../../../tasks/install_psmdb_full.yml
+  when: lookup('env', 'psmdb_to_test') == "psmdb42"
 
 - name: stop mongod service
   service: name=mongod state=stopped
@@ -72,24 +80,31 @@
     path: /etc/pbm-agent-storage.conf
     create: true
     block: |
-      type: s3
-      s3:
-         region: us-west
-         endpointUrl: http://localhost:9000
-         bucket: pbm
-         credentials:
-           access-key-id: {{ access_key }}
-           secret-access-key: {{ access_secret }}
+      storage:
+        type: s3
+        s3:
+           region: us-east-1
+           bucket: operator-testing
+           credentials:
+             access-key-id: {{ access_key }}
+             secret-access-key: {{ access_secret }}
   vars:
     access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
     access_secret: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
 
-- name: edit pbm-agent service config
+- name: edit pbm-agent service config for deb
   blockinfile:
     path: /etc/default/pbm-agent
     block: |
-      PBM_MONGODB_URI="mongodb://localhost:27017/"
+      PBM_MONGODB_URI="mongodb://localhost:27017/?replicaSet=rs1"
   when: ansible_os_family == "Debian"
+
+- name: edit pbm-agent service config for rhel based
+  blockinfile:
+    path: /etc/sysconfig/pbm-agent
+    block: |
+      PBM_MONGODB_URI="mongodb://localhost:27017/?replicaSet=rs1"
+  when: ansible_os_family == "RedHat"
 
 - name: start pbm-agent service
   service:

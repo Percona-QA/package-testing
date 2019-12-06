@@ -30,7 +30,7 @@
     apt:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - percona-server-mongodb
       - percona-server-mongodb-server
@@ -45,7 +45,7 @@
     apt:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - percona-server-mongodb
       - percona-server-mongodb-server
@@ -108,7 +108,7 @@
     apt:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - percona-server-mongodb-36
       - percona-server-mongodb-36-server
@@ -122,7 +122,7 @@
     apt:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - percona-server-mongodb-36
       - percona-server-mongodb-36-server
@@ -177,14 +177,14 @@
   - name: Remove psmdb directories
     shell: rm -rf /var/lib/mongodb*
 
-  # 
+  #
   # Install PSMDB 3.4 packages
   #
   - name: Install psmdb 3.4 packages in debian
     apt:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - percona-server-mongodb-34
       - percona-server-mongodb-34-server
@@ -198,7 +198,7 @@
     apt:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - percona-server-mongodb-34
       - percona-server-mongodb-34-server
@@ -253,14 +253,14 @@
   - name: Remove psmdb directories
     shell: rm -rf /var/lib/mongodb*
 
-  # 
+  #
   # Install PSMDB 3.2 packages
   #
   - name: Install psmdb 3.2 packages in debian
     apt:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - percona-server-mongodb-32
       - percona-server-mongodb-32-dbg
@@ -274,7 +274,7 @@
     apt:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - percona-server-mongodb-32
       - percona-server-mongodb-32-dbg
@@ -329,14 +329,14 @@
   - name: Remove psmdb directories
     shell: rm -rf /var/lib/mongodb*
 
-  # 
+  #
   # Install PBM (mongodb backup) packages
   #
   - name: Install pbm packages in debian
     apt:
       name: "{{ packages }}"
       state: latest
-    vars: 
+    vars:
       packages:
       - percona-backup-mongodb-coordinator
       - percona-backup-mongodb-agent
@@ -347,7 +347,7 @@
     apt:
       name: "{{ packages }}"
       state: absent
-    vars: 
+    vars:
       packages:
       - percona-backup-mongodb-coordinator
       - percona-backup-mongodb-agent

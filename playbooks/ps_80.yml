@@ -4,16 +4,29 @@
 #   installs latest version of PS 8.0, PT and PXB 8.0
 #   does some tests
 
-# Cosmic is still missing python 
+# Cosmic is still missing python
 # import_playbook: test_prep.yml
 
 - hosts: all
   become: true
   become_method: sudo
+  vars:
+    vault_token: "{{ lookup('env', 'VAULT_TEST_TOKEN') }}"
+    vault_cert: "{{ lookup('env', 'VAULT_TEST_CERT') }}"
 
   tasks:
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
+
+  - name: setup config file for keyring vault
+    template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test.j2
+              dest=/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
+              mode=0664 owner=root group=root
+
+  - name: copy certificate for keyring vault
+    copy:
+      src: "{{ vault_cert }}"
+      dest: /package-testing/scripts/ps_keyring_plugins_test/test.cer
 
   - name: include tasks for enabling main repo
     include: ../tasks/enable_main_repo.yml
@@ -35,10 +48,6 @@
     command: "{{ item }}"
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
-
-  - name: disable the mysql module on RHEL/CentOS 8
-    command: /usr/bin/dnf module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: install Percona Toolkit new deb packages
     include_tasks: ../tasks/install_pt.yml
@@ -74,25 +83,25 @@
     include_tasks: ../tasks/gr_test.yml
 
   - name: install tokudb and restart server
-    command: /usr/bin/ps-admin --enable-tokudb 
+    command: /usr/bin/ps-admin --enable-tokudb
 
   - name: restart mysql service
     service: name=mysql state=restarted
 
   - name: re-run ps-admin to finish tokudb install
-    command: /usr/bin/ps-admin --enable-tokudb 
+    command: /usr/bin/ps-admin --enable-tokudb
 
   - name: install percona-mysql-shell package for CentOS
-    yum: 
+    yum:
       name: "{{ packages }}"
     vars:
       packages:
       - percona-mysql-shell
-    when: ansible_os_family == "RedHat" 
+    when: ansible_os_family == "RedHat"
 
   - name: install percona-mysql-shell package for Debian/Ubuntu
     apt:
-      update_cache: yes 
+      update_cache: yes
       state: present
       name: "{{ packages }}"
     vars:
@@ -134,7 +143,7 @@
     include_tasks: ../tasks/pam_test.yml
 
   - name: install 3rd party packages with apt
-    apt: 
+    apt:
       name: "{{ packages }}"
     vars:
       packages:
@@ -142,7 +151,7 @@
     when: ansible_os_family == "Debian"
 
   - name: install 3rd party packages with yum
-    yum: 
+    yum:
       name: "{{ packages }}"
     vars:
       packages:
@@ -158,11 +167,10 @@
   - name: check that mysqladmin shutdown works correctly
     command: /package-testing/madmin_check.sh
 
-
   - name: remove Percona Server deb packages
-    apt: 
-      name: "{{ packages }}" 
-      update_cache: no 
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
       state: absent
     vars:
       packages:
@@ -170,7 +178,7 @@
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server rpm packages
-    yum: 
+    yum:
       name: "{{ packages }}"
       state: absent
     vars:

@@ -1,7 +1,7 @@
 ---
 # This playbook sets up the percona repo
 
-- import_playbook: test_prep.yml
+# - import_playbook: test_prep.yml
 
 - hosts: all
   become: true
@@ -17,13 +17,17 @@
       deb: https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
     when: ansible_os_family == "Debian"
 
-  - name: Install MySQL RHEL 6 yum repository package 
+  - name: Install MySQL RHEL 6 yum repository package
     yum: name=https://dev.mysql.com/get/mysql80-community-release-el6-1.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
-  - name: Install MySQL RHEL 7 yum repository package 
+  - name: Install MySQL RHEL 7 yum repository package
     yum: name=https://dev.mysql.com/get/mysql80-community-release-el7-1.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: Install MySQL RHEL 8 yum repository package
+    yum: name=https://dev.mysql.com/get/mysql80-community-release-el8-1.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: epel 6 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm state=present
@@ -38,22 +42,26 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: install deb packages 
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: /usr/bin/dnf module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: install deb packages
     apt:
       name: "{{ packages }}"
-      update_cache: yes 
-    vars: 
+      update_cache: yes
+    vars:
       packages:
       - vim
       - pv
       - unzip
     when: ansible_os_family == "Debian"
 
-  - name: install MySQL Community deb packages 
+  - name: install MySQL Community deb packages
     apt:
       name: "{{ packages }}"
-      update_cache: yes 
-    vars: 
+      update_cache: yes
+    vars:
       packages:
       - mysql-community-server
     when: ansible_os_family == "Debian"
@@ -68,13 +76,23 @@
       - pv
       - unzip
       - mysql-community-server
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
 
-  - name: Start the MySQL service  
+  - name: install packages in rhel/centos 8
+    yum:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - python3-libselinux
+      - mysql-community-server
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: Start the MySQL service
     service: name=mysql state=started
     when: ansible_os_family == "Debian"
 
-  - name: Start the MySQL service  
+  - name: Start the MySQL service
     service: name=mysqld state=started
     when: ansible_os_family == "RedHat"
 

@@ -1,5 +1,5 @@
 ---
-# This playbook sets up the garbd 
+# This playbook sets up the garbd
 
 - hosts: all
   sudo: yes
@@ -12,16 +12,16 @@
   - apt_key: id=CD2EFD2A keyserver=keys.gnupg.net state=present
   - name: install garbd
     apt: name={{ item }} update_cache=yes
-    with_items: 
+    with_items:
 #   - language-pack-hr
     - vim
     - pv
     - python-mysqldb
     - percona-xtradb-cluster-garbd-3
   - name: configure garbd
-    template: src=/home/hrvoje/worktable/package-testing/templates/garbd.j2 
+    template: src=/home/hrvoje/worktable/package-testing/templates/garbd.j2
               dest=/etc/default/garbd
               mode=0640 owner=root group=root
   # start mysql service
   - command: service garbd start
-  
+

@@ -10,7 +10,7 @@ platforms:
     region: ${AWS_DEFAULT_REGION}
     image: ${IMAGE}
     vpc_subnet_id: ${SUBNET}
-    instance_type: t3.micro
+    instance_type: ${INSTANCE_TYPE}
     ssh_user: ${USER}
     instance_tags:
       iit-billing-tag: jenkins-pg-worker
@@ -19,7 +19,6 @@ provisioner:
   log: True
   playbooks:
     create: ../../../playbooks/create.yml
-    cleanup: ../../../playbooks/cleanup.yml
     destroy: ../../../playbooks/destroy.yml
     prepare: ../../../playbooks/prepare.yml
   lint:
@@ -44,9 +43,7 @@ scenario:
   clenup_sequence:
     - cleanup
   test_sequence:
-    - lint
     - destroy
-    - dependency
     - create
     - prepare
     - converge

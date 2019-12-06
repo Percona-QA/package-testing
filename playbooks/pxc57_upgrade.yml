@@ -22,7 +22,7 @@
   - name: upgrade PXC 5.7 to new deb packages
     apt:
       name: "{{ packages }}"
-      update_cache: yes 
+      update_cache: yes
       state: latest
     vars:
       packages:

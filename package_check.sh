@@ -75,7 +75,7 @@ echo -n > $log
 
 if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
   if [ -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
-    if [ -f /etc/system-release ]; then
+    if [ -f /etc/system-release -a $(grep -c Amazon /etc/system-release) -eq 1 ]; then
       centos_maj_version="7"
     else
       centos_maj_version=$(cat /etc/redhat-release | grep -oE '[0-9]+' | head -n 1)
@@ -221,7 +221,7 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; t
   else
     extra_version=""
   fi
-  if [ -f /etc/redhat-release ]; then
+  if [ -f /etc/redhat-release ] || [ -f /etc/system-release ] ; then
     if [ "$(rpm -qa | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" == "3" ]; then
       echo "all packages are installed"
     else
