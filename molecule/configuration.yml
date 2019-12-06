@@ -1,6 +1,18 @@
+centos-6:
+  image: ami-c8b587d5
+  user: centos
+  subnet: subnet-085deaca8c1c59a4f
+  aws_default_region: eu-central-1
+  instance_type: t2.micro
 centos-7:
   image: ami-7cbc6e13
   user: centos
+  subnet: subnet-085deaca8c1c59a4f
+  aws_default_region: eu-central-1
+  instance_type: t2.micro
+debian-8:
+  image: ami-abff2ac4
+  user: admin
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
@@ -18,6 +30,30 @@ debian-10:
   instance_type: t2.micro
 ubuntu-18.04:
   image: ami-0a8561d8c5a4f098a
+  user: ubuntu
+  subnet: subnet-085deaca8c1c59a4f
+  aws_default_region: eu-central-1
+  instance_type: t2.micro
+ubuntu-cosmic:
+  image: ami-0ead033d778487b37
+  user: ubuntu
+  subnet: subnet-085deaca8c1c59a4f
+  aws_default_region: eu-central-1
+  instance_type: t2.micro
+ubuntu-disco:
+  image:
+  user: ubuntu
+  subnet: subnet-085deaca8c1c59a4f
+  aws_default_region: eu-central-1
+  instance_type: t2.micro
+ubuntu-bionic:
+  image: ami-00aa61be0e9a8f948
+  user: ubuntu
+  subnet: subnet-085deaca8c1c59a4f
+  aws_default_region: eu-central-1
+  instance_type: t2.micro
+ubuntu-xenial:
+  image: ami-44182caf
   user: ubuntu
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1

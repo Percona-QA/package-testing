@@ -1,0 +1,152 @@
+pipeline {
+  agent {
+  label 'micro-amazon'
+  }
+  environment {
+      PATH = '/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/ec2-user/.local/bin'
+  }
+  parameters {
+        choice(
+            name: 'PLATFORM',
+            description: 'For what platform (OS) need to test',
+            choices: [
+                'centos-6',
+                'centos-7',
+                'debian-8',
+                'debian-9',
+                'debian-10',
+                'ubuntu-16.10',
+                'ubuntu-18.04',
+                'ubuntu-bionic',
+                'ubuntu-cosmic',
+                'ubuntu-disco',
+                'rhel8'
+            ]
+        )
+        choice(
+            name: 'install_repo',
+            description: 'Repo for testing',
+            choices: [
+                'testing',
+                'experimental',
+                'main',
+            ]
+        )
+        choice(
+            name: 'product_to_test',
+            description: 'PSMDB for testing',
+            choices: [
+                'psmdb34'
+                'psmdb36',
+                'psmdb40',
+                'psmdb42'
+            ]
+        )
+        choice(
+            name: 'product_to_test',
+            description: 'PSMDB for testing',
+            choices: [
+                'psmdb34'
+                'psmdb36',
+                'psmdb40',
+                'psmdb42'
+            ]
+        )
+        choice(
+            name: 'test_type',
+            description: 'PSMDB test type',
+            choices: [
+                'install'
+                'upgrade',
+                'upgrade-to',
+                'upgrade-from'
+            ]
+        )
+        booleanParam(name: 'DESTROY', defaultValue: true, description: 'Keep VMs after the test')
+  }
+  stages {
+    stage('Set build name'){
+      steps {
+                script {
+                    currentBuild.displayName = "${env.BUILD_NUMBER}-${env.PLATFORM}"
+                }
+            }
+        }
+    stage ('Setup Environment Variables') {
+      steps {
+       script {
+       vms = readYaml (file: 'molecule/configuration.yml')
+       env.IMAGE = vms."${PLATFORM}".image
+       env.USER = vms."${PLATFORM}".user
+       env.SUBNET = vms."${PLATFORM}".subnet
+       env.AWS_DEFAULT_REGION = vms."${PLATFORM}".aws_default_region
+       env.INSTANCE_TYPE = vms."${PLATFORM}".instance_type
+        }
+       }
+      }
+    stage ('Prepare') {
+      steps {
+        checkout scm
+        sh '''
+            sudo yum install -y gcc python3 python3-pip python3-devel libselinux-python openssl-devel
+            sudo mkdir -p /usr/local/lib64/python3.7/site-packages
+            sudo rsync -aHv /usr/lib64/python2.7/site-packages/*selinux* /usr/local/lib64/python3.7/site-packages/
+            pip3 install --user pytest molecule ansible wheel boto boto3 paramiko selinux 'molecule[ec2]'
+        '''
+      }
+    }
+    stage ('Create virtual machines') {
+      steps {
+       withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+          sh '''
+              cd molecule/"${product_to_test}"-"${test_type}"
+              python3 -m molecule create
+          '''
+      }
+     }
+    }
+    stage ('Run playbook for test') {
+      steps {
+             withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+        sh '''
+            cd molecule/"${product_to_test}"-"${test_type}"
+            python3 -m molecule converge
+        '''
+      }
+     }
+    }
+    stage ('Start testinfra tests') {
+      steps {
+        sh '''
+            cd molecule/"${product_to_test}"-"${test_type}"
+            python3 -m molecule verify
+        '''
+        junit 'molecule/"${product_to_test}"-"${test_type}"/molecule/default/*.xml'
+      }
+    }
+    stage ('Start packages deletion') {
+      steps {
+        sh '''
+            cd molecule/"${product_to_test}"-"${test_type}"
+            python3 -m molecule cleanup
+        '''
+      }
+    }
+  }
+  post {
+    always {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+        script {
+        if(params.DESTROY){
+            sh '''
+                cd molecule/"${product_to_test}"-"${test_type}"
+                python3 -m molecule destroy
+            '''
+            } else {
+                echo "Skipping"
+            }
+           }
+          }
+        }
+      }
+}
