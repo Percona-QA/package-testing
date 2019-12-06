@@ -41,7 +41,7 @@ ubuntu-cosmic:
   aws_default_region: eu-central-1
   instance_type: t2.micro
 ubuntu-disco:
-  image:
+  image: ami-084a12ae4a0c27ea7
   user: ubuntu
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
