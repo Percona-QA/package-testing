@@ -8,7 +8,6 @@
     ssh_user: ubuntu
     ssh_port: 22
     default_region: "{{ lookup('env', 'AWS_DEFAULT_REGION') | default('us-east-1', true) }}"
-
     security_group_name_prefix: molecule
     security_group_description: Security group for testing Molecule
     security_group_rules:
@@ -25,9 +24,9 @@
         from_port: 0
         to_port: 0
         cidr_ip: '0.0.0.0/0'
-
-    keypair_name: molecule_key
+    keypair_name: "molecule-pkg-tests"
     keypair_path: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/ssh_key"
+
   tasks:
     - name: Check subnet
       ec2_vpc_subnet_facts:
@@ -52,35 +51,27 @@
         region: "{{ item.region|default(default_region) }}"
       with_items: "{{ molecule_yml.platforms }}"
 
-    - name: Test for presence of local keypair
-      stat:
-        path: "{{ keypair_path }}-{{ item.region|default(default_region) }}"
-      with_items: "{{ molecule_yml.platforms }}"
-      register: keypair_local
+#    - name: Delete remote keypair
+#      ec2_key:
+#        name: "{{ keypair_name }}"
+#        state: absent
+#        region: "{{ item.item.region|default(default_region) }}"
+#      with_items: "{{ keypair_local.results}}"
+#      when: not item.stat.exists
 
-    - name: Delete remote keypair
-      ec2_key:
-        name: "{{ keypair_name }}"
-        state: absent
-        region: "{{ item.item.region|default(default_region) }}"
-      with_items: "{{ keypair_local.results}}"
-      when: not item.stat.exists
+#    - name: Create keypair
+#      ec2_key:
+#        name: "{{ keypair_name }}"
+#        region: "{{ item.region|default(default_region) }}"
+#      with_items: "{{ molecule_yml.platforms }}"
+#      register: keypair
 
-    - name: Create keypair
-      ec2_key:
-        name: "{{ keypair_name }}"
-        region: "{{ item.region|default(default_region) }}"
-      with_items: "{{ molecule_yml.platforms }}"
-      register: keypair
-
-
-    - name: Persist the keypair
+    - name: Setup keypair for molecule ec2
       copy:
-        dest: "{{ keypair_path }}-{{ item.invocation.module_args.region }}"
-        content: "{{ item.key.private_key }}"
+        dest: "{{ keypair_path }}-{{ item.region|default(default_region) }}"
+        src: "{{ lookup('env', 'MOLECULE_AWS_PRIVATE_KEY') }}"
         mode: 0600
-      with_items: "{{ keypair.results }}"
-      when: item.key.private_key is defined
+      with_items: "{{ molecule_yml.platforms }}"
 
     - name: Get the ec2 ami(s) by owner and name, if image not set
       ec2_ami_facts:
@@ -118,6 +109,11 @@
         count_tag:
           Name: "{{ item.name }}"
         region: "{{ item.region|default(default_region) }}"
+        volumes:
+          - device_name: /dev/sda1
+            volume_type: gp2
+            volume_size: 16
+            delete_on_termination: true
       register: server
       loop: "{{ molecule_yml.platforms }}"
       loop_control:
