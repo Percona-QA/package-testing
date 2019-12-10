@@ -15,6 +15,7 @@
   vars:
     vault_token: "{{ lookup('env', 'VAULT_TEST_TOKEN') }}"
     vault_cert: "{{ lookup('env', 'VAULT_TEST_CERT') }}"
+    vault_url: "{{ lookup('env', 'VAULT_TEST_URL') }}"
 
   tasks:
   - name: include tasks for test env setup
