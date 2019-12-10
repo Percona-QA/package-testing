@@ -16,7 +16,6 @@ pipeline {
                 'debian-9',
                 'debian-10',
                 'ubuntu-16.10',
-                'ubuntu-18.04',
                 'ubuntu-bionic',
                 'ubuntu-cosmic',
                 'ubuntu-disco',

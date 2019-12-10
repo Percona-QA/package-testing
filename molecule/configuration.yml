@@ -28,12 +28,6 @@ debian-10:
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
-ubuntu-18.04:
-  image: ami-0a8561d8c5a4f098a
-  user: ubuntu
-  subnet: subnet-085deaca8c1c59a4f
-  aws_default_region: eu-central-1
-  instance_type: t2.micro
 ubuntu-cosmic:
   image: ami-0ead033d778487b37
   user: ubuntu
@@ -47,7 +41,7 @@ ubuntu-disco:
   aws_default_region: eu-central-1
   instance_type: t2.micro
 ubuntu-bionic:
-  image: ami-00aa61be0e9a8f948
+  image: ami-0a8561d8c5a4f098a
   user: ubuntu
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
