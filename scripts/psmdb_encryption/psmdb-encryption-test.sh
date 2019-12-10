@@ -64,6 +64,8 @@ if [ "$1" == "vault" ]; then
   chown mongod:mongod ${TOKEN_FILE}
   chmod 600 ${CA_FILE}
   chown mongod:mongod ${CA_FILE}
+  echo ${TOKEN_FILE}
+  echo ${CA_FILE}
 
   for cipher in AES256-CBC AES256-GCM; do
     echo "=============================================" | tee -a ${LOG}
