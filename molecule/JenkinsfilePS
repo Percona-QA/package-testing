@@ -45,7 +45,8 @@ pipeline {
     stage('Set build name'){
       steps {
         script {
-          currentBuild.displayName = "${BUILD_NUMBER}-${ROLE_NAME}-${PLATFORM}-${INSTALL_REPO}"
+          currentBuild.displayName = "#${BUILD_NUMBER}-${ROLE_NAME}-${PLATFORM}"
+          currentBuild.description = "${INSTALL_REPO}"
         }
       }
     }

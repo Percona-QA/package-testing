@@ -13,7 +13,7 @@ pipeline {
     stage('Prepare') {
       steps {
           script {
-            currentBuild.displayName = "#${BUILD_NUMBER}-${UPSTREAM_VERSION}-${PS_VERSION}-${TEST_DIST}"
+            currentBuild.displayName = "#${BUILD_NUMBER}-${UPSTREAM_VERSION}-${PS_VERSION}-${TEST_DIST##*/}"
             currentBuild.description = "${PS_REVISION}-${INSTALL_REPO}"
             env['PS_NODE1_IP'] = "192.168.33.50"
             env['PS_NODE2_IP'] = "192.168.33.51"
