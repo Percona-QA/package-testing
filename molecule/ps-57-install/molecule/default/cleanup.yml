@@ -1,0 +1,46 @@
+---
+- name: Cleanup
+  hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+  - name: remove Percona Server deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server-server-5.7
+      - percona-server-test-5.7
+      - percona-server-5.7-dbg
+      - percona-server-source-5.7
+      - percona-server-client-5.7
+      - percona-server-tokudb-5.7
+      - percona-server-rocksdb-5.7
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+     packages:
+      - Percona-Server-server-57
+      - Percona-Server-client-57
+      - Percona-Server-test-57
+      - Percona-Server-test-57
+      - Percona-Server-57-debuginfo
+      - Percona-Server-devel-57
+      - Percona-Server-tokudb-57
+      - Percona-Server-rocksdb-57
+    when: ansible_os_family == "RedHat"
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mysql stopped
+
+#    - name: Unregister RedHat
+#      redhat_subscription:
+#        state: absent
+#      when: ansible_distribution == "RedHat" and ansible_distribution_major_version == "8"

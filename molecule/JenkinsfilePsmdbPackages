@@ -80,6 +80,7 @@ pipeline {
        env.SUBNET = vms."${PLATFORM}".subnet
        env.AWS_DEFAULT_REGION = vms."${PLATFORM}".aws_default_region
        env.INSTANCE_TYPE = vms."${PLATFORM}".instance_type
+       env.ROOT_DEVICE_NAME = vms."${PLATFORM}".root_device_name
         }
        }
       }

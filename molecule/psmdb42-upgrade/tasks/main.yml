@@ -35,7 +35,6 @@
     src: "{{ vault_cert }}"
     dest: /package-testing/scripts/psmdb_encryption/test.cer
   vars:
-    vault_token: "{{ lookup('env', 'VAULT_TEST_TOKEN') }}"
     vault_cert: "{{ lookup('env', 'VAULT_TEST_CERT') }}"
 
 - name: create token file for vault
@@ -45,7 +44,6 @@
       {{ vault_token }}
   vars:
     vault_token: "{{ lookup('env', 'VAULT_TEST_TOKEN') }}"
-    vault_cert: "{{ lookup('env', 'VAULT_TEST_CERT') }}"
 
 #
 # Upgrade packages

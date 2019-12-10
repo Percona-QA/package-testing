@@ -13,7 +13,7 @@ pipeline {
           }
           steps {
             script {
-                currentBuild.description = "${PS_VERSION}-${PS_REVISION}"
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
               sh '''

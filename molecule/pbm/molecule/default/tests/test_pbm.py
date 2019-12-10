@@ -206,13 +206,12 @@ def test_pbm_version(host):
     assert result.rc == 0, result.stdout
     lines = result.stdout.split("\n")
     parsed_config = {line.split(":")[0]: line.split(":")[1].strip() for line in lines[0:-1]}
-    print(parsed_config)
-    assert parsed_config['Version'] == '1.1.0'
-    assert parsed_config['Platform']
-    assert parsed_config['GitCommit']
-    assert parsed_config['GitBranch']
-    assert parsed_config['BuildTime']
-    assert parsed_config['GoVersion']
+    assert parsed_config['Version'] == '1.1.0', parsed_config
+    assert parsed_config['Platform'], parsed_config
+    assert parsed_config['GitCommit'], parsed_config
+    assert parsed_config['GitBranch'], parsed_config
+    assert parsed_config['BuildTime'], parsed_config
+    assert parsed_config['GoVersion'], parsed_config
 
 
 def test_pbm_help(host):
@@ -222,7 +221,7 @@ def test_pbm_help(host):
     :return:
     """
     result = host.run("pbm help")
-    assert result.rc == 0
+    assert result.rc == 0, result.stdout
 
 
 def test_set_store(set_store):
@@ -261,8 +260,8 @@ def test_backup(backup):
     :param backup:
     :return:
     """
-    assert backup[0]
-    assert backup[1]
+    assert backup[0], backup
+    assert backup[1], backup
 
 
 def test_backup_list(host, backup):
@@ -273,9 +272,8 @@ def test_backup_list(host, backup):
     """
     cmd = "pbm list --mongodb-uri=mongodb://localhost:27017"
     result = host.run(cmd)
-    print(result.stdout)
     assert result.rc == 0, result.stdout
-    assert backup[1] in result.stdout
+    assert backup[1] in result.stdout, result.stdout
 
 
 def test_restore(restore, backup):
@@ -285,5 +283,4 @@ def test_restore(restore, backup):
     :param backup:
     :return:
     """
-    print(restore)
-    assert backup[0] == restore
+    assert backup[0] == restore, restore

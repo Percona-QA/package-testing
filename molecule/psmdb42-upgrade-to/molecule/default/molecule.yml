@@ -12,6 +12,8 @@ platforms:
     vpc_subnet_id: ${SUBNET}
     instance_type: ${INSTANCE_TYPE}
     ssh_user: ${USER}
+    root_device_name: ${ROOT_DEVICE_NAME}
+
     instance_tags:
       iit-billing-tag: jenkins-pg-worker
 provisioner:

@@ -1,0 +1,58 @@
+---
+# tasks file for ps-80-maj-upgrade-to
+# This playbook install Percona Server 5.7 with TokuDB and MyRocks
+# It will disable the original repo and upgrade to Percona Server 8.0
+
+  - import_playbook: ../playbooks/common_57.yml
+
+  - name: Remove PS 5.7 packages
+    include_tasks: ../../../tasks/remove_ps57.yml
+
+  - name: include tasks for enabling PS 8 test repo
+    include: ../../../tasks/enable_ps8_main_repo.yml
+    when: lookup('env', 'INSTALL_REPO') == "main"
+
+  - name: include tasks for enabling PS 8 test repo
+    include: ../../../tasks/enable_ps8_testing_repo.yml
+    when: lookup('env', 'INSTALL_REPO') == "testing" or lookup('env', 'INSTALL_REPO') == ""
+
+  - name: install Percona Server 8.0 packages
+    include_tasks: ../../../tasks/install_ps80.yml
+
+  - name: start mysql service with service command
+    command: service mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: run mysql_upgrade
+    command: mysql_upgrade -uroot
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+
+  - name: check that Percona Server version is correct
+    command: /package-testing/version_check.sh ps80
+
+  - name: check that Percona Server package versions are correct
+    command: /package-testing/package_check.sh ps80
+
+  - name: run some MyRocks tests
+    command: /package-testing/scripts/ps_myrocks_test.sh
+
+  - name: run bats tests for PAM
+    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
+
+  - name: keyring plugins test
+    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps57
+
+  - name: run bats unit tests for ps-admin script
+    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
+
+  - name: run bats integration tests for ps-admin script
+    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
+
+  - name: run bats tests for mysql init scripts
+    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
