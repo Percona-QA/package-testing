@@ -11,7 +11,8 @@ pipeline {
     stage('Run test') {
       steps {
           script {
-            currentBuild.description = "${PS_VERSION}-${PS_REVISION}"
+            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+            currentBuild.description = "${DOCKER_ACC}"
           }
           sh '''
             # disable THP on the host for TokuDB
