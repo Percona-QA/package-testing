@@ -5,8 +5,9 @@
 - hosts: all
   become: true
   become_method: sudo
-  gather_facts: false
+  gather_facts: true
 
   tasks:
   - name: install python2
     raw: test -e /usr/bin/python || (which apt && apt -y update && apt install -y python-minimal)
+    when: ansible_os_family == "Debian"
