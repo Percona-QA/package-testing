@@ -3,8 +3,5 @@
   hosts: all
   become: true
   become_method: sudo
-  vars:
-    vault_token: "{{ lookup('env', 'VAULT_TEST_TOKEN') }}"
-    vault_cert: "{{ lookup('env', 'VAULT_TEST_CERT') }}"
   roles:
     - role: ps-80-maj-upgrade-to
