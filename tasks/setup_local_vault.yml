@@ -19,17 +19,29 @@
        - openssl
     when: ansible_os_family == "RedHat"
 
+  - name: Download get_download_link.sh script
+    get_url:
+      url: https://raw.githubusercontent.com/Percona-QA/percona-qa/master/get_download_link.sh
+      dest: /package-testing/scripts/get_download_link.sh
+      mode: 'a+rx'
+
+  - name: Download vault_test_setup.sh script
+    get_url:
+      url: https://raw.githubusercontent.com/Percona-QA/percona-qa/master/vault_test_setup.sh
+      dest: /package-testing/scripts/vault_test_setup.sh
+      mode: 'a+rx'
+
   - name: Setup local Vault server
-    command: /package-testing/scripts/start_local_vault.sh
+    command: /package-testing/scripts/vault_test_setup.sh --use-ssl --workdir=/package-testing/scripts/vault-server
     args:
       chdir: /package-testing/scripts
 
-  - name: Load data from VAULT_URL file
+  - name: Load data from VAULT_ADDR file
     slurp:
-      src: /package-testing/scripts/vault-server/VAULT_URL
+      src: /package-testing/scripts/vault-server/VAULT_ADDR
     register: vault_url_slurp
 
-  - name: Decode data for VAULT_URL
+  - name: Set vault_url fact
     set_fact:
       vault_url: "{{ vault_url_slurp.content | b64decode | trim }}"
 
@@ -38,16 +50,16 @@
       src: /package-testing/scripts/vault-server/VAULT_TOKEN
     register: vault_token_slurp
 
-  - name: Decode data for VAULT_TOKEN
+  - name: Set vault_token fact
     set_fact:
       vault_token: "{{ vault_token_slurp.content | b64decode | trim }}"
 
-  - name: Load data from VAULT_CERTIFICATE file
+  - name: Load data from VAULT_CERT file
     slurp:
       src: /package-testing/scripts/vault-server/VAULT_CERT
     register: vault_cert_slurp
 
-  - name: Decode data for VAULT_CERTIFICATE
+  - name: Set vault_cert fact
     set_fact:
       vault_cert: "{{ vault_cert_slurp.content | b64decode | trim }}"
 
