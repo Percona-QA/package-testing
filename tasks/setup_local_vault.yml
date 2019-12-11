@@ -1,0 +1,56 @@
+# This task sets up local vault server for encryption test
+#
+  - name: Install needed deb packages for setting up vault
+    apt:
+      update_cache: no
+      state: latest
+      pkg:
+       - unzip
+       - wget
+       - openssl
+    when: ansible_os_family == "Debian"
+
+  - name: Install needed rpm packages for setting up vault
+    yum:
+      state: latest
+      name:
+       - unzip
+       - wget
+       - openssl
+    when: ansible_os_family == "RedHat"
+
+  - name: Setup local Vault server
+    command: /package-testing/scripts/start_local_vault.sh
+    args:
+      chdir: /package-testing/scripts
+
+  - name: Load data from VAULT_URL file
+    slurp:
+      src: /package-testing/scripts/vault-server/VAULT_URL
+    register: vault_url_slurp
+
+  - name: Decode data for VAULT_URL
+    set_fact:
+      vault_url: "{{ vault_url_slurp.content | b64decode | trim }}"
+
+  - name: Load data from VAULT_TOKEN file
+    slurp:
+      src: /package-testing/scripts/vault-server/VAULT_TOKEN
+    register: vault_token_slurp
+
+  - name: Decode data for VAULT_TOKEN
+    set_fact:
+      vault_token: "{{ vault_token_slurp.content | b64decode | trim }}"
+
+  - name: Load data from VAULT_CERTIFICATE file
+    slurp:
+      src: /package-testing/scripts/vault-server/VAULT_CERT
+    register: vault_cert_slurp
+
+  - name: Decode data for VAULT_CERTIFICATE
+    set_fact:
+      vault_cert: "{{ vault_cert_slurp.content | b64decode | trim }}"
+
+  - name: Set vault_location fact to local
+    set_fact:
+      vault_location: "local"
