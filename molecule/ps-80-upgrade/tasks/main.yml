@@ -202,8 +202,8 @@
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
 
-  - name: run bats tests for PAM
-    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
+#  - name: run bats tests for PAM
+#    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
