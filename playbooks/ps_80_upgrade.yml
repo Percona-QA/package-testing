@@ -94,6 +94,16 @@
   - name: install plugins, import world database, test tokudb
     command: /package-testing/plugins_test_80.sh ps
 
+  - name: install percona-mysql-shell package for Debian/Ubuntu
+    apt:
+      update_cache: yes
+      state: present
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - percona-mysql-shell
+    when: ansible_os_family == "Debian"
+
   - name: install percona-mysql-shell package for CentOS/Amazon
     yum:
       name: "{{ packages }}"
@@ -222,6 +232,16 @@
       packages:
       - percona-mysql-shell
     when: ansible_os_family == "RedHat"
+
+  - name: install percona-mysql-shell package for Debian/Ubuntu
+    apt:
+      update_cache: yes
+      state: present
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - percona-mysql-shell
+    when: ansible_os_family == "Debian"
 
   - name: run mysql_upgrade
     command: mysql_upgrade -uroot
