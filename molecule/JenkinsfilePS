@@ -41,6 +41,11 @@ pipeline {
         'ps-80-upgrade',
       ]
     )
+    booleanParam(
+      name: 'MOLECULE_DEBUG',
+      defaultValue: false,
+      description: 'Run molecule in debug mode'
+    )
   }
   stages {
     stage('Set build name'){
