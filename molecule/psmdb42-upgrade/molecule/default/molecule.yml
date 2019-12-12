@@ -33,8 +33,6 @@ verifier:
   options:
     verbose: true
     s: true
-    junitxml: report.xml
-    junit_family: xunit2
   lint:
     name: flake8
     enabled: False

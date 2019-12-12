@@ -104,7 +104,6 @@ pipeline {
             cd molecule/"${product_to_test}"-upgrade
             python3 -m molecule verify
         '''
-        junit 'molecule/"${product_to_test}"-upgrade/molecule/default/*.xml'
       }
     }
     stage ('Start packages deletion') {
