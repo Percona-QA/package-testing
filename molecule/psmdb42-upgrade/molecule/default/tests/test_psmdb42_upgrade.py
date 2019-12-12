@@ -192,161 +192,16 @@ def test_binary_version(host, binary):
     assert result.rc == 0, result.stdout
 
 
-# @pytest.mark.parametrize("engine", ENGINES)
 def test_functional(host):
     with host.sudo():
         result = host.run("/package-testing/scripts/psmdb_test.sh 4.2")
     assert result.rc == 0, result.stderr
-    # with host.sudo():
-    #     backup_config_cmd = "cp {} {}".format(CONFIGFILE, BACKUP_CONFIGFILE)
-    #     backup_config = host.run(backup_config_cmd)
-    #     assert backup_config.rc == 0, backup_config.stdout
-    #     stop_service(host)
-    #     clean_datadir(host)
-    #     set_engine_cmd = 'sed -i "/engine: *{}/s/#//g" {}'.format(engine, CONFIGFILE)
-    #     set_engine = host.run(set_engine_cmd)
-    #     print(set_engine.stdout)
-    #     print(set_engine.stderr)
-    #     assert set_engine.rc == 0, set_engine.stdout
-    #     start_service(host)
-    #     check_engine_cmd = "mongo --eval \"db.serverStatus().storageEngine\" | tee -a {}".format(LOG)
-    #     check_engine = host.run(check_engine_cmd)
-    #     assert check_engine.rc == 0, check_engine.stdout
-    #     insert_data_cmd = "mongo < /package-testing/scripts/mongo_insert.js >> {}".format(LOG)
-    #     insert_data = host.run(insert_data_cmd)
-    #     assert insert_data.rc == 0, insert_data.stdout
-    #     if engine == 'wiredTiger':
-    #        hotbackup(host)
-    #     stop_service(host)
-    #     disable_engine_cmd = "sed -i \"/engine: *{}/s//#engine: {}/g\" {}".format(engine, engine, LOG)
-    #     disable_engine = host.run(disable_engine_cmd)
-    #     assert disable_engine.rc == 0, disable_engine.stdout
-
-
-# @pytest.mark.parametrize("cipher", ['AES256-CBC', 'AES256-GCM'])
-# def test_encryption_keyfile(host, cipher):
-    # with host.sudo():
-    #     backup_config_cmd = "cp {} {}".format(CONFIGFILE, BACKUP_CONFIGFILE)
-    #     backup_config = host.run(backup_config_cmd)
-    #     assert backup_config.rc == 0, backup_config.stdout
-    #     chmod_key_cmd = "chmod 600 {}".format(KEY_FILE)
-    #     chmod_key = host.run(chmod_key_cmd)
-    #     assert chmod_key.rc == 0, chmod_key.stdout
-    #     chown_cmd = "chown mongod:mongod -R {}".format(KEY_FILE)
-    #     chown = host.run(chown_cmd)
-    #     assert chown.rc == 0, chown.stdout
-    #     stop_service(host)
-    #     clean_datadir(host)
-    #     sed_cmd = "sed -i \"/^  engine: /s/^/#/g\" {}".format(CONFIGFILE)
-    #     sed = host.run(sed_cmd)
-    #     assert sed.rc == 0, sed.stdout
-    #     set_engine_cmd = "sed -i \"/engine: *wiredTiger/s/#//g\" {}"
-    #     set_engine = host.run(set_engine_cmd)
-    #     assert set_engine.rc == 0, set_engine.stdout
-    #     if cipher == "AES256-CBC":
-    #         set_encr_cmd = "sed -i \"s|#security:|security:\n  enableEncryption: true\n" \
-    #                         "  encryptionCipherMode: {}\n  encryptionKeyFile: {}|\" {}".format(cipher, KEY_FILE, CONFIGFILE)
-    #     else:
-    #         set_encr_cmd = "sed -i \"s/encryptionCipherMode: AES256-CBC/encryptionCipherMode: AES256-GCM/\" {}".format(
-    #             CONFIGFILE)
-    #     set_encr = host.run(set_encr_cmd)
-    #     assert set_encr.rc == 0, set_encr.stdout
-    #     start_service(host)
-    #     check_enc_enabled_cmd = "mongo --quiet --eval" \
-    #                             " \"db.serverCmdLineOpts().parsed.security.enableEncryption\" | tail -n1"
-    #     check_enc_mode_cmd = "mongo --quiet --eval" \
-    #                          " \"db.serverCmdLineOpts().parsed.security.encryptionCipherMode\" | tail -n1"
-    #     check_enc_key_file_cmd = "mongo --quiet --eval" \
-    #                              " \"db.serverCmdLineOpts().parsed.security.encryptionKeyFile\" | tail -n1"
-    #     check_enc_enabled = host.run(check_enc_enabled_cmd)
-    #     assert check_enc_enabled.rc == 0, check_enc_enabled.stdout
-    #     assert 'true' == check_enc_enabled.stdout.strip("\n")
-    #     check_enc_mode = host.run(check_enc_mode_cmd)
-    #     assert check_enc_mode.rc == 0, check_enc_mode.stdout
-    #     assert cipher == check_enc_mode.stdout.strip("\n")
-    #     check_enc_key_file = host.run(check_enc_key_file_cmd)
-    #     assert check_enc_key_file.rc == 0, check_enc_key_file.stdout
-    #     assert KEY_FILE == check_enc_key_file.stdout.strip("\n")
-    #     add_data_cmd = 'mongo localhost:27017/test --eval ' \
-    #                    '"for(i=1; i <= 100000; i++) { db.series.insert( {{ id: i, name: \'series\'+i }})}" >> {}'.format(LOG
-    #                                                                                                                      )
-    #     add_data = host.run(add_data_cmd)
-    #     assert add_data.rc == 0, add_data.stdout
-    #     add_index_cmd = "mongo localhost:27017/test --eval \"db.series.ensureIndex({{ name: 1 }})\" >> {}".format(LOG)
-    #     add_index = host.run(add_index_cmd)
-    #     assert add_index.rc == 0, add_index.stdout
-    #     hotbackup(host)
-
-
-# @pytest.mark.parametrize("cipher", ['AES256-CBC', 'AES256-GCM'])
-# def test_encryption_vault(host, cipher):
-#     with host.sudo():
-#         backup_config_cmd = "cp {} {}".format(CONFIGFILE, BACKUP_CONFIGFILE)
-#         backup_config = host.run(backup_config_cmd)
-#         assert backup_config.rc == 0, backup_config.stdout
-#         chmod_ca_cmd = "chmod 600 {}".format(CA_FILE)
-#         chmod_ca = host.run(chmod_ca_cmd)
-#         assert chmod_ca.rc == 0, chmod_ca.stdout
-#         chmod_token_cmd = "chmod 600 {}".format(TOKEN_FILE)
-#         chmod_token = host.run(chmod_token_cmd)
-#         assert chmod_token.rc == 0, chmod_token.stdout
-#         chown_cmd = "chown mongod:mongod {}".format(CA_FILE)
-#         chown = host.run(chown_cmd)
-#         assert chown.rc == 0, chown.stdout
-#         stop_service(host)
-#         clean_datadir(host)
-#         sed_cmd = "sed -i \"/^  engine: /s/^/#/g\" {}".format(CONFIGFILE)
-#         sed = host.run(sed_cmd)
-#         assert sed.rc == 0, sed.stdout
-#         print(host.run("cat {}").format(CONFIGFILE).stdout)
-#         set_engine_cmd = "sed -i \"/engine: *wiredTiger/s/#//g\" {}"
-#         set_engine = host.run(set_engine_cmd)
-#         assert set_engine.rc == 0, set_engine.stdout
-#         if cipher == "AES256-CBC":
-#             set_encr_cmd = "sed -i \"s|#security:|security:\n  enableEncryption: true\n" \
-#                            "  encryptionCipherMode: {}\n  vault:\n    serverName: 10.30.6.213\n" \
-#                            "    port: 8200\n    tokenFile: {}\n    serverCAFile: {}\n" \
-#                            "    secret: secret_v2/data/psmdb-test/package-test|\" {}".format(cipher, TOKEN_FILE,
-#                                                                                              CA_FILE, CONFIGFILE)
-#         else:
-#             set_encr_cmd = "sed -i \"s/encryptionCipherMode: AES256-CBC/encryptionCipherMode: AES256-GCM/\" {}".format(
-#                 CONFIGFILE)
-#         set_encr = host.run(set_encr_cmd)
-#         print(host.run("cat {}").format(CONFIGFILE).stdout)
-#         assert set_encr.rc == 0, set_encr.stdout
-#         start_service(host)
-#         check_enc_enabled_cmd = "mongo --quiet --eval" \
-#                                 " \"db.serverCmdLineOpts().parsed.security.enableEncryption\" | tail -n1"
-#         check_enc_mode_cmd = "mongo --quiet --eval" \
-#                              " \"db.serverCmdLineOpts().parsed.security.encryptionCipherMode\" | tail -n1"
-#         check_enc_ip_cmd = "mongo --quiet --eval" \
-#                            " \"db.serverCmdLineOpts().parsed.security.encryptionKeyFile\" | tail -n1"
-#         check_enc_enabled = host.run(check_enc_enabled_cmd)
-#         assert check_enc_enabled.rc == 0, check_enc_enabled.stdout
-#         assert 'true' == check_enc_enabled.stdout.strip("\n")
-#         check_enc_mode = host.run(check_enc_mode_cmd)
-#         assert check_enc_mode.rc == 0, check_enc_mode.stdout
-#         assert cipher == check_enc_mode.stdout.strip("\n")
-#         check_enc_ip = host.run(check_enc_ip_cmd)
-#         assert check_enc_ip.rc == 0, check_enc_ip.stdout
-#         assert "10.30.6.213" == check_enc_ip.stdout.strip("\n")
-#         add_data_cmd = 'mongo localhost:27017/test --eval ' \
-#                        '"for(i=1; i <= 100000; i++) { db.series.insert( {{ id: i, name: \'series\'+i }})}" >> {}'.format(LOG
-#                                                                                                                          )
-#         add_data = host.run(add_data_cmd)
-#         assert add_data.rc == 0, add_data.stdout
-#         add_index_cmd = "mongo localhost:27017/test --eval \"db.series.ensureIndex({{ name: 1 }})\" >> {}".format(LOG)
-#         add_index = host.run(add_index_cmd)
-#         assert add_index.rc == 0, add_index.stdout
-#         hotbackup(host)
 
 
 @pytest.mark.parametrize("encryption", ['keyfile', 'vault'])
 def test_encryption(host, encryption):
     with host.sudo():
         result = host.run("/package-testing/scripts/psmdb_encryption/psmdb-encryption-test.sh {}".format(encryption))
-        print(result.stdout)
-        print(result.stderr)
     assert result.rc == 0, result.stderr
 
 
@@ -354,8 +209,6 @@ def test_enable_auth(host):
     cmd = "/package-testing/scripts/psmdb_set_auth.sh"
     with host.sudo():
         result = host.run(cmd)
-        print(result.stdout)
-        print(result.stderr)
     assert result.rc == 0, result.stdout
 
 
@@ -363,8 +216,6 @@ def test_bats(host):
     cmd = "/usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats"
     with host.sudo():
         result = host.run(cmd)
-        print(result.stdout)
-        print(result.stderr)
     assert result.rc == 0, result.stdout
 
 
@@ -378,8 +229,6 @@ def test_bats_with_numactl(host):
         assert result.rc == 0, result.stdout
         cmd = "/usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats"
         result = host.run(cmd)
-        print(result.stdout)
-        print(result.stderr)
     assert result.rc == 0, result.stdout
 
 
