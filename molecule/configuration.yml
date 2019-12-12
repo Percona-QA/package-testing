@@ -4,7 +4,7 @@ centos-6:
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
-  root_device_name: /dev/sda1
+  root_device_name: /dev/sda
 centos-7:
   image: ami-7cbc6e13
   user: centos
@@ -18,7 +18,7 @@ debian-8:
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
-  root_device_name: xvda
+  root_device_name: /dev/xvda
 debian-9:
   image: ami-006c08e13f35edce0
   user: admin
