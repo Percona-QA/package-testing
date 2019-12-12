@@ -132,9 +132,9 @@ def test_bats(host):
 def test_bats_with_numactl(host):
     with host.sudo():
         os = host.system_info.distribution
-        cmd = 'apt-get install numactl'
+        cmd = 'apt-get install numactl -y'
         if os.lower() in ["redhat", "centos", 'rhel']:
-            cmd = 'yum install numactl'
+            cmd = 'yum install numactl -y'
         result = host.run(cmd)
         assert result.rc == 0, result.stdout
         cmd = "/usr/local/bin/bats /package-testing/bats/mongo-init-scripts.bats"
