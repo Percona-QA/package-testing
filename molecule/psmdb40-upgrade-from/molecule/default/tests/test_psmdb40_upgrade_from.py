@@ -88,7 +88,8 @@ def test_bats(host):
 
 
 def test_service(host):
-    assert host.service("mongod").is_running
+    with host.sudo():
+        assert host.service("mongod").is_running
 
 
 def test_data_is_there(host):

@@ -148,4 +148,4 @@ def test_bats_with_numactl(host):
 def test_service(host):
     with host.sudo():
         start_service(host)
-    assert host.service("mongod").is_running
+        assert host.service("mongod").is_running
