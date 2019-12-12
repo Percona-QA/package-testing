@@ -22,15 +22,16 @@ driver:
 lint:
   name: yamllint
 platforms:
-  - name: ps80-pkg-maj-upgrade-to-${PLATFORM}
-    region: ${AWS_DEFAULT_REGION}
-    image: ${IMAGE}
-    vpc_subnet_id: ${SUBNET}
-    instance_type: ${INSTANCE_TYPE}
-    root_device_name: ${ROOT_DEVICE_NAME}
-    ssh_user: ${USER}
-    instance_tags:
-      iit-billing-tag: jenkins-ps-pkg-worker
+##PLATFORM_PLACEHOLDER##
+#  - name: ps80-pkg-install-${PLATFORM}
+#    region: ${AWS_DEFAULT_REGION}
+#    image: ${IMAGE}
+#    vpc_subnet_id: ${SUBNET}
+#    instance_type: ${INSTANCE_TYPE}
+#    root_device_name: ${ROOT_DEVICE_NAME}
+#    ssh_user: ${USER}
+#    instance_tags:
+#      iit-billing-tag: jenkins-ps-pkg-worker
 provisioner:
   name: ansible
   env:

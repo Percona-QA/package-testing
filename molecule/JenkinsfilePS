@@ -7,19 +7,18 @@ pipeline {
     PATH='/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/ec2-user/.local/bin'
   }
   parameters {
-    choice(
-      name: 'PLATFORM',
-      description: 'Test distribution',
-      choices: [
-        'centos-6',
-        'centos-7',
-        'debian-8',
-        'debian-9',
-        'debian-10',
-        'ubuntu-xenial',
-        'ubuntu-bionic',
-        'rhel8'
-      ]
+    text(
+      name: 'PLATFORMS',
+      description: 'Test distributions',
+      defaultValue: '''centos-6
+centos-7
+debian-8
+debian-9
+debian-10
+ubuntu-xenial
+ubuntu-bionic
+rhel8
+'''
     )
     choice(
       name: 'INSTALL_REPO',
@@ -48,29 +47,12 @@ pipeline {
     )
   }
   stages {
-    stage('Set build name'){
-      steps {
-        script {
-          currentBuild.displayName = "#${BUILD_NUMBER}-${ROLE_NAME}-${PLATFORM}"
-          currentBuild.description = "${INSTALL_REPO}"
-        }
-      }
-    }
-    stage ('Setup Environment Variables') {
-      steps {
-        script {
-          vms = readYaml (file: 'molecule/configuration.yml')
-          env.IMAGE = vms."${PLATFORM}".image
-          env.USER = vms."${PLATFORM}".user
-          env.SUBNET = vms."${PLATFORM}".subnet
-          env.AWS_DEFAULT_REGION = vms."${PLATFORM}".aws_default_region
-          env.INSTANCE_TYPE = vms."${PLATFORM}".instance_type
-          env.ROOT_DEVICE_NAME = vms."${PLATFORM}".root_device_name
-        }
-      }
-    }
     stage ('Prepare') {
       steps {
+        script {
+          currentBuild.displayName = "#${BUILD_NUMBER}-${ROLE_NAME}-${INSTALL_REPO}"
+          currentBuild.description = "${PLATFORMS}".replaceAll("\n", " ");
+        }
         checkout scm
         sh '''
             sudo yum install -y gcc python3-pip python3-devel libselinux-python openssl-devel
@@ -80,6 +62,30 @@ pipeline {
         '''
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'AMI/OVF', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
           sh '''
+              REPLACE_STRING="##PLATFORM_PLACEHOLDER##"
+              MOLECULE_FILE="molecule/${ROLE_NAME}/molecule/ec2/molecule.yml"
+              for PLATFORM in ${PLATFORMS}; do
+                PL_PARAMS=$(grep -A6 "${PLATFORM}:" molecule/configuration.yml)
+                AWS_DEFAULT_REGION=$(echo "${PL_PARAMS}" | grep "aws_default_region:"|awk -F': ' '{print $2}' )
+                IMAGE=$(echo "${PL_PARAMS}" | grep "image:"|awk -F': ' '{print $2}' )
+                SUBNET=$(echo "${PL_PARAMS}" | grep "subnet:"|awk -F': ' '{print $2}' )
+                INSTANCE_TYPE=$(echo "${PL_PARAMS}" | grep "instance_type:"|awk -F': ' '{print $2}' )
+                ROOT_DEVICE_NAME=$(echo "${PL_PARAMS}" | grep "root_device_name:"|awk -F': ' '{print $2}' )
+                USER=$(echo "${PL_PARAMS}" | grep "user:"|awk -F': ' '{print $2}' )
+                #
+                sed -i "s/${REPLACE_STRING}/  - name: ${ROLE_NAME}-${PLATFORM}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                sed -i "s/${REPLACE_STRING}/    region: ${AWS_DEFAULT_REGION}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                sed -i "s/${REPLACE_STRING}/    image: ${IMAGE}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                sed -i "s/${REPLACE_STRING}/    vpc_subnet_id: ${SUBNET}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                sed -i "s/${REPLACE_STRING}/    instance_type: ${INSTANCE_TYPE}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                sed -i "s!${REPLACE_STRING}!    root_device_name: ${ROOT_DEVICE_NAME}\\n${REPLACE_STRING}!" ${MOLECULE_FILE}
+                sed -i "s/${REPLACE_STRING}/    ssh_user: ${USER}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                sed -i "s/${REPLACE_STRING}/    instance_tags:\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                sed -i "s/${REPLACE_STRING}/      iit-billing-tag: jenkins-ps-pkg-worker\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+              done
+              echo "##### MOLECULE FILE CONTENT #####"
+              cat ${MOLECULE_FILE}
+              echo "#########################"
               cd molecule/${ROLE_NAME}
               python3 -m molecule list
               python3 -m molecule destroy -s ec2 || true
@@ -94,11 +100,6 @@ pipeline {
       steps {
         withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''), [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'AMI/OVF', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
           sh '''
-              echo $USER
-              echo $REGION
-              echo $SUBNET
-              echo $IMAGE
-              echo $PLATFORM
               cd molecule/${ROLE_NAME}
               python3 -m molecule list
               python3 -m molecule create -s ec2
@@ -145,6 +146,7 @@ pipeline {
             python3 -m molecule destroy -s ec2
         '''
       }
+      deleteDir()
     }
   }
 }
