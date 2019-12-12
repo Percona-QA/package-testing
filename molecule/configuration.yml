@@ -1,10 +1,10 @@
 centos-6:
-  image: ami-c8b587d5
+  image: ami-07fa74e425f2abf29
   user: centos
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
   instance_type: t2.micro
-  root_device_name: /dev/sda
+  root_device_name: /dev/sda1
 centos-7:
   image: ami-7cbc6e13
   user: centos
