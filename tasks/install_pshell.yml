@@ -1,0 +1,21 @@
+# This task installs percona-mysql-shell
+#
+
+  - name: install percona-mysql-shell deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-mysql-shell
+    when: ansible_os_family == "Debian"
+
+  - name: install percona-mysql-shell new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-mysql-shell
+    when: ansible_os_family == "RedHat"
