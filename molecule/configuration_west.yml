@@ -18,7 +18,7 @@ debian-8:
   subnet: subnet-03136d8c244f56036
   aws_default_region: us-west-2
   instance_type: t2.micro
-  root_device_name: xvda
+  root_device_name: /dev/xvda
 debian-9:
   image: ami-84439fe4
   user: admin
