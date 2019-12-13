@@ -87,23 +87,8 @@
   - name: re-run ps-admin to finish tokudb install
     command: /usr/bin/ps-admin --enable-tokudb
 
-  - name: install percona-mysql-shell package for CentOS
-    yum:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - percona-mysql-shell
-    when: ansible_os_family == "RedHat"
-
-  - name: install percona-mysql-shell package for Debian/Ubuntu
-    apt:
-      update_cache: yes
-      state: present
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - percona-mysql-shell
-    when: ansible_os_family == "Debian"
+  - name: install percona-mysql-shell package
+    include_tasks: ../tasks/install_pshell.yml
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps80
