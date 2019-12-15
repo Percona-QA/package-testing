@@ -102,7 +102,7 @@
       packages:
       - rsyslog-mysql
       - python3-PyMySQL
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version = "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: add sbt user
     mysql_user:
