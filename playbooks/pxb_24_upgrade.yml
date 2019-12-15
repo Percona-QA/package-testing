@@ -95,6 +95,15 @@
       - MySQL-python
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
 
+  - name: install 3rd party packages with yum
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+      - python3-PyMySQL
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version = "8"
+
   - name: add sbt user
     mysql_user:
       name: sbt
