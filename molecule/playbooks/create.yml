@@ -71,6 +71,7 @@
         dest: "{{ keypair_path }}-{{ item.region|default(default_region) }}"
         src: "{{ lookup('env', 'MOLECULE_AWS_PRIVATE_KEY') }}"
         mode: 0600
+      no_log: True
       with_items: "{{ molecule_yml.platforms }}"
 
 #    - name: Get the ec2 ami(s) by owner and name, if image not set
