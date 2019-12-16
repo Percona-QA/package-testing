@@ -180,24 +180,8 @@
   - name: start mysql service
     service: name=mysql state=started
 
-  - name: remove Percona Server deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: absent
-    vars:
-      packages:
-      - percona-server-server-5.7
-    when: ansible_os_family == "Debian"
-
-  - name: remove Percona Server rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: absent
-    vars:
-      packages:
-      - Percona-Server-server-57
-    when: ansible_os_family == "RedHat"
+  - name: remove PS 5.7 packages
+    include_tasks: ../tasks/remove_ps57.yml
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped

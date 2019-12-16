@@ -155,7 +155,7 @@
       state: absent
     vars:
       packages:
-      - percona-server-server*
+      - percona-server*
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server rpm packages
@@ -164,7 +164,7 @@
       state: absent
     vars:
      packages:
-      - percona-server-server*
+      - percona-server*
     when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal
