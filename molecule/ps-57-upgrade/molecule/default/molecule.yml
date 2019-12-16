@@ -25,7 +25,7 @@ platforms:
 provisioner:
   name: ansible
   playbooks:
-    cleanup: cleanup.yml
+    cleanup: ../../../ps-57-install/molecule/default/cleanup.yml
     prepare: ../../../playbooks/prepare.yml
   lint:
     name: ansible-lint
