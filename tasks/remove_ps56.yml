@@ -1,0 +1,32 @@
+# This task installs Percona Server 5.6 packages on CentOS and Debian/Ubuntu
+#
+
+  - name: install Percona Server deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: absent
+    vars:
+      packages:
+      - percona-server-server-5.6
+      - percona-server-test-5.6
+      - percona-server-5.6-dbg
+      - percona-server-source-5.6
+      - percona-server-tokudb-5.6
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona Server rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - Percona-Server-server-56
+      - Percona-Server-test-56
+      - Percona-Server-56-debuginfo
+      - Percona-Server-devel-56
+      - Percona-Server-tokudb-56
+      - Percona-Server-selinux-56
+      - Percona-Server-shared-56
+      - Percona-Server-client-56
+    when: ansible_os_family == "RedHat"

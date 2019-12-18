@@ -53,6 +53,9 @@
   - name: install Percona XtraBackup 2.4 packages from main repos
     include_tasks: ../tasks/install_pxb24.yml
 
+  - name: list installed packages
+    include_tasks: ../tasks/list_installed_packages.yml
+
   - name: start mysql service with service command
     command: service mysql start
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
@@ -132,6 +135,9 @@
   - name: install Percona XtraBackup 2.4 packages from main repos
     include_tasks: ../tasks/install_pxb24.yml
 
+  - name: list installed packages
+    include_tasks: ../tasks/list_installed_packages.yml
+
   - name: run mysql_upgrade
     command: mysql_upgrade -uroot
 
@@ -180,24 +186,16 @@
   - name: start mysql service
     service: name=mysql state=started
 
-  - name: remove Percona Server deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: absent
-    vars:
-      packages:
-      - percona-server-server-5.7
-    when: ansible_os_family == "Debian"
-
-  - name: remove Percona Server rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: absent
-    vars:
-      packages:
-      - Percona-Server-server-57
-    when: ansible_os_family == "RedHat"
+  - name: remove PS 5.7 packages
+    include_tasks: ../tasks/remove_ps57.yml
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
+
+  - stat:
+      path: /var/lib/mysql
+    register: p
+
+  - fail:
+      msg: "Path exists and is a directory and is not empty"
+    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000

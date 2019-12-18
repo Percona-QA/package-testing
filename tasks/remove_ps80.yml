@@ -1,14 +1,10 @@
----
-- name: Cleanup
-  hosts: all
-  become: true
-  become_method: sudo
+# This task installs Percona Server 8.0 on CentOS and Debian/Ubuntu
+#
 
-  tasks:
-  - name: remove Percona Server deb packages
+  - name: install Percona Server deb packages
     apt:
       name: "{{ packages }}"
-      update_cache: no
+      update_cache: yes
       state: absent
     vars:
       packages:
@@ -21,12 +17,13 @@
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
 
-  - name: remove Percona Server rpm packages
+  - name: install Percona Server rpm packages
     yum:
       name: "{{ packages }}"
       state: absent
+      disablerepo: "epel"
     vars:
-     packages:
+      packages:
       - percona-server-server
       - percona-server-client
       - percona-server-test
@@ -35,11 +32,3 @@
       - percona-server-tokudb
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
-
-  - name: check if process is stopped after package removal
-    command: /package-testing/check_running.sh mysql stopped
-
-#    - name: Unregister RedHat
-#      redhat_subscription:
-#        state: absent
-#      when: ansible_distribution == "RedHat" and ansible_distribution_major_version == "8"

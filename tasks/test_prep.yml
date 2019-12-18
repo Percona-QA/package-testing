@@ -112,6 +112,12 @@
     - rm -f master.zip
     - mv package-testing-master /package-testing
 
+#  - name: copy package-testing directory to remote
+#    copy:
+#      src: ../../package-testing
+#      dest: /
+#      force: yes
+
   - name: install latest bats from github
     command: "{{ item }}"
     with_items:
@@ -121,3 +127,16 @@
     - rm -f master.zip
     - bats-master/install.sh /usr/local
     - rm -rf bats-master
+
+  - name: include tasks for listing already installed packages
+    include_tasks: list_installed_packages.yml
+
+  - name: get selinux status
+    command: sestatus
+    register: selinux_status
+    when: ansible_os_family == "RedHat"
+
+  - name: list selinux status
+    debug:
+      var: selinux_status
+    when: ansible_os_family == "RedHat"
