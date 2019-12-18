@@ -231,6 +231,7 @@ function teardown(){
       [ $status -eq 1 ]
       run is_running
       [ $status -eq 1 ]
+      run sed -i '/nonexistingoption=/d' ${MYSQLCONF}
     fi
   else
     skip "system doesn't have systemctl command"
@@ -248,6 +249,7 @@ function teardown(){
 #     [ $status -eq 1 ]
 #     run is_running
 #     [ $status -eq 1 ]
+#     run sed -i '/nonexistingoption=/d' ${MYSQLCONF}
 #   else
 #     skip "system doesn't have service command"
 #   fi
