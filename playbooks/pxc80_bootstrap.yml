@@ -53,7 +53,7 @@
       state: latest
     vars:
       packages:
-      - Percona-XtraDB-Cluster-full
+      - percona-xtradb-cluster-full
       - MySQL-python
     when: ansible_os_family == "RedHat"
 
