@@ -70,7 +70,7 @@ pipeline {
               echo $IMAGE
               echo $PLATFORM
               cd molecule/pg-11
-              python3 -m molecule create -s ec2
+              python3 -m molecule create -s pg-11-5
           '''
         }
       }
@@ -79,7 +79,7 @@ pipeline {
       steps {
         sh '''
             cd molecule/pg-11
-            python3 -m molecule converge -s ec2
+            python3 -m molecule converge -s pg-11-5
         '''
       }
     }
@@ -88,7 +88,7 @@ pipeline {
         sh '''
             cd molecule/pg-11
 
-            python3 -m molecule verify -s ec2
+            python3 -m molecule verify -s pg-11-5
         '''
         junit 'molecule/pg-11/molecule/ec2/*.xml'
       }
@@ -97,7 +97,7 @@ pipeline {
       steps {
         sh '''
             cd molecule/pg-11
-            python3 -m molecule cleanup -s ec2
+            python3 -m molecule cleanup -s pg-11-5
         '''
       }
     }
@@ -108,7 +108,7 @@ pipeline {
       [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
             cd molecule/pg-11
-            python3 -m molecule destroy -s ec2
+            python3 -m molecule destroy -s pg-11-5
         '''
       }
     }
