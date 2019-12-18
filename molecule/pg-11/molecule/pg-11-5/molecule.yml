@@ -21,8 +21,12 @@ provisioner:
   lint:
     name: ansible-lint
     enabled: False
+  playbooks:
+    create: ../../playbooks/create.yml
+    destroy: ../../playbooks/destroy.yml
+    prepare: ../../playbooks/prepare.yml
 instances:
-  - name: pg-11
+  - name: pg-11-5
 verifier:
   name: testinfra
   options:
@@ -33,7 +37,7 @@ verifier:
     name: flake8
     enabled: False
 scenario:
-  name: ec2
+  name: pg-11-5
   destroy_sequence:
     - destroy
   clenup_sequence:
