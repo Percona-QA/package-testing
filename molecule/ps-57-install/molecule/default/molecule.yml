@@ -20,7 +20,7 @@ lint:
   name: yamllint
 platforms:
   - name: ps57-install
-    box: "${PLATFORM}"
+    box: ${PLATFORM}
     memory: 1024
 provisioner:
   name: ansible

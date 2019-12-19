@@ -83,7 +83,7 @@
     include_tasks: ../tasks/pam_test.yml
 
   - name: disable selinux on centos7 for TokuDB to work
-    command: setenforce 0
+    shell: setenforce 0 || true
     when: ansible_os_family == "RedHat"
 
   - name: install tokudb and restart server
