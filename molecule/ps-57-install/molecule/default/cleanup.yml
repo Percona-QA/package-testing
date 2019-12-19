@@ -5,40 +5,25 @@
   become_method: sudo
 
   tasks:
+  - name: get my.cnf stats
+    stat: path=/etc/my.cnf
+    register: mycnf
+
+  - name: copy config file to backup
+    copy:
+      src: /etc/my.cnf
+      dest: /etc/my.cnf.backup
+      remote_src: yes
+    when: mycnf.stat.exists and ansible_os_family == "RedHat"
+
   - name: disable all percona repos
     command: percona-release disable all
 
-  - name: remove Percona Server deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: absent
-    vars:
-      packages:
-      - percona-server-server-5.7
-      - percona-server-test-5.7
-      - percona-server-5.7-dbg
-      - percona-server-source-5.7
-      - percona-server-client-5.7
-      - percona-server-tokudb-5.7
-      - percona-server-rocksdb-5.7
-    when: ansible_os_family == "Debian"
+  - name: remove PXB 2.4 packages
+    include_tasks: ../../../tasks/remove_pxb24.yml
 
-  - name: remove Percona Server rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: absent
-    vars:
-     packages:
-      - Percona-Server-server-57
-      - Percona-Server-client-57
-      - Percona-Server-test-57
-      - Percona-Server-test-57
-      - Percona-Server-57-debuginfo
-      - Percona-Server-devel-57
-      - Percona-Server-tokudb-57
-      - Percona-Server-rocksdb-57
-    when: ansible_os_family == "RedHat"
+  - name: remove PS 5.7 packages
+    include_tasks: ../../../tasks/remove_ps57.yml
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped

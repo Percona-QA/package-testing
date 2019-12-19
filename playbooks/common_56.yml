@@ -58,9 +58,9 @@
     command: systemctl start mysql
     when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version == "7")
 
-  - name: disable selinux on centos7 for TokuDB to work
+  - name: disable selinux on centos for TokuDB to work
     command: setenforce 0
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    when: ansible_os_family == "RedHat"
 
 # Start PAM test
   - group:
@@ -205,6 +205,17 @@
 
   - name: uninstall PAM before final package uninstall
     command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
+
+  - name: get my.cnf stats
+    stat: path=/etc/my.cnf
+    register: mycnf
+
+  - name: copy config file to backup
+    copy:
+      src: /etc/my.cnf
+      dest: /etc/my.cnf.backup
+      remote_src: yes
+    when: mycnf.stat.exists and ansible_os_family == "RedHat"
 
   - name: remove Percona Server 5.6 deb packages
     apt:
