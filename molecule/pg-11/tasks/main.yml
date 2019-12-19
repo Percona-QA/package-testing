@@ -23,7 +23,7 @@
     force: true
 
 - name: setup temporary repo until percona-release is updated
-  command: percona-release enable {{ VERSION }} {{ repo }}
+  command: percona-release enable {{ PG_VERSION }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
     repo: "{{ lookup('env', 'PG_VERSION') }}"
