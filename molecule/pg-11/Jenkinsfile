@@ -55,7 +55,7 @@ pipeline {
        env.INSTANCE_TYPE = vms."${PLATFORM}".instance_type
        env.ROOT_DEVICE_NAME = vms."${PLATFORM}".root_device_name
        versions = readYaml (file: 'molecule/pg-11/versions.yml')
-       env.VERSION = versions."${VERSION}".version
+       env.PG_VERSION = versions."${VERSION}".version
         }
        }
       }

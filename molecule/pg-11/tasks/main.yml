@@ -26,7 +26,7 @@
   command: percona-release enable {{ VERSION }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
-    repo: "{{ lookup('env', 'VERSION') }}"
+    repo: "{{ lookup('env', 'PG_VERSION') }}"
 
 - name: install Percona Platform for PostgreSQL 11 packages
   include_tasks: ../../../tasks/install_ppg11.yml
