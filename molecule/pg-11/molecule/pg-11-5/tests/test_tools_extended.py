@@ -90,10 +90,8 @@ def python3_function(host):
                 $$ LANGUAGE plpython3u;
                         """
         execute_psql = host.run("psql -c \'{}\'".format(create_function))
-        print(execute_psql.stdout)
-        print(execute_psql.stderr)
-        assert execute_psql.rc == 0
-        assert execute_psql.stdout.strip("\n") == "CREATE FUNCTION"
+        assert execute_psql.rc == 0, execute_psql.stderr
+        assert execute_psql.stdout.strip("\n") == "CREATE FUNCTION", execute_psql.stdout
         return execute_psql
 
 

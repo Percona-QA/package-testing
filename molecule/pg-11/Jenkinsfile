@@ -26,6 +26,14 @@ pipeline {
                 'main',
             ]
         )
+        choice(
+            name: 'VERSION',
+            description: 'PG version for test',
+            choices: [
+                'pg-11-5',
+                'pg-11-6',
+            ]
+        )
   }
   stages {
     stage('Set build name'){
@@ -65,7 +73,7 @@ pipeline {
         [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
           sh '''
               cd molecule/pg-11
-              molecule create -s pg-11-5
+              molecule create -s ${VERSION}
           '''
         }
       }
@@ -74,7 +82,7 @@ pipeline {
       steps {
         sh '''
             cd molecule/pg-11
-            molecule converge -s pg-11-5
+            molecule converge -s ${VERSION}
         '''
       }
     }
@@ -82,7 +90,7 @@ pipeline {
       steps {
         sh '''
             cd molecule/pg-11
-            molecule verify -s pg-11-5
+            molecule verify -s ${VERSION}
         '''
         junit 'molecule/pg-11/molecule/ec2/*.xml'
       }
@@ -91,7 +99,7 @@ pipeline {
       steps {
         sh '''
             cd molecule/pg-11
-            molecule cleanup -s pg-11-5
+            molecule cleanup -s ${VERSION}
         '''
       }
     }
@@ -102,7 +110,7 @@ pipeline {
       [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
             cd molecule/pg-11
-            molecule destroy -s pg-11-5
+            molecule destroy -s ${VERSION}
         '''
       }
     }

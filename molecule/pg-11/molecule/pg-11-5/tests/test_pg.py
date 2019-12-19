@@ -1,4 +1,3 @@
-import os
 import pytest
 
 import testinfra.utils.ansible_runner
@@ -91,7 +90,7 @@ def test_rpm_package_is_installed(host, package):
     pkg = host.package(package)
     assert pkg.is_installed
     if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
-        assert pkg.version == "11.5"
+        assert pkg.version == PG_VERSION
     else:
         assert pkg.version == "204"
 
@@ -106,7 +105,7 @@ def test_rpm7_package_is_installed(host, package):
     pkg = host.package(package)
     assert pkg.is_installed
     if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
-        assert pkg.version == "11.5"
+        assert pkg.version == PG_VERSION
     else:
         assert pkg.version == "204"
 
@@ -159,7 +158,7 @@ def test_pg_config_server_version(host):
 
 def test_postgresql_query_version(postgresql_query_version):
     assert postgresql_query_version.rc == 0
-    assert postgresql_query_version.stdout.strip("\n") == "11.5"
+    assert postgresql_query_version.stdout.strip("\n") == PG_VERSION
 
 
 def test_postgres_client_version(host):
