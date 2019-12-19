@@ -84,7 +84,7 @@
 
   - name: disable selinux on centos7 for TokuDB to work
     command: setenforce 0
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when: ansible_os_family == "RedHat"
 
   - name: install tokudb and restart server
     command: /usr/bin/ps_tokudb_admin --enable --enable-backup
@@ -167,9 +167,15 @@
   - name: start mysql service
     service: name=mysql state=started
 
+  - name: upgrade partitioning
+    command: /package-testing/scripts/ps_upgrade_partitioning.sh
+
 # temporary commented out until BLD-906 is fixed
 # - name: check that mysqladmin shutdown works correctly
 #   command: /package-testing/madmin_check.sh
+
+  - name: disable all percona repos
+    command: percona-release disable all
 
   - name: remove PS 5.7 packages
     include_tasks: ../tasks/remove_ps57.yml

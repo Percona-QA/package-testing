@@ -169,3 +169,21 @@ load ps-admin_helper
     check_rocksdb_notexists
   fi
 }
+
+@test "reinstall ALL plugins for upgrade test" {
+  install_all
+  if [ ${MYSQL_VERSION} != "8.0" ]; then
+    check_qrt_exists
+  fi
+  check_audit_exists
+# check_pam_exists
+# check_pam_compat_exists
+  if [ ${MYSQL_VERSION} != "5.5" ]; then
+    check_tokudb_exists
+    check_tokubackup_exists
+  fi
+  if [ ${MYSQL_VERSION} != "5.5" -a ${MYSQL_VERSION} != "5.6" ]; then
+    check_mysqlx_exists
+    check_rocksdb_exists
+  fi
+}

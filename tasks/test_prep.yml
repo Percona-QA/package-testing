@@ -117,6 +117,7 @@
 #      src: ../../package-testing
 #      dest: /
 #      force: yes
+#      mode: preserve
 
   - name: install latest bats from github
     command: "{{ item }}"
