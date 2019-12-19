@@ -2,7 +2,7 @@
 # It will disable the original repo and upgrade to Percona Server 8.0
 #
 
-- import_playbook: ../playbooks/common_57.yml
+- import_playbook: common_57.yml
 
 - hosts: all
   become: true

@@ -1,23 +1,12 @@
 ---
-# This playbook does following:
-#   enables Percona testing repository
-#   installs latest version of PS 5.6, PT and PXB 2.3
-#   does some tests
+# tasks file for ps-57-maj-upgrade-to
+# This playbook install Percona Server 5.7 with TokuDB and MyRocks
+# It will disable the original repo and upgrade to Percona Server 8.0
 
-# Cosmic is still missing python
-- import_playbook: test_prep.yml
-- import_playbook: common_56.yml
+#  - import_playbook: ../../ps-56-install/tasks/main.yml
 
-- hosts: all
-  become: true
-  become_method: sudo
-  vars:
-    vault_token: "{{ lookup('env', 'VAULT_TEST_TOKEN') }}"
-    vault_cert: "{{ lookup('env', 'VAULT_TEST_CERT') }}"
-
-  tasks:
   - name: remove PS 5.6 packages
-    include_tasks: ../tasks/remove_ps56.yml
+    include_tasks: ../../../tasks/remove_ps56.yml
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
@@ -32,7 +21,7 @@
 
   - name: copy config file to original location
     copy:
-      src: /etc/my.cnf.backup
+      src: /etc/my.cnf.rpmsave
       dest: /etc/my.cnf
       remote_src: yes
       force: yes
@@ -56,35 +45,35 @@
       dest: /package-testing/scripts/ps_keyring_plugins_test/test.cer
 
   - name: include tasks for enabling test repo
-    include: ../tasks/enable_testing_repo.yml
+    include: ../../../tasks/enable_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling main repo
-    include: ../tasks/enable_main_repo.yml
+    include: ../../../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling experimental repo
-    include: ../tasks/enable_experimental_repo.yml
+    include: ../../../tasks/enable_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: enable tools testing repo
     command: percona-release enable tools testing
 
   - name: install Percona Server 5.7 packages
-    include_tasks: ../tasks/install_ps57.yml
+    include_tasks: ../../../tasks/install_ps57.yml
 
   - name: install Percona Toolkit new deb packages
-    include_tasks: ../tasks/install_pt.yml
+    include_tasks: ../../../tasks/install_pt.yml
 
   - name: install sysbench packages
-    include_tasks: ../tasks/install_sysbench.yml
+    include_tasks: ../../../tasks/install_sysbench.yml
     when: lookup('env', 'install_repo') != "experimental"
 
   - name: install Percona XtraBackup 2.4 packages
-    include_tasks: ../tasks/install_pxb24.yml
+    include_tasks: ../../../tasks/install_pxb24.yml
 
   - name: list installed packages
-    include_tasks: ../tasks/list_installed_packages.yml
+    include_tasks: ../../../tasks/list_installed_packages.yml
 
   - name: start mysql service with service command
     command: service mysql start
@@ -127,17 +116,3 @@
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb24
     when: lookup('env', 'install_repo') != "experimental"
-
-  - name: remove PS 5.7 packages
-    include_tasks: ../tasks/remove_ps57.yml
-
-  - name: check if process is stopped after package removal
-    command: /package-testing/check_running.sh mysql stopped
-
-  - stat:
-      path: /var/lib/mysql
-    register: p
-
-  - fail:
-      msg: "Path exists and is a directory and is not empty"
-    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000

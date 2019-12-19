@@ -17,7 +17,6 @@ debian-9
 debian-10
 ubuntu-xenial
 ubuntu-bionic
-rhel8
 '''
     )
     choice(
@@ -35,6 +34,8 @@ rhel8
       choices: [
         'ps-57-install',
         'ps-57-upgrade',
+        'ps-57-maj-upgrade-to',
+        'ps-57-maj-upgrade-from',
         'ps-80-install',
         'ps-80-maj-upgrade-to',
         'ps-80-upgrade',
