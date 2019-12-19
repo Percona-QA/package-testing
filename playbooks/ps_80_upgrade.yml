@@ -209,12 +209,6 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: run mysql_upgrade
-    command: mysql_upgrade -uroot
-
-  - name: restart mysql service
-    service: name=mysql state=restarted
-
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps80
 

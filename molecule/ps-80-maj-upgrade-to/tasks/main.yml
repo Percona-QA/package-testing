@@ -69,12 +69,6 @@
     command: systemctl start mysql
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: run mysql_upgrade
-    command: mysql_upgrade -uroot
-
-  - name: restart mysql service
-    service: name=mysql state=restarted
-
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps80
 
