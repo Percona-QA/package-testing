@@ -19,8 +19,8 @@ driver:
 lint:
   name: yamllint
 platforms:
-  - name: ps80-upgrade
-    box: "${PLATFORM}"
+  - name: ps57-maj-upgrade-to
+    box: ${PLATFORM}
     memory: 1024
 provisioner:
   name: ansible
