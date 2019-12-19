@@ -151,7 +151,7 @@ def test_pg_config_server_version(host):
     cmd = "pg_config --version"
     try:
         result = host.check_output(cmd)
-        assert "11" in result
+        assert "11" in result, result.stdout
     except AssertionError:
         pytest.mark.xfail(reason="Maybe dev package not install")
 
@@ -164,21 +164,21 @@ def test_postgresql_query_version(postgresql_query_version):
 def test_postgres_client_version(host):
     cmd = "psql --version"
     result = host.check_output(cmd)
-    assert "11" in result.strip("\n")
+    assert "11" in result.strip("\n"), result.stdout
 
 
 def test_start_stop_postgresql(start_stop_postgresql):
-    assert start_stop_postgresql.rc == 0
-    assert "active" in start_stop_postgresql.stdout
+    assert start_stop_postgresql.rc == 0, start_stop_postgresql.rc
+    assert "active" in start_stop_postgresql.stdout, start_stop_postgresql.stdout
 
 
 def test_restart_postgresql(restart_postgresql):
-    assert restart_postgresql.rc == 0
-    assert "active" in restart_postgresql.stdout
+    assert restart_postgresql.rc == 0, restart_postgresql.stderr
+    assert "active" in restart_postgresql.stdout, restart_postgresql.stdout
 
 
 def test_insert_data(insert_data):
-    assert insert_data == "100000"
+    assert insert_data == "100000", insert_data
 
 
 def test_extenstions_list(extension_list, host):
@@ -198,21 +198,11 @@ def test_enable_extension(host, extension):
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION \"{}\";'".format(extension))
-        try:
-            assert install_extension.rc == 0
-            assert install_extension.stdout.strip("\n") == "CREATE EXTENSION"
-        except AssertionError:
-            pytest.fail("Return code {}. Stderror: {}. Stdout {}".format(install_extension.rc,
-                                                                         install_extension.stderr,
-                                                                         install_extension.stdout))
-
-        try:
-            extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
-            assert extensions.rc == 0
-            assert extension in set(extensions.stdout.split())
-        except AssertionError:
-            pytest.fail("Return code {}. Stderror: {}. Stdout {}").format(extension.rc, extension.stderr,
-                                                                          extension.stdout)
+        assert install_extension.rc == 0, install_extension.rc
+        assert install_extension.stdout.strip("\n") == "CREATE EXTENSION", install_extension.stderr
+        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+        assert extensions.rc == 0, extension.rc
+        assert extension in set(extensions.stdout.split()), extensions.stdout
 
 
 @pytest.mark.parametrize("extension", EXTENSIONS[::-1])
@@ -223,29 +213,19 @@ def test_drop_extension(host, extension):
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
     with host.sudo("postgres"):
         drop_extension = host.run("psql -c 'DROP EXTENSION \"{}\";'".format(extension))
-        try:
-            assert drop_extension.rc == 0
-            assert drop_extension.stdout.strip("\n") == "DROP EXTENSION"
-        except AssertionError:
-            pytest.fail("Return code {}. Stderror: {}. Stdout {}".format(drop_extension.rc,
-                                                                         drop_extension.stderr,
-                                                                         drop_extension.stdout))
-
-        try:
-            extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
-            assert extensions.rc == 0
-            assert extension not in set(extensions.stdout.split())
-        except AssertionError:
-            pytest.fail("Return code {}. Stderror: {}. Stdout {}").format(extension.rc, extension.stderr,
-                                                                          extension.stdout)
+        assert drop_extension.rc == 0, drop_extension.rc
+        assert drop_extension.stdout.strip("\n") == "DROP EXTENSION", drop_extension.stdout
+        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+        assert extensions.rc == 0, extension.rc
+        assert extension not in set(extensions.stdout.split()), extension.stdout
 
 
 def test_plpgsql_extension(host):
 
     with host.sudo("postgres"):
         extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
-        assert extensions.rc == 0
-        assert "plpgsql" in set(extensions.stdout.split())
+        assert extensions.rc == 0, extensions.rc
+        assert "plpgsql" in set(extensions.stdout.split()), extensions.stdout
 
 
 @pytest.mark.parametrize("file", DEB_FILES)
@@ -290,8 +270,8 @@ def test_language(host, language):
             if "python3" in language:
                 pytest.skip("Skipping python3 language for Centos or RHEL")
         lang = host.run("psql -c 'CREATE LANGUAGE {};'".format(language))
-        assert lang.rc == 0
-        assert lang.stdout.strip("\n") == "CREATE LANGUAGE"
+        assert lang.rc == 0, lang.rc
+        assert lang.stdout.strip("\n") == "CREATE LANGUAGE", lang.stdout
         drop_lang = host.run("psql -c 'DROP LANGUAGE {};'".format(language))
-        assert drop_lang.rc == 0
-        assert drop_lang.stdout.strip("\n") == "DROP LANGUAGE"
+        assert drop_lang.rc == 0, lang.rc
+        assert drop_lang.stdout.strip("\n") == "DROP LANGUAGE", lang.stdout
