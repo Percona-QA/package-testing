@@ -59,6 +59,9 @@
     include_tasks: ../tasks/install_pxb80.yml
     when: lookup('env', 'install_repo') != "experimental"
 
+  - name: list installed packages
+    include_tasks: ../tasks/list_installed_packages.yml
+
   - name: start mysql service with service command
     command: service mysql start
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
@@ -139,6 +142,9 @@
       - rsyslog-mysql
     when: ansible_os_family == "RedHat"
 
+  - name: list installed packages
+    include_tasks: ../tasks/list_installed_packages.yml
+
   - name: run bats tests for mysql init scripts
     command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
 
@@ -147,6 +153,9 @@
 
   - name: check that mysqladmin shutdown works correctly
     command: /package-testing/madmin_check.sh
+
+  - name: disable all percona repos
+    command: percona-release disable all
 
   - name: remove Percona Server deb packages
     apt:
@@ -169,3 +178,11 @@
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
+
+  - stat:
+      path: /var/lib/mysql
+    register: p
+
+  - fail:
+      msg: "Path exists and is a directory and is not empty"
+    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000

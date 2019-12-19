@@ -5,6 +5,9 @@
   become_method: sudo
 
   tasks:
+  - name: disable all percona repos
+    command: percona-release disable all
+
   - name: remove Percona Server deb packages
     apt:
       name: "{{ packages }}"
@@ -39,6 +42,14 @@
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
+
+  - stat:
+      path: /var/lib/mysql
+    register: p
+
+  - fail:
+      msg: "Path exists and is a directory and is not empty"
+    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
 
 #    - name: Unregister RedHat
 #      redhat_subscription:

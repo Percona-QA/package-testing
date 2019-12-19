@@ -102,21 +102,22 @@
       - unzip
     when: ansible_os_family == "Suse"
 
-  - name: download package-testing repo with wget
-    command: "{{ item }}"
-    with_items:
-    - rm -rf /package-testing
-    - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
-    - unzip master.zip
-    - rm -f master.zip
-    - mv package-testing-master /package-testing
+#  - name: download package-testing repo with wget
+#    command: "{{ item }}"
+#    with_items:
+#    - rm -rf /package-testing
+#    - rm -f master.zip
+#    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+#    - unzip master.zip
+#    - rm -f master.zip
+#    - mv package-testing-master /package-testing
 
-#  - name: copy package-testing directory to remote
-#    copy:
-#      src: ../../package-testing
-#      dest: /
-#      force: yes
+  - name: copy package-testing directory to remote
+    copy:
+      src: ../../package-testing
+      dest: /
+      force: yes
+      mode: preserve
 
   - name: install latest bats from github
     command: "{{ item }}"
