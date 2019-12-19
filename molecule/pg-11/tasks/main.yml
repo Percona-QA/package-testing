@@ -23,9 +23,10 @@
     force: true
 
 - name: setup temporary repo until percona-release is updated
-  command: percona-release enable ppg-11 {{ repo }}
+  command: percona-release enable {{ VERSION }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
+    repo: "{{ lookup('env', 'VERSION') }}"
 
 - name: install Percona Platform for PostgreSQL 11 packages
   include_tasks: ../../../tasks/install_ppg11.yml

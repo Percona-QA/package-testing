@@ -157,8 +157,8 @@ def test_pg_config_server_version(host):
 
 
 def test_postgresql_query_version(postgresql_query_version):
-    assert postgresql_query_version.rc == 0
-    assert postgresql_query_version.stdout.strip("\n") == PG_VERSION
+    assert postgresql_query_version.rc == 0, postgresql_query_version.stderr
+    assert postgresql_query_version.stdout.strip("\n") == PG_VERSION, postgresql_query_version.stdout
 
 
 def test_postgres_client_version(host):
@@ -274,12 +274,12 @@ def test_rpm_files(file, host):
         assert f.user == "postgres"
 
 
-def test_package_content(host):
-    pass
-
-
-def test_package_metadata(host):
-    pass
+# def test_package_content(host):
+#     pass
+#
+#
+# def test_package_metadata(host):
+#     pass
 
 
 @pytest.mark.parametrize("language", LANGUAGES)

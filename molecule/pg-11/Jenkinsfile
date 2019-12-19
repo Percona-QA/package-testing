@@ -34,6 +34,7 @@ pipeline {
                 'pg-11-6',
             ]
         )
+
   }
   stages {
     stage('Set build name'){
@@ -53,6 +54,8 @@ pipeline {
        env.AWS_DEFAULT_REGION = vms."${PLATFORM}".aws_default_region
        env.INSTANCE_TYPE = vms."${PLATFORM}".instance_type
        env.ROOT_DEVICE_NAME = vms."${PLATFORM}".root_device_name
+       versions = readYaml (file: 'molecule/pg-11/versions.yml')
+       env.VERSION = versions."${VERSION}".version
         }
        }
       }
