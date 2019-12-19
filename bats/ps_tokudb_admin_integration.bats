@@ -66,3 +66,12 @@ load ps_tokudb_admin_helper
   check_tokubackup_notexists
   check_tokudb_notexists
 }
+
+@test "reinstall ALL plugins for upgrade test" {
+  if [ ${MYSQL_VERSION} = "5.5" ]; then
+    skip "MySQL version 5.5 doesn't support TokuDB."
+  fi
+  install_all
+  check_tokudb_exists
+  check_tokubackup_exists
+}

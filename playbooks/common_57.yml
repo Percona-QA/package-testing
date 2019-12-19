@@ -177,6 +177,17 @@
   - name: disable all percona repos
     command: percona-release disable all
 
+  - name: get my.cnf stats
+    stat: path=/etc/my.cnf
+    register: mycnf
+
+  - name: copy config file to backup
+    copy:
+      src: /etc/my.cnf
+      dest: /etc/my.cnf.backup
+      remote_src: yes
+    when: mycnf.stat.exists and ansible_os_family == "RedHat"
+
   - name: remove PS 5.7 packages
     include_tasks: ../tasks/remove_ps57.yml
 
