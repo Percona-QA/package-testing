@@ -27,6 +27,7 @@
     copy:
       src: "{{ vault_cert }}"
       dest: /package-testing/scripts/ps_keyring_plugins_test/test.cer
+    when: lookup('env', 'PS_SKIP_KEYRING') == "" or lookup('env', 'PS_SKIP_KEYRING') == "0"
 
   - name: include tasks for enabling test repo
     include: ../tasks/enable_testing_repo.yml
@@ -95,7 +96,7 @@
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps57
-#   when: ansible_os_family == "Debian"
+    when: lookup('env', 'PS_SKIP_KEYRING') == "" or lookup('env', 'PS_SKIP_KEYRING') == "0"
 
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
@@ -193,6 +194,7 @@
       path: /var/lib/mysql
     register: p
 
-  - fail:
+  - name: check /var/lib/mysql exists and not empty
+    fail:
       msg: "Path exists and is a directory and is not empty"
     when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
