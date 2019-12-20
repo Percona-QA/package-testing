@@ -63,6 +63,9 @@ ubuntu-bionic'''
         '''
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'AMI/OVF', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
           sh '''
+              # remove this because otherwise molecule will fail to validate
+              rm -f molecule/${ROLE_NAME}/molecule/default/molecule.yml
+
               REPLACE_STRING="##PLATFORM_PLACEHOLDER##"
               MOLECULE_FILE="molecule/${ROLE_NAME}/molecule/ec2/molecule.yml"
               for PLATFORM in ${PLATFORMS}; do
