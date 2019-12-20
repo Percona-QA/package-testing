@@ -79,8 +79,8 @@
     when: ansible_os_family == "RedHat"
 
   - name: disable selinux on centos7 for TokuDB to work
-    command: setenforce 0
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    shell: setenforce 0 || true
+    when: ansible_os_family == "RedHat"
 
   - name: install tokudb and restart server
     command: /usr/bin/ps-admin --enable-tokudb
@@ -208,12 +208,6 @@
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
-
-  - name: run mysql_upgrade
-    command: mysql_upgrade -uroot
-
-  - name: restart mysql service
-    service: name=mysql state=restarted
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps80

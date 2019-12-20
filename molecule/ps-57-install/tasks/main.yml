@@ -71,7 +71,7 @@
     include_tasks: ../../../tasks/pam_test.yml
 
   - name: disable selinux on centos for TokuDB to work
-    command: setenforce 0
+    shell: setenforce 0 || true
     when: ansible_os_family == "RedHat"
 
   - name: install tokudb and restart server
@@ -153,6 +153,9 @@
 
   - name: start mysql service
     service: name=mysql state=started
+
+  - name: upgrade partitioning
+    command: /package-testing/scripts/ps_upgrade_partitioning.sh
 
 # temporary commented out until BLD-906 is fixed
 # - name: check that mysqladmin shutdown works correctly

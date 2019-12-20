@@ -20,10 +20,10 @@
     command: percona-release disable all
 
   - name: remove PXB 8.0 packages
-    include_tasks: ../../../tasks/remove_pxb80.yml
+    include_tasks: ../../../../tasks/remove_pxb80.yml
 
   - name: remove PS 8.0 packages
-    include_tasks: ../../../tasks/remove_ps80.yml
+    include_tasks: ../../../../tasks/remove_ps80.yml
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped

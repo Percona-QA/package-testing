@@ -57,7 +57,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: disable selinux on centos for TokuDB to work
-    command: setenforce 0
+    shell: setenforce 0 || true
     when: ansible_os_family == "RedHat"
 
   - name: install tokudb and restart server
@@ -177,12 +177,6 @@
       - percona-xtrabackup-test-80
       - percona-xtrabackup-80-debuginfo
     when: ansible_os_family == "RedHat"
-
-  - name: run mysql_upgrade
-    command: mysql_upgrade -uroot
-
-  - name: restart mysql service
-    service: name=mysql state=restarted
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps80
