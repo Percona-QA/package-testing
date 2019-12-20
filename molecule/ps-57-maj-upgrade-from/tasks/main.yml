@@ -1,22 +1,30 @@
 ---
-# This playbook does following:
-#   installs latest version of PS 5.7, PT and PXB 2.4
-#   upgrades to PS 8.0
+# tasks file for ps-57-maj-upgrade-from
+# This playbook install Percona Server 5.7 with TokuDB and MyRocks
+# It will disable the original repo and upgrade to Percona Server 8.0
 
-# Cosmic is still missing python
-# import_playbook: test_prep.yml
-- import_playbook: common_57.yml
+  - name: install 5.7
+    include_tasks: ../../ps-57-install/tasks/main.yml
 
-- hosts: all
-  become: true
-  become_method: sudo
-  vars:
-    vault_token: "{{ lookup('env', 'VAULT_TEST_TOKEN') }}"
-    vault_cert: "{{ lookup('env', 'VAULT_TEST_CERT') }}"
+  - name: get my.cnf stats
+    stat: path=/etc/my.cnf
+    register: mycnf
 
-  tasks:
+  - name: copy config file to backup
+    copy:
+      src: /etc/my.cnf
+      dest: /etc/my.cnf.backup
+      remote_src: yes
+    when: mycnf.stat.exists and ansible_os_family == "RedHat"
+
+  - name: disable all percona repos
+    command: percona-release disable all
+
+  - name: remove PXB 2.4 packages
+    include_tasks: ../../../tasks/remove_pxb24.yml
+
   - name: remove PS 5.7 packages
-    include_tasks: ../tasks/remove_ps57.yml
+    include_tasks: ../../../tasks/remove_ps57.yml
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
@@ -25,12 +33,18 @@
       path: /var/lib/mysql
     register: p
 
-  - fail:
+  - name: check /var/lib/mysql exists and not empty
+    fail:
       msg: "Path exists and is a directory and is not empty"
     when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
 
-  - name: remove PXB 2.4 packages
-    include_tasks: ../tasks/remove_pxb24.yml
+  - name: copy config file to original location
+    copy:
+      src: /etc/my.cnf.rpmsave
+      dest: /etc/my.cnf
+      remote_src: yes
+      force: yes
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
   - name: include tasks for enabling PS 8 test repo
     include: ../tasks/enable_ps8_main_repo.yml
@@ -81,17 +95,3 @@
 
   - name: run Group Replication tests
     include_tasks: ../tasks/gr_test.yml
-
-  - name: remove PS 8.0 packages
-    include_tasks: ../tasks/remove_ps80.yml
-
-  - name: check if process is stopped after package removal
-    command: /package-testing/check_running.sh mysql stopped
-
-  - stat:
-      path: /var/lib/mysql
-    register: p
-
-  - fail:
-      msg: "Path exists and is a directory and is not empty"
-    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000

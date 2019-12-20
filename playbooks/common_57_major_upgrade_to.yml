@@ -38,12 +38,14 @@
       force: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
+  # BUG: PS-3664
   - name: create env file for systemd service
     copy:
       dest: "/etc/sysconfig/mysql"
       content: |
-        LD_PRELOAD=/usr/lib64/libjemalloc.so.1
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+        LD_PRELOAD=/usr/lib64/libjemalloc.so.1 /usr/lib64/mysql/libHotBackup.so
+        THP_SETTING=never
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: setup config file for keyring vault
     template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test.j2

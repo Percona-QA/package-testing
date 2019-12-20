@@ -1,9 +1,27 @@
 ---
 # tasks file for ps-57-maj-upgrade-to
-# This playbook install Percona Server 5.7 with TokuDB and MyRocks
-# It will disable the original repo and upgrade to Percona Server 8.0
+# This playbook install Percona Server 5.6 with TokuDB and MyRocks
+# It will disable the original repo and upgrade to Percona Server 5.7
 
-#  - import_playbook: ../../ps-56-install/tasks/main.yml
+  - name: install PS 5.6
+    include_tasks: ../../ps-56-install/tasks/main.yml
+
+  - name: get my.cnf stats
+    stat: path=/etc/my.cnf
+    register: mycnf
+
+  - name: copy config file to backup
+    copy:
+      src: /etc/my.cnf
+      dest: /etc/my.cnf.backup
+      remote_src: yes
+    when: mycnf.stat.exists and ansible_os_family == "RedHat"
+
+  - name: disable all percona repos
+    command: percona-release disable all
+
+  - name: remove PXB 2.4 packages
+    include_tasks: ../../../tasks/remove_pxb24.yml
 
   - name: remove PS 5.6 packages
     include_tasks: ../../../tasks/remove_ps56.yml
@@ -15,7 +33,8 @@
       path: /var/lib/mysql
     register: p
 
-  - fail:
+  - name: check /var/lib/mysql exists and not empty
+    fail:
       msg: "Path exists and is a directory and is not empty"
     when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
 
@@ -27,53 +46,53 @@
       force: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
+  # BUG: PS-3664
   - name: create env file for systemd service
     copy:
       dest: "/etc/sysconfig/mysql"
       content: |
-        LD_PRELOAD=/usr/lib64/libjemalloc.so.1
+        LD_PRELOAD=/usr/lib64/libjemalloc.so.1 /usr/lib64/mysql/libHotBackup.so
+        THP_SETTING=never
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
+  - name: include tasks for local vault setup
+    include_tasks: ../../../tasks/setup_local_vault.yml
+
   - name: setup config file for keyring vault
-    template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test.j2
+    template: src=../../../scripts/ps_keyring_plugins_test/keyring_vault_test_v2.j2
               dest=/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
               mode=0664 owner=root group=root
 
-  - name: copy certificate for keyring vault
-    copy:
-      src: "{{ vault_cert }}"
-      dest: /package-testing/scripts/ps_keyring_plugins_test/test.cer
-
   - name: include tasks for enabling test repo
-    include: ../../../tasks/enable_testing_repo.yml
+    include: ../tasks/enable_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling main repo
-    include: ../../../tasks/enable_main_repo.yml
+    include: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling experimental repo
-    include: ../../../tasks/enable_experimental_repo.yml
+    include: ../tasks/enable_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: enable tools testing repo
     command: percona-release enable tools testing
 
   - name: install Percona Server 5.7 packages
-    include_tasks: ../../../tasks/install_ps57.yml
+    include_tasks: ../tasks/install_ps57.yml
 
   - name: install Percona Toolkit new deb packages
-    include_tasks: ../../../tasks/install_pt.yml
+    include_tasks: ../tasks/install_pt.yml
 
   - name: install sysbench packages
-    include_tasks: ../../../tasks/install_sysbench.yml
+    include_tasks: ../tasks/install_sysbench.yml
     when: lookup('env', 'install_repo') != "experimental"
 
   - name: install Percona XtraBackup 2.4 packages
-    include_tasks: ../../../tasks/install_pxb24.yml
+    include_tasks: ../tasks/install_pxb24.yml
 
   - name: list installed packages
-    include_tasks: ../../../tasks/list_installed_packages.yml
+    include_tasks: ../tasks/list_installed_packages.yml
 
   - name: start mysql service
     service: name=mysql state=started
