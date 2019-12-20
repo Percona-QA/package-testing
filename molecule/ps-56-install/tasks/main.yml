@@ -8,6 +8,9 @@
 # Cosmic is still missing python
 # import_playbook: test_prep.yml
 
+  - name: include tasks for test env setup
+    include_tasks: ../../../tasks/test_prep.yml
+
   - name: include tasks for enabling test repo
     include: ../../../tasks/enable_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
