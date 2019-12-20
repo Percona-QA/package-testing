@@ -201,7 +201,7 @@ def test_enable_extension(host, extension):
         assert install_extension.rc == 0, install_extension.rc
         assert install_extension.stdout.strip("\n") == "CREATE EXTENSION", install_extension.stderr
         extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
-        assert extensions.rc == 0, extension.rc
+        assert extensions.rc == 0, extensions.stderr
         assert extension in set(extensions.stdout.split()), extensions.stdout
 
 
@@ -216,15 +216,15 @@ def test_drop_extension(host, extension):
         assert drop_extension.rc == 0, drop_extension.rc
         assert drop_extension.stdout.strip("\n") == "DROP EXTENSION", drop_extension.stdout
         extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
-        assert extensions.rc == 0, extension.rc
-        assert extension not in set(extensions.stdout.split()), extension.stdout
+        assert extensions.rc == 0, extensions.stderr
+        assert extension not in set(extensions.stdout.split()), extensions.stdout
 
 
 def test_plpgsql_extension(host):
 
     with host.sudo("postgres"):
         extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
-        assert extensions.rc == 0, extensions.rc
+        assert extensions.rc == 0, extensions.stderr
         assert "plpgsql" in set(extensions.stdout.split()), extensions.stdout
 
 
@@ -270,8 +270,8 @@ def test_language(host, language):
             if "python3" in language:
                 pytest.skip("Skipping python3 language for Centos or RHEL")
         lang = host.run("psql -c 'CREATE LANGUAGE {};'".format(language))
-        assert lang.rc == 0, lang.rc
+        assert lang.rc == 0, lang.stderr
         assert lang.stdout.strip("\n") == "CREATE LANGUAGE", lang.stdout
         drop_lang = host.run("psql -c 'DROP LANGUAGE {};'".format(language))
-        assert drop_lang.rc == 0, lang.rc
+        assert drop_lang.rc == 0, drop_lang.stderr
         assert drop_lang.stdout.strip("\n") == "DROP LANGUAGE", lang.stdout
