@@ -3,7 +3,7 @@
 # This playbook install Percona Server 5.7 with TokuDB and MyRocks
 # It will disable the original repo and upgrade to Percona Server 8.0
 
-  - name: install 5.7
+  - name: install PS 5.7
     include_tasks: ../../ps-57-install/tasks/main.yml
 
   - name: get my.cnf stats
@@ -33,7 +33,8 @@
       path: /var/lib/mysql
     register: p
 
-  - fail:
+  - name: check /var/lib/mysql exists and not empty
+    fail:
       msg: "Path exists and is a directory and is not empty"
     when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
 
@@ -61,13 +62,8 @@
   - name: list installed packages
     include_tasks: ../../../tasks/list_installed_packages.yml
 
-  - name: start mysql service with service command
-    command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
-  - name: start mysql service with systemctl command
-    command: systemctl start mysql
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+  - name: start mysql service
+    service: name=mysql state=started
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps80

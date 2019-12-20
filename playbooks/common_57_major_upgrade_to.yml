@@ -38,12 +38,14 @@
       force: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
+  # BUG: PS-3664
   - name: create env file for systemd service
     copy:
       dest: "/etc/sysconfig/mysql"
       content: |
-        LD_PRELOAD=/usr/lib64/libjemalloc.so.1
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+        LD_PRELOAD=/usr/lib64/libjemalloc.so.1 /usr/lib64/mysql/libHotBackup.so
+        THP_SETTING=never
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: setup config file for keyring vault
     template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test.j2
@@ -86,13 +88,8 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: start mysql service with service command
-    command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
-  - name: start mysql service with systemctl command
-    command: systemctl start mysql
-    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
+  - name: start mysql service
+    service: name=mysql state=started
 
   - name: run mysql_upgrade
     command: mysql_upgrade -uroot

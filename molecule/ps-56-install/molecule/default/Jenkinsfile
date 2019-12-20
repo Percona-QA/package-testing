@@ -1,0 +1,71 @@
+pipeline {
+  agent {
+      label "pkgtest"
+  }
+  parameters {
+    string(name: 'UPSTREAM_VERSION', defaultValue: '8.0.17', description: 'Upstream MySQL version')
+    string(name: 'PS_VERSION', defaultValue: '8', description: 'Percona part of version')
+    string(name: 'PS_REVISION', defaultValue: '868a4ef', description: 'Short git hash for release')
+    choice(name: 'PLATFORM', choices: ['bento/ubuntu-18.04','bento/ubuntu-16.04','bento/debian-10','bento/debian-9','bento/centos-8','bento/centos-7'], description: 'On which image to run test.')
+    choice(name: 'INSTALL_REPO', choices: ['testing','main','experimental'], description: 'Repo to install packages from.')
+  }
+  stages {
+    stage('Prepare') {
+      steps {
+          script {
+            currentBuild.description = "${UPSTREAM_VERSION}-${PS_VERSION}-${PS_REVISION}-${TEST_DIST}"
+          }
+          sh '''
+            export PATH=${PATH}:~/.local/bin
+            python3 -m venv ${WORKSPACE}/python-venv-molecule
+            source ${WORKSPACE}/python-venv-molecule/bin/activate
+            pip3 install wheel
+            pip3 install molecule ansible python-vagrant testinfra pytest
+            rm -rf package-testing
+            git clone https://github.com/tplavcic/package-testing.git --branch ps-molecule --depth 1
+          '''
+      } //end steps
+    } //end Prepare stage
+    stage('Create instance') {
+      steps {
+          sh '''
+            source ${WORKSPACE}/python-venv-molecule/bin/activate
+            cd ${WORKSPACE}/package-testing/molecule/ps-56-install
+            molecule create
+            cd ${WORKSPACE}/package-testing/molecule/ps-56-install
+            molecule create
+          '''
+      } //end steps
+    } //end Create instances stage
+    stage('Run ansible playbook') {
+      steps {
+          sh '''
+            source ${WORKSPACE}/python-venv-molecule/bin/activate
+            cd ${WORKSPACE}/package-testing/molecule/ps-56-install
+            molecule converge
+          '''
+      } //end steps
+    } //end Run ansible playbook stage
+    stage('Verify with testinfra') {
+      steps {
+          sh '''
+            source ${WORKSPACE}/python-venv-molecule/bin/activate
+            cd ${WORKSPACE}/package-testing/molecule/ps-56-install
+            molecule verify
+          '''
+          junit 'package-testing/molecule/ps-56-install/molecule/default/report.xml'
+      } //end steps
+    } //end Verify with testinfra stage
+  } //end stages
+  post {
+    always {
+      sh '''
+        source ${WORKSPACE}/python-venv-molecule/bin/activate
+        cd ${WORKSPACE}/package-testing/molecule/ps-56-install
+        molecule destroy
+        cd ${WORKSPACE}/package-testing/molecule/ps-56-install
+        molecule destroy
+      '''
+    }
+  } //end post
+} //end pipeline

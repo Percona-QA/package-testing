@@ -16,8 +16,7 @@ debian-8
 debian-9
 debian-10
 ubuntu-xenial
-ubuntu-bionic
-'''
+ubuntu-bionic'''
     )
     choice(
       name: 'INSTALL_REPO',
@@ -32,6 +31,7 @@ ubuntu-bionic
       name: 'ROLE_NAME',
       description: 'Role to test',
       choices: [
+        'ps-56-install',
         'ps-57-install',
         'ps-57-upgrade',
         'ps-57-maj-upgrade-to',
