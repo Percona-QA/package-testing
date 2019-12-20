@@ -36,7 +36,7 @@
       dest: /etc/my.cnf
       remote_src: yes
       force: yes
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version == "7")
 
   # BUG: PS-3664
   - name: create env file for systemd service

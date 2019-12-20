@@ -53,7 +53,7 @@
       content: |
         LD_PRELOAD=/usr/lib64/libjemalloc.so.1 /usr/lib64/mysql/libHotBackup.so
         THP_SETTING=never
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version == "7")
 
   - name: include tasks for local vault setup
     include_tasks: ../../../tasks/setup_local_vault.yml
