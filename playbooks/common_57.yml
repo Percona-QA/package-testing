@@ -61,13 +61,8 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: start mysql service with service command
-    command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
-  - name: start mysql service with systemctl command
-    command: systemctl start mysql
-    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
+  - name: start mysql service
+    service: name=mysql state=started
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
