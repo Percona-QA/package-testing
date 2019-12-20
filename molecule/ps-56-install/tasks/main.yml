@@ -102,7 +102,7 @@
 
   - name: copy config file for mysql PAM into system dir
     template:
-      src: ../scripts/ps_pam_test/mysqld
+      src: ../../../scripts/ps_pam_test/mysqld
       dest: /etc/pam.d/mysqld
       owner: root
       group: root
