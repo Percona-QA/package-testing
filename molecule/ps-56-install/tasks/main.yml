@@ -9,15 +9,15 @@
 # import_playbook: test_prep.yml
 
   - name: include tasks for enabling test repo
-    include: ../tasks/enable_testing_repo.yml
+    include: ../../../tasks/enable_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling main repo
-    include: ../tasks/enable_main_repo.yml
+    include: ../../../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling experimental repo
-    include: ../tasks/enable_experimental_repo.yml
+    include: ../../../tasks/enable_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: download and extract world database
@@ -26,16 +26,16 @@
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
   - name: install Percona Toolkit new packages
-    include_tasks: ../tasks/install_pt.yml
+    include_tasks: ../../../tasks/install_pt.yml
 
   - name: install sysbench new packages
-    include_tasks: ../tasks/install_sysbench.yml
+    include_tasks: ../../../tasks/install_sysbench.yml
 
   - name: install PS 5.6 packages
-    include_tasks: ../tasks/install_ps56.yml
+    include_tasks: ../../../tasks/install_ps56.yml
 
   - name: install PXB 2.4 packages
-    include_tasks: ../tasks/install_pxb24.yml
+    include_tasks: ../../../tasks/install_pxb24.yml
 
   - name: Make sure SELinux is in enforcing mode on CentOS
     selinux:
