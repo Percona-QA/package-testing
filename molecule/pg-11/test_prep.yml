@@ -106,7 +106,7 @@
 
   - name: copy package-testing directory to remote
     synchronize:
-      src: ../../../../*
+      src: ../../../../
       dest: /
       recursive: yes
       perms: yes
