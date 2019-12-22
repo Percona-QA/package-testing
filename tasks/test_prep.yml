@@ -104,12 +104,33 @@
       - unzip
     when: ansible_os_family == "Suse"
 
+  - name: get abs path of package-testing into pkg_testing_path variable
+    shell: echo '{{ hostvars["localhost"]["playbook_dir"] }}' | grep -oE '^.*package-testing'
+    register: pkg_testing_path_output
+    when: lookup('env', 'USE_LOCAL_PKG_TEST') == "1"
+
+  - set_fact:
+      pkg_testing_path: "{{ pkg_testing_path_output.stdout }}"
+    when: lookup('env', 'USE_LOCAL_PKG_TEST') == "1"
+
   - name: copy package-testing directory to remote
     synchronize:
-      src: ../../package-testing
+      src: "{{ pkg_testing_path }}"
       dest: /
       recursive: yes
       perms: yes
+    when: lookup('env', 'USE_LOCAL_PKG_TEST') == "1"
+
+  - name: download package-testing repo with wget
+    command: "{{ item }}"
+    with_items:
+    - rm -rf /package-testing
+    - rm -f master.zip
+    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+    - unzip master.zip
+    - rm -f master.zip
+    - mv package-testing-master /package-testing
+    when: lookup('env', 'USE_LOCAL_PKG_TEST') == "" or lookup('env', 'USE_LOCAL_PKG_TEST') == "0"
 
   - name: install latest bats from github
     command: "{{ item }}"
