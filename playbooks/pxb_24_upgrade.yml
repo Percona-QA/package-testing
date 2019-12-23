@@ -181,6 +181,15 @@
       - percona-server-server-5.7
     when: ansible_os_family == "Debian"
 
+  - name: remove Percona Toolkit rpm packages on rhel/centos8
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-toolkit
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
   - name: remove Percona Server rpm packages
     yum:
       name: "{{ packages }}"
@@ -188,7 +197,17 @@
     vars:
       packages:
       - Percona-Server-server-57
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+
+    # Fix for PS-6087
+  - name: remove Percona Server rpm packages on rhel/centos8
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - Percona-Server*
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
