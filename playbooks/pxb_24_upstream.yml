@@ -34,10 +34,11 @@
     yum: name=https://dev.mysql.com/get/mysql80-community-release-el7-2.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: Install MySQL RHEL 8 yum repository package
-    yum: name=https://dev.mysql.com/get/mysql80-community-release-el8-2.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
+    # Note: Mysql 5.7 packages for RHEL8/CentOS8 do not exist in mysql80-community-release-el8-1.noarch.rpm, hence we can't run the upstream script for CentOS8 till the packages are available. Uncomment following section after MS5.7 packages are available for Centos8.
+    # - name: Install MySQL RHEL 8 yum repository package
+    #   yum: name=https://dev.mysql.com/get/mysql80-community-release-el8-1.noarch.rpm state=present
+    #   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
