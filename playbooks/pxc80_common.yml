@@ -43,6 +43,16 @@
       - python-mysqldb
     when: ansible_os_family == "Debian"
 
+  # Since Centos8 is recently released, currently there is no MySQL-python package for this distribution
+  - name: install python rpm package
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - MySQL-python
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+
   - name: install PXC 8 rpm packages
     yum:
       name: "{{ packages }}"
@@ -51,7 +61,6 @@
       packages:
       - percona-xtradb-cluster-full
       - percona-xtradb-cluster-source
-      - MySQL-python
     when: ansible_os_family == "RedHat"
 
   - name: stop mysql service with service command
@@ -61,9 +70,9 @@
     template: src=../templates/my_rpm.j2 dest=/etc/my.cnf
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
-  - name: copy PXC config on centos 7
+  - name: copy PXC config on centos 7 and centos 8
     template: src=../templates/my_rpm_7.j2 dest=/etc/my.cnf
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
   - name: copy PXC config on debian/ubuntu
     template: src=../templates/my.j2
