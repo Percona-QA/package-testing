@@ -35,10 +35,9 @@ pipeline {
             name: 'product_to_test',
             description: 'PSMDB for testing',
             choices: [
-                'psmdb36',
+                'psmdb42',
                 'psmdb40',
-                'psmdb34',
-                'psmdb42'
+                'psmdb36'
             ]
         )
         booleanParam(name: 'DESTROY', defaultValue: true, description: 'Keep VMs after the test')
