@@ -24,6 +24,9 @@
     mode: '755'
     force: true
 
+- debug:
+    msg: "{{ lookup('env', 'PG_VERSION') }}"
+
 - name: setup temporary repo until percona-release is updated
   command: percona-release enable {{ pg_version }} {{ repo }}
   vars:
