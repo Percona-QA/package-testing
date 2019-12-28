@@ -30,7 +30,7 @@
     keypair_path: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/ssh_key"
   tasks:
     - name: Check subnet
-      ec2_vpc_subnet_facts:
+      ec2_vpc_subnet_info:
         region: "{{ item.region|default(default_region) }}"
         filters:
           subnet-id: "{{ item.vpc_subnet_id }}"
