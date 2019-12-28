@@ -1,0 +1,42 @@
+# This task installs all the PSMDB packages without using the meta package
+
+  - name: install psmdb deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-server-mongodb
+      - percona-server-mongodb-server
+      - percona-server-mongodb-mongos
+      - percona-server-mongodb-shell
+      - percona-server-mongodb-tools
+    when: ansible_os_family == "Debian"
+
+  - name: install psmdb rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-server-mongodb
+      - percona-server-mongodb-server
+      - percona-server-mongodb-mongos
+      - percona-server-mongodb-shell
+      - percona-server-mongodb-tools
+      - percona-server-mongodb-debuginfo
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+
+  - name: install psmdb rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+        - percona-server-mongodb
+        - percona-server-mongodb-server
+        - percona-server-mongodb-mongos
+        - percona-server-mongodb-shell
+        - percona-server-mongodb-tools
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"

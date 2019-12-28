@@ -35,17 +35,19 @@
   command: percona-release enable psmdb-42
   when: lookup('env', 'psmdb_to_test') == "psmdb42"
 
-- name: include tasks for PSMDB 4.0 install
-  include_tasks: ../../../tasks/install_psmdb_full.yml
-  when: lookup('env', 'psmdb_to_test') == "psmdb40"
+- name: include tasks for PSMDB 4.0 and 4.2 install
+  include_tasks: install_psmdb_full.yml
+#  include_tasks: ../../../tasks/install_psmdb_full.yml
+  when: lookup('env', 'psmdb_to_test') == "psmdb40" or lookup('env', 'psmdb_to_test') == "psmdb42"
 
 - name: include tasks for PSMDB 3.6 install
-  include_tasks: ../../../tasks/install_psmdb_36_full.yml
+  include_tasks: install_psmdb_36_full.yml
+#  include_tasks: ../../../tasks/install_psmdb_36_full.yml
   when: lookup('env', 'psmdb_to_test') == "psmdb36"
 
-- name: include tasks for PSMDB 4.2 install
-  include_tasks: ../../../tasks/install_psmdb_full.yml
-  when: lookup('env', 'psmdb_to_test') == "psmdb42"
+#- name: include tasks for PSMDB 4.2 install
+##  include_tasks: ../../../tasks/install_psmdb_full.yml
+#  when: lookup('env', 'psmdb_to_test') == "psmdb42"
 
 - name: stop mongod service
   service: name=mongod state=stopped
