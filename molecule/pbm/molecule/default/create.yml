@@ -8,6 +8,7 @@
     ssh_user: ubuntu
     ssh_port: 22
     default_region: "{{ lookup('env', 'AWS_DEFAULT_REGION') | default('us-east-1', true) }}"
+
     security_group_name_prefix: molecule
     security_group_description: Security group for testing Molecule
     security_group_rules:
@@ -24,9 +25,9 @@
         from_port: 0
         to_port: 0
         cidr_ip: '0.0.0.0/0'
-    keypair_name: "molecule-pkg-tests"
-    keypair_path: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/ssh_key"
 
+    keypair_name: molecule_key
+    keypair_path: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/{{ lookup('env', 'BUILD_NUMBER') }}_ssh_key"
   tasks:
     - name: Check subnet
       ec2_vpc_subnet_info:
@@ -51,43 +52,52 @@
         region: "{{ item.region|default(default_region) }}"
       with_items: "{{ molecule_yml.platforms }}"
 
-#    - name: Delete remote keypair
-#      ec2_key:
-#        name: "{{ keypair_name }}"
-#        state: absent
-#        region: "{{ item.item.region|default(default_region) }}"
-#      with_items: "{{ keypair_local.results}}"
-#      when: not item.stat.exists
-
-#    - name: Create keypair
-#      ec2_key:
-#        name: "{{ keypair_name }}"
-#        region: "{{ item.region|default(default_region) }}"
-#      with_items: "{{ molecule_yml.platforms }}"
-#      register: keypair
-
-    - name: Setup keypair for molecule ec2
-      copy:
-        dest: "{{ keypair_path }}-{{ item.region|default(default_region) }}"
-        src: "{{ lookup('env', 'MOLECULE_AWS_PRIVATE_KEY') }}"
-        mode: 0600
-      no_log: True
+    - name: Test for presence of local keypair
+      stat:
+        path: "{{ keypair_path }}-{{ item.region|default(default_region) }}"
       with_items: "{{ molecule_yml.platforms }}"
+      register: keypair_local
 
-#    - name: Get the ec2 ami(s) by owner and name, if image not set
-#      ec2_ami_facts:
-#        owners: "{{ item.image_owner }}"
-#        filters:
-#          name: "{{ item.image_name }}"
-#        region: "{{ item.region|default(default_region) }}"
-#      loop: "{{ molecule_yml.platforms }}"
-#      when: item.image is not defined
-#      register: ami_facts
+    - name: Delete remote keypair
+      ec2_key:
+        name: "{{ keypair_name }}"
+        state: absent
+        region: "{{ item.item.region|default(default_region) }}"
+      with_items: "{{ keypair_local.results}}"
+      when: not item.stat.exists
+
+    - name: Create keypair
+      ec2_key:
+        name: "{{ keypair_name }}"
+        region: "{{ item.region|default(default_region) }}"
+      with_items: "{{ molecule_yml.platforms }}"
+      register: keypair
+
+
+    - name: Persist the keypair
+      copy:
+        dest: "{{ keypair_path }}-{{ item.invocation.module_args.region }}"
+        content: "{{ item.key.private_key }}"
+        mode: 0600
+      with_items: "{{ keypair.results }}"
+      when: item.key.private_key is defined
+
+    - name: Get the ec2 ami(s) by owner and name, if image not set
+      ec2_ami_facts:
+        owners: "{{ item.image_owner }}"
+        filters:
+          name: "{{ item.image_name }}"
+        region: "{{ item.region|default(default_region) }}"
+      loop: "{{ molecule_yml.platforms }}"
+      when: item.image is not defined
+      register: ami_facts
 
     - name: Create molecule instance(s)
       ec2:
         key_name: "{{ keypair_name }}"
-        image: "{{ item.image }}"
+        image: "{{ item.image
+          if item.image is defined
+          else (ami_facts.results[index].images | sort(attribute='creation_date', reverse=True))[0].image_id }}"
         instance_type: "{{ item.instance_type }}"
         vpc_subnet_id: "{{ item.vpc_subnet_id }}"
         group: "{{ security_group_name_prefix }}-{{ subnet_dict[item.vpc_subnet_id] }}"
@@ -108,11 +118,6 @@
         count_tag:
           Name: "{{ item.name }}"
         region: "{{ item.region|default(default_region) }}"
-        volumes:
-          - device_name: "{{ item.root_device_name }}"
-            volume_type: gp2
-            volume_size: 16
-            delete_on_termination: true
       register: server
       loop: "{{ molecule_yml.platforms }}"
       loop_control:
