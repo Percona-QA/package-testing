@@ -22,9 +22,9 @@ pipeline {
             name: 'install_repo',
             description: 'Repo for testing',
             choices: [
-                'testing',
                 'experimental',
-                'main',
+                'testing',
+                'main'
             ]
         )
         choice(
