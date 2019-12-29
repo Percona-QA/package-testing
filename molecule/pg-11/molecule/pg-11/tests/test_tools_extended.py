@@ -169,11 +169,3 @@ def test_python3(host, python3_function):
         result = host.run("psql -c \'SELECT pymax3(1, 2);\' | awk 'NR>=3{print $1}'")
         assert result.rc == 0
         assert result.stdout.strip("\n(1") == "2"
-
-
-# def test_fdw_extenstion(fdw_extension):
-#     pass
-#
-#
-# def test_fdw_functional(fdw_functional):
-#     pass

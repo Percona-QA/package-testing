@@ -1,16 +1,6 @@
-import os
-
-
-if os.getenv("PG_VERSION") == "ppg-11.6":
-    PG_VERSION = "11.6"
-    DEB_PKG_VERSIONS = ["11+204-1.buster", "204-1.buster", "1:11-5.buster", "1:11-5.stretch", "204-1.stretch",
-                        "11+204-1.stretch", "1:11-5.bionic", '11+204-1.bionic', "204-1.bionic", "1:11-5.cosmic",
-                        "11+204-1.cosmic", "204-1.cosmic", "1:11-5.disco", "11+204-1.disco", "204-1.disco"]
-if os.getenv("PG_VERSION") == "ppg-11.5":
-    DEB_PKG_VERSIONS = ["11+204-1.buster", "204-1.buster", "1:11-5.buster", "1:11-5.stretch", "204-1.stretch",
-                        "11+204-1.stretch", "1:11-5.bionic", '11+204-1.bionic', "204-1.bionic", "1:11-5.cosmic",
-                        "11+204-1.cosmic", "204-1.cosmic", "1:11-5.disco", "11+204-1.disco", "204-1.disco"]
-    PG_VERSION = "11.5"
+DEB_PKG_VERSIONS = ["11+204-1.buster", "204-1.buster", "1:11-5.buster", "1:11-5.stretch", "204-1.stretch",
+                    "11+204-1.stretch", "1:11-5.bionic", '11+204-1.bionic', "204-1.bionic", "1:11-5.cosmic",
+                    "11+204-1.cosmic", "204-1.cosmic", "1:11-5.disco", "11+204-1.disco", "204-1.disco"]
 
 DEB_PACKAGES = ["percona-postgresql-11", "percona-postgresql-client", "percona-postgresql",
                 "percona-postgresql-client-11", "percona-postgresql-client-common",
@@ -57,3 +47,83 @@ EXTENSIONS = ['xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', '
               'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'postgres_fdw']
 
 LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", "plpython3u"]
+
+
+pgrepack = {"ppg-11.5": {"version": "pg_repack 1.4.4",
+                         "binary": {"centos": "",
+                                    "ubuntu": "",
+                                    "debian": "/usr/lib/postgresql/11/bin/pg_repack: ELF 64-bit LSB shared object,"
+                                              " x86-64, version 1 (SYSV),"
+                                              " dynamically linked,interpreter"
+                                              " /lib64/ld-linux-x86-64.so.2,"
+                                              " for GNU/Linux 3.2.0,"
+                                              " BuildID[sha1]=9aef45d1e9a16645857aba84473dd8f150998d90, stripped",
+                                    "debian9.9": "/usr/lib/postgresql/11/bin/pg_repack: ELF 64-bit LSB shared object,"
+                                              " x86-64, version 1 (SYSV),"
+                                              " dynamically linked,"
+                                              " interpreter /lib64/ld-linux-x86-64.so.2,for GNU/Linux 2.6.32,"
+                                              " BuildID[sha1]=0f89ea7cb7dcbe4435aefd2c74be0505a818614b, stripped",
+                                    "rhel": "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable, x86-64,"
+                                            " version 1 (SYSV), dynamically linked,"
+                                            " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                            " for GNU/Linux 3.2.0,"
+                                            " BuildID[sha1]=a43932c618eeeca37607301c219935b23e13f498, not stripped"}},
+            "ppg-11.6": {"version": "pg_repack 1.4.5",
+                                    "binary": {"centos": "",
+                                               "ubuntu": "",
+                                               "debian": "",
+                                               "debian9.9": "",
+                                               "rhel": ""}}}
+pgbackrest = {"ppg-11.5": {"version": "2.16",
+                           "binary_version": "pgBackRest 2.16",
+                           "binary": {"centos": "",
+                                      "ubuntu": "",
+                                      "debian": "",
+                                      "rhel": ""}},
+              "ppg-11.6": {"version": "2.20",
+                           "binary_version": "pgBackRest 2.20",
+                           "binary": {"centos": "",
+                                      "ubuntu": "",
+                                      "debian": "",
+                                      "rhel": ""}}}
+patroni = {"ppg-11.5": {'version': "",
+                        "binary": {"centos": "",
+                                   "ubuntu": "",
+                                   "debian": "",
+                                   "rhel": ""}},
+           "ppg-11.6": {'version': "",
+                        "binary": {"centos": "",
+                                   "ubuntu": "",
+                                   "debian": "",
+                                   "rhel": ""}}
+           }
+pgaudit = {"ppg-11.5": {"version": "1.3",
+                        "binary": {"centos": "",
+                                   "ubuntu": "",
+                                   "debian": "",
+                                   "rhel": ""}},
+           "ppg-11.6": {"version": "1.4.0",
+                        "binary": {"centos": "",
+                                   "ubuntu": "",
+                                   "debian": "",
+                                   "rhel": ""}}}
+
+
+versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB_PKG_VERSIONS,
+                         "percona-postgresql-common": '210',
+                         "percona-postgresql-client-common": "210",
+                         "libpq_version": "110006",
+                         "pg_audit": pgaudit['ppg-11.6'],
+                         "pgbackrest": pgbackrest['ppg-11.6'],
+                         "patroni": patroni['ppg-11.6'],
+                         "pgrepack": pgrepack['ppg-11.65']},
+            "ppg-11.5": {"version": "11.5", "deb_pkg_ver": DEB_PKG_VERSIONS,
+                         "percona-postgresql-common": '204',
+                         "percona-postgresql-client-common": "204",
+                         "libpq_version": "110005",
+                         "pg_audit": pgaudit['ppg-11.5'],
+                         "pgbackrest": pgbackrest['ppg-11.5'],
+                         "patroni": patroni['ppg-11.5'],
+                         "pgrepack": pgrepack['ppg-11.5']
+                         }
+            }

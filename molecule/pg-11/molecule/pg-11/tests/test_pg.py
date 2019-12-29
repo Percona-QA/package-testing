@@ -1,12 +1,15 @@
+import os
 import pytest
 
 import testinfra.utils.ansible_runner
 
-from .settings import *
+from .settings import versions, DEB_PACKAGES, RHEL_FILES, RPM7_PACKAGES, RPM_PACKAGES, EXTENSIONS, LANGUAGES, DEB_FILES
 
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
+
+pg_versions = versions[os.getenv("PG_VERSION")]
 
 
 @pytest.fixture()
@@ -77,7 +80,7 @@ def test_deb_package_is_installed(host, package):
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert pkg.version in DEB_PKG_VERSIONS
+    assert pkg.version in pg_versions['deb_pkg_ver']
 
 
 @pytest.mark.parametrize("package", RPM_PACKAGES)
@@ -90,9 +93,9 @@ def test_rpm_package_is_installed(host, package):
     pkg = host.package(package)
     assert pkg.is_installed
     if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
-        assert pkg.version == PG_VERSION
+        assert pkg.version == pg_versions['version']
     else:
-        assert pkg.version == "204"
+        assert pkg.version == pg_versions[package]
 
 
 @pytest.mark.parametrize("package", RPM7_PACKAGES)
@@ -105,9 +108,9 @@ def test_rpm7_package_is_installed(host, package):
     pkg = host.package(package)
     assert pkg.is_installed
     if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
-        assert pkg.version == PG_VERSION
+        assert pkg.version == pg_versions['version']
     else:
-        assert pkg.version == "204"
+        assert pkg.version == pg_versions[package]
 
 
 def test_postgresql_client_version(host):
@@ -158,7 +161,7 @@ def test_pg_config_server_version(host):
 
 def test_postgresql_query_version(postgresql_query_version):
     assert postgresql_query_version.rc == 0, postgresql_query_version.stderr
-    assert postgresql_query_version.stdout.strip("\n") == PG_VERSION, postgresql_query_version.stdout
+    assert postgresql_query_version.stdout.strip("\n") == pg_versions['version'], postgresql_query_version.stdout
 
 
 def test_postgres_client_version(host):
@@ -221,7 +224,6 @@ def test_drop_extension(host, extension):
 
 
 def test_plpgsql_extension(host):
-
     with host.sudo("postgres"):
         extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
         assert extensions.rc == 0, extensions.stderr
@@ -252,14 +254,6 @@ def test_rpm_files(file, host):
         assert f.size > 0
         assert f.content_string != ""
         assert f.user == "postgres"
-
-
-# def test_package_content(host):
-#     pass
-#
-#
-# def test_package_metadata(host):
-#     pass
 
 
 @pytest.mark.parametrize("language", LANGUAGES)

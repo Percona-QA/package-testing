@@ -3,9 +3,12 @@ import pytest
 
 import testinfra.utils.ansible_runner
 
+from .settings import versions
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
+
+pg_versions = versions[os.getenv("PG_VERSION")]
 
 
 @pytest.fixture(scope="module")
@@ -223,7 +226,7 @@ def test_pgaudit_package(host):
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
-    assert "1.3" in pkg.version
+    assert pg_versions['pgaudit']['version'] in pkg.version
 
 
 def test_pgaudit(pgaudit):
@@ -243,7 +246,7 @@ def test_pgrepack_package(host):
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
-    assert "1.4" in pkg.version
+    assert pg_versions['pgrepack']['version'] in pkg.version
 
 
 def test_pgrepack_binary(host, pgrepack):
@@ -319,20 +322,20 @@ def test_pgbackrest_package(host):
         doc_pkgn = "percona-pgbackrest-doc"
         docs_pkg = host.package(doc_pkgn)
         assert docs_pkg.is_installed
-        assert "2.16" in docs_pkg.version
+        assert pg_versions['pgbackrest']['version'] in docs_pkg.version
         dbg_pkg = "percona-pgbackrest-dbgsym"
         dbg = host.package(dbg_pkg)
         assert dbg.is_installed
-        assert "2.16" in dbg.version
+        assert pg_versions['pgbackrest']['version'] in dbg.version
     if pkgn == "":
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
-    assert "2.16" in pkg.version
+    assert pg_versions['pgbackrest']['version'] in pkg.version
 
 
 def test_pgbackrest_version(pgbackrest_version):
-    assert pgbackrest_version == "pgBackRest 2.16"
+    assert pgbackrest_version == pg_versions['pgbackrest']['binary_version']
 
 
 def test_pgbackrest_binary(pgbackrest, operating_system, host):
@@ -408,10 +411,11 @@ def test_patroni_package(host):
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
-    assert "1.6" in pkg.version
+    assert pg_versions['patroni']['version'] in pkg.version
 
 
 def test_patroni(patroni):
-    assert "Usage: /opt/patroni/bin/patroni config.yml" in patroni.stdout
+    print(patroni)
+    assert "Usage: /opt/patroni/bin/patroni config.yml" in patroni.stdout, patroni.stdout
     assert "Patroni may also read the configuration" \
-           " from the PATRONI_CONFIGURATION environment variable" in patroni.stdout
+           " from the PATRONI_CONFIGURATION environment variable" in patroni.stdout, patroni.stdout
