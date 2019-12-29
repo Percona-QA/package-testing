@@ -76,7 +76,6 @@ def show_store(host, set_store):
     command = "pbm config --list --mongodb-uri=mongodb://localhost:27017/?replicaSet=rs1"
     result = host.run(command)
     assert result.rc == 0, result.stdout
-    print(result.stdout)
     return parse_yaml_string(result.stdout.split("\n", 2)[2].strip())
 
 
@@ -236,7 +235,8 @@ def test_set_store(set_store):
     :return:
     """
     assert set_store.rc == 0, set_store.stdout
-    store_out = parse_yaml_string(set_store.stdout.split("\n", 2)[2].strip())
+    store_out = parse_yaml_string(set_store.stdout.split("\n", 2)[2].rstrip(
+        "Backup list resync from the store has started'").strip())
     assert store_out['storage']['type'] == 's3'
     assert store_out['storage']['s3']['region'] == 'us-east-1'
     assert store_out['storage']['s3']['bucket'] == 'operator-testing'
