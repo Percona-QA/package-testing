@@ -49,7 +49,7 @@ EXTENSIONS = ['xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', '
 LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", "plpython3u"]
 
 
-pgrepack = {"ppg-11.5": {"version": "pg_repack 1.4.4",
+pgrepack = {"ppg-11.5": {"version": "1.4.4",
                          "binary": {"centos": "",
                                     "ubuntu": "",
                                     "debian": "/usr/lib/postgresql/11/bin/pg_repack: ELF 64-bit LSB shared object,"
@@ -68,7 +68,7 @@ pgrepack = {"ppg-11.5": {"version": "pg_repack 1.4.4",
                                             " interpreter /lib64/ld-linux-x86-64.so.2,"
                                             " for GNU/Linux 3.2.0,"
                                             " BuildID[sha1]=a43932c618eeeca37607301c219935b23e13f498, not stripped"}},
-            "ppg-11.6": {"version": "pg_repack 1.4.5",
+            "ppg-11.6": {"version": "1.4.5",
                                     "binary": {"centos": "",
                                                "ubuntu": "",
                                                "debian": "",
@@ -113,7 +113,7 @@ versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB_PKG_VERSIONS,
                          "percona-postgresql-common": '210',
                          "percona-postgresql-client-common": "210",
                          "libpq_version": "110006",
-                         "pg_audit": pgaudit['ppg-11.6'],
+                         "pgaudit": pgaudit['ppg-11.6'],
                          "pgbackrest": pgbackrest['ppg-11.6'],
                          "patroni": patroni['ppg-11.6'],
                          "pgrepack": pgrepack['ppg-11.6']},
@@ -121,7 +121,7 @@ versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB_PKG_VERSIONS,
                          "percona-postgresql-common": '204',
                          "percona-postgresql-client-common": "204",
                          "libpq_version": "110005",
-                         "pg_audit": pgaudit['ppg-11.5'],
+                         "pgaudit": pgaudit['ppg-11.5'],
                          "pgbackrest": pgbackrest['ppg-11.5'],
                          "patroni": patroni['ppg-11.5'],
                          "pgrepack": pgrepack['ppg-11.5']
