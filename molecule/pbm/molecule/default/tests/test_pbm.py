@@ -19,6 +19,7 @@ def parse_yaml_string(ys):
     :param ys:
     :return:
     """
+    print(ys)
     fd = StringIO(ys)
     dct = yaml.load(fd)
     return dct
@@ -75,6 +76,7 @@ def show_store(host, set_store):
     command = "pbm config --list --mongodb-uri=mongodb://localhost:27017/?replicaSet=rs1"
     result = host.run(command)
     assert result.rc == 0, result.stdout
+    print(result.stdout)
     return parse_yaml_string(result.stdout.split("\n", 2)[2].strip())
 
 
@@ -96,6 +98,8 @@ def backup(host):
     hash = save_hash_result.stdout.strip("\n")
     backup = """pbm backup --mongodb-uri=mongodb://localhost:27017"""
     backup_result = host.run(backup)
+    print(backup_result.stdout)
+    print(backup_result.rc)
     assert backup_result.rc == 0, backup_result.stdout
     time.sleep(120)
     backup_name = backup_result.stdout.split()[2].strip("\'").rstrip("'...")
@@ -117,6 +121,7 @@ def restore(backup, host):
     """
     restore = """pbm restore --mongodb-uri=mongodb://localhost:27017 {}""".format(backup[1])
     restore_result = host.run(restore)
+    print(restore_result.stdout)
     assert restore_result.rc == 0, restore_result.stdout
     time.sleep(120)
     db_hash_after = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
