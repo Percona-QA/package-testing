@@ -232,7 +232,7 @@ def test_set_store(set_store):
     """
     assert set_store.rc == 0, set_store.stdout
     print(set_store.stdout)
-    store_out = parse_yaml_string("\n".join(set_store.stdout.split("\n")[:-2]))
+    store_out = parse_yaml_string("\n".join(set_store.stdout.split("\n")[2:-2]))
     assert store_out['storage']['type'] == 's3'
     assert store_out['storage']['s3']['region'] == 'us-east-1'
     assert store_out['storage']['s3']['bucket'] == 'operator-testing'
