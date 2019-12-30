@@ -10,7 +10,8 @@ pipeline {
     text(
       name: 'PLATFORMS',
       description: 'Test distributions',
-      defaultValue: '''centos-6
+      defaultValue: '''amazonlinux-2
+centos-6
 centos-7
 debian-8
 debian-9
