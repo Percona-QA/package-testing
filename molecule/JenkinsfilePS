@@ -56,37 +56,52 @@ ubuntu-bionic'''
           currentBuild.description = "${PLATFORMS}".replaceAll("\n", " ");
         }
         checkout scm
-        sh '''
-            sudo yum install -y gcc python3-pip python3-devel libselinux-python openssl-devel
-            sudo mkdir -p /usr/local/lib64/python3.7/site-packages
-            sudo rsync -aHv /usr/lib64/python2.7/site-packages/*selinux* /usr/local/lib64/python3.7/site-packages/
-            pip3 install --user pytest molecule ansible wheel boto boto3 paramiko selinux 'molecule[ec2]'
-        '''
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'AMI/OVF', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-          sh '''
+          sh '''#!/bin/bash
+              sudo yum install -y gcc python3-pip python3-devel libselinux-python openssl-devel
+              sudo mkdir -p /usr/local/lib64/python3.7/site-packages
+              sudo rsync -aHv /usr/lib64/python2.7/site-packages/*selinux* /usr/local/lib64/python3.7/site-packages/
+              pip3 install --user pytest molecule ansible wheel boto boto3 paramiko selinux 'molecule[ec2]'
+
               # remove this because otherwise molecule will fail to validate
               rm -f molecule/${ROLE_NAME}/molecule/default/molecule.yml
 
               REPLACE_STRING="##PLATFORM_PLACEHOLDER##"
               MOLECULE_FILE="molecule/${ROLE_NAME}/molecule/ec2/molecule.yml"
+              #
+              PS_56_INSTALL_DIST=(debian-8 debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic)
+              PS_57_INSTALL_DIST=(debian-8 debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
+              PS_57_UPGRADE_DIST=(debian-8 debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
+              PS_57_MAJ_UPGRADE_TO_DIST=(debian-8 debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
+              PS_57_MAJ_UPGRADE_FROM_DIST=(debian-8 debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
+              PS_80_INSTALL_DIST=(debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
+              PS_80_UPGRADE_DIST=(debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
+              PS_80_MAJ_UPGRADE_TO_DIST=(debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
+              #
+              ROLE_DIST="${ROLE_NAME//-/_}"
+              ROLE_DIST="${ROLE_DIST^^}_DIST[@]"
               for PLATFORM in ${PLATFORMS}; do
-                PL_PARAMS=$(grep -A6 "${PLATFORM}:" molecule/configuration.yml)
-                AWS_DEFAULT_REGION=$(echo "${PL_PARAMS}" | grep "aws_default_region:"|awk -F': ' '{print $2}' )
-                IMAGE=$(echo "${PL_PARAMS}" | grep "image:"|awk -F': ' '{print $2}' )
-                SUBNET=$(echo "${PL_PARAMS}" | grep "subnet:"|awk -F': ' '{print $2}' )
-                INSTANCE_TYPE=$(echo "${PL_PARAMS}" | grep "instance_type:"|awk -F': ' '{print $2}' )
-                ROOT_DEVICE_NAME=$(echo "${PL_PARAMS}" | grep "root_device_name:"|awk -F': ' '{print $2}' )
-                USER=$(echo "${PL_PARAMS}" | grep "user:"|awk -F': ' '{print $2}' )
-                #
-                sed -i "s/${REPLACE_STRING}/  - name: ${ROLE_NAME}-${PLATFORM}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
-                sed -i "s/${REPLACE_STRING}/    region: ${AWS_DEFAULT_REGION}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
-                sed -i "s/${REPLACE_STRING}/    image: ${IMAGE}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
-                sed -i "s/${REPLACE_STRING}/    vpc_subnet_id: ${SUBNET}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
-                sed -i "s/${REPLACE_STRING}/    instance_type: ${INSTANCE_TYPE}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
-                sed -i "s!${REPLACE_STRING}!    root_device_name: ${ROOT_DEVICE_NAME}\\n${REPLACE_STRING}!" ${MOLECULE_FILE}
-                sed -i "s/${REPLACE_STRING}/    ssh_user: ${USER}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
-                sed -i "s/${REPLACE_STRING}/    instance_tags:\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
-                sed -i "s/${REPLACE_STRING}/      iit-billing-tag: jenkins-ps-pkg-worker\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                if [[ " ${!ROLE_DIST} " =~ " ${PLATFORM} " ]]; then
+                  PL_PARAMS=$(grep -A6 "${PLATFORM}:" molecule/configuration.yml)
+                  AWS_DEFAULT_REGION=$(echo "${PL_PARAMS}" | grep "aws_default_region:"|awk -F': ' '{print $2}' )
+                  IMAGE=$(echo "${PL_PARAMS}" | grep "image:"|awk -F': ' '{print $2}' )
+                  SUBNET=$(echo "${PL_PARAMS}" | grep "subnet:"|awk -F': ' '{print $2}' )
+                  INSTANCE_TYPE=$(echo "${PL_PARAMS}" | grep "instance_type:"|awk -F': ' '{print $2}' )
+                  ROOT_DEVICE_NAME=$(echo "${PL_PARAMS}" | grep "root_device_name:"|awk -F': ' '{print $2}' )
+                  USER=$(echo "${PL_PARAMS}" | grep "user:"|awk -F': ' '{print $2}' )
+                  #
+                  sed -i "s/${REPLACE_STRING}/  - name: ${ROLE_NAME}-${PLATFORM}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                  sed -i "s/${REPLACE_STRING}/    region: ${AWS_DEFAULT_REGION}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                  sed -i "s/${REPLACE_STRING}/    image: ${IMAGE}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                  sed -i "s/${REPLACE_STRING}/    vpc_subnet_id: ${SUBNET}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                  sed -i "s/${REPLACE_STRING}/    instance_type: ${INSTANCE_TYPE}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                  sed -i "s!${REPLACE_STRING}!    root_device_name: ${ROOT_DEVICE_NAME}\\n${REPLACE_STRING}!" ${MOLECULE_FILE}
+                  sed -i "s/${REPLACE_STRING}/    ssh_user: ${USER}\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                  sed -i "s/${REPLACE_STRING}/    instance_tags:\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                  sed -i "s/${REPLACE_STRING}/      iit-billing-tag: jenkins-ps-pkg-worker\\n${REPLACE_STRING}/" ${MOLECULE_FILE}
+                else
+                  echo "##### Skipping ${PLATFORM} since not supported by role ${ROLE_NAME} #####"
+                fi
               done
               echo "##### MOLECULE FILE CONTENT #####"
               cat ${MOLECULE_FILE}
