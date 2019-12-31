@@ -6,7 +6,7 @@ centos-6:
   instance_type: t2.micro
   root_device_name: /dev/sda1
 centos-7:
-  image: ami-7cbc6e13
+  image: ami-04cf43aca3e6f3de3
   user: centos
   subnet: subnet-085deaca8c1c59a4f
   aws_default_region: eu-central-1
