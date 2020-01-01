@@ -51,8 +51,14 @@ LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", 
 
 pgrepack = {"ppg-11.5": {"version": "1.4.4",
                          "binary_version": "pg_repack 1.4.4",
-                         "binary": {"centos": "",
-                                    "ubuntu": "",
+                         "binary": {"centos": "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable, x86-64,"
+                                              " version 1 (SYSV), dynamically linked (uses shared libs),"
+                                              " for GNU/Linux 2.6.32,"
+                                              " BuildID[sha1]=b76f53a7d4ffe7dfab0d9bd5868e99bdfcfe48e9, not stripped",
+                                    "ubuntu": "/usr/lib/postgresql/11/bin/pg_repack: ELF 64-bit LSB shared object,"
+                                              " x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/l,"
+                                              " for GNU/Linux 3.2.0,"
+                                              " BuildID[sha1]=79aca6e4d94f971b1adc16c4d523ce69a85ad1d4, stripped",
                                     "debian": "/usr/lib/postgresql/11/bin/pg_repack: ELF 64-bit LSB shared object,"
                                               " x86-64, version 1 (SYSV),"
                                               " dynamically linked,interpreter"
@@ -78,10 +84,30 @@ pgrepack = {"ppg-11.5": {"version": "1.4.4",
                                                "rhel": ""}}}
 pgbackrest = {"ppg-11.5": {"version": "2.16",
                            "binary_version": "pgBackRest 2.16",
-                           "binary": {"centos": "",
-                                      "ubuntu": "",
-                                      "debian": "",
-                                      "rhel": ""}},
+                           "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,x86-64,"
+                                                " version 1 (SYSV),dynamically linked (uses shared libs),"
+                                                " for GNU/Linux 2.6.32,"
+                                                " BuildID[sha1]=ee740c6f97b0910ac912eec89030c56fb28f77aa, not stripped",
+                                      "ubuntu": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
+                                                " x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/l,"
+                                                " for GNU/Linux 3.2.0,"
+                                                " BuildID[sha1]=ce50eadfcbe1b0e170df51ec85aebb96db44b420, stripped",
+                                      "debian": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object, x86-64,"
+                                                " version 1 (SYSV), dynamically linked,"
+                                                " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                                " for GNU/Linux 3.2.0,"
+                                                " BuildID[sha1]=1d374746b869cd054bd13bc59a3984500bd4018d, stripped",
+                                      "debian9.9": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
+                                                   " x86-64, version 1 (SYSV), dynamically linked,"
+                                                   " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                                   " for GNU/Linux 2.6.32,"
+                                                   " BuildID[sha1]=b2e1c41d6e6b6c26e6f6371348799e39fbd4cae1, stripped",
+                                      "rhel": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
+                                              " x86-64, version 1 (SYSV),"
+                                              " dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2,"
+                                              " for GNU/Linux 3.2.0,"
+                                              " BuildID[sha1]=7b29febffa6997744eb3be2e5bc1bc97647722e5,"
+                                              " with debug_info, not stripped, too many notes (256)"}},
               "ppg-11.6": {"version": "2.20",
                            "binary_version": "pgBackRest 2.20",
                            "binary": {"centos": "",

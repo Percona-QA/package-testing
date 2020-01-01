@@ -252,28 +252,16 @@ def test_pgrepack_package(host):
 def test_pgrepack_binary(host, pgrepack):
     os = host.system_info.distribution
     if os.lower() == "centos":
-        assert pgrepack == "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable, x86-64," \
-                           " version 1 (SYSV), dynamically linked (uses shared libs)," \
-                           " for GNU/Linux 2.6.32, BuildID[sha1]=b76f53a7d4ffe7dfab0d9bd5868e99bdfcfe48e9, not stripped"
+        assert pgrepack == pg_versions['pgrepack']['binary']['centos']
     elif os.lower() in ['redhat', 'rhel']:
-        assert pgrepack == "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable, x86-64," \
-                           " version 1 (SYSV)," \
-                           " dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2," \
-                           " for GNU/Linux 3.2.0, BuildID[sha1]=a43932c618eeeca37607301c219935b23e13f498, not stripped"
+        assert pgrepack == pg_versions['pgrepack']['binary']['rhel']
     elif os.lower() == "debian":
         if host.system_info.release == '9.9':
-            assert pgrepack == "/usr/lib/postgresql/11/bin/pg_repack: ELF 64-bit LSB shared object," \
-                           " x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2," \
-                           " for GNU/Linux 2.6.32, BuildID[sha1]=0f89ea7cb7dcbe4435aefd2c74be0505a818614b, stripped"
+            assert pgrepack == pg_versions['pgrepack']['binary']['debian9.9']
         else:
-            assert pgrepack == "/usr/lib/postgresql/11/bin/pg_repack: ELF 64-bit LSB shared object," \
-                               " x86-64, version 1 (SYSV), dynamically linked," \
-                               " interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0," \
-                               " BuildID[sha1]=9aef45d1e9a16645857aba84473dd8f150998d90, stripped"
+            assert pgrepack == pg_versions['pgrepack']['binary']['debian']
     elif os.lower() == "ubuntu":
-        assert pgrepack == "/usr/lib/postgresql/11/bin/pg_repack: ELF 64-bit LSB shared object," \
-                           " x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/l," \
-                           " for GNU/Linux 3.2.0, BuildID[sha1]=79aca6e4d94f971b1adc16c4d523ce69a85ad1d4, stripped"
+        assert pgrepack == pg_versions['pgrepack']['binary']['ubuntu']
 
 
 def test_pgrepack(host):
@@ -341,35 +329,16 @@ def test_pgbackrest_version(pgbackrest_version):
 def test_pgbackrest_binary(pgbackrest, operating_system, host):
     assert pgbackrest.rc == 0
     if operating_system.lower() == "centos":
-        assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB executable," \
-                                                " x86-64, version 1 (SYSV)," \
-                                                " dynamically linked (uses shared libs)," \
-                                                " for GNU/Linux 2.6.32," \
-                                                " BuildID[sha1]=ee740c6f97b0910ac912eec89030c56fb28f77aa, not stripped"
+        assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['centos']
     elif operating_system.lower() in ["redhat", 'rhel']:
-        assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object," \
-                                                " x86-64, version 1 (SYSV), dynamically linked," \
-                                                " interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0," \
-                                                " BuildID[sha1]=7b29febffa6997744eb3be2e5bc1bc97647722e5," \
-                                                " with debug_info, not stripped, too many notes (256)"
+        assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['rhel']
     elif operating_system.lower() == 'debian':
         if host.system_info.release == "9.9":
-            assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object," \
-                                                    " x86-64, version 1 (SYSV)," \
-                                                    " dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2," \
-                                                    " for GNU/Linux 2.6.32," \
-                                                    " BuildID[sha1]=b2e1c41d6e6b6c26e6f6371348799e39fbd4cae1, stripped"
+            assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['debian9.9']
         else:
-            assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object," \
-                                                    " x86-64, version 1 (SYSV)," \
-                                                    " dynamically linked," \
-                                                    " interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0," \
-                                                    " BuildID[sha1]=1d374746b869cd054bd13bc59a3984500bd4018d, stripped"
+            assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['debian']
     elif operating_system.lower == "ubuntu":
-        assert pgbackrest.stdout.strip("\n") == "/usr/bin/pgbackrest: ELF 64-bit LSB shared object, x86-64," \
-                                                " version 1 (SYSV), dynamically linked, interpreter /lib64/l," \
-                                                " for GNU/Linux 3.2.0," \
-                                                " BuildID[sha1]=ce50eadfcbe1b0e170df51ec85aebb96db44b420, stripped"
+        assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['ubuntu']
 
 
 def test_pgbackrest_create_stanza(create_stanza):
