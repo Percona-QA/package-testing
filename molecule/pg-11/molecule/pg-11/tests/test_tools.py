@@ -252,16 +252,16 @@ def test_pgrepack_package(host):
 def test_pgrepack_binary(host, pgrepack):
     os = host.system_info.distribution
     if os.lower() == "centos":
-        assert pgrepack == pg_versions['pgrepack']['binary']['centos']
+        assert pgrepack == pg_versions['pgrepack']['binary']['centos'], pgrepack
     elif os.lower() in ['redhat', 'rhel']:
-        assert pgrepack == pg_versions['pgrepack']['binary']['rhel']
+        assert pgrepack == pg_versions['pgrepack']['binary']['rhel'], pgrepack
     elif os.lower() == "debian":
         if host.system_info.release == '9.9':
-            assert pgrepack == pg_versions['pgrepack']['binary']['debian9.9']
+            assert pgrepack == pg_versions['pgrepack']['binary']['debian9.9'], pgrepack
         else:
-            assert pgrepack == pg_versions['pgrepack']['binary']['debian']
+            assert pgrepack == pg_versions['pgrepack']['binary']['debian'], pgrepack
     elif os.lower() == "ubuntu":
-        assert pgrepack == pg_versions['pgrepack']['binary']['ubuntu']
+        assert pgrepack == pg_versions['pgrepack']['binary']['ubuntu'], pgrepack
 
 
 def test_pgrepack(host):
@@ -329,16 +329,21 @@ def test_pgbackrest_version(pgbackrest_version):
 def test_pgbackrest_binary(pgbackrest, operating_system, host):
     assert pgbackrest.rc == 0
     if operating_system.lower() == "centos":
-        assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['centos']
+        assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['centos'],\
+            pgbackrest.stdout.strip("\n")
     elif operating_system.lower() in ["redhat", 'rhel']:
-        assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['rhel']
+        assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['rhel'],\
+            pgbackrest.stdout.strip("\n")
     elif operating_system.lower() == 'debian':
         if host.system_info.release == "9.9":
-            assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['debian9.9']
+            assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['debian9.9'],\
+                pgbackrest.stdout.strip("\n")
         else:
-            assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['debian']
+            assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['debian'],\
+                pgbackrest.stdout.strip("\n")
     elif operating_system.lower == "ubuntu":
-        assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['ubuntu']
+        assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['ubuntu'],\
+            pgbackrest.stdout.strip("\n")
 
 
 def test_pgbackrest_create_stanza(create_stanza):
