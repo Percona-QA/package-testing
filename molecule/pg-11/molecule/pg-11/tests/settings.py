@@ -126,6 +126,6 @@ versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB_PKG_VERSIONS,
                          "pgaudit": pgaudit['ppg-11.5'],
                          "pgbackrest": pgbackrest['ppg-11.5'],
                          "patroni": patroni['ppg-11.5'],
-                         "pgrepack": pgrepack['ppg-11.5', "libpq": "Version of libpq: 110005"]
+                         "pgrepack": pgrepack['ppg-11.5'], "libpq": "Version of libpq: 110005"
                          }
             }
