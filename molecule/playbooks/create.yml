@@ -111,7 +111,7 @@
         volumes:
           - device_name: "{{ item.root_device_name }}"
             volume_type: gp2
-            volume_size: 16
+            volume_size: 30
             delete_on_termination: true
       register: server
       loop: "{{ molecule_yml.platforms }}"
