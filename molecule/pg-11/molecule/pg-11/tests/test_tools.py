@@ -293,7 +293,7 @@ def test_pgrepack(host):
 
 def test_pg_repack_client_version(pg_repack_client_version):
     assert pg_repack_client_version.rc == 0
-    assert pg_repack_client_version.stdout.strip("\n") == "pg_repack 1.4.4"
+    assert pg_repack_client_version.stdout.strip("\n") == pg_versions['pgrepack']['binary_version']
 
 
 def test_pg_repack_functional(pg_repack_functional):

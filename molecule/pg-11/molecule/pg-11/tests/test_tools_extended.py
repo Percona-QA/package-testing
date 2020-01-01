@@ -3,7 +3,7 @@ import pytest
 
 import testinfra.utils.ansible_runner
 
-from .settings import DEB_PKG_VERSIONS
+from .settings import DEB_PKG_VERSIONS, versions
 
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -12,6 +12,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 PACKAGES = ["libecpg-compat3", "libecpg-compat3-dbgsym", "libecpg-dev-dbgsym", "libecpg-dev", "libecpg6-dbgsym",
             'libecpg6', "libpgtypes3", "libpgtypes3-dbgsym", "libpq-dev", "libpq5-dbgsym", "libpq5"]
 
+pg_versions = versions[os.getenv("PG_VERSION")]
 
 # @pytest.fixture()
 # def fdw_extension(host):
@@ -139,7 +140,7 @@ def test_deb_package_is_installed(host, package):
 def test_build_libpq_programm(host, build_libpq_programm):
     assert build_libpq_programm.rc == 0
     libpq_version = host.run("./lib_version ")
-    assert libpq_version.stdout.strip("\n") == "Version of libpq: 110005"
+    assert libpq_version.stdout.strip("\n") == pg_versions['libpq']
     assert libpq_version.rc == 0
 
 

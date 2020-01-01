@@ -50,6 +50,7 @@ LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", 
 
 
 pgrepack = {"ppg-11.5": {"version": "1.4.4",
+                         "binary_version": "pg_repack 1.4.4",
                          "binary": {"centos": "",
                                     "ubuntu": "",
                                     "debian": "/usr/lib/postgresql/11/bin/pg_repack: ELF 64-bit LSB shared object,"
@@ -69,6 +70,7 @@ pgrepack = {"ppg-11.5": {"version": "1.4.4",
                                             " for GNU/Linux 3.2.0,"
                                             " BuildID[sha1]=a43932c618eeeca37607301c219935b23e13f498, not stripped"}},
             "ppg-11.6": {"version": "1.4.5",
+                         "binary_version": "pg_repack 1.4.5",
                                     "binary": {"centos": "",
                                                "ubuntu": "",
                                                "debian": "",
@@ -116,7 +118,7 @@ versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB_PKG_VERSIONS,
                          "pgaudit": pgaudit['ppg-11.6'],
                          "pgbackrest": pgbackrest['ppg-11.6'],
                          "patroni": patroni['ppg-11.6'],
-                         "pgrepack": pgrepack['ppg-11.6']},
+                         "pgrepack": pgrepack['ppg-11.6'], "libpq": "Version of libpq: 110006"},
             "ppg-11.5": {"version": "11.5", "deb_pkg_ver": DEB_PKG_VERSIONS,
                          "percona-postgresql-common": '204',
                          "percona-postgresql-client-common": "204",
@@ -124,6 +126,6 @@ versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB_PKG_VERSIONS,
                          "pgaudit": pgaudit['ppg-11.5'],
                          "pgbackrest": pgbackrest['ppg-11.5'],
                          "patroni": patroni['ppg-11.5'],
-                         "pgrepack": pgrepack['ppg-11.5']
+                         "pgrepack": pgrepack['ppg-11.5', "libpq": "Version of libpq: 110005"]
                          }
             }
