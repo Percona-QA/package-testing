@@ -16,6 +16,7 @@
     yum:
       name: "{{ packages }}"
       state: latest
+      update_cache: yes
     vars:
       packages:
       - percona-xtrabackup-24
