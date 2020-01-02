@@ -26,6 +26,16 @@
   - name: remove PS 5.7 packages
     include_tasks: ../../../tasks/remove_ps57.yml
 
+  - name: remove mysql package on centos 8
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - mysql
+      - mysql-common
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
 
@@ -40,11 +50,17 @@
 
   - name: copy config file to original location
     copy:
-      src: /etc/my.cnf.rpmsave
+      src: /etc/my.cnf.backup
       dest: /etc/my.cnf
       remote_src: yes
       force: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+
+  - name: restore percona-server.conf.d and mysql.cnf.d
+    shell: |
+      mv /etc/percona-server.conf.d_backup-* /etc/percona-server.conf.d
+      mv /etc/my.cnf.d_backup-* /etc/my.cnf.d
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
 
   - name: include tasks for enabling PS 8 test repo
     include: ../tasks/enable_ps8_main_repo.yml

@@ -36,7 +36,7 @@
       dest: /etc/my.cnf
       remote_src: yes
       force: yes
-    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version == "7")
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
 
   # BUG: PS-3664
   - name: create env file for systemd service
@@ -45,7 +45,7 @@
       content: |
         LD_PRELOAD=/usr/lib64/libjemalloc.so.1 /usr/lib64/mysql/libHotBackup.so
         THP_SETTING=never
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
   - name: setup config file for keyring vault
     template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test.j2
@@ -57,6 +57,16 @@
       src: "{{ vault_cert }}"
       dest: /package-testing/scripts/ps_keyring_plugins_test/test.cer
     when: lookup('env', 'PS_SKIP_KEYRING') == "" or lookup('env', 'PS_SKIP_KEYRING') == "0"
+
+  - name: remove mysql package on centos 8
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - mysql
+      - mysql-common
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
   - name: include tasks for enabling test repo
     include: ../tasks/enable_testing_repo.yml
