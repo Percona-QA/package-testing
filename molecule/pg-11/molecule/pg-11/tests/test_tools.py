@@ -395,12 +395,14 @@ def test_patroni_package(host):
 
 def test_patroni(patroni):
     print(patroni)
-    assert "Usage: /opt/patroni/bin/patroni config.yml" in patroni.stdout, patroni.stdout
-    assert "Patroni may also read the configuration" \
-           " from the PATRONI_CONFIGURATION environment variable" in patroni.stdout, patroni.stdout
+    if os.getenv("PG_VERSION") == "ppg-11.5":
+        assert "Usage: /opt/patroni/bin/patroni config.yml" in patroni.stdout, patroni.stdout
+        assert "Patroni may also read the configuration" \
+               " from the PATRONI_CONFIGURATION environment variable" in patroni.stdout, patroni.stdout
+    elif os.getenv("PG_VERSION") == "ppg-11.5":
+        assert "Config is empty" in patroni.stdout, patroni.stdout
 
 
 def test_patroni_version(patroni_version):
-    print(patroni_version.stdout)
     assert patroni_version.rc == 0, patroni_version.stder
-    assert patroni_version.stdout == pg_versions['patroni']['version']
+    assert patroni_version.stdout.strip("\n") == pg_versions['patroni']['binary_version']
