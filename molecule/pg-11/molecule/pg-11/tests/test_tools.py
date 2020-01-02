@@ -211,6 +211,11 @@ def patroni(host):
     return host.run("/opt/patroni/bin/patroni")
 
 
+@pytest.fixture()
+def patroni_version(host):
+    return host.run("/opt/patroni/bin/patroni --version")
+
+
 def test_pgaudit_package(host):
     os = host.system_info.distribution
     pkgn = ""
@@ -393,3 +398,9 @@ def test_patroni(patroni):
     assert "Usage: /opt/patroni/bin/patroni config.yml" in patroni.stdout, patroni.stdout
     assert "Patroni may also read the configuration" \
            " from the PATRONI_CONFIGURATION environment variable" in patroni.stdout, patroni.stdout
+
+
+def test_patroni_version(patroni_version):
+    print(patroni_version.stdout)
+    assert patroni_version.rc == 0, patroni_version.stder
+    assert patroni_version.stdout == pg_versions['patroni']['version']

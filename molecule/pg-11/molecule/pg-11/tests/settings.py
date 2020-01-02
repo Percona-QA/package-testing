@@ -77,7 +77,11 @@ pgrepack = {"ppg-11.5": {"version": "1.4.4",
                                             " BuildID[sha1]=a43932c618eeeca37607301c219935b23e13f498, not stripped"}},
             "ppg-11.6": {"version": "1.4.5",
                          "binary_version": "pg_repack 1.4.5",
-                                    "binary": {"centos": "",
+                                    "binary": {"centos": "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable,"
+                                                         " x86-64, version 1 (SYSV),"
+                                                         " dynamically linked (uses shared libs), for GNU/Linux 2.6.32,"
+                                                         " BuildID[sha1]=bd2f6cc2747db832da8302ce8ceaddd6cf56dad0,"
+                                                         " not stripped",
                                                "ubuntu": "",
                                                "debian": "",
                                                "debian9.9": "",
@@ -110,7 +114,10 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                                               " with debug_info, not stripped, too many notes (256)"}},
               "ppg-11.6": {"version": "2.20",
                            "binary_version": "pgBackRest 2.20",
-                           "binary": {"centos": "",
+                           "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,"
+                                                " x86-64, version 1 (SYSV), dynamically linked (uses shared libs),"
+                                                " for GNU/Linux 2.6.32,"
+                                                " BuildID[sha1]=2bbde5c2b47d66d10c8c8f41db3197fd8a9a141b, not stripped",
                                       "ubuntu": "",
                                       "debian": "",
                                       "rhel": ""}}}
