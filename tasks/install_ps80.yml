@@ -40,6 +40,7 @@
       name: "{{ packages }}"
       state: latest
       disablerepo: "epel"
+      update_cache: yes
     vars:
       packages:
       - percona-server-server
