@@ -393,14 +393,11 @@ def test_patroni_package(host):
     assert pg_versions['patroni']['version'] in pkg.version
 
 
+@pytest.mark.skipif(os.getenv("PG_VERSION") == "ppg-11.6")
 def test_patroni(patroni):
-    print(patroni)
-    if os.getenv("PG_VERSION") == "ppg-11.5":
-        assert "Usage: /opt/patroni/bin/patroni config.yml" in patroni.stdout, patroni.stdout
-        assert "Patroni may also read the configuration" \
-               " from the PATRONI_CONFIGURATION environment variable" in patroni.stdout, patroni.stdout
-    elif os.getenv("PG_VERSION") == "ppg-11.5":
-        assert "Config is empty" in patroni.stdout, patroni.stdout
+    assert "Usage: /opt/patroni/bin/patroni config.yml" in patroni.stdout, patroni.stdout
+    assert "Patroni may also read the configuration" \
+           " from the PATRONI_CONFIGURATION environment variable" in patroni.stdout, patroni.stdout
 
 
 def test_patroni_version(patroni_version):
