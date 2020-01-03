@@ -69,7 +69,7 @@ ubuntu-bionic'''
               REPLACE_STRING="##PLATFORM_PLACEHOLDER##"
               MOLECULE_FILE="molecule/${ROLE_NAME}/molecule/ec2/molecule.yml"
               #
-              PS_56_INSTALL_DIST=(debian-8 debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic)
+              PS_56_INSTALL_DIST=(debian-8 debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
               PS_57_INSTALL_DIST=(debian-8 debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
               PS_57_UPGRADE_DIST=(debian-8 debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
               PS_57_MAJ_UPGRADE_TO_DIST=(debian-8 debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
