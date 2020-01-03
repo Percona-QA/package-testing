@@ -14,3 +14,9 @@
 
   - name: enable the PSMDB 4.0 testing repo
     command: percona-release enable-only psmdb-40 testing
+
+  - name: clean and update yum cache
+    shell: |
+      yum clean all
+      yum makecache
+    when: ansible_os_family == "RedHat"

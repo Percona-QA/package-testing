@@ -13,3 +13,9 @@
 
   - name: enable tools release repo
     command: percona-release enable tools release
+
+  - name: clean and update yum cache
+    shell: |
+      yum clean all
+      yum makecache
+    when: ansible_os_family == "RedHat"

@@ -73,7 +73,7 @@ ubuntu-bionic'''
               PS_57_INSTALL_DIST=(debian-8 debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
               PS_57_UPGRADE_DIST=(debian-8 debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
               PS_57_MAJ_UPGRADE_TO_DIST=(debian-8 debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
-              PS_57_MAJ_UPGRADE_FROM_DIST=(debian-8 debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
+              PS_57_MAJ_UPGRADE_FROM_DIST=(debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
               PS_80_INSTALL_DIST=(debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
               PS_80_UPGRADE_DIST=(debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)
               PS_80_MAJ_UPGRADE_TO_DIST=(debian-9 debian-10 centos-6 centos-7 ubuntu-xenial ubuntu-bionic amazonlinux-2)

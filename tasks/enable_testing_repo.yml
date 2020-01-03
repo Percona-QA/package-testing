@@ -16,3 +16,9 @@
 
   - name: change the default repo to testing
     command: percona-release enable original testing
+
+  - name: clean and update yum cache
+    shell: |
+      yum clean all
+      yum makecache
+    when: ansible_os_family == "RedHat"
