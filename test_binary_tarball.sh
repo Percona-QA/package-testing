@@ -68,6 +68,46 @@ elif [ $1 = "pxb24" ]; then
 
     exec_files="xbcloud xbcrypt xbstream xtrabackup innobackupex"
 
+elif [ $1 = "psmdb40" -o $1 = "psmdb42" ]; then
+    product=$1
+    if [ $1 = "psmdb40" ]; then
+        version=${PSMDB40_VER}
+    elif [ $1 = "psmdb42" ]; then
+        version=${PSMDB42_VER}
+    fi
+    major_version=$(echo ${version}| cut -f1-2 -d.)
+    if [ -f /etc/redhat-release ]; then
+        centos_version=$(cat /etc/redhat-release | grep -o "[0-9]" | head -n 1)
+        if [ "${centos_version}" -eq 6 ]; then
+            dist="centos6"
+        elif [ "${centos_version}" -eq 7 ]; then
+            dist="centos7"
+        elif [ "${centos_version}" -eq 8 ]; then
+            dist="centos8"
+        fi
+    else
+        debian_version=$(lsb_release -d |cut -f1 -d.|grep -oE "[0-9]+" | head -n 1)
+        if [ "${debian_version}" -eq 9 ]; then
+            dist="stretch"
+        elif [ "${debian_version}" -eq 16 ]; then
+            dist="xenial"
+        elif [ "${debian_version}" -eq 18 ]; then
+            dist="bionic"
+        elif [ "${debian_version}" -eq 19 ]; then
+            dist="disco"
+        fi
+    fi
+
+    echo "Downloading ${1} latest version..." >> "${log}"
+    wget https://www.percona.com/downloads/percona-server-mongodb-${major_version}/percona-server-mongodb-${version}/binary/tarball/percona-server-mongodb-${version}-${dist}-x86_64.tar.gz
+    tarball_dir="percona-server-mongodb-${version}"
+
+    echo "Extracting binary" >> "${log}"
+    tar -xf percona-server-mongodb-${version}-${dist}-x86_64.tar.gz
+    mv ${tarball_dir} ${product}
+    tarball_dir=${product}
+
+    exec_files="mongo mongod mongoexport mongoimport mongorestore mongostat perconadecrypt bsondump mongobridge mongodump mongofiles mongoreplay mongos mongotop"
 else
   echo "Incorrect product selected!"
   exit 1
@@ -75,13 +115,18 @@ fi
 
 echo "Check symlinks for all executables" >> "${log}"
 for binary in $exec_files; do
-    echo "Check ${tarball_dir}/bin/${binary}" >> "${log}"
-    ldd ${tarball_dir}/bin/${binary} | grep "not found"
-    if [ "$?" -eq 0 ]; then
-        echo "Err: Binary $binary in version ${version} has an incorrect linked library"
-        exit 1
+    if [ -f ${tarball_dir}/bin/${binary} ]; then
+        echo "Check ${tarball_dir}/bin/${binary}" >> "${log}"
+        ldd ${tarball_dir}/bin/${binary} | grep "not found"
+        if [ "$?" -eq 0 ]; then
+            echo "Err: Binary $binary in version ${version} has an incorrect linked library"
+            exit 1
+        else
+            echo "Binary $binary check passed" >> "${log}"
+        fi
     else
-        echo "Binary $binary check passed" >> "${log}"
+        echo "Err: The binary ${tarball_dir}/bin/${binary} was not found"
+        exit 1
     fi
 done
 
@@ -106,4 +151,20 @@ if [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; the
             fi
         done
     fi
+fi
+
+if [ ${product} = "psmdb40" -o ${product} = "psmdb42" ]; then
+    for binary in $exec_files; do
+        if [ "${binary}" = "perconadecrypt" -o "${binary}" = "mongobridge" ]; then
+            echo "The ${binary} binary does not have a version attached to it" >> "${log}"
+            continue
+        fi
+        version_check=$(${tarball_dir}/bin/${binary} --version 2>&1|grep -c ${version})
+        if [ ${version_check} -eq 0 ]; then
+            echo "${binary} version is incorrect! Expected version: ${version}"
+            exit 1
+        else
+            echo "${binary} version is correctly displayed as: ${version}" >> "${log}"
+        fi
+    done
 fi
