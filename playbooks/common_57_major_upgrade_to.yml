@@ -1,8 +1,12 @@
 ---
-# This playbook does following:
-#   enables Percona testing repository
-#   installs latest version of PS 5.6, PT and PXB 2.3
-#   does some tests
+# This playbook:
+#   installs Percona Server 5.6 from testing repo
+#   installs TokuDB and some other plugins
+#   removes 5.6
+#   installs 5.7
+#   enables RocksDB and repeats some tests
+#   removes 5.7 packages
+#   NOTICE: it installs both 5.6 and 5.7 from testing repo!
 
 # Cosmic is still missing python
 - import_playbook: test_prep.yml

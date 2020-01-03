@@ -1,7 +1,13 @@
 ---
-# This playbook does following:
-#   installs latest version of PS 5.7, PT and PXB 2.4
-#   upgrades to PS 8.0
+# This playbook:
+#   installs Percona Server 5.7 from testing repo
+#   installs TokuDB, RocksDB and some other plugins
+#   disables original repo
+#   removes 5.7
+#   enables ps-80 repo
+#   installs 8.0 and repeats some tests
+#   removes packages
+#   NOTICE: it installs both 5.7 and 8.0 from testing repo!
 
 # Cosmic is still missing python
 # import_playbook: test_prep.yml

@@ -1,7 +1,14 @@
 ---
 # tasks file for ps-80-maj-upgrade-to
-# This playbook install Percona Server 5.7 with TokuDB and MyRocks
-# It will disable the original repo and upgrade to Percona Server 8.0
+# This playbook:
+#   installs Percona Server 5.7 from testing repo
+#   installs TokuDB, RocksDB and some other plugins
+#   disables original repo
+#   removes 5.7
+#   enables ps-80 repo
+#   installs 8.0 and repeats some tests
+#   removes packages
+#   NOTICE: it installs both 5.7 and 8.0 from testing repo!
 
   - name: install PS 5.7
     include_tasks: ../../ps-57-install/tasks/main.yml

@@ -1,7 +1,13 @@
 ---
 # tasks file for ps-57-maj-upgrade-to
-# This playbook install Percona Server 5.6 with TokuDB and MyRocks
-# It will disable the original repo and upgrade to Percona Server 5.7
+# This playbook:
+#   installs Percona Server 5.6 from testing repo
+#   installs TokuDB and some other plugins
+#   removes 5.6
+#   installs 5.7
+#   enables RocksDB and repeats some tests
+#   removes 5.7 packages
+#   NOTICE: it installs both 5.6 and 5.7 from testing repo!
 
   - name: install PS 5.6
     include_tasks: ../../ps-56-install/tasks/main.yml
