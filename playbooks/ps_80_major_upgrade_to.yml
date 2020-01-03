@@ -43,7 +43,7 @@
       mv /etc/my.cnf.d_backup-* /etc/my.cnf.d
     when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
 
-  - name: include tasks for enabling PS 8 test repo
+  - name: include tasks for enabling PS 8 main repo
     include: ../tasks/enable_ps8_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
@@ -96,11 +96,11 @@
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
     when: lookup('env', 'PS_SKIP_KEYRING') == "" or lookup('env', 'PS_SKIP_KEYRING') == "0"
 
-#  - name: run bats unit tests for ps-admin script
-#    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
+  - name: run bats unit tests for ps-admin script
+    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
 
-#  - name: run bats integration tests for ps-admin script
-#    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
+  - name: run bats integration tests for ps-admin script
+    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
 
   - name: run bats tests for mysql init scripts
     command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats

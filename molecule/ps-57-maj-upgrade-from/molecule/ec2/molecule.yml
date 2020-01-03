@@ -38,7 +38,7 @@ provisioner:
     MOLECULE_KEY_NAME: molecule-${ROLE_NAME}
   playbooks:
     create: ../../../playbooks/create.yml
-    cleanup: ../../../ps-57-install/molecule/default/cleanup.yml
+    cleanup: ../../../ps-80-install/molecule/default/cleanup.yml
     destroy: ../../../playbooks/destroy.yml
     prepare: ../../../playbooks/prepare.yml
   lint:
@@ -46,7 +46,7 @@ provisioner:
     enabled: False
 verifier:
   name: testinfra
-  directory: ../../../ps-57-install/molecule/default/tests
+  directory: ../../../ps-80-install/molecule/default/tests
   options:
     verbose: true
     s: true
