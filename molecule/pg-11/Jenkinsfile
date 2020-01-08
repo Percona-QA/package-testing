@@ -21,6 +21,7 @@ pipeline {
             name: 'REPO',
             description: 'Repo for testing',
             choices: [
+                'testing',
                 'experimental',
                 'main',
             ]
