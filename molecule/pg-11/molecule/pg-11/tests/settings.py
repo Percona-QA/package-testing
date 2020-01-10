@@ -117,32 +117,18 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                            "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,"
                                                 " x86-64, version 1 (SYSV), dynamically linked (uses shared libs),"
                                                 " for GNU/Linux 2.6.32,"
-                                                " BuildID[sha1]=2bbde5c2b47d66d10c8c8f41db3197fd8a9a141b, not stripped",
+                                                " BuildID[sha1]=4189028da7f21d6a0b4fa300cfe3605a1e3523ad, not stripped",
                                       "ubuntu": "",
                                       "debian": "",
+                                      "debian9.9": "",
                                       "rhel": ""}}}
 patroni = {"ppg-11.5": {'version': "",
-                        "binary": {"centos": "",
-                                   "ubuntu": "",
-                                   "debian": "",
-                                   "rhel": ""}},
+                        "binary_version": ""},
            "ppg-11.6": {'version': "1.6.3",
-                        "binary_version": "patroni 1.6.3",
-                        "binary": {"centos": "",
-                                   "ubuntu": "",
-                                   "debian": "",
-                                   "rhel": ""}}
+                        "binary_version": "patroni 1.6.3"}
            }
-pgaudit = {"ppg-11.5": {"version": "1.3",
-                        "binary": {"centos": "",
-                                   "ubuntu": "",
-                                   "debian": "",
-                                   "rhel": ""}},
-           "ppg-11.6": {"version": "1.4.0",
-                        "binary": {"centos": "",
-                                   "ubuntu": "",
-                                   "debian": "",
-                                   "rhel": ""}}}
+pgaudit = {"ppg-11.5": {"version": "1.3"},
+           "ppg-11.6": {"version": "1.4.0"}}
 
 
 versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB_PKG_VERSIONS,
