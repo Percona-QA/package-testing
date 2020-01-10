@@ -7,8 +7,8 @@
     when: ansible_os_family == "Debian"
 
   - name: install Percona repository package on centos
-    #    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-    yum: name=https://repo.percona.com/yum/testing/7Server/RPMS/noarch/percona-release-1.0-14.noarch.rpm
+    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+#    yum: name=https://repo.percona.com/yum/testing/7Server/RPMS/noarch/percona-release-1.0-14.noarch.rpm
     when: ansible_os_family == "RedHat"
 
   - name: enable tools release repo
