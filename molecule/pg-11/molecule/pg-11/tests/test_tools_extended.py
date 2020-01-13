@@ -3,7 +3,7 @@ import pytest
 
 import testinfra.utils.ansible_runner
 
-from .settings import DEB_PKG_VERSIONS, versions
+from .settings import versions
 
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -38,6 +38,7 @@ pg_versions = versions[os.getenv("PG_VERSION")]
 # @pytest.fixture()
 # def fdw_functional(host):
 #     pass
+
 
 @pytest.fixture()
 def pythonu_function(host):
@@ -134,7 +135,7 @@ def test_deb_package_is_installed(host, package):
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert pkg.version in DEB_PKG_VERSIONS
+    assert pkg.version in pg_versions['deb_pkg_ver']
 
 
 def test_build_libpq_programm(host, build_libpq_programm):
