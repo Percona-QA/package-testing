@@ -146,7 +146,7 @@ pgaudit = {"ppg-11.5": {"version": "1.3"},
 
 
 versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB116_PKG_VERSIONS,
-                         "deb_pachages": DEB116_PACKAGES,
+                         "deb_packages": DEB116_PACKAGES,
                          "percona-postgresql-common": '210',
                          "percona-postgresql-client-common": "210",
                          "libpq_version": "110006",
