@@ -266,12 +266,12 @@ def test_rpm_files(file, host):
 
 @pytest.mark.parametrize("language", LANGUAGES)
 def test_language(host, language):
-    os = host.system_info.distribution
+    ds = host.system_info.distribution
     with host.sudo("postgres"):
-        if os.lower() in ["redhat", "centos", 'rhel']:
+        if ds.lower() in ["redhat", "centos", 'rhel']:
             if "python3" in language:
                 pytest.skip("Skipping python3 language for Centos or RHEL")
-        if os.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == 'ppg-11.6':
+        if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == 'ppg-11.6':
             if language in ['plpythonu', "plpython2u"]:
                 pytest.skip("Skipping python2 extensions for DEB based in 11.6 pg")
         lang = host.run("psql -c 'CREATE LANGUAGE {};'".format(language))
