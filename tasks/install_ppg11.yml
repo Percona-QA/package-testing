@@ -32,7 +32,7 @@
     apt_repository:
       repo: deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch-9 main
       state: present
-    when: ansible_distribution == "Debian" and ansible_distribution_major_version == '9' and "{{ lookup('env', 'PG_VERSION') }}" == "ppg-11.6"
+    when: ansible_distribution == "Debian" and ansible_distribution_major_version > '8' and "{{ lookup('env', 'PG_VERSION') }}" == "ppg-11.6"
 
   - name: Install llvm9 packages repos for debian9
     apt:
@@ -43,7 +43,7 @@
         - clang-9
         - libllvm9
         - llvm-9-dev
-    when: ansible_distribution == "Debian" and ansible_distribution_major_version == '9' and "{{ lookup('env', 'PG_VERSION') }}" == "ppg-11.6"
+    when: ansible_distribution == "Debian" and ansible_distribution_major_version > '8' and "{{ lookup('env', 'PG_VERSION') }}" == "ppg-11.6"
 
   - name: Clean dnf RHEL8
     become: true

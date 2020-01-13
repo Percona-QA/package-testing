@@ -32,7 +32,7 @@
           - percona-postgresql-pltcl-11-dbgsym
       when: ansible_os_family == "Debian"
 
-    - name: install Percona Platform for PostgreSQL deb packages
+    - name: Remove Percona Platform for PostgreSQL deb packages
       apt:
         name: "{{ packages }}"
         state: absent
