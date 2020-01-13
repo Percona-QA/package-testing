@@ -73,7 +73,7 @@ def insert_data(host):
     yield result.strip("\n")
 
 
-@pytest.mark.parametrize("package", versions['deb_packages'])
+@pytest.mark.parametrize("package", pg_versions['deb_packages'])
 def test_deb_package_is_installed(host, package):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
