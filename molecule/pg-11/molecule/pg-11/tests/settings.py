@@ -2,6 +2,20 @@ DEB_PKG_VERSIONS = ["11+204-1.buster", "204-1.buster", "1:11-5.buster", "1:11-5.
                     "11+204-1.stretch", "1:11-5.bionic", '11+204-1.bionic', "204-1.bionic", "1:11-5.cosmic",
                     "11+204-1.cosmic", "204-1.cosmic", "1:11-5.disco", "11+204-1.disco", "204-1.disco"]
 
+DEB116_PKG_VERSIONS = ["11+210-1.buster", "204-1.buster", "2:11-6.2.buster", "2:11-6.2.stretch", "204-1.stretch",
+                       "11+210-1.stretch", "2:11-6.2.bionic", '11+210-1.bionic', "204-1.bionic", "2:11-6.2.cosmic",
+                       "11+210-1.cosmic", "204-1.cosmic", "2:11-6.2.disco", "11+210-1.disco", "204-1.disco"]
+
+DEB116_PACKAGES = ["percona-postgresql-11", "percona-postgresql-client", "percona-postgresql",
+                   "percona-postgresql-client-11", "percona-postgresql-client-common",
+                   "percona-postgresql-contrib", "percona-postgresql-doc", "percona-postgresql-server-dev-all",
+                   "percona-postgresql-doc-11", "percona-postgresql-plperl-11", "percona-postgresql-common",
+                   "percona-postgresql-plpython3-11", "percona-postgresql-pltcl-11", "percona-postgresql-all",
+                   "percona-postgresql-server-dev-11", "percona-postgresql-11-dbgsym",
+                   "percona-postgresql-client-11-dbgsym", "percona-postgresql-plperl-11-dbgsym",
+                   "percona-postgresql-plpython3-11-dbgsym", "percona-postgresql-pltcl-11-dbgsym",
+                   "percona-postgresql-server-dev-11-dbgsym"]
+
 DEB_PACKAGES = ["percona-postgresql-11", "percona-postgresql-client", "percona-postgresql",
                 "percona-postgresql-client-11", "percona-postgresql-client-common",
                 "percona-postgresql-contrib", "percona-postgresql-doc", "percona-postgresql-server-dev-all",
@@ -131,7 +145,8 @@ pgaudit = {"ppg-11.5": {"version": "1.3"},
            "ppg-11.6": {"version": "1.4.0"}}
 
 
-versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB_PKG_VERSIONS,
+versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB116_PKG_VERSIONS,
+                         "deb_pachages": DEB116_PACKAGES,
                          "percona-postgresql-common": '210',
                          "percona-postgresql-client-common": "210",
                          "libpq_version": "110006",
@@ -140,6 +155,7 @@ versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB_PKG_VERSIONS,
                          "patroni": patroni['ppg-11.6'],
                          "pgrepack": pgrepack['ppg-11.6'], "libpq": "Version of libpq: 110006"},
             "ppg-11.5": {"version": "11.5", "deb_pkg_ver": DEB_PKG_VERSIONS,
+                         "deb_packages": DEB_PACKAGES,
                          "percona-postgresql-common": '204',
                          "percona-postgresql-client-common": "204",
                          "libpq_version": "110005",

@@ -3,7 +3,7 @@ import pytest
 
 import testinfra.utils.ansible_runner
 
-from .settings import versions, DEB_PACKAGES, RHEL_FILES, RPM7_PACKAGES, RPM_PACKAGES, EXTENSIONS, LANGUAGES, DEB_FILES
+from .settings import versions, RHEL_FILES, RPM7_PACKAGES, RPM_PACKAGES, EXTENSIONS, LANGUAGES, DEB_FILES
 
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -73,7 +73,7 @@ def insert_data(host):
     yield result.strip("\n")
 
 
-@pytest.mark.parametrize("package", DEB_PACKAGES)
+@pytest.mark.parametrize("package", versions['deb_packages'])
 def test_deb_package_is_installed(host, package):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
@@ -199,6 +199,10 @@ def test_enable_extension(host, extension):
     if os.lower() in ["redhat", "centos", 'rhel']:
         if "python3" in extension:
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
+    if os.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == '11.6':
+        if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
+                         'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
+            pytest.skip("Skipping python2 extensions for DEB based in 11.6 pg")
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION \"{}\";'".format(extension))
         assert install_extension.rc == 0, install_extension.stderr
@@ -214,6 +218,10 @@ def test_drop_extension(host, extension):
     if os.lower() in ["redhat", "centos", 'rhel']:
         if "python3" in extension:
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
+    if os.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == '11.6':
+        if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
+                         'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
+            pytest.skip("Skipping python2 extensions for DEB based in 11.6 pg")
     with host.sudo("postgres"):
         drop_extension = host.run("psql -c 'DROP EXTENSION \"{}\";'".format(extension))
         assert drop_extension.rc == 0, drop_extension.stderr
@@ -263,6 +271,9 @@ def test_language(host, language):
         if os.lower() in ["redhat", "centos", 'rhel']:
             if "python3" in language:
                 pytest.skip("Skipping python3 language for Centos or RHEL")
+        if os.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == '11.6':
+            if language in ['plpythonu', "plpython2u"]:
+                pytest.skip("Skipping python2 extensions for DEB based in 11.6 pg")
         lang = host.run("psql -c 'CREATE LANGUAGE {};'".format(language))
         assert lang.rc == 0, lang.stderr
         assert lang.stdout.strip("\n") == "CREATE LANGUAGE", lang.stdout
