@@ -199,7 +199,7 @@ def test_enable_extension(host, extension):
     if ds.lower() in ["redhat", "centos", 'rhel']:
         if "python3" in extension:
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
-    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == '11.6':
+    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == 'ppg-11.6':
         if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                          'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
             pytest.skip("Skipping python2 extensions for DEB based in 11.6 pg")
@@ -218,7 +218,7 @@ def test_drop_extension(host, extension):
     if ds.lower() in ["redhat", "centos", 'rhel']:
         if "python3" in extension:
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
-    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == '11.6':
+    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == 'ppg-11.6':
         if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                          'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
             pytest.skip("Skipping python2 extensions for DEB based in 11.6 pg")
@@ -271,7 +271,7 @@ def test_language(host, language):
         if os.lower() in ["redhat", "centos", 'rhel']:
             if "python3" in language:
                 pytest.skip("Skipping python3 language for Centos or RHEL")
-        if os.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == '11.6':
+        if os.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == 'ppg-11.6':
             if language in ['plpythonu', "plpython2u"]:
                 pytest.skip("Skipping python2 extensions for DEB based in 11.6 pg")
         lang = host.run("psql -c 'CREATE LANGUAGE {};'".format(language))
