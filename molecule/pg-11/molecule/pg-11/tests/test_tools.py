@@ -226,7 +226,7 @@ def test_pgaudit_package(host):
         dbgsym_pkgn = "percona-postgresql-11-pgaudit-dbgsym"
         dbgsym_pkg = host.package(dbgsym_pkgn)
         assert dbgsym_pkg.is_installed
-        assert "1.3" in dbgsym_pkg.version
+        assert pg_versions['pgaudit']['version'] in dbgsym_pkg.version
     if pkgn == "":
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
@@ -401,5 +401,5 @@ def test_patroni(patroni):
 
 
 def test_patroni_version(patroni_version):
-    assert patroni_version.rc == 0, patroni_version.stder
+    assert patroni_version.rc == 0, patroni_version.stderr
     assert patroni_version.stdout.strip("\n") == pg_versions['patroni']['binary_version']

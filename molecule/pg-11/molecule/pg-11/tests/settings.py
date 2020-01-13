@@ -98,7 +98,13 @@ pgrepack = {"ppg-11.5": {"version": "1.4.4",
                                                          " not stripped",
                                                "ubuntu": "",
                                                "debian": "",
-                                               "debian9.9": "",
+                                               "debian9.9": "/usr/lib/postgresql/11/bin/pg_repack:"
+                                                            " ELF 64-bit LSB shared object, x86-64,"
+                                                            " version 1 (SYSV), dynamically linked,"
+                                                            " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                                            " for GNU/Linux 2.6.32,"
+                                                            " BuildID[sha1]=882af5eb384bd255a2258bf842d9ec61c0c247dd,"
+                                                            " stripped",
                                                "rhel": ""}}}
 pgbackrest = {"ppg-11.5": {"version": "2.16",
                            "binary_version": "pgBackRest 2.16",
@@ -134,7 +140,11 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                                                 " BuildID[sha1]=4189028da7f21d6a0b4fa300cfe3605a1e3523ad, not stripped",
                                       "ubuntu": "",
                                       "debian": "",
-                                      "debian9.9": "",
+                                      "debian9.9": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
+                                                   " x86-64, version 1 (SYSV), dynamically linked,"
+                                                   " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                                   " for GNU/Linux 2.6.32,"
+                                                   " BuildID[sha1]=b28fdcb98063422df7c1eac6623054016f1f2781, stripped",
                                       "rhel": ""}}}
 patroni = {"ppg-11.5": {'version': "",
                         "binary_version": ""},
