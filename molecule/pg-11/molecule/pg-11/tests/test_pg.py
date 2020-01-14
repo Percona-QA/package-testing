@@ -185,11 +185,15 @@ def test_insert_data(insert_data):
 
 
 def test_extenstions_list(extension_list, host):
-    os = host.system_info.distribution
+    ds = host.system_info.distribution
     for extension in EXTENSIONS:
-        if os.lower() in ['centos', 'redhat', 'rhel']:
+        if ds.lower() in ['centos', 'redhat', 'rhel']:
             if "python3" in extension:
                 pytest.skip("Skipping python3 extensions for Centos or RHEL")
+        if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == 'ppg-11.6':
+            if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
+                             'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
+                pytest.skip("Skipping python2 extensions for DEB based in 11.6 pg")
         assert extension in extension_list
 
 
