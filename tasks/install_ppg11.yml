@@ -5,11 +5,11 @@
       url: https://apt.llvm.org/llvm-snapshot.gpg.key
       dest: /tmp/llvm-snapshot.gpg.key
       mode: '0440'
-    when: ansible_distribution == "Debian"
+    when: ansible_os_family == "Debian"
 
   - name: Add GPG key for llvm repos for debian9
     command: apt-key add /tmp/llvm-snapshot.gpg.key
-    when: ansible_distribution == "Debian"
+    when: ansible_os_family == "Debian"
 
   - name: install llvm repos for debian9
     apt_repository:
@@ -71,6 +71,20 @@
     when:
       - ansible_distribution == "Debian"
       - lookup('env', 'PG_VERSION') == "ppg-11.6"
+      - ansible_distribution_major_version == '9'
+
+  - name: Install llvm9 packages repos for debian10
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+        - libllvm9
+        - llvm-9-dev
+    when:
+      - ansible_distribution == "Debian"
+      - lookup('env', 'PG_VERSION') == "ppg-11.6"
+      - ansible_distribution_major_version == '10
 
   - name: Clean dnf RHEL8
     become: true
