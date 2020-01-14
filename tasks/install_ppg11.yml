@@ -39,6 +39,25 @@
     when:
       - ansible_distribution == "Debian"
       - lookup('env', 'PG_VERSION') == "ppg-11.6"
+      - ansible_distribution_major_version == '9'
+
+  - name: install 9 repos for debian0
+    apt_repository:
+      repo: deb http://apt.llvm.org/buster/ llvm-toolchain-buster-9 main
+      state: present
+    when:
+      - ansible_distribution == "Debian"
+      - lookup('env', 'PG_VERSION') == "ppg-11.6"
+      - ansible_distribution_major_version == '10'
+
+  - name: install 9 repos for Ubuntu
+    apt_repository:
+      repo: deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main
+      state: present
+    when:
+      - ansible_distribution == "Ubuntu"
+      - lookup('env', 'PG_VERSION') == "ppg-11.6"
+      - ansible_distribution_major_version == '18'
 
   - name: Install llvm9 packages repos for debian9
     apt:
