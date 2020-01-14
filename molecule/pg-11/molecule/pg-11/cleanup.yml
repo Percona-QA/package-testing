@@ -41,7 +41,9 @@
         - percona-postgresql-plpython-11
         - percona-postgresql-plpython-11-dbgsym
         - percona-postgresql-server-dev-11-dbgsym
-      when: ansible_os_family == "Debian" and "{{ lookup('env', 'PG_VERSION') }}" == "ppg-11.5"
+      when:
+        - ansible_os_family == "Debian"
+        - lookup('env', 'PG_VERSION') == "ppg-11.5"
 
     - name: remove Postgresql rpm packages
       yum:
