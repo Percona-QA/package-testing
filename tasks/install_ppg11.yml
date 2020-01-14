@@ -39,7 +39,7 @@
     when:
       - ansible_distribution == "Debian"
       - lookup('env', 'PG_VERSION') == "ppg-11.6"
-      - ansible_distribution_major_version == '9'
+      - ansible_distribution_major_version == "9"
 
   - name: install llvm9 repos for debian10
     apt_repository:
@@ -48,7 +48,7 @@
     when:
       - ansible_distribution == "Debian"
       - lookup('env', 'PG_VERSION') == "ppg-11.6"
-      - ansible_distribution_major_version == '10'
+      - ansible_distribution_major_version == "10"
 
   - name: install 9 repos for Ubuntu
     apt_repository:
@@ -57,7 +57,7 @@
     when:
       - ansible_distribution == "Ubuntu"
       - lookup('env', 'PG_VERSION') == "ppg-11.6"
-      - ansible_distribution_major_version == '18'
+      - ansible_distribution_major_version == "18"
 
   - name: Install llvm9 packages repos for debian9
     apt:
@@ -71,7 +71,7 @@
     when:
       - ansible_distribution == "Debian"
       - lookup('env', 'PG_VERSION') == "ppg-11.6"
-      - ansible_distribution_major_version == '9'
+      - ansible_distribution_major_version == "9"
 
   - name: Install llvm9 packages repos for debian10
     apt:
@@ -84,7 +84,7 @@
     when:
       - ansible_distribution == "Debian"
       - lookup('env', 'PG_VERSION') == "ppg-11.6"
-      - ansible_distribution_major_version == '10
+      - ansible_distribution_major_version == "10"
 
   - name: Install llvm9 packages repos for ubuntu
     apt:
@@ -98,7 +98,7 @@
     when:
       - ansible_distribution == "Ubuntu"
       - lookup('env', 'PG_VERSION') == "ppg-11.6"
-      - ansible_distribution_major_version == '18
+      - ansible_distribution_major_version == "18"
 
   - name: Clean dnf RHEL8
     become: true
