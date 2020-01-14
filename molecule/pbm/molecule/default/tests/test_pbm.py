@@ -59,7 +59,7 @@ def set_store(host):
     :param host:
     :return:
     """
-    command = "pbm config --file=/etc/pbm-agent-storage.conf --mongodb-uri=mongodb://localhost:27017/?replicaSet=rs1"
+    command = "pbm config --file=/etc/pbm-agent-storage.conf --mongodb-uri=mongodb://localhost:27017/"
     result = host.run(command)
     return result
 
