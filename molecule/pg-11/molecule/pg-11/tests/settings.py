@@ -155,7 +155,7 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                                               " interpreter /lib64/ld-linux-x86-64.so.2,"
                                               " for GNU/Linux 3.2.0,"
                                               " BuildID[sha1]=29c29685ff2008d3930b309ecbb206cda1b4d51e,"
-                                              " with debug_info, not stripped, too many notes"}}}
+                                              " with debug_info, not stripped, too many notes "}}}
 patroni = {"ppg-11.5": {'version': "",
                         "binary_version": ""},
            "ppg-11.6": {'version': "1.6.3",
