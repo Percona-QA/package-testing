@@ -73,32 +73,32 @@
       - lookup('env', 'PG_VERSION') == "ppg-11.6"
       - ansible_distribution_major_version == "9"
 
-  - name: Install llvm9 packages repos for debian10
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-    vars:
-      packages:
-        - libllvm9
-        - llvm-9-dev
-    when:
-      - ansible_distribution == "Debian"
-      - lookup('env', 'PG_VERSION') == "ppg-11.6"
-      - ansible_distribution_major_version == "10"
-
-  - name: Install llvm9 packages repos for ubuntu
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-    vars:
-      packages:
-        - clang-9
-        - libllvm9
-        - llvm-9-dev
-    when:
-      - ansible_distribution == "Ubuntu"
-      - lookup('env', 'PG_VERSION') == "ppg-11.6"
-      - ansible_distribution_major_version == "18"
+#  - name: Install llvm9 packages repos for debian10
+#    apt:
+#      name: "{{ packages }}"
+#      update_cache: yes
+#    vars:
+#      packages:
+#        - libllvm9
+#        - llvm-9-dev
+#    when:
+#      - ansible_distribution == "Debian"
+#      - lookup('env', 'PG_VERSION') == "ppg-11.6"
+#      - ansible_distribution_major_version == "10"
+#
+#  - name: Install llvm9 packages repos for ubuntu
+#    apt:
+#      name: "{{ packages }}"
+#      update_cache: yes
+#    vars:
+#      packages:
+#        - clang-9
+#        - libllvm9
+#        - llvm-9-dev
+#    when:
+#      - ansible_distribution == "Ubuntu"
+#      - lookup('env', 'PG_VERSION') == "ppg-11.6"
+#      - ansible_distribution_major_version == "18"
 
   - name: Clean dnf RHEL8
     become: true
