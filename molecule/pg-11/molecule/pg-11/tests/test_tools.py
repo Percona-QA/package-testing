@@ -13,6 +13,7 @@ pg_versions = versions[os.getenv("PG_VERSION")]
 
 @pytest.fixture(scope="module")
 def operating_system(host):
+    print(host.system_info.distribution)
     return host.system_info.distribution
 
 
