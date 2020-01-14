@@ -103,7 +103,13 @@ pgrepack = {"ppg-11.5": {"version": "1.4.4",
                                                          " for GNU/Linux 3.2.0,"
                                                          " BuildID[sha1]=6354cb6b54e6c7c114eafbb054307cd9880a08e4,"
                                                          " stripped",
-                                               "debian": "",
+                                               "debian": "/usr/lib/postgresql/11/bin/pg_repack:"
+                                                         " ELF 64-bit LSB shared object, x86-64,"
+                                                         " version 1 (SYSV), dynamically linked,"
+                                                         " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                                         " for GNU/Linux 3.2.0,"
+                                                         " BuildID[sha1]=51ee777d6a32be840cd12e7c826a05f4af6e709a,"
+                                                         " stripped",
                                                "debian9.9": "/usr/lib/postgresql/11/bin/pg_repack:"
                                                             " ELF 64-bit LSB shared object, x86-64,"
                                                             " version 1 (SYSV), dynamically linked,"
@@ -150,7 +156,11 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                                                 " for GNU/Linux 2.6.32,"
                                                 " BuildID[sha1]=4189028da7f21d6a0b4fa300cfe3605a1e3523ad, not stripped",
                                       "ubuntu": "",
-                                      "debian": "",
+                                      "debian": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
+                                                " x86-64, version 1 (SYSV), dynamically linked,"
+                                                " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                                " for GNU/Linux 3.2.0,"
+                                                " BuildID[sha1]=2951dc20ccbda22ac64fddd635eef812d228fb87, stripped",
                                       "debian9.9": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
                                                    " x86-64, version 1 (SYSV), dynamically linked,"
                                                    " interpreter /lib64/ld-linux-x86-64.so.2,"
