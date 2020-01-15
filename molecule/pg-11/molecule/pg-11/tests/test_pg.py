@@ -286,53 +286,67 @@ def test_language(host, language):
         assert drop_lang.stdout.strip("\n") == "DROP LANGUAGE", lang.stdout
 
 
-# @pytest.mark.parametrize("package", DEB_PACKAGES)
-# def test_deb_packages_provides(host, package):
-#     """Execute command for check provides and check that we have link to vanila postgres
-#
-#     :param host:
-#     :param package:
-#     :return:
-#     """
-#     os = host.system_info.distribution
-#     if os.lower() in ["redhat", "centos", 'rhel']:
-#         pytest.skip("This test only for Debian based platforms")
-#     cmd = ""
-#     result = host.run(cmd)
-#     assert package in result.stdout, result.stdout
-#
+@pytest.mark.parametrize("package", pg_versions['deb_packages'])
+def test_deb_packages_provides(host, package):
+    """Execute command for check provides and check that we have link to vanila postgres
 
-# @pytest.mark.parametrize("package", RPM_PACKAGES)
-# def test_rpm_package_provides(host, package):
-#     """Execute command for check provides and check that we have link to vanila postgres
-#
-#     :param host:
-#     :param package:
-#     :return:
-#     """
-#     os = host.system_info.distribution
-#     if os in ["debian", "ubuntu"]:
-#         pytest.skip("This test only for RHEL based platforms")
-#     if host.system_info.release == "7":
-#         pytest.skip("Only for RHEL8 tests")
-#     cmd = ""
-#     result = host.run(cmd)
-#     assert package in result.stdout, result.stdout
-#
-#
-# @pytest.mark.parametrize("package", RPM7_PACKAGES)
-# def test_rpm7_package_provides(host, package):
-#     """Execute command for check provides and check that we have link to vanila postgres
-#
-#     :param host:
-#     :param package:
-#     :return:
-#     """
-#     os = host.system_info.distribution
-#     if os in ["debian", "ubuntu"]:
-#         pytest.skip("This test only for RHEL based platforms")
-#     if host.system_info.release == "8.0":
-#         pytest.skip("Only for centos7 tests")
-#     cmd = ""
-#     result = host.run(cmd)
-#     assert package in result.stdout, result.stdout
+    :param host:
+    :param package:
+    :return:
+    """
+    os = host.system_info.distribution
+    if os.lower() in ["redhat", "centos", 'rhel']:
+        pytest.skip("This test only for Debs.ian based platforms")
+    cmd = "dpkg -s {} | grep Provides".format(package)
+    result = host.run(cmd)
+    vanila_package_name = package.strip('percona').lstrip("-")
+    assert result.rc == 0, result.stdout
+    assert vanila_package_name in result.stdout, result.stdout
+
+
+@pytest.mark.parametrize("package", RPM_PACKAGES)
+def test_rpm_package_provides(host, package):
+    """Execute command for check provides and check that we have link to vanila postgres
+
+    :param host:
+    :param package:
+    :return:
+    """
+    os = host.system_info.distribution
+    if os in ["debian", "ubuntu"]:
+        pytest.skip("This test only for RHEL based platforms")
+    if host.system_info.release == "7":
+        pytest.skip("Only for RHEL8 tests")
+    vanila_package_name = package.strip('percona').lstrip("-")
+    cmd = "rpm -q --provides {} | awk \'{{ print $1 }}\'".format(package)
+    result = host.run(cmd)
+    provides = result.stdout.split()
+    assert result.rc == 0, result.stderr
+    assert len(provides) > 2
+    for pkg in provides:
+        assert vanila_package_name in pkg, pkg
+    assert package in result.stdout, result.stdout
+
+
+@pytest.mark.parametrize("package", RPM7_PACKAGES)
+def test_rpm7_package_provides(host, package):
+    """Execute command for check provides and check that we have link to vanila postgres
+
+    :param host:
+    :param package:
+    :return:
+    """
+    os = host.system_info.distribution
+    if os in ["debian", "ubuntu"]:
+        pytest.skip("This test only for RHEL based platforms")
+    if host.system_info.release == "8.0":
+        pytest.skip("Only for centos7 tests")
+    vanila_package_name = package.strip('percona').lstrip("-")
+    cmd = "rpm -q --provides {} | awk \'{{ print $1 }}\'".format(package)
+    result = host.run(cmd)
+    provides = result.stdout.split()
+    assert result.rc == 0, result.stderr
+    assert len(provides) > 2
+    for pkg in provides:
+        assert vanila_package_name in pkg, pkg
+    assert package in result.stdout, result.stdout
