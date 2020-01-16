@@ -299,9 +299,11 @@ def test_deb_packages_provides(host, package):
         pytest.skip("This test only for Debs.ian based platforms")
     cmd = "dpkg -s {} | grep Provides".format(package)
     result = host.run(cmd)
-    vanila_package_name = package.strip('percona').lstrip("-")
+    vanila_package_name = package.strip('percona').lstrip("-").rstrip('11').rstrip("-")
+    provides = set(result.stdout.split(","))
+    print(provides)
     assert result.rc == 0, result.stdout
-    assert vanila_package_name in result.stdout, result.stdout
+    assert vanila_package_name in provides, result.stdout
 
 
 @pytest.mark.parametrize("package", RPM_PACKAGES)
@@ -320,7 +322,8 @@ def test_rpm_package_provides(host, package):
     vanila_package_name = package.strip('percona').lstrip("-")
     cmd = "rpm -q --provides {} | awk \'{{ print $1 }}\'".format(package)
     result = host.run(cmd)
-    provides = result.stdout.split()
+    provides = result.stdout.split("\n")
+    print(provides)
     assert result.rc == 0, result.stderr
     assert len(provides) > 2
     for pkg in provides:
