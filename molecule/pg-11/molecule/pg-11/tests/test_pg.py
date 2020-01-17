@@ -300,7 +300,7 @@ def test_deb_packages_provides(host, package):
         pytest.skip("This test only for Debs.ian based platforms")
     cmd = "dpkg -s {} | grep Provides".format(package)
     result = host.run(cmd)
-    vanila_package_name = package.strip('percona').lstrip("-")
+    vanila_package_name = package.lstrip('percona').lstrip("-")
     provides = set(result.stdout.split())
     print(provides)
     assert result.rc == 0, result.stdout
@@ -321,10 +321,10 @@ def test_rpm_package_provides(host, package):
         pytest.skip("This test only for RHEL based platforms")
     if host.system_info.release == "7":
         pytest.skip("Only for RHEL8 tests")
-    vanila_package_name = package.strip('percona').lstrip("-")
+    vanila_package_name = package.lstrip('percona').lstrip("-")
     cmd = "rpm -q --provides {} | awk \'{{ print $1 }}\'".format(package)
     result = host.run(cmd)
-    provides = result.stdout.split("\n")
+    provides = set(result.stdout.split("\n"))
     print(provides)
     assert result.rc == 0, result.stderr
     assert vanila_package_name in provides, result.stdout
@@ -344,10 +344,10 @@ def test_rpm7_package_provides(host, package):
         pytest.skip("This test only for RHEL based platforms")
     if host.system_info.release == "8.0":
         pytest.skip("Only for centos7 tests")
-    vanila_package_name = package.strip('percona').lstrip("-")
+    vanila_package_name = package.lstrip('percona').lstrip("-")
     cmd = "rpm -q --provides {} | awk \'{{ print $1 }}\'".format(package)
     result = host.run(cmd)
-    provides = result.stdout.split()
+    provides = set(result.stdout.split())
     print(provides)
     assert result.rc == 0, result.stderr
     assert vanila_package_name in provides, result.stdout
