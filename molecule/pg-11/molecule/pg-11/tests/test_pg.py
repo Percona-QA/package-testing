@@ -348,6 +348,7 @@ def test_rpm7_package_provides(host, package):
     cmd = "rpm -q --provides {} | awk \'{{ print $1 }}\'".format(package)
     result = host.run(cmd)
     provides = result.stdout.split()
+    print(provides)
     assert result.rc == 0, result.stderr
     assert len(provides) > 2
     for pkg in provides:
