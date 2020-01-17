@@ -300,7 +300,7 @@ def test_deb_packages_provides(host, package):
     cmd = "dpkg -s {} | grep Provides".format(package)
     result = host.run(cmd)
     vanila_package_name = package.strip('percona').lstrip("-").rstrip('11').rstrip("-")
-    provides = set(result.stdout.split(","))
+    provides = set(result.stdout.split())
     print(provides)
     assert result.rc == 0, result.stdout
     assert vanila_package_name in provides, result.stdout
