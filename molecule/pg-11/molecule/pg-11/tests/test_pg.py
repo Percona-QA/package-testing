@@ -286,6 +286,7 @@ def test_language(host, language):
         assert drop_lang.stdout.strip("\n") == "DROP LANGUAGE", lang.stdout
 
 
+@pytest.mark.skipif(os.getenv("PG_VERSION") == 'ppg-11.5', reason="Only 11.6 pg test")
 @pytest.mark.parametrize("package", pg_versions['deb_packages'])
 def test_deb_packages_provides(host, package):
     """Execute command for check provides and check that we have link to vanila postgres
@@ -306,6 +307,7 @@ def test_deb_packages_provides(host, package):
     assert vanila_package_name in provides, result.stdout
 
 
+@pytest.mark.skipif(os.getenv("PG_VERSION") == 'ppg-11.5', reason="Only 11.6 pg test")
 @pytest.mark.parametrize("package", RPM_PACKAGES)
 def test_rpm_package_provides(host, package):
     """Execute command for check provides and check that we have link to vanila postgres
@@ -328,6 +330,7 @@ def test_rpm_package_provides(host, package):
     assert vanila_package_name in provides, result.stdout
 
 
+@pytest.mark.skipif(os.getenv("PG_VERSION") == 'ppg-11.5', reason="Only 11.6 pg test")
 @pytest.mark.parametrize("package", RPM7_PACKAGES)
 def test_rpm7_package_provides(host, package):
     """Execute command for check provides and check that we have link to vanila postgres
