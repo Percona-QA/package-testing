@@ -325,10 +325,7 @@ def test_rpm_package_provides(host, package):
     provides = result.stdout.split("\n")
     print(provides)
     assert result.rc == 0, result.stderr
-    assert len(provides) > 2
-    for pkg in provides:
-        assert vanila_package_name in pkg, pkg
-    assert package in result.stdout, result.stdout
+    assert vanila_package_name in provides, result.stdout
 
 
 @pytest.mark.parametrize("package", RPM7_PACKAGES)
@@ -350,7 +347,4 @@ def test_rpm7_package_provides(host, package):
     provides = result.stdout.split()
     print(provides)
     assert result.rc == 0, result.stderr
-    assert len(provides) > 2
-    for pkg in provides:
-        assert vanila_package_name in pkg, pkg
-    assert package in result.stdout, result.stdout
+    assert vanila_package_name in provides, result.stdout
