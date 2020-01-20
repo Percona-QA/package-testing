@@ -307,12 +307,13 @@ def test_deb_packages_provides(host, percona_package, vanila_package):
 
 
 @pytest.mark.skipif(os.getenv("PG_VERSION") == 'ppg-11.5', reason="Only 11.6 pg test")
-@pytest.mark.parametrize("package", RPM_PACKAGES)
-def test_rpm_package_provides(host, package):
+@pytest.mark.parametrize("percona_package, vanila_package", pg_versions['rpm_provides'])
+def test_rpm_package_provides(host, percona_package, vanila_package):
     """Execute command for check provides and check that we have link to vanila postgres
 
     :param host:
-    :param package:
+    :param vanila_package:
+    :param percona_package:
     :return:
     """
     os = host.system_info.distribution
@@ -320,13 +321,12 @@ def test_rpm_package_provides(host, package):
         pytest.skip("This test only for RHEL based platforms")
     if host.system_info.release == "7":
         pytest.skip("Only for RHEL8 tests")
-    vanila_package_name = package.lstrip('percona').lstrip("-")
-    cmd = "rpm -q --provides {} | awk \'{{ print $1 }}\'".format(package)
+    cmd = "rpm -q --provides {} | awk \'{{ print $1 }}\'".format(percona_package)
     result = host.run(cmd)
     provides = set(result.stdout.split("\n"))
     print(provides)
     assert result.rc == 0, result.stderr
-    assert vanila_package_name in provides, result.stdout
+    assert vanila_package in provides, result.stdout
 
 
 @pytest.mark.skipif(os.getenv("PG_VERSION") == 'ppg-11.5', reason="Only 11.6 pg test")
