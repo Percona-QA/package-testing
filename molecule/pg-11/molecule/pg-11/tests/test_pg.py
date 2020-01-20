@@ -3,7 +3,7 @@ import pytest
 
 import testinfra.utils.ansible_runner
 
-from .settings import versions, RHEL_FILES, RPM7_PACKAGES, RPM_PACKAGES, EXTENSIONS, LANGUAGES, DEB_FILES
+from .settings import versions, RHEL_FILES, RPM7_PACKAGES, RPM_PACKAGES, EXTENSIONS, LANGUAGES, DEB_FILES, DEB_PROVIDES
 
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -287,24 +287,24 @@ def test_language(host, language):
 
 
 @pytest.mark.skipif(os.getenv("PG_VERSION") == 'ppg-11.5', reason="Only 11.6 pg test")
-@pytest.mark.parametrize("package", pg_versions['deb_packages'])
-def test_deb_packages_provides(host, package):
+@pytest.mark.parametrize("percona_package, vanila_package", DEB_PROVIDES)
+def test_deb_packages_provides(host, percona_package, vanila_package):
     """Execute command for check provides and check that we have link to vanila postgres
 
     :param host:
-    :param package:
+    :param vanila_package:
+    :param percona_package:
     :return:
     """
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
         pytest.skip("This test only for Debs.ian based platforms")
-    cmd = "dpkg -s {} | grep Provides".format(package)
+    cmd = "dpkg -s {} | grep Provides".format(percona_package)
     result = host.run(cmd)
-    vanila_package_name = package.lstrip('percona').lstrip("-")
     provides = set(result.stdout.split())
     print(provides)
     assert result.rc == 0, result.stdout
-    assert vanila_package_name in provides, result.stdout
+    assert vanila_package in provides, result.stdout
 
 
 @pytest.mark.skipif(os.getenv("PG_VERSION") == 'ppg-11.5', reason="Only 11.6 pg test")

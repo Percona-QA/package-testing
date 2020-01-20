@@ -180,6 +180,17 @@ patroni = {"ppg-11.5": {'version': "",
 pgaudit = {"ppg-11.5": {"version": "1.3"},
            "ppg-11.6": {"version": "1.4.0"}}
 
+DEB_PROVIDES = [("percona-postgresql-11", "postgresql-11"), ("percona-postgresql-client", "postgresql-client"),
+                ("percona-postgresql", "postgresql"), ("percona-postgresql-client-11", "postgresql-client-11"),
+                ("postgresql-client-common", "postgresql-client-common"),
+                ("percona-postgresql-contrib", "postgresql-contrib"), ("percona-postgresql-doc", "ppostgresql-doc"),
+                ("percona-postgresql-server-dev-all", "postgresql-server-dev-all"),
+                ('percona-postgresql-plperl-11', 'postgresql-plperl-11'),
+                ("percona-postgresql-common", "postgresql-common"),
+                ("percona-postgresql-plpython3-11", "postgresql-11-plpython3"),
+                ("percona-postgresql-pltcl-11", "postgresql-11-pltcl"), ("percona-postgresql-all", "postgresql-all"),
+                ("percona-postgresql-server-dev-11", 'postgresql-server-dev-all-11')]
+
 
 versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB116_PKG_VERSIONS,
                          "deb_packages": DEB116_PACKAGES,
