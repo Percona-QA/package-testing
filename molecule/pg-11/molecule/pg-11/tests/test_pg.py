@@ -302,7 +302,6 @@ def test_deb_packages_provides(host, percona_package, vanila_package):
     cmd = "dpkg -s {} | grep Provides".format(percona_package)
     result = host.run(cmd)
     provides = set(result.stdout.split())
-    print(provides)
     assert result.rc == 0, result.stdout
     assert vanila_package in provides, result.stdout
 
@@ -348,6 +347,5 @@ def test_rpm7_package_provides(host, percona_package, vanila_package):
     cmd = "rpm -q --provides {} | awk \'{{ print $1 }}\'".format(percona_package)
     result = host.run(cmd)
     provides = set(result.stdout.split())
-    print(provides)
     assert result.rc == 0, result.stderr
     assert vanila_package in provides, result.stdout

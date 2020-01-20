@@ -204,7 +204,20 @@ RPM7_PROVIDES = [("percona-postgresql11", 'postgresql11'),
                  ("percona-postgresql11-test", 'postgresql11-test'),
                  ("percona-postgresql-client-common", 'postgresql-client-common')]
 
-RPM_PROVIDES = [()]
+RPM_PROVIDES = [("percona-postgresql11", "postgresql11"),
+                ("percona-postgresql11-contrib", "postgresql11-contrib"),
+                ("percona-postgresql-common", "postgresql-common"),
+                ("percona-postgresql11-devel", "postgresql-devel"),
+                ("percona-postgresql11-docs", "postgresql-docs"),
+                ("percona-postgresql11-libs", "postgresql11-libs"),
+                ("percona-postgresql11-llvmjit", "postgresql11-llvmjit"),
+                ("percona-postgresql11-plperl", 'postgresql11-plperl'),
+                ("percona-postgresql11-plpython", 'postgresql-plpython'),
+                ("percona-postgresql11-pltcl", 'postgresql11-pltcl'),
+                ("percona-postgresql11-server", 'postgresql11-server'),
+                ("percona-postgresql11-test", "postgresql11-test"),
+                ("percona-postgresql-client-common", 'postgresql-client-common')
+                ]
 
 
 versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB116_PKG_VERSIONS,
