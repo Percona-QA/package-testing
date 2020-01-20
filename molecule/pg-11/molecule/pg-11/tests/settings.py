@@ -116,7 +116,7 @@ pgrepack = {"ppg-11.5": {"version": "1.4.4",
                                                             " interpreter /lib64/ld-linux-x86-64.so.2,"
                                                             " for GNU/Linux 2.6.32,"
                                                             " BuildID[sha1]=882af5eb384bd255a2258bf842d9ec61c0c247dd,"
-                                                            " stripped",
+                                                            " stripped",
                                                "rhel": "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable,"
                                                        " x86-64, version 1 (SYSV), dynamically linked,"
                                                        " interpreter /lib64/ld-linux-x86-64.so.2,"
@@ -165,7 +165,7 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                                                    " x86-64, version 1 (SYSV), dynamically linked,"
                                                    " interpreter /lib64/ld-linux-x86-64.so.2,"
                                                    " for GNU/Linux 2.6.32,"
-                                                   " BuildID[sha1]=b28fdcb98063422df7c1eac6623054016f1f2781, stripped",
+                                                   " BuildID[sha1]=b28fdcb98063422df7c1eac6623054016f1f2781, stripped",
                                       "rhel": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object, x86-64,"
                                               " version 1 (SYSV), dynamically linked,"
                                               " interpreter /lib64/ld-linux-x86-64.so.2,"
@@ -182,14 +182,29 @@ pgaudit = {"ppg-11.5": {"version": "1.3"},
 
 DEB_PROVIDES = [("percona-postgresql-11", "postgresql-11"), ("percona-postgresql-client", "postgresql-client"),
                 ("percona-postgresql", "postgresql"), ("percona-postgresql-client-11", "postgresql-client-11"),
-                ("postgresql-client-common", "postgresql-client-common"),
-                ("percona-postgresql-contrib", "postgresql-contrib"), ("percona-postgresql-doc", "ppostgresql-doc"),
+                ("percona-postgresql-client-common", "postgresql-client-common"),
+                ("percona-postgresql-contrib", "postgresql-contrib"), ("percona-postgresql-doc", "postgresql-doc"),
                 ("percona-postgresql-server-dev-all", "postgresql-server-dev-all"),
                 ('percona-postgresql-plperl-11', 'postgresql-plperl-11'),
                 ("percona-postgresql-common", "postgresql-common"),
                 ("percona-postgresql-plpython3-11", "postgresql-11-plpython3"),
                 ("percona-postgresql-pltcl-11", "postgresql-11-pltcl"), ("percona-postgresql-all", "postgresql-all"),
                 ("percona-postgresql-server-dev-11", 'postgresql-server-dev-all-11')]
+
+RPM7_PROVIDES = [("percona-postgresql11", 'postgresql11'),
+                 ("percona-postgresql11-contrib", 'postgresql11-contrib'),
+                 ("percona-postgresql-common", 'postgresql-common'),
+                 ("percona-postgresql11-devel", 'postgresql11-devel'),
+                 ("percona-postgresql11-docs", "postgresql-docs"),
+                 ("percona-postgresql11-libs", 'postgresql11-libs'),
+                 ("percona-postgresql11-llvmjit", 'postgresql11-llvmjit'),
+                 ('percona-postgresql11-plperl', 'postgresql11-plperl'),
+                 ("percona-postgresql11-pltcl", 'postgresql11-pltcl'),
+                 ('percona-postgresql11-server', 'postgresql11-server'),
+                 ("percona-postgresql11-test", 'postgresql11-test'),
+                 ("percona-postgresql-client-common", 'postgresql-client-common')]
+
+RPM_PROVIDES = [()]
 
 
 versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB116_PKG_VERSIONS,
@@ -200,7 +215,9 @@ versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB116_PKG_VERSIONS,
                          "pgaudit": pgaudit['ppg-11.6'],
                          "pgbackrest": pgbackrest['ppg-11.6'],
                          "patroni": patroni['ppg-11.6'],
-                         "pgrepack": pgrepack['ppg-11.6'], "libpq": "Version of libpq: 110006"},
+                         "pgrepack": pgrepack['ppg-11.6'], "libpq": "Version of libpq: 110006",
+                         "deb_provides": DEB_PROVIDES,
+                         "rpm7_provides": RPM7_PROVIDES},
             "ppg-11.5": {"version": "11.5", "deb_pkg_ver": DEB_PKG_VERSIONS,
                          "deb_packages": DEB_PACKAGES,
                          "percona-postgresql-common": '204',
