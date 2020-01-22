@@ -65,6 +65,8 @@ def pgaudit(host):
         result = host.check_output(drop_pgaudit)
         assert result.strip("\n") == "DROP EXTENSION"
     cmd = "sudo systemctl restart postgresql"
+    if os.lower in ["redhat", "centos", 'rhel']:
+        cmd = "sudo systemctl restart postgresql-11"
     result = host.run(cmd)
     assert result.rc == 0
 
@@ -392,13 +394,6 @@ def test_patroni_package(host):
     pkg = host.package(pkgn)
     assert pkg.is_installed
     assert pg_versions['patroni']['version'] in pkg.version
-
-
-@pytest.mark.skipif(os.getenv("PG_VERSION") == "ppg-11.6", reason="Incorrect PG version for this test")
-def test_patroni(patroni):
-    assert "Usage: /opt/patroni/bin/patroni config.yml" in patroni.stdout, patroni.stdout
-    assert "Patroni may also read the configuration" \
-           " from the PATRONI_CONFIGURATION environment variable" in patroni.stdout, patroni.stdout
 
 
 def test_patroni_version(patroni_version):

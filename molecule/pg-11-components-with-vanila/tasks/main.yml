@@ -52,12 +52,20 @@
 
 - name: Install vanila postgres RHEL
   yum:
-    name: postgresql11-server
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - postgresql11-server
+      - postgresql11-contrib
   when: ansible_os_family == "RedHat"
 
 - name: Install vanila postgres DEB
   apt:
-    name: postgresql-11
+    name: "{{ packages }}" 
+  vars:
+    packages:
+      - postgresql-11
+      - postgresql-contrib
   when: ansible_os_family == "Debian"
 
 - name: Initialize Postgres RHEL
