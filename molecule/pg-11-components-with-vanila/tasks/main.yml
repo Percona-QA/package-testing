@@ -61,7 +61,7 @@
 
 - name: Install vanila postgres DEB
   apt:
-    name: "{{ packages }}" 
+    name: "{{ packages }}"
   vars:
     packages:
       - postgresql-11

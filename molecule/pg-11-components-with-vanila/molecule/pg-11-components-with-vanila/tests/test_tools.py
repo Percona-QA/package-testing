@@ -13,14 +13,14 @@ pg_versions = versions['ppg-11.6']
 
 @pytest.fixture(scope="module")
 def operating_system(host):
-    print(host.system_info.distribution)
     return host.system_info.distribution
 
 
 @pytest.fixture()
 def load_data(host):
     pgbench = "pgbench -i -s 1"
-    assert host.run(pgbench).rc == 0
+    cmd = host.run(pgbench)
+    assert cmd.rc == 0, cmd.stdout
     select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
     assert host.run(select).rc == 0
 
@@ -65,7 +65,7 @@ def pgaudit(host):
         result = host.check_output(drop_pgaudit)
         assert result.strip("\n") == "DROP EXTENSION"
     cmd = "sudo systemctl restart postgresql"
-    if os.lower in ["redhat", "centos", 'rhel']:
+    if os.lower() in ["redhat", "centos", 'rhel']:
         cmd = "sudo systemctl restart postgresql-11"
     result = host.run(cmd)
     assert result.rc == 0
@@ -173,7 +173,8 @@ def pg_repack_functional(host):
     os = host.system_info.distribution
     with host.sudo("postgres"):
         pgbench = "pgbench -i -s 1"
-        assert host.run(pgbench).rc == 0
+        cmd = host.run(pgbench)
+        assert cmd.rc == 0, cmd.stdout
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
         assert host.run(select).rc == 0
         if os.lower() in ["redhat", "centos", 'rhel']:
@@ -189,7 +190,8 @@ def pg_repack_functional(host):
 def pg_repack_dry_run(host, operating_system):
     with host.sudo("postgres"):
         pgbench = "pgbench -i -s 1"
-        assert host.run(pgbench).rc == 0
+        cmd = host.run(pgbench)
+        assert cmd.run(pgbench).rc == 0, cmd.stdout
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
         assert host.run(select).rc == 0
         if operating_system.lower() in ["redhat", "centos", 'rhel']:
