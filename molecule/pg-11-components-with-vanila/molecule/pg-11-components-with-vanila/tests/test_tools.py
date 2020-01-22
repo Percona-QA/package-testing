@@ -191,7 +191,7 @@ def pg_repack_dry_run(host, operating_system):
     with host.sudo("postgres"):
         pgbench = "pgbench -i -s 1"
         cmd = host.run(pgbench)
-        assert cmd.run(pgbench).rc == 0, cmd.stdout
+        assert cmd.rc == 0, cmd.stdout
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
         assert host.run(select).rc == 0
         if operating_system.lower() in ["redhat", "centos", 'rhel']:
