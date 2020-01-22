@@ -23,7 +23,7 @@
     dest: /usr/bin/percona-release
     mode: '755'
     force: true
-  
+
 - name: setup temporary repo until percona-release is updated
   command: percona-release enable ppg-11.6 {{ repo }}
   vars:
@@ -47,7 +47,7 @@
   when: ansible_distribution == "Debian"
 
 - name: Add PostgreSQL YUM Repository
-  yum: name=hhttps://download.postgresql.org/pub/repos/yum/11/redhat/rhel-7-x86_64/pgdg-centos11-11-2.noarch.rpm state=present
+  yum: name=https://download.postgresql.org/pub/repos/yum/11/redhat/rhel-7-x86_64/pgdg-centos11-11-2.noarch.rpm state=present
   when: ansible_os_family == "RedHat"
 
 - name: Install vanila postgres RHEL
