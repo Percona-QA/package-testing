@@ -1,0 +1,109 @@
+---
+# This playbook does following:
+#   enables Percona repository
+#   installs Percona Platform for PostgreSQL packages
+#   does some tests
+#- name: include tasks for test env setup
+#  include_tasks: ../../../tasks/test_prep.yml
+- name: include tasks for test env setup
+  include_tasks: ../test_prep.yml
+
+### temp part until percona-release is updated for PPG project
+
+- name: Install percona repository package
+  apt:
+    deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+  when: ansible_os_family == "Debian"
+
+- name: add the main Percona yum repos for centos 6 and 7
+  yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+  when: ansible_os_family == "RedHat"
+
+- name: setup temporary repo until percona-release is updated
+  command: percona-release enable ppg-11.6 {{ repo }}
+  vars:
+    repo: "{{ lookup('env', 'REPO') }}"
+
+- name: enable tools repo
+  command: percona-release enable tools {{ repo }}
+  vars:
+    repo: "{{ lookup('env', 'REPO') }}"
+
+- name: install Percona Platform for PostgreSQL deb packages
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+    state: latest
+  vars:
+    packages:
+    - percona-postgresql
+    - percona-postgresql-11
+    - percona-postgresql-all
+    - percona-postgresql-client
+    - percona-postgresql-client-11
+    - percona-postgresql-client-common
+    - percona-postgresql-common
+    - percona-postgresql-contrib
+    - percona-postgresql-server-dev-11
+    - percona-postgresql-server-dev-all
+  when: ansible_os_family == "Debian"
+
+- name: DNF clean RHEL
+  command: sudo dnf module disable postgresql
+  when: ansible_distribution == "RedHat"
+
+- name: Disable dnf module for RHEL
+  command: sudo dnf module disable postgresql
+  when: ansible_distribution == "RedHat"
+
+- name: install Percona Platform for PostgreSQL rpm packages for RHEL
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+      - percona-postgresql-client-common
+      - percona-postgresql-common
+      - percona-postgresql-server-dev-all
+      - percona-postgresql11
+      - percona-postgresql11-contrib
+      - percona-postgresql11-devel
+      - percona-postgresql11-libs
+      - percona-postgresql11-llvmjit
+      - percona-postgresql11-server
+  when: ansible_os_family == "RedHat"
+
+- name: Initialize Postgres RHEL
+  command: /usr/pgsql-11/bin/postgresql-11-setup initdb
+  environment:
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  when: ansible_os_family == "RedHat"
+
+- name: Start Postgres RHEL
+  service:
+    name: postgresql-11
+    state: started
+    enabled: yes
+  when: ansible_os_family == "RedHat"
+
+- name: Restart Postgres RHEL
+  service:
+    name: postgresql-11
+    state: restarted
+  when: ansible_os_family == "RedHat"
+
+- name: Retart Postgres Debian
+  command: sudo systemctl restart postgresql
+  environment:
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  when: ansible_os_family == "Debian"
+
+- name: Install pdg
+  yum: name=https://download.postgresql.org/pub/repos/yum/11/redhat/rhel-7-x86_64/pgdg-centos11-11-2.noarch.rpm
+  when: ansible_os_family == "RedHat"
+
+- name: install postgis RHEL
+  yum:
+    name: postgis25_11
+    state: latest
+  when: ansible_os_family == "RedHat"
