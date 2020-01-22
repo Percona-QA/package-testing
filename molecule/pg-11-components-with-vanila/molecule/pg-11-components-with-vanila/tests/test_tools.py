@@ -17,8 +17,10 @@ def operating_system(host):
 
 
 @pytest.fixture()
-def load_data(host):
+def load_data(host, operating_system):
     pgbench = "pgbench -i -s 1"
+    if operating_system.lower() in ["redhat", "centos", 'rhel']:
+        pgbench = '/usr/pgsql-11/bin/pgbench'
     cmd = host.run(pgbench)
     assert cmd.rc == 0, cmd.stdout
     select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
@@ -169,10 +171,12 @@ def pgrepack(host):
 
 
 @pytest.fixture()
-def pg_repack_functional(host):
+def pg_repack_functional(host, operating_system):
     os = host.system_info.distribution
     with host.sudo("postgres"):
         pgbench = "pgbench -i -s 1"
+        if operating_system.lower() in ["redhat", "centos", 'rhel']:
+            pgbench = '/usr/pgsql-11/bin/pgbench'
         cmd = host.run(pgbench)
         assert cmd.rc == 0, cmd.stdout
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
@@ -190,6 +194,8 @@ def pg_repack_functional(host):
 def pg_repack_dry_run(host, operating_system):
     with host.sudo("postgres"):
         pgbench = "pgbench -i -s 1"
+        if operating_system.lower() in ["redhat", "centos", 'rhel']:
+            pgbench = '/usr/pgsql-11/bin/pgbench'
         cmd = host.run(pgbench)
         assert cmd.rc == 0, cmd.stdout
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
