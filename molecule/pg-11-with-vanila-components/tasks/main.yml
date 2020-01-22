@@ -19,6 +19,13 @@
   yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
   when: ansible_os_family == "RedHat"
 
+- name: download newer percona-release script
+  get_url:
+    url: https://raw.githubusercontent.com/percona/percona-repositories/master/scripts/percona-release.sh
+    dest: /usr/bin/percona-release
+    mode: '755'
+    force: true
+
 - name: setup temporary repo until percona-release is updated
   command: percona-release enable ppg-11.6 {{ repo }}
   vars:

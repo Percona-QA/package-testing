@@ -17,6 +17,13 @@
 - name: include tasks for enabling main repo (do this just for GPG key)
   include: ../../../tasks/enable_main_repo.yml
 
+- name: download newer percona-release script
+  get_url:
+    url: https://raw.githubusercontent.com/percona/percona-repositories/master/scripts/percona-release.sh
+    dest: /usr/bin/percona-release
+    mode: '755'
+    force: true
+  
 - name: setup temporary repo until percona-release is updated
   command: percona-release enable ppg-11.6 {{ repo }}
   vars:
