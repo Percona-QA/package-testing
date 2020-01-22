@@ -58,7 +58,7 @@
 - name: Install vanila postgres DEB
   apt:
     name: postgresql-11
-    when: ansible_os_family == "Debian"
+  when: ansible_os_family == "Debian"
 
 - name: Initialize Postgres RHEL
   command: /usr/pgsql-11/bin/postgresql-11-setup initdb
