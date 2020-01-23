@@ -197,17 +197,17 @@
   yum:
     name: percona-patroni
 
-- name: Install libpq debug packages with libraries
-  apt:
-    name: "{{ packages }}"
-  vars:
-    packages:
-      - libecpg-compat3-dbgsym
-      - libecpg-dev-dbgsym
-      - libecpg6-dbgsym
-      - libpgtypes3-dbgsym
-      - libpq5-dbgsym
-  when: ansible_os_family == "Debian"
+#- name: Install libpq debug packages with libraries
+#  apt:
+#    name: "{{ packages }}"
+#  vars:
+#    packages:
+#      - libecpg-compat3-dbgsym
+#      - libecpg-dev-dbgsym
+#      - libecpg6-dbgsym
+#      - libpgtypes3-dbgsym
+#      - libpq5-dbgsym
+#  when: ansible_os_family == "Debian"
 #- name: Install libpq with libraries
 #  apt:
 #    name: "{{ packages }}"
