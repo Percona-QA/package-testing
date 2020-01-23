@@ -30,7 +30,7 @@
 - debug:
     msg: "{{ lookup('env', 'PG_VERSION') }}"
 
-- name: setup temporary repo until percona-release is updated
+- name: setup repo with percona-release
   command: percona-release enable {{ pg_version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
