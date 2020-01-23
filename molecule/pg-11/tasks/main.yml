@@ -19,7 +19,7 @@
 
 - name: download newer percona-release script
   get_url:
-    url: https://raw.githubusercontent.com/percona/percona-repositories/master/scripts/percona-release.sh
+    url: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
     dest: /usr/bin/percona-release
     mode: '755'
     force: true
