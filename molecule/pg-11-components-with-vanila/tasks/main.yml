@@ -29,6 +29,11 @@
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
 
+- name: enable tools repo
+  command: percona-release enable tools {{ repo }}
+  vars:
+    repo: "{{ lookup('env', 'REPO') }}"
+
 - name: Download postgresql GPG Key
   get_url:
     url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
