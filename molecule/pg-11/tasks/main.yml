@@ -36,14 +36,14 @@
 - name: install Percona Platform for PostgreSQL 11 packages
   include_tasks: ../../../tasks/install_ppg11.yml
 
-- name: Install libpq-dev
-  apt:
-    name: "{{ packages }}"
-  vars:
-    packages:
-      - libpq-dev
-      - libdbd-pg-perl
-  when: ansible_os_family == "Debian"
+#- name: Install libpq-dev
+#  apt:
+#    name: "{{ packages }}"
+#  vars:
+#    packages:
+#      - libpq-dev
+#      - libdbd-pg-perl
+#  when: ansible_os_family == "Debian"
 
 - name: Initialize Postgres RHEL
   command: /usr/pgsql-11/bin/postgresql-11-setup initdb

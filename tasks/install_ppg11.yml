@@ -1,105 +1,110 @@
 # This task installs Percona Platform for PostgreSQL on CentOS and Debian/Ubuntu
 #
-  - name: Download GPG Key
-    get_url:
-      url: https://apt.llvm.org/llvm-snapshot.gpg.key
-      dest: /tmp/llvm-snapshot.gpg.key
-      mode: '0440'
-    when: ansible_os_family == "Debian"
+#  - name: Download GPG Key
+#    get_url:
+#      url: https://apt.llvm.org/llvm-snapshot.gpg.key
+#      dest: /tmp/llvm-snapshot.gpg.key
+#      mode: '0440'
+#    when: ansible_os_family == "Debian"
+#
+#  - name: Add GPG key for llvm repos for debian9
+#    command: apt-key add /tmp/llvm-snapshot.gpg.key
+#    when: ansible_os_family == "Debian"
+#
+#  - name: install llvm repos for debian9
+#    apt_repository:
+#      repo: deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch-7 main
+#      state: present
+#    when:
+#      - ansible_distribution == "Debian"
+#      - lookup('env', 'PG_VERSION') == "ppg-11.5"
+#
+#  - name: Install llvm packages repos for debian9
+#    apt:
+#      name: "{{ packages }}"
+#      update_cache: yes
+#    vars:
+#      packages:
+#       - clang-7
+#       - libllvm7
+#       - llvm-7-dev
+#    when:
+#      - ansible_distribution == "Debian"
+#      - lookup('env', 'PG_VERSION') == "ppg-11.5"
+#
+#  - name: install 9 repos for debian9
+#    apt_repository:
+#      repo: deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch-9 main
+#      state: present
+#    when:
+#      - ansible_distribution == "Debian"
+#      - lookup('env', 'PG_VERSION') == "ppg-11.6"
+#      - ansible_distribution_major_version == "9"
+#
+#  - name: install llvm9 repos for debian10
+#    apt_repository:
+#      repo: deb http://apt.llvm.org/buster/ llvm-toolchain-buster-9 main
+#      state: present
+#    when:
+#      - ansible_distribution == "Debian"
+#      - lookup('env', 'PG_VERSION') == "ppg-11.6"
+#      - ansible_distribution_major_version == "10"
+#
+#  - name: install 9 repos for Ubuntu
+#    apt_repository:
+#      repo: deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main
+#      state: present
+#    when:
+#      - ansible_distribution == "Ubuntu"
+#      - lookup('env', 'PG_VERSION') == "ppg-11.6"
+#      - ansible_distribution_major_version == "18"
+#
+#  - name: Install llvm9 packages repos for debian9
+#    apt:
+#      name: "{{ packages }}"
+#      update_cache: yes
+#    vars:
+#      packages:
+#        - clang-9
+#        - libllvm9
+#        - llvm-9-dev
+#    when:
+#      - ansible_distribution == "Debian"
+#      - lookup('env', 'PG_VERSION') == "ppg-11.6"
+#      - ansible_distribution_major_version == "9"
+#
+#  - name: Install llvm9 packages repos for debian10
+#    apt:
+#      name: "{{ packages }}"
+#      update_cache: yes
+#    vars:
+#      packages:
+#        - clang-9
+#        - libllvm9
+#        - llvm-9-dev
+#    when:
+#      - ansible_distribution == "Debian"
+#      - lookup('env', 'PG_VERSION') == "ppg-11.6"
+#      - ansible_distribution_major_version == "10"
+#
+#  - name: Install llvm9 packages repos for ubuntu
+#    apt:
+#      name: "{{ packages }}"
+#      update_cache: yes
+#    vars:
+#      packages:
+#        - clang-9
+#        - libllvm9
+#        - llvm-9-dev
+#    when:
+#      - ansible_distribution == "Ubuntu"
+#      - lookup('env', 'PG_VERSION') == "ppg-11.6"
+#      - ansible_distribution_major_version == "18"
 
-  - name: Add GPG key for llvm repos for debian9
-    command: apt-key add /tmp/llvm-snapshot.gpg.key
-    when: ansible_os_family == "Debian"
-
-  - name: install llvm repos for debian9
-    apt_repository:
-      repo: deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch-7 main
-      state: present
-    when:
-      - ansible_distribution == "Debian"
-      - lookup('env', 'PG_VERSION') == "ppg-11.5"
-
-  - name: Install llvm packages repos for debian9
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
+  - name: Enable tools repo
+    command: percona-release enable tools {{ repo }}
     vars:
-      packages:
-       - clang-7
-       - libllvm7
-       - llvm-7-dev
-    when:
-      - ansible_distribution == "Debian"
-      - lookup('env', 'PG_VERSION') == "ppg-11.5"
-
-  - name: install 9 repos for debian9
-    apt_repository:
-      repo: deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch-9 main
-      state: present
-    when:
-      - ansible_distribution == "Debian"
-      - lookup('env', 'PG_VERSION') == "ppg-11.6"
-      - ansible_distribution_major_version == "9"
-
-  - name: install llvm9 repos for debian10
-    apt_repository:
-      repo: deb http://apt.llvm.org/buster/ llvm-toolchain-buster-9 main
-      state: present
-    when:
-      - ansible_distribution == "Debian"
-      - lookup('env', 'PG_VERSION') == "ppg-11.6"
-      - ansible_distribution_major_version == "10"
-
-  - name: install 9 repos for Ubuntu
-    apt_repository:
-      repo: deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main
-      state: present
-    when:
-      - ansible_distribution == "Ubuntu"
-      - lookup('env', 'PG_VERSION') == "ppg-11.6"
-      - ansible_distribution_major_version == "18"
-
-  - name: Install llvm9 packages repos for debian9
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-    vars:
-      packages:
-        - clang-9
-        - libllvm9
-        - llvm-9-dev
-    when:
-      - ansible_distribution == "Debian"
-      - lookup('env', 'PG_VERSION') == "ppg-11.6"
-      - ansible_distribution_major_version == "9"
-
-  - name: Install llvm9 packages repos for debian10
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-    vars:
-      packages:
-        - clang-9
-        - libllvm9
-        - llvm-9-dev
-    when:
-      - ansible_distribution == "Debian"
-      - lookup('env', 'PG_VERSION') == "ppg-11.6"
-      - ansible_distribution_major_version == "10"
-
-  - name: Install llvm9 packages repos for ubuntu
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-    vars:
-      packages:
-        - clang-9
-        - libllvm9
-        - llvm-9-dev
-    when:
-      - ansible_distribution == "Ubuntu"
-      - lookup('env', 'PG_VERSION') == "ppg-11.6"
-      - ansible_distribution_major_version == "18"
+      repo: "{{ lookup('env', 'REPO') }}"
 
   - name: Clean dnf RHEL8
     become: true

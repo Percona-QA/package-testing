@@ -23,7 +23,7 @@ pipeline {
             choices: [
                 'testing',
                 'experimental',
-                'release',
+                'release'
             ]
         )
         choice(
