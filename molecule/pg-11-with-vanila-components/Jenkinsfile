@@ -74,7 +74,7 @@ pipeline {
     stage ('Run playbook for test') {
       steps {
         sh '''
-            cd molecule/pg-11
+            cd molecule/pg-11-with-vanila-components
             molecule converge -s pg-11-with-vanila-components
         '''
       }
