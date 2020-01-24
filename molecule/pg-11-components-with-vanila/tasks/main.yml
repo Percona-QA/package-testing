@@ -54,9 +54,13 @@
     state: present
   when: ansible_os_family == "Debian"
 
-- name: Add PostgreSQL YUM Repository
+- name: Add PostgreSQL YUM Repository RHEL7
   yum: name=https://download.postgresql.org/pub/repos/yum/11/redhat/rhel-7-x86_64/pgdg-centos11-11-2.noarch.rpm state=present
-  when: ansible_os_family == "RedHat"
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+- name: Add PostgreSQL YUM Repository RHEL8
+  yum: name=https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm state=present
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
 - name: Install vanila postgres RHEL
   yum:
