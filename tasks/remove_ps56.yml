@@ -1,7 +1,7 @@
 # This task installs Percona Server 5.6 packages on CentOS and Debian/Ubuntu
 #
 
-  - name: install Percona Server deb packages
+  - name: remove Percona Server 5.6 deb packages
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -15,7 +15,7 @@
       - percona-server-tokudb-5.6
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Server rpm packages
+  - name: remove Percona Server 5.6 rpm packages
     yum:
       name: "{{ packages }}"
       state: absent
@@ -29,4 +29,8 @@
       - Percona-Server-selinux-56
       - Percona-Server-shared-56
       - Percona-Server-client-56
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and not major_upgrade
+
+  - name: remove Percona Server 5.6 rpm packages without dependencies
+    shell: rpm -qa | grep Percona-Server | xargs rpm -e --nodeps
+    when: ansible_os_family == "RedHat" and major_upgrade
