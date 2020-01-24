@@ -29,8 +29,8 @@
       - Percona-Server-selinux-56
       - Percona-Server-shared-56
       - Percona-Server-client-56
-    when: ansible_os_family == "RedHat" and not major_upgrade
+    when: ansible_os_family == "RedHat" and major_upgrade is undefined
 
   - name: remove Percona Server 5.6 rpm packages without dependencies
     shell: rpm -qa | grep Percona-Server | xargs rpm -e --nodeps
-    when: ansible_os_family == "RedHat" and major_upgrade
+    when: ansible_os_family == "RedHat" and major_upgrade is defined
