@@ -37,22 +37,22 @@
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
 
-- name: Download postgresql GPG Key
-  get_url:
+- name: postgresql key
+  apt_key:
     url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
-    dest: /tmp/ACCC4CF8.asc
-    mode: '0440'
-  when: ansible_os_family == "Debian"
-
-- name: Add GPG key for postgresql repos for debian9
-  command: apt-key add /tmp/ACCC4CF8.asc
-  when: ansible_os_family == "Debian"
-
-- name: install postgresql repos for debian9
-  apt_repository:
-    repo: deb http://apt.postgresql.org/pub/repos/apt/ stretch-pgdg main
     state: present
-  when: ansible_distribution == "Debian"
+
+- name: create variable
+  command: bash -c "echo \"deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main\" "
+  register: repo_line
+
+- debug:
+    msg: "{{ repo_line.stdout }}"
+
+- name: add postgresql repo
+  apt_repository:
+    repo: "{{ repo_line.stdout }}"
+    state: present
 
 - name: Add PostgreSQL YUM Repository
   yum: name=https://download.postgresql.org/pub/repos/yum/11/redhat/rhel-7-x86_64/pgdg-centos11-11-2.noarch.rpm state=present
