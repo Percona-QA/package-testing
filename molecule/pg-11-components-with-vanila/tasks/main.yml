@@ -55,7 +55,7 @@
   when: ansible_os_family == "Debian"
 
 - name: DNF clean RHEL
-  command: sudo dnf module disable postgresql
+  command: sudo dnf module disable postgresql -y
   when: ansible_distribution == "RedHat"
 
 - name: Add PostgreSQL YUM Repository RHEL7

@@ -184,7 +184,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: DNF clean RHEL
-    command: sudo dnf module disable postgresql
+    command: sudo dnf module disable postgresql -y
     when: ansible_distribution == "RedHat"
 
   - name: install Percona Platform for PostgreSQL rpm packages for RHEL
