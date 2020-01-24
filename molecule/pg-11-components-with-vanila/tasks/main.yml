@@ -48,10 +48,6 @@
   register: repo_line
   when: ansible_os_family == "Debian"
 
-
-- debug:
-    msg: "{{ repo_line.stdout }}"
-
 - name: add postgresql repo
   apt_repository:
     repo: "{{ repo_line.stdout }}"
