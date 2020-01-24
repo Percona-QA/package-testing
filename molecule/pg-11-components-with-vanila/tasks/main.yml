@@ -77,7 +77,7 @@
   vars:
     packages:
       - postgresql-11
-      - postgresql-contrib
+      - postgresql-contrib-11
   when: ansible_os_family == "Debian"
 
 - name: Initialize Postgres RHEL
