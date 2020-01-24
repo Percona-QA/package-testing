@@ -118,3 +118,29 @@
     name: postgis25_11
     state: latest
   when: ansible_os_family == "RedHat"
+
+- name: postgresql key
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: create variable
+  command: bash -c "echo \"deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main\" "
+  register: repo_line
+  when: ansible_os_family == "Debian"
+
+- debug:
+    msg: "{{ repo_line.stdout }}"
+
+- name: add postgresql repo
+  apt_repository:
+    repo: "{{ repo_line.stdout }}"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Install PostGIS
+  apt: pkg=postgresql-11-postgis-2.5 state=present
+
+  when: ansible_os_family == "Debian"
+
