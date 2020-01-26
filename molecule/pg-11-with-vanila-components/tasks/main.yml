@@ -59,8 +59,12 @@
     - percona-postgresql-server-dev-all
   when: ansible_os_family == "Debian"
 
-- name: DNF clean RHEL
+- name: DNF disable postgresql RHEL
   command: sudo dnf module disable postgresql -y
+  when: ansible_distribution == "RedHat"
+
+- name: DNF clean
+  command: sudo dnf clean all -y
   when: ansible_distribution == "RedHat"
 
 - name: install Percona Platform for PostgreSQL rpm packages for RHEL
