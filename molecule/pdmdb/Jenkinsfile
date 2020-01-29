@@ -14,24 +14,16 @@ pipeline {
                 'debian-9',
                 'debian-10',
                 'ubuntu-bionic',
-                'ubuntu-disco',
                 'rhel8'
             ]
         )
         choice(
-            name: 'install_repo',
+            name: 'REPO',
             description: 'Repo for testing',
             choices: [
-                'experimental',
                 'testing',
+                'experimental',
                 'release'
-            ]
-        )
-        choice(
-            name: 'psmdb_to_test',
-            description: 'PSMDB for testing',
-            choices: [
-                'psmdb42'
             ]
         )
   }
@@ -60,7 +52,7 @@ pipeline {
       steps {
         checkout scm
         sh '''
-            sudo yum install -y gcc python3 python3-pip python3-devel libselinux-python openssl-devel
+            sudo yum install -y gcc python3-pip python3-devel libselinux-python openssl-devel
             sudo mkdir -p /usr/local/lib64/python3.7/site-packages
             sudo rsync -aHv /usr/lib64/python2.7/site-packages/*selinux* /usr/local/lib64/python3.7/site-packages/
             pip3 install --user pytest molecule ansible wheel boto boto3 paramiko selinux 'molecule[ec2]'
@@ -69,53 +61,50 @@ pipeline {
     }
     stage ('Create virtual machines') {
       steps {
-       withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
-       [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+        withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
+        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
           sh '''
               cd molecule/pdmdb
-              python3 -m molecule create
+              molecule create
           '''
+        }
       }
-     }
     }
     stage ('Run playbook for test') {
       steps {
-             withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
-             [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '2a84aea7-32a0-4598-9e8d-5153179097a9', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
             cd molecule/pdmdb
-            python3 -m molecule converge
+            molecule converge
         '''
       }
-     }
     }
     stage ('Start testinfra tests') {
       steps {
-
         sh '''
             cd molecule/pdmdb
-            python3 -m molecule verify
+            molecule verify
         '''
-        junit 'molecule/pdmdb/molecule/default/*.xml'
+        junit 'molecule/pdmdb/molecule/default/report.xml'
       }
     }
     stage ('Start packages deletion') {
       steps {
         sh '''
             cd molecule/pdmdb
-            python3 -m molecule cleanup
+            molecule cleanup
         '''
       }
     }
   }
   post {
     always {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+      withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
+      [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
             cd molecule/pdmdb
-            python3 -m molecule destroy
+            molecule destroy
         '''
-     }
+      }
     }
   }
 }
