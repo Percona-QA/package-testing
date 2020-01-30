@@ -28,11 +28,11 @@
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
 
-- name: clean and update yum cache
-  shell: |
-    yum clean all
-    yum makecache
-  when: ansible_os_family == "RedHat"
+#- name: clean and update yum cache
+#  shell: |
+#    yum clean all
+#    yum makecache
+#  when: ansible_os_family == "RedHat"
 
 - name: install psmdb deb packages
   apt:
