@@ -236,9 +236,6 @@ def test_set_store(set_store):
     assert store_out['storage']['type'] == 's3'
     assert store_out['storage']['s3']['region'] == 'us-east-1'
     assert store_out['storage']['s3']['bucket'] == 'operator-testing'
-    assert store_out['storage']['s3']['credentials']
-    assert store_out['storage']['s3']['credentials']['access-key-id']
-    assert store_out['storage']['s3']['credentials']['secret-access-key']
 
 
 def test_show_store(show_store):
@@ -250,9 +247,6 @@ def test_show_store(show_store):
     assert show_store['s3']
     assert show_store['s3']['region'] == 'us-east-1'
     assert show_store['s3']['bucket'] == 'operator-testing'
-    assert show_store['s3']['credentials']
-    assert show_store['s3']['credentials']['access-key-id']
-    assert show_store['s3']['credentials']['secret-access-key']
 
 
 def test_backup(backup):

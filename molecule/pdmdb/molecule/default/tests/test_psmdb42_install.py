@@ -28,16 +28,12 @@ def test_mongod_service(host):
 def test_package_script(host):
     with host.sudo():
         result = host.run("/package-testing/package_check.sh psmdb42")
-        print(result.stdout)
-        print(result.stderr)
     assert result.rc == 0, result.stderr
 
 
 def test_version_script(host):
     with host.sudo():
         result = host.run("/package-testing/version_check.sh psmdb42")
-        print(result.stdout)
-        print(result.stderr)
     assert result.rc == 0, result.stderr
 
 
