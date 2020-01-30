@@ -89,14 +89,6 @@ pipeline {
         junit 'molecule/pdmdb/molecule/default/report.xml'
       }
     }
-    stage ('Start packages deletion') {
-      steps {
-        sh '''
-            cd molecule/pdmdb
-            molecule cleanup
-        '''
-      }
-    }
   }
   post {
     always {
