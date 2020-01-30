@@ -96,7 +96,6 @@ def backup(host):
     hash = save_hash_result.stdout.strip("\n")
     backup = """pbm backup --mongodb-uri=mongodb://localhost:27017"""
     backup_result = host.run(backup)
-    print(backup_result.stdout)
     assert backup_result.rc == 0, backup_result.stdout
     time.sleep(120)
     backup_name = backup_result.stdout.split()[2].strip("\'").rstrip("'...")
@@ -118,7 +117,6 @@ def restore(backup, host):
     """
     restore = """pbm restore --mongodb-uri=mongodb://localhost:27017 {}""".format(backup[1])
     restore_result = host.run(restore)
-    print(restore_result.stdout)
     assert restore_result.rc == 0, restore_result.stdout
     time.sleep(120)
     db_hash_after = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
@@ -206,6 +204,7 @@ def test_pbm_version(host):
     """
     result = host.run("pbm version")
     assert result.rc == 0, result.stdout
+    print(result.stdout)
     lines = result.stdout.split("\n")
     parsed_config = {line.split(":")[0]: line.split(":")[1].strip() for line in lines[0:-1]}
     assert parsed_config['Version'] == '1.1.0', parsed_config
