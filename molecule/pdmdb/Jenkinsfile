@@ -17,7 +17,6 @@ pipeline {
                 'debian-10',
                 'ubuntu-xenial',
                 'ubuntu-bionic',
-                'ubuntu-disco',
                 'rhel8'
             ]
         )
