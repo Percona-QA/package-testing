@@ -103,7 +103,6 @@ def backup(host):
     hash = save_hash_result.stdout.strip("\n")
     backup = """pbm backup --mongodb-uri=mongodb://localhost:27017"""
     backup_result = host.run(backup)
-    print(backup_result.stdout)
     assert 'Starting' in backup_result.stdout, backup_result.stdout
     time.sleep(120)
     backup_name = backup_result.stdout.split()[2].strip("\'").rstrip("'...")
@@ -291,7 +290,7 @@ def test_restore(restore, backup):
     assert backup[0] == restore, restore
 
 
-@pytest.mark.parametrize("store", storage_configs)
+@pytest.mark.parametrize("store", storage_configs, ids=['aws', 'gcp', 'local'])
 def test_backup_and_restore(host, store):
     drop_data = """mongo --quiet --eval 'db.dropDatabase()' test"""
     host.run(drop_data)
