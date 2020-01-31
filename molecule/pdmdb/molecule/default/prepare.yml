@@ -1,5 +1,5 @@
 ---
-- name: Prepare Debian based
+- name: Prepare
   hosts: all
   gather_facts: true
   tasks:
