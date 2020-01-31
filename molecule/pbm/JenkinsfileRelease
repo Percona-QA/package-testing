@@ -84,9 +84,7 @@ pipeline {
   }
   post {
     always {
-        sh '''
-            junit 'molecule/pbm/molecule/default/*.xml'
-        '''
+        junit 'molecule/pbm/molecule/default/*.xml'
      }
   }
 }

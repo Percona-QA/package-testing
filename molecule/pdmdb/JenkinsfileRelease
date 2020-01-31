@@ -75,10 +75,7 @@ pipeline {
   }
   post {
     always {
-
-        sh '''
            junit 'molecule/pdmdb/molecule/default/report.xml'
-        '''
      }
   }
 }
