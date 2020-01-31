@@ -40,7 +40,6 @@ verifier:
 scenario:
   name: default
   destroy_sequence:
-    - cleanup
     - destroy
   clenup_sequence:
     - cleanup

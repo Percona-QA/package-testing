@@ -89,6 +89,15 @@ pipeline {
         junit 'molecule/pdmdb/molecule/default/report.xml'
       }
     }
+      stage ('Start Cleanup ') {
+      steps {
+
+        sh '''
+            cd molecule/pdmdb
+            python3 -m molecule cleanup
+        '''
+      }
+    }
   }
   post {
     always {

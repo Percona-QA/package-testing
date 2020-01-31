@@ -102,6 +102,16 @@ pipeline {
         junit 'molecule/pbm/molecule/default/*.xml'
       }
     }
+      stage ('Start Cleanup ') {
+      steps {
+
+        sh '''
+            cd molecule/pbm
+            python3 -m molecule cleanup
+        '''
+        junit 'molecule/pbm/molecule/default/*.xml'
+      }
+    }
   }
   post {
     always {
