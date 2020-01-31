@@ -34,25 +34,27 @@ def start_stop_pbm(host):
     :param host:
     :return:
     """
-    cmd = "sudo systemctl stop pbm-agent"
-    result = host.run(cmd)
-    assert result.rc == 0, result.stdout
-    cmd = "sudo systemctl start pbm-agent"
-    result = host.run(cmd)
-    assert result.rc == 0, result.stdout
-    cmd = "sudo systemctl status pbm-agent"
-    return host.run(cmd)
+    with host.sudo("root"):
+        cmd = "sudo systemctl stop pbm-agent"
+        result = host.run(cmd)
+        assert result.rc == 0, result.stdout
+        cmd = "sudo systemctl start pbm-agent"
+        result = host.run(cmd)
+        assert result.rc == 0, result.stdout
+        cmd = "sudo systemctl status pbm-agent"
+        return host.run(cmd)
 
 
 @pytest.fixture()
 def restart_pbm_agent(host):
     """Restart pbm-agent service
     """
-    cmd = "sudo systemctl restart pbm-agent"
-    result = host.run(cmd)
-    assert result.rc == 0, result.stdout
-    cmd = "sudo systemctl status pbm-agent"
-    return host.run(cmd)
+    with host.sudo("root"):
+        cmd = "sudo systemctl restart pbm-agent"
+        result = host.run(cmd)
+        assert result.rc == 0, result.stdout
+        cmd = "sudo systemctl status pbm-agent"
+        return host.run(cmd)
 
 
 @pytest.fixture()
@@ -135,17 +137,19 @@ def restore(backup, host):
 def test_package(host):
     """Check pbm package
     """
-    package = host.package("percona-backup-mongodb")
-    assert package.is_installed
-    assert "1.1.1" in package.version, package.version
+    with host.sudo("root"):
+        package = host.package("percona-backup-mongodb")
+        assert package.is_installed
+        assert "1.1.1" in package.version, package.version
 
 
 def test_service(host):
     """Check pbm-agent service
     """
-    service = host.service("pbm-agent")
-    assert service.is_enabled
-    assert service.is_running
+    with host.sudo("root"):
+        service = host.service("pbm-agent")
+        assert service.is_enabled
+        assert service.is_running
 
 
 def test_pbm_binary(host):
