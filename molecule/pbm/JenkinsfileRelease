@@ -88,6 +88,5 @@ pipeline {
             junit 'molecule/pbm/molecule/default/*.xml'
         '''
      }
-    }
   }
 }
