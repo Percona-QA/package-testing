@@ -102,14 +102,6 @@ pipeline {
         junit 'molecule/pbm/molecule/default/*.xml'
       }
     }
-    stage ('Start packages deletion') {
-      steps {
-        sh '''
-            cd molecule/pbm
-            python3 -m molecule cleanup
-        '''
-      }
-    }
   }
   post {
     always {
