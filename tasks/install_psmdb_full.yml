@@ -27,9 +27,6 @@
       - percona-server-mongodb-shell
       - percona-server-mongodb-tools
       - percona-server-mongodb-debuginfo
-      - percona-server-mongodb-mongos-debuginfo
-      - percona-server-mongodb-shell-debuginfo
-      - percona-server-mongodb-tools-debuginfo
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
 
   - name: install psmdb rpm packages
