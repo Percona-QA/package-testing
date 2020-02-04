@@ -41,4 +41,4 @@
         - percona-server-mongodb-shell
         - percona-server-mongodb-tools
         - percona-server-mongodb-debugsource
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version > "7"
