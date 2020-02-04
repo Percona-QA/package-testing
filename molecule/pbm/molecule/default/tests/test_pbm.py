@@ -298,6 +298,7 @@ def test_backup_and_restore(host, store):
     command = "pbm config --file={} --mongodb-uri=mongodb://localhost:27017/".format(store)
     result = host.run(command)
     assert result.rc == 0, result.stderr
+    time.sleep(180)
     print(host.run('pbm config --list --mongodb-uri=mongodb://localhost:27017/'))
     insert_data = """mongo --quiet --eval 'for(
         i=1; i <= 100000; i++) { db.test.insert( {_id: i, name: "Test_"+i })}' test"""
