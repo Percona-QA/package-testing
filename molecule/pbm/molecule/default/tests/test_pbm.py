@@ -125,7 +125,6 @@ def restore(backup, host):
     restore = """pbm restore --mongodb-uri=mongodb://localhost:27017 {}""".format(backup[1])
     restore_result = host.run(restore)
     print(restore_result.stdout)
-    # assert restore_result.rc == 0, restore_result.stdout
     time.sleep(120)
     db_hash_after = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
     db_hash_after_result = host.run(db_hash_after)
@@ -287,6 +286,8 @@ def test_restore(restore, backup):
     :param backup:
     :return:
     """
+    print(backup[0])
+    print(restore)
     assert backup[0] == restore, restore
 
 
@@ -297,6 +298,7 @@ def test_backup_and_restore(host, store):
     command = "pbm config --file={} --mongodb-uri=mongodb://localhost:27017/".format(store)
     result = host.run(command)
     assert result.rc == 0, result.stderr
+    time.sleep(180)
     print(host.run('pbm config --list --mongodb-uri=mongodb://localhost:27017/'))
     insert_data = """mongo --quiet --eval 'for(
         i=1; i <= 100000; i++) { db.test.insert( {_id: i, name: "Test_"+i })}' test"""
@@ -329,7 +331,7 @@ def test_backup_and_restore(host, store):
     print(restore_result.stdout)
     print(restore_result.stderr)
     # assert restore_result.rc == 0, restore_result.stdout
-    time.sleep(180)
+    time.sleep(360)
     db_hash_after = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
     db_hash_after_result = host.run(db_hash_after)
     db_hash_after_value = db_hash_after_result.stdout.strip("\n")
