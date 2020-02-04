@@ -12,6 +12,9 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
+storage_configs = ['/etc/pbm-agent-storage.conf', '/etc/pbm-agent-storage-gcp.conf',
+                   '/etc/pbm-agent-storage-local.conf']
+
 
 def parse_yaml_string(ys):
     """Parse yaml string to dictionary
@@ -107,22 +110,6 @@ def backup(host):
     assert result.rc == 0, result.stdout
     assert result.stdout.split("\n")[0] == "0"
     return hash, backup_name
-
-
-@pytest.fixture()
-def restore(backup, host):
-    """Restore database from backup and get hash restored db
-
-    :return:
-    """
-    restore = """pbm restore --mongodb-uri=mongodb://localhost:27017 {}""".format(backup[1])
-    restore_result = host.run(restore)
-    print(restore_result.stdout)
-    time.sleep(180)
-    db_hash_after = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
-    db_hash_after_result = host.run(db_hash_after)
-    assert db_hash_after_result.rc == 0, db_hash_after_result.stdout
-    return db_hash_after_result.stdout.strip("\n")
 
 
 def test_package(host):
@@ -271,11 +258,50 @@ def test_backup_list(host, backup):
     assert backup[1] in result.stdout, result.stdout
 
 
-def test_restore(restore, backup):
-    """Compare hashes after restore
-
-    :param restore:
-    :param backup:
-    :return:
-    """
-    assert backup[0] == restore, restore
+@pytest.mark.parametrize("store", storage_configs, ids=['aws', 'gcp', 'local'])
+def test_backup_and_restore(host, store):
+    drop_data = """mongo --quiet --eval 'db.dropDatabase()' test"""
+    host.run(drop_data)
+    command = "pbm config --file={} --mongodb-uri=mongodb://localhost:27017/".format(store)
+    result = host.run(command)
+    assert result.rc == 0, result.stderr
+    print(host.run('pbm config --list --mongodb-uri=mongodb://localhost:27017/'))
+    insert_data = """mongo --quiet --eval 'for(
+        i=1; i <= 100000; i++) { db.test.insert( {_id: i, name: "Test_"+i })}' test"""
+    insert_data_result = host.run(insert_data)
+    assert insert_data_result.rc == 0, insert_data_result.stdout
+    assert insert_data_result.stdout.strip("\n") == """WriteResult({ "nInserted" : 1 })""", insert_data_result.stdout
+    save_hash = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
+    save_hash_result = host.run(save_hash)
+    assert save_hash_result.rc == 0, save_hash_result.stdout
+    hash_before = save_hash_result.stdout.strip("\n")
+    backup = """pbm backup --mongodb-uri=mongodb://localhost:27017"""
+    backup_result = host.run(backup)
+    print(backup_result.stdout)
+    assert 'Starting' in backup_result.stdout, backup_result.stdout
+    time.sleep(180)
+    backup_name = backup_result.stdout.split()[2].strip("\'").rstrip("'...")
+    cmd = "pbm list --mongodb-uri=mongodb://localhost:27017"
+    result = host.run(cmd)
+    assert result.rc == 0, result.stdout
+    assert backup_name in result.stdout, result.stdout
+    drop_data = """mongo --quiet --eval 'db.dropDatabase()' test"""
+    drop_data_result = host.run(drop_data)
+    assert drop_data_result.rc == 0, drop_data_result.stdout
+    documents_after_drop = """mongo --quiet --eval 'db.test.count()' test|tail -n1"""
+    result = host.run(documents_after_drop)
+    assert result.rc == 0, result.stdout
+    assert result.stdout.split("\n")[0] == "0"
+    restore = """pbm restore --mongodb-uri=mongodb://localhost:27017 {}""".format(backup_name)
+    restore_result = host.run(restore)
+    print(restore_result.stdout)
+    print(restore_result.stderr)
+    # assert restore_result.rc == 0, restore_result.stdout
+    time.sleep(180)
+    db_hash_after = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
+    db_hash_after_result = host.run(db_hash_after)
+    db_hash_after_value = db_hash_after_result.stdout.strip("\n")
+    assert db_hash_after_result.rc == 0, db_hash_after_result.stdout
+    print(hash_before)
+    print(db_hash_after_value)
+    assert hash_before == db_hash_after_value
