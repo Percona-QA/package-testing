@@ -117,7 +117,7 @@ def restore(backup, host):
     """
     restore = """pbm restore --mongodb-uri=mongodb://localhost:27017 {}""".format(backup[1])
     restore_result = host.run(restore)
-    assert restore_result.rc == 0, restore_result.stdout
+    print(restore_result.stdout)
     time.sleep(120)
     db_hash_after = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
     db_hash_after_result = host.run(db_hash_after)
@@ -130,7 +130,7 @@ def test_package(host):
     """
     package = host.package("percona-backup-mongodb")
     assert package.is_installed
-    assert "1.1.0" in package.version, package.version
+    assert "1.1.1" in package.version, package.version
 
 
 def test_service(host):
@@ -207,7 +207,7 @@ def test_pbm_version(host):
     print(result.stdout)
     lines = result.stdout.split("\n")
     parsed_config = {line.split(":")[0]: line.split(":")[1].strip() for line in lines[0:-1]}
-    assert parsed_config['Version'] == '1.1.0', parsed_config
+    assert parsed_config['Version'] == '1.1.1', parsed_config
     assert parsed_config['Platform'], parsed_config
     assert parsed_config['GitCommit'], parsed_config
     assert parsed_config['GitBranch'], parsed_config

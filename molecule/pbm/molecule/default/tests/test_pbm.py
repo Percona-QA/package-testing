@@ -287,6 +287,8 @@ def test_restore(restore, backup):
     :param backup:
     :return:
     """
+    print(backup[0])
+    print(restore)
     assert backup[0] == restore, restore
 
 
