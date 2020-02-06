@@ -32,7 +32,18 @@
     with_items:
     - Percona-Server-MongoDB-36
     - Percona-Server-MongoDB-36-debuginfo
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version < "8"
+
+  - name: install Percona Server for MongoDB 3.6 new rpm packages previous version
+    yum: name={{item}} state=latest
+    with_items:
+    - Percona-Server-MongoDB-36
+    - Percona-Server-MongoDB-36-debugsource
+    - Percona-Server-MongoDB-36-shell-debuginfo
+    - Percona-Server-MongoDB-36-tools-debuginfo
+    - Percona-Server-MongoDB-36-server-debuginfo
+    - Percona-Server-MongoDB-36-mongos-debuginfo
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version > "7"
 
   - name: start mongod with service
     command: service mongod start
@@ -40,7 +51,7 @@
 
   - name: start mongod with systemctl
     command: systemctl start mongod
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
   - name: check that PSMDB 3.6 package versions are correct
     command: /package-testing/package_check.sh psmdb36
@@ -69,7 +80,22 @@
     - Percona-Server-MongoDB-36-mongos
     - Percona-Server-MongoDB-36-tools
     - Percona-Server-MongoDB-36-debuginfo
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version < "8"
+
+  - name: remove Percona Server for MongoDB 3.6 rpm packages
+    yum: name={{item}} state=absent
+    with_items:
+    - Percona-Server-MongoDB-36
+    - Percona-Server-MongoDB-36-server
+    - Percona-Server-MongoDB-36-shell
+    - Percona-Server-MongoDB-36-mongos
+    - Percona-Server-MongoDB-36-tools
+    - Percona-Server-MongoDB-36-debugsource
+    - Percona-Server-MongoDB-36-shell-debuginfo
+    - Percona-Server-MongoDB-36-tools-debuginfo
+    - Percona-Server-MongoDB-36-server-debuginfo
+    - Percona-Server-MongoDB-36-mongos-debuginfo
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version > "7"
 
 #
 # Upgrade packages
@@ -98,7 +124,22 @@
     - percona-server-mongodb-mongos
     - percona-server-mongodb-tools
     - percona-server-mongodb-debuginfo
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version < "8"
+
+  - name: upgrade Percona Server for MongoDB to 4.0 rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - percona-server-mongodb
+    - percona-server-mongodb-server
+    - percona-server-mongodb-shell
+    - percona-server-mongodb-mongos
+    - percona-server-mongodb-tools
+    - percona-server-mongodb-debugsource
+    - percona-server-mongodb-shell-debuginfo
+    - percona-server-mongodb-tools-debuginfo
+    - percona-server-mongodb-mongos-debuginfo
+    - percona-server-mongodb-server-debuginfo
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version > "7"
 
   - name: check that PSMDB 4.0 package versions are correct
     command: /package-testing/package_check.sh psmdb40
