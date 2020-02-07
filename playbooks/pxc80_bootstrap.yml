@@ -68,12 +68,6 @@
     template: src=../templates/my_rpm_7.j2 dest=/etc/my.cnf
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: configure PXC on debian/ubuntu
-    template: src=../templates/my.j2
-              dest=/etc/mysql/my.cnf
-              mode=0640 owner=mysql group=root
-    when: ansible_os_family == "Debian"
-
   # bootstrap the cluster
   - name: bootstrap cluster on RHEL6
     command: /etc/init.d/mysql bootstrap-pxc
