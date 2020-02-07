@@ -81,37 +81,6 @@ def show_store(host, set_store):
     return parse_yaml_string(result.stdout.split("\n", 2)[2].strip())
 
 
-@pytest.fixture(scope="module")
-def backup(host):
-    """Insert data and create backup.
-
-    :param host:
-    :return:
-    """
-    insert_data = """mongo --quiet --eval 'for(
-    i=1; i <= 100000; i++) { db.test.insert( {_id: i, name: "Test_"+i })}' test"""
-    insert_data_result = host.run(insert_data)
-    assert insert_data_result.rc == 0, insert_data_result.stdout
-    assert insert_data_result.stdout.strip("\n") == """WriteResult({ "nInserted" : 1 })""", insert_data_result.stdout
-    save_hash = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
-    save_hash_result = host.run(save_hash)
-    assert save_hash_result.rc == 0, save_hash_result.stdout
-    hash = save_hash_result.stdout.strip("\n")
-    backup = """pbm backup --mongodb-uri=mongodb://localhost:27017"""
-    backup_result = host.run(backup)
-    assert backup_result.rc == 0, backup_result.stdout
-    time.sleep(180)
-    backup_name = backup_result.stdout.split()[2].strip("\'").rstrip("'...")
-    drop_data = """mongo --quiet --eval 'db.dropDatabase()' test"""
-    drop_data_result = host.run(drop_data)
-    assert drop_data_result.rc == 0, drop_data_result.stdout
-    documents_after_drop = """mongo --quiet --eval 'db.test.count()' test|tail -n1"""
-    result = host.run(documents_after_drop)
-    assert result.rc == 0, result.stdout
-    assert result.stdout.split("\n")[0] == "0"
-    return hash, backup_name
-
-
 def test_package(host):
     """Check pbm package
     """
@@ -236,30 +205,10 @@ def test_show_store(show_store):
     assert show_store['s3']['bucket'] == 'operator-testing'
 
 
-def test_backup(backup):
-    """Create backup
-
-    :param backup:
-    :return:
-    """
-    assert backup[0], backup
-    assert backup[1], backup
-
-
-def test_backup_list(host, backup):
-    """Show backup list
-
-    :param backup:
-    :return:
-    """
-    cmd = "pbm list --mongodb-uri=mongodb://localhost:27017"
-    result = host.run(cmd)
-    assert result.rc == 0, result.stdout
-    assert backup[1] in result.stdout, result.stdout
-
-
 @pytest.mark.parametrize("store", storage_configs, ids=['aws', 'gcp', 'local'])
 def test_backup_and_restore(host, store):
+    """ Insert some data, make backup, check that backup in list, drop data, restore.
+    """
     drop_data = """mongo --quiet --eval 'db.dropDatabase()' test"""
     host.run(drop_data)
     command = "pbm config --file={} --mongodb-uri=mongodb://localhost:27017/".format(store)
