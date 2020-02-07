@@ -227,6 +227,7 @@ def test_backup_and_restore(host, store):
     backup = """pbm backup --mongodb-uri=mongodb://localhost:27017"""
     backup_result = host.run(backup)
     print(backup_result.stdout)
+    print(backup_result.stderr)
     assert 'Starting' in backup_result.stdout, backup_result.stdout
     time.sleep(180)
     backup_name = backup_result.stdout.split()[2].strip("\'").rstrip("'...")
