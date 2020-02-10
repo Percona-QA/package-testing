@@ -7,7 +7,12 @@
       state: absent
     vars:
       packages:
+      - percona-server-mongodb
       - percona-server-mongodb-server
+      - percona-server-mongodb-mongos
+      - percona-server-mongodb-shell
+      - percona-server-mongodb-tools
+      - percona-server-mongodb-dbg
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server for MongoDB rpm packages
@@ -16,5 +21,25 @@
       state: absent
     vars:
       packages:
+      - percona-server-mongodb
       - percona-server-mongodb-server
-    when: ansible_os_family == "RedHat"
+      - percona-server-mongodb-shell
+      - percona-server-mongodb-mongos
+      - percona-server-mongodb-tools
+      - percona-server-mongodb-debuginfo
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int < 8
+
+  - name: remove Percona Server for MongoDB rpm packages on Centos8 and greater
+    yum:
+      name: "{{ packages }}"
+      state: absent
+      autoremove: yes
+    vars:
+      packages:
+      - percona-server-mongodb
+      - percona-server-mongodb-mongos-debuginfo
+      - percona-server-mongodb-server-debuginfo
+      - percona-server-mongodb-shell-debuginfo
+      - percona-server-mongodb-tools-debuginfo
+      - percona-server-mongodb-debugsource
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 7
