@@ -54,9 +54,6 @@
       - MySQL-python
     when: ansible_os_family == "RedHat"
 
-  - name: stop mysql service with service command
-    command: service mysql stop
-
   - name: copy PXC config on centos 6
     template: src=../templates/my_rpm.j2 dest=/etc/my.cnf
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
@@ -65,9 +62,9 @@
     template: src=../templates/my_rpm_7.j2 dest=/etc/my.cnf
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: copy PXC config on debian/ubuntu
-    template: src=../templates/my.j2
-              dest=/etc/mysql/my.cnf
+  - name: configure PXC debian/ubuntu
+    template: src=../templates/my_80.j2
+              dest=/etc/mysql/mysql.conf.d/mysqld.cnf
               mode=0640 owner=mysql group=root
     when: ansible_os_family == "Debian"
 

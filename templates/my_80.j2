@@ -1,0 +1,39 @@
+[mysqld]
+
+user=mysql
+datadir=/var/lib/mysql
+
+log_slave_updates
+gtid_mode=ON
+enforce_gtid_consistency
+slave_parallel_workers=2
+wsrep_slave_threads=8
+log_bin=mysql-bin
+server_id=103
+
+# Path to Galera library
+wsrep_provider=/usr/lib/libgalera_smm.so
+
+# Cluster connection URL contains the IPs of node#1, node#2 and node#3
+wsrep_cluster_address=gcomm://192.168.70.61,192.168.70.62,192.168.70.63
+
+# In order for Galera to work correctly binlog format should be ROW
+binlog_format=ROW
+
+# MyISAM storage engine has only experimental support
+default_storage_engine=InnoDB
+
+# This changes how InnoDB autoincrement locks are managed and is a requirement for Galera
+innodb_autoinc_lock_mode=2
+
+# Node #1 address
+wsrep_node_address={{ man_ip }}
+
+# SST method
+wsrep_sst_method=xtrabackup-v2
+
+# Cluster name
+wsrep_cluster_name=cluster_80
+
+pid-file        = /var/run/mysqld/mysqld.pid
+socket          = /var/run/mysqld/mysqld.sock
