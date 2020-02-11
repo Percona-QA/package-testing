@@ -32,11 +32,11 @@
 #
 # Install from main repository
 #
-  - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_main_repo.yml
 
   - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_psmdb40_main_repo.yml
+    include_tasks: ../tasks/enable_psmdb_repo.yml
+    vars:
+      psmdb_repo: "psmdb-40"
 
   - name: install Percona Server for MongoDB 4.0 packages from main repos
     include_tasks: ../tasks/install_psmdb.yml
@@ -53,7 +53,9 @@
 # Enable testing repository
 #
   - name: include tasks for enabling test repo
-    include_tasks: ../tasks/enable_psmdb40_testing_repo.yml
+    include_tasks: ../tasks/enable_psmdb_repo.yml
+    vars:
+      psmdb_repo: "psmdb-40 testing"
 
 #
 # Upgrade packages
