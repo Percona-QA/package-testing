@@ -26,7 +26,14 @@ pipeline {
                 'release'
             ]
         )
-
+        choice(
+            name: 'VERSION',
+            description: 'PG version for test',
+            choices: [
+                'pg-11-6',
+                'pg-11-7'
+            ]
+        )
   }
   stages {
     stage('Set build name'){

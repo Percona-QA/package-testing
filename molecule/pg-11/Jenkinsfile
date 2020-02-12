@@ -32,6 +32,7 @@ pipeline {
             choices: [
                 'pg-11-5',
                 'pg-11-6',
+                'pg-11-7'
             ]
         )
 

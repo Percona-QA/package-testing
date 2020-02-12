@@ -31,14 +31,16 @@
 #    force: true
 
 - name: setup repo with percona-release
-  command: percona-release enable ppg-11.6 {{ repo }}
+  command: percona-release enable {{ pg_version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
+    pg_version: "{{ lookup('env', 'PG_VERSION') }}"
 
 - name: enable tools repo
   command: percona-release enable tools {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
+
 
 - name: install Percona Platform for PostgreSQL deb packages
   apt:
