@@ -21,7 +21,9 @@
 # Install from main repository
 #
   - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_main_repo.yml
+    include_tasks: ../tasks/enable_psmdb_repo.yml
+    vars:
+      psmdb_repo: "original"
 
   - name: install Percona Server for MongoDB 3.4 deb packages previous version
     apt: name={{item}} update_cache=yes state=latest
@@ -71,7 +73,10 @@
 #
 # Enable testing repository
 #
-  - include: ../tasks/enable_testing_repo.yml
+  - name: include tasks for enabling test repo
+    include_tasks: ../tasks/enable_psmdb_repo.yml
+    vars:
+      psmdb_repo: "original testing"
 
 #
 # Upgrade packages
