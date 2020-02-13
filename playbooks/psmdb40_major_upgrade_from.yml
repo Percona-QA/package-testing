@@ -18,15 +18,21 @@
     include_tasks: ../tasks/test_prep.yml
 
   - name: include tasks for enabling test repo
-    include_tasks: ../tasks/enable_psmdb40_testing_repo.yml
+    include_tasks: ../tasks/enable_psmdb_repo.yml
+    vars:
+      psmdb_repo: "psmdb-40 testing"
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_psmdb40_main_repo.yml
+    include_tasks: ../tasks/enable_psmdb_repo.yml
+    vars:
+      psmdb_repo: "psmdb-40"
     when: lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling experimental repo
-    include_tasks: ../tasks/enable_psmdb40_experimental_repo.yml
+    include_tasks: ../tasks/enable_psmdb_repo.yml
+    vars:
+      psmdb_repo: "psmdb-40 experimental"
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: install PSMDB packages
@@ -59,7 +65,9 @@
 #
 
   - name: include tasks for enabling main PSMDB 4.2 repo
-    include_tasks: ../tasks/enable_psmdb42_main_repo.yml
+    include_tasks: ../tasks/enable_psmdb_repo.yml
+    vars:
+      psmdb_repo: "psmdb-42"
 
   - name: upgrade Percona Server for MongoDB to 4.2 packages
     include_tasks: ../tasks/install_psmdb.yml
