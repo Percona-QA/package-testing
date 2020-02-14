@@ -26,25 +26,7 @@
       psmdb_repo: "original"
 
   - name: install Percona Server for MongoDB 3.6 deb packages previous version
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - percona-server-mongodb-36
-      - percona-server-mongodb-36-dbg
-    when: ansible_os_family == "Debian"
-
-  - name: install Percona Server for MongoDB 3.6 new rpm packages previous version
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - Percona-Server-MongoDB-36
-      - Percona-Server-MongoDB-36-debuginfo
-    when: ansible_os_family == "RedHat"
+    include_tasks: ../tasks/install_psmdb_36.yml
 
   - name: start mongod with service
     command: service mongod start
@@ -83,6 +65,11 @@
       - Percona-Server-MongoDB-36-mongos
       - Percona-Server-MongoDB-36-tools
       - Percona-Server-MongoDB-36-debuginfo
+      - Percona-Server-MongoDB-36-debugsource
+      - Percona-Server-MongoDB-36-mongos-debuginfo
+      - Percona-Server-MongoDB-36-server-debuginfo
+      - Percona-Server-MongoDB-36-shell-debuginfo
+      - Percona-Server-MongoDB-36-tools-debuginfo
     when: ansible_os_family == "RedHat"
 
 #
@@ -97,33 +84,7 @@
 # Upgrade packages
 #
   - name: upgrade to Percona Server for MongoDB 4.0 new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - percona-server-mongodb
-      - percona-server-mongodb-server
-      - percona-server-mongodb-mongos
-      - percona-server-mongodb-shell
-      - percona-server-mongodb-tools
-      - percona-server-mongodb-dbg
-    when: ansible_os_family == "Debian"
-
-  - name: upgrade Percona Server for MongoDB 4.0 to new rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-server-mongodb-server
-      - percona-server-mongodb-tools
-      - percona-server-mongodb-mongos
-      - percona-server-mongodb-shell
-      - percona-server-mongodb
-      - percona-server-mongodb-debuginfo
-    when: ansible_os_family == "RedHat"
+    include_tasks: ../tasks/install_psmdb.yml
 
   - name: start mongod service
     service: name=mongod state=started
