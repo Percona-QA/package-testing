@@ -5,6 +5,7 @@ WARNINGS_AFTER=0
 ERROR_LOG=""
 ERROR_LOG=$(mysql -N -s -e "show variables like 'log_error';" | grep -v "Warning:" | grep -o "\/.*$")
 if [ ! -f ${ERROR_LOG} ]; then
+  echo ${ERROR_LOG}
   echo "Error log was not found!"
   exit 1
 fi
