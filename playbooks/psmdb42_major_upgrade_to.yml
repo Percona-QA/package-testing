@@ -58,27 +58,8 @@
   - name: check that data is there
     command: /package-testing/scripts/mongo_check.sh
 
-  - name: remove Percona Server for MongoDB 4.0 deb packages
-    apt: name={{item}} update_cache=no state=absent
-    with_items:
-    - percona-server-mongodb
-    - percona-server-mongodb-server
-    - percona-server-mongodb-mongos
-    - percona-server-mongodb-shell
-    - percona-server-mongodb-tools
-    - percona-server-mongodb-dbg
-    when: ansible_os_family == "Debian"
-
-  - name: remove Percona Server for MongoDB 4.0 rpm packages
-    yum: name={{item}} state=absent
-    with_items:
-    - percona-server-mongodb
-    - percona-server-mongodb-server
-    - percona-server-mongodb-shell
-    - percona-server-mongodb-mongos
-    - percona-server-mongodb-tools
-    - percona-server-mongodb-debuginfo
-    when: ansible_os_family == "RedHat"
+  - name: remove Percona Server for MongoDB 4.0 packages
+    include_tasks: ../tasks/remove_psmdb.yml
 
 #
 # Upgrade packages
