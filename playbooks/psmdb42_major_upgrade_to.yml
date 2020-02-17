@@ -70,27 +70,8 @@
     vars:
       psmdb_repo: "psmdb-42 testing"
 
-  - name: upgrade Percona Server for MongoDB to 4.2 deb packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - percona-server-mongodb
-    - percona-server-mongodb-server
-    - percona-server-mongodb-mongos
-    - percona-server-mongodb-shell
-    - percona-server-mongodb-tools
-    - percona-server-mongodb-dbg
-    when: ansible_os_family == "Debian"
-
-  - name: upgrade Percona Server for MongoDB to 4.2 rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - percona-server-mongodb
-    - percona-server-mongodb-server
-    - percona-server-mongodb-shell
-    - percona-server-mongodb-mongos
-    - percona-server-mongodb-tools
-    - percona-server-mongodb-debuginfo
-    when: ansible_os_family == "RedHat"
+  - name: upgrade Percona Server for MongoDB to 4.2 packages
+    include_tasks: ../tasks/install_psmdb.yml
 
   - name: check that PSMDB 4.2 package versions are correct
     command: /package-testing/package_check.sh psmdb42
