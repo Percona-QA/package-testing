@@ -10,14 +10,11 @@ container_name = 'pxc-docker-test-static'
 
 @pytest.fixture(scope='module')
 def host():
-    # run a container
     docker_id = subprocess.check_output(
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd, '-d', docker_image]).decode().strip()
     subprocess.check_call(['docker','exec','--user','root',container_name,'yum','install','-y','net-tools'])
     time.sleep(20)
-    # return a testinfra connection to the container
     yield testinfra.get_host("docker://root@" + docker_id)
-    # at the end of the test suite, destroy the container
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
 
 
