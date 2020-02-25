@@ -1,0 +1,2 @@
+[mysqld]
+pxc_encrypt_cluster_traffic=OFF
