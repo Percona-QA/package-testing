@@ -1,6 +1,6 @@
 pipeline {
   agent {
-      label "docker-32gb"
+      label "docker"
   }
   parameters {
     choice(name: 'DOCKER_ACC', choices: ['percona','perconalab'], description: 'Docker repo to use: percona or perconalab')
