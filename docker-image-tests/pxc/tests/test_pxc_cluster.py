@@ -45,25 +45,23 @@ def cluster():
 
 
 class TestCluster:
-    def test_install_functions(self, cluster):
-        for function in pxc_functions:
-            fname, soname, return_type = function[0], function[1], function[2]
-            cmd = cluster[0].ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "CREATE FUNCTION '+fname+' RETURNS '+return_type+' SONAME \''+soname+'\';"')
+    @pytest.mark.parametrize("fname,soname,return_type", pxc_functions)
+    def test_install_functions(self, cluster, fname, soname, return_type):
+        cmd = cluster[0].ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "CREATE FUNCTION '+fname+' RETURNS '+return_type+' SONAME \''+soname+'\';"')
+        assert cmd.succeeded
+        for node in cluster:
+            cmd = node.ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "SELECT name FROM mysql.func WHERE dl = \''+soname+'\';"')
             assert cmd.succeeded
-            for node in cluster:
-                cmd = node.ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "SELECT name FROM mysql.func WHERE dl = \''+soname+'\';"')
-                assert cmd.succeeded
-                assert fname in cmd.stdout
+            assert fname in cmd.stdout
 
-    def test_install_plugin(self, cluster):
-        for plugin in pxc_plugins:
-            pname, soname = plugin[0], plugin[1]
-            cmd = cluster[0].ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "INSTALL PLUGIN '+pname+' SONAME \''+soname+'\';"')
+    @pytest.mark.parametrize("pname,soname", pxc_plugins)
+    def test_install_plugin(self, cluster, pname, soname):
+        cmd = cluster[0].ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "INSTALL PLUGIN '+pname+' SONAME \''+soname+'\';"')
+        assert cmd.succeeded
+        for node in cluster:
+            cmd = node.ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = \''+pname+'\';"')
             assert cmd.succeeded
-            for node in cluster:
-                cmd = node.ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = \''+pname+'\';"')
-                assert cmd.succeeded
-                assert 'ACTIVE' in cmd.stdout
+            assert 'ACTIVE' in cmd.stdout
 
     def test_replication(self, cluster):
         cmd = cluster[0].ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "create database test;"')

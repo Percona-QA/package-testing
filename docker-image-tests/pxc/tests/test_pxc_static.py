@@ -22,15 +22,15 @@ def host():
 
 
 class TestMysqlEnvironment:
-    def test_packages(self, host):
-        for package in pxc_packages:
-            assert host.package(package).is_installed
-            assert host.package(package).version == pxc_version_upstream
+    @pytest.mark.parametrize("pkg_name", pxc_packages)
+    def test_packages(self, host, pkg_name):
+        assert host.package(pkg_name).is_installed
+        assert host.package(pkg_name).version == pxc_version_upstream
 
-    def test_binaries_exist(self, host):
-        for binary in pxc_binaries:
-            assert host.file(binary).exists
-            assert oct(host.file(binary).mode) == '0o755'
+    @pytest.mark.parametrize("binary", pxc_binaries)
+    def test_binaries_exist(self, host, binary):
+        assert host.file(binary).exists
+        assert oct(host.file(binary).mode) == '0o755'
 
     def test_binaries_version(self, host):
         if pxc_version_major in ['5.7','5.6']:
