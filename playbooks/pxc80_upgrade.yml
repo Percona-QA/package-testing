@@ -51,8 +51,8 @@
       - percona-xtradb-cluster-devel
       - percona-xtradb-cluster-client
       - percona-xtradb-cluster-debuginfo
-      - percona-xtradb-cluster-devel-57
-      - percona-xtradb-cluster-57
+      - percona-xtradb-cluster-devel
+      - percona-xtradb-cluster
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Server new rpm packages
