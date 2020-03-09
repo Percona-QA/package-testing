@@ -34,8 +34,8 @@ class TestMysqlEnvironment:
             assert host.check_output('mysql --version') == 'mysql  Ver 14.14 Distrib '+pxc_version+', for Linux (x86_64) using  6.2'
             assert host.check_output('mysqld --version') == 'mysqld  Ver '+pxc_version+' for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release rel'+pxc_version_percona+', Revision '+pxc_revision+')'
         else:
-            assert host.check_output('mysql --version') == 'mysql  Ver '+ pxc_version +'-80 for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release rel'+ pxc_version_percona +', Revision '+ pxc_revision +', WSREP version '+ pxc_wsrep_version +')'
-            assert host.check_output('mysqld --version') == '/usr/sbin/mysqld  Ver '+ pxc_version +'-80 for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release rel'+ pxc_version_percona +', Revision '+ pxc_revision +', WSREP version '+ pxc_wsrep_version +')'
+            assert host.check_output('mysql --version') == 'mysql  Ver '+ pxc_version +' for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release rel'+ pxc_version_percona +', Revision '+ pxc_revision +', WSREP version '+ pxc_wsrep_version +')'
+            assert host.check_output('mysqld --version') == '/usr/sbin/mysqld  Ver '+ pxc_version +' for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release rel'+ pxc_version_percona +', Revision '+ pxc_revision +', WSREP version '+ pxc_wsrep_version +')'
 
     def test_process_running(self, host):
         assert host.process.get(user="mysql", comm="mysqld")
