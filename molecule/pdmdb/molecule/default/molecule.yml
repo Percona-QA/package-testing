@@ -3,8 +3,6 @@ dependency:
   name: galaxy
 driver:
   name: ec2
-lint:
-  name: yamllint
 platforms:
   - name: ${PLATFORM}
     region: ${AWS_DEFAULT_REGION}
