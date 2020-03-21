@@ -1,0 +1,50 @@
+#!/usr/bin/env groovy
+
+pipeline {
+  agent {
+  label 'micro-amazon'
+  }
+  environment {
+      PATH = '/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/ec2-user/.local/bin'
+  }
+  parameters {
+        choice(
+            name: 'REPO',
+            description: 'Repo for testing',
+            choices: [
+                'testing',
+                'experimental',
+                'main',
+            ]
+        )
+        choice(
+            name: 'VERSION',
+            description: 'PG version for test',
+            choices: [
+                'pg-11-5',
+                'pg-11-6',
+            ]
+        )
+  }
+    stages {
+        stage('Test packages') {
+            steps {
+                script {
+                    def tests = [:]
+                    def operatingSystems = ['centos-7', 'debian-9', 'debian-10',
+                     'ubuntu-bionic', 'rhel8']
+                    operatingSystems.each { os ->
+                        tests["${os}"] = {
+                            build job: 'pg-11-package-testing', parameters: [
+                [$class: 'StringParameterValue', name: 'PLATFORM', value: os],
+                [$class: 'StringParameterValue', name: 'REPO', value: env.REPO],
+                [$class: 'StringParameterValue', name: 'VERSION', value: env.VERSION]
+            ]
+                        }
+                    }
+                    parallel tests
+                }
+            }
+        }
+    }
+}
