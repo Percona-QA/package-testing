@@ -20,9 +20,9 @@ provisioner:
     name: ansible-lint
     enabled: False
   playbooks:
-    create: ../../playbooks/create.yml
-    destroy: ../../playbooks/destroy.yml
-    prepare: ../../playbooks/prepare.yml
+    create: ../../../playbooks/create.yml
+    destroy: ../../../playbooks/destroy.yml
+    prepare: ../../../playbooks/prepare.yml
 instances:
   - name: pg-11-with-vanila-components
 verifier:
