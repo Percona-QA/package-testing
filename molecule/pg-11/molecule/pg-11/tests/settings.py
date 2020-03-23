@@ -238,6 +238,8 @@ versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB116_PKG_VERSIONS,
                          "percona-postgresql-client-common": "204",
                          "libpq_version": "110005",
                          "deb_provides": DEB_PROVIDES,
+                         "rpm7_provides": RPM7_PROVIDES,
+                         'rpm_provides': RPM_PROVIDES
                          "pgaudit": pgaudit['ppg-11.5'],
                          "pgbackrest": pgbackrest['ppg-11.5'],
                          "patroni": patroni['ppg-11.5'],
