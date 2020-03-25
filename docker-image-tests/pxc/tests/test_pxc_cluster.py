@@ -13,19 +13,28 @@ class PxcNode:
         if bootstrap_node:
             self.docker_id = subprocess.check_output(
                 ['docker', 'run', '--name', node_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd, 
-                 '-e', 'CLUSTER_NAME='+cluster_name, '--net='+docker_network,'-v', 
-                 test_pwd+'/config:/etc/percona-xtradb-cluster.conf.d', '-d', docker_image]).decode().strip()
+                 '-e', 'CLUSTER_NAME='+cluster_name, '--net='+docker_network,'-d', docker_image]).decode().strip()
+            time.sleep(30)
+            subprocess.check_call(['mkdir', '-p', test_pwd+'/cert'])
+            subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/ca.pem', test_pwd+'/cert'])
+            subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/server-cert.pem', test_pwd+'/cert'])
+            subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/server-key.pem', test_pwd+'/cert'])
+            subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/client-cert.pem', test_pwd+'/cert'])
+            subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/client-key.pem', test_pwd+'/cert'])
+            subprocess.check_call(['chmod','a+r','-R', test_pwd+'/cert'])
         else:
             self.docker_id = subprocess.check_output(
             ['docker', 'run', '--name', node_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd, 
              '-e', 'CLUSTER_NAME='+cluster_name, '-e', 'CLUSTER_JOIN='+base_node_name+'1', 
              '--net='+docker_network,'-v', test_pwd+'/config:/etc/percona-xtradb-cluster.conf.d', 
-             '-d', docker_image]).decode().strip()
-        time.sleep(30)
+             '-v', test_pwd+'/cert:/cert', '-d', docker_image]).decode().strip()
+            time.sleep(30)
         self.ti_host = testinfra.get_host("docker://root@" + self.docker_id)
 
     def destroy(self):
         subprocess.check_call(['docker', 'rm', '-f', self.docker_id])
+        if self.bootstrap_node:
+            subprocess.check_call(['rm', '-rf', test_pwd+'/cert'])
 
 
 @pytest.fixture(scope='module')
