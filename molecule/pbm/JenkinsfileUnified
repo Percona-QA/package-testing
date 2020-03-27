@@ -14,7 +14,7 @@ pipeline {
             choices: [
                 'testing',
                 'experimental',
-                'main',
+                'main'
             ]
         )
   }
@@ -98,7 +98,6 @@ pipeline {
                     parallel tests
                 }
             }
-
         }
     }
 }
