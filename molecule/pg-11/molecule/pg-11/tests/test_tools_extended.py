@@ -44,7 +44,7 @@ pg_versions = versions[os.getenv("PG_VERSION")]
 @pytest.fixture()
 def pythonu_function(host):
     ds = host.system_info.distribution
-    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == 'ppg-11.6':
+    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") != 'ppg-11.5':
         pytest.skip("Skipping python2 extensions for DEB based in 11.6 pg")
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION IF NOT EXISTS\"plpythonu\";'")

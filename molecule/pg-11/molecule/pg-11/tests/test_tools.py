@@ -394,7 +394,7 @@ def test_patroni_package(host):
     assert pg_versions['patroni']['version'] in pkg.version
 
 
-@pytest.mark.skipif(os.getenv("PG_VERSION") == "ppg-11.6", reason="Incorrect PG version for this test")
+@pytest.mark.skipif(os.getenv("PG_VERSION") != "ppg-11.5", reason="Incorrect PG version for this test")
 def test_patroni(patroni):
     assert "Usage: /opt/patroni/bin/patroni config.yml" in patroni.stdout, patroni.stdout
     assert "Patroni may also read the configuration" \

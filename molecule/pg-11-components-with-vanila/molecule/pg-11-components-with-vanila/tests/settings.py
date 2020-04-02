@@ -175,10 +175,13 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
 patroni = {"ppg-11.5": {'version': "",
                         "binary_version": ""},
            "ppg-11.6": {'version': "1.6.3",
+                        "binary_version": "patroni 1.6.3"},
+           "ppg-11.7": {'version': "1.6.3",
                         "binary_version": "patroni 1.6.3"}
            }
 pgaudit = {"ppg-11.5": {"version": "1.3"},
-           "ppg-11.6": {"version": "1.4.0"}}
+           "ppg-11.6": {"version": "1.4.0"},
+           "ppg-11.7": {"version": "1.4.0"}}
 
 DEB_PROVIDES = [("percona-postgresql-11", "postgresql-11"), ("percona-postgresql-client", "postgresql-client"),
                 ("percona-postgresql", "postgresql"), ("percona-postgresql-client-11", "postgresql-client-11"),

@@ -2,3 +2,5 @@ pg-11-5:
   version: ppg-11.5
 pg-11-6:
   version: ppg-11.6
+pg-11-7:
+  version: ppg-11.7
