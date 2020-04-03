@@ -1,0 +1,40 @@
+---
+- name: SideEffect
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: remove Postgresql deb packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+          - percona-postgresql
+      when: ansible_os_family == "Debian"
+
+    - name: remove pgaudit deb packages
+      apt:
+        name: percona-postgresql-11-pgaudit
+        state: absent
+      when: ansible_os_family == "Debian"
+
+    - name: remove pg_repack deb packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+          - percona-postgresql-11-repack
+          - percona-postgresql-11-repack-dbgsym
+      when: ansible_os_family == "Debian"
+
+    - name: remove pgbackrest deb packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+          - percona-pgbackrest
+          - percona-pgbackrest-doc
+      when: ansible_os_family == "Debian"
