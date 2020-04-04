@@ -344,6 +344,7 @@ def test_pgbackrest_version(pgbackrest_version):
 
 def test_pgbackrest_binary(pgbackrest, operating_system, host):
     assert pgbackrest.rc == 0
+    print(operating_system)
     if operating_system.lower() == "centos":
         assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['centos'],\
             pgbackrest.stdout.strip("\n")
@@ -357,7 +358,7 @@ def test_pgbackrest_binary(pgbackrest, operating_system, host):
         else:
             assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['debian'],\
                 pgbackrest.stdout.strip("\n")
-    elif operating_system.lower == "ubuntu":
+    elif operating_system.lower() == "ubuntu":
         assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['ubuntu'],\
             pgbackrest.stdout.strip("\n")
 
