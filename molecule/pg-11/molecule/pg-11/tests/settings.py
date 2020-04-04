@@ -10,7 +10,7 @@ DEB116_PKG_VERSIONS = ["11+210-1.buster", "204-1.buster", "2:11-6.2.buster", "2:
 DEB117_PKG_VERSIONS = ["11+214-1.buster", "204-1.buster", "2:11-7.2.buster", "2:11-7.2.stretch", "204-1.stretch",
                        "11+214-1.stretch", "2:11-7.2.bionic", '11+214-1.bionic', "204-1.bionic", "2:11-7.2.cosmic",
                        "11+214-1.cosmic", "204-1.cosmic", "2:11-7.2.disco", "11+214-1.disco", "204-1.disco",
-                       "210-1.stretch", "210-1.cosmic", "210-1.buster", '210-1.disco', "210-1.bionic"]
+                       "214-1.stretch", "214-1.cosmic", "214-1.buster", '214-1.disco', "214-1.bionic"]
 
 DEB116_PACKAGES = ["percona-postgresql-11", "percona-postgresql-client", "percona-postgresql",
                    "percona-postgresql-client-11", "percona-postgresql-client-common",
