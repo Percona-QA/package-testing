@@ -7,6 +7,11 @@ DEB116_PKG_VERSIONS = ["11+210-1.buster", "204-1.buster", "2:11-6.2.buster", "2:
                        "11+210-1.cosmic", "204-1.cosmic", "2:11-6.2.disco", "11+210-1.disco", "204-1.disco",
                        "210-1.stretch", "210-1.cosmic", "210-1.buster", '210-1.disco', "210-1.bionic"]
 
+DEB117_PKG_VERSIONS = ["11+210-1.buster", "204-1.buster", "2:11-7.2.buster", "2:11-7.2.stretch", "204-1.stretch",
+                       "11+210-1.stretch", "2:11-7.2.bionic", '11+210-1.bionic', "204-1.bionic", "2:11-7.2.cosmic",
+                       "11+210-1.cosmic", "204-1.cosmic", "2:11-7.2.disco", "11+210-1.disco", "204-1.disco",
+                       "210-1.stretch", "210-1.cosmic", "210-1.buster", '210-1.disco', "210-1.bionic"]
+
 DEB116_PACKAGES = ["percona-postgresql-11", "percona-postgresql-client", "percona-postgresql",
                    "percona-postgresql-client-11", "percona-postgresql-client-common",
                    "percona-postgresql-contrib", "percona-postgresql-doc", "percona-postgresql-server-dev-all",
@@ -207,8 +212,8 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                                               " for GNU/Linux 3.2.0,"
                                               " BuildID[sha1]=29c29685ff2008d3930b309ecbb206cda1b4d51e,"
                                               " with debug_info, not stripped, too many notes (256)"}},
-              "ppg-11.7": {"version": "2.20",
-                           "binary_version": "pgBackRest 2.20",
+              "ppg-11.7": {"version": "2.25",
+                           "binary_version": "pgBackRest 2.25",
                            "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,"
                                                 " x86-64, version 1 (SYSV), dynamically linked (uses shared libs),"
                                                 " for GNU/Linux 2.6.32,"
@@ -235,8 +240,8 @@ patroni = {"ppg-11.5": {'version': "",
                         "binary_version": ""},
            "ppg-11.6": {'version': "1.6.3",
                         "binary_version": "patroni 1.6.3"},
-           "ppg-11.7": {'version': "1.6.3",
-                        "binary_version": "patroni 1.6.3"}
+           "ppg-11.7": {'version': "1.6.4",
+                        "binary_version": "patroni 1.6.4"}
            }
 pgaudit = {"ppg-11.5": {"version": "1.3"},
            "ppg-11.6": {"version": "1.4.0"},
@@ -282,15 +287,16 @@ RPM_PROVIDES = [("percona-postgresql11", "postgresql11"),
                 ]
 
 
-versions = {"ppg-11.7": {"version": "11.7", "deb_pkg_ver": DEB116_PKG_VERSIONS,
+versions = {"ppg-11.7": {"version": "11.7", "deb_pkg_ver": DEB117_PKG_VERSIONS,
                          "deb_packages": DEB116_PACKAGES,
                          "percona-postgresql-common": '210',
                          "percona-postgresql-client-common": "210",
-                         "libpq_version": "110006",
+                         "libpq_version": "110007",
                          "pgaudit": pgaudit['ppg-11.7'],
                          "pgbackrest": pgbackrest['ppg-11.7'],
                          "patroni": patroni['ppg-11.7'],
-                         "pgrepack": pgrepack['ppg-11.7'], "libpq": "Version of libpq: 110007",
+                         "pgrepack": pgrepack['ppg-11.7'],
+                         "libpq": "Version of libpq: 110007",
                          "deb_provides": DEB_PROVIDES,
                          "rpm7_provides": RPM7_PROVIDES,
                          'rpm_provides': RPM_PROVIDES},
