@@ -122,7 +122,42 @@ pgrepack = {"ppg-11.5": {"version": "1.4.4",
                                                        " interpreter /lib64/ld-linux-x86-64.so.2,"
                                                        " for GNU/Linux 3.2.0,"
                                                        " BuildID[sha1]=7b5826a6fdafe64e13a0d0c3192f5b96b8870f6c,"
-                                                       " not stripped"}}}
+                                                       " not stripped"}},
+            "ppg-11.7": {"version": "1.4.5",
+                         "binary_version": "pg_repack 1.4.5",
+                         "binary": {"centos": "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable,"
+                                              " x86-64, version 1 (SYSV),"
+                                              " dynamically linked (uses shared libs), for GNU/Linux 2.6.32,"
+                                              " BuildID[sha1]=bd2f6cc2747db832da8302ce8ceaddd6cf56dad0,"
+                                              " not stripped",
+                                    "ubuntu": "/usr/lib/postgresql/11/bin/pg_repack:"
+                                              " ELF 64-bit LSB shared object, x86-64,"
+                                              " version 1 (SYSV), dynamically linked,"
+                                              " interpreter /lib64/l,"
+                                              " for GNU/Linux 3.2.0,"
+                                              " BuildID[sha1]=6354cb6b54e6c7c114eafbb054307cd9880a08e4,"
+                                              " stripped",
+                                    "debian": "/usr/lib/postgresql/11/bin/pg_repack:"
+                                              " ELF 64-bit LSB shared object, x86-64,"
+                                              " version 1 (SYSV), dynamically linked,"
+                                              " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                              " for GNU/Linux 3.2.0,"
+                                              " BuildID[sha1]=51ee777d6a32be840cd12e7c826a05f4af6e709a,"
+                                              " stripped",
+                                    "debian9.9": "/usr/lib/postgresql/11/bin/pg_repack:"
+                                                 " ELF 64-bit LSB shared object, x86-64,"
+                                                 " version 1 (SYSV), dynamically linked,"
+                                                 " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                                 " for GNU/Linux 2.6.32,"
+                                                 " BuildID[sha1]=882af5eb384bd255a2258bf842d9ec61c0c247dd,"
+                                                 " stripped",
+                                    "rhel": "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable,"
+                                            " x86-64, version 1 (SYSV), dynamically linked,"
+                                            " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                            " for GNU/Linux 3.2.0,"
+                                            " BuildID[sha1]=7b5826a6fdafe64e13a0d0c3192f5b96b8870f6c,"
+                                            " not stripped"}}
+            }
 pgbackrest = {"ppg-11.5": {"version": "2.16",
                            "binary_version": "pgBackRest 2.16",
                            "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,x86-64,"
@@ -171,7 +206,31 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                                               " interpreter /lib64/ld-linux-x86-64.so.2,"
                                               " for GNU/Linux 3.2.0,"
                                               " BuildID[sha1]=29c29685ff2008d3930b309ecbb206cda1b4d51e,"
-                                              " with debug_info, not stripped, too many notes (256)"}}}
+                                              " with debug_info, not stripped, too many notes (256)"}},
+              "ppg-11.7": {"version": "2.20",
+                           "binary_version": "pgBackRest 2.20",
+                           "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,"
+                                                " x86-64, version 1 (SYSV), dynamically linked (uses shared libs),"
+                                                " for GNU/Linux 2.6.32,"
+                                                " BuildID[sha1]=4189028da7f21d6a0b4fa300cfe3605a1e3523ad, not stripped",
+                                      "ubuntu": "",
+                                      "debian": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
+                                                " x86-64, version 1 (SYSV), dynamically linked,"
+                                                " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                                " for GNU/Linux 3.2.0,"
+                                                " BuildID[sha1]=2951dc20ccbda22ac64fddd635eef812d228fb87, stripped",
+                                      "debian9.9": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
+                                                   " x86-64, version 1 (SYSV), dynamically linked,"
+                                                   " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                                   " for GNU/Linux 2.6.32,"
+                                                   " BuildID[sha1]=b28fdcb98063422df7c1eac6623054016f1f2781, stripped",
+                                      "rhel": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object, x86-64,"
+                                              " version 1 (SYSV), dynamically linked,"
+                                              " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                              " for GNU/Linux 3.2.0,"
+                                              " BuildID[sha1]=29c29685ff2008d3930b309ecbb206cda1b4d51e,"
+                                              " with debug_info, not stripped, too many notes (256)"}}
+              }
 patroni = {"ppg-11.5": {'version': "",
                         "binary_version": ""},
            "ppg-11.6": {'version': "1.6.3",
@@ -223,7 +282,19 @@ RPM_PROVIDES = [("percona-postgresql11", "postgresql11"),
                 ]
 
 
-versions = {"ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB116_PKG_VERSIONS,
+versions = {"ppg-11.7": {"version": "11.7", "deb_pkg_ver": DEB116_PKG_VERSIONS,
+                         "deb_packages": DEB116_PACKAGES,
+                         "percona-postgresql-common": '210',
+                         "percona-postgresql-client-common": "210",
+                         "libpq_version": "110006",
+                         "pgaudit": pgaudit['ppg-11.7'],
+                         "pgbackrest": pgbackrest['ppg-11.7'],
+                         "patroni": patroni['ppg-11.7'],
+                         "pgrepack": pgrepack['ppg-11.7'], "libpq": "Version of libpq: 110007",
+                         "deb_provides": DEB_PROVIDES,
+                         "rpm7_provides": RPM7_PROVIDES,
+                         'rpm_provides': RPM_PROVIDES},
+            "ppg-11.6": {"version": "11.6", "deb_pkg_ver": DEB116_PKG_VERSIONS,
                          "deb_packages": DEB116_PACKAGES,
                          "percona-postgresql-common": '210',
                          "percona-postgresql-client-common": "210",
