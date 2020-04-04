@@ -131,10 +131,9 @@ pgrepack = {"ppg-11.5": {"version": "1.4.4",
             "ppg-11.7": {"version": "1.4.5",
                          "binary_version": "pg_repack 1.4.5",
                          "binary": {"centos": "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable,"
-                                              " x86-64, version 1 (SYSV),"
-                                              " dynamically linked (uses shared libs), for GNU/Linux 2.6.32,"
-                                              " BuildID[sha1]=bd2f6cc2747db832da8302ce8ceaddd6cf56dad0,"
-                                              " not stripped",
+                                              " x86-64, version 1 (SYSV), dynamically linked (uses shared libs),"
+                                              " for GNU/Linux 2.6.32,"
+                                              " BuildID[sha1]=18dc799e14ca27086d8b8f33d762e58adee39a7b, not stripped",
                                     "ubuntu": "/usr/lib/postgresql/11/bin/pg_repack: ELF 64-bit LSB shared object,"
                                               " x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/l,"
                                               " for GNU/Linux 3.2.0,"
@@ -208,7 +207,7 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                            "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,"
                                                 " x86-64, version 1 (SYSV), dynamically linked (uses shared libs),"
                                                 " for GNU/Linux 2.6.32,"
-                                                " BuildID[sha1]=4189028da7f21d6a0b4fa300cfe3605a1e3523ad, not stripped",
+                                                " BuildID[sha1]=023087205f1bb533c9331efa1aa2fa12add7eb11, not stripped",
                                       "ubuntu": "",
                                       "debian": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object, x86-64,"
                                                 " version 1 (SYSV), dynamically linked,"

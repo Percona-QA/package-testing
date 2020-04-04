@@ -130,11 +130,10 @@ pgrepack = {"ppg-11.5": {"version": "1.4.4",
                                                        " not stripped"}},
             "ppg-11.7": {"version": "1.4.5",
                          "binary_version": "pg_repack 1.4.5",
-                         "binary": {"centos": "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable,"
-                                              " x86-64, version 1 (SYSV),"
-                                              " dynamically linked (uses shared libs), for GNU/Linux 2.6.32,"
-                                              " BuildID[sha1]=bd2f6cc2747db832da8302ce8ceaddd6cf56dad0,"
-                                              " not stripped",
+                         "binary": {"centos": "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable, x86-64,"
+                                              " version 1 (SYSV), dynamically linked (uses shared libs),"
+                                              " for GNU/Linux 2.6.32,"
+                                              " BuildID[sha1]=18dc799e14ca27086d8b8f33d762e58adee39a7b, not stripped",
                                     "ubuntu": "/usr/lib/postgresql/11/bin/pg_repack: ELF 64-bit LSB shared object,"
                                               " x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/l,"
                                               " for GNU/Linux 3.2.0,"
