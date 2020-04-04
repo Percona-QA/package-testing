@@ -27,6 +27,16 @@
     deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
   when: ansible_os_family == "Debian"
 
+# Temp solution for percona release
+- name: download newer percona-release script
+  get_url:
+    url: https://raw.githubusercontent.com/percona/percona-repositories/1.0/scripts/percona-release.sh
+    dest: /usr/bin/percona-release
+    mode: '755'
+    force: true
+
+# End of temp solution
+
 - name: setup temporary repo until percona-release is updated
   command: percona-release enable {{ pg_version }} {{ repo }}
   vars:

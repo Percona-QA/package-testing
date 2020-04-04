@@ -10,7 +10,7 @@
 
 ### temp part until percona-release is updated for PPG project
 
-- name: add the main Percona yum repos for centos 6 and 7
+- name: Install Percona release package for RHEL based distros
   yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
   when: ansible_os_family == "RedHat"
 
@@ -30,6 +30,15 @@
 #    mode: '755'
 #    force: true
 
+# Temp solution for percona release
+- name: download newer percona-release script
+  get_url:
+    url: https://raw.githubusercontent.com/percona/percona-repositories/1.0/scripts/percona-release.sh
+    dest: /usr/bin/percona-release
+    mode: '755'
+    force: true
+
+# End of temp solution
 - name: setup repo with percona-release
   command: percona-release enable {{ pg_version }} {{ repo }}
   vars:
