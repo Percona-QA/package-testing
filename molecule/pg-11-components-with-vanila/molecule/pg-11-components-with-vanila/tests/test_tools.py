@@ -8,7 +8,7 @@ from .settings import versions
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-pg_versions = versions['ppg-11.6']
+pg_versions = versions[os.getenv("PG_VERSION")]
 
 
 @pytest.fixture(scope="module")
