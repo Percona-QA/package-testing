@@ -355,7 +355,7 @@ def test_pgbackrest_binary(pgbackrest, operating_system, host):
         else:
             assert pgbackrest.stdout.strip("\n") == versions['pgbackrest']['binary']['debian'],\
                 pgbackrest.stdout.strip("\n")
-    elif operating_system.lower == "ubuntu":
+    elif operating_system.lower() == "ubuntu":
         assert pgbackrest.stdout.strip("\n") == versions['pgbackrest']['binary']['ubuntu'],\
             pgbackrest.stdout.strip("\n")
 
