@@ -1,5 +1,6 @@
 #!/usr/bin/env groovy
 
+def operatingSystems = ['centos-7', 'debian-9', 'debian-10', 'ubuntu-bionic', 'rhel8']
 pipeline {
   agent {
   label 'micro-amazon'
@@ -13,8 +14,8 @@ pipeline {
             description: 'Repo for testing',
             choices: [
                 'testing',
-                'experimental',
                 'main',
+                'experimental'
             ]
         )
   }
@@ -23,20 +24,12 @@ pipeline {
             steps {
                 script {
                     def tests = [:]
-                    def operatingSystems = [
-                'centos-6',
-                'centos-7',
-                'debian-9',
-                'debian-10',
-                'ubuntu-xenial',
-                'ubuntu-bionic',
-                'rhel8'
-            ]
                     operatingSystems.each { os ->
                         tests["${os}"] = {
-                            build job: 'pdmdb-package-testing', parameters: [
+                            build job: 'pdps-package-testing', parameters: [
                 [$class: 'StringParameterValue', name: 'PLATFORM', value: os],
-                [$class: 'StringParameterValue', name: 'REPO', value: env.REPO]            ]
+                [$class: 'StringParameterValue', name: 'REPO', value: env.REPO],
+            ]
                         }
                     }
                     parallel tests

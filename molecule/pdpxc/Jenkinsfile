@@ -10,11 +10,9 @@ pipeline {
             name: 'PLATFORM',
             description: 'For what platform (OS) need to test',
             choices: [
-                'centos-6',
                 'centos-7',
                 'debian-9',
                 'debian-10',
-                'ubuntu-xenial',
                 'ubuntu-bionic',
                 'rhel8'
             ]
@@ -24,8 +22,8 @@ pipeline {
             description: 'Repo for testing',
             choices: [
                 'testing',
-                'experimental',
-                'release'
+                'main',
+                'experimental'
             ]
         )
   }
@@ -40,13 +38,7 @@ pipeline {
     stage ('Setup Environment Variables') {
       steps {
        script {
-       vms = readYaml (file: 'molecule/configuration.yml')
-       env.IMAGE = vms."${PLATFORM}".image
-       env.USER = vms."${PLATFORM}".user
-       env.SUBNET = vms."${PLATFORM}".subnet
-       env.AWS_DEFAULT_REGION = vms."${PLATFORM}".aws_default_region
-       env.INSTANCE_TYPE = vms."${PLATFORM}".instance_type
-       env.ROOT_DEVICE_NAME = vms."${PLATFORM}".root_device_name
+       env.NAME = "${env.BUILD_NUMBER}-${env.PLATFORM}"
         }
        }
       }
@@ -57,51 +49,43 @@ pipeline {
             sudo yum install -y gcc python3-pip python3-devel libselinux-python openssl-devel
             sudo mkdir -p /usr/local/lib64/python3.7/site-packages
             sudo rsync -aHv /usr/lib64/python2.7/site-packages/*selinux* /usr/local/lib64/python3.7/site-packages/
-            pip3 install --user molecule==2.22 pytest molecule-ec2 ansible wheel boto boto3 paramiko selinux
+            pip3 install --user molecule pytest ansible wheel boto boto3 paramiko selinux molecule-ec2
         '''
       }
     }
     stage ('Create virtual machines') {
       steps {
         withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
-        string(credentialsId: 'GCP_SECRET_KEY', variable: 'GCP_SECRET_KEY'), string(credentialsId: 'GCP_ACCESS_KEY', variable: 'GCP_ACCESS_KEY'),
-        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
-        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'S3_ACCESS_KEY_ID', credentialsId: '2a84aea7-32a0-4598-9e8d-5153179097a9', secretKeyVariable: 'S3_SECRET_ACCESS_KEY']]) {
+        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
           sh '''
-              cd molecule/pdmdb
-              molecule create
+              cd molecule/pdpxc
+              molecule create -s "${PLATFORM}"
           '''
         }
       }
     }
     stage ('Run playbook for test') {
       steps {
-        withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
-        string(credentialsId: 'GCP_SECRET_KEY', variable: 'GCP_SECRET_KEY'), string(credentialsId: 'GCP_ACCESS_KEY', variable: 'GCP_ACCESS_KEY'),
-        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],
-        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'S3_ACCESS_KEY_ID', credentialsId: '2a84aea7-32a0-4598-9e8d-5153179097a9', secretKeyVariable: 'S3_SECRET_ACCESS_KEY']]) {
-          sh '''
-              cd molecule/pdmdb
-              molecule converge
-          '''
-        }
+        sh '''
+            cd molecule/pdpxc
+            molecule converge -s "${PLATFORM}"
+        '''
       }
     }
     stage ('Start testinfra tests') {
       steps {
         sh '''
-            cd molecule/pdmdb
-            molecule verify
+            cd molecule/pdpxc
+            molecule verify -s "${PLATFORM}"
         '''
-        junit 'molecule/pdmdb/molecule/default/report.xml'
+        junit 'molecule/pdpxc/molecule/"${PLATFORM}"/report.xml'
       }
     }
-      stage ('Start Cleanup ') {
+    stage ('Start packages deletion') {
       steps {
-
         sh '''
-            cd molecule/pdmdb
-            python3 -m molecule cleanup
+            cd molecule/pdpxc
+            molecule cleanup -s --scenario-name "${PLATFORM}"
         '''
       }
     }
@@ -111,8 +95,8 @@ pipeline {
       withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
       [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
-            cd molecule/pdmdb
-            molecule destroy
+            cd molecule/pdpxc
+            molecule destroy -s "${PLATFORM}"
         '''
       }
     }

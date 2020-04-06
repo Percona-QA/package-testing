@@ -36,13 +36,10 @@ scenario:
   clenup_sequence:
     - cleanup
   test_sequence:
-    - lint
     - destroy
-    - dependency
     - create
     - prepare
     - converge
     - verify
     - cleanup
-    # - side_effect
     - destroy
