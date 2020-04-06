@@ -18,21 +18,21 @@ debian-8:
   subnet: subnet-03136d8c244f56036
   aws_default_region: us-west-2
   instance_type: t2.micro
-  root_device_name: /dev/xvda
+  root_device_name: xvda
 debian-9:
   image: ami-84439fe4
   user: admin
   subnet: subnet-03136d8c244f56036
   aws_default_region: us-west-2
   instance_type: t2.micro
-  root_device_name: /dev/xvda
+  root_device_name: xvda
 debian-10:
   image: ami-0f5d8e2951e3f83a5
   user: admin
   subnet: subnet-03136d8c244f56036
   aws_default_region: us-west-2
   instance_type: t2.micro
-  root_device_name: /dev/xvda
+  root_device_name: xvda
 ubuntu-cosmic:
   image: ami-0ead033d778487b37
   user: ubuntu
@@ -48,7 +48,7 @@ ubuntu-disco:
   instance_type: t2.micro
   root_device_name: /dev/sda1
 ubuntu-bionic:
-  image: ami-0a8561d8c5a4f098a
+  image: ami-09c6723c6c24250c9
   user: ubuntu
   subnet: subnet-03136d8c244f56036
   aws_default_region: us-west-2
@@ -62,7 +62,7 @@ ubuntu-xenial:
   instance_type: t2.micro
   root_device_name: /dev/sda1
 rhel8:
-  image: ami-0badcc5b522737046
+  image: ami-023606275172407c5
   user: ec2-user
   subnet: subnet-03136d8c244f56036
   aws_default_region: us-west-2
