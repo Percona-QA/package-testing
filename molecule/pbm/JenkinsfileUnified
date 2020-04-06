@@ -1,4 +1,6 @@
 #!/usr/bin/env groovy
+def operatingSystems = [ 'centos-6', 'centos-7', 'debian-9', 'debian-10', 'ubuntu-bionic', 'rhel8']
+
 
 pipeline {
   agent {
@@ -23,14 +25,6 @@ pipeline {
             steps {
                 script {
                     def tests = [:]
-                    def operatingSystems = [
-                'centos-6',
-                'centos-7',
-                'debian-9',
-                'debian-10',
-                'ubuntu-bionic',
-                'rhel8'
-            ]
                     operatingSystems.each { os ->
                         tests["${os}"] = {
                             build job: 'percona-backup-mongodb-packages', parameters: [
@@ -49,15 +43,6 @@ pipeline {
             steps {
                 script {
                     def tests = [:]
-                    def operatingSystems = [
-                'centos-6',
-                'centos-7',
-                'debian-9',
-                'debian-10',
-                'ubuntu-xenial',
-                'ubuntu-bionic',
-                'rhel8'
-            ]
                     operatingSystems.each { os ->
                         tests["${os}"] = {
                             build job: 'percona-backup-mongodb-packages', parameters: [
@@ -76,15 +61,6 @@ pipeline {
             steps {
                 script {
                     def tests = [:]
-                    def operatingSystems = [
-                'centos-6',
-                'centos-7',
-                'debian-9',
-                'debian-10',
-                'ubuntu-xenial',
-                'ubuntu-bionic',
-                'rhel8'
-            ]
                     operatingSystems.each { os ->
                         tests["${os}"] = {
                             build job: 'percona-backup-mongodb-packages', parameters: [
