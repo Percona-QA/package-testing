@@ -1,0 +1,4 @@
+---
+# tasks file for pdpxc
+- name: include tasks for test env setup
+  include_tasks: ../../../playbooks/pxc80_common.yml
