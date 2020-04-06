@@ -25,7 +25,7 @@ debian-9:
   subnet: subnet-03136d8c244f56036
   aws_default_region: us-west-2
   instance_type: t2.micro
-  root_device_name: xvda
+  root_device_name: /dev/xvda
 debian-10:
   image: ami-0f5d8e2951e3f83a5
   user: admin
@@ -62,7 +62,7 @@ ubuntu-xenial:
   instance_type: t2.micro
   root_device_name: /dev/sda1
 rhel8:
-  image: ami-023606275172407c5
+  image: ami-0c98b2fdb4c52c077
   user: ec2-user
   subnet: subnet-03136d8c244f56036
   aws_default_region: us-west-2
