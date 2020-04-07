@@ -34,6 +34,8 @@ def start_stop_pbm(host):
     :param host:
     :return:
     """
+    print(host.system_info.distribution)
+    print(host.system_info.release)
     with host.sudo("root"):
         cmd = "sudo systemctl stop pbm-agent"
         result = host.run(cmd)
@@ -49,6 +51,8 @@ def start_stop_pbm(host):
 def restart_pbm_agent(host):
     """Restart pbm-agent service
     """
+    print(host.system_info.distribution)
+    print(host.system_info.release)
     with host.sudo("root"):
         cmd = "sudo systemctl restart pbm-agent"
         result = host.run(cmd)
