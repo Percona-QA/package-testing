@@ -19,7 +19,7 @@ provisioner:
   playbooks:
     create: ../../../playbooks/create.yml
     destroy: ../../../playbooks/destroy.yml
-    prepare: ../../../playbooks/prepare.yml
+#    prepare: ../../../playbooks/prepare.yml
   lint:
     name: ansible-lint
     enabled: False
