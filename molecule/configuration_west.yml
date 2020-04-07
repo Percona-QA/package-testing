@@ -69,7 +69,7 @@ ubuntu-xenial:
   instance_type: t2.micro
   root_device_name: /dev/sda1
 rhel8:
-  image: ami-0c98b2fdb4c52c077
+  image: ami-087c2c50437d0b80d
   user: ec2-user
   subnet: subnet-03136d8c244f56036
   aws_default_region: us-west-2
