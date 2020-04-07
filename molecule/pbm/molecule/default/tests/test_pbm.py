@@ -34,25 +34,42 @@ def start_stop_pbm(host):
     :param host:
     :return:
     """
-    print(host.system_info.distribution)
-    print(host.system_info.release)
-    with host.sudo("root"):
-        cmd = "sudo systemctl stop pbm-agent"
-        result = host.run(cmd)
-        assert result.rc == 0, result.stdout
-        cmd = "sudo systemctl start pbm-agent"
-        result = host.run(cmd)
-        assert result.rc == 0, result.stdout
-        cmd = "sudo systemctl status pbm-agent"
-        return host.run(cmd)
+    operating_system = host.system_info.distribution
+    if operating_system.lower() == "centos":
+        if '6' in host.system_info.release:
+            with host.sudo("root"):
+                cmd = "sudo service pbm-agent stop"
+                result = host.run(cmd)
+                assert result.rc == 0, result.stdout
+                cmd = "sudo service pbm-agent start"
+                result = host.run(cmd)
+                assert result.rc == 0, result.stdout
+                cmd = "sudo service pbm-agent status"
+                return host.run(cmd)
+    else:
+        with host.sudo("root"):
+            cmd = "sudo systemctl stop pbm-agent"
+            result = host.run(cmd)
+            assert result.rc == 0, result.stdout
+            cmd = "sudo systemctl start pbm-agent"
+            result = host.run(cmd)
+            assert result.rc == 0, result.stdout
+            cmd = "sudo systemctl status pbm-agent"
+            return host.run(cmd)
 
 
 @pytest.fixture()
 def restart_pbm_agent(host):
     """Restart pbm-agent service
     """
-    print(host.system_info.distribution)
-    print(host.system_info.release)
+    operating_system = host.system_info.distribution
+    if operating_system.lower() == "centos":
+        if '6' in host.system_info.release:
+            cmd = "sudo service pbm-agent restart"
+            result = host.run(cmd)
+            assert result.rc == 0, result.stdout
+            cmd = "sudo service pbm-agent status"
+            return host.run(cmd)
     with host.sudo("root"):
         cmd = "sudo systemctl restart pbm-agent"
         result = host.run(cmd)
@@ -157,7 +174,7 @@ def test_restart_service(restart_pbm_agent):
     :param restart_pbm_agent:
     """
     assert restart_pbm_agent.rc == 0, restart_pbm_agent.stdout
-    assert "active" in restart_pbm_agent.stdout
+    assert "active" in restart_pbm_agent.stdout, restart_pbm_agent.stdout
 
 
 def test_pbm_version(host):
