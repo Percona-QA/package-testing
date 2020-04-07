@@ -159,22 +159,32 @@ def test_pbm_storage_default_config(host):
 
 
 # TODO add correct start/stop test
-def test_start_stop_service(start_stop_pbm):
+def test_start_stop_service(start_stop_pbm, host):
     """Start and stop pbm agent
 
     :param start_stop_pbm:
     """
-    assert start_stop_pbm.rc == 0, restart_pbm_agent.stdout
-    assert "active" in start_stop_pbm.stdout, restart_pbm_agent.stdout
+    assert start_stop_pbm.rc == 0, start_stop_pbm.stdout
+    operating_system = host.system_info.distribution
+    if operating_system.lower() == "centos":
+        if '6' in host.system_info.release:
+            assert "running" in start_stop_pbm.stdout, start_stop_pbm.stdout
+    else:
+        assert "active" in start_stop_pbm.stdout, start_stop_pbm.stdout
 
 
-def test_restart_service(restart_pbm_agent):
+def test_restart_service(restart_pbm_agent, host):
     """Restart pbm agent
 
     :param restart_pbm_agent:
     """
     assert restart_pbm_agent.rc == 0, restart_pbm_agent.stdout
-    assert "active" in restart_pbm_agent.stdout, restart_pbm_agent.stdout
+    operating_system = host.system_info.distribution
+    if operating_system.lower() == "centos":
+        if '6' in host.system_info.release:
+            assert "running" in restart_pbm_agent.stdout, restart_pbm_agent.stdout
+    else:
+        assert "active" in restart_pbm_agent.stdout, restart_pbm_agent.stdout
 
 
 def test_pbm_version(host):
