@@ -35,17 +35,16 @@ def start_stop_pbm(host):
     :return:
     """
     operating_system = host.system_info.distribution
-    if operating_system.lower() == "centos":
-        if '6' in host.system_info.release:
-            with host.sudo("root"):
-                cmd = "sudo service pbm-agent stop"
-                result = host.run(cmd)
-                assert result.rc == 0, result.stdout
-                cmd = "sudo service pbm-agent start"
-                result = host.run(cmd)
-                assert result.rc == 0, result.stdout
-                cmd = "sudo service pbm-agent status"
-                return host.run(cmd)
+    if operating_system.lower() == "centos" and '6' in host.system_info.release:
+        with host.sudo("root"):
+            cmd = "sudo service pbm-agent stop"
+            result = host.run(cmd)
+            assert result.rc == 0, result.stdout
+            cmd = "sudo service pbm-agent start"
+            result = host.run(cmd)
+            assert result.rc == 0, result.stdout
+            cmd = "sudo service pbm-agent status"
+            return host.run(cmd)
     else:
         with host.sudo("root"):
             cmd = "sudo systemctl stop pbm-agent"
@@ -63,13 +62,12 @@ def restart_pbm_agent(host):
     """Restart pbm-agent service
     """
     operating_system = host.system_info.distribution
-    if operating_system.lower() == "centos":
-        if '6' in host.system_info.release:
-            cmd = "sudo service pbm-agent restart"
-            result = host.run(cmd)
-            assert result.rc == 0, result.stdout
-            cmd = "sudo service pbm-agent status"
-            return host.run(cmd)
+    if operating_system.lower() == "centos" and '6' in host.system_info.release:
+        cmd = "sudo service pbm-agent restart"
+        result = host.run(cmd)
+        assert result.rc == 0, result.stdout
+        cmd = "sudo service pbm-agent status"
+        return host.run(cmd)
     with host.sudo("root"):
         cmd = "sudo systemctl restart pbm-agent"
         result = host.run(cmd)
