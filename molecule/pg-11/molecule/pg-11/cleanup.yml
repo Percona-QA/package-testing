@@ -5,8 +5,12 @@
   become_method: sudo
   tasks:
     - apt_repository:
-        repo: deb http://cdn-aws.deb.debian.org/debian stretch-updates main
+        repo: "{{ repos }}"
         state: absent
+      vars:
+        repos:
+          - deb http://cdn-aws.deb.debian.org/debian stretch-updates main
+          - deb http://cdn-aws.deb.debian.org/debian stretch main
 
 
     - name: Get list of repositories for Debian
