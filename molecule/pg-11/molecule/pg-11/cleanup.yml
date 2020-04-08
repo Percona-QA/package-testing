@@ -4,6 +4,11 @@
   become: true
   become_method: sudo
   tasks:
+    - apt_repository:
+        repo: deb http://cdn-aws.deb.debian.org/debian stretch-updates main
+        state: absent
+
+
     - name: Get list of repositories for Debian
       shell: grep -r --include '*.list' '^deb ' /etc/apt/sources.list*
       register: sources_list
