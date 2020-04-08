@@ -5,10 +5,9 @@
   become_method: sudo
   tasks:
     - apt_repository:
-        repo: "{{ repos }}"
+        repo: "{{ item }}"
         state: absent
-      vars:
-        repos:
+      with_items:
           - deb http://cdn-aws.deb.debian.org/debian stretch-updates main
           - deb http://cdn-aws.deb.debian.org/debian stretch main
 
