@@ -64,6 +64,8 @@ elif [ $1 = "pmm" ]; then
 elif [ $1 = "pbm" ]; then
   version=${PBM_VER}
   pkg_version=${PBM_PKG_VER}
+elif [ $1 = "repo" ]; then
+  version=${REPO_VER}
 else
   echo "Illegal product selected!"
   exit 1
@@ -346,6 +348,22 @@ elif [ "${product}" == "pbm" ]; then
     fi
   fi
 
+elif [ "${product}" == "repo" ]; then
+  if [ -f /etc/redhat-release ]; then
+    if [ "$(rpm -qa | grep percona-release | grep -c ${version})" == "1" ]; then
+      echo "repo packages is installed"
+    else 
+      echo "WARNING percona-release-${version} is not installed"
+      exit 1 
+    fi
+  else
+    if [ "$(dpkg -l | grep percona-release | grep -c ${version})" == "1" ]; then
+      echo "repo packages is installed"
+    else
+      echo "WARNING: percona-release-${version} is not installed"
+      exit 1
+    fi
+  fi
 fi
 
 echo "${product} installed package versions are OK"
