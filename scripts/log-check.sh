@@ -8,6 +8,8 @@ if [ -f /etc/redhat-release ]; then
     else
        logfile='/var/log/yum.log'
     fi
+elif [ -f /etc/system-release ]; then
+       logfile='/var/log/yum.log'
 else
   logfile='/var/log/apt/term.log'
 fi
