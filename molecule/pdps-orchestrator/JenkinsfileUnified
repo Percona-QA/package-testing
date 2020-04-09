@@ -1,0 +1,40 @@
+#!/usr/bin/env groovy
+
+def operatingSystems = ['centos-7', 'debian-9', 'debian-10', 'ubuntu-bionic', 'rhel8']
+pipeline {
+  agent {
+  label 'micro-amazon'
+  }
+  environment {
+      PATH = '/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/ec2-user/.local/bin'
+  }
+  parameters {
+        choice(
+            name: 'REPO',
+            description: 'Repo for testing',
+            choices: [
+                'testing',
+                'main',
+                'experimental'
+            ]
+        )
+  }
+    stages {
+        stage('Test packages') {
+            steps {
+                script {
+                    def tests = [:]
+                    operatingSystems.each { os ->
+                        tests["${os}"] = {
+                            build job: 'pdps-orchestrator-package-testing', parameters: [
+                [$class: 'StringParameterValue', name: 'PLATFORM', value: os],
+                [$class: 'StringParameterValue', name: 'REPO', value: env.REPO],
+            ]
+                        }
+                    }
+                    parallel tests
+                }
+            }
+        }
+    }
+}

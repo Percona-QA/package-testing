@@ -1,0 +1,4 @@
+---
+# tasks file for pdps
+- name: include tasks for test env setup
+  include_tasks: ../../../playbooks/ps_80.yml
