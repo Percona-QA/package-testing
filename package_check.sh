@@ -349,7 +349,7 @@ elif [ "${product}" == "pbm" ]; then
   fi
 
 elif [ "${product}" == "repo" ]; then
-  if [ -f /etc/redhat-release ]; then
+  if [ -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
     if [ "$(rpm -qa | grep percona-release | grep -c ${version})" == "1" ]; then
       echo "repo packages is installed"
     else 
