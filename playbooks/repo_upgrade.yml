@@ -41,3 +41,6 @@
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh repo
+
+  - name: check that apt/yum/dnf logs are clean
+    command: /package-testing/scripts/log-check.sh
