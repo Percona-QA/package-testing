@@ -27,12 +27,12 @@ debian-8:
   instance_type: t2.micro
   root_device_name: xvda
 debian-9:
-  image: ami-84439fe4
+  image: ami-01d07e14f082b3ba1
   user: admin
   subnet: subnet-03136d8c244f56036
   aws_default_region: us-west-2
   instance_type: t2.micro
-  root_device_name: /dev/xvda
+  root_device_name: xvda
 debian-10:
   image: ami-0f5d8e2951e3f83a5
   user: admin
