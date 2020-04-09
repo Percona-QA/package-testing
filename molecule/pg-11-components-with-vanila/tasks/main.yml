@@ -22,18 +22,21 @@
     name: gnupg2
   when: ansible_os_family == "Debian"
 
+# Temp solution
 - name: Install percona repository package
   apt:
-    deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+    deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-16.generic_all.deb
+#    deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
   when: ansible_os_family == "Debian"
 
+
 # Temp solution for percona release
-- name: download newer percona-release script
-  get_url:
-    url: https://raw.githubusercontent.com/percona/percona-repositories/1.0/scripts/percona-release.sh
-    dest: /usr/bin/percona-release
-    mode: '755'
-    force: true
+#- name: download newer percona-release script
+#  get_url:
+#    url: https://raw.githubusercontent.com/percona/percona-repositories/1.0/scripts/percona-release.sh
+#    dest: /usr/bin/percona-release
+#    mode: '755'
+#    force: true
 
 # End of temp solution
 
