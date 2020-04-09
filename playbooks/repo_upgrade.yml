@@ -12,8 +12,8 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: include tasks for enabling testing repo
-    include: ../tasks/enable_testing_repo.yml
+  - name: enabling testing repo
+    command: percona-release enable original testing
 
   - name: install Percona Server deb packages
     apt:
