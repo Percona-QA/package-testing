@@ -17,7 +17,7 @@ pipeline {
                 'ubuntu-bionic',
                 'ubuntu-xenial',
                 'ubuntu-disco',
-                'ubuntu-eoan,'
+                'ubuntu-eoan',
                 'rhel8',
                 'amazonlinux-2'
             ]
