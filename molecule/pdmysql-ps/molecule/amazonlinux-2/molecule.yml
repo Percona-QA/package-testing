@@ -1,0 +1,44 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: ${NAME}
+    region: eu-central-1
+    image: ami-074dc9dd588b6ea52
+    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    instance_type: t2.micro
+    ssh_user: ec2-user
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-pg-worker
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    create: ../../../playbooks/create.yml
+    destroy: ../../../playbooks/destroy.yml
+    prepare: ../../../playbooks/prepare.yml
+    cleanup: ../playbooks/cleanup.yml
+verifier:
+  name: testinfra
+  directory: ../tests/
+  options:
+    verbose: true
+    s: true
+    junitxml: report.xml
+scenario:
+  name: amazonlinux-2
+  destroy_sequence:
+    - destroy
+  clenup_sequence:
+    - cleanup
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+    - destroy

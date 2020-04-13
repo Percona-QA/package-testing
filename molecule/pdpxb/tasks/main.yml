@@ -1,4 +1,0 @@
----
-# tasks file for pdpxb
-- name: include tasks for test env setup
-  include_tasks: ../../../playbooks/pxb_80.yml
