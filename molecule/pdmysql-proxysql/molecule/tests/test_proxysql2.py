@@ -8,6 +8,8 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 def test_proxysql2_version(host):
     cmd = 'proxysql --version'
+    cmd_pkg = host.run("repoquery -i proxysql2")
+    print(cmd_pkg.stdout)
     result = host.run(cmd)
     print(result.stdout)
     assert result.rc == 0, result.stderr

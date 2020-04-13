@@ -5,9 +5,9 @@
 
 - name: include tasks for enabling main repo
   include: ../../pdmysql_tasks/enable_original_repo.yml
-  when: lookup('env', 'install_repo') == "main"
+  when: lookup('env', 'REPO') == "main"
 
-- name: include tasks for enabling PS 8 test repo
+- name: include tasks for enabling PDMYSQL PS 8 test repo
   include: ../../pdmysql_tasks/enable_main_repo.yml
   when: lookup('env', 'REPO') == "main"
 

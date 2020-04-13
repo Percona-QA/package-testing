@@ -20,6 +20,8 @@ def test_check_deb_package(host, package):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
         pytest.skip("This test only for Debian based platforms")
+    cmd = host.run("apt-cache showpkg {}".format(package))
+    print(cmd.stdout)
     pkg = host.package(package)
     assert pkg.is_installed
     assert '8.0.18' in pkg.version, pkg.version
@@ -30,6 +32,8 @@ def test_check_rpm_package(host, package):
     os = host.system_info.distribution
     if os in ["debian", "ubuntu"]:
         pytest.skip("This test only for RHEL based platforms")
+    cmd = host.run("repoquery -i {}".format(package))
+    print(cmd.stdout)
     pkg = host.package(package)
     assert pkg.is_installed
     assert '8.0.18' in pkg.version, pkg.version
