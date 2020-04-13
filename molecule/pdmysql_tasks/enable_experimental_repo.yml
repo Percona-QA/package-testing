@@ -14,7 +14,7 @@
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
 
-  - name: enable the PS-80 experimental repo
+  - name: enable the PDMYSQL-80 experimental repo
     command: percona-release enable pdmysql-8.0.18 experimental
 
   - name: enable tools experimental repo
@@ -25,3 +25,8 @@
       yum clean all
       yum makecache
     when: ansible_os_family == "RedHat"
+
+  - name: Get list of repositories for Debian
+    shell: grep -r --include '*.list' '^deb ' /etc/apt/sources.list*
+    register: sources_list
+    when: ansible_os_family == "Debian"
