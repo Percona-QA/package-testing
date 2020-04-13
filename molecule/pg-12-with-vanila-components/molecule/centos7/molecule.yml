@@ -21,7 +21,6 @@ provisioner:
     destroy: ../../../playbooks/destroy.yml
     prepare: ../../../playbooks/prepare.yml
     cleanup: ../playbooks/cleanup-rpm.yml
-    side_effect: ../playbooks/side-effect-rpm.yml
 verifier:
   name: testinfra
   directory: ../tests/

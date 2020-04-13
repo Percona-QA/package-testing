@@ -1,0 +1,58 @@
+#!/usr/bin/env groovy
+
+pipeline {
+  agent {
+  label 'micro-amazon'
+  }
+  environment {
+      PATH = '/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/ec2-user/.local/bin'
+  }
+  parameters {
+        choice(
+            name: 'REPO',
+            description: 'Repo for testing',
+            choices: [
+                'testing',
+                'main',
+                'experimental'
+            ]
+        )
+  }
+    stages {
+        stage('Test Percona Server') {
+            steps {
+                build job: 'pdmysql-ps-unified', parameters: [
+                [$class: 'StringParameterValue', name: 'REPO', value: env.REPO]
+            }
+
+        }
+        stage('Test PXB') {
+            steps {
+                build job: 'pdmysql-pxb-unified', parameters: [
+                [$class: 'StringParameterValue', name: 'REPO', value: env.REPO]
+            }
+
+        }
+        stage('Test Proxysql') {
+            steps {
+                build job: 'pdmysql-proxysql-unified', parameters: [
+                [$class: 'StringParameterValue', name: 'REPO', value: env.REPO]
+            }
+
+        }
+        stage('Test Orchestrator') {
+            steps {
+                build job: 'pdmysql-orchestrator-unified', parameters: [
+                [$class: 'StringParameterValue', name: 'REPO', value: env.REPO]
+            }
+
+        }
+        stage('Test PXC') {
+            steps {
+                build job: 'pdmysql-pxc-unified', parameters: [
+                [$class: 'StringParameterValue', name: 'REPO', value: env.REPO]
+            }
+
+        }
+    }
+}

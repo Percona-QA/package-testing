@@ -1,0 +1,6 @@
+---
+# tasks file for pdmysql-pxc
+- name: include tasks for test env setup
+  include_tasks: ../../../playbooks/pxc80_bootstrap.yml
+- name: include tasks for test env setup
+  include_tasks: ../../../playbooks/pxc80_common.yml

@@ -1,0 +1,20 @@
+---
+- name: Cleanup
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: remove PDPS-proxysql rpm packages
+      yum:
+        name: proxysql2
+        state: absent
+      when: ansible_os_family == "RedHat"
+
+    - name: remove PDPS deb packages
+      apt:
+        name: proxysql2
+        state: absent
+      when: ansible_os_family == "Debian"
+
+    - name: check if process is stopped after package removal
+        command: /package-testing/check_running.sh proxysql stopped
