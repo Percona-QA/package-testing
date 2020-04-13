@@ -13,7 +13,7 @@
 
 - name: include tasks for enabling PS 8 test repo
   include: ../../pdmysql_tasks/enable_testing_repo.yml
-  when: lookup('env', 'REPO') == "testing" or lookup('env', 'install_repo') == ""
+  when: lookup('env', 'REPO') == "testing" or lookup('env', 'REPO') == ""
 
 - name: include tasks for enabling PS 8 experimental repo
   include: ../../pdmysql_tasks/enable_experimental_repo.yml
