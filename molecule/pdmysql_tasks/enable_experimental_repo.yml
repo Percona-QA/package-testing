@@ -25,16 +25,3 @@
       yum clean all
       yum makecache
     when: ansible_os_family == "RedHat"
-
-  - name: Get list of repositories for Debian
-    shell: grep -r --include '*.list' '^deb ' /etc/apt/sources.list*
-    register: sources_list
-    when: ansible_os_family == "Debian"
-
-  - name: Get list of repositories for RHEL
-    shell: yum repolist all
-    register: sources_list
-    when: ansible_os_family == "RedHat"
-
-  - debug:
-      msg: "{{ sources_list.stdout_lines }}"
