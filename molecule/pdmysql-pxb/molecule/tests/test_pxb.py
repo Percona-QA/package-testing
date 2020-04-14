@@ -17,6 +17,9 @@ RPMPACKAGES = ['percona-xtrabackup-80',
 
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
+    dist = host.system_info.distribution
+    if dist.lower() in ["redhat", "centos", 'rhel']:
+        pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
     assert '8.0.11' in pkg.version, pkg.version
@@ -24,6 +27,9 @@ def test_check_deb_package(host, package):
 
 @pytest.mark.parametrize("package", RPMPACKAGES)
 def test_check_rpm_package(host, package):
+    dist = host.system_info.distribution
+    if dist.lower() in ["debian", "ubuntu"]:
+        pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
     assert '8.0.11' in pkg.version, pkg.version
