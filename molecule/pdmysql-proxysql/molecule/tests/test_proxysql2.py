@@ -8,9 +8,11 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 def test_proxysql2_version(host):
     cmd = 'proxysql --version'
-    cmd_pkg = host.run("repoquery -i proxysql2")
-    print(cmd_pkg.stdout)
+    if os.lower() in ["redhat", "centos", 'rhel']:
+        cmd_pkg = host.run("repoquery -i proxysql2")
+    else:
+        cmd_pkg = host.run("apt-cache showpkg proxysql2")
+    print(cmd_pkg.stdout, cmd_pkg.stderr)
     result = host.run(cmd)
-    print(result.stdout)
     assert result.rc == 0, result.stderr
-    assert '8.0.18' in result.stdout, result.stdout
+    assert '2.0.10' in result.stdout, result.stdout

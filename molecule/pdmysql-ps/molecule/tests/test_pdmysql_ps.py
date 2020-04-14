@@ -101,10 +101,11 @@ def test_binary_version(host, binary):
 
 @pytest.mark.parametrize('component', ['@@INNODB_VERSION', '@@VERSION', '@@TOKUDB_VERSION'])
 def test_mysql_version(host, component):
-    cmd = "mysql -e \"SELECT {}; \"| grep -c \"{}\")".format(component, '8.0.18')
-    result = host.run(cmd)
-    print(result.stdout)
-    assert result.rc == 0, result.stderr
+    with host.sudo("root"):
+        cmd = "mysql -e \"SELECT {}; \"| grep -c \"{}\"".format(component, '8.0.18')
+        result = host.run(cmd)
+        print(result.stdout)
+        assert result.rc == 0, result.stderr
 
 
 @pytest.mark.parametrize('plugin_command', PLUGIN_COMMANDS)
@@ -116,13 +117,14 @@ def test_plugins(host, plugin_command):
 
 @pytest.mark.parametrize("component", COMPONENTS)
 def test_components(component, host):
-    cmd = 'mysql -Ns -e "select count(*) from mysql.component where component_urn=\"file://{}\";"'.format(component)
-    check_component = host.run(cmd)
-    if check_component.rc == 0:
-        inst_cmd = 'mysql -e "INSTALL COMPONENT \"file://{}\";"'.format(component)
-        inst_res = host.run(inst_cmd)
-        assert inst_res.rc == 0, inst_res.stderr
-    check_cmd = 'mysql -Ns -e "select count(*) from mysql.component where component_urn=\"file://{}\";"'.format(
-        component)
-    check_result = host.run(check_cmd)
-    assert check_result.rc == 1, (check_result.rc, check_result.stderr, check_result.stdout)
+    with host.sudo("root"):
+        cmd = 'mysql -Ns -e "select count(*) from mysql.component where component_urn=\"file://{}\";"'.format(component)
+        check_component = host.run(cmd)
+        if check_component.rc == 0:
+            inst_cmd = 'mysql -e "INSTALL COMPONENT \"file://{}\";"'.format(component)
+            inst_res = host.run(inst_cmd)
+            assert inst_res.rc == 0, inst_res.stderr
+        check_cmd = 'mysql -Ns -e "select count(*) from mysql.component where component_urn=\"file://{}\";"'.format(
+            component)
+        check_result = host.run(check_cmd)
+        assert check_result.rc == 1, (check_result.rc, check_result.stderr, check_result.stdout)
