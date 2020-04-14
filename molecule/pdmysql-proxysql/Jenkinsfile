@@ -12,7 +12,6 @@ pipeline {
             choices: [
                 'centos-6',
                 'centos-7',
-                'debian-8',
                 'debian-9',
                 'debian-10',
                 'ubuntu-xenial',

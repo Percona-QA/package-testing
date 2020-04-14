@@ -16,10 +16,7 @@ pipeline {
                 'debian-10',
                 'ubuntu-bionic',
                 'ubuntu-xenial',
-                'ubuntu-disco',
-                'ubuntu-eoan',
-                'rhel8',
-                'amazonlinux-2'
+                'rhel8'
             ]
         )
         choice(
