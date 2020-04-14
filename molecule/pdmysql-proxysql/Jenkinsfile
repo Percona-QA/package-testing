@@ -80,6 +80,7 @@ pipeline {
         sh '''
             cd molecule/pdmysql-proxysql
             molecule verify -s "${PLATFORM}"
+            junit 'molecule/pdmysql-proxysql/molecule/${PLATFORM}/report.xml'
         '''
       }
     }

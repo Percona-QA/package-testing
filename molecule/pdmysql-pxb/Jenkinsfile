@@ -82,14 +82,14 @@ pipeline {
             cd molecule/pdmysql-pxb
             molecule verify -s "${PLATFORM}"
         '''
-        junit 'molecule/pdmysql-pxb/molecule/"${PLATFORM}"/report.xml'
+        junit 'molecule/pdmysql-pxb/molecule/${PLATFORM}/report.xml'
       }
     }
     stage ('Start packages deletion') {
       steps {
         sh '''
             cd molecule/pdmysql-pxb
-            molecule cleanup -s --scenario-name "${PLATFORM}"
+            molecule cleanup -s "${PLATFORM}"
         '''
       }
     }
