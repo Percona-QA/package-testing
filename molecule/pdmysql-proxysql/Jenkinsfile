@@ -81,14 +81,13 @@ pipeline {
             cd molecule/pdmysql-proxysql
             molecule verify -s "${PLATFORM}"
         '''
-        junit 'molecule/pdmysql-proxysql/molecule/"${PLATFORM}"/report.xml'
       }
     }
     stage ('Start packages deletion') {
       steps {
         sh '''
             cd molecule/pdmysql-proxysql
-            molecule cleanup -s --scenario-name "${PLATFORM}"
+            molecule cleanup -s "${PLATFORM}"
         '''
       }
     }

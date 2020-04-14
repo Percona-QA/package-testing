@@ -110,9 +110,10 @@ def test_mysql_version(host, component):
 
 @pytest.mark.parametrize('plugin_command', PLUGIN_COMMANDS)
 def test_plugins(host, plugin_command):
-    result = host.run(plugin_command)
-    print(result.stdout)
-    assert result.rc == 0, result.stderr
+    with host.sudo("root"):
+        result = host.run(plugin_command)
+        print(result.stdout)
+        assert result.rc == 0, result.stderr
 
 
 @pytest.mark.parametrize("component", COMPONENTS)
