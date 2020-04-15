@@ -66,6 +66,31 @@ COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_audit_api_message_emit']
 
 
+def is_running(host):
+    cmd = 'ps auxww| grep -v grep  | grep -c "mysql"'
+    result = host.run(cmd)
+    print(result.stdout)
+    stdout = int(result.stdout)
+    if stdout == 0:
+        return True
+    return False
+
+
+@pytest.fixture(scope='function')
+def start_mysql(host):
+    with host.sudo("root"):
+        operating_system = host.system_info.distribution
+        if operating_system.lower() == "centos" and '6' in host.system_info.release:
+            cmd = "sudo service mysql start"
+            result = host.run(cmd)
+            assert result.rc == 0, result.stdout
+            return result
+        cmd = "sudo systemctl start mysql"
+        result = host.run(cmd)
+        assert result.rc == 0, result.stdout
+        return result
+
+
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
     dist = host.system_info.distribution
@@ -125,3 +150,20 @@ def test_components(component, host):
             component)
         check_result = host.run(check_cmd)
         assert check_result.rc == 1, (check_result.rc, check_result.stderr, check_result.stdout)
+
+
+def test_madmin(host, start_mysql):
+    _ = start_mysql
+    running = is_running(host)
+    assert running, "Make sure that service is running before stopping it"
+    cmd = 'mysqladmin shutdown'
+    shutdown = host.run(cmd)
+    assert shutdown.rc == 0, shutdown.stdout
+    running = is_running(host)
+    assert running, "Service is still running"
+    cmd = 'service mysql start'
+    start = host.run(cmd)
+    assert start.rc == 0, start.stderr
+    running = is_running(host)
+    assert not running, "Service didn't start"
+
