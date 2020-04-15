@@ -56,11 +56,3 @@
 
 - name: check that Percona XtraBackup package versions are correct
   command: /package-testing/package_check.sh pxb80
-
-#- name: run backup
-#  command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
-#
-#- name: prepare backup
-#  command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
-
-
