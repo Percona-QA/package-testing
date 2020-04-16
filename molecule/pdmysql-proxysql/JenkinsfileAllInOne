@@ -17,6 +17,13 @@ pipeline {
         )
   }
   stages {
+    stage ('Setup Environment Variables') {
+      steps {
+       script {
+       env.NAME = "${env.BUILD_NUMBER}"
+        }
+       }
+      }
     stage ('Prepare') {
       steps {
         checkout scm
