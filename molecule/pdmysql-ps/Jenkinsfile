@@ -16,6 +16,7 @@ pipeline {
                 'debian-10',
                 'ubuntu-bionic',
                 'ubuntu-xenial',
+                'ubuntu-focal',
                 'rhel8'
             ]
         )

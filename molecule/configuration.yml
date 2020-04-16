@@ -68,6 +68,13 @@ ubuntu-xenial:
   aws_default_region: eu-central-1
   instance_type: t2.micro
   root_device_name: /dev/sda1
+ubuntu-focal:
+  image: ami-0269b8ddda2534f31
+  user: ubuntu
+  subnet: subnet-085deaca8c1c59a4f
+  aws_default_region: eu-central-1
+  instance_type: t2.micro
+  root_device_name: /dev/sda1
 rhel8:
   image: ami-0badcc5b522737046
   user: ec2-user

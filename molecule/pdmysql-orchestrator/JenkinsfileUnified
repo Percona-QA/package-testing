@@ -1,6 +1,7 @@
 #!/usr/bin/env groovy
 
-def operatingSystems = ['centos-7', 'debian-9', 'debian-10', 'ubuntu-bionic', 'rhel8']
+def operatingSystems = ['centos-6', 'centos-7', 'debian-9', 'debian-10',
+                        'ubuntu-xenial', 'ubuntu-focal', 'ubuntu-bionic', 'rhel8']
 pipeline {
   agent {
   label 'micro-amazon'

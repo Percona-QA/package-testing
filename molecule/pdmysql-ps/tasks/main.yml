@@ -152,9 +152,5 @@
   - name: start mysql service
     service: name=mysql state=started enabled=yes
 
-  - name: start mysqld service debian
-    service: name=mysqld state=started enabled=yes
-    when: ansible_os_family == "Debian"
-
-  - name: check that mysqladmin shutdown works correctly
-    command: /package-testing/madmin_check.sh
+#  - name: check that mysqladmin shutdown works correctly
+#    command: /package-testing/madmin_check.sh

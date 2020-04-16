@@ -137,6 +137,19 @@ def test_components(component, host):
         assert check_result.rc == 1, (check_result.rc, check_result.stderr, check_result.stdout)
 
 
+def test_madmin(host):
+    with host.sudo("root"):
+        mysql = host.service("mysql")
+        assert mysql.is_running
+        # running = is_running(host)
+        # assert running, "Make sure that service is running before stopping it"
+        cmd = 'mysqladmin shutdown'
+        shutdown = host.run(cmd)
+        print(shutdown.stdout)
+        print(shutdown.stderr)
+        assert shutdown.rc == 0, shutdown.stdout
+        mysql = host.service("mysql")
+        assert not mysql.is_running
 # def test_madmin(host):
 #     running = is_running(host)
 #     assert running, "Make sure that service is running before stopping it"
