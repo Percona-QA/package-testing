@@ -45,7 +45,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: stop mysql service with service command
-    command: service mysql stop
+  command: service mysql stop
 
 - name: copy pxc config on centos 6
   template: src=../templates/my_rpm.j2 dest=/etc/my.cnf
