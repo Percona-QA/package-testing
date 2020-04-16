@@ -128,5 +128,5 @@
 - name: run bats tests for mysql init scripts
   command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
 
-- name: install plugins
-  command: /package-testing/plugins_test_80.sh pxc
+#- name: install plugins
+#  command: /package-testing/plugins_test_80.sh pxc
