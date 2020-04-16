@@ -19,8 +19,8 @@
   include: ../../pdmysql_tasks/enable_experimental_repo.yml
   when: lookup('env', 'REPO') == "experimental"
 
-#- name: download and extract world database
-#  command: wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+- name: download and extract world database
+  command: wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
 - name: install PXC 8 deb packages
   apt:
@@ -128,8 +128,5 @@
 - name: run bats tests for mysql init scripts
   command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
 
-- name: start mysql service
-  service: name=mysql state=started
-  
 - name: install plugins
   command: /package-testing/plugins_test_80.sh pxc

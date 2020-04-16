@@ -19,6 +19,7 @@
   vars:
     packages:
     - proxysql2
+    - proxysql2-dbgsym
   when: ansible_os_family == "Debian"
 
 - name: install proxysql new rpm packages

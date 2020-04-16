@@ -151,6 +151,3 @@
 
   - name: start mysql service
     service: name=mysql state=started enabled=yes
-
-#  - name: check that mysqladmin shutdown works correctly
-#    command: /package-testing/madmin_check.sh

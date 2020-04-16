@@ -6,17 +6,18 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-DEBPACKAGES = ['percona-server-server', 'percona-server-test',
-               'percona-server-dbg', 'percona-server-source',
-               'percona-server-client', 'percona-server-tokudb',
-               'percona-server-rocksdb', 'percona-mysql-router',
-               'percona-mysql-shell']
+DEBPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-source',
+               'python-mysqldb', 'percona-xtradb-cluster-client', 'percona-xtradb-cluster-common',
+               'percona-xtradb-cluster-dbg', 'percona-xtradb-cluster-garbd-debug',
+               'percona-xtradb-cluster-garbd', 'percona-xtradb-cluster-server-debug',
+               'percona-xtradb-cluster-test', 'percona-xtradb-cluster']
 
-RPMPACKAGES = ['percona-server-server', 'percona-server-client',
-               'percona-server-test', 'percona-server-debuginfo',
-               'percona-server-devel', 'percona-server-tokudb',
-               'percona-server-rocksdb', 'percona-mysql-router',
-               'percona-mysql-shell']
+RPMPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-source',
+               'percona-xtradb-cluster', 'percona-xtradb-cluster-client',
+               'percona-xtradb-cluster-debuginfo', 'percona-xtradb-cluster-devel',
+               'percona-xtradb-cluster-garbd', 'percona-xtradb-cluster-server',
+               'percona-xtradb-cluster-shared', 'percona-xtradb-cluster-shared-compat',
+               'percona-xtradb-cluster-test']
 
 PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    " fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so';\"",
@@ -105,7 +106,7 @@ def test_binary_version(host, binary):
     assert '8.0.18' in result.stdout, result.stdout
 
 
-@pytest.mark.parametrize('component', ['@@INNODB_VERSION', '@@VERSION', '@@TOKUDB_VERSION'])
+@pytest.mark.parametrize('component', ['@@INNODB_VERSION', '@@VERSION'])
 def test_mysql_version(host, component):
     with host.sudo("root"):
         cmd = "mysql -e \"SELECT {}; \"| grep -c \"{}\"".format(component, '8.0.18')
@@ -126,7 +127,8 @@ def test_plugins(host, plugin_command):
 @pytest.mark.parametrize("component", COMPONENTS)
 def test_components(component, host):
     with host.sudo("root"):
-        cmd = 'mysql -Ns -e "select count(*) from mysql.component where component_urn=\"file://{}\";"'.format(component)
+        cmd = 'mysql -Ns -e "select count(*) from' \
+              ' mysql.component where component_urn=\"file://{}\";"'.format(component)
         check_component = host.run(cmd)
         if check_component.rc == 0:
             inst_cmd = 'mysql -e "INSTALL COMPONENT \"file://{}\";"'.format(component)
@@ -136,14 +138,3 @@ def test_components(component, host):
             component)
         check_result = host.run(check_cmd)
         assert check_result.rc == 1, (check_result.rc, check_result.stderr, check_result.stdout)
-
-
-def test_madmin(host):
-    with host.sudo("root"):
-        mysql = host.service("mysql")
-        assert mysql.is_running
-        cmd = 'mysqladmin shutdown'
-        shutdown = host.run(cmd)
-        assert shutdown.rc == 0, shutdown.stdout
-        mysql = host.service("mysql")
-        assert not mysql.is_running
