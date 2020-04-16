@@ -19,8 +19,8 @@
   include: ../../pdmysql_tasks/enable_experimental_repo.yml
   when: lookup('env', 'REPO') == "experimental"
 
-- name: download and extract world database
-  command: wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+#- name: download and extract world database
+#  command: wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
 - name: install PXC 8 deb packages
   apt:
@@ -31,6 +31,14 @@
     - percona-xtradb-cluster-full
     - percona-xtradb-cluster-source
     - python-mysqldb
+    - percona-xtradb-cluster-client
+    - percona-xtradb-cluster-common
+    - percona-xtradb-cluster-dbg
+    - percona-xtradb-cluster-garbd-debug
+    - percona-xtradb-cluster-garbd
+    - percona-xtradb-cluster-server-debug
+    - percona-xtradb-cluster-test
+    - percona-xtradb-cluster
   when: ansible_os_family == "Debian"
 
 - name: install PXC 8 rpm packages
@@ -41,63 +49,87 @@
     packages:
     - percona-xtradb-cluster-full
     - percona-xtradb-cluster-source
+    - percona-xtradb-cluster
+    - percona-xtradb-cluster-client
+    - percona-xtradb-cluster-debuginfo
+    - percona-xtradb-cluster-devel
+    - percona-xtradb-cluster-garbd
+    - percona-xtradb-cluster-server
+    - percona-xtradb-cluster-shared
+    - percona-xtradb-cluster-shared-compat
+    - percona-xtradb-cluster-test
     - MySQL-python
   when: ansible_os_family == "RedHat"
 
 - name: stop mysql service with service command
   command: service mysql stop
 
-- name: copy pxc config on centos 6
-  template: src=../../../templates/my_rpm.j2 dest=/etc/my.cnf
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
-- name: copy pxc config on centos 7
-  template: src=../../../templates/my_rpm_7.j2 dest=/etc/my.cnf
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-
-- name: configure PXC on debian/ubuntu
-  template: src=../../../templates/my.j2
-            dest=/etc/mysql/my.cnf
-            mode=0640 owner=mysql group=root
-  when: ansible_os_family == "Debian"
+#- name: copy pxc config on centos 6
+#  template: src=../../../templates/my_rpm.j2 dest=/etc/my.cnf
+#  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+#
+#- name: copy pxc config on centos 7
+#  template: src=../../../templates/my_rpm_7.j2 dest=/etc/my.cnf
+#  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+#
+#- name: configure PXC on debian/ubuntu
+#  template: src=../../../templates/my.j2
+#            dest=/etc/mysql/my.cnf
+#            mode=0640 owner=mysql group=root
+#  when: ansible_os_family == "Debian"
 
 # bootstrap the cluster
-- name: bootstrap cluster on RHEL6
-  command: /etc/init.d/mysql bootstrap-pxc
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
-- name: bootstrap cluster on RHEL7
-  command: systemctl start mysql@bootstrap.service
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-
-- name: run the bootstrap service on debian/ubuntu
-  command: service mysql bootstrap-pxc
-  when: ansible_os_family == "Debian"
+#- name: bootstrap cluster on RHEL6
+#  command: /etc/init.d/mysql bootstrap-pxc
+#  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+#
+#- name: bootstrap cluster on RHEL7
+#  command: systemctl start mysql@bootstrap.service
+#  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+#
+#- name: run the bootstrap service on debian/ubuntu
+#  command: service mysql bootstrap-pxc
+#  when: ansible_os_family == "Debian"
 
 # set root password on centos
-- name: set root password on centos
-  command: /package-testing/setpass_57.sh
-  when: ansible_os_family == "RedHat"
-
-- name: copy .my.cnf with credentials on centos
-  template: src=../../../templates/my_57.j2
-            dest=/root/.my.cnf
-            mode=0640 owner=root group=root
-  when: ansible_os_family == "RedHat"
+#- name: set root password on centos
+#  command: /package-testing/setpass_57.sh
+#  when: ansible_os_family == "RedHat"
+#
+#- name: copy .my.cnf with credentials on centos
+#  template: src=../../../templates/my_57.j2
+#            dest=/root/.my.cnf
+#            mode=0640 owner=root group=root
+#  when: ansible_os_family == "RedHat"
 
 # add sstuser
-- name: create backup user on centos 6
-  mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" state=present
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
-- name: create backup user on centos 7
-  command: /package-testing/pxc_backup_user.sh
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-
-- name: create backup user on debian/ubuntu
-  mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" state=present
-  when: ansible_os_family == "Debian"
+#- name: create backup user on centos 6
+#  mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" state=present
+#  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+#
+#- name: create backup user on centos 7
+#  command: /package-testing/pxc_backup_user.sh
+#  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+#
+#- name: create backup user on debian/ubuntu
+#  mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" state=present
+#  when: ansible_os_family == "Debian"
 
 # other tests
+- name: start mysql service
+  service: name=mysql state=started
+
+- name: check that PXC version is correct
+  command: /package-testing/version_check.sh pxc80
+
+- name: check that PXC package versions are correct
+  command: /package-testing/package_check.sh pxc80
+
+- name: run bats tests for mysql init scripts
+  command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
+
+- name: start mysql service
+  service: name=mysql state=started
+  
 - name: install plugins
   command: /package-testing/plugins_test_80.sh pxc
