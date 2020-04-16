@@ -137,17 +137,17 @@ def test_components(component, host):
         assert check_result.rc == 1, (check_result.rc, check_result.stderr, check_result.stdout)
 
 
-def test_madmin(host):
-    running = is_running(host)
-    assert running, "Make sure that service is running before stopping it"
-    cmd = 'mysqladmin shutdown'
-    shutdown = host.run(cmd)
-    assert shutdown.rc == 0, shutdown.stdout
-    running = is_running(host)
-    assert running, "Service is still running"
-    cmd = 'service mysql start'
-    start = host.run(cmd)
-    assert start.rc == 0, start.stderr
-    running = is_running(host)
-    assert not running, "Service didn't start"
+# def test_madmin(host):
+#     running = is_running(host)
+#     assert running, "Make sure that service is running before stopping it"
+#     cmd = 'mysqladmin shutdown'
+#     shutdown = host.run(cmd)
+#     assert shutdown.rc == 0, shutdown.stdout
+#     running = is_running(host)
+#     assert running, "Service is still running"
+#     cmd = 'service mysql start'
+#     start = host.run(cmd)
+#     assert start.rc == 0, start.stderr
+#     running = is_running(host)
+#     assert not running, "Service didn't start"
 

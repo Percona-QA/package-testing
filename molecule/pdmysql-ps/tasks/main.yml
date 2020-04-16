@@ -150,8 +150,8 @@
     command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
 
   - name: start mysql service
-    service: name=mysql state=started
+    service: name=mysql state=started enabled=yes
 
-#  - name: check that mysqladmin shutdown works correctly
-#    command: /package-testing/madmin_check.sh
+  - name: check that mysqladmin shutdown works correctly
+    command: /package-testing/madmin_check.sh
 
