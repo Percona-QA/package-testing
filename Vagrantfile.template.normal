@@ -12,10 +12,8 @@ servers=[
   { :hostname => "rhel-8-64-@@hostname@@", :box => "generic/rhel8" },
   { :hostname => "u-trusty-64-@@hostname@@", :box => "bento/ubuntu-14.04" },
   { :hostname => "u-xenial-64-@@hostname@@", :box => "bento/ubuntu-16.04" },
-  { :hostname => "u-bionic-64-@@hostname@@", :box => "bento/ubuntu-18.04" },
   { :hostname => "u-cosmic-64-@@hostname@@", :box => "bento/ubuntu-18.10" },
-  { :hostname => "u-disco-64-@@hostname@@", :box => "bento/ubuntu-19.04" },
-  { :hostname => "u-eoan-64-@@hostname@@", :box => "bento/ubuntu-19.10" },
+  { :hostname => "u-focal-64-@@hostname@@", :box => "ubuntu/focal64" },
   { :hostname => "sles-11-64-@@hostname@@", :box => "wvera/sles11sp4" },
   { :hostname => "sles-12-64-@@hostname@@", :box => "wvera/sles12sp2" }
 ]
