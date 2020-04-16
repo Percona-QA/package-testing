@@ -20,7 +20,7 @@ pipeline {
     stage ('Setup Environment Variables') {
       steps {
        script {
-       env.NAME = "${env.BUILD_NUMBER}"
+       env.NAME = "all"
         }
        }
       }
