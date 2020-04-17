@@ -80,7 +80,7 @@ pipeline {
         [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
           sh '''
               cd molecule/pg-11
-              molecule create -s pg-11
+              molecule create -s "${PLATFORM}"
           '''
         }
       }
@@ -89,7 +89,7 @@ pipeline {
       steps {
         sh '''
             cd molecule/pg-11
-            molecule converge -s pg-11
+            molecule converge -s "${PLATFORM}"
         '''
       }
     }
@@ -97,16 +97,16 @@ pipeline {
       steps {
         sh '''
             cd molecule/pg-11
-            molecule verify -s pg-11
+            molecule verify -s "${PLATFORM}"
         '''
-        junit 'molecule/pg-11/molecule/pg-11/report.xml'
+        junit 'molecule/pg-11/molecule/${PLATFORM}/report.xml'
       }
     }
     stage ('Start packages deletion') {
       steps {
         sh '''
             cd molecule/pg-11
-            molecule cleanup -s pg-11
+            molecule cleanup -s "${PLATFORM}"
         '''
       }
     }
@@ -117,7 +117,7 @@ pipeline {
       [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
             cd molecule/pg-11
-            molecule destroy -s pg-11
+            molecule destroy -s "${PLATFORM}"
         '''
       }
     }

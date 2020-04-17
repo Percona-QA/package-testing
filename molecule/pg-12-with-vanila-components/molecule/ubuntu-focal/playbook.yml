@@ -4,4 +4,4 @@
   become: true
   become_method: sudo
   roles:
-    - role: pdmysql-proxysql
+    - role: pg-12-with-vanila-components

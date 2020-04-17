@@ -1,5 +1,4 @@
 import os
-import pytest
 
 import testinfra.utils.ansible_runner
 
@@ -7,9 +6,8 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
 
-@pytest.mark.parametrize('pkg', ['proxysql2', 'proxysql2-dbgsym'])
-def test_package_is_installed(host, pkg):
-    pkg = host.package(pkg)
+def test_package_is_installed(host):
+    pkg = host.package('proxysql2')
     assert pkg.is_installed
 
 
