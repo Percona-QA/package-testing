@@ -1,19 +1,22 @@
 #!/usr/bin/env groovy
 
-def operatingSystems = ['centos-6', 'centos-7', 'debian-9', 'debian-10', 'ubuntu-focal',
-                        'ubuntu-xenial', 'ubuntu-bionic', 'rhel8']
-
 def doDynamicParallelSteps(){
+  def operatingSystems = ['centos-6', 'centos-7', 'debian-9', 'debian-10', 'ubuntu-focal',
+                        'ubuntu-xenial', 'ubuntu-bionic', 'rhel8']
   tests = [:]
   operatingSystems.each { os ->
    tests["${os}"] =  {
-      node {
         stage("${os}") {
-            sh '''
+
+            env.NAME = "${env.BUILD_NUMBER}-${os}"
+            withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
+        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+            sh """
                   cd molecule/pdmysql-proxysql
-                  molecule test -s '${os}'
-              '''
+                  molecule test -s ${os}
+              """
         }
+            junit 'molecule/pdmysql-proxysql/molecule/${os}/report.xml'
       }
     }
   }
