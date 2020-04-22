@@ -83,39 +83,6 @@
         - wget
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
 
-    - name: register SLES for updates with suse_register
-      command: suse_register -a email="@@SLES_REG_EMAIL@@" -a regcode-sles=@@SLES_REG_CODE@@
-      when: ansible_os_family == "Suse" and ansible_distribution_major_version == "11"
-
-    - name: register SLES for updates with SUSEConnect
-      command: SUSEConnect --email="@@SLES_REG_EMAIL@@" --regcode=@@SLES_REG_CODE@@
-      when: ansible_os_family == "Suse" and ansible_distribution_major_version == "12"
-
-    - name: import rpm gpg key on sles12
-      command: rpmkeys --import https://www.percona.com/downloads/RPM-GPG-KEY-percona
-      when: ansible_os_family == "Suse" and ansible_distribution_major_version == "12"
-
-    # - name: setup SDK repo on SLES
-    #   zypper: name="{{ item }}" state=present
-    #   with_items:
-    #   - /package-testing/sle-sdk-release-11.4-1.55.x86_64.rpm
-    #   - /package-testing/sle-sdk-release-SDK-11.4-1.55.x86_64.rpm
-    #   when: ansible_os_family == "Suse"
-
-    - name: update image
-      command: zypper -n update
-      when: ansible_os_family == "Suse" and ansible_distribution_major_version == "12"
-
-    - name: install needed packages for running tests with zypper
-      zypper:
-        name: "{{ packages }}"
-        state: latest
-      vars:
-        packages:
-        - wget
-        - unzip
-      when: ansible_os_family == "Suse"
-
     - name: get abs path of package-testing into pkg_testing_path variable
       shell: echo '{{ hostvars["localhost"]["playbook_dir"] }}' | grep -oE '^.*package-testing'
       register: pkg_testing_path_output
@@ -154,8 +121,25 @@
       - bats-master/install.sh /usr/local
       - rm -rf bats-master
 
-    - name: include tasks for listing already installed packages
-      include_tasks: list_installed_packages.yml
+    - name: get list of installed packages on Debian/Ubuntu
+      shell: dpkg -l|grep -iE "percona|sysbench|mysql|mongo|proxysql|maria" || true
+      register: installed_packages
+      when: ansible_os_family == "Debian"
+
+    - name: list installed packages on Debian/Ubuntu
+      debug:
+        var: installed_packages
+      when: ansible_os_family == "Debian"
+
+    - name: get list of installed packages on Centos
+      shell: yum list installed|grep -iE "percona|sysbench|mysql|mongo|proxysql|maria" || true
+      register: installed_packages
+      when: ansible_os_family == "RedHat"
+
+    - name: list installed packages on Centos
+      debug:
+        var: installed_packages
+    when: ansible_os_family == "RedHat"
 
     - name: get selinux status
       command: sestatus
