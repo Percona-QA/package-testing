@@ -1,5 +1,5 @@
 ---
-# tasks file for pdps-proxysql
+# tasks file for pdmysql-proxysql
 - name: include tasks for test env setup
   include_tasks: ../../../tasks/test_prep.yml
 

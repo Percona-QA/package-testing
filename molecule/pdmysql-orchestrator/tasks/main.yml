@@ -1,4 +1,30 @@
 ---
-# tasks file for pdps
+# tasks file for pdmysql-orchestrator
 - name: include tasks for test env setup
-  include_tasks: ../../../playbooks/ps_80.yml
+  include_tasks: ../../../tasks/test_prep.yml
+
+- name: include tasks for enabling test repo
+  include_tasks: ../../pdmysql_tasks/enable_testing_repo.yml
+  when: lookup('env', 'REPO') == "testing" or lookup('env', 'REPO') == ""
+
+- name: include tasks for enabling main repo
+  include: ../../pdmysql_tasks/enable_main_repo.yml
+  when: lookup('env', 'REPO') == "main"
+
+- name: install proxysql new deb packages
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+    state: latest
+  vars:
+    packages:
+    - percona-orchestrator-cli
+    - percona-orchestrator-client
+    - percona-orchestrator
+  when: ansible_os_family == "Debian"
+
+- name: install proxysql new rpm packages
+  yum:
+    name: percona-orchestrator
+    state: latest
+  when: ansible_os_family == "RedHat"

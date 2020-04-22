@@ -1,0 +1,22 @@
+---
+- name: Cleanup
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: remove PDMYSQL Orchestrator deb packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+          - percona-orchestrator-cli
+          - percona-orchestrator-client
+          - percona-orchestrator
+      when: ansible_os_family == "Debian"
+
+    - name: remove PDMYSQL Orchestrator rpm packages
+      yum:
+        name: percona-orchestrator
+        state: absent
+      when: ansible_os_family == "RedHat"
