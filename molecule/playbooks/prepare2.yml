@@ -1,0 +1,72 @@
+---
+- name: Prepare node for running tests
+  hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: true
+  tasks:
+#    - name: Install python for Ansible
+#      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+#      become: true
+#      changed_when: false
+#      when: ansible_os_family == "Debian"
+
+    - name: Delete apt lock file
+      file:
+        state: absent
+        path: "/var/lib/dpkg/lock-frontend"
+      become: true
+      when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
+
+#    - name: Install python for Ansible RHEL
+#      raw: test -e /usr/bin/python || (yum update -y && yum install -y python2)
+#      become: true
+#      changed_when: false
+#      when: ansible_distribution == "RedHat"
+
+#    - name: Install python for Ansible
+#      raw: test -e /usr/bin/python || (yum update -y && yum install -y python-minimal python-libselinux)
+#      become: true
+#      changed_when: false
+#      when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "8"
+
+    - name: Install epel-release package for CentOS 6
+      yum:
+        name: epel-release
+        state: latest
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+    - name: Install cloud-utils-growpart package for CentOS 6
+      yum:
+        name: cloud-utils-growpart
+        state: latest
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+    - name: Resize root partition on CentOS 6 on AWS
+      command: /usr/bin/growpart /dev/xvda 1
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+    - name: Restart Centos 6 for partition to grow
+      shell: sleep 2 && shutdown -r now "Ansible reboot"
+      async: 1
+      poll: 0
+      ignore_errors: true
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+    - name: Wait for server to come back
+      local_action: wait_for
+      args:
+        host: "{{ ansible_host }}"
+        port: "{{ ansible_port }}"
+        state: started
+        delay: 30
+        timeout: 300
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+    - shell: df -h
+      register: result
+
+    - name: Print info about disk space and partitions
+      debug:
+        var: result
+        verbosity: 0

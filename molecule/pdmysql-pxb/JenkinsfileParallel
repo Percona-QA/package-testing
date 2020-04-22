@@ -15,7 +15,7 @@ def doDynamicParallelSteps(){
                   cd molecule/pdmysql-proxysql
                   molecule test -s ${os}
               """
-            junit 'molecule/pdmysql-proxysql/molecule/${os}/report.xml'
+            junit "molecule/pdmysql-pxb/molecule/${os}/report.xml"
         }
       }
     }

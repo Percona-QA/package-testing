@@ -15,7 +15,7 @@ def doDynamicParallelSteps(){
                   molecule test -s ${os}
               """
         }
-            junit 'molecule/pg12/molecule/${os}/report.xml'
+            junit "molecule/pg12/molecule/${os}/report.xml"
       }
       stage("Test PG-12  with vanila components on ${os}") {
 
@@ -27,7 +27,7 @@ def doDynamicParallelSteps(){
                   molecule test -s ${os}
               """
         }
-            junit 'molecule/pg-12-with-vanila-components/molecule/${os}/report.xml'
+            junit "molecule/pg-12-with-vanila-components/molecule/${os}/report.xml"
       }
       stage("Test PG-12 components with vanila on ${os}") {
 
@@ -39,7 +39,7 @@ def doDynamicParallelSteps(){
                   molecule test -s ${os}
               """
         }
-            junit 'molecule/pg-12-components-with-vanila/molecule/${os}/report.xml'
+            junit "molecule/pg-12-components-with-vanila/molecule/${os}/report.xml"
       }
     }
   }

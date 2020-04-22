@@ -15,7 +15,7 @@ def doDynamicParallelSteps(){
                   cd molecule/pg-12
                   molecule test -s ${os}
               """
-            junit 'molecule/pg-12/molecule/${os}/report.xml'
+            junit "molecule/pg-12/molecule/${os}/report.xml"
         }
       }
     }

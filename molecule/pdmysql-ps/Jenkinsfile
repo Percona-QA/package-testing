@@ -81,7 +81,7 @@ pipeline {
             cd molecule/pdmysql-ps
             molecule verify -s "${PLATFORM}"
         '''
-        junit 'molecule/pdmysql-ps/molecule/${PLATFORM}/report.xml'
+        junit "molecule/pdmysql-ps/molecule/${PLATFORM}/report.xml"
       }
     }
     stage ('Start packages deletion') {

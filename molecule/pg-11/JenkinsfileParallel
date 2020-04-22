@@ -15,7 +15,7 @@ def doDynamicParallelSteps(){
                   molecule test -s ${os}
               """
         }
-            junit 'molecule/pg11/molecule/${os}/report.xml'
+            junit "molecule/pg11/molecule/${os}/report.xml"
       }
       stage("Test PG-11  with vanila components on ${os}") {
 
@@ -27,7 +27,7 @@ def doDynamicParallelSteps(){
                   molecule test -s ${os}
               """
         }
-            junit 'molecule/pg-11-with-vanila-components/molecule/${os}/report.xml'
+            junit "molecule/pg-11-with-vanila-components/molecule/${os}/report.xml"
       }
       stage("Test PG-11 components with vanila on ${os}") {
 
