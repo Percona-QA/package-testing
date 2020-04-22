@@ -40,10 +40,10 @@
         state: latest
       vars:
         packages:
-        - unzip
-        - wget
-        - gnupg
-        - rsync
+          - unzip
+          - wget
+          - gnupg
+          - rsync
       retries: 60
       delay: 10
       register: result
@@ -66,11 +66,11 @@
         state: latest
       vars:
         packages:
-        - pv
-        - libselinux-python
-        - unzip
-        - wget
-        - rsync
+          - pv
+          - libselinux-python
+          - unzip
+          - wget
+          - rsync
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
 
     - name: install needed packages for running tests with yum on RHEL8
@@ -103,23 +103,23 @@
     - name: download package-testing repo with wget
       command: "{{ item }}"
       with_items:
-      - rm -rf /package-testing
-      - rm -f master.zip
-      - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
-      - unzip master.zip
-      - rm -f master.zip
-      - mv package-testing-master /package-testing
+        - rm -rf /package-testing
+        - rm -f master.zip
+        - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+        - unzip master.zip
+        - rm -f master.zip
+        - mv package-testing-master /package-testing
       when: lookup('env', 'USE_LOCAL_PKG_TEST') == "" or lookup('env', 'USE_LOCAL_PKG_TEST') == "0"
 
     - name: install latest bats from github
       command: "{{ item }}"
       with_items:
-      - rm -f master.zip
-      - wget --no-check-certificate -O master.zip https://github.com/sstephenson/bats/archive/master.zip
-      - unzip master.zip
-      - rm -f master.zip
-      - bats-master/install.sh /usr/local
-      - rm -rf bats-master
+        - rm -f master.zip
+        - wget --no-check-certificate -O master.zip https://github.com/sstephenson/bats/archive/master.zip
+        - unzip master.zip
+        - rm -f master.zip
+        - bats-master/install.sh /usr/local
+        - rm -rf bats-master
 
     - name: get list of installed packages on Debian/Ubuntu
       shell: dpkg -l|grep -iE "percona|sysbench|mysql|mongo|proxysql|maria" || true
@@ -139,7 +139,7 @@
     - name: list installed packages on Centos
       debug:
         var: installed_packages
-    when: ansible_os_family == "RedHat"
+       when: ansible_os_family == "RedHat"
 
     - name: get selinux status
       command: sestatus
