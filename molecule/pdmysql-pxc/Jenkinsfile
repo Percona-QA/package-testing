@@ -41,9 +41,7 @@ pipeline {
     stage ('Setup Environment Variables') {
       steps {
        script {
-       env.NAME = "${env.BUILD_NUMBER}-${env.PLATFORM}-1"
-       env.NAME2 = "${env.BUILD_NUMBER}-${env.PLATFORM}-2"
-       env.NAME3 = "${env.BUILD_NUMBER}-${env.PLATFORM}-3"
+       env.NAME = "${env.BUILD_NUMBER}-${env.PLATFORM}"
         }
        }
       }

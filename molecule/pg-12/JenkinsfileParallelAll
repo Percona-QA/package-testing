@@ -1,12 +1,11 @@
 #!/usr/bin/env groovy
 
 def doDynamicParallelSteps(){
-  def operatingSystems = ['centos-6', 'centos-7', 'debian-9', 'debian-10', 'ubuntu-focal',
-                        'ubuntu-xenial', 'ubuntu-bionic', 'rhel8']
+  def operatingSystems = ['centos-7', 'debian-9', 'debian-10', 'ubuntu-focal', 'ubuntu-bionic', 'rhel8']
   tests = [:]
   operatingSystems.each { os ->
    tests["${os}"] =  {
-        stage("${os}") {
+        stage("Test PG-12 packages ${os}") {
 
             env.NAME = "${env.BUILD_NUMBER}-${os}"
             withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
@@ -15,8 +14,32 @@ def doDynamicParallelSteps(){
                   cd molecule/pg-12
                   molecule test -s ${os}
               """
-            junit 'molecule/pg-12/molecule/${os}/report.xml'
         }
+            junit 'molecule/pg12/molecule/${os}/report.xml'
+      }
+      stage("Test PG-12  with vanila components on ${os}") {
+
+            env.NAME = "${env.BUILD_NUMBER}-${os}"
+            withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
+        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+            sh """
+                  cd molecule/pg-12-with-vanila-components
+                  molecule test -s ${os}
+              """
+        }
+            junit 'molecule/pg-12-with-vanila-components/molecule/${os}/report.xml'
+      }
+      stage("Test PG-12 components with vanila on ${os}") {
+
+            env.NAME = "${env.BUILD_NUMBER}-${os}"
+            withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
+        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+            sh """
+                  cd molecule/pg-12-components-with-vanila
+                  molecule test -s ${os}
+              """
+        }
+            junit 'molecule/pg-12-components-with-vanila/molecule/${os}/report.xml'
       }
     }
   }

@@ -11,7 +11,7 @@
   include: ../../pdmysql_tasks/enable_main_repo.yml
   when: lookup('env', 'REPO') == "main"
 
-- name: install proxysql new deb packages
+- name: install orchestrator new deb packages
   apt:
     name: "{{ packages }}"
     update_cache: yes
@@ -23,7 +23,7 @@
     - percona-orchestrator
   when: ansible_os_family == "Debian"
 
-- name: install proxysql new rpm packages
+- name: install orchestrator new rpm packages
   yum:
     name: percona-orchestrator
     state: latest
