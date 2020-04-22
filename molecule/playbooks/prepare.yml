@@ -5,11 +5,11 @@
   become_method: sudo
   gather_facts: true
   tasks:
-    - name: Install python for Ansible
-      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
-      become: true
-      changed_when: false
-      when: ansible_os_family == "Debian"
+#    - name: Install python for Ansible
+#      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+#      become: true
+#      changed_when: false
+#      when: ansible_os_family == "Debian"
 
     - name: Delete apt lock file
       file:
@@ -18,17 +18,17 @@
       become: true
       when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
 
-    - name: Install python for Ansible RHEL
-      raw: test -e /usr/bin/python || (yum update -y && yum install -y python2)
-      become: true
-      changed_when: false
-      when: ansible_distribution == "RedHat"
+#    - name: Install python for Ansible RHEL
+#      raw: test -e /usr/bin/python || (yum update -y && yum install -y python2)
+#      become: true
+#      changed_when: false
+#      when: ansible_distribution == "RedHat"
 
-    - name: Install python for Ansible
-      raw: test -e /usr/bin/python || (yum update -y && yum install -y python-minimal python-libselinux)
-      become: true
-      changed_when: false
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "8"
+#    - name: Install python for Ansible
+#      raw: test -e /usr/bin/python || (yum update -y && yum install -y python-minimal python-libselinux)
+#      become: true
+#      changed_when: false
+#      when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "8"
 
     - name: Install epel-release package for CentOS 6
       yum:

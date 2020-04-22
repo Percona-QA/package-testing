@@ -15,7 +15,7 @@ def doDynamicParallelSteps(){
                   cd molecule/pdmysql-orchestrator
                   molecule test -s ${os}
               """
-            junit 'molecule/pdmysql-orchestrator/molecule/${os}/report.xml'
+            junit "molecule/pdmysql-orchestrator/molecule/${os}/report.xml"
         }
       }
     }
