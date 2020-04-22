@@ -55,14 +55,14 @@ ubuntu-disco:
   instance_type: t2.micro
   root_device_name: /dev/sda1
 ubuntu-bionic:
-  image: ami-01946830552766aa5
+  image: ami-0bdce65403a70952b
   user: ubuntu
   subnet: subnet-03136d8c244f56036
   aws_default_region: us-west-2
   instance_type: t2.micro
   root_device_name: /dev/sda1
 ubuntu-xenial:
-  image: ami-056f971efe114915a
+  image: ami-0eef083267386d5ae
   user: ubuntu
   subnet: subnet-03136d8c244f56036
   aws_default_region: us-west-2
