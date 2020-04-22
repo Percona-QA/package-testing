@@ -139,7 +139,7 @@
     - name: list installed packages on Centos
       debug:
         var: installed_packages
-       when: ansible_os_family == "RedHat"
+      when: ansible_os_family == "RedHat"
 
     - name: get selinux status
       command: sestatus
