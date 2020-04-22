@@ -5,8 +5,8 @@
 #   does some tests
 #- name: include tasks for test env setup
 #  include_tasks: ../../../tasks/test_prep.yml
-- name: include tasks for test env setup
-  include_tasks: ../test_prep.yml
+#- name: include tasks for test env setup
+#  include_tasks: ../test_prep.yml
 
 ### temp part until percona-release is updated for PPG project
 
