@@ -17,4 +17,4 @@
       when: ansible_os_family == "Debian"
 
     - name: check if process is stopped after package removal
-        command: /package-testing/check_running.sh proxysql stopped
+      command: /package-testing/check_running.sh proxysql stopped
