@@ -1,6 +1,4 @@
 #!/usr/bin/env groovy
-def operatingSystems = ['centos-6', 'centos-7', 'debian-9', 'debian-10', 'ubuntu-bionic', 'ubuntu-focal', 'rhel8']
-
 
 pipeline {
   agent {
@@ -24,55 +22,32 @@ pipeline {
         stage('Test PBM packages with PSMDB 3.6') {
             steps {
                 script {
-                    def tests = [:]
-                    operatingSystems.each { os ->
-                        tests["${os}"] = {
-                            build job: 'percona-backup-mongodb-packages', parameters: [
-                [$class: 'StringParameterValue', name: 'PLATFORM', value: os],
-                [$class: 'StringParameterValue', name: 'install_repo', value: env.REPO],
-                [$class: 'StringParameterValue', name: 'psmdb_to_test', value: 'psmdb36']
+                build job: 'percona-backup-mongodb-packages-parallel', parameters: [
+                    [$class: 'StringParameterValue', name: 'install_repo', value: env.REPO],
+                    [$class: 'StringParameterValue', name: 'psmdb_to_test', value: 'psmdb36']
             ]
                         }
                     }
-                    parallel tests
                 }
-            }
-
-        }
         stage('Test PBM packages with PSMDB 4.0') {
             steps {
                 script {
-                    def tests = [:]
-                    operatingSystems.each { os ->
-                        tests["${os}"] = {
-                            build job: 'percona-backup-mongodb-packages', parameters: [
-                [$class: 'StringParameterValue', name: 'PLATFORM', value: os],
-                [$class: 'StringParameterValue', name: 'install_repo', value: env.REPO],
-                [$class: 'StringParameterValue', name: 'psmdb_to_test', value: 'psmdb40']
+                build job: 'percona-backup-mongodb-packages-parallel', parameters: [
+                    [$class: 'StringParameterValue', name: 'install_repo', value: env.REPO],
+                    [$class: 'StringParameterValue', name: 'psmdb_to_test', value: 'psmdb40']
             ]
                         }
                     }
-                    parallel tests
                 }
-            }
-
-        }
         stage('Test PBM packages with PSMDB 4.2') {
             steps {
                 script {
-                    def tests = [:]
-                    operatingSystems.each { os ->
-                        tests["${os}"] = {
-                            build job: 'percona-backup-mongodb-packages', parameters: [
-                [$class: 'StringParameterValue', name: 'PLATFORM', value: os],
-                [$class: 'StringParameterValue', name: 'install_repo', value: env.REPO],
-                [$class: 'StringParameterValue', name: 'psmdb_to_test', value: 'psmdb42']
+                build job: 'percona-backup-mongodb-packages-parallel', parameters: [
+                    [$class: 'StringParameterValue', name: 'install_repo', value: env.REPO],
+                    [$class: 'StringParameterValue', name: 'psmdb_to_test', value: 'psmdb42']
             ]
                         }
                     }
-                    parallel tests
                 }
-            }
-        }
-    }
+                }
 }

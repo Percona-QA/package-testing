@@ -50,13 +50,7 @@ pipeline {
     stage ('Setup Environment Variables') {
       steps {
        script {
-       vms = readYaml (file: 'molecule/configuration_west.yml')
-       env.IMAGE = vms."${PLATFORM}".image
-       env.USER = vms."${PLATFORM}".user
-       env.SUBNET = vms."${PLATFORM}".subnet
-       env.AWS_DEFAULT_REGION = vms."${PLATFORM}".aws_default_region
-       env.INSTANCE_TYPE = vms."${PLATFORM}".instance_type
-       env.ROOT_DEVICE_NAME = vms."${PLATFORM}".root_device_name
+       env.NAME = "${env.BUILD_NUMBER}-${env.PLATFORM}"
         }
        }
       }
@@ -77,7 +71,7 @@ pipeline {
        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
           sh '''
               cd molecule/pbm
-              python3 -m molecule create
+              python3 -m molecule create -s "${PLATFORM}"
           '''
       }
      }
@@ -89,7 +83,7 @@ pipeline {
        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],])  {
         sh '''
             cd molecule/pbm
-            python3 -m molecule converge
+            python3 -m molecule converge -s "${PLATFORM}"
         '''
       }
      }
@@ -99,9 +93,8 @@ pipeline {
 
         sh '''
             cd molecule/pbm
-            python3 -m molecule verify
+            python3 -m molecule verify -s "${PLATFORM}"
         '''
-        junit 'molecule/pbm/molecule/default/*.xml'
       }
     }
       stage ('Start Cleanup ') {
@@ -109,9 +102,9 @@ pipeline {
 
         sh '''
             cd molecule/pbm
-            python3 -m molecule cleanup
+            python3 -m molecule cleanup -s "${PLATFORM}"
         '''
-        junit 'molecule/pbm/molecule/default/*.xml'
+        junit 'molecule/pbm/molecule/${PLATFORM}/*.xml'
       }
     }
   }
@@ -120,7 +113,7 @@ pipeline {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
             cd molecule/pbm
-            python3 -m molecule destroy
+            python3 -m molecule destroy -s "${PLATFORM}"
         '''
      }
     }
