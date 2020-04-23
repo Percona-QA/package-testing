@@ -48,11 +48,11 @@
 - name: install plugins, import world database
   command: /package-testing/plugins_test.sh
 
-- name: check that Percona Toolkit version is correct
-  command: /package-testing/version_check.sh pt
+#- name: check that Percona Toolkit version is correct
+#  command: /package-testing/version_check.sh pt
 
-- name: check that Percona XtraBackup version is correct
-  command: /package-testing/version_check.sh pxb80
+#- name: check that Percona XtraBackup version is correct
+#  command: /package-testing/version_check.sh pxb80
 
-- name: check that Percona XtraBackup package versions are correct
-  command: /package-testing/package_check.sh pxb80
+#- name: check that Percona XtraBackup package versions are correct
+#  command: /package-testing/package_check.sh pxb80
