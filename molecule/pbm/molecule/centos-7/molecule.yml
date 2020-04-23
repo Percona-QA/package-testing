@@ -4,7 +4,7 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: ${NAME}
+  - name: centos7-${BUILD_NUMBER}
     region: us-west-2
     image: ami-036d2cdf95d86d256
     vpc_subnet_id: subnet-03136d8c244f56036

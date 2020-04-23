@@ -4,7 +4,7 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: ${NAME}
+  - name: uxenial-${BUILD_NUMBER}
     region: us-west-2
     image: ami-0eef083267386d5ae
     vpc_subnet_id: subnet-03136d8c244f56036

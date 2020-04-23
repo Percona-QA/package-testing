@@ -4,7 +4,7 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: ${NAME}
+  - name: ubionic-${BUILD_NUMBER}
     region: us-west-2
     image: ami-0bdce65403a70952b
     vpc_subnet_id: subnet-03136d8c244f56036

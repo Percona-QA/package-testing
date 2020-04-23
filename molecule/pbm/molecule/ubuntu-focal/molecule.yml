@@ -4,7 +4,7 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: ${NAME}
+  - name: ufocal-${BUILD_NUMBER}
     region: us-west-2
     image: ami-05a98b3bebe1b280e
     vpc_subnet_id: subnet-03136d8c244f56036
