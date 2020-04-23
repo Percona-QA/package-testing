@@ -19,7 +19,7 @@ PTBINS = ['pt-align', 'pt-archiver', 'pt-config-diff', 'pt-deadlock-logger', 'pt
           'pt-fk-error-logger', 'pt-heartbeat', 'pt-index-usage', 'pt-ioprofile', 'pt-kill',
           'pt-mext', 'pt-mongodb-query-digest', 'pt-mongodb-summary', 'pt-mysql-summary',
           'pt-online-schema-change', 'pt-pmp', 'pt-query-digest', 'pt-show-grants', 'pt-sift',
-          'pt-slave-delay', 'pt-slave-find', 'pt-slave-restart', 'pt-stalk' 'pt-summary',
+          'pt-slave-delay', 'pt-slave-find', 'pt-slave-restart', 'pt-stalk', 'pt-summary',
           'pt-table-checksum', 'pt-table-sync', 'pt-table-usage', 'pt-upgrade',
           'pt-variable-advisor', 'pt-visual-explain']
 
@@ -55,15 +55,14 @@ def test_binary_version(host):
 def test_pt_binaries(host, pt_bin):
     cmd = '{} --version'.format(pt_bin)
     result = host.run(cmd)
-    print(result.stdout)
     assert result.rc == 0, result.stderr
+    assert '3.1.0' in result.stdout, result.stdout
 
 
 def test_run_backup(host):
     with host.sudo("root"):
         cmd = "/usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/"
         result = host.run(cmd)
-        print(result.stdout)
         assert result.rc == 0, result.stderr
 
 
@@ -71,5 +70,4 @@ def test_run_prepare(host):
     with host.sudo("root"):
         cmd = "/usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/"
         result = host.run(cmd)
-        print(result.stdout)
         assert result.rc == 0, result.stderr
