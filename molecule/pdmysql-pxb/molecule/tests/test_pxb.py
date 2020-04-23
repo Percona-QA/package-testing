@@ -53,7 +53,7 @@ def test_binary_version(host):
 
 @pytest.mark.parametrize("pt_bin", PTBINS)
 def test_pt_binaries(host, pt_bin):
-    cmd = '{} --help'.format(pt_bin)
+    cmd = '{} --version'.format(pt_bin)
     result = host.run(cmd)
     print(result.stdout)
     assert result.rc == 0, result.stderr
