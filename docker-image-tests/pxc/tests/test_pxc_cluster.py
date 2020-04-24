@@ -65,6 +65,10 @@ class TestCluster:
 
     @pytest.mark.parametrize("pname,soname", pxc_plugins)
     def test_install_plugin(self, cluster, pname, soname):
+        if pname == "group_replication":
+            for node in cluster:
+                cmd = node.ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "set global pxc_strict_mode=\'PERMISSIVE\';"')
+                assert cmd.succeeded
         cmd = cluster[0].ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "INSTALL PLUGIN '+pname+' SONAME \''+soname+'\';"')
         assert cmd.succeeded
         for node in cluster:
