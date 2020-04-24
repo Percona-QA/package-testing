@@ -48,7 +48,6 @@
   vars:
     packages:
     - percona-xtradb-cluster-full
-    - percona-xtradb-cluster-source
     - percona-xtradb-cluster
     - percona-xtradb-cluster-client
     - percona-xtradb-cluster-debuginfo

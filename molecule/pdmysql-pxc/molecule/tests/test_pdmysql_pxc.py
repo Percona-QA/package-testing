@@ -67,16 +67,6 @@ COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_audit_api_message_emit']
 
 
-def is_running(host):
-    cmd = 'ps auxww| grep -v grep  | grep -c "mysql"'
-    result = host.run(cmd)
-    print(result.stdout)
-    stdout = int(result.stdout)
-    if stdout == 0:
-        return True
-    return False
-
-
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
     dist = host.system_info.distribution

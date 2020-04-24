@@ -55,7 +55,8 @@ def test_binary_version(host):
 def test_pt_binaries(host, pt_bin):
     cmd = '{} --version'.format(pt_bin)
     result = host.run(cmd)
-    assert result.rc == 0, result.stderr
+    print(result.stdout)
+    assert result.rc == 0, (result.stderr, result.stderr)
     assert '3.2.0' in result.stdout, result.stdout
 
 
