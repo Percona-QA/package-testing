@@ -29,7 +29,6 @@
   vars:
     packages:
     - percona-xtradb-cluster-full
-    - percona-xtradb-cluster-source
     - python-mysqldb
     - percona-xtradb-cluster-client
     - percona-xtradb-cluster-common
@@ -91,15 +90,15 @@
 #  when: ansible_os_family == "Debian"
 
 # set root password on centos
-#- name: set root password on centos
-#  command: /package-testing/setpass_57.sh
-#  when: ansible_os_family == "RedHat"
-#
-#- name: copy .my.cnf with credentials on centos
-#  template: src=../../../templates/my_57.j2
-#            dest=/root/.my.cnf
-#            mode=0640 owner=root group=root
-#  when: ansible_os_family == "RedHat"
+- name: set root password on centos
+  command: /package-testing/setpass_57.sh
+  when: ansible_os_family == "RedHat"
+
+- name: copy .my.cnf with credentials on centos
+  template: src=../../../templates/my_57.j2
+            dest=/root/.my.cnf
+            mode=0640 owner=root group=root
+  when: ansible_os_family == "RedHat"
 
 # add sstuser
 #- name: create backup user on centos 6

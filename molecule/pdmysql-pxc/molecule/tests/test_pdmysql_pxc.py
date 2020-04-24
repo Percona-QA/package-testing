@@ -6,18 +6,17 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-DEBPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-source',
-               'python-mysqldb', 'percona-xtradb-cluster-client', 'percona-xtradb-cluster-common',
+DEBPACKAGES = ['percona-xtradb-cluster-full', 'python-mysqldb',
+               'percona-xtradb-cluster-client', 'percona-xtradb-cluster-common',
                'percona-xtradb-cluster-dbg', 'percona-xtradb-cluster-garbd-debug',
                'percona-xtradb-cluster-garbd', 'percona-xtradb-cluster-server-debug',
                'percona-xtradb-cluster-test', 'percona-xtradb-cluster']
 
-RPMPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-source',
-               'percona-xtradb-cluster', 'percona-xtradb-cluster-client',
-               'percona-xtradb-cluster-debuginfo', 'percona-xtradb-cluster-devel',
-               'percona-xtradb-cluster-garbd', 'percona-xtradb-cluster-server',
-               'percona-xtradb-cluster-shared', 'percona-xtradb-cluster-shared-compat',
-               'percona-xtradb-cluster-test']
+RPMPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster',
+               'percona-xtradb-cluster-client', 'percona-xtradb-cluster-debuginfo',
+               'percona-xtradb-cluster-devel', 'percona-xtradb-cluster-garbd',
+               'percona-xtradb-cluster-server', 'percona-xtradb-cluster-shared',
+               'percona-xtradb-cluster-shared-compat', 'percona-xtradb-cluster-test']
 
 PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    " fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so';\"",
@@ -87,13 +86,13 @@ def test_check_rpm_package(host, package):
     assert '8.0.18' in pkg.version, pkg.version
 
 
-@pytest.mark.parametrize("binary", ['mysqlsh', 'mysql', 'mysqlrouter'])
-def test_binary_version(host, binary):
-    cmd = "{} --version".format(binary)
-    result = host.run(cmd)
-    print(result.stdout)
-    assert result.rc == 0, result.stderr
-    assert '8.0.18' in result.stdout, result.stdout
+def test_binary_version(host):
+    with host.sudo("root"):
+        cmd = "mysql --version"
+        result = host.run(cmd)
+        print(result.stdout)
+        assert result.rc == 0, result.stderr
+        assert '8.0.18' in result.stdout, result.stdout
 
 
 @pytest.mark.parametrize('component', ['@@INNODB_VERSION', '@@VERSION'])
@@ -107,15 +106,17 @@ def test_mysql_version(host, component):
 
 
 def test_version_commnet(host):
-    cmd = "mysql -e \"SELECT @@VERSION_COMMENT;\""
-    result = host.run(cmd)
-    print(result.stdout)
+    with host.sudo("root"):
+        cmd = "mysql -e \"SELECT @@VERSION_COMMENT;\""
+        result = host.run(cmd)
+        print(result.stdout)
 
 
 def test_wresp_version(host):
-    cmd = "mysql -e \"SHOW STATUS LIKE 'wsrep_provider_version';\""
-    result = host.run(cmd)
-    print(result.stdout)
+    with host.sudo("root"):
+        cmd = "mysql -e \"SHOW STATUS LIKE 'wsrep_provider_version';\""
+        result = host.run(cmd)
+        print(result.stdout)
 
 
 @pytest.mark.parametrize('plugin_command', PLUGIN_COMMANDS)
