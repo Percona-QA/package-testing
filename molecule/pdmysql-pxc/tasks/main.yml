@@ -87,6 +87,9 @@
 #  when: ansible_os_family == "Debian"
 
 # set root password on centos
+- name: start mysql service
+  service: name=mysql state=started
+  
 - name: set root password on centos
   command: /package-testing/setpass_57.sh
   when: ansible_os_family == "RedHat"
@@ -111,8 +114,7 @@
 #  when: ansible_os_family == "Debian"
 
 # other tests
-- name: start mysql service
-  service: name=mysql state=started
+
 
 #- name: check that PXC version is correct
 #  command: /package-testing/version_check.sh pxc80
