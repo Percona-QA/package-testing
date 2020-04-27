@@ -30,7 +30,7 @@ verifier:
     s: true
     junitxml: report.xml
 scenario:
-  name: ubuntu-ami-44182caf
+  name: ubuntu-xenial
   destroy_sequence:
     - destroy
   clenup_sequence:
