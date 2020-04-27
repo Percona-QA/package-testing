@@ -200,4 +200,4 @@
     when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
 
   - name: check apt/yum logs for errors
-    command: /package-testing/log-check.sh
+    command: /package-testing/scripts/log-check.sh
