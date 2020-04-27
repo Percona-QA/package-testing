@@ -4,7 +4,7 @@
 #   installs latest version of PMM client and PT
 #   does some tests
 
-- import_playbook: test_prep.yml
+# - import_playbook: test_prep.yml
 
 - hosts: all
   become: true
