@@ -4,13 +4,13 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: ${PLATFORM}
-    region: ${AWS_DEFAULT_REGION}
-    image: ${IMAGE}
-    vpc_subnet_id: ${SUBNET}
-    instance_type: ${INSTANCE_TYPE}
-    ssh_user: ${USER}
-    root_device_name: ${ROOT_DEVICE_NAME}
+  - name: ${NAME}
+    region: eu-central-1
+    image: ami-04cf43aca3e6f3de3
+    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    instance_type: t2.micro
+    ssh_user: centos
+    root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pg-worker
 provisioner:
@@ -20,23 +20,17 @@ provisioner:
     create: ../../../playbooks/create.yml
     destroy: ../../../playbooks/destroy.yml
     prepare: ../../../playbooks/prepare.yml
-  lint:
-    name: ansible-lint
-    enabled: False
-instances:
-  - name: pdmdb
+    cleanup: ../../playbooks/cleanup.yml
+    converge: ../../playbooks/playbook.yml
 verifier:
   name: testinfra
-  directory: ../default/tests
+  directory: ../tests/
   options:
     verbose: true
     s: true
     junitxml: report.xml
-  lint:
-    name: flake8
-    enabled: False
 scenario:
-  name: default
+  name: centos-7
   destroy_sequence:
     - destroy
   clenup_sequence:

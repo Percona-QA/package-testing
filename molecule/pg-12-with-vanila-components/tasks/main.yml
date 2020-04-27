@@ -34,7 +34,7 @@
   command: percona-release enable {{ pg_version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
-    pg_version: "{{ lookup('env', 'PG_VERSION') }}"
+    pg_version: "{{ lookup('env', 'VERSION') }}"
 
 - name: enable tools repo
   command: percona-release enable tools {{ repo }}
