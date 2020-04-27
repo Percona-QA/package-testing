@@ -29,7 +29,7 @@
   vars:
     packages:
     - percona-xtradb-cluster-full
-    - python-mysqldb
+#    - python-mysqldb
     - percona-xtradb-cluster-client
     - percona-xtradb-cluster-common
     - percona-xtradb-cluster-dbg
@@ -56,7 +56,7 @@
     - percona-xtradb-cluster-shared
     - percona-xtradb-cluster-shared-compat
     - percona-xtradb-cluster-test
-    - MySQL-python
+#    - MySQL-python
   when: ansible_os_family == "RedHat"
 
 #- name: copy pxc config on centos 6
@@ -89,7 +89,7 @@
 # set root password on centos
 - name: start mysql service
   service: name=mysql state=started
-  
+
 - name: set root password on centos
   command: /package-testing/setpass_57.sh
   when: ansible_os_family == "RedHat"

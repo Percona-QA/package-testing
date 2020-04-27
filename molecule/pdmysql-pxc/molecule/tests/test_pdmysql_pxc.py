@@ -90,7 +90,6 @@ def test_binary_version(host):
     with host.sudo("root"):
         cmd = "mysql --version"
         result = host.run(cmd)
-        print(result.stdout)
         assert result.rc == 0, result.stderr
         assert '8.0.18' in result.stdout, result.stdout
 
@@ -100,7 +99,6 @@ def test_mysql_version(host, component):
     with host.sudo("root"):
         cmd = "mysql -e \"SELECT {}; \"| grep -c \"{}\"".format(component, '8.0.18')
         result = host.run(cmd)
-        print(result.stdout)
         assert result.rc == 0, result.stderr
         assert int(result.stdout) == 1, result.stdout
 
@@ -110,6 +108,7 @@ def test_version_commnet(host):
         cmd = "mysql -e \"SELECT @@VERSION_COMMENT;\""
         result = host.run(cmd)
         print(result.stdout)
+        assert result.rc == 0
 
 
 def test_wresp_version(host):
@@ -117,14 +116,14 @@ def test_wresp_version(host):
         cmd = "mysql -e \"SHOW STATUS LIKE 'wsrep_provider_version';\""
         result = host.run(cmd)
         print(result.stdout)
+        assert result.rc == 0
 
 
 @pytest.mark.parametrize('plugin_command', PLUGIN_COMMANDS)
 def test_plugins(host, plugin_command):
     with host.sudo("root"):
         result = host.run(plugin_command)
-        print(result.stdout)
-        assert result.rc == 0, result.stderr
+        assert result.rc == 0, (result.stderr, result.stdout)
 
 
 @pytest.mark.parametrize("component", COMPONENTS)
@@ -133,11 +132,11 @@ def test_components(component, host):
         cmd = 'mysql -Ns -e "select count(*) from' \
               ' mysql.component where component_urn=\"file://{}\";"'.format(component)
         check_component = host.run(cmd)
-        if check_component.rc == 0:
-            inst_cmd = 'mysql -e "INSTALL COMPONENT \"file://{}\";"'.format(component)
-            inst_res = host.run(inst_cmd)
-            assert inst_res.rc == 0, inst_res.stderr
-        check_cmd = 'mysql -Ns -e "select count(*) from mysql.component where component_urn=\"file://{}\";"'.format(
-            component)
+        assert check_component.rc == 0, check_component.stdout
+        inst_cmd = 'mysql -e "INSTALL COMPONENT \"file://{}\";"'.format(component)
+        inst_res = host.run(inst_cmd)
+        assert inst_res.rc == 0, inst_res.stderr
+        check_cmd = 'mysql -Ns -e "select count(*)' \
+                    ' from mysql.component where component_urn=\"file://{}\";"'.format(component)
         check_result = host.run(check_cmd)
         assert check_result.rc == 1, (check_result.rc, check_result.stderr, check_result.stdout)
