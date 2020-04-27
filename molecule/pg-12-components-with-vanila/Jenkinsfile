@@ -42,7 +42,6 @@ pipeline {
       steps {
        script {
        env.NAME = "${env.BUILD_NUMBER}-${env.PLATFORM}"
-       env.PG_VERSION = "ppg-12.2"
         }
        }
       }

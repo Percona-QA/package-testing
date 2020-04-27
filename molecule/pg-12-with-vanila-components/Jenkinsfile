@@ -29,6 +29,14 @@ pipeline {
                 'release'
             ]
         )
+        choice(
+            name: 'VERSION',
+            description: 'PG version for test',
+            choices: [
+                'ppg-12',
+                'ppg-12.2'
+            ]
+        )
   }
   stages {
     stage('Set build name'){
@@ -42,7 +50,6 @@ pipeline {
       steps {
        script {
        env.NAME = "${env.BUILD_NUMBER}-${env.PLATFORM}"
-       env.PG_VERSION = "ppg-12.2"
         }
        }
       }
