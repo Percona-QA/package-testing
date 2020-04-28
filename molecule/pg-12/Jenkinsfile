@@ -95,7 +95,7 @@ pipeline {
       steps {
         sh '''
             cd molecule/pg-12
-            molecule cleanup -s --scenario-name "${PLATFORM}"
+            molecule cleanup -s "${PLATFORM}"
         '''
       }
     }
