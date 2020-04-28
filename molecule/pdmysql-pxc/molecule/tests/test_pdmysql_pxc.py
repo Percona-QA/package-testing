@@ -129,15 +129,13 @@ def test_plugins(host, plugin_command):
 @pytest.mark.parametrize("component", COMPONENTS)
 def test_components(component, host):
     with host.sudo("root"):
-        cmd = 'mysql -Ns -e "select count(*) from' \
-              ' mysql.component where component_urn=\"file://{}\";"'.format(component)
+        cmd = 'mysql -Ns -e "select count(*) from mysql.component where component_urn=\"file://{}\";"'.format(component)
         check_component = host.run(cmd)
-        print((check_component.stdout, check_component.stderr))
-        assert check_component.rc == 0, (check_component.stdout, check_component.stderr)
-        inst_cmd = 'mysql -e "INSTALL COMPONENT \"file://{}\";"'.format(component)
-        inst_res = host.run(inst_cmd)
-        assert inst_res.rc == 0, inst_res.stderr
-        check_cmd = 'mysql -Ns -e "select count(*)' \
-                    ' from mysql.component where component_urn=\"file://{}\";"'.format(component)
+        if check_component.rc == 0:
+            inst_cmd = 'mysql -e "INSTALL COMPONENT \"file://{}\";"'.format(component)
+            inst_res = host.run(inst_cmd)
+            assert inst_res.rc == 0, inst_res.stderr
+        check_cmd = 'mysql -Ns -e "select count(*) from mysql.component where component_urn=\"file://{}\";"'.format(
+            component)
         check_result = host.run(check_cmd)
         assert check_result.rc == 1, (check_result.rc, check_result.stderr, check_result.stdout)
