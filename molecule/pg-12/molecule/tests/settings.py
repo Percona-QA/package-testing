@@ -8,7 +8,7 @@ DEB116_PACKAGES = ["percona-postgresql-12", "percona-postgresql-client", "percon
                    "percona-postgresql-contrib", "percona-postgresql-doc", "percona-postgresql-server-dev-all",
                    "percona-postgresql-doc-12", "percona-postgresql-plperl-12", "percona-postgresql-common",
                    "percona-postgresql-plpython3-12", "percona-postgresql-pltcl-12", "percona-postgresql-all",
-                   "percona-postgresql-server-dev-11", "percona-postgresql-12-dbgsym",
+                   "percona-postgresql-server-dev-12", "percona-postgresql-12-dbgsym",
                    "percona-postgresql-client-12-dbgsym", "percona-postgresql-plperl-12-dbgsym",
                    "percona-postgresql-plpython3-12-dbgsym", "percona-postgresql-pltcl-12-dbgsym"]
 
@@ -24,7 +24,7 @@ RPM_PACKAGES = ["percona-postgresql12", "percona-postgresql12-contrib", "percona
                 "percona-postgresql12-test-debuginfo"]
 
 RPM7_PACKAGES = ["percona-postgresql12", "percona-postgresql12-contrib", "percona-postgresql-common",
-                 "percona-postgresql12-debuginfo", "percona-postgresql12-devel", "percona-postgresql11-docs",
+                 "percona-postgresql12-debuginfo", "percona-postgresql12-devel", "percona-postgresql12-docs",
                  "percona-postgresql12-libs", "percona-postgresql12-llvmjit", "percona-postgresql12-plperl",
                  "percona-postgresql12-plpython", "percona-postgresql12-pltcl", "percona-postgresql12-server",
                  "percona-postgresql12-test", "percona-postgresql-client-common"]
@@ -53,8 +53,9 @@ pgrepack = {
                          "binary_version": "pg_repack 1.4.5",
                                     "binary": {"centos": "/usr/pgsql-12/bin/pg_repack: ELF 64-bit LSB executable,"
                                                          " x86-64, version 1 (SYSV),"
-                                                         " dynamically linked (uses shared libs), for GNU/Linux 2.6.32,"
-                                                         " BuildID[sha1]=bd2f6cc2747db832da8302ce8ceaddd6cf56dad0,"
+                                                         " dynamically linked (uses shared libs),"
+                                                         " for GNU/Linux 2.6.32,"
+                                                         " BuildID[sha1]=f61d3d7655a56d1aee52824b2a16a1648318b373,"
                                                          " not stripped",
                                                "ubuntu": "/usr/lib/postgresql/11/bin/pg_repack:"
                                                          " ELF 64-bit LSB shared object, x86-64,"
@@ -83,12 +84,12 @@ pgrepack = {
                                                        " for GNU/Linux 3.2.0,"
                                                        " BuildID[sha1]=7b5826a6fdafe64e13a0d0c3192f5b96b8870f6c,"
                                                        " not stripped"}}}
-pgbackrest = {"ppg-12.2": {"version": "2.16",
-                           "binary_version": "pgBackRest 2.16",
-                           "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,x86-64,"
-                                              " version 1 (SYSV),dynamically linked (uses shared libs),"
-                                              " for GNU/Linux 2.6.32,"
-                                              " BuildID[sha1]=ee740c6f97b0910ac912eec89030c56fb28f77aa, not stripped",
+pgbackrest = {"ppg-12.2": {"version": "2.26",
+                           "binary_version": "pgBackRest 2.26",
+                           "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,"
+                                                " x86-64, version 1 (SYSV), dynamically linked (uses shared libs),"
+                                                " for GNU/Linux 2.6.32,"
+                                                " BuildID[sha1]=8946a6c12c9d6c1f5ee93ff23715b152fc064be1, not stripped",
                                       "ubuntu": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
                                                 " x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/l,"
                                                 " for GNU/Linux 3.2.0,"
@@ -112,7 +113,7 @@ pgbackrest = {"ppg-12.2": {"version": "2.16",
 patroni = {"ppg-12.2": {'version': "",
                         "binary_version": ""}
            }
-pgaudit = {"ppg-12.2": {"version": "1.3"}}
+pgaudit = {"ppg-12.2": {"version": "1.4"}}
 
 DEB_PROVIDES = [("percona-postgresql-12", "postgresql-12"), ("percona-postgresql-client", "postgresql-client"),
                 ("percona-postgresql", "postgresql"), ("percona-postgresql-client-12", "postgresql-client-12"),
@@ -156,9 +157,9 @@ RPM_PROVIDES = [("percona-postgresql12", "postgresql12"),
 
 versions = {"ppg-12.2": {"version": "12.2", "deb_pkg_ver": DEB116_PKG_VERSIONS,
                          "deb_packages": DEB116_PACKAGES,
-                         "percona-postgresql-common": '210',
-                         "percona-postgresql-client-common": "210",
-                         "libpq_version": "110006",
+                         "percona-postgresql-common": '214',
+                         "percona-postgresql-client-common": "214",
+                         "libpq_version": "120002",
                          "pgaudit": pgaudit['ppg-12.2'],
                          "pgbackrest": pgbackrest['ppg-12.2'],
                          "patroni": patroni['ppg-12.2'],

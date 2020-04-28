@@ -130,7 +130,7 @@ def test_build_libpq_programm(host, build_libpq_programm):
 def test_pythonu_function(host, pythonu_function):
     _ = pythonu_function
     with host.sudo("postgres"):
-        result = host.run("psql -c \'SELECT pymax(1, 2);\' | awk 'NR>=3{print $3}'")
+        result = host.run("psql -c \'SELECT pymax(1, 2);\' | awk 'NR>=3{print $1}'")
         assert result.rc == 0
         assert result.stdout.strip("\n(1") == "2", result.stdout
 
@@ -138,7 +138,7 @@ def test_pythonu_function(host, pythonu_function):
 def test_perl_function(host, perl_function):
     _ = perl_function
     with host.sudo("postgres"):
-        result = host.run("psql -c \'SELECT perl_max(1, 2);\' | awk 'NR>=3{print $3}'")
+        result = host.run("psql -c \'SELECT perl_max(1, 2);\' | awk 'NR>=3{print $1}'")
         assert result.rc == 0
         assert result.stdout.strip("\n(1") == "2", result.stdout
 
@@ -146,7 +146,7 @@ def test_perl_function(host, perl_function):
 def test_tcl_function(host, tcl_function):
     _ = tcl_function
     with host.sudo("postgres"):
-        result = host.run("psql -c \'SELECT tcl_max(1, 2);\' | awk 'NR>=3{print $3}'")
+        result = host.run("psql -c \'SELECT tcl_max(1, 2);\' | awk 'NR>=3{print $1}'")
         assert result.rc == 0
         assert result.stdout.strip("\n(1") == "2", result.stdout
 
@@ -154,6 +154,6 @@ def test_tcl_function(host, tcl_function):
 def test_python3(host, python3_function):
     _ = python3_function
     with host.sudo("postgres"):
-        result = host.run("psql -c \'SELECT pymax3(1, 2);\' | awk 'NR>=3{print $3}'")
+        result = host.run("psql -c \'SELECT pymax3(1, 2);\' | awk 'NR>=3{print $1}'")
         assert result.rc == 0
         assert result.stdout.strip("\n(1") == "2", result.stdout
