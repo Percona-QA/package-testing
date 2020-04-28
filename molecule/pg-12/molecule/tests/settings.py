@@ -29,11 +29,11 @@ RPM7_PACKAGES = ["percona-postgresql12", "percona-postgresql12-contrib", "percon
                  "percona-postgresql12-plpython", "percona-postgresql12-pltcl", "percona-postgresql12-server",
                  "percona-postgresql12-test", "percona-postgresql-client-common"]
 
-DEB_FILES = ["/etc/postgresql/11/main/postgresql.conf", "/etc/postgresql/11/main/pg_hba.conf",
-             "/etc/postgresql/11/main/pg_ctl.conf", "/etc/postgresql/11/main/pg_ident.conf"]
+DEB_FILES = ["/etc/postgresql/12/main/postgresql.conf", "/etc/postgresql/12/main/pg_hba.conf",
+             "/etc/postgresql/12/main/pg_ctl.conf", "/etc/postgresql/12/main/pg_ident.conf"]
 
-RHEL_FILES = ["/var/lib/pgsql/11/data/postgresql.conf", "/var/lib/pgsql/11/data/pg_hba.conf",
-              "/var/lib/pgsql/11/data/pg_ident.conf"]
+RHEL_FILES = ["/var/lib/pgsql/12/data/postgresql.conf", "/var/lib/pgsql/12/data/pg_hba.conf",
+              "/var/lib/pgsql/12/data/pg_ident.conf"]
 
 EXTENSIONS = ['xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', 'hstore', 'plperlu', 'plperl', 'ltree',
               'hstore_plperlu', 'dict_xsyn', 'autoinc', 'hstore_plpython3u', 'insert_username', 'intagg', 'adminpack',
@@ -51,7 +51,7 @@ LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", 
 pgrepack = {
             "ppg-12.2": {"version": "1.4.5",
                          "binary_version": "pg_repack 1.4.5",
-                                    "binary": {"centos": "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable,"
+                                    "binary": {"centos": "/usr/pgsql-12/bin/pg_repack: ELF 64-bit LSB executable,"
                                                          " x86-64, version 1 (SYSV),"
                                                          " dynamically linked (uses shared libs), for GNU/Linux 2.6.32,"
                                                          " BuildID[sha1]=bd2f6cc2747db832da8302ce8ceaddd6cf56dad0,"
@@ -77,7 +77,7 @@ pgrepack = {
                                                             " for GNU/Linux 2.6.32,"
                                                             " BuildID[sha1]=882af5eb384bd255a2258bf842d9ec61c0c247dd,"
                                                             " stripped",
-                                               "rhel": "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable,"
+                                               "rhel": "/usr/pgsql-12/bin/pg_repack: ELF 64-bit LSB executable,"
                                                        " x86-64, version 1 (SYSV), dynamically linked,"
                                                        " interpreter /lib64/ld-linux-x86-64.so.2,"
                                                        " for GNU/Linux 3.2.0,"

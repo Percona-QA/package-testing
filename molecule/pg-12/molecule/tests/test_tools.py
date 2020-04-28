@@ -49,13 +49,13 @@ def pgaudit(host):
         result = host.run(create_table)
         assert result.rc == 0
         assert result.stdout.strip("\n") == "CREATE TABLE"
-        log_file = "/var/log/postgresql/postgresql-11-main.log"
+        log_file = "/var/log/postgresql/postgresql-12-main.log"
         if os.lower() in ["debian", "ubuntu"]:
             log_file = "/var/log/postgresql/postgresql-11-main.log"
         elif os.lower() in ["redhat", "centos", 'rhel']:
-            log_files = "ls /var/lib/pgsql/11/data/log/"
+            log_files = "ls /var/lib/pgsql/12/data/log/"
             file_name = host.check_output(log_files).strip("\n")
-            log_file = "".join(["/var/lib/pgsql/11/data/log/", file_name])
+            log_file = "".join(["/var/lib/pgsql/12/data/log/", file_name])
         file = host.file(log_file)
         file_content = file.content_string
     yield file_content
@@ -130,10 +130,10 @@ def pgbackrest_full_backup(host):
 def pgbackrest_delete_data(host):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
-        data_dir = "/var/lib/pgsql/11/data/*"
-        service_name = "postgresql-11"
+        data_dir = "/var/lib/pgsql/12/data/*"
+        service_name = "postgresql-12"
     else:
-        data_dir = "/var/lib/postgresql/11/main/*"
+        data_dir = "/var/lib/postgresql/12/main/*"
         service_name = "postgresql"
     with host.sudo("root"):
         stop_postgresql = 'systemctl stop {}'.format(service_name)
@@ -158,10 +158,10 @@ def pgbackrest_restore(pgbackrest_delete_data, host):
 def pgrepack(host):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
-        cmd = "file /usr/pgsql-11/bin/pg_repack "
+        cmd = "file /usr/pgsql-12/bin/pg_repack "
     else:
         # TODO need to be in PATH?
-        cmd = "file /usr/lib/postgresql/11/bin/pg_repack"
+        cmd = "file /usr/lib/postgresql/12/bin/pg_repack"
     return host.check_output(cmd)
 
 
@@ -174,10 +174,10 @@ def pg_repack_functional(host):
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
         assert host.run(select).rc == 0
         if os.lower() in ["redhat", "centos", 'rhel']:
-            cmd = "/usr/pgsql-11/bin/pg_repack -t pgbench_accounts -j 4"
+            cmd = "/usr/pgsql-12/bin/pg_repack -t pgbench_accounts -j 4"
         else:
             # TODO need to be in PATH?
-            cmd = "/usr/lib/postgresql/11/bin/pg_repack -t pgbench_accounts -j 4"
+            cmd = "/usr/lib/postgresql/12/bin/pg_repack -t pgbench_accounts -j 4"
         pg_repack_result = host.run(cmd)
     yield pg_repack_result
 
@@ -190,9 +190,9 @@ def pg_repack_dry_run(host, operating_system):
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
         assert host.run(select).rc == 0
         if operating_system.lower() in ["redhat", "centos", 'rhel']:
-            cmd = "/usr/pgsql-11/bin/pg_repack --dry-run -d postgres"
+            cmd = "/usr/pgsql-12/bin/pg_repack --dry-run -d postgres"
         else:
-            cmd = "/usr/lib/postgresql/11/bin/pg_repack --dry-run -d postgres"
+            cmd = "/usr/lib/postgresql/12/bin/pg_repack --dry-run -d postgres"
         pg_repack_result = host.run(cmd)
     yield pg_repack_result
 
@@ -201,9 +201,9 @@ def pg_repack_dry_run(host, operating_system):
 def pg_repack_client_version(host, operating_system):
     with host.sudo("postgres"):
         if operating_system.lower() in ["redhat", "centos", 'rhel']:
-            return host.run("/usr/pgsql-11/bin/pg_repack --version")
+            return host.run("/usr/pgsql-12/bin/pg_repack --version")
         elif operating_system.lower() in ["debian", "ubuntu"]:
-            return host.run("/usr/lib/postgresql/11/bin/pg_repack --version")
+            return host.run("/usr/lib/postgresql/12/bin/pg_repack --version")
 
 
 @pytest.fixture()
@@ -222,8 +222,8 @@ def test_pgaudit_package(host):
     if os.lower() in ["redhat", "centos", 'rhel']:
         pkgn = "percona-pgaudit"
     elif os in ["debian", "ubuntu"]:
-        pkgn = "percona-postgresql-11-pgaudit"
-        dbgsym_pkgn = "percona-postgresql-11-pgaudit-dbgsym"
+        pkgn = "percona-postgresql-12-pgaudit"
+        dbgsym_pkgn = "percona-postgresql-12-pgaudit-dbgsym"
         dbgsym_pkg = host.package(dbgsym_pkgn)
         assert dbgsym_pkg.is_installed
         assert pg_versions['pgaudit']['version'] in dbgsym_pkg.version
@@ -242,10 +242,10 @@ def test_pgrepack_package(host):
     os = host.system_info.distribution
     pkgn = ""
     if os.lower() in ["redhat", "centos", 'rhel']:
-        pkgn = "percona-pg_repack11"
+        pkgn = "percona-pg_repack12"
     elif os in ["debian", "ubuntu"]:
-        pkgn = "percona-postgresql-11-repack"
-        pkg_dbgsym = host.package("percona-postgresql-11-repack-dbgsym")
+        pkgn = "percona-postgresql-12-repack"
+        pkg_dbgsym = host.package("percona-postgresql-12-repack-dbgsym")
         assert pkg_dbgsym.is_installed
     if pkgn == "":
         pytest.fail("Unsupported operating system")
@@ -366,7 +366,7 @@ def test_pgbackrest_full_backup(pgbackrest_full_backup):
 def test_pgbackrest_restore(host):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
-        service_name = "postgresql-11"
+        service_name = "postgresql-12"
     else:
         service_name = "postgresql"
     with host.sudo("root"):
@@ -391,13 +391,6 @@ def test_patroni_package(host):
     pkg = host.package(pkgn)
     assert pkg.is_installed
     assert pg_versions['patroni']['version'] in pkg.version
-
-
-@pytest.mark.skipif(os.getenv("PG_VERSION") != "ppg-11.5", reason="Incorrect PG version for this test")
-def test_patroni(patroni):
-    assert "Usage: /opt/patroni/bin/patroni config.yml" in patroni.stdout, patroni.stdout
-    assert "Patroni may also read the configuration" \
-           " from the PATRONI_CONFIGURATION environment variable" in patroni.stdout, patroni.stdout
 
 
 def test_patroni_version(patroni_version):
