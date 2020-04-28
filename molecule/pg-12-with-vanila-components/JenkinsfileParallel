@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
 def doDynamicParallelSteps(){
-  def operatingSystems = ['centos-6', 'centos-7', 'debian-9', 'debian-10', 'ubuntu-focal',
+  def operatingSystems = ['centos-7', 'debian-9', 'debian-10', 'ubuntu-focal',
                         'ubuntu-xenial', 'ubuntu-bionic', 'rhel8']
   tests = [:]
   operatingSystems.each { os ->
@@ -15,7 +15,7 @@ def doDynamicParallelSteps(){
                   cd molecule/pg-12-with-vanila-components
                   molecule test -s ${os}
               """
-            junit 'molecule/pg-12-with-vanila-components/molecule/${os}/report.xml'
+            junit "molecule/pg-12-with-vanila-components/molecule/${os}/report.xml"
         }
       }
     }
@@ -43,7 +43,6 @@ pipeline {
             name: 'VERSION',
             description: 'PG version for test',
             choices: [
-                'ppg-12',
                 'ppg-12.2'
             ]
         )

@@ -10,7 +10,6 @@ pipeline {
             name: 'PLATFORM',
             description: 'For what platform (OS) need to test',
             choices: [
-                'centos-6',
                 'centos-7',
                 'debian-9',
                 'debian-10',
@@ -33,7 +32,6 @@ pipeline {
             name: 'VERSION',
             description: 'PG version for test',
             choices: [
-                'ppg-12',
                 'ppg-12.2'
             ]
         )
@@ -89,7 +87,7 @@ pipeline {
             cd molecule/pg-12-with-vanila-components
             molecule verify -s "${PLATFORM}"
         '''
-        junit 'molecule/pg-12-with-vanila-components/molecule/"${PLATFORM}"/report.xml'
+        junit "molecule/pg-12-with-vanila-components/molecule/"${PLATFORM}"/report.xml"
       }
     }
     stage ('Start packages deletion') {

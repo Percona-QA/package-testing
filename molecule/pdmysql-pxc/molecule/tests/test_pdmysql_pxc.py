@@ -132,7 +132,8 @@ def test_components(component, host):
         cmd = 'mysql -Ns -e "select count(*) from' \
               ' mysql.component where component_urn=\"file://{}\";"'.format(component)
         check_component = host.run(cmd)
-        assert check_component.rc == 0, check_component.stdout
+        print((check_component.stdout, check_component.stderr))
+        assert check_component.rc == 0, (check_component.stdout, check_component.stderr)
         inst_cmd = 'mysql -e "INSTALL COMPONENT \"file://{}\";"'.format(component)
         inst_res = host.run(inst_cmd)
         assert inst_res.rc == 0, inst_res.stderr

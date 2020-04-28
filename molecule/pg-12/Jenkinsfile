@@ -88,7 +88,7 @@ pipeline {
             cd molecule/pg-12
             molecule verify -s "${PLATFORM}"
         '''
-        junit 'molecule/pg-12/molecule/"${PLATFORM}"/report.xml'
+        junit "molecule/pg-12/molecule/"${PLATFORM}"/report.xml"
       }
     }
     stage ('Start packages deletion') {
