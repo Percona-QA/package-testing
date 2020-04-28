@@ -101,7 +101,7 @@ def build_libpq_programm(host):
     pg_include_cmd = "pg_config --includedir"
     pg_include = host.check_output(pg_include_cmd)
     lib_dir_cmd = "pg_config --libdir"
-    lib_dir = host.check_output(lib_dir_cmd)
+    host.check_output(lib_dir_cmd)
     if os in ["centos", 'rhel', "redhat"]:
         return host.run(
             "export LIBPQ_DIR=/usr/pgsql-12/  && export LIBRARY_PATH=/usr/pgsql-12/lib/ &&"
@@ -128,6 +128,7 @@ def test_build_libpq_programm(host, build_libpq_programm):
 
 
 def test_pythonu_function(host, pythonu_function):
+    _ = pythonu_function
     with host.sudo("postgres"):
         result = host.run("psql -c \'SELECT pymax(1, 2);\' | awk 'NR>=3{print $1}'")
         assert result.rc == 0
@@ -135,6 +136,7 @@ def test_pythonu_function(host, pythonu_function):
 
 
 def test_perl_function(host, perl_function):
+    _ = perl_function
     with host.sudo("postgres"):
         result = host.run("psql -c \'SELECT perl_max(1, 2);\' | awk 'NR>=3{print $1}'")
         assert result.rc == 0
@@ -142,6 +144,7 @@ def test_perl_function(host, perl_function):
 
 
 def test_tcl_function(host, tcl_function):
+    _ = tcl_function
     with host.sudo("postgres"):
         result = host.run("psql -c \'SELECT tcl_max(1, 2);\' | awk 'NR>=3{print $1}'")
         assert result.rc == 0
@@ -149,6 +152,7 @@ def test_tcl_function(host, tcl_function):
 
 
 def test_python3(host, python3_function):
+    _ = python3_function
     with host.sudo("postgres"):
         result = host.run("psql -c \'SELECT pymax3(1, 2);\' | awk 'NR>=3{print $1}'")
         assert result.rc == 0

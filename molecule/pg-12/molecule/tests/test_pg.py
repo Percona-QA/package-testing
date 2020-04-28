@@ -211,7 +211,9 @@ def test_enable_extension(host, extension):
         install_extension = host.run("psql -c 'CREATE EXTENSION \"{}\";'".format(extension))
         assert install_extension.rc == 0, install_extension.stderr
         assert install_extension.stdout.strip("\n") == "CREATE EXTENSION", install_extension.stderr
-        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+        # extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+        extensions = host.run("psql -c 'SELECT * FROM pg_extension;'")
+        print(extensions.stdout)
         assert extensions.rc == 0, extensions.stderr
         assert extension in set(extensions.stdout.split()), extensions.stdout
 
@@ -230,14 +232,17 @@ def test_drop_extension(host, extension):
         drop_extension = host.run("psql -c 'DROP EXTENSION \"{}\";'".format(extension))
         assert drop_extension.rc == 0, drop_extension.stderr
         assert drop_extension.stdout.strip("\n") == "DROP EXTENSION", drop_extension.stdout
-        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $2}'")
+
+        # extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
         assert extensions.rc == 0, extensions.stderr
         assert extension not in set(extensions.stdout.split()), extensions.stdout
 
 
 def test_plpgsql_extension(host):
     with host.sudo("postgres"):
-        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+        # extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $3}'")
         assert extensions.rc == 0, extensions.stderr
         assert "plpgsql" in set(extensions.stdout.split()), extensions.stdout
 
@@ -275,9 +280,8 @@ def test_language(host, language):
         if ds.lower() in ["redhat", "centos", 'rhel']:
             if "python3" in language:
                 pytest.skip("Skipping python3 language for Centos or RHEL")
-        if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == 'ppg-12.2':
-            if language in ['plpythonu', "plpython2u"]:
-                pytest.skip("Skipping python2 extensions for DEB based in 12.2 pg")
+        if ds.lower() in ['debian', 'ubuntu'] and language in ['plpythonu', "plpython2u"]:
+            pytest.skip("Skipping python2 extensions for DEB based in 12.2 pg")
         lang = host.run("psql -c 'CREATE LANGUAGE {};'".format(language))
         assert lang.rc == 0, lang.stderr
         assert lang.stdout.strip("\n") == "CREATE LANGUAGE", lang.stdout
