@@ -154,7 +154,7 @@ RPM_PROVIDES = [("percona-postgresql12", "postgresql12"),
                 ]
 
 
-versions = {"ppg-12.2": {"version": "ppg-12.2", "deb_pkg_ver": DEB116_PKG_VERSIONS,
+versions = {"ppg-12.2": {"version": "12.2", "deb_pkg_ver": DEB116_PKG_VERSIONS,
                          "deb_packages": DEB116_PACKAGES,
                          "percona-postgresql-common": '210',
                          "percona-postgresql-client-common": "210",

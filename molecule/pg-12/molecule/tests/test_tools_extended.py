@@ -123,37 +123,37 @@ def test_deb_package_is_installed(host, package):
 def test_build_libpq_programm(host, build_libpq_programm):
     assert build_libpq_programm.rc == 0
     libpq_version = host.run("./lib_version ")
-    assert libpq_version.stdout.strip("\n") == pg_versions['libpq']
+    assert libpq_version.stdout.strip("\n") == pg_versions['libpq'], libpq_version.stdout
     assert libpq_version.rc == 0
 
 
 def test_pythonu_function(host, pythonu_function):
     _ = pythonu_function
     with host.sudo("postgres"):
-        result = host.run("psql -c \'SELECT pymax(1, 2);\' | awk 'NR>=3{print $1}'")
+        result = host.run("psql -c \'SELECT pymax(1, 2);\' | awk 'NR>=3{print $3}'")
         assert result.rc == 0
-        assert result.stdout.strip("\n(1") == "2"
+        assert result.stdout.strip("\n(1") == "2", result.stdout
 
 
 def test_perl_function(host, perl_function):
     _ = perl_function
     with host.sudo("postgres"):
-        result = host.run("psql -c \'SELECT perl_max(1, 2);\' | awk 'NR>=3{print $1}'")
+        result = host.run("psql -c \'SELECT perl_max(1, 2);\' | awk 'NR>=3{print $3}'")
         assert result.rc == 0
-        assert result.stdout.strip("\n(1") == "2"
+        assert result.stdout.strip("\n(1") == "2", result.stdout
 
 
 def test_tcl_function(host, tcl_function):
     _ = tcl_function
     with host.sudo("postgres"):
-        result = host.run("psql -c \'SELECT tcl_max(1, 2);\' | awk 'NR>=3{print $1}'")
+        result = host.run("psql -c \'SELECT tcl_max(1, 2);\' | awk 'NR>=3{print $3}'")
         assert result.rc == 0
-        assert result.stdout.strip("\n(1") == "2"
+        assert result.stdout.strip("\n(1") == "2", result.stdout
 
 
 def test_python3(host, python3_function):
     _ = python3_function
     with host.sudo("postgres"):
-        result = host.run("psql -c \'SELECT pymax3(1, 2);\' | awk 'NR>=3{print $1}'")
+        result = host.run("psql -c \'SELECT pymax3(1, 2);\' | awk 'NR>=3{print $3}'")
         assert result.rc == 0
-        assert result.stdout.strip("\n(1") == "2"
+        assert result.stdout.strip("\n(1") == "2", result.stdout

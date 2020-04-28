@@ -20,7 +20,7 @@ def operating_system(host):
 def load_data(host):
     pgbench = "pgbench -i -s 1"
     assert host.run(pgbench).rc == 0
-    select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
+    select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $3}'"
     assert host.run(select).rc == 0
 
 
@@ -35,7 +35,7 @@ def pgaudit(host):
         result = host.check_output(enable_pgaudit)
         assert result.strip("\n") == "CREATE EXTENSION"
         cmd = """
-        psql -c \"SELECT setting FROM pg_settings WHERE name='shared_preload_libraries';\" | awk 'NR==3{print $1}'
+        psql -c \"SELECT setting FROM pg_settings WHERE name='shared_preload_libraries';\" | awk 'NR==3{print $3}'
         """
         result = host.check_output(cmd)
         assert result.strip("\n") == "pgaudit"
@@ -171,7 +171,7 @@ def pg_repack_functional(host):
     with host.sudo("postgres"):
         pgbench = "pgbench -i -s 1"
         assert host.run(pgbench).rc == 0
-        select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
+        select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $3}'"
         assert host.run(select).rc == 0
         if os.lower() in ["redhat", "centos", 'rhel']:
             cmd = "/usr/pgsql-12/bin/pg_repack -t pgbench_accounts -j 4"
@@ -187,7 +187,7 @@ def pg_repack_dry_run(host, operating_system):
     with host.sudo("postgres"):
         pgbench = "pgbench -i -s 1"
         assert host.run(pgbench).rc == 0
-        select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
+        select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $3}'"
         assert host.run(select).rc == 0
         if operating_system.lower() in ["redhat", "centos", 'rhel']:
             cmd = "/usr/pgsql-12/bin/pg_repack --dry-run -d postgres"
@@ -279,7 +279,7 @@ def test_pgrepack(host):
             pytest.fail("Return code {}. Stderror: {}. Stdout {}".format(install_extension.rc,
                                                                          install_extension.stderr,
                                                                          install_extension.stdout))
-            extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+            extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $3}'")
             assert extensions.rc == 0
             assert "pg_repack" in set(extensions.stdout.split())
 
@@ -373,7 +373,7 @@ def test_pgbackrest_restore(host):
         stop_postgresql = 'systemctl start {}'.format(service_name)
         assert host.run(stop_postgresql).rc == 0
     with host.sudo("postgres"):
-        select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
+        select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $3}'"
         result = host.run(select)
         assert result.rc == 0
         assert result.stdout.strip("\n") == "100000"

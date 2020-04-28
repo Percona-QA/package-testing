@@ -57,7 +57,7 @@ def restart_postgresql(host):
 @pytest.fixture()
 def extension_list(host):
     with host.sudo("postgres"):
-        result = host.check_output("psql -c 'SELECT * FROM pg_available_extensions;' | awk 'NR>=3{print $1}'")
+        result = host.check_output("psql -c 'SELECT * FROM pg_available_extensions;' | awk 'NR>=3{print $3}'")
         result = result.split()
         return result
 
@@ -68,7 +68,7 @@ def insert_data(host):
         pgbench = "pgbench -i -s 1"
         result = host.run(pgbench)
         assert result.rc == 0
-        select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
+        select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $3}'"
         result = host.check_output(select)
     yield result.strip("\n")
 
@@ -211,8 +211,8 @@ def test_enable_extension(host, extension):
         install_extension = host.run("psql -c 'CREATE EXTENSION \"{}\";'".format(extension))
         assert install_extension.rc == 0, install_extension.stderr
         assert install_extension.stdout.strip("\n") == "CREATE EXTENSION", install_extension.stderr
-        # extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
-        extensions = host.run("psql -c 'SELECT * FROM pg_extension;'")
+        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $3}'")
+        # extensions = host.run("psql -c 'SELECT * FROM pg_extension;'")
         print(extensions.stdout)
         assert extensions.rc == 0, extensions.stderr
         assert extension in set(extensions.stdout.split()), extensions.stdout
@@ -232,7 +232,7 @@ def test_drop_extension(host, extension):
         drop_extension = host.run("psql -c 'DROP EXTENSION \"{}\";'".format(extension))
         assert drop_extension.rc == 0, drop_extension.stderr
         assert drop_extension.stdout.strip("\n") == "DROP EXTENSION", drop_extension.stdout
-        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $2}'")
+        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $3}'")
 
         # extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
         assert extensions.rc == 0, extensions.stderr
