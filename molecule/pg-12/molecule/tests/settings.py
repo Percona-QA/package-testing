@@ -41,7 +41,7 @@ EXTENSIONS = ['xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', '
               'bloom', 'seg', 'pageinspect', 'btree_gist', 'sslinfo', 'pg_visibility', 'ltree_plpython2u', 'refint',
               'jsonb_plpython3u', 'jsonb_plpythonu', 'moddatetime', 'ltree_plpythonu', 'dict_int', 'pg_freespacemap',
               'pgstattuple', 'hstore_plpythonu', 'uuid-ossp', 'tsm_system_time', 'tsm_system_rows', 'unaccent',
-              'tablefunc', 'pgcrypto', 'pg_buffercache', 'amcheck', 'citext',  'timetravel',  'isn',
+              'tablefunc', 'pgcrypto', 'pg_buffercache', 'amcheck', 'citext', 'isn',
               'hstore_plpython2u', 'ltree_plpython3u', 'fuzzystrmatch', 'earthdistance', 'hstore_plperl', 'pg_prewarm',
               'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'postgres_fdw']
 
@@ -163,7 +163,7 @@ versions = {"ppg-12.2": {"version": "12.2", "deb_pkg_ver": DEB116_PKG_VERSIONS,
                          "pgaudit": pgaudit['ppg-12.2'],
                          "pgbackrest": pgbackrest['ppg-12.2'],
                          "patroni": patroni['ppg-12.2'],
-                         "pgrepack": pgrepack['ppg-12.2'], "libpq": "Version of libpq: 110006",
+                         "pgrepack": pgrepack['ppg-12.2'], "libpq": "Version of libpq: 120002",
                          "deb_provides": DEB_PROVIDES,
                          "rpm7_provides": RPM7_PROVIDES,
                          'rpm_provides': RPM_PROVIDES}

@@ -373,7 +373,7 @@ def test_pgbackrest_restore(host):
         stop_postgresql = 'systemctl start {}'.format(service_name)
         assert host.run(stop_postgresql).rc == 0
     with host.sudo("postgres"):
-        select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $3}'"
+        select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
         result = host.run(select)
         assert result.rc == 0
         assert result.stdout.strip("\n") == "100000"
