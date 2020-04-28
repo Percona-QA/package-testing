@@ -6,11 +6,11 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-DEBPACKAGES = ['percona-xtradb-cluster-full', 'python-mysqldb',
-               'percona-xtradb-cluster-client', 'percona-xtradb-cluster-common',
-               'percona-xtradb-cluster-dbg', 'percona-xtradb-cluster-garbd-debug',
-               'percona-xtradb-cluster-garbd', 'percona-xtradb-cluster-server-debug',
-               'percona-xtradb-cluster-test', 'percona-xtradb-cluster']
+DEBPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-client',
+               'percona-xtradb-cluster-common', 'percona-xtradb-cluster-dbg',
+               'percona-xtradb-cluster-garbd-debug', 'percona-xtradb-cluster-garbd',
+               'percona-xtradb-cluster-server-debug', 'percona-xtradb-cluster-test',
+               'percona-xtradb-cluster']
 
 RPMPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster',
                'percona-xtradb-cluster-client', 'percona-xtradb-cluster-debuginfo',
