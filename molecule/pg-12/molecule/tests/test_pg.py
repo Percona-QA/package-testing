@@ -9,7 +9,7 @@ from .settings import versions, RHEL_FILES, RPM7_PACKAGES, RPM_PACKAGES, EXTENSI
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-pg_versions = versions[os.getenv("PG_VERSION")]
+pg_versions = versions[os.getenv("VERSION")]
 
 
 @pytest.fixture()

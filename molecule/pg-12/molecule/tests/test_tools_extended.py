@@ -13,7 +13,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 #             'libecpg6', "libpgtypes3", "libpgtypes3-dbgsym", "libpq-dev", "libpq5-dbgsym", "libpq5"]
 
 PACKAGES = ["libecpg-compat3",  "libecpg-dev", 'libecpg6', "libpgtypes3", "libpq-dev",  "libpq5"]
-pg_versions = versions[os.getenv("PG_VERSION")]
+pg_versions = versions[os.getenv("VERSION")]
 
 # @pytest.fixture()
 # def fdw_extension(host):
@@ -39,28 +39,6 @@ pg_versions = versions[os.getenv("PG_VERSION")]
 # @pytest.fixture()
 # def fdw_functional(host):
 #     pass
-
-
-@pytest.fixture()
-def pythonu_function(host):
-    ds = host.system_info.distribution
-    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") != 'ppg-11.5':
-        pytest.skip("Skipping python2 extensions for DEB based in 11.6 pg")
-    with host.sudo("postgres"):
-        install_extension = host.run("psql -c 'CREATE EXTENSION IF NOT EXISTS\"plpythonu\";'")
-        assert install_extension.rc == 0
-        create_function = """CREATE FUNCTION pymax (a integer, b integer)
-          RETURNS integer
-        AS $$
-          if a > b:
-            return a
-          return b
-        $$ LANGUAGE plpythonu;
-                """
-        execute_psql = host.run("psql -c \'{}\'".format(create_function))
-        assert execute_psql.rc == 0
-        assert execute_psql.stdout.strip("\n") == "CREATE FUNCTION"
-        return execute_psql
 
 
 @pytest.fixture()

@@ -3,31 +3,31 @@ DEB116_PKG_VERSIONS = ["11+210-1.buster", "204-1.buster", "2:11-6.2.buster", "2:
                        "11+210-1.cosmic", "204-1.cosmic", "2:11-6.2.disco", "11+210-1.disco", "204-1.disco",
                        "210-1.stretch", "210-1.cosmic", "210-1.buster", '210-1.disco', "210-1.bionic"]
 
-DEB116_PACKAGES = ["percona-postgresql-11", "percona-postgresql-client", "percona-postgresql",
-                   "percona-postgresql-client-11", "percona-postgresql-client-common",
+DEB116_PACKAGES = ["percona-postgresql-12", "percona-postgresql-client", "percona-postgresql",
+                   "percona-postgresql-client-12", "percona-postgresql-client-common",
                    "percona-postgresql-contrib", "percona-postgresql-doc", "percona-postgresql-server-dev-all",
-                   "percona-postgresql-doc-11", "percona-postgresql-plperl-11", "percona-postgresql-common",
-                   "percona-postgresql-plpython3-11", "percona-postgresql-pltcl-11", "percona-postgresql-all",
-                   "percona-postgresql-server-dev-11", "percona-postgresql-11-dbgsym",
-                   "percona-postgresql-client-11-dbgsym", "percona-postgresql-plperl-11-dbgsym",
-                   "percona-postgresql-plpython3-11-dbgsym", "percona-postgresql-pltcl-11-dbgsym"]
+                   "percona-postgresql-doc-12", "percona-postgresql-plperl-12", "percona-postgresql-common",
+                   "percona-postgresql-plpython3-12", "percona-postgresql-pltcl-12", "percona-postgresql-all",
+                   "percona-postgresql-server-dev-11", "percona-postgresql-12-dbgsym",
+                   "percona-postgresql-client-12-dbgsym", "percona-postgresql-plperl-12-dbgsym",
+                   "percona-postgresql-plpython3-12-dbgsym", "percona-postgresql-pltcl-12-dbgsym"]
 
-RPM_PACKAGES = ["percona-postgresql11", "percona-postgresql11-contrib", "percona-postgresql-common",
-                "percona-postgresql11-debuginfo", "percona-postgresql11-devel", "percona-postgresql11-docs",
-                "percona-postgresql11-libs", "percona-postgresql11-llvmjit", "percona-postgresql11-plperl",
-                "percona-postgresql11-plpython", "percona-postgresql11-pltcl", "percona-postgresql11-server",
-                "percona-postgresql11-test", "percona-postgresql-client-common", "percona-postgresql11-debuginfo",
-                "percona-postgresql11-debugsource", "percona-postgresql11-devel-debuginfo",
-                "percona-postgresql11-libs-debuginfo", "percona-postgresql11-plperl-debuginfo",
-                "percona-postgresql11-plpython-debuginfo", "percona-postgresql11-plpython3-debuginfo",
-                "percona-postgresql11-pltcl-debuginfo", "percona-postgresql11-server-debuginfo",
-                "percona-postgresql11-test-debuginfo"]
+RPM_PACKAGES = ["percona-postgresql12", "percona-postgresql12-contrib", "percona-postgresql-common",
+                "percona-postgresql12-debuginfo", "percona-postgresql12-devel", "percona-postgresql12-docs",
+                "percona-postgresql12-libs", "percona-postgresql12-llvmjit", "percona-postgresql12-plperl",
+                "percona-postgresql12-plpython", "percona-postgresql12-pltcl", "percona-postgresql12-server",
+                "percona-postgresql12-test", "percona-postgresql-client-common", "percona-postgresql12-debuginfo",
+                "percona-postgresql12-debugsource", "percona-postgresql12-devel-debuginfo",
+                "percona-postgresql12-libs-debuginfo", "percona-postgresql12-plperl-debuginfo",
+                "percona-postgresql12-plpython-debuginfo", "percona-postgresql12-plpython3-debuginfo",
+                "percona-postgresql12-pltcl-debuginfo", "percona-postgresql12-server-debuginfo",
+                "percona-postgresql12-test-debuginfo"]
 
-RPM7_PACKAGES = ["percona-postgresql11", "percona-postgresql11-contrib", "percona-postgresql-common",
-                 "percona-postgresql11-debuginfo", "percona-postgresql11-devel", "percona-postgresql11-docs",
-                 "percona-postgresql11-libs", "percona-postgresql11-llvmjit", "percona-postgresql11-plperl",
-                 "percona-postgresql11-plpython", "percona-postgresql11-pltcl", "percona-postgresql11-server",
-                 "percona-postgresql11-test", "percona-postgresql-client-common"]
+RPM7_PACKAGES = ["percona-postgresql12", "percona-postgresql12-contrib", "percona-postgresql-common",
+                 "percona-postgresql12-debuginfo", "percona-postgresql12-devel", "percona-postgresql11-docs",
+                 "percona-postgresql12-libs", "percona-postgresql12-llvmjit", "percona-postgresql12-plperl",
+                 "percona-postgresql12-plpython", "percona-postgresql12-pltcl", "percona-postgresql12-server",
+                 "percona-postgresql12-test", "percona-postgresql-client-common"]
 
 DEB_FILES = ["/etc/postgresql/11/main/postgresql.conf", "/etc/postgresql/11/main/pg_hba.conf",
              "/etc/postgresql/11/main/pg_ctl.conf", "/etc/postgresql/11/main/pg_ident.conf"]
@@ -84,11 +84,11 @@ pgrepack = {
                                                        " BuildID[sha1]=7b5826a6fdafe64e13a0d0c3192f5b96b8870f6c,"
                                                        " not stripped"}}}
 pgbackrest = {"ppg-12": {"version": "2.16",
-                           "binary_version": "pgBackRest 2.16",
-                           "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,x86-64,"
-                                                " version 1 (SYSV),dynamically linked (uses shared libs),"
-                                                " for GNU/Linux 2.6.32,"
-                                                " BuildID[sha1]=ee740c6f97b0910ac912eec89030c56fb28f77aa, not stripped",
+                         "binary_version": "pgBackRest 2.16",
+                         "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,x86-64,"
+                                              " version 1 (SYSV),dynamically linked (uses shared libs),"
+                                              " for GNU/Linux 2.6.32,"
+                                              " BuildID[sha1]=ee740c6f97b0910ac912eec89030c56fb28f77aa, not stripped",
                                       "ubuntu": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
                                                 " x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/l,"
                                                 " for GNU/Linux 3.2.0,"
@@ -109,61 +109,61 @@ pgbackrest = {"ppg-12": {"version": "2.16",
                                               " for GNU/Linux 3.2.0,"
                                               " BuildID[sha1]=7b29febffa6997744eb3be2e5bc1bc97647722e5,"
                                               " with debug_info, not stripped, too many notes (256)"}}}
-patroni = {"ppg-12": {'version': "",
+patroni = {"ppg-12.2": {'version': "",
                       "binary_version": ""}
            }
-pgaudit = {"ppg-12": {"version": "1.3"}
+pgaudit = {"ppg-12.2": {"version": "1.3"}
            }
 
-DEB_PROVIDES = [("percona-postgresql-11", "postgresql-11"), ("percona-postgresql-client", "postgresql-client"),
-                ("percona-postgresql", "postgresql"), ("percona-postgresql-client-11", "postgresql-client-11"),
+DEB_PROVIDES = [("percona-postgresql-12", "postgresql-12"), ("percona-postgresql-client", "postgresql-client"),
+                ("percona-postgresql", "postgresql"), ("percona-postgresql-client-12", "postgresql-client-12"),
                 ("percona-postgresql-client-common", "postgresql-client-common"),
                 ("percona-postgresql-contrib", "postgresql-contrib"), ("percona-postgresql-doc", "postgresql-doc"),
                 ("percona-postgresql-server-dev-all", "postgresql-server-dev-all"),
-                ('percona-postgresql-plperl-11', 'postgresql-plperl-11'),
+                ('percona-postgresql-plperl-12', 'postgresql-plperl-12'),
                 ("percona-postgresql-common", "postgresql-common"),
-                ("percona-postgresql-plpython3-11", "postgresql-11-plpython3"),
-                ("percona-postgresql-pltcl-11", "postgresql-11-pltcl"), ("percona-postgresql-all", "postgresql-all"),
-                ("percona-postgresql-server-dev-11", 'postgresql-server-dev-all-11')]
+                ("percona-postgresql-plpython3-12", "postgresql-12-plpython3"),
+                ("percona-postgresql-pltcl-12", "postgresql-12-pltcl"), ("percona-postgresql-all", "postgresql-all"),
+                ("percona-postgresql-server-dev-12", 'postgresql-server-dev-all-12')]
 
-RPM7_PROVIDES = [("percona-postgresql11", 'postgresql11'),
-                 ("percona-postgresql11-contrib", 'postgresql11-contrib'),
+RPM7_PROVIDES = [("percona-postgresql12", 'postgresql12'),
+                 ("percona-postgresql12-contrib", 'postgresql12-contrib'),
                  ("percona-postgresql-common", 'postgresql-common'),
-                 ("percona-postgresql11-devel", 'postgresql11-devel'),
-                 ("percona-postgresql11-docs", "postgresql-docs"),
-                 ("percona-postgresql11-libs", 'postgresql11-libs'),
-                 ("percona-postgresql11-llvmjit", 'postgresql11-llvmjit'),
-                 ('percona-postgresql11-plperl', 'postgresql11-plperl'),
-                 ("percona-postgresql11-pltcl", 'postgresql11-pltcl'),
-                 ('percona-postgresql11-server', 'postgresql11-server'),
-                 ("percona-postgresql11-test", 'postgresql11-test'),
+                 ("percona-postgresql12-devel", 'postgresql12-devel'),
+                 ("percona-postgresql12-docs", "postgresql-docs"),
+                 ("percona-postgresql12-libs", 'postgresql12-libs'),
+                 ("percona-postgresql12-llvmjit", 'postgresql12-llvmjit'),
+                 ('percona-postgresql12-plperl', 'postgresql12-plperl'),
+                 ("percona-postgresql12-pltcl", 'postgresql12-pltcl'),
+                 ('percona-postgresql12-server', 'postgresql12-server'),
+                 ("percona-postgresql12-test", 'postgresql12-test'),
                  ("percona-postgresql-client-common", 'postgresql-client-common')]
 
-RPM_PROVIDES = [("percona-postgresql11", "postgresql11"),
-                ("percona-postgresql11-contrib", "postgresql11-contrib"),
+RPM_PROVIDES = [("percona-postgresql12", "postgresql12"),
+                ("percona-postgresql12-contrib", "postgresql12-contrib"),
                 ("percona-postgresql-common", "postgresql-common"),
-                ("percona-postgresql11-devel", "postgresql-devel"),
-                ("percona-postgresql11-docs", "postgresql-docs"),
-                ("percona-postgresql11-libs", "postgresql11-libs"),
-                ("percona-postgresql11-llvmjit", "postgresql11-llvmjit"),
-                ("percona-postgresql11-plperl", 'postgresql11-plperl'),
-                ("percona-postgresql11-plpython", 'postgresql-plpython'),
-                ("percona-postgresql11-pltcl", 'postgresql11-pltcl'),
-                ("percona-postgresql11-server", 'postgresql11-server'),
-                ("percona-postgresql11-test", "postgresql11-test"),
+                ("percona-postgresql12-devel", "postgresql-devel"),
+                ("percona-postgresql12-docs", "postgresql-docs"),
+                ("percona-postgresql12-libs", "postgresql12-libs"),
+                ("percona-postgresql12-llvmjit", "postgresql12-llvmjit"),
+                ("percona-postgresql12-plperl", 'postgresql12-plperl'),
+                ("percona-postgresql12-plpython", 'postgresql-plpython'),
+                ("percona-postgresql12-pltcl", 'postgresql12-pltcl'),
+                ("percona-postgresql12-server", 'postgresql12-server'),
+                ("percona-postgresql12-test", "postgresql12-test"),
                 ("percona-postgresql-client-common", 'postgresql-client-common')
                 ]
 
 
-versions = {"ppg-12": {"version": "11.6", "deb_pkg_ver": DEB116_PKG_VERSIONS,
+versions = {"ppg-12.2": {"version": "ppg-12.2", "deb_pkg_ver": DEB116_PKG_VERSIONS,
                          "deb_packages": DEB116_PACKAGES,
                          "percona-postgresql-common": '210',
                          "percona-postgresql-client-common": "210",
                          "libpq_version": "110006",
-                         "pgaudit": pgaudit['ppg-11.6'],
-                         "pgbackrest": pgbackrest['ppg-11.6'],
-                         "patroni": patroni['ppg-11.6'],
-                         "pgrepack": pgrepack['ppg-11.6'], "libpq": "Version of libpq: 110006",
+                         "pgaudit": pgaudit['ppg-12.2'],
+                         "pgbackrest": pgbackrest['ppg-12.2'],
+                         "patroni": patroni['ppg-12.2'],
+                         "pgrepack": pgrepack['ppg-12.2'], "libpq": "Version of libpq: 110006",
                          "deb_provides": DEB_PROVIDES,
                          "rpm7_provides": RPM7_PROVIDES,
                          'rpm_provides': RPM_PROVIDES}
