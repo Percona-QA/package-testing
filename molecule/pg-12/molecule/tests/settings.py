@@ -78,11 +78,11 @@ pgrepack = {
                                                             " for GNU/Linux 2.6.32,"
                                                             " BuildID[sha1]=882af5eb384bd255a2258bf842d9ec61c0c247dd,"
                                                             " stripped",
-                                               "rhel": "/usr/pgsql-12/bin/pg_repack: ELF 64-bit LSB executable,"
-                                                       " x86-64, version 1 (SYSV), dynamically linked,"
-                                                       " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                               "rhel": "/usr/pgsql-12/bin/pg_repack: ELF 64-bit LSB executable, x86-64,"
+                                                       " version 1 (SYSV),"
+                                                       " dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2,"
                                                        " for GNU/Linux 3.2.0,"
-                                                       " BuildID[sha1]=7b5826a6fdafe64e13a0d0c3192f5b96b8870f6c,"
+                                                       " BuildID[sha1]=e37e73fdb0d4719e2eea1b784186bce7c26fd5d7,"
                                                        " not stripped"}}}
 pgbackrest = {"ppg-12.2": {"version": "2.26",
                            "binary_version": "pgBackRest 2.26",
@@ -104,12 +104,12 @@ pgbackrest = {"ppg-12.2": {"version": "2.26",
                                                    " interpreter /lib64/ld-linux-x86-64.so.2,"
                                                    " for GNU/Linux 2.6.32,"
                                                    " BuildID[sha1]=b2e1c41d6e6b6c26e6f6371348799e39fbd4cae1, stripped",
-                                      "rhel": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
-                                              " x86-64, version 1 (SYSV),"
-                                              " dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2,"
+                                      "rhel": "/usr/bin/pgbackrest: ELF 64-bit LSB executable, x86-64,"
+                                              " version 1 (SYSV), dynamically linked,"
+                                              " interpreter /lib64/ld-linux-x86-64.so.2,"
                                               " for GNU/Linux 3.2.0,"
-                                              " BuildID[sha1]=7b29febffa6997744eb3be2e5bc1bc97647722e5,"
-                                              " with debug_info, not stripped, too many notes (256)"}}}
+                                              " BuildID[sha1]=ba1f33e28e40289682814fe2f69498288b872e83, not stripped,"
+                                              " too many notes (256)"}}}
 patroni = {"ppg-12.2": {'version': "1.6.5",
                         "binary_version": "patroni 1.6.5"}
            }
