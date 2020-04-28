@@ -83,8 +83,8 @@ pgrepack = {
                                                        " for GNU/Linux 3.2.0,"
                                                        " BuildID[sha1]=7b5826a6fdafe64e13a0d0c3192f5b96b8870f6c,"
                                                        " not stripped"}}}
-pgbackrest = {"ppg-12": {"version": "2.16",
-                         "binary_version": "pgBackRest 2.16",
+pgbackrest = {"ppg-12.2": {"version": "2.16",
+                           "binary_version": "pgBackRest 2.16",
                          "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,x86-64,"
                                               " version 1 (SYSV),dynamically linked (uses shared libs),"
                                               " for GNU/Linux 2.6.32,"
