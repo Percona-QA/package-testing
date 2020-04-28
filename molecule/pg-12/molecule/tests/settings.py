@@ -49,7 +49,7 @@ LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", 
 
 
 pgrepack = {
-            "ppg-11.6": {"version": "1.4.5",
+            "ppg-12.2": {"version": "1.4.5",
                          "binary_version": "pg_repack 1.4.5",
                                     "binary": {"centos": "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable,"
                                                          " x86-64, version 1 (SYSV),"
@@ -85,7 +85,7 @@ pgrepack = {
                                                        " not stripped"}}}
 pgbackrest = {"ppg-12.2": {"version": "2.16",
                            "binary_version": "pgBackRest 2.16",
-                         "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,x86-64,"
+                           "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,x86-64,"
                                               " version 1 (SYSV),dynamically linked (uses shared libs),"
                                               " for GNU/Linux 2.6.32,"
                                               " BuildID[sha1]=ee740c6f97b0910ac912eec89030c56fb28f77aa, not stripped",
@@ -110,10 +110,9 @@ pgbackrest = {"ppg-12.2": {"version": "2.16",
                                               " BuildID[sha1]=7b29febffa6997744eb3be2e5bc1bc97647722e5,"
                                               " with debug_info, not stripped, too many notes (256)"}}}
 patroni = {"ppg-12.2": {'version': "",
-                      "binary_version": ""}
+                        "binary_version": ""}
            }
-pgaudit = {"ppg-12.2": {"version": "1.3"}
-           }
+pgaudit = {"ppg-12.2": {"version": "1.3"}}
 
 DEB_PROVIDES = [("percona-postgresql-12", "postgresql-12"), ("percona-postgresql-client", "postgresql-client"),
                 ("percona-postgresql", "postgresql"), ("percona-postgresql-client-12", "postgresql-client-12"),
