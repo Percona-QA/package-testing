@@ -87,7 +87,7 @@ pipeline {
             cd molecule/pg-12-with-vanila-components
             molecule verify -s "${PLATFORM}"
         '''
-        junit "molecule/pg-12-with-vanila-components/molecule/"${PLATFORM}"/report.xml"
+        junit "molecule/pg-12-with-vanila-components/molecule/${PLATFORM}/report.xml"
       }
     }
     stage ('Start packages deletion') {
