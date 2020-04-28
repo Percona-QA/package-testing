@@ -36,15 +36,6 @@
 - name: install Percona Platform for PostgreSQL 12 packages
   include_tasks: ../../../tasks/install_ppg12.yml
 
-#- name: Install libpq-dev
-#  apt:
-#    name: "{{ packages }}"
-#  vars:
-#    packages:
-#      - libpq-dev
-#      - libdbd-pg-perl
-#  when: ansible_os_family == "Debian"
-
 - name: Initialize Postgres RHEL
   command: /usr/pgsql-12/bin/postgresql-12-setup initdb
   environment:

@@ -127,14 +127,6 @@ def test_build_libpq_programm(host, build_libpq_programm):
     assert libpq_version.rc == 0
 
 
-def test_pythonu_function(host, pythonu_function):
-    _ = pythonu_function
-    with host.sudo("postgres"):
-        result = host.run("psql -c \'SELECT pymax(1, 2);\' | awk 'NR>=3{print $1}'")
-        assert result.rc == 0
-        assert result.stdout.strip("\n(1") == "2", result.stdout
-
-
 def test_perl_function(host, perl_function):
     _ = perl_function
     with host.sudo("postgres"):

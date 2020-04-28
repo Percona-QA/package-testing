@@ -110,8 +110,8 @@ pgbackrest = {"ppg-12.2": {"version": "2.26",
                                               " for GNU/Linux 3.2.0,"
                                               " BuildID[sha1]=7b29febffa6997744eb3be2e5bc1bc97647722e5,"
                                               " with debug_info, not stripped, too many notes (256)"}}}
-patroni = {"ppg-12.2": {'version': "",
-                        "binary_version": ""}
+patroni = {"ppg-12.2": {'version': "1.6.5",
+                        "binary_version": "patroni 1.6.5"}
            }
 pgaudit = {"ppg-12.2": {"version": "1.4"}}
 
