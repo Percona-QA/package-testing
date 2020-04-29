@@ -8,6 +8,8 @@ from .settings import versions
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
+pg_version = versions[os.getenv("VERSION")]
+
 
 @pytest.fixture(scope="module")
 def operating_system(host):
@@ -193,7 +195,7 @@ def pg_repack_dry_run(host, operating_system):
     with host.sudo("postgres"):
         pgbench = "pgbench -i -s 1"
         if operating_system.lower() in ["redhat", "centos", 'rhel']:
-            pgbench = '/usr/pgsql-2/bin/pgbench -i -s 1'
+            pgbench = '/usr/pgsql-12/bin/pgbench -i -s 1'
         cmd = host.run(pgbench)
         assert cmd.rc == 0, cmd.stdout
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
@@ -235,12 +237,12 @@ def test_pgaudit_package(host):
         dbgsym_pkgn = "percona-postgresql-12-pgaudit-dbgsym"
         dbgsym_pkg = host.package(dbgsym_pkgn)
         assert dbgsym_pkg.is_installed
-        assert versions['pgaudit']['version'] in dbgsym_pkg.version
+        assert pg_version['pgaudit']['version'] in dbgsym_pkg.version
     if pkgn == "":
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
-    assert versions['pgaudit']['version'] in pkg.version
+    assert pg_version['pgaudit']['version'] in pkg.version
 
 
 def test_pgaudit(pgaudit):
@@ -260,22 +262,22 @@ def test_pgrepack_package(host):
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
-    assert versions['pgrepack']['version'] in pkg.version
+    assert pg_version['pgrepack']['version'] in pkg.version
 
 
 def test_pgrepack_binary(host, pgrepack):
     os = host.system_info.distribution
     if os.lower() == "centos":
-        assert pgrepack == versions['pgrepack']['binary']['centos'], pgrepack
+        assert pgrepack == pg_version['pgrepack']['binary']['centos'], pgrepack
     elif os.lower() in ['redhat', 'rhel']:
-        assert pgrepack == versions['pgrepack']['binary']['rhel'], pgrepack
+        assert pgrepack == pg_version['pgrepack']['binary']['rhel'], pgrepack
     elif os.lower() == "debian":
         if host.system_info.release == '9.9':
-            assert pgrepack == versions['pgrepack']['binary']['debian9.9'], pgrepack
+            assert pgrepack == pg_version['pgrepack']['binary']['debian9.9'], pgrepack
         else:
-            assert pgrepack == versions['pgrepack']['binary']['debian'], pgrepack
+            assert pgrepack == pg_version['pgrepack']['binary']['debian'], pgrepack
     elif os.lower() == "ubuntu":
-        assert pgrepack == versions['pgrepack']['binary']['ubuntu'], pgrepack
+        assert pgrepack == pg_version['pgrepack']['binary']['ubuntu'], pgrepack
 
 
 def test_pgrepack(host):
@@ -295,7 +297,7 @@ def test_pgrepack(host):
 
 def test_pg_repack_client_version(pg_repack_client_version):
     assert pg_repack_client_version.rc == 0
-    assert pg_repack_client_version.stdout.strip("\n") == versions['pgrepack']['binary_version']
+    assert pg_repack_client_version.stdout.strip("\n") == pg_version['pgrepack']['binary_version']
 
 
 def test_pg_repack_functional(pg_repack_functional):
@@ -324,39 +326,39 @@ def test_pgbackrest_package(host):
         doc_pkgn = "percona-pgbackrest-doc"
         docs_pkg = host.package(doc_pkgn)
         assert docs_pkg.is_installed
-        assert versions['pgbackrest']['version'] in docs_pkg.version
+        assert pg_version['pgbackrest']['version'] in docs_pkg.version
         dbg_pkg = "percona-pgbackrest-dbgsym"
         dbg = host.package(dbg_pkg)
         assert dbg.is_installed
-        assert versions['pgbackrest']['version'] in dbg.version
+        assert pg_version['pgbackrest']['version'] in dbg.version
     if pkgn == "":
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
-    assert versions['pgbackrest']['version'] in pkg.version
+    assert pg_version['pgbackrest']['version'] in pkg.version
 
 
 def test_pgbackrest_version(pgbackrest_version):
-    assert pgbackrest_version == versions['pgbackrest']['binary_version']
+    assert pgbackrest_version == pg_version['pgbackrest']['binary_version']
 
 
 def test_pgbackrest_binary(pgbackrest, operating_system, host):
     assert pgbackrest.rc == 0
     if operating_system.lower() == "centos":
-        assert pgbackrest.stdout.strip("\n") == versions['pgbackrest']['binary']['centos'],\
+        assert pgbackrest.stdout.strip("\n") == pg_version['pgbackrest']['binary']['centos'],\
             pgbackrest.stdout.strip("\n")
     elif operating_system.lower() in ["redhat", 'rhel']:
-        assert pgbackrest.stdout.strip("\n") == versions['pgbackrest']['binary']['rhel'],\
+        assert pgbackrest.stdout.strip("\n") == pg_version['pgbackrest']['binary']['rhel'],\
             pgbackrest.stdout.strip("\n")
     elif operating_system.lower() == 'debian':
         if host.system_info.release == "9.9":
-            assert pgbackrest.stdout.strip("\n") == versions['pgbackrest']['binary']['debian9.9'],\
+            assert pgbackrest.stdout.strip("\n") == pg_version['pgbackrest']['binary']['debian9.9'],\
                 pgbackrest.stdout.strip("\n")
         else:
-            assert pgbackrest.stdout.strip("\n") == versions['pgbackrest']['binary']['debian'],\
+            assert pgbackrest.stdout.strip("\n") == pg_version['pgbackrest']['binary']['debian'],\
                 pgbackrest.stdout.strip("\n")
     elif operating_system.lower() == "ubuntu":
-        assert pgbackrest.stdout.strip("\n") == versions['pgbackrest']['binary']['ubuntu'],\
+        assert pgbackrest.stdout.strip("\n") == pg_version['pgbackrest']['binary']['ubuntu'],\
             pgbackrest.stdout.strip("\n")
 
 
@@ -399,9 +401,9 @@ def test_patroni_package(host):
         pytest.fail("Unsupported operating system")
     pkg = host.package(pkgn)
     assert pkg.is_installed
-    assert versions['patroni']['version'] in pkg.version
+    assert pg_version['patroni']['version'] in pkg.version
 
 
 def test_patroni_version(patroni_version):
     assert patroni_version.rc == 0, patroni_version.stderr
-    assert patroni_version.stdout.strip("\n") == versions['patroni']['binary_version']
+    assert patroni_version.stdout.strip("\n") == pg_version['patroni']['binary_version']

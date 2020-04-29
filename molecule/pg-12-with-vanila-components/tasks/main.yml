@@ -121,7 +121,7 @@
 
 - name: install postgis RHEL based 8
   dnf:
-    name: postgis25_12
+    name: postgis30_12
     state: latest
     enablerepo: PowerTools
   when: ansible_distribution == "RedHat" and ansible_distribution_major_version == "8"
