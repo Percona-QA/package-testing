@@ -30,7 +30,7 @@ verifier:
     s: true
     junitxml: report.xml
 scenario:
-  name: centos7
+  name: centos-7
   destroy_sequence:
     - destroy
   clenup_sequence:

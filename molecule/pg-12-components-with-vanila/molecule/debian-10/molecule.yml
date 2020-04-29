@@ -30,7 +30,7 @@ verifier:
     s: true
     junitxml: report.xml
 scenario:
-  name: debian10
+  name: debian-10
   destroy_sequence:
     - destroy
   clenup_sequence:
