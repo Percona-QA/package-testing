@@ -4,6 +4,7 @@
     apt:
       name: "{{ packages }}"
       update_cache: no
+      force: yes
       state: latest
     vars:
       packages:
