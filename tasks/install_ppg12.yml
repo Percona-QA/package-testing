@@ -49,9 +49,8 @@
       state: latest
     vars:
       packages:
-      - percona-postgresql-plpython-12
-      - percona-postgresql-plpython-12-dbgsym
-      - percona-postgresql-server-dev-12-dbgsym
+      - percona-postgresql-plpython3-12
+      - percona-postgresql-plpython3-12-dbgsym
     when:
       - ansible_os_family == "Debian"
 
