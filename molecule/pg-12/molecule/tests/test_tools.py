@@ -51,7 +51,7 @@ def pgaudit(host):
         assert result.stdout.strip("\n") == "CREATE TABLE"
         log_file = "/var/log/postgresql/postgresql-12-main.log"
         if os.lower() in ["debian", "ubuntu"]:
-            log_file = "/var/log/postgresql/postgresql-11-main.log"
+            log_file = "/var/log/postgresql/postgresql-12-main.log"
         elif os.lower() in ["redhat", "centos", 'rhel']:
             log_files = "ls /var/lib/pgsql/12/data/log/"
             file_name = host.check_output(log_files).strip("\n")
