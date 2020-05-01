@@ -100,7 +100,7 @@ pgbackrest = {"ppg-12.2": {"version": "2.26",
                                                       " version 1 (SYSV), dynamically linked,"
                                                       " interpreter /lib64/ld-linux-x86-64.so.2, "
                                                       "BuildID[sha1]=fe553fc803b87217b18827d65cc6d18f3ee06b50,"
-                                                      " for GNU/Linux 3.2.0, stripped",
+                                                      " for GNU/Linux 3.2.0, stripped",
                                       "debian": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
                                                 " x86-64, version 1 (SYSV), dynamically linked,"
                                                 " interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0,"
