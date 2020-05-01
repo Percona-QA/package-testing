@@ -266,7 +266,12 @@ def test_pgrepack_binary(host, pgrepack):
         else:
             assert pgrepack == pg_versions['pgrepack']['binary']['debian'], pgrepack
     elif os.lower() == "ubuntu":
-        assert pgrepack == pg_versions['pgrepack']['binary']['ubuntu'], pgrepack
+        rel_name = host.system_info.release
+        print(rel_name)
+        if rel_name == 'bionic':
+            assert pgrepack == pg_versions['pgrepack']['binary']['ubuntu'], pgrepack
+        else:
+            assert pgrepack == pg_versions['pgrepack']['binary']['ubuntu-focal'], pgrepack
 
 
 def test_pgrepack(host):
@@ -347,8 +352,14 @@ def test_pgbackrest_binary(pgbackrest, operating_system, host):
             assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['debian'],\
                 pgbackrest.stdout.strip("\n")
     elif operating_system.lower() == "ubuntu":
-        assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['ubuntu'],\
-            pgbackrest.stdout.strip("\n")
+        rel_name = host.system_info.release
+        print(rel_name)
+        actual = pgbackrest.stdout.strip("\n")
+        if rel_name == 'bionic':
+            expected = pg_versions['pgbackrest']['binary']['ubuntu']
+        else:
+            expected = pg_versions['pgbackrest']['binary']['ubuntu-focal']
+        assert actual == expected, actual
 
 
 def test_pgbackrest_create_stanza(create_stanza):
