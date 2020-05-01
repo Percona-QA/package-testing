@@ -75,7 +75,7 @@ def insert_data(host):
 
 def test_psql_client_version(host):
     result = host.run('psql --version')
-    print(result.stdout)
+    assert pg_versions['version'] in result.stdout, result.stdout
 
 
 @pytest.mark.parametrize("package", pg_versions['deb_packages'])
