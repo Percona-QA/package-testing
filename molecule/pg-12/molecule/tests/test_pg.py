@@ -190,7 +190,7 @@ def test_extenstions_list(extension_list, host):
         if ds.lower() in ['centos', 'redhat', 'rhel']:
             if "python3" in extension:
                 pytest.skip("Skipping python3 extensions for Centos or RHEL")
-        if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == 'ppg-12.2':
+        if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") == 'ppg-12.2':
             if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                              'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
                 pytest.skip("Skipping python2 extensions for DEB based in 12.2 pg")
@@ -203,7 +203,7 @@ def test_enable_extension(host, extension):
     if ds.lower() in ["redhat", "centos", 'rhel']:
         if "python3" in extension:
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
-    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == 'ppg-12.2':
+    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") == 'ppg-12.2':
         if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                          'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
             pytest.skip("Skipping python2 extensions for DEB based in 12.2 pg")
@@ -222,7 +222,7 @@ def test_drop_extension(host, extension):
     if ds.lower() in ["redhat", "centos", 'rhel']:
         if "python3" in extension:
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
-    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == 'ppg-12.2':
+    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") == 'ppg-12.2':
         if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                          'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
             pytest.skip("Skipping python2 extensions for DEB based in 12.2 pg")
@@ -300,8 +300,9 @@ def test_deb_packages_provides(host, percona_package, vanila_package):
     cmd = "dpkg -s {} | grep Provides".format(percona_package)
     result = host.run(cmd)
     provides = set(result.stdout.split())
+    provides = {provide.strip(",") for provide in provides}
     assert result.rc == 0, result.stdout
-    assert vanila_package in provides, result.stdout
+    assert vanila_package in provides, provides
 
 
 @pytest.mark.parametrize("percona_package, vanila_package", pg_versions['rpm_provides'])
