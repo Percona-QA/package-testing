@@ -1,7 +1,7 @@
-DEB116_PKG_VERSIONS = ["11+210-1.buster", "204-1.buster", "2:12-2.4.buster", "2:12-2.4.stretch", "204-1.stretch",
-                       "11+210-1.stretch", "2:12-2.4.bionic", '11+210-1.bionic', "204-1.bionic", "2:12-2.4.focal",
-                       "11+210-1.focal", "204-1.focal", "2:12-2.4.disco", "11+210-1.disco", "204-1.disco",
-                       "210-1.stretch", "210-1.focal", "210-1.buster", '210-1.disco', "210-1.bionic"]
+DEB116_PKG_VERSIONS = ["12+214-1.buster", "204-1.buster", "2:12-2.4.buster", "2:12-2.4.stretch", "204-1.stretch",
+                       "12+214-1.stretch", "2:12-2.4.bionic", '12+214-1.bionic', "204-1.bionic", "2:12-2.4.focal",
+                       "12+214-1.focal", "204-1.focal", "2:12-2.4.disco", "12+214-1.disco", "204-1.disco",
+                       "214-1.stretch", "214-1.focal", "214-1.buster", '214-1.disco', "214-1.bionic"]
 
 DEB116_PACKAGES = ["percona-postgresql-12", "percona-postgresql-client", "percona-postgresql",
                    "percona-postgresql-client-12", "percona-postgresql-client-common",
@@ -119,7 +119,7 @@ DEB_PROVIDES = [("percona-postgresql-12", "postgresql-12"), ("percona-postgresql
                 ("percona-postgresql-server-dev-all", "postgresql-server-dev-all"),
                 ('percona-postgresql-plperl-12', 'postgresql-plperl-12'),
                 ("percona-postgresql-common", "postgresql-common"),
-                ("percona-postgresql-plpython3-12", "postgresql-12-plpython3"),
+                ("percona-postgresql-plpython3-12", "postgresql-plpython3-12"),
                 ("percona-postgresql-pltcl-12", "postgresql-12-pltcl"), ("percona-postgresql-all", "postgresql-all"),
                 ("percona-postgresql-server-dev-12", 'postgresql-server-dev-all-12')]
 

@@ -273,7 +273,7 @@ def test_pgrepack(host):
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION \"pg_repack\";'")
         try:
-            assert install_extension.rc == 0
+            assert install_extension.rc == 0, install_extension.stdout
             assert install_extension.stdout.strip("\n") == "CREATE EXTENSION"
         except AssertionError:
             pytest.fail("Return code {}. Stderror: {}. Stdout {}".format(install_extension.rc,
