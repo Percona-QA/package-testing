@@ -59,7 +59,7 @@ pgrepack = {
                                                          " for GNU/Linux 2.6.32,"
                                                          " BuildID[sha1]=f61d3d7655a56d1aee52824b2a16a1648318b373,"
                                                          " not stripped",
-                                               "ubuntu": "//usr/lib/postgresql/12/bin/pg_repack:"
+                                               "ubuntu": "/usr/lib/postgresql/12/bin/pg_repack:"
                                                          " ELF 64-bit LSB shared object, x86-64, version 1 (SYSV),"
                                                          " dynamically linked,"
                                                          " interpreter /lib64/l, for GNU/Linux 3.2.0,"
