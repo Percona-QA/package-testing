@@ -73,6 +73,11 @@ def insert_data(host):
     yield result.strip("\n")
 
 
+def test_psql_client_version(host):
+    result = host.run('psql --version')
+    print(result.stdout)
+
+
 @pytest.mark.parametrize("package", pg_versions['deb_packages'])
 def test_deb_package_is_installed(host, package):
     os = host.system_info.distribution
