@@ -10,7 +10,6 @@ pipeline {
             name: 'PLATFORM',
             description: 'For what platform (OS) need to test',
             choices: [
-                'centos-6',
                 'centos-7',
                 'debian-9',
                 'debian-10',
