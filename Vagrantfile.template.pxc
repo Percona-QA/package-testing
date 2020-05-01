@@ -2,15 +2,14 @@
 # vi: set ft=ruby :
 
 servers=[
-  { :hostname => "d-jessie-64-@@hostname@@", :box => "bento/debian-8" },
   { :hostname => "d-stretch-64-@@hostname@@", :box => "bento/debian-9" },
   { :hostname => "d-buster-64-@@hostname@@", :box => "bento/debian-10" },
   { :hostname => "centos-6-64-@@hostname@@", :box => "bento/centos-6" },
   { :hostname => "centos-7-64-@@hostname@@", :box => "bento/centos-7" },
-  { :hostname => "u-trusty-64-@@hostname@@", :box => "bento/ubuntu-14.04" },
+  { :hostname => "centos-8-64-@@hostname@@", :box => "bento/centos-8" },
   { :hostname => "u-xenial-64-@@hostname@@", :box => "bento/ubuntu-16.04" },
   { :hostname => "u-bionic-64-@@hostname@@", :box => "bento/ubuntu-18.04" },
-  { :hostname => "u-focal-64-@@hostname@@", :box => "ubuntu/focal64" },
+  { :hostname => "u-focal-64-@@hostname@@", :box => "bento/ubuntu-20.04" },
   { :hostname => "sles-12-64-@@hostname@@", :box => "wvera/sles12sp2" }
 ]
 
