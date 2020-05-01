@@ -51,7 +51,6 @@
       packages:
       - percona-postgresql-plpython3-12
       - percona-postgresql-plpython3-12-dbgsym
-      - percona-postgresql-server-dev-12-dbgsym
     when:
       - ansible_os_family == "Debian"
 
