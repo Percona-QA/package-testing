@@ -75,7 +75,6 @@
     vars:
       packages:
       - rsyslog-mysql
-      - python-mysqldb
     when: ansible_os_family == "Debian"
 
   - name: install 3rd party packages with yum
@@ -84,29 +83,10 @@
     vars:
       packages:
       - rsyslog-mysql
-      - MySQL-python
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
-
-# Since Centos8 is recently released, currently there is no MySQL-python package for this distribution
-  - name: install 3rd party packages with yum on RHEL/Centos8
-    yum:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - rsyslog-mysql
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat"
 
   - name: add sbt user
-    mysql_user:
-      name: sbt
-      password: s3cret!Pass
-      priv: '*.*:ALL'
-      state: present
-    when: (ansible_os_family == "Debian") or (ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7")
-
-  - name: add sbt user on RHEL/Centos8
     command: mysql -e "CREATE USER 'sbt'@'localhost' IDENTIFIED BY 's3cret!Pass'; GRANT ALL ON *.* TO 'sbt'@'localhost'; FLUSH PRIVILEGES;"
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: run sysbench prepare script
     command: sysbench --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
