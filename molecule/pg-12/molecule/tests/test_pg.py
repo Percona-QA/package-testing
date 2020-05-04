@@ -3,7 +3,7 @@ import pytest
 
 import testinfra.utils.ansible_runner
 
-from .settings import versions, RHEL_FILES, RPM7_PACKAGES, RPM_PACKAGES, EXTENSIONS, LANGUAGES, DEB_FILES, DEB_PROVIDES
+from .settings import versions, RHEL_FILES, RPM7_PACKAGES, RPM_PACKAGES, EXTENSIONS, LANGUAGES, DEB_FILES
 
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -71,6 +71,11 @@ def insert_data(host):
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
         result = host.check_output(select)
     yield result.strip("\n")
+
+
+def test_psql_client_version(host):
+    result = host.run('psql --version')
+    assert pg_versions['version'] in result.stdout, result.stdout
 
 
 @pytest.mark.parametrize("package", pg_versions['deb_packages'])
@@ -190,7 +195,7 @@ def test_extenstions_list(extension_list, host):
         if ds.lower() in ['centos', 'redhat', 'rhel']:
             if "python3" in extension:
                 pytest.skip("Skipping python3 extensions for Centos or RHEL")
-        if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == 'ppg-12.2':
+        if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") == 'ppg-12.2':
             if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                              'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
                 pytest.skip("Skipping python2 extensions for DEB based in 12.2 pg")
@@ -203,7 +208,7 @@ def test_enable_extension(host, extension):
     if ds.lower() in ["redhat", "centos", 'rhel']:
         if "python3" in extension:
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
-    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == 'ppg-12.2':
+    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") == 'ppg-12.2':
         if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                          'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
             pytest.skip("Skipping python2 extensions for DEB based in 12.2 pg")
@@ -222,7 +227,7 @@ def test_drop_extension(host, extension):
     if ds.lower() in ["redhat", "centos", 'rhel']:
         if "python3" in extension:
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
-    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") == 'ppg-12.2':
+    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") == 'ppg-12.2':
         if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                          'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
             pytest.skip("Skipping python2 extensions for DEB based in 12.2 pg")
@@ -288,11 +293,6 @@ def test_language(host, language):
 @pytest.mark.parametrize("percona_package, vanila_package", pg_versions['deb_provides'])
 def test_deb_packages_provides(host, percona_package, vanila_package):
     """Execute command for check provides and check that we have link to vanila postgres
-
-    :param host:
-    :param vanila_package:
-    :param percona_package:
-    :return:
     """
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
@@ -300,18 +300,14 @@ def test_deb_packages_provides(host, percona_package, vanila_package):
     cmd = "dpkg -s {} | grep Provides".format(percona_package)
     result = host.run(cmd)
     provides = set(result.stdout.split())
+    provides = {provide.strip(",") for provide in provides}
     assert result.rc == 0, result.stdout
-    assert vanila_package in provides, result.stdout
+    assert vanila_package in provides, provides
 
 
 @pytest.mark.parametrize("percona_package, vanila_package", pg_versions['rpm_provides'])
 def test_rpm_package_provides(host, percona_package, vanila_package):
     """Execute command for check provides and check that we have link to vanila postgres
-
-    :param host:
-    :param vanila_package:
-    :param percona_package:
-    :return:
     """
     os = host.system_info.distribution
     if os in ["debian", "ubuntu"]:
@@ -321,7 +317,6 @@ def test_rpm_package_provides(host, percona_package, vanila_package):
     cmd = "rpm -q --provides {} | awk \'{{ print $1 }}\'".format(percona_package)
     result = host.run(cmd)
     provides = set(result.stdout.split("\n"))
-    print(provides)
     assert result.rc == 0, result.stderr
     assert vanila_package in provides, result.stdout
 
@@ -329,11 +324,6 @@ def test_rpm_package_provides(host, percona_package, vanila_package):
 @pytest.mark.parametrize("percona_package, vanila_package", pg_versions['rpm7_provides'])
 def test_rpm7_package_provides(host, percona_package, vanila_package):
     """Execute command for check provides and check that we have link to vanila postgres
-
-    :param host:
-    :param vanila_package:
-    :param percona_package:
-    :return:
     """
     os = host.system_info.distribution
     if os in ["debian", "ubuntu"]:

@@ -51,7 +51,7 @@ def pgaudit(host):
         assert result.stdout.strip("\n") == "CREATE TABLE"
         log_file = "/var/log/postgresql/postgresql-12-main.log"
         if os.lower() in ["debian", "ubuntu"]:
-            log_file = "/var/log/postgresql/postgresql-11-main.log"
+            log_file = "/var/log/postgresql/postgresql-12-main.log"
         elif os.lower() in ["redhat", "centos", 'rhel']:
             log_files = "ls /var/lib/pgsql/12/data/log/"
             file_name = host.check_output(log_files).strip("\n")
@@ -266,14 +266,19 @@ def test_pgrepack_binary(host, pgrepack):
         else:
             assert pgrepack == pg_versions['pgrepack']['binary']['debian'], pgrepack
     elif os.lower() == "ubuntu":
-        assert pgrepack == pg_versions['pgrepack']['binary']['ubuntu'], pgrepack
+        rel_name = host.system_info.release
+        print(rel_name)
+        if rel_name == '18.04':
+            assert pgrepack == pg_versions['pgrepack']['binary']['ubuntu'], pgrepack
+        else:
+            assert pgrepack == pg_versions['pgrepack']['binary']['ubuntu-focal'], pgrepack
 
 
 def test_pgrepack(host):
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION \"pg_repack\";'")
         try:
-            assert install_extension.rc == 0
+            assert install_extension.rc == 0, install_extension.stdout
             assert install_extension.stdout.strip("\n") == "CREATE EXTENSION"
         except AssertionError:
             pytest.fail("Return code {}. Stderror: {}. Stdout {}".format(install_extension.rc,
@@ -347,8 +352,14 @@ def test_pgbackrest_binary(pgbackrest, operating_system, host):
             assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['debian'],\
                 pgbackrest.stdout.strip("\n")
     elif operating_system.lower() == "ubuntu":
-        assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['ubuntu'],\
-            pgbackrest.stdout.strip("\n")
+        rel_name = host.system_info.release
+        print(rel_name)
+        actual = pgbackrest.stdout.strip("\n")
+        if rel_name == '18.04':
+            expected = pg_versions['pgbackrest']['binary']['ubuntu']
+        else:
+            expected = pg_versions['pgbackrest']['binary']['ubuntu-focal']
+        assert actual == expected, actual
 
 
 def test_pgbackrest_create_stanza(create_stanza):
