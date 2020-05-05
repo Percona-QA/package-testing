@@ -49,7 +49,7 @@ LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", 
 
 pg_repack_focal_bin_ver = "/usr/lib/postgresql/12/bin/pg_repack: ELF 64-bit LSB shared object," \
                           " x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2," \
-                          " BuildID[sha1]=b6342fbfccf88d748e606279a4f5faacebd49293, for GNU/Linux 3.2.0, stripped"
+                          " BuildID[sha1]=d66e27c535df3c13d7594ef715e16fc588285576, for GNU/Linux 3.2.0, stripped"
 pgrepack = {
             "ppg-12.2": {"version": "1.4.5",
                          "binary_version": "pg_repack 1.4.5",
@@ -57,34 +57,33 @@ pgrepack = {
                                                          " x86-64, version 1 (SYSV),"
                                                          " dynamically linked (uses shared libs),"
                                                          " for GNU/Linux 2.6.32,"
-                                                         " BuildID[sha1]=f61d3d7655a56d1aee52824b2a16a1648318b373,"
+                                                         " BuildID[sha1]=23be32801393894d8b6840dce7548ce08aa61cfa,"
                                                          " not stripped",
-                                               "ubuntu": "/usr/lib/postgresql/12/bin/pg_repack:"
-                                                         " ELF 64-bit LSB shared object, x86-64, version 1 (SYSV),"
-                                                         " dynamically linked,"
-                                                         " interpreter /lib64/l, for GNU/Linux 3.2.0,"
-                                                         " BuildID[sha1]=bb45aad882367564e744cb13aba2fa7ee84e3526,"
+                                               "ubuntu": "/usr/lib/postgresql/12/bin/pg_repack: ELF 64-bit LSB "
+                                                         "shared object, x86-64, version 1 (SYSV),"
+                                                         " dynamically linked, interpreter /lib64/l,"
+                                                         " for GNU/Linux 3.2.0,"
+                                                         " BuildID[sha1]=ccb23f9c3eb9b6da117e315e83c6891f8e8499a0,"
                                                          " stripped",
                                                "ubuntu-focal": pg_repack_focal_bin_ver,
-                                               "debian": "/usr/lib/postgresql/12/bin/pg_repack:"
-                                                         " ELF 64-bit LSB shared object, x86-64,"
-                                                         " version 1 (SYSV), dynamically linked,"
+                                               "debian": "/usr/lib/postgresql/12/bin/pg_repack: ELF 64-bit LSB shared "
+                                                         "object, x86-64, version 1 (SYSV), dynamically linked,"
                                                          " interpreter /lib64/ld-linux-x86-64.so.2,"
                                                          " for GNU/Linux 3.2.0,"
-                                                         " BuildID[sha1]=165d9e5c79a719c88e3bebc3f3b5a5e648abbf68,"
+                                                         " BuildID[sha1]=4bbdde54243ee8f3ce05eae90db2488d543e56ef,"
                                                          " stripped",
-                                               "debian9.9": "/usr/lib/postgresql/12/bin/pg_repack:"
-                                                            " ELF 64-bit LSB shared object,"
-                                                            " x86-64, version 1 (SYSV), dynamically linked,"
-                                                            " interpreter /lib64/ld-linux-x86-64.so.2,"
-                                                            " for GNU/Linux 2.6.32,"
-                                                            " BuildID[sha1]=811aa254ddc08c4b6d20ea53b024dc8bbb9f83a2,"
+                                               "debian9.9": "/usr/lib/postgresql/12/bin/pg_repack: ELF 64-bit LSB "
+                                                            "shared object, x86-64,"
+                                                            " version 1 (SYSV), dynamically linked,"
+                                                            " interpreter /lib64/ld-linux-x86-64.so.2, "
+                                                            "for GNU/Linux 2.6.32, "
+                                                            "BuildID[sha1]=627b47874890b10ec34358f8c8cc82713b28e615,"
                                                             " stripped",
-                                               "rhel": "/usr/pgsql-12/bin/pg_repack: ELF 64-bit LSB executable, x86-64,"
-                                                       " version 1 (SYSV),"
-                                                       " dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2,"
+                                               "rhel": "/usr/pgsql-12/bin/pg_repack: ELF 64-bit LSB executable,"
+                                                       " x86-64, version 1 (SYSV), dynamically linked,"
+                                                       " interpreter /lib64/ld-linux-x86-64.so.2,"
                                                        " for GNU/Linux 3.2.0,"
-                                                       " BuildID[sha1]=e37e73fdb0d4719e2eea1b784186bce7c26fd5d7,"
+                                                       " BuildID[sha1]=3701679a889dec1d4e53942b80300b9f9064d462,"
                                                        " not stripped"}}}
 pgbackrest = {"ppg-12.2": {"version": "2.26",
                            "binary_version": "pgBackRest 2.26",

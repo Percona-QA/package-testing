@@ -10,13 +10,10 @@
         state: absent
       vars:
         packages:
-          - percona-postgresql
           - percona-postgresql-12
           - percona-postgresql-all
           - percona-postgresql-client
           - percona-postgresql-client-12
-          - percona-postgresql-client-common
-          - percona-postgresql-common
           - percona-postgresql-contrib
           - percona-postgresql-doc
           - percona-postgresql-doc-12
@@ -34,7 +31,7 @@
 
     - name: remove pgaudit deb packages
       apt:
-        name: percona-postgresql-11-pgaudit
+        name: percona-postgresql-12-pgaudit
         state: absent
       when: ansible_os_family == "Debian"
 
@@ -44,8 +41,8 @@
         state: absent
       vars:
         packages:
-          - percona-postgresql-11-repack
-          - percona-postgresql-11-repack-dbgsym
+          - percona-postgresql-12-repack
+          - percona-postgresql-12-repack-dbgsym
       when: ansible_os_family == "Debian"
 
     - name: remove pgbackrest deb packages
