@@ -80,7 +80,7 @@
 
   - name: copy PXC config on centos 7
     template: src=../templates/my_rpm_7.j2 dest=/etc/my.cnf
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
   - name: copy PXC config on debian/ubuntu
     template: src=../templates/my.j2
