@@ -18,7 +18,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: enable main repo
-    command: percona-release enable original
+    command: percona-release enable original release
 
   - name: clean and update yum cache
     shell: |
