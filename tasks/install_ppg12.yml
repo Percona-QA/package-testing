@@ -20,6 +20,7 @@
       state: latest
     vars:
       packages:
+      - percona-postgresql
       - percona-postgresql-12
       - percona-postgresql-all
       - percona-postgresql-client
