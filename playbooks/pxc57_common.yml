@@ -69,7 +69,6 @@
       packages:
       - Percona-XtraDB-Cluster-full-57
       - Percona-XtraDB-Cluster-57
-      - MySQL-python
     when: ansible_os_family == "RedHat"
 
   - name: stop mysql service with service command
