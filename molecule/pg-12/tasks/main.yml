@@ -181,9 +181,19 @@
     name: percona-pg_repack12
   when: ansible_os_family == "RedHat"
 
-- name: Install patroni
+- name: Install patroni RPM
   yum:
     name: percona-patroni
+  when: ansible_os_family == "RedHat"
+
+- name: Install patroni debian
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - percona-patroni
+      - percona-patroni-doc
+  when: ansible_os_family == "Debian"
 
 - name: Install GCC Deb
   apt:
