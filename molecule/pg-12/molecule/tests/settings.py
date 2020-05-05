@@ -64,7 +64,7 @@ pgrepack = {
                                                          " dynamically linked, interpreter /lib64/l,"
                                                          " for GNU/Linux 3.2.0,"
                                                          " BuildID[sha1]=ccb23f9c3eb9b6da117e315e83c6891f8e8499a0,"
-                                                         " stripped",
+                                                         " stripped",
                                                "ubuntu-focal": pg_repack_focal_bin_ver,
                                                "debian": "/usr/lib/postgresql/12/bin/pg_repack: ELF 64-bit LSB shared "
                                                          "object, x86-64, version 1 (SYSV), dynamically linked,"
@@ -78,7 +78,7 @@ pgrepack = {
                                                             " interpreter /lib64/ld-linux-x86-64.so.2, "
                                                             "for GNU/Linux 2.6.32, "
                                                             "BuildID[sha1]=627b47874890b10ec34358f8c8cc82713b28e615,"
-                                                            " stripped",
+                                                            " stripped",
                                                "rhel": "/usr/pgsql-12/bin/pg_repack: ELF 64-bit LSB executable,"
                                                        " x86-64, version 1 (SYSV), dynamically linked,"
                                                        " interpreter /lib64/ld-linux-x86-64.so.2,"
