@@ -12,7 +12,6 @@
         packages:
           - percona-postgresql-12
           - percona-postgresql-all
-          - percona-postgresql-client
           - percona-postgresql-client-12
           - percona-postgresql-contrib
           - percona-postgresql-doc
