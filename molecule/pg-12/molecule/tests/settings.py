@@ -84,7 +84,7 @@ pgrepack = {
                                                        " interpreter /lib64/ld-linux-x86-64.so.2,"
                                                        " for GNU/Linux 3.2.0,"
                                                        " BuildID[sha1]=3701679a889dec1d4e53942b80300b9f9064d462,"
-                                                       " not stripped"}}}
+                                                       " not stripped"}}}
 pgbackrest = {"ppg-12.2": {"version": "2.26",
                            "binary_version": "pgBackRest 2.26",
                            "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,"
