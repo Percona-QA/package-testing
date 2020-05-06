@@ -19,6 +19,10 @@
     command: service mysql restart
     when: ansible_os_family == "Debian"
 
+  - name: stop the service on CentOS 8
+    command: mysqladmin stop
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+
   - name: upgrade PXC 5.7 to new deb packages
     apt:
       name: "{{ packages }}"
@@ -66,7 +70,7 @@
 # PXC-2317 workaround
   - name: start mysql service
     service: name=mysql state=started
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "7"
 # PXC-2317 workaround
 
   - name: run mysql_upgrade
