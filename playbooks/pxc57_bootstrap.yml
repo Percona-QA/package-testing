@@ -146,7 +146,7 @@
 
   - name: create backup user on centos 7
     command: /package-testing/pxc_backup_user.sh
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
   - name: create backup user on debian/ubuntu
     mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" state=present
