@@ -213,7 +213,11 @@ def patroni(host):
 
 @pytest.fixture()
 def patroni_version(host):
-    return host.run("/opt/patroni/bin/patroni --version")
+    os_dist = host.system_info.distribution
+    if os_dist in ["redhat", "centos", 'rhel']:
+        return host.run("/opt/patroni/bin/patroni --version")
+    else:
+        return host.run("patroni --version")
 
 
 def test_pgaudit_package(host):
