@@ -24,7 +24,7 @@
     when: ansible_os_family == "Debian"
 
   - name: stop the service on CentOS 8
-    command: mysqladmin stop
+    command: mysqladmin shutdown
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: upgrade PXC 5.7 to new deb packages
