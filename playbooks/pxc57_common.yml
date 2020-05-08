@@ -100,6 +100,9 @@
   - name: start mysql service
     service: name=mysql state=started
 
+  - name: include tasks for listing already installed packages
+    include_tasks: list_installed_packages.yml
+
   - name: check that PXC version is correct
     command: /package-testing/version_check.sh pxc57
 
