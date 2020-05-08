@@ -118,6 +118,7 @@
     vars:
       packages:
       - Percona-XtraDB-Cluster-server-57
+      - percona-xtrabackup-24
     when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal
