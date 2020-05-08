@@ -6,25 +6,26 @@
   become_method: sudo
 
   tasks:
-    #
-# - name: include tasks for enabling testing repo
-#   include: ../tasks/enable_testing_repo.yml
+     
+  - name: include tasks for enabling testing repo
+    include: ../tasks/enable_testing_repo.yml
 
-  - name: include tasks for enabling experimental repo
-    include: ../tasks/enable_experimental_repo.yml
+# - name: include tasks for enabling experimental repo
+#   include: ../tasks/enable_experimental_repo.yml
 
 # restart the bootstrapped node before upgrading
-#
+ 
   - name: restart the service
     command: service mysql restart
     when: ansible_os_family == "Debian"
 
   - name: restart the service
     command: service mysql restart
+    when: ansible_os_family == "Debian"
 
   - name: stop the service on CentOS 8
     command: mysqladmin stop
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: upgrade PXC 5.7 to new deb packages
     apt:
