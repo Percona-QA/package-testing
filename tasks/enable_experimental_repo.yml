@@ -15,7 +15,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: change the default repo to experimental
-    command: percona-release enable-only original experimental
+    command: percona-release enable original experimental
 
   - name: add the experimental tools repo
     command: percona-release enable tools experimental
