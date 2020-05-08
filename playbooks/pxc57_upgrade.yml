@@ -21,7 +21,6 @@
 
   - name: restart the service
     command: service mysql restart
-    when: ansible_os_family == "Debian"
 
   - name: stop the service on CentOS 8
     command: mysqladmin stop
