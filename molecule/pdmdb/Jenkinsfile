@@ -63,7 +63,7 @@ pipeline {
         [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'S3_ACCESS_KEY_ID', credentialsId: '2a84aea7-32a0-4598-9e8d-5153179097a9', secretKeyVariable: 'S3_SECRET_ACCESS_KEY']]) {
           sh '''
               cd molecule/pdmdb
-              molecule create
+              molecule create -s "${PLATFORM}"
           '''
         }
       }
@@ -76,7 +76,7 @@ pipeline {
         [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'S3_ACCESS_KEY_ID', credentialsId: '2a84aea7-32a0-4598-9e8d-5153179097a9', secretKeyVariable: 'S3_SECRET_ACCESS_KEY']]) {
           sh '''
               cd molecule/pdmdb
-              molecule converge
+              molecule converge -s "${PLATFORM}"
           '''
         }
       }
@@ -85,7 +85,7 @@ pipeline {
       steps {
         sh '''
             cd molecule/pdmdb
-            molecule verify
+            molecule verify -s "${PLATFORM}"
         '''
         junit 'molecule/pdmdb/molecule/default/report.xml'
       }
@@ -95,7 +95,7 @@ pipeline {
 
         sh '''
             cd molecule/pdmdb
-            python3 -m molecule cleanup
+            molecule cleanup -s "${PLATFORM}"
         '''
       }
     }
@@ -106,7 +106,7 @@ pipeline {
       [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
             cd molecule/pdmdb
-            molecule destroy
+            molecule destroy -s "${PLATFORM}"
         '''
       }
     }
