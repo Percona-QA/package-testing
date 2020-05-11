@@ -86,7 +86,7 @@ def test_package(host):
     """
     package = host.package("percona-backup-mongodb")
     assert package.is_installed
-    assert "1.1.3" in package.version, package.version
+    assert "1.2.0" in package.version, package.version
 
 
 def test_service(host):
@@ -162,7 +162,7 @@ def test_pbm_version(host):
     assert result.rc == 0, result.stdout
     lines = result.stdout.split("\n")
     parsed_config = {line.split(":")[0]: line.split(":")[1].strip() for line in lines[0:-1]}
-    assert parsed_config['Version'] == '1.1.3', parsed_config
+    assert parsed_config['Version'] == '1.2.0', parsed_config
     assert parsed_config['Platform'], parsed_config
     assert parsed_config['GitCommit'], parsed_config
     assert parsed_config['GitBranch'], parsed_config
@@ -202,56 +202,3 @@ def test_show_store(show_store):
     assert show_store['s3']
     assert show_store['s3']['region'] == 'us-east-1'
     assert show_store['s3']['bucket'] == 'operator-testing'
-
-
-@pytest.mark.parametrize("store", storage_configs, ids=['aws', 'gcp', 'local'])
-def test_backup_and_restore(host, store):
-    """ Insert some data, make backup, check that backup in list, drop data, restore.
-    """
-    drop_data = """mongo --quiet --eval 'db.dropDatabase()' test"""
-    host.run(drop_data)
-    command = "pbm config --file={} --mongodb-uri=mongodb://localhost:27017/".format(store)
-    result = host.run(command)
-    assert result.rc == 0, result.stderr
-    time.sleep(180)
-    print(host.run('pbm config --list --mongodb-uri=mongodb://localhost:27017/'))
-    insert_data = """mongo --quiet --eval 'for(
-        i=1; i <= 100000; i++) { db.test.insert( {_id: i, name: "Test_"+i })}' test"""
-    insert_data_result = host.run(insert_data)
-    assert insert_data_result.rc == 0, insert_data_result.stdout
-    assert insert_data_result.stdout.strip("\n") == """WriteResult({ "nInserted" : 1 })""", insert_data_result.stdout
-    save_hash = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
-    save_hash_result = host.run(save_hash)
-    assert save_hash_result.rc == 0, save_hash_result.stdout
-    hash_before = save_hash_result.stdout.strip("\n")
-    backup = """pbm backup --mongodb-uri=mongodb://localhost:27017"""
-    backup_result = host.run(backup)
-    print(backup_result.stdout)
-    print(backup_result.stderr)
-    assert 'Starting' in backup_result.stdout, backup_result.stdout
-    time.sleep(180)
-    backup_name = backup_result.stdout.split()[2].strip("\'").rstrip("'...")
-    cmd = "pbm list --mongodb-uri=mongodb://localhost:27017"
-    result = host.run(cmd)
-    assert result.rc == 0, result.stdout
-    assert backup_name in result.stdout, result.stdout
-    drop_data = """mongo --quiet --eval 'db.dropDatabase()' test"""
-    drop_data_result = host.run(drop_data)
-    assert drop_data_result.rc == 0, drop_data_result.stdout
-    documents_after_drop = """mongo --quiet --eval 'db.test.count()' test|tail -n1"""
-    result = host.run(documents_after_drop)
-    assert result.rc == 0, result.stdout
-    assert result.stdout.split("\n")[0] == "0"
-    restore = """pbm restore --mongodb-uri=mongodb://localhost:27017 {}""".format(backup_name)
-    restore_result = host.run(restore)
-    print(restore_result.stdout)
-    print(restore_result.stderr)
-    # assert restore_result.rc == 0, restore_result.stdout
-    time.sleep(360)
-    db_hash_after = """mongo --quiet --eval 'db.runCommand({ dbHash: 1 }).md5' test|tail -n1"""
-    db_hash_after_result = host.run(db_hash_after)
-    db_hash_after_value = db_hash_after_result.stdout.strip("\n")
-    assert db_hash_after_result.rc == 0, db_hash_after_result.stdout
-    print(hash_before)
-    print(db_hash_after_value)
-    assert hash_before == db_hash_after_value
