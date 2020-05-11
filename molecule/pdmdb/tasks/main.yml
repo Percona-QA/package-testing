@@ -33,8 +33,8 @@
   yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
   when: ansible_os_family == "RedHat"
 
-- name: enable main repo
-  command: percona-release enable original
+#- name: enable main repo
+#  command: percona-release enable original
 
 - name: clean and update yum cache
   shell: |
@@ -45,12 +45,12 @@
 #- name: include tasks for enabling main repo (do this just for GPG key)
 #  include: ../../../tasks/enable_main_repo.yml
 
-- name: download newer percona-release script
-  get_url:
-    url: https://raw.githubusercontent.com/EvgeniyPatlan/percona-repositories/master/scripts/percona-release.sh
-    dest: /usr/bin/percona-release
-    mode: '755'
-    force: true
+#- name: download newer percona-release script
+#  get_url:
+#    url: https://raw.githubusercontent.com/EvgeniyPatlan/percona-repositories/master/scripts/percona-release.sh
+#    dest: /usr/bin/percona-release
+#    mode: '755'
+#    force: true
 
 
 #- name: install Percona repository package on debian/ubuntu
