@@ -87,7 +87,7 @@ pipeline {
             cd molecule/pdmdb
             molecule verify -s "${PLATFORM}"
         '''
-        junit 'molecule/pdmdb/molecule/default/report.xml'
+        junit "molecule/pdmdb/molecule/${PLATFORM}/report.xml"
       }
     }
       stage ('Start Cleanup ') {
