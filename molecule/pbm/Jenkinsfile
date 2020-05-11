@@ -16,6 +16,7 @@ pipeline {
                 'debian-9',
                 'debian-10',
                 'ubuntu-bionic',
+                'ubuntu-xenial',
                 'ubuntu-focal',
                 'rhel8'
                 ]
@@ -71,7 +72,7 @@ pipeline {
        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
           sh '''
               cd molecule/pbm
-              python3 -m molecule create -s "${PLATFORM}"
+              molecule create -s "${PLATFORM}"
           '''
       }
      }
@@ -83,7 +84,7 @@ pipeline {
        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'],])  {
         sh '''
             cd molecule/pbm
-            python3 -m molecule converge -s "${PLATFORM}"
+            molecule converge -s "${PLATFORM}"
         '''
       }
      }
@@ -93,7 +94,7 @@ pipeline {
 
         sh '''
             cd molecule/pbm
-            python3 -m molecule verify -s "${PLATFORM}"
+            molecule verify -s "${PLATFORM}"
         '''
       }
     }
@@ -102,7 +103,7 @@ pipeline {
 
         sh '''
             cd molecule/pbm
-            python3 -m molecule cleanup -s "${PLATFORM}"
+            molecule cleanup -s "${PLATFORM}"
         '''
         junit 'molecule/pbm/molecule/${PLATFORM}/*.xml'
       }
@@ -113,7 +114,7 @@ pipeline {
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
             cd molecule/pbm
-            python3 -m molecule destroy -s "${PLATFORM}"
+            molecule destroy -s "${PLATFORM}"
         '''
      }
     }
