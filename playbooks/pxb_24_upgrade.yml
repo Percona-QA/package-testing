@@ -95,7 +95,7 @@
 
 
   - name: add sbt user
-  command: mysql -e "CREATE USER 'sbt'@'localhost' IDENTIFIED BY 's3cret!Pass'; GRANT ALL ON *.* TO 'sbt'@'localhost'; FLUSH PRIVILEGES;"
+    command: mysql -e "CREATE USER 'sbt'@'localhost' IDENTIFIED BY 's3cret!Pass'; GRANT ALL ON *.* TO 'sbt'@'localhost'; FLUSH PRIVILEGES;"
 
 #
 # Enable testing repository
