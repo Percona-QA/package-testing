@@ -17,7 +17,7 @@ RPM_NEW_CENTOS_PACKAGES = ['percona-server-mongodb', 'percona-server-mongodb-mon
 BINARIES = ['mongo', 'mongod', 'mongos', 'bsondump', 'mongoexport',
             'mongofiles', 'mongoimport', 'mongorestore', 'mongotop', 'mongostat']
 
-PSMDB42_VER = "4.2.2"
+PSMDB42_VER = "4.2.6"
 
 
 def test_mongod_service(host):
