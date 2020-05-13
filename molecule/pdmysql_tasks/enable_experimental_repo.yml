@@ -17,8 +17,8 @@
   - name: enable the PDMYSQL-80 experimental repo
     command: percona-release enable pdmysql-8.0.18 experimental
 
-  - name: enable tools experimental repo
-    command: percona-release enable tools experimental
+#  - name: enable tools experimental repo
+#    command: percona-release enable tools experimental
 
   - name: clean and update yum cache
     shell: |
