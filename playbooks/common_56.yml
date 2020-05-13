@@ -34,6 +34,7 @@
 
   - name: install Percona Toolkit new packages
     include_tasks: ../tasks/install_pt.yml
+    when: ansible_distribution_release != "jessie"
 
   - name: install sysbench new packages
     include_tasks: ../tasks/install_sysbench.yml
