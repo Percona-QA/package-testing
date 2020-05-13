@@ -16,7 +16,7 @@ fi
 
 #echo ${logfile}
 
-if [ "$(egrep -ic "error|warn" ${logfile})" != 0 ];then
+if [ "$(egrep -c "error" ${logfile})" != 0 ];then
         echo "ERROR: Warnings or Errors found in the installation logs"
         exit 1
 else
