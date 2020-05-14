@@ -78,10 +78,15 @@
       - percona-postgresql-12-pgaudit
       - percona-postgresql-12-pgaudit-dbgsym
   when: ansible_os_family == "Debian"
+#
+#- name: Install pgaudit RHEL
+#  yum:
+#    name: percona-pgaudit
+#  when: ansible_os_family == "RedHat"
 
 - name: Install pgaudit RHEL
   yum:
-    name: percona-pgaudit
+    name: percona-pgaudit14
   when: ansible_os_family == "RedHat"
 
 - name: Enable pgaudit for Debian
@@ -118,10 +123,15 @@
       - percona-pgbackrest-dbgsym
   when: ansible_os_family == "Debian"
 
+#- name: Install pgbackrest RHEL
+#  yum:
+#    name: percona-pgbackrest
+#  when: ansible_os_family == "RedHat"
 - name: Install pgbackrest RHEL
   yum:
-    name: percona-pgbackrest
+    name: percona-pgbackrest-2.26-1
   when: ansible_os_family == "RedHat"
+
 
 - name: Create pgbackrest directory
   file:
@@ -202,9 +212,13 @@
     name: percona-pg_repack12
   when: ansible_os_family == "RedHat"
 
+#- name: Install patroni RPM
+#  yum:
+#    name: percona-patroni
+#  when: ansible_os_family == "RedHat"
 - name: Install patroni RPM
   yum:
-    name: percona-patroni
+    name: percona-patroni-1.6.5-2
   when: ansible_os_family == "RedHat"
 
 - name: Install patroni debian
