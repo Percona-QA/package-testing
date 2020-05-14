@@ -14,8 +14,8 @@
 
 ### temp part until percona-release is updated for PPG project
 
-- name: include tasks for enabling main repo (do this just for GPG key)
-  include: ../../../tasks/enable_main_repo.yml
+#- name: include tasks for enabling main repo (do this just for GPG key)
+#  include: ../../../tasks/enable_main_repo.yml
 
 - name: Install gnupg2 Debian
   apt:
@@ -23,11 +23,27 @@
   when: ansible_os_family == "Debian"
 
 # Temp solution
+
+- name: disable the mysql module on RHEL/CentOS 8
+  command: /usr/bin/dnf module disable mysql -y
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
 - name: Install percona repository package
   apt:
-    deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-17.generic_all.deb
+   deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-18.generic_all.deb
 #    deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
   when: ansible_os_family == "Debian"
+
+- name: add the main Percona yum repos for centos 6 and 7
+  yum: name=https://repo.percona.com/yum/testing/latest/RPMS/noarch/percona-release-1.0-18.noarch.rpm
+#   yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+  when: ansible_os_family == "RedHat"
+
+- name: clean and update yum cache
+  shell: |
+    yum clean all
+    yum makecache
+  when: ansible_os_family == "RedHat"
 
 # Temp solution for percona release
 #- name: download newer percona-release script
