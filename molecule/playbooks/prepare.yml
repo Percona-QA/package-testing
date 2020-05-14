@@ -43,6 +43,7 @@
           - unzip
           - wget
           - gnupg
+          - gnupg2
           - rsync
       retries: 60
       delay: 10
