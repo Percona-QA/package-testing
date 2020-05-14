@@ -14,7 +14,9 @@ pipeline {
                 'centos-7',
                 'debian-9',
                 'debian-10',
+                'ubuntu-focal',
                 'ubuntu-bionic',
+                'ubuntu-xenial',
                 'rhel8'
             ]
         )
