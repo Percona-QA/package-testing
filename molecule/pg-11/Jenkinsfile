@@ -51,7 +51,6 @@ pipeline {
     stage ('Setup Environment Variables') {
       steps {
        script {
-       env.NAME = "${env.BUILD_NUMBER}-${env.PLATFORM}"
        versions = readYaml (file: 'molecule/pg-11/versions.yml')
        env.PG_VERSION = versions."${VERSION}".version
         }

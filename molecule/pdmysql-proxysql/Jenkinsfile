@@ -38,13 +38,6 @@ pipeline {
                 }
             }
         }
-    stage ('Setup Environment Variables') {
-      steps {
-       script {
-       env.NAME = "${env.BUILD_NUMBER}-${env.PLATFORM}"
-        }
-       }
-      }
     stage ('Prepare') {
       steps {
         checkout scm

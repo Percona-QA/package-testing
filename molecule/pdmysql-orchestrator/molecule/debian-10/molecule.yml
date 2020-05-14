@@ -4,7 +4,7 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: ${NAME}
+  - name: debian10-${BUILD_NUMBER}-${JOB_NAME}
     region: eu-central-1
     image: ami-0be88f8d647409e61
     vpc_subnet_id: subnet-085deaca8c1c59a4f
