@@ -86,7 +86,7 @@
 
 - name: Install pgaudit RHEL
   yum:
-    name: percona-pgaudit14
+    name: percona-pgaudit14_12
   when: ansible_os_family == "RedHat"
 
 - name: Enable pgaudit for Debian
@@ -129,7 +129,7 @@
 #  when: ansible_os_family == "RedHat"
 - name: Install pgbackrest RHEL
   yum:
-    name: percona-pgbackrest-2.26-1
+    name: percona-pgbackrest
   when: ansible_os_family == "RedHat"
 
 
@@ -218,7 +218,7 @@
 #  when: ansible_os_family == "RedHat"
 - name: Install patroni RPM
   yum:
-    name: percona-patroni-1.6.5-2
+    name: percona-patroni
   when: ansible_os_family == "RedHat"
 
 - name: Install patroni debian
