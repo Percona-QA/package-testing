@@ -1,4 +1,21 @@
 #!/usr/bin/env groovy
+def doDynamicParallelPost(){
+    posts = [:]
+    def operatingSystems = ['centos-7', 'debian-9', 'debian-10', 'ubuntu-focal',
+                            'ubuntu-xenial', 'ubuntu-bionic', 'rhel8']
+    operatingSystems.each { os ->
+     posts["${os}"] = {
+      withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
+      [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+        sh """
+            cd molecule/pdmysql-pxc
+            molecule destroy -s ${os}
+        """
+  }
+ }
+}
+ parallel posts
+}
 
 def doDynamicParallelSteps(){
   def operatingSystems = ['centos-7', 'debian-9', 'debian-10', 'ubuntu-focal',
@@ -55,6 +72,13 @@ pipeline {
                 script {
                     doDynamicParallelSteps()
         }
+      }
+    }
+  }
+    post {
+    always {
+      script {
+       doDynamicParallelPost()
       }
     }
   }
