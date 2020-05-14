@@ -85,6 +85,14 @@ pipeline {
             '''
           }
         }
+        stage ('Setup Environment Variables') {
+          steps {
+           script {
+           versions = readYaml (file: 'molecule/pg-11/versions.yml')
+           env.PG_VERSION = versions."${VERSION}".version
+            }
+           }
+          }
         stage('Test') {
             steps{
                 script {
