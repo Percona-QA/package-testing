@@ -40,7 +40,7 @@
 
     - name: remove pgaudit rpm packages
       yum:
-        name: percona-pgaudit
+        name: percona-pgaudit14_12
         state: absent
       when: ansible_os_family == "RedHat"
 

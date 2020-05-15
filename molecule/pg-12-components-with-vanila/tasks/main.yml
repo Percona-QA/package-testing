@@ -112,7 +112,7 @@
 
 - name: Install pgaudit RHEL
   yum:
-    name: percona-pgaudit
+    name: percona-pgaudit14_12
   when: ansible_os_family == "RedHat"
 
 - name: Enable pgaudit for Debian

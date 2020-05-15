@@ -235,7 +235,8 @@ def test_pgaudit_package(host):
     os = host.system_info.distribution
     pkgn = ""
     if os.lower() in ["redhat", "centos", 'rhel']:
-        pkgn = "percona-pgaudit"
+        # pkgn = "percona-pgaudit"
+        pkgn = "percona-pgaudit14_12"
     elif os in ["debian", "ubuntu"]:
         pkgn = "percona-postgresql-12-pgaudit"
         dbgsym_pkgn = "percona-postgresql-12-pgaudit-dbgsym"
