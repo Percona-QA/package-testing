@@ -5,7 +5,6 @@
 #   changes repo to testing
 #   upgrades packages to the new version
 #   does some tests
-- import_playbook: test_prep.yml
 
 - hosts: all
   become: true
@@ -49,7 +48,18 @@
     with_items:
     - Percona-Server-MongoDB-36
     - Percona-Server-MongoDB-36-debuginfo
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version < "8"
+
+  - name: install Percona Server for MongoDB 3.6 new rpm packages previous version
+    yum: name={{item}} state=latest
+    with_items:
+    - Percona-Server-MongoDB-36
+    - Percona-Server-MongoDB-36-debugsource
+    - Percona-Server-MongoDB-36-shell-debuginfo
+    - Percona-Server-MongoDB-36-tools-debuginfo
+    - Percona-Server-MongoDB-36-server-debuginfo
+    - Percona-Server-MongoDB-36-mongos-debuginfo
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version > "7"
 
   - name: start mongod with init script
     command: /etc/init.d/mongod start

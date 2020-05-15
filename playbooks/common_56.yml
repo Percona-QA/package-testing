@@ -37,7 +37,6 @@
 
   - name: install sysbench new packages
     include_tasks: ../tasks/install_sysbench.yml
-    when: ansible_distribution_release != "jessie"
 
   - name: install PS 5.6 packages
     include_tasks: ../tasks/install_ps56.yml
@@ -149,8 +148,8 @@
   - name: check that Percona Toolkit version is correct
     command: /package-testing/version_check.sh pt
 
-# - name: check that sysbench version is correct
-#   command: /package-testing/version_check.sh sysbench
+  - name: check that sysbench version is correct
+    command: /package-testing/version_check.sh sysbench
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
