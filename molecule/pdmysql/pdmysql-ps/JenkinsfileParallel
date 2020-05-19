@@ -1,0 +1,85 @@
+#!/usr/bin/env groovy
+def doDynamicParallelPost(){
+    posts = [:]
+    def operatingSystems = ['centos-6', 'centos-7', 'debian-9', 'debian-10', 'ubuntu-focal',
+                        'ubuntu-xenial', 'ubuntu-bionic', 'rhel8']
+    operatingSystems.each { os ->
+     posts["${os}"] = {
+      withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
+      [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+        sh """
+            cd molecule/pdmysql/pdmysql-ps
+            molecule destroy -s ${os}
+        """
+  }
+ }
+}
+ parallel posts
+}
+
+def doDynamicParallelSteps(){
+  def operatingSystems = ['centos-6', 'centos-7', 'debian-9', 'debian-10', 'ubuntu-focal',
+                        'ubuntu-xenial', 'ubuntu-bionic', 'rhel8']
+  tests = [:]
+  operatingSystems.each { os ->
+   tests["${os}"] =  {
+        stage("${os}") {
+            withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
+        [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+            sh """
+                  cd molecule/pdmysql/pdmysql-ps
+                  molecule test -s ${os}
+              """
+            junit "molecule/pdmysql/pdmysql-ps/molecule/${os}/report.xml"
+        }
+      }
+    }
+  }
+  parallel tests
+}
+pipeline {
+  agent {
+  label 'micro-amazon'
+  }
+  environment {
+      PATH = '/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/ec2-user/.local/bin'
+  }
+  parameters {
+        choice(
+            name: 'REPO',
+            description: 'Repo for testing',
+            choices: [
+                'testing',
+                'main',
+                'experimental'
+            ]
+        )
+  }
+    stages {
+        stage ('Prepare') {
+          steps {
+            checkout scm
+            sh '''
+                sudo yum install -y gcc python3-pip python3-devel libselinux-python openssl-devel
+                sudo mkdir -p /usr/local/lib64/python3.7/site-packages
+                sudo rsync -aHv /usr/lib64/python2.7/site-packages/*selinux* /usr/local/lib64/python3.7/site-packages/
+                pip3 install --user molecule==2.22 pytest ansible wheel boto boto3 paramiko selinux
+            '''
+          }
+        }
+        stage('Test') {
+            steps{
+                script {
+                    doDynamicParallelSteps()
+        }
+      }
+    }
+  }
+    post {
+    always {
+      script {
+       doDynamicParallelPost()
+      }
+    }
+  }
+}
