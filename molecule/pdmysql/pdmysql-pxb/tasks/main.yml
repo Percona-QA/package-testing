@@ -28,7 +28,7 @@
   include_tasks: ../../../tasks/install_pt.yml
 
 - name: install Percona Server 8.0 packages
-  include_tasks: ../../../tasks/install_ps80.yml
+  include_tasks: ../../pdmysql_tasks/install_ps.yml
 
 - name: install Percona XtraBackup 8.0 packages
   include_tasks: ../../../tasks/install_pxb80.yml

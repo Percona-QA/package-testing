@@ -1,10 +1,6 @@
   - name: include playbook for removing Percona repo
     include: ../../../tasks/remove_percona_repository.yml
 
-  - name: disable the mysql module on RHEL/CentOS 8
-    command: sudo /usr/bin/dnf module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
   - name: Install percona repository package
     apt:
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
