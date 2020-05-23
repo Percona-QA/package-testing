@@ -26,7 +26,7 @@ pipeline {
             choices: [
                 'testing',
                 'experimental',
-                'release'
+                'main'
             ]
         )
   }

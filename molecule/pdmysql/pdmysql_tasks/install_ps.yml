@@ -1,5 +1,17 @@
 # This task installs Percona Server 8.0 on CentOS and Debian/Ubuntu
 #
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: yum module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+
+  - name: disable the mariadb module on RHEL/CentOS 8
+    command: yum module disable mariadb -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+
+  - name: DNF clean RHEL
+    command: sudo dnf clean all -y
+    when: ansible_distribution == "RedHat"
+
   - name: install Percona Server deb packages
     apt:
       name: "{{ packages }}"
