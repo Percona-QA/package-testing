@@ -24,7 +24,7 @@ provisioner:
     converge: ../../playbooks/playbook.yml
 verifier:
   name: testinfra
-  directory: ../../../tests/
+  directory: ../../../tests/*.py
   options:
     verbose: true
     s: true
