@@ -3,13 +3,20 @@ import pytest
 
 import testinfra.utils.ansible_runner
 
-from .settings import versions, RHEL_FILES, RPM7_PACKAGES, RPM_PACKAGES, EXTENSIONS, LANGUAGES, DEB_FILES, DEB_PROVIDES
+from .settings import versions
 
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-pg_versions = versions[os.getenv("PG_VERSION")]
+pg_versions = versions[os.getenv("VERSION")]
+
+RHEL_FILES = pg_versions['rhel_files']
+RPM7_PACKAGES = pg_versions['rpm7_packages']
+RPM_PACKAGES = pg_versions['rpm_packages']
+EXTENSIONS = pg_versions['extensions']
+LANGUAGES = pg_versions['languages']
+DEB_FILES = pg_versions['deb_files']
 
 
 @pytest.fixture()
@@ -34,9 +41,9 @@ def start_stop_postgresql(host):
 def postgresql_binary(host):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
-        return host.file("/usr/pgsql-11/bin/postgres")
+        return host.file("/usr/pgsql-12/bin/postgres")
     elif os in ["debian", "ubuntu"]:
-        return host.file("/usr/lib/postgresql/11/bin/postgres")
+        return host.file("/usr/lib/postgresql/12/bin/postgres")
 
 
 @pytest.fixture()
@@ -73,6 +80,11 @@ def insert_data(host):
     yield result.strip("\n")
 
 
+def test_psql_client_version(host):
+    result = host.run('psql --version')
+    assert pg_versions['version'] in result.stdout, result.stdout
+
+
 @pytest.mark.parametrize("package", pg_versions['deb_packages'])
 def test_deb_package_is_installed(host, package):
     os = host.system_info.distribution
@@ -86,7 +98,7 @@ def test_deb_package_is_installed(host, package):
 @pytest.mark.parametrize("package", RPM_PACKAGES)
 def test_rpm_package_is_installed(host, package):
     os = host.system_info.distribution
-    if os.lower() in ["debian", "ubuntu"]:
+    if os in ["debian", "ubuntu"]:
         pytest.skip("This test only for RHEL based platforms")
     if host.system_info.release == "7":
         pytest.skip("Only for RHEL8 tests")
@@ -101,7 +113,7 @@ def test_rpm_package_is_installed(host, package):
 @pytest.mark.parametrize("package", RPM7_PACKAGES)
 def test_rpm7_package_is_installed(host, package):
     os = host.system_info.distribution
-    if os.lower() in ["debian", "ubuntu"]:
+    if os in ["debian", "ubuntu"]:
         pytest.skip("This test only for RHEL based platforms")
     if host.system_info.release == "8.0":
         pytest.skip("Only for centos7 tests")
@@ -115,26 +127,26 @@ def test_rpm7_package_is_installed(host, package):
 
 def test_postgresql_client_version(host):
     os = host.system_info.distribution
-    pkg = "percona-postgresql-11"
+    pkg = "percona-postgresql-12"
     if os.lower() in ["redhat", "centos", 'rhel']:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(pkg)
-    assert "11" in pkg.version
+    assert "12" in pkg.version
 
 
 def test_postgresql_version(host):
     os = host.system_info.distribution
-    pkg = "percona-postgresql-client-11"
+    pkg = "percona-postgresql-client-12"
     if os.lower() in ["redhat", "centos", 'rhel']:
-        pkg = "percona-postgresql11"
+        pkg = "percona-postgresql12"
     pkg = host.package(pkg)
-    assert "11" in pkg.version
+    assert "12" in pkg.version
 
 
 def test_postgresql_is_running_and_enabled(host):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
-        postgresql = host.service("postgresql-11")
+        postgresql = host.service("postgresql-12")
     else:
         postgresql = host.service("postgresql")
     assert postgresql.is_running
@@ -154,7 +166,7 @@ def test_pg_config_server_version(host):
     cmd = "pg_config --version"
     try:
         result = host.check_output(cmd)
-        assert "11" in result, result.stdout
+        assert "12" in result, result.stdout
     except AssertionError:
         pytest.mark.xfail(reason="Maybe dev package not install")
 
@@ -167,7 +179,7 @@ def test_postgresql_query_version(postgresql_query_version):
 def test_postgres_client_version(host):
     cmd = "psql --version"
     result = host.check_output(cmd)
-    assert "11" in result.strip("\n"), result.stdout
+    assert "12" in result.strip("\n"), result.stdout
 
 
 def test_start_stop_postgresql(start_stop_postgresql):
@@ -190,11 +202,10 @@ def test_extenstions_list(extension_list, host):
         if ds.lower() in ['centos', 'redhat', 'rhel']:
             if "python3" in extension:
                 pytest.skip("Skipping python3 extensions for Centos or RHEL")
-        if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") in ['ppg-11.6',
-                                                                          'ppg-11.7']:
+        if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") == 'ppg-12.2':
             if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                              'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
-                pytest.skip("Skipping python2 extensions for DEB based in 11.6 pg")
+                pytest.skip("Skipping python2 extensions for DEB based in 12.2 pg")
         assert extension in extension_list
 
 
@@ -204,16 +215,15 @@ def test_enable_extension(host, extension):
     if ds.lower() in ["redhat", "centos", 'rhel']:
         if "python3" in extension:
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
-    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") in ['ppg-11.6',
-                                                                          'ppg-11.7']:
+    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") == 'ppg-12.2':
         if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                          'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
-            pytest.skip("Skipping python2 extensions for DEB based in 11.6 pg")
+            pytest.skip("Skipping python2 extensions for DEB based in 12.2 pg")
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION \"{}\";'".format(extension))
         assert install_extension.rc == 0, install_extension.stderr
         assert install_extension.stdout.strip("\n") == "CREATE EXTENSION", install_extension.stderr
-        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $3}'")
         assert extensions.rc == 0, extensions.stderr
         assert extension in set(extensions.stdout.split()), extensions.stdout
 
@@ -224,23 +234,22 @@ def test_drop_extension(host, extension):
     if ds.lower() in ["redhat", "centos", 'rhel']:
         if "python3" in extension:
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
-    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("PG_VERSION") in ['ppg-11.6',
-                                                                          'ppg-11.7']:
+    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") == 'ppg-12.2':
         if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                          'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
-            pytest.skip("Skipping python2 extensions for DEB based in 11.6 pg")
+            pytest.skip("Skipping python2 extensions for DEB based in 12.2 pg")
     with host.sudo("postgres"):
         drop_extension = host.run("psql -c 'DROP EXTENSION \"{}\";'".format(extension))
         assert drop_extension.rc == 0, drop_extension.stderr
         assert drop_extension.stdout.strip("\n") == "DROP EXTENSION", drop_extension.stdout
-        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $3}'")
         assert extensions.rc == 0, extensions.stderr
         assert extension not in set(extensions.stdout.split()), extensions.stdout
 
 
 def test_plpgsql_extension(host):
     with host.sudo("postgres"):
-        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
+        extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $3}'")
         assert extensions.rc == 0, extensions.stderr
         assert "plpgsql" in set(extensions.stdout.split()), extensions.stdout
 
@@ -278,13 +287,8 @@ def test_language(host, language):
         if ds.lower() in ["redhat", "centos", 'rhel']:
             if "python3" in language:
                 pytest.skip("Skipping python3 language for Centos or RHEL")
-        if ds.lower() in ['debian',
-                          'ubuntu'] and os.getenv("PG_VERSION") in ['ppg-11.6',
-                                                                    'ppg-11.7']:
-            if language in ['plpythonu',
-                            "plpython2u"]:
-                pytest.skip(
-                    "Skipping python2 extensions for DEB based in 11.6 and 11.7 pg")
+        if ds.lower() in ['debian', 'ubuntu'] and language in ['plpythonu', "plpython2u"]:
+            pytest.skip("Skipping python2 extensions for DEB based in 12.2 pg")
         lang = host.run("psql -c 'CREATE LANGUAGE {};'".format(language))
         assert lang.rc == 0, lang.stderr
         assert lang.stdout.strip("\n") == "CREATE LANGUAGE", lang.stdout
@@ -293,15 +297,9 @@ def test_language(host, language):
         assert drop_lang.stdout.strip("\n") == "DROP LANGUAGE", lang.stdout
 
 
-@pytest.mark.skipif(os.getenv("PG_VERSION") == 'ppg-11.5', reason="Only 11.6 pg test")
 @pytest.mark.parametrize("percona_package, vanila_package", pg_versions['deb_provides'])
 def test_deb_packages_provides(host, percona_package, vanila_package):
     """Execute command for check provides and check that we have link to vanila postgres
-
-    :param host:
-    :param vanila_package:
-    :param percona_package:
-    :return:
     """
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
@@ -309,19 +307,14 @@ def test_deb_packages_provides(host, percona_package, vanila_package):
     cmd = "dpkg -s {} | grep Provides".format(percona_package)
     result = host.run(cmd)
     provides = set(result.stdout.split())
+    provides = {provide.strip(",") for provide in provides}
     assert result.rc == 0, result.stdout
-    assert vanila_package in provides, result.stdout
+    assert vanila_package in provides, provides
 
 
-@pytest.mark.skipif(os.getenv("PG_VERSION") == 'ppg-11.5', reason="Only 11.6 pg test")
 @pytest.mark.parametrize("percona_package, vanila_package", pg_versions['rpm_provides'])
 def test_rpm_package_provides(host, percona_package, vanila_package):
     """Execute command for check provides and check that we have link to vanila postgres
-
-    :param host:
-    :param vanila_package:
-    :param percona_package:
-    :return:
     """
     os = host.system_info.distribution
     if os in ["debian", "ubuntu"]:
@@ -331,20 +324,13 @@ def test_rpm_package_provides(host, percona_package, vanila_package):
     cmd = "rpm -q --provides {} | awk \'{{ print $1 }}\'".format(percona_package)
     result = host.run(cmd)
     provides = set(result.stdout.split("\n"))
-    print(provides)
     assert result.rc == 0, result.stderr
     assert vanila_package in provides, result.stdout
 
 
-@pytest.mark.skipif(os.getenv("PG_VERSION") == 'ppg-11.5', reason="Only 11.6 pg test")
 @pytest.mark.parametrize("percona_package, vanila_package", pg_versions['rpm7_provides'])
 def test_rpm7_package_provides(host, percona_package, vanila_package):
     """Execute command for check provides and check that we have link to vanila postgres
-
-    :param host:
-    :param vanila_package:
-    :param percona_package:
-    :return:
     """
     os = host.system_info.distribution
     if os in ["debian", "ubuntu"]:

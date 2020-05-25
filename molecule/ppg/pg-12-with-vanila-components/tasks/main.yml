@@ -1,40 +1,6 @@
 ---
-# This playbook does following:
-#   enables Percona repository
-#   installs Percona Platform for PostgreSQL packages
-#   does some tests
-#- name: include tasks for test env setup
-#  include_tasks: ../../../tasks/test_prep.yml
-#- name: include tasks for test env setup
-#  include_tasks: ../test_prep.yml
-
-### temp part until percona-release is updated for PPG project
-
-- name: add the main Percona yum repos for centos 6 and 7
-  yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-  when: ansible_os_family == "RedHat"
-
-- name: Install gnupg2 Debian
-  apt:
-    name: gnupg2
-  when: ansible_os_family == "Debian"
-
-- name: Install percona repository package
-  apt:
-    deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
-  when: ansible_os_family == "Debian"
-#- name: download newer percona-release script
-#  get_url:
-#    url: https://raw.githubusercontent.com/percona/percona-repositories/master/scripts/percona-release.sh
-#    dest: /usr/bin/percona-release
-#    mode: '755'
-#    force: true
-
-- name: setup repo with percona-release
-  command: percona-release enable {{ pg_version }} {{ repo }}
-  vars:
-    repo: "{{ lookup('env', 'REPO') }}"
-    pg_version: "{{ lookup('env', 'VERSION') }}"
+- name: Configure repository
+  include_tasks: ../../common/tasks/enable_repo.yml
 
 - name: enable tools repo
   command: percona-release enable tools {{ repo }}
@@ -142,7 +108,6 @@
   command: bash -c "echo \"deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main\" "
   register: repo_line
   when: ansible_os_family == "Debian"
-
 
 - name: add postgresql repo
   apt_repository:

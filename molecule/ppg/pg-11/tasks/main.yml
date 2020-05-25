@@ -1,52 +1,11 @@
 ---
-- name: Install gnupg2 Debian
-  apt:
-    name: gnupg2
-  when: ansible_os_family == "Debian"
+# Tasks for install PPG 11 packages
 
-# Temp solution
-
-- name: disable the mysql module on RHEL/CentOS 8
-  command: /usr/bin/dnf module disable mysql -y
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
-- name: Install percona repository package
-  apt:
-   deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-18.generic_all.deb
-#    deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
-  when: ansible_os_family == "Debian"
-
-- name: add the main Percona yum repos for centos 6 and 7
-  yum: name=https://repo.percona.com/yum/testing/latest/RPMS/noarch/percona-release-1.0-18.noarch.rpm
-#   yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-  when: ansible_os_family == "RedHat"
-
-- name: clean and update yum cache
-  shell: |
-    yum clean all
-    yum makecache
-  when: ansible_os_family == "RedHat"
-
-# Temp solution for percona release
-#- name: download newer percona-release script
-#  get_url:
-#    url: https://raw.githubusercontent.com/percona/percona-repositories/1.0/scripts/percona-release.sh
-#    dest: /usr/bin/percona-release
-#    mode: '755'
-#    force: true
-
-# End of temp solution
-- debug:
-    msg: "{{ lookup('env', 'PG_VERSION') }}"
-
-- name: setup repo with percona-release
-  command: percona-release enable {{ pg_version }} {{ repo }}
-  vars:
-    repo: "{{ lookup('env', 'REPO') }}"
-    pg_version: "{{ lookup('env', 'PG_VERSION') }}"
+- name: Configure repository
+  include_tasks: ../../common/tasks/enable_repo.yml
 
 - name: install Percona Platform for PostgreSQL 11 packages
-  include_tasks: ../../../tasks/install_ppg11.yml
+  include_tasks: ../../../../tasks/install_ppg11.yml
 
 - name: Initialize Postgres RHEL
   command: /usr/pgsql-11/bin/postgresql-11-setup initdb
@@ -61,141 +20,8 @@
     enabled: yes
   when: ansible_os_family == "RedHat"
 
-- name: Install pgaudit Debian
-  apt:
-    name: "{{ packages }}"
-  vars:
-    packages:
-      - percona-postgresql-11-pgaudit
-      - percona-postgresql-11-pgaudit-dbgsym
-  when: ansible_os_family == "Debian"
-
-- name: Install pgaudit RHEL
-  yum:
-    name: percona-pgaudit
-  when: ansible_os_family == "RedHat"
-
-- name: Enable pgaudit for Debian
-  lineinfile:
-    path: /etc/postgresql/11/main/postgresql.conf
-    line: shared_preload_libraries = 'pgaudit'
-  when: ansible_os_family == "Debian"
-
-- name: Enable pgaudit for RHEL
-  lineinfile:
-    path: /var/lib/pgsql/11/data/postgresql.conf
-    line: shared_preload_libraries = 'pgaudit'
-  when: ansible_os_family == "RedHat"
-
-- name: Restart Postgres RHEL
-  service:
-    name: postgresql-11
-    state: restarted
-  when: ansible_os_family == "RedHat"
-
-- name: Retart Postgres Debian
-  command: sudo systemctl restart postgresql
-  environment:
-    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-  when: ansible_os_family == "Debian"
-
-- name: Install pgbackrest Debian
-  apt:
-    name: "{{ packages }}"
-  vars:
-    packages:
-      - percona-pgbackrest
-      - percona-pgbackrest-doc
-      - percona-pgbackrest-dbgsym
-  when: ansible_os_family == "Debian"
-
-- name: Install pgbackrest RHEL
-  yum:
-    name: percona-pgbackrest
-  when: ansible_os_family == "RedHat"
-
-- name: Create pgbackrest directory
-  file:
-    path: /etc/pgbackrest/
-    state: directory
-
-
-- name: Create pgbackrest configuration Debian
-  blockinfile:
-    path: /etc/pgbackrest/pgbackrest.conf
-    create: yes
-    block: |
-      [global]
-      repo1-path=/var/lib/pgbackrest
-
-      [testing]
-      pg1-path=/var/lib/postgresql/11/main
-      pg1-port=5432
-  when: ansible_os_family == "Debian"
-
-- name: Create pgbackrest configuration RHEL
-  blockinfile:
-    path: /etc/pgbackrest/pgbackrest.conf
-    create: yes
-    block: |
-      [global]
-      repo1-path=/var/lib/pgbackrest
-
-      [testing]
-      pg1-path=/var/lib/pgsql/11/data
-      pg1-port=5432
-  when: ansible_os_family == "RedHat"
-
-
-- name: Configure backup config for Debian
-  blockinfile:
-    path: /etc/postgresql/11/main/postgresql.conf
-    block: |
-      archive_mode = on
-      archive_command = 'pgbackrest --stanza=testing archive-push %p'
-      max_wal_senders = 3
-      wal_level = replica
-  when: ansible_os_family == "Debian"
-
-- name: Configure backup config for RHEL
-  blockinfile:
-    path: /var/lib/pgsql/11/data/postgresql.conf
-    block: |
-      archive_mode = on
-      archive_command = 'pgbackrest --stanza=testing archive-push %p'
-      max_wal_senders = 3
-      wal_level = replica
-  when: ansible_os_family == "RedHat"
-
-- name: Restart Postgres RHEL
-  service:
-    name: postgresql-11
-    state: restarted
-  when: ansible_os_family == "RedHat"
-
-- name: Retart Postgres Debian
-  command: sudo systemctl restart postgresql
-  environment:
-    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-  when: ansible_os_family == "Debian"
-
-- name: Install pgrepack Debian
-  apt:
-    name: "{{ packages }}"
-  vars:
-    packages:
-      - percona-postgresql-11-repack
-      - percona-postgresql-11-repack-dbgsym
-  when: ansible_os_family == "Debian"
-
-- name: Install pgrepack RHEL
-  yum:
-    name: percona-pg_repack11
-  when: ansible_os_family == "RedHat"
-
-- name: Install patroni
-  yum:
-    name: percona-patroni
+- name: Install vanila postgresql
+  include_tasks: ../../common/tasks/install_ppg11_tools.yml
 
 - name: Install GCC Deb
   apt:
@@ -212,5 +38,5 @@
 
 - name: Copy libpq source file
   copy:
-    src: lib_version.c
+    src: ../../common/files/lib_version.c
     dest: /tmp/libpq_command_temp_dir

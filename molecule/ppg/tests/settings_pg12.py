@@ -157,18 +157,3 @@ RPM_PROVIDES = [("percona-postgresql12", "postgresql12"),
                 ("percona-postgresql12-test", "postgresql12-test"),
                 ("percona-postgresql-client-common", 'postgresql-client-common')
                 ]
-
-
-versions = {"ppg-12.2": {"version": "12.2", "deb_pkg_ver": DEB116_PKG_VERSIONS,
-                         "deb_packages": DEB116_PACKAGES,
-                         "percona-postgresql-common": '214',
-                         "percona-postgresql-client-common": "214",
-                         "libpq_version": "120002",
-                         "pgaudit": pgaudit['ppg-12.2'],
-                         "pgbackrest": pgbackrest['ppg-12.2'],
-                         "patroni": patroni['ppg-12.2'],
-                         "pgrepack": pgrepack['ppg-12.2'], "libpq": "Version of libpq: 120002",
-                         "deb_provides": DEB_PROVIDES,
-                         "rpm7_provides": RPM7_PROVIDES,
-                         'rpm_provides': RPM_PROVIDES}
-            }
