@@ -4,4 +4,4 @@
   become: true
   become_method: sudo
   roles:
-    - role: pdmysql-orchestrator
+    - role: pxb
