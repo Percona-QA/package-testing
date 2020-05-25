@@ -42,7 +42,7 @@ versions = {"ppg-11.7": {"version": "11.7",
                          "rhel_files": pg11.RHEL_FILES,
                          "deb_files": pg11.DEB_FILES,
                          "extensions": pg11.EXTENSIONS,
-                         "languages": pg11.EXTENSIONS
+                         "languages": pg11.LANGUAGES
                          },
             "ppg-11.5": {"version": "11.5", "deb_pkg_ver": pg11.DEB_PKG_VERSIONS,
                          "deb_packages": pg11.DEB_PACKAGES,
@@ -75,6 +75,6 @@ versions = {"ppg-11.7": {"version": "11.7",
                          "rhel_files": pg12.RHEL_FILES,
                          "deb_files": pg12.DEB_FILES,
                          "extensions": pg12.EXTENSIONS,
-                         "languages": pg12.EXTENSIONS
+                         "languages": pg12.LANGUAGES
                          }
             }
