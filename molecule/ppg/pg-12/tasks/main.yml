@@ -36,5 +36,5 @@
 
 - name: Copy libpq source file
   copy:
-    src: lib_version.c
+    src: ../../common/files/lib_version.c
     dest: /tmp/libpq_command_temp_dir
