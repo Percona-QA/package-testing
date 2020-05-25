@@ -24,8 +24,7 @@ provisioner:
     converge: ../../playbooks/playbook.yml
 verifier:
   name: testinfra
-  additional_files_or_dirs:
-    - ../../../tests/test_postgis.py
+  directory: ../../../tests/test_postgis.py
   options:
     verbose: true
     s: true
