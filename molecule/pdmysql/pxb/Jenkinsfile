@@ -54,7 +54,7 @@ pipeline {
         withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
         [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
           sh '''
-              cd molecule/pdmysql/pdmysql-pxb
+              cd molecule/pdmysql/pxb
               molecule create -s "${PLATFORM}"
           '''
         }
@@ -63,7 +63,7 @@ pipeline {
     stage ('Run playbook for test') {
       steps {
         sh '''
-            cd molecule/pdmysql/pdmysql-pxb
+            cd molecule/pdmysql/pxb
             molecule converge -s "${PLATFORM}"
         '''
       }
@@ -71,16 +71,16 @@ pipeline {
     stage ('Start testinfra tests') {
       steps {
         sh '''
-            cd molecule/pdmysql/pdmysql-pxb
+            cd molecule/pdmysql/pxb
             molecule verify -s "${PLATFORM}"
         '''
-        junit 'molecule/pdmysql/pdmysql-pxb/molecule/${PLATFORM}/report.xml'
+        junit 'molecule/pdmysql/pxb/molecule/${PLATFORM}/report.xml'
       }
     }
     stage ('Start packages deletion') {
       steps {
         sh '''
-            cd molecule/pdmysql/pdmysql-pxb
+            cd molecule/pdmysql/pxb
             molecule cleanup -s "${PLATFORM}"
         '''
       }
@@ -91,7 +91,7 @@ pipeline {
       withCredentials([sshUserPrivateKey(credentialsId: 'MOLECULE_AWS_PRIVATE_KEY', keyFileVariable: 'MOLECULE_AWS_PRIVATE_KEY', passphraseVariable: '', usernameVariable: ''),
       [$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: '4462f2e5-f01c-4e3f-9586-2ffcf5bf366a', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
         sh '''
-            cd molecule/pdmysql/pdmysql-pxb
+            cd molecule/pdmysql/pxb
             molecule destroy -s "${PLATFORM}"
         '''
       }
