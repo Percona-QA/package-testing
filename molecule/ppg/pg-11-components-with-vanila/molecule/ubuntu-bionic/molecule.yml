@@ -25,7 +25,7 @@ provisioner:
 verifier:
   name: testinfra
   additional_files_or_dirs:
-    - ../../tests/test_tools.py
+    - ../../../tests/test_tools.py
   options:
     verbose: true
     s: true
