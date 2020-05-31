@@ -48,7 +48,6 @@ EXTENSIONS = ['xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', '
 LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", "plpython3u"]
 
 
-
 DEB_PROVIDES = [("percona-postgresql-12", "postgresql-12"), ("percona-postgresql-client", "postgresql-client"),
                 ("percona-postgresql", "postgresql"), ("percona-postgresql-client-12", "postgresql-client-12"),
                 ("percona-postgresql-client-common", "postgresql-client-common"),

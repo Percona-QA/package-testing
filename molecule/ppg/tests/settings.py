@@ -5,10 +5,11 @@ from molecule.ppg.tests.versions.patroni import patroni
 from molecule.ppg.tests.versions.pgbackrest import pgbackrest
 from molecule.ppg.tests.versions.pgaudit import pgaudit
 from molecule.ppg.tests.versions.pg_repack import pgrepack
+from molecule.ppg.tests.versions.ppg import ppg
 
 versions = {"ppg-11.8": {"version": "11.8",
-                         "deb_pkg_ver": pg11.DEB117_PKG_VERSIONS,
-                         "deb_packages": pg11.DEB116_PACKAGES,
+                         "deb_pkg_ver": ppg["ppg-11.8"]['deb_pkg_ver'],
+                         "deb_packages": ppg["ppg-11.8"]['deb_packages'],
                          "percona-postgresql-common": '214',
                          "percona-postgresql-client-common": "214",
                          "libpq_version": "110008",
@@ -25,7 +26,7 @@ versions = {"ppg-11.8": {"version": "11.8",
                          "rhel_files": pg11.RHEL_FILES,
                          "deb_files": pg11.DEB_FILES,
                          "extensions": pg11.EXTENSIONS,
-                         "languages": pg11.EXTENSIONS
+                         "languages": pg11.LANGUAGES
                          },
             "ppg-11.7": {"version": "11.7",
                          "deb_pkg_ver": pg11.DEB117_PKG_VERSIONS,
@@ -46,7 +47,7 @@ versions = {"ppg-11.8": {"version": "11.8",
                          "rhel_files": pg11.RHEL_FILES,
                          "deb_files": pg11.DEB_FILES,
                          "extensions": pg11.EXTENSIONS,
-                         "languages": pg11.EXTENSIONS
+                         "languages": pg11.LANGUAGES
                          },
             "ppg-11.6": {"version": "11.6",
                          "deb_pkg_ver": pg11.DEB116_PKG_VERSIONS,
