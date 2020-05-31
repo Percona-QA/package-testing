@@ -133,43 +133,47 @@ PG12_EXTENSIONS = [
 
 LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", "plpython3u"]
 
-DEB_PROVIDES = [("percona-postgresql-11", "postgresql-11"), ("percona-postgresql-client", "postgresql-client"),
-                ("percona-postgresql", "postgresql"), ("percona-postgresql-client-11", "postgresql-client-11"),
-                ("percona-postgresql-client-common", "postgresql-client-common"),
-                ("percona-postgresql-contrib", "postgresql-contrib"), ("percona-postgresql-doc", "postgresql-doc"),
-                ("percona-postgresql-server-dev-all", "postgresql-server-dev-all"),
-                ('percona-postgresql-plperl-11', 'postgresql-plperl-11'),
-                ("percona-postgresql-common", "postgresql-common"),
-                ("percona-postgresql-plpython3-11", "postgresql-11-plpython3"),
-                ("percona-postgresql-pltcl-11", "postgresql-11-pltcl"), ("percona-postgresql-all", "postgresql-all"),
-                ("percona-postgresql-server-dev-11", 'postgresql-server-dev-all-11')]
+DEB_PROVIDES_TEMPLATE = [("percona-postgresql-{}", "postgresql-{}"),
+                         ("percona-postgresql-client", "postgresql-client"),
+                         ("percona-postgresql", "postgresql"),
+                         ("percona-postgresql-client-{}", "postgresql-client-{}"),
+                         ("percona-postgresql-client-common", "postgresql-client-common"),
+                         ("percona-postgresql-contrib", "postgresql-contrib"),
+                         ("percona-postgresql-doc", "postgresql-doc"),
+                         ("percona-postgresql-server-dev-all", "postgresql-server-dev-all"),
+                         ('percona-postgresql-plperl-{}', 'postgresql-plperl-{}'),
+                         ("percona-postgresql-common", "postgresql-common"),
+                         ("percona-postgresql-plpython3-{}", "postgresql-{}-plpython3"),
+                         ("percona-postgresql-pltcl-{}", "postgresql-{}-pltcl"),
+                         ("percona-postgresql-all", "postgresql-all"),
+                         ("percona-postgresql-server-dev-{}", 'postgresql-server-dev-all-{}')]
 
-RPM7_PROVIDES = [("percona-postgresql11", 'postgresql11'),
-                 ("percona-postgresql11-contrib", 'postgresql11-contrib'),
-                 ("percona-postgresql-common", 'postgresql-common'),
-                 ("percona-postgresql11-devel", 'postgresql11-devel'),
-                 ("percona-postgresql11-docs", "postgresql-docs"),
-                 ("percona-postgresql11-libs", 'postgresql11-libs'),
-                 ("percona-postgresql11-llvmjit", 'postgresql11-llvmjit'),
-                 ('percona-postgresql11-plperl', 'postgresql11-plperl'),
-                 ("percona-postgresql11-pltcl", 'postgresql11-pltcl'),
-                 ('percona-postgresql11-server', 'postgresql11-server'),
-                 ("percona-postgresql11-test", 'postgresql11-test'),
-                 ("percona-postgresql-client-common", 'postgresql-client-common')]
+RPM7_PROVIDES_TEMPLATE = [("percona-postgresql{}", 'postgresql{}'),
+                          ("percona-postgresql{}-contrib", 'postgresql{}-contrib'),
+                          ("percona-postgresql-common", 'postgresql-common'),
+                          ("percona-postgresql{}-devel", 'postgresql{}-devel'),
+                          ("percona-postgresql{}-docs", "postgresql-docs"),
+                          ("percona-postgresql{}-libs", 'postgresql{}-libs'),
+                          ("percona-postgresql{}-llvmjit", 'postgresql{}-llvmjit'),
+                          ('percona-postgresql{}-plperl', 'postgresql{}-plperl'),
+                          ("percona-postgresql{}-pltcl", 'postgresql{}-pltcl'),
+                          ('percona-postgresql{}-server', 'postgresql{}-server'),
+                          ("percona-postgresql{}-test", 'postgresql{}-test'),
+                          ("percona-postgresql-client-common", 'postgresql-client-common')]
 
-RPM_PROVIDES = [("percona-postgresql11", "postgresql11"),
-                ("percona-postgresql11-contrib", "postgresql11-contrib"),
-                ("percona-postgresql-common", "postgresql-common"),
-                ("percona-postgresql11-devel", "postgresql-devel"),
-                ("percona-postgresql11-docs", "postgresql-docs"),
-                ("percona-postgresql11-libs", "postgresql11-libs"),
-                ("percona-postgresql11-llvmjit", "postgresql11-llvmjit"),
-                ("percona-postgresql11-plperl", 'postgresql11-plperl'),
-                ("percona-postgresql11-plpython", 'postgresql-plpython'),
-                ("percona-postgresql11-pltcl", 'postgresql11-pltcl'),
-                ("percona-postgresql11-server", 'postgresql11-server'),
-                ("percona-postgresql11-test", "postgresql11-test"),
-                ("percona-postgresql-client-common", 'postgresql-client-common')
+RPM_PROVIDES_TEMPLATE = [("percona-postgresql{}", "postgresql{}"),
+                         ("percona-postgresql{}-contrib", "postgresql{}-contrib"),
+                         ("percona-postgresql-common", "postgresql-common"),
+                         ("percona-postgresql{}-devel", "postgresql-devel"),
+                         ("percona-postgresql{}-docs", "postgresql-docs"),
+                         ("percona-postgresql{}-libs", "postgresql{}-libs"),
+                         ("percona-postgresql{}-llvmjit", "postgresql{}-llvmjit"),
+                         ("percona-postgresql{}-plperl", 'postgresql{}-plperl'),
+                         ("percona-postgresql{}-plpython", 'postgresql-plpython'),
+                         ("percona-postgresql{}-pltcl", 'postgresql{}-pltcl'),
+                         ("percona-postgresql{}-server", 'postgresql{}-server'),
+                         ("percona-postgresql{}-test", "postgresql{}-test"),
+                         ("percona-postgresql-client-common", 'postgresql-client-common')
                 ]
 
 
@@ -183,25 +187,35 @@ def fill_template_form(template, pg_version):
     return [t.format(pg_version) for t in template]
 
 
+def fill_provides_template_form(provides_template, pg_version):
+    """
+
+    :param provides_template:
+    :param pg_version:
+    :return:
+    """
+    return [(t[0].format(pg_version), t[1].format(pg_version)) for t in provides_template]
+
+
 ppg = {"ppg-11.6": {},
        "ppg-11.7": {},
-       "ppg-11.8": {"deb_pkg_ver": "",
-                    "deb_packages": "",
-                    "deb_provides": "",
-                    "rpm7_provides": "",
-                    'rpm_provides': "",
-                    "rpm_packages": "",
-                    "rpm7_packages": "",
-                    "rhel_files": "",
+       "ppg-11.8": {"deb_pkg_ver": DEB_PKG_VERSIONS,
+                    "deb_packages": fill_template_form(DEB_PACKAGES_TEMPLATE, "11"),
+                    "deb_provides": fill_provides_template_form(DEB_PROVIDES_TEMPLATE, "11"),
+                    "rpm7_provides": fill_provides_template_form(RPM7_PROVIDES_TEMPLATE, "11"),
+                    'rpm_provides': fill_provides_template_form(RPM_PROVIDES_TEMPLATE, "11"),
+                    "rpm_packages": fill_template_form(RPM_PACKAGES_TEMPLATE, "11"),
+                    "rpm7_packages": fill_template_form(RPM7_PACKAGES_TEMPLATE, "11"),
+                    "rhel_files": fill_template_form(RHEL_FILES_TEMPLATE, "11"),
                     "deb_files": fill_template_form(DEB_FILES_TEMPLATE, "11"),
-                    "extensions": "",
-                    "languages": ""
+                    "extensions": PG11_EXTENSIONS,
+                    "languages": LANGUAGES
                     },
        "ppg-12.2": {"deb_pkg_ver": "",
-                    "deb_packages": "",
-                    "deb_provides": DEB_PROVIDES,
-                    "rpm7_provides": RPM7_PROVIDES,
-                    'rpm_provides': RPM_PROVIDES,
+                    "deb_packages": fill_template_form(DEB_PACKAGES_TEMPLATE, "12"),
+                    "deb_provides": fill_provides_template_form(DEB_PROVIDES_TEMPLATE, "12"),
+                    "rpm7_provides": fill_provides_template_form(RPM7_PROVIDES_TEMPLATE, "12"),
+                    'rpm_provides': fill_provides_template_form(RPM_PROVIDES_TEMPLATE, "12"),
                     "rpm_packages": fill_template_form(RPM_PACKAGES_TEMPLATE, "12"),
                     "rpm7_packages": fill_template_form(RPM7_PACKAGES_TEMPLATE, "12"),
                     "rhel_files": fill_template_form(RHEL_FILES_TEMPLATE, "12"),
@@ -209,10 +223,10 @@ ppg = {"ppg-11.6": {},
                     "extensions": PG12_EXTENSIONS,
                     "languages": LANGUAGES},
        "ppg-12.3": {"deb_pkg_ver": "",
-                    "deb_packages": "",
-                    "deb_provides": DEB_PROVIDES,
-                    "rpm7_provides": RPM7_PROVIDES,
-                    'rpm_provides': RPM_PROVIDES,
+                    "deb_packages": fill_template_form(DEB_PACKAGES_TEMPLATE, "12"),
+                    "deb_provides": fill_provides_template_form(DEB_PROVIDES_TEMPLATE, "12"),
+                    "rpm7_provides": fill_provides_template_form(RPM7_PROVIDES_TEMPLATE, "12"),
+                    'rpm_provides': fill_provides_template_form(RPM_PROVIDES_TEMPLATE, "12"),
                     "rpm_packages": fill_template_form(RPM_PACKAGES_TEMPLATE, "12"),
                     "rpm7_packages": fill_template_form(RPM7_PACKAGES_TEMPLATE, "12"),
                     "rhel_files": fill_template_form(RHEL_FILES_TEMPLATE, "12"),
