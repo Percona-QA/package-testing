@@ -198,7 +198,18 @@ def fill_provides_template_form(provides_template, pg_version):
 
 
 ppg = {"ppg-11.6": {},
-       "ppg-11.7": {},
+       "ppg-11.7": {"deb_pkg_ver": DEB_PKG_VERSIONS,
+                    "deb_packages": fill_template_form(DEB_PACKAGES_TEMPLATE, "11"),
+                    "deb_provides": fill_provides_template_form(DEB_PROVIDES_TEMPLATE, "11"),
+                    "rpm7_provides": fill_provides_template_form(RPM7_PROVIDES_TEMPLATE, "11"),
+                    'rpm_provides': fill_provides_template_form(RPM_PROVIDES_TEMPLATE, "11"),
+                    "rpm_packages": fill_template_form(RPM_PACKAGES_TEMPLATE, "11"),
+                    "rpm7_packages": fill_template_form(RPM7_PACKAGES_TEMPLATE, "11"),
+                    "rhel_files": fill_template_form(RHEL_FILES_TEMPLATE, "11"),
+                    "deb_files": fill_template_form(DEB_FILES_TEMPLATE, "11"),
+                    "extensions": PG11_EXTENSIONS,
+                    "languages": LANGUAGES
+                    },
        "ppg-11.8": {"deb_pkg_ver": DEB_PKG_VERSIONS,
                     "deb_packages": fill_template_form(DEB_PACKAGES_TEMPLATE, "11"),
                     "deb_provides": fill_provides_template_form(DEB_PROVIDES_TEMPLATE, "11"),
