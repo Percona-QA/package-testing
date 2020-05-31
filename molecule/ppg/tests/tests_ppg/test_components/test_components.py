@@ -3,7 +3,7 @@ import pytest
 
 import testinfra.utils.ansible_runner
 
-from molecule.ppg.tests.settings import versions
+from molecule.ppg.tests.settings import versions, PG_MAJOR_VER
 
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -104,8 +104,9 @@ def build_libpq_programm(host):
     host.check_output(lib_dir_cmd)
     if os in ["centos", 'rhel', "redhat"]:
         return host.run(
-            "export LIBPQ_DIR=/usr/pgsql-12/  && export LIBRARY_PATH=/usr/pgsql-12/lib/ &&"
-            "gcc -o lib_version /tmp/libpq_command_temp_dir/lib_version.c -I{} -lpq -std=c99".format(pg_include))
+            "export LIBPQ_DIR=/usr/pgsql-{}/  && export LIBRARY_PATH=/usr/pgsql-12/lib/ &&"
+            "gcc -o lib_version /tmp/libpq_command_temp_dir/lib_version.c -I{} -lpq -std=c99".format(
+                PG_MAJOR_VER, pg_include))
     return host.run(
         "gcc -o lib_version /tmp/libpq_command_temp_dir/lib_version.c -I{} -lpq -std=c99".format(pg_include))
 

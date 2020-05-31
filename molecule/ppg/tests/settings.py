@@ -1,3 +1,4 @@
+import os
 import molecule.ppg.tests.settings_pg11 as pg11
 import molecule.ppg.tests.settings_pg12 as pg12
 
@@ -6,6 +7,10 @@ from molecule.ppg.tests.versions.pgbackrest import pgbackrest
 from molecule.ppg.tests.versions.pgaudit import pgaudit
 from molecule.ppg.tests.versions.pg_repack import pgrepack
 from molecule.ppg.tests.versions.ppg import ppg
+
+PG_MAJOR_VER = "12"
+if "11" in os.getenv("VERSION"):
+    PG_MAJOR_VER = "11"
 
 versions = {"ppg-11.8": {"version": "11.8",
                          "deb_pkg_ver": ppg["ppg-11.8"]['deb_pkg_ver'],

@@ -3,7 +3,7 @@ import pytest
 
 import testinfra.utils.ansible_runner
 
-from molecule.ppg.tests.settings import versions
+from molecule.ppg.tests.settings import versions, PG_MAJOR_VER
 
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -127,7 +127,7 @@ def test_rpm7_package_is_installed(host, package):
 
 def test_postgresql_client_version(host):
     os = host.system_info.distribution
-    pkg = "percona-postgresql-12"
+    pkg = "percona-postgresql-{}".format(PG_MAJOR_VER)
     if os.lower() in ["redhat", "centos", 'rhel']:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(pkg)
@@ -138,9 +138,9 @@ def test_postgresql_version(host):
     os = host.system_info.distribution
     pkg = "percona-postgresql-client-12"
     if os.lower() in ["redhat", "centos", 'rhel']:
-        pkg = "percona-postgresql12"
+        pkg = "percona-postgresql{}".format(PG_MAJOR_VER)
     pkg = host.package(pkg)
-    assert "12" in pkg.version
+    assert PG_MAJOR_VER in pkg.version
 
 
 def test_postgresql_is_running_and_enabled(host):
@@ -166,7 +166,7 @@ def test_pg_config_server_version(host):
     cmd = "pg_config --version"
     try:
         result = host.check_output(cmd)
-        assert "12" in result, result.stdout
+        assert PG_MAJOR_VER in result, result.stdout
     except AssertionError:
         pytest.mark.xfail(reason="Maybe dev package not install")
 
@@ -179,7 +179,7 @@ def test_postgresql_query_version(postgresql_query_version):
 def test_postgres_client_version(host):
     cmd = "psql --version"
     result = host.check_output(cmd)
-    assert "12" in result.strip("\n"), result.stdout
+    assert PG_MAJOR_VER in result.strip("\n"), result.stdout
 
 
 def test_start_stop_postgresql(start_stop_postgresql):

@@ -3,7 +3,7 @@ import pytest
 
 import testinfra.utils.ansible_runner
 
-from molecule.ppg.tests.settings import versions
+from molecule.ppg.tests.settings import versions, PG_MAJOR_VER
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
@@ -49,13 +49,13 @@ def pgaudit(host):
         result = host.run(create_table)
         assert result.rc == 0
         assert result.stdout.strip("\n") == "CREATE TABLE"
-        log_file = "/var/log/postgresql/postgresql-12-main.log"
+        log_file = "/var/log/postgresql/postgresql-{}-main.log".format(PG_MAJOR_VER)
         if os.lower() in ["debian", "ubuntu"]:
-            log_file = "/var/log/postgresql/postgresql-12-main.log"
+            log_file = "/var/log/postgresql/postgresql-{}-main.log".format(PG_MAJOR_VER)
         elif os.lower() in ["redhat", "centos", 'rhel']:
-            log_files = "ls /var/lib/pgsql/12/data/log/"
+            log_files = "ls /var/lib/pgsql/{}/data/log/".format(PG_MAJOR_VER)
             file_name = host.check_output(log_files).strip("\n")
-            log_file = "".join(["/var/lib/pgsql/12/data/log/", file_name])
+            log_file = "".join(["/var/lib/pgsql/{}/data/log/".format(PG_MAJOR_VER), file_name])
         file = host.file(log_file)
         file_content = file.content_string
     yield file_content
@@ -130,10 +130,10 @@ def pgbackrest_full_backup(host):
 def pgbackrest_delete_data(host):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
-        data_dir = "/var/lib/pgsql/12/data/*"
-        service_name = "postgresql-12"
+        data_dir = "/var/lib/pgsql/{}/data/*".format(PG_MAJOR_VER)
+        service_name = "postgresql-{}".format(PG_MAJOR_VER)
     else:
-        data_dir = "/var/lib/postgresql/12/main/*"
+        data_dir = "/var/lib/postgresql/{}/main/*".format(PG_MAJOR_VER)
         service_name = "postgresql"
     with host.sudo("root"):
         stop_postgresql = 'systemctl stop {}'.format(service_name)
@@ -158,10 +158,10 @@ def pgbackrest_restore(pgbackrest_delete_data, host):
 def pgrepack(host):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
-        cmd = "file /usr/pgsql-12/bin/pg_repack "
+        cmd = "file /usr/pgsql-{}/bin/pg_repack ".format(PG_MAJOR_VER)
     else:
         # TODO need to be in PATH?
-        cmd = "file /usr/lib/postgresql/12/bin/pg_repack"
+        cmd = "file /usr/lib/postgresql/{}/bin/pg_repack".format(PG_MAJOR_VER)
     return host.check_output(cmd)
 
 
@@ -174,10 +174,10 @@ def pg_repack_functional(host):
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $3}'"
         assert host.run(select).rc == 0
         if os.lower() in ["redhat", "centos", 'rhel']:
-            cmd = "/usr/pgsql-12/bin/pg_repack -t pgbench_accounts -j 4"
+            cmd = "/usr/pgsql-{}/bin/pg_repack -t pgbench_accounts -j 4".format(PG_MAJOR_VER)
         else:
             # TODO need to be in PATH?
-            cmd = "/usr/lib/postgresql/12/bin/pg_repack -t pgbench_accounts -j 4"
+            cmd = "/usr/lib/postgresql/{}/bin/pg_repack -t pgbench_accounts -j 4".format(PG_MAJOR_VER)
         pg_repack_result = host.run(cmd)
     yield pg_repack_result
 
@@ -190,9 +190,9 @@ def pg_repack_dry_run(host, operating_system):
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $3}'"
         assert host.run(select).rc == 0
         if operating_system.lower() in ["redhat", "centos", 'rhel']:
-            cmd = "/usr/pgsql-12/bin/pg_repack --dry-run -d postgres"
+            cmd = "/usr/pgsql-{}/bin/pg_repack --dry-run -d postgres".format(PG_MAJOR_VER)
         else:
-            cmd = "/usr/lib/postgresql/12/bin/pg_repack --dry-run -d postgres"
+            cmd = "/usr/lib/postgresql/{}/bin/pg_repack --dry-run -d postgres".format(PG_MAJOR_VER)
         pg_repack_result = host.run(cmd)
     yield pg_repack_result
 
@@ -201,9 +201,9 @@ def pg_repack_dry_run(host, operating_system):
 def pg_repack_client_version(host, operating_system):
     with host.sudo("postgres"):
         if operating_system.lower() in ["redhat", "centos", 'rhel']:
-            return host.run("/usr/pgsql-12/bin/pg_repack --version")
+            return host.run("/usr/pgsql-{}/bin/pg_repack --version".format(PG_MAJOR_VER))
         elif operating_system.lower() in ["debian", "ubuntu"]:
-            return host.run("/usr/lib/postgresql/12/bin/pg_repack --version")
+            return host.run("/usr/lib/postgresql/{}/bin/pg_repack --version".format(PG_MAJOR_VER))
 
 
 @pytest.fixture()
@@ -227,8 +227,8 @@ def test_pgaudit_package(host):
         # pkgn = "percona-pgaudit"
         pkgn = "percona-pgaudit14_12"
     elif os in ["debian", "ubuntu"]:
-        pkgn = "percona-postgresql-12-pgaudit"
-        dbgsym_pkgn = "percona-postgresql-12-pgaudit-dbgsym"
+        pkgn = "percona-postgresql-{}-pgaudit".format(PG_MAJOR_VER)
+        dbgsym_pkgn = "percona-postgresql-{}-pgaudit-dbgsym".format(PG_MAJOR_VER)
         dbgsym_pkg = host.package(dbgsym_pkgn)
         assert dbgsym_pkg.is_installed
         assert pg_versions['pgaudit']['version'] in dbgsym_pkg.version
@@ -249,8 +249,8 @@ def test_pgrepack_package(host):
     if os.lower() in ["redhat", "centos", 'rhel']:
         pkgn = "percona-pg_repack12"
     elif os in ["debian", "ubuntu"]:
-        pkgn = "percona-postgresql-12-repack"
-        pkg_dbgsym = host.package("percona-postgresql-12-repack-dbgsym")
+        pkgn = "percona-postgresql-{}-repack".format(PG_MAJOR_VER)
+        pkg_dbgsym = host.package("percona-postgresql-{}-repack-dbgsym".format(PG_MAJOR_VER))
         assert pkg_dbgsym.is_installed
     if pkgn == "":
         pytest.fail("Unsupported operating system")
@@ -382,7 +382,7 @@ def test_pgbackrest_full_backup(pgbackrest_full_backup):
 def test_pgbackrest_restore(host):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
-        service_name = "postgresql-12"
+        service_name = "postgresql-{}".format(PG_MAJOR_VER)
     else:
         service_name = "postgresql"
     with host.sudo("root"):
