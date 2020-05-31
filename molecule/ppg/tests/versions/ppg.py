@@ -55,8 +55,31 @@ DEB_PACKAGES_TEMPLATE = ["percona-postgresql-{}",
                          "percona-postgresql-plperl-{}-dbgsym",
                          "percona-postgresql-plpython-{}-dbgsym",
                          "percona-postgresql-plpython3-{}-dbgsym",
-                         "percona-postgresql-pltcl-{}-dbgsym",
-                         "percona-postgresql-server-dev-{}-dbgsym"]
+                         "percona-postgresql-pltcl-{}-dbgsym"
+                         ]
+
+DEB12_PACKAGES_TEMPLATE = [
+    "percona-postgresql-{}",
+    "percona-postgresql-client",
+    "percona-postgresql",
+    "percona-postgresql-client-{}",
+    "percona-postgresql-client-common",
+    "percona-postgresql-contrib",
+    "percona-postgresql-doc",
+    "percona-postgresql-server-dev-all",
+    "percona-postgresql-doc-{}",
+    "percona-postgresql-plperl-{}",
+    "percona-postgresql-common",
+    "percona-postgresql-plpython3-{}",
+    "percona-postgresql-pltcl-{}",
+    "percona-postgresql-all",
+    "percona-postgresql-server-dev-{}",
+    "percona-postgresql-{}-dbgsym",
+    "percona-postgresql-client-{}-dbgsym",
+    "percona-postgresql-plperl-{}-dbgsym",
+    "percona-postgresql-plpython3-{}-dbgsym",
+    "percona-postgresql-pltcl-{}-dbgsym"
+]
 
 RPM_PACKAGES_TEMPLATE = ["percona-postgresql{}",
                          "percona-postgresql{}-contrib",
@@ -174,7 +197,7 @@ RPM_PROVIDES_TEMPLATE = [("percona-postgresql{}", "postgresql{}"),
                          ("percona-postgresql{}-server", 'postgresql{}-server'),
                          ("percona-postgresql{}-test", "postgresql{}-test"),
                          ("percona-postgresql-client-common", 'postgresql-client-common')
-                ]
+                         ]
 
 
 def fill_template_form(template, pg_version):
@@ -212,7 +235,7 @@ ppg_11_versions = {
                     }
 
 ppg_12_versions = {"deb_pkg_ver": "",
-                   "deb_packages": fill_template_form(DEB_PACKAGES_TEMPLATE, "12"),
+                   "deb_packages": fill_template_form(DEB12_PACKAGES_TEMPLATE, "12"),
                    "deb_provides": fill_provides_template_form(DEB_PROVIDES_TEMPLATE, "12"),
                    "rpm7_provides": fill_provides_template_form(RPM7_PROVIDES_TEMPLATE, "12"),
                    'rpm_provides': fill_provides_template_form(RPM_PROVIDES_TEMPLATE, "12"),
