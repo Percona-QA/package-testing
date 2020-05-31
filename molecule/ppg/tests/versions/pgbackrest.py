@@ -72,12 +72,17 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                                               " interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0,"
                                               " BuildID[sha1]=be1a9050576aa512fd00923f8d9cf9fc0df471a5,"
                                               " not stripped, too many notes (256)"}},
-              "ppg-11.8": {"version": "1.4.5",
-                           "binary_version": "pg_repack 1.4.5",
+              "ppg-11.8": {"version": "2.27",
+                           "binary_version": "pgBackRest 2.27",
                            "binary": {"centos": "",
                                       "ubuntu": "",
                                       "debian": "",
-                                      "debian9.9": "",
+                                      "debian9.9": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,"
+                                                   " x86-64, version 1 (SYSV),"
+                                                   " dynamically linked (uses shared libs),"
+                                                   " for GNU/Linux 2.6.32,"
+                                                   " BuildID[sha1]=8b0047ccd113805806a65c929e9191dbd9a8992a,"
+                                                   " not stripped",
                                       "rhel": ""}},
               "ppg-12.2": {"version": "2.26",
                            "binary_version": "pgBackRest 2.26",

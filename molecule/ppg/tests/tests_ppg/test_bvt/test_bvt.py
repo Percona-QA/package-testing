@@ -226,6 +226,7 @@ def test_enable_extension(host, extension):
         extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $3}'")
         if "11" in os.getenv("VERSION"):
             extensions = host.run("psql -c 'SELECT * FROM pg_extension;'")
+            print(extensions.stdout)
         assert extensions.rc == 0, extensions.stderr
         assert extension in set(extensions.stdout.split()), extensions.stdout
 

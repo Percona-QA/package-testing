@@ -91,7 +91,11 @@ pgrepack = {"ppg-11.5": {"version": "1.4.4",
                          "binary": {"centos": "",
                                     "ubuntu": "",
                                     "debian": "",
-                                    "debian9.9": "",
+                                    "debian9.9": "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable, x86-64,"
+                                                 " version 1 (SYSV), dynamically linked (uses shared libs),"
+                                                 " for GNU/Linux 2.6.32,"
+                                                 " BuildID[sha1]=ec965b02929553830317b07dd4a0048be7e4e772,"
+                                                 " not stripped",
                                     "rhel": ""}},
             "ppg-12.2": {"version": "1.4.5",
                          "binary_version": "pg_repack 1.4.5",
