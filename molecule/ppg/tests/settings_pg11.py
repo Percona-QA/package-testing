@@ -151,7 +151,14 @@ pgrepack = {"ppg-11.5": {"version": "1.4.4",
                                     "rhel": "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable,"
                                             " x86-64, version 1 (SYSV), dynamically linked,"
                                             " interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0,"
-                                            " BuildID[sha1]=12c0c776186a6f6e6bc44b22921b881c8e5cdc8b, not stripped"}}
+                                            " BuildID[sha1]=12c0c776186a6f6e6bc44b22921b881c8e5cdc8b, not stripped"}},
+            "ppg-11.8": {"version": "1.4.5",
+                         "binary_version": "pg_repack 1.4.5",
+                         "binary": {"centos": "",
+                                    "ubuntu": "",
+                                    "debian": "",
+                                    "debian9.9": "",
+                                    "rhel": ""}}
             }
 pgbackrest = {"ppg-11.5": {"version": "2.16",
                            "binary_version": "pgBackRest 2.16",
@@ -226,7 +233,14 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                                               " x86-64, version 1 (SYSV), dynamically linked,"
                                               " interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0,"
                                               " BuildID[sha1]=be1a9050576aa512fd00923f8d9cf9fc0df471a5,"
-                                              " not stripped, too many notes (256)"}}
+                                              " not stripped, too many notes (256)"}},
+              "ppg-11.8": {"version": "1.4.5",
+                           "binary_version": "pg_repack 1.4.5",
+                           "binary": {"centos": "",
+                                      "ubuntu": "",
+                                      "debian": "",
+                                      "debian9.9": "",
+                                      "rhel": ""}}
               }
 patroni = {"ppg-11.5": {'version': "",
                         "binary_version": ""},
