@@ -41,9 +41,9 @@ def start_stop_postgresql(host):
 def postgresql_binary(host):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
-        return host.file("/usr/pgsql-12/bin/postgres")
+        return host.file("/usr/pgsql-{}/bin/postgres".format(PG_MAJOR_VER))
     elif os in ["debian", "ubuntu"]:
-        return host.file("/usr/lib/postgresql/12/bin/postgres")
+        return host.file("/usr/lib/postgresql/{}/bin/postgres".format(PG_MAJOR_VER))
 
 
 @pytest.fixture()
@@ -131,12 +131,12 @@ def test_postgresql_client_version(host):
     if os.lower() in ["redhat", "centos", 'rhel']:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(pkg)
-    assert "12" in pkg.version
+    assert PG_MAJOR_VER in pkg.version
 
 
 def test_postgresql_version(host):
     os = host.system_info.distribution
-    pkg = "percona-postgresql-client-12"
+    pkg = "percona-postgresql-client-{}".format(PG_MAJOR_VER)
     if os.lower() in ["redhat", "centos", 'rhel']:
         pkg = "percona-postgresql{}".format(PG_MAJOR_VER)
     pkg = host.package(pkg)
@@ -146,7 +146,7 @@ def test_postgresql_version(host):
 def test_postgresql_is_running_and_enabled(host):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
-        postgresql = host.service("postgresql-12")
+        postgresql = host.service("postgresql-{}".format(PG_MAJOR_VER))
     else:
         postgresql = host.service("postgresql")
     assert postgresql.is_running
@@ -226,7 +226,6 @@ def test_enable_extension(host, extension):
         extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $3}'")
         if "11" in os.getenv("VERSION"):
             extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
-            print(extensions.stdout)
         assert extensions.rc == 0, extensions.stderr
         assert extension in set(extensions.stdout.split()), extensions.stdout
 
@@ -246,6 +245,8 @@ def test_drop_extension(host, extension):
         assert drop_extension.rc == 0, drop_extension.stderr
         assert drop_extension.stdout.strip("\n") == "DROP EXTENSION", drop_extension.stdout
         extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $3}'")
+        if "11" in os.getenv("VERSION"):
+            extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
         assert extensions.rc == 0, extensions.stderr
         assert extension not in set(extensions.stdout.split()), extensions.stdout
 
@@ -253,6 +254,8 @@ def test_drop_extension(host, extension):
 def test_plpgsql_extension(host):
     with host.sudo("postgres"):
         extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $3}'")
+        if "11" in os.getenv("VERSION"):
+            extensions = host.run("psql -c 'SELECT * FROM pg_extension;' | awk 'NR>=3{print $1}'")
         assert extensions.rc == 0, extensions.stderr
         assert "plpgsql" in set(extensions.stdout.split()), extensions.stdout
 

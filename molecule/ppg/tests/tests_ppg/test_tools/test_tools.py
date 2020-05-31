@@ -272,7 +272,6 @@ def test_pgrepack_binary(host, pgrepack):
             assert pgrepack == pg_versions['pgrepack']['binary']['debian'], pgrepack
     elif os.lower() == "ubuntu":
         rel_name = host.system_info.release
-        print(rel_name)
         if rel_name == '18.04':
             assert pgrepack == pg_versions['pgrepack']['binary']['ubuntu'], pgrepack
         else:
@@ -358,7 +357,6 @@ def test_pgbackrest_binary(pgbackrest, operating_system, host):
                 pgbackrest.stdout.strip("\n")
     elif operating_system.lower() == "ubuntu":
         rel_name = host.system_info.release
-        print(rel_name)
         actual = pgbackrest.stdout.strip("\n")
         if rel_name == '18.04':
             expected = pg_versions['pgbackrest']['binary']['ubuntu']
