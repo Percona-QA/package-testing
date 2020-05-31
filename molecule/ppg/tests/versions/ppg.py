@@ -223,7 +223,8 @@ ppg_12_versions = {"deb_pkg_ver": "",
                    "extensions": PG12_EXTENSIONS,
                    "languages": LANGUAGES}
 
-ppg = {"ppg-11.6": ppg_11_versions,
+ppg = {"ppg-11.5": ppg_11_versions,
+       "ppg-11.6": ppg_11_versions,
        "ppg-11.7": ppg_11_versions,
        "ppg-11.8": ppg_11_versions,
        "ppg-12.2": ppg_12_versions,
