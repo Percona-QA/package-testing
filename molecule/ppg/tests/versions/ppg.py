@@ -1,17 +1,4 @@
-DEB_PKG_VERSIONS = ["11+204-1.buster", "204-1.buster", "1:11-5.buster", "1:11-5.stretch", "204-1.stretch",
-                    "11+204-1.stretch", "1:11-5.bionic", '11+204-1.bionic', "204-1.bionic", "1:11-5.cosmic",
-                    "11+204-1.cosmic", "204-1.cosmic", "1:11-5.disco", "11+204-1.disco", "204-1.disco"]
-
-DEB116_PKG_VERSIONS = ["11+210-1.buster", "204-1.buster", "2:11-6.2.buster", "2:11-6.2.stretch", "204-1.stretch",
-                       "11+210-1.stretch", "2:11-6.2.bionic", '11+210-1.bionic', "204-1.bionic", "2:11-6.2.cosmic",
-                       "11+210-1.cosmic", "204-1.cosmic", "2:11-6.2.disco", "11+210-1.disco", "204-1.disco",
-                       "210-1.stretch", "210-1.cosmic", "210-1.buster", '210-1.disco', "210-1.bionic"]
-
-DEB117_PKG_VERSIONS = ["11+214-1.buster", "204-1.buster", "2:11-7.2.buster", "2:11-7.2.stretch", "204-1.stretch",
-                       "11+214-1.stretch", "2:11-7.2.bionic", '11+214-1.bionic', "204-1.bionic", "2:11-7.2.cosmic",
-                       "11+214-1.cosmic", "204-1.cosmic", "2:11-7.2.disco", "11+214-1.disco", "204-1.disco",
-                       "214-1.stretch", "214-1.cosmic", "214-1.buster", '214-1.disco', "214-1.bionic"]
-
+DISTROS = ['buster', 'stretch', 'bionic', 'focal']
 DEB116_PACKAGES_TEMPLATE = ["percona-postgresql-{}",
                             "percona-postgresql-client",
                             "percona-postgresql",
@@ -220,8 +207,15 @@ def fill_provides_template_form(provides_template, pg_version):
     return [(t[0].format(pg_version), t[1].format(pg_version)) for t in provides_template]
 
 
+def fill_package_versions(packages, distros):
+    result = []
+    for d in distros:
+        for p in packages:
+            result.append(".".join([p, d]))
+    return result
+
+
 ppg_11_versions = {
-    "deb_pkg_ver": DEB_PKG_VERSIONS,
     "deb_packages": fill_template_form(DEB_PACKAGES_TEMPLATE, "11"),
     "deb_provides": fill_provides_template_form(DEB_PROVIDES_TEMPLATE, "11"),
     "rpm7_provides": fill_provides_template_form(RPM7_PROVIDES_TEMPLATE, "11"),
@@ -234,7 +228,7 @@ ppg_11_versions = {
     "languages": LANGUAGES
                     }
 
-ppg_12_versions = {"deb_pkg_ver": "",
+ppg_12_versions = {
                    "deb_packages": fill_template_form(DEB12_PACKAGES_TEMPLATE, "12"),
                    "deb_provides": fill_provides_template_form(DEB_PROVIDES_TEMPLATE, "12"),
                    "rpm7_provides": fill_provides_template_form(RPM7_PROVIDES_TEMPLATE, "12"),
@@ -246,9 +240,19 @@ ppg_12_versions = {"deb_pkg_ver": "",
                    "extensions": PG12_EXTENSIONS,
                    "languages": LANGUAGES}
 
-ppg = {"ppg-11.5": ppg_11_versions,
-       "ppg-11.6": ppg_11_versions,
-       "ppg-11.7": ppg_11_versions,
-       "ppg-11.8": ppg_11_versions,
+ppg = {"ppg-11.5": ppg_11_versions.update({
+           "deb_pkg_ver": fill_package_versions(packages=["11+204-1", "204-1", '1:11-5', '11+210-1'],
+                                                distros=DISTROS)}),
+       "ppg-11.6": ppg_11_versions.update({
+           "deb_pkg_ver": fill_package_versions(packages=["11+204-1", "204-1", '2:11-6.2', '11+210-1'],
+                                                distros=DISTROS)}),
+       "ppg-11.7": ppg_11_versions.update({
+           "deb_pkg_ver": fill_package_versions(packages=["11+214-1", "204-1", '2:11-7.2', '11+210-1'],
+                                                distros=DISTROS)}),
+       "ppg-11.8": ppg_11_versions.update({
+           "deb_pkg_ver": fill_package_versions(packages=["11+204-1", "204-1", '2:11-8.1', '11+210-1'],
+                                                distros=DISTROS)}),
        "ppg-12.2": ppg_12_versions,
-       "ppg-12.3": ppg_12_versions}
+       "ppg-12.3": ppg_12_versions.update({
+           "deb_pkg_ver": fill_package_versions(packages=["2:12-3.1", "12+215-1", '215-1'],
+                                                distros=DISTROS)})}

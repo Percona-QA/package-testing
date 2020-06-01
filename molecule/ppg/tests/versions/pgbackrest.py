@@ -81,7 +81,20 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                                                 " BuildID[sha1]=8b0047ccd113805806a65c929e9191dbd9a8992a,"
                                                 " not stripped",
                                       "ubuntu": "",
-                                      "debian": "",
+                                      "ubuntu-focal": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
+                                                      " x86-64, version 1 (SYSV),"
+                                                      " dynamically linked,"
+                                                      " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                                      " for GNU/Linux 3.2.0,"
+                                                      " BuildID[sha1]=3dcd55ad6e18c376bb7ba1d6db410e0d6dd77470,"
+                                                      " stripped",
+                                      "debian": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
+                                                " x86-64, version 1 (SYSV),"
+                                                " dynamically linked,"
+                                                " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                                " for GNU/Linux 3.2.0,"
+                                                " BuildID[sha1]=3dcd55ad6e18c376bb7ba1d6db410e0d6dd77470,"
+                                                " stripped",
                                       "debian9.9": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,"
                                                    " x86-64, version 1 (SYSV),"
                                                    " dynamically linked (uses shared libs),"

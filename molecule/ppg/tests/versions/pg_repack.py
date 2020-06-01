@@ -95,6 +95,14 @@ pgrepack = {"ppg-11.5": {"version": "1.4.4",
                                               " BuildID[sha1]=ec965b02929553830317b07dd4a0048be7e4e772,"
                                               " not stripped",
                                     "ubuntu": "",
+                                    "ubuntu-focal": "/usr/lib/postgresql/11/bin/pg_repack:"
+                                                    " ELF 64-bit LSB shared object, x86-64,"
+                                                    " version 1 (SYSV),"
+                                                    " dynamically linked,"
+                                                    " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                                    " for GNU/Linux 3.2.0,"
+                                                    " BuildID[sha1]=a8a97ed03f9dbc4dff4bfbf9c48dc45d54752772,"
+                                                    " stripped",
                                     "debian": "",
                                     "debian9.9": "/usr/pgsql-11/bin/pg_repack: ELF 64-bit LSB executable, x86-64,"
                                                  " version 1 (SYSV), dynamically linked (uses shared libs),"

@@ -3,7 +3,7 @@ import pytest
 
 import testinfra.utils.ansible_runner
 
-from molecule.ppg.tests.settings import versions, PG_MAJOR_VER
+from molecule.ppg.tests.settings import versions, MAJOR_VER
 
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -106,7 +106,7 @@ def build_libpq_programm(host):
         return host.run(
             "export LIBPQ_DIR=/usr/pgsql-{}/  && export LIBRARY_PATH=/usr/pgsql-{}/lib/ &&"
             "gcc -o lib_version /tmp/libpq_command_temp_dir/lib_version.c -I{} -lpq -std=c99".format(
-                PG_MAJOR_VER, PG_MAJOR_VER, pg_include))
+                MAJOR_VER, MAJOR_VER, pg_include))
     return host.run(
         "gcc -o lib_version /tmp/libpq_command_temp_dir/lib_version.c -I{} -lpq -std=c99".format(pg_include))
 
