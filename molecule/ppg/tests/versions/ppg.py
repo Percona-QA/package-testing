@@ -252,7 +252,9 @@ ppg = {"ppg-11.5": ppg_11_versions.update({
        "ppg-11.8": ppg_11_versions.update({
            "deb_pkg_ver": fill_package_versions(packages=["11+204-1", "204-1", '2:11-8.1', '11+210-1'],
                                                 distros=DISTROS)}),
-       "ppg-12.2": ppg_12_versions,
+       "ppg-12.2": ppg_12_versions.update({
+           "deb_pkg_ver": fill_package_versions(packages=["2:12-3.1", "12+215-1", '215-1'],
+                                                distros=DISTROS)}),
        "ppg-12.3": ppg_12_versions.update({
            "deb_pkg_ver": fill_package_versions(packages=["2:12-3.1", "12+215-1", '215-1'],
                                                 distros=DISTROS)})}
