@@ -215,46 +215,50 @@ def fill_package_versions(packages, distros):
     return result
 
 
-ppg_11_versions = {
-    "deb_packages": fill_template_form(DEB_PACKAGES_TEMPLATE, "11"),
-    "deb_provides": fill_provides_template_form(DEB_PROVIDES_TEMPLATE, "11"),
-    "rpm7_provides": fill_provides_template_form(RPM7_PROVIDES_TEMPLATE, "11"),
-    'rpm_provides': fill_provides_template_form(RPM_PROVIDES_TEMPLATE, "11"),
-    "rpm_packages": fill_template_form(RPM_PACKAGES_TEMPLATE, "11"),
-    "rpm7_packages": fill_template_form(RPM7_PACKAGES_TEMPLATE, "11"),
-    "rhel_files": fill_template_form(RHEL_FILES_TEMPLATE, "11"),
-    "deb_files": fill_template_form(DEB_FILES_TEMPLATE, "11"),
-    "extensions": PG11_EXTENSIONS,
-    "languages": LANGUAGES
-                    }
+def get_pg11_versions(distros, packages):
+    ppg_11_versions = {
+        "deb_packages": fill_template_form(DEB_PACKAGES_TEMPLATE, "11"),
+        "deb_provides": fill_provides_template_form(DEB_PROVIDES_TEMPLATE, "11"),
+        "rpm7_provides": fill_provides_template_form(RPM7_PROVIDES_TEMPLATE, "11"),
+        'rpm_provides': fill_provides_template_form(RPM_PROVIDES_TEMPLATE, "11"),
+        "rpm_packages": fill_template_form(RPM_PACKAGES_TEMPLATE, "11"),
+        "rpm7_packages": fill_template_form(RPM7_PACKAGES_TEMPLATE, "11"),
+        "rhel_files": fill_template_form(RHEL_FILES_TEMPLATE, "11"),
+        "deb_files": fill_template_form(DEB_FILES_TEMPLATE, "11"),
+        "extensions": PG11_EXTENSIONS,
+        "languages": LANGUAGES
+                        }
+    ppg_11_versions.update({"deb_pkg_ver": fill_package_versions(packages=packages,
+                                                                 distros=distros)})
+    return ppg_11_versions
 
-ppg_12_versions = {
-                   "deb_packages": fill_template_form(DEB12_PACKAGES_TEMPLATE, "12"),
-                   "deb_provides": fill_provides_template_form(DEB_PROVIDES_TEMPLATE, "12"),
-                   "rpm7_provides": fill_provides_template_form(RPM7_PROVIDES_TEMPLATE, "12"),
-                   'rpm_provides': fill_provides_template_form(RPM_PROVIDES_TEMPLATE, "12"),
-                   "rpm_packages": fill_template_form(RPM_PACKAGES_TEMPLATE, "12"),
-                   "rpm7_packages": fill_template_form(RPM7_PACKAGES_TEMPLATE, "12"),
-                   "rhel_files": fill_template_form(RHEL_FILES_TEMPLATE, "12"),
-                   "deb_files": fill_template_form(DEB_FILES_TEMPLATE, "12"),
-                   "extensions": PG12_EXTENSIONS,
-                   "languages": LANGUAGES}
 
-ppg = {"ppg-11.5": ppg_11_versions.update({
-           "deb_pkg_ver": fill_package_versions(packages=["11+204-1", "204-1", '1:11-5', '11+210-1'],
-                                                distros=DISTROS)}),
-       "ppg-11.6": ppg_11_versions.update({
-           "deb_pkg_ver": fill_package_versions(packages=["11+204-1", "204-1", '2:11-6.2', '11+210-1'],
-                                                distros=DISTROS)}),
-       "ppg-11.7": ppg_11_versions.update({
-           "deb_pkg_ver": fill_package_versions(packages=["11+214-1", "204-1", '2:11-7.2', '11+210-1'],
-                                                distros=DISTROS)}),
-       "ppg-11.8": ppg_11_versions.update({
-           "deb_pkg_ver": fill_package_versions(packages=["11+204-1", "204-1", '2:11-8.1', '11+210-1'],
-                                                distros=DISTROS)}),
-       "ppg-12.2": ppg_12_versions.update({
-           "deb_pkg_ver": fill_package_versions(packages=["2:12-3.1", "12+215-1", '215-1'],
-                                                distros=DISTROS)}),
-       "ppg-12.3": ppg_12_versions.update({
-           "deb_pkg_ver": fill_package_versions(packages=["2:12-3.1", "12+215-1", '215-1'],
-                                                distros=DISTROS)})}
+def get_pg12_versions(distros, packages):
+    ppg_12_versions = {
+                       "deb_packages": fill_template_form(DEB12_PACKAGES_TEMPLATE, "12"),
+                       "deb_provides": fill_provides_template_form(DEB_PROVIDES_TEMPLATE, "12"),
+                       "rpm7_provides": fill_provides_template_form(RPM7_PROVIDES_TEMPLATE, "12"),
+                       'rpm_provides': fill_provides_template_form(RPM_PROVIDES_TEMPLATE, "12"),
+                       "rpm_packages": fill_template_form(RPM_PACKAGES_TEMPLATE, "12"),
+                       "rpm7_packages": fill_template_form(RPM7_PACKAGES_TEMPLATE, "12"),
+                       "rhel_files": fill_template_form(RHEL_FILES_TEMPLATE, "12"),
+                       "deb_files": fill_template_form(DEB_FILES_TEMPLATE, "12"),
+                       "extensions": PG12_EXTENSIONS,
+                       "languages": LANGUAGES}
+    ppg_12_versions.update({"deb_pkg_ver": fill_package_versions(packages=packages,
+                                                                 distros=distros)})
+    return ppg_12_versions
+
+
+ppg = {"ppg-11.5": get_pg11_versions(packages=["11+204-1", "204-1", '1:11-5', '11+210-1'],
+                                     distros=DISTROS),
+       "ppg-11.6": get_pg11_versions(packages=["11+204-1", "204-1", '2:11-6.2', '11+210-1'],
+                                     distros=DISTROS),
+       "ppg-11.7": get_pg11_versions(packages=["11+214-1", "204-1", '2:11-7.2', '11+210-1'],
+                                     distros=DISTROS),
+       "ppg-11.8": get_pg11_versions(packages=["11+204-1", "204-1", '2:11-8.1', '11+210-1'],
+                                     distros=DISTROS),
+       "ppg-12.2": get_pg12_versions(packages=["2:12-3.1", "12+215-1", '215-1'],
+                                     distros=DISTROS),
+       "ppg-12.3": get_pg12_versions(packages=["2:12-3.1", "12+215-1", '215-1'],
+                                     distros=DISTROS)}
