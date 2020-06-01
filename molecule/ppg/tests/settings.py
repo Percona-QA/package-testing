@@ -1,6 +1,4 @@
 import os
-import molecule.ppg.tests.settings_pg11 as pg11
-import molecule.ppg.tests.settings_pg12 as pg12
 
 from molecule.ppg.tests.versions.patroni import patroni
 from molecule.ppg.tests.versions.pgbackrest import pgbackrest
@@ -34,7 +32,7 @@ versions = {"ppg-11.8": {"version": "11.8",
                          "languages": ppg["ppg-11.8"]['languages']
                          },
             "ppg-11.7": {"version": "11.7",
-                         "deb_pkg_ver": pg11.DEB117_PKG_VERSIONS,
+                         "deb_pkg_ver": ppg["ppg-11.7"]['deb_pkg_ver'],
                          "deb_packages": ppg["ppg-11.7"]['deb_packages'],
                          "percona-postgresql-common": '214',
                          "percona-postgresql-client-common": "214",
@@ -55,7 +53,7 @@ versions = {"ppg-11.8": {"version": "11.8",
                          "languages": ppg["ppg-11.7"]['languages']
                          },
             "ppg-11.6": {"version": "11.6",
-                         "deb_pkg_ver": pg11.DEB116_PKG_VERSIONS,
+                         "deb_pkg_ver": ppg["ppg-11.6"]['deb_pkg_ver'],
                          "deb_packages": ppg["ppg-11.6"]['deb_packages'],
                          "percona-postgresql-common": '210',
                          "percona-postgresql-client-common": "210",
@@ -76,7 +74,7 @@ versions = {"ppg-11.8": {"version": "11.8",
                          "languages": ppg["ppg-11.6"]['languages']
                          },
             "ppg-11.5": {"version": "11.5",
-                         "deb_pkg_ver": pg11.DEB_PKG_VERSIONS,
+                         "deb_pkg_ver": ppg["ppg-11.5"]['deb_pkg_ver'],
                          "deb_packages": ppg["ppg-11.5"]['deb_packages'],
                          "percona-postgresql-common": '204',
                          "percona-postgresql-client-common": "204",
@@ -91,7 +89,7 @@ versions = {"ppg-11.8": {"version": "11.8",
                          "libpq": "Version of libpq: 110005"
                          },
             "ppg-12.2": {"version": "12.2",
-                         "deb_pkg_ver": pg12.DEB116_PKG_VERSIONS,
+                         "deb_pkg_ver": ppg["ppg-12.2"]['deb_pkg_ver'],
                          "deb_packages": ppg["ppg-12.2"]['deb_packages'],
                          "percona-postgresql-common": '214',
                          "percona-postgresql-client-common": "214",
@@ -112,7 +110,7 @@ versions = {"ppg-11.8": {"version": "11.8",
                          "languages": ppg["ppg-12.2"]['languages']
                          },
             "ppg-12.3": {"version": "12.3",
-                         "deb_pkg_ver": pg12.DEB116_PKG_VERSIONS,
+                         "deb_pkg_ver": ppg["ppg-12.3"]['deb_pkg_ver'],
                          "deb_packages": ppg["ppg-12.3"]['deb_packages'],
                          "percona-postgresql-common": '214',
                          "percona-postgresql-client-common": "214",
