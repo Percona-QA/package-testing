@@ -141,6 +141,9 @@ PG12_EXTENSIONS = [
     'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'postgres_fdw'
 ]
 
+PG12_DEB_EXENTSIONS = []
+PG11_DEB_EXTENSIONS = []
+
 LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", "plpython3u"]
 
 DEB_PROVIDES_TEMPLATE = [("percona-postgresql-{}", "postgresql-{}"),
@@ -215,6 +218,11 @@ def fill_package_versions(packages, distros):
     return result
 
 
+def get_extensions(distro_type, version):
+    if distro_type == "deb":
+        return PG12_DEB_EXENTSIONS
+
+
 def get_pg11_versions(distros, packages):
     ppg_11_versions = {
         "deb_packages": fill_template_form(DEB_PACKAGES_TEMPLATE, "11"),
@@ -256,7 +264,7 @@ ppg = {"ppg-11.5": get_pg11_versions(packages=["11+204-1", "204-1", '1:11-5', '1
                                      distros=DISTROS),
        "ppg-11.7": get_pg11_versions(packages=["11+214-1", "204-1", '2:11-7.2', '11+210-1'],
                                      distros=DISTROS),
-       "ppg-11.8": get_pg11_versions(packages=["11+204-1", "204-1", '2:11-8.1', '11+210-1'],
+       "ppg-11.8": get_pg11_versions(packages=["11+204-1", '2:11-8.1', '215-1', '11+215-1'],
                                      distros=DISTROS),
        "ppg-12.2": get_pg12_versions(packages=["2:12-3.1", "12+215-1", '215-1'],
                                      distros=DISTROS),

@@ -80,13 +80,22 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                                                 " for GNU/Linux 2.6.32,"
                                                 " BuildID[sha1]=8b0047ccd113805806a65c929e9191dbd9a8992a,"
                                                 " not stripped",
-                                      "ubuntu": "",
-                                      "ubuntu-focal": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
-                                                      " x86-64, version 1 (SYSV),"
+                                      "ubuntu": "/usr/bin/pgbackrest:"
+                                                " ELF 64-bit LSB shared object,"
+                                                " x86-64, version 1 (SYSV),"
+                                                " dynamically linked,"
+                                                " interpreter /lib64/l,"
+                                                " for GNU/Linux 3.2.0,"
+                                                " BuildID[sha1]=32f534d89509deca2900eed38444853023c054ca,"
+                                                " stripped",
+                                      "ubuntu-focal": "/usr/bin/pgbackrest:"
+                                                      " ELF 64-bit LSB shared object,"
+                                                      " x86-64,"
+                                                      " version 1 (SYSV),"
                                                       " dynamically linked,"
                                                       " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                                      " BuildID[sha1]=24a1e9caa4f5d981ef3b6f82b7bee4420b48c7fc,"
                                                       " for GNU/Linux 3.2.0,"
-                                                      " BuildID[sha1]=3dcd55ad6e18c376bb7ba1d6db410e0d6dd77470,"
                                                       " stripped",
                                       "debian": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
                                                 " x86-64, version 1 (SYSV),"
@@ -95,13 +104,24 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                                                 " for GNU/Linux 3.2.0,"
                                                 " BuildID[sha1]=3dcd55ad6e18c376bb7ba1d6db410e0d6dd77470,"
                                                 " stripped",
-                                      "debian9.9": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,"
-                                                   " x86-64, version 1 (SYSV),"
-                                                   " dynamically linked (uses shared libs),"
+                                      "debian9.9": "/usr/bin/pgbackrest:"
+                                                   " ELF 64-bit LSB shared object,"
+                                                   " x86-64,"
+                                                   " version 1 (SYSV),"
+                                                   " dynamically linked,"
+                                                   " interpreter /lib64/ld-linux-x86-64.so.2,"
                                                    " for GNU/Linux 2.6.32,"
-                                                   " BuildID[sha1]=8b0047ccd113805806a65c929e9191dbd9a8992a,"
-                                                   " not stripped",
-                                      "rhel": ""}},
+                                                   " BuildID[sha1]=52c707d8b3b1faa32386a5800867d95c6e61199a,"
+                                                   " stripped",
+                                      "rhel": "/usr/bin/pgbackrest:"
+                                              " ELF 64-bit LSB executable,"
+                                              " x86-64, version 1 (SYSV),"
+                                              " dynamically linked,"
+                                              " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                              " for GNU/Linux 3.2.0,"
+                                              " BuildID[sha1]=2bddcfb5bf7c4cb1b8a8cf8f7a430453d29324ea,"
+                                              " not stripped,"
+                                              " too many notes (256)"}},
               "ppg-12.2": {"version": "2.26",
                            "binary_version": "pgBackRest 2.26",
                            "binary": {"centos": "/usr/bin/pgbackrest: ELF 64-bit LSB executable,"
@@ -148,9 +168,33 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
               "ppg-12.3": {"version": "2.27",
                            "binary_version": "pgBackRest 2.27",
                            "binary": {"centos": "",
-                                      "ubuntu": "",
-                                      "ubuntu-focal": "",
-                                      "debian": "",
+                                      "ubuntu": "/usr/bin/pgbackrest:"
+                                                " ELF 64-bit LSB shared object,"
+                                                " x86-64,"
+                                                " version 1 (SYSV),"
+                                                " dynamically linked,"
+                                                " interpreter /lib64/l,"
+                                                " for GNU/Linux 3.2.0,"
+                                                " BuildID[sha1]=b2dd33bb2bb237727244bb3f71b5f5820e6cfc36,"
+                                                " stripped",
+                                      "ubuntu-focal": "/usr/bin/pgbackrest:"
+                                                      " ELF 64-bit LSB shared object,"
+                                                      " x86-64,"
+                                                      " version 1 (SYSV),"
+                                                      " dynamically linked,"
+                                                      " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                                      " BuildID[sha1]=3baeb49fc6b4d8c80dc908af45a5a03dc0d605f2,"
+                                                      " for GNU/Linux 3.2.0,"
+                                                      " stripped",
+                                      "debian": "/usr/bin/pgbackrest:"
+                                                " ELF 64-bit LSB shared object,"
+                                                " x86-64,"
+                                                " version 1 (SYSV),"
+                                                " dynamically linked,"
+                                                " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                                " for GNU/Linux 3.2.0,"
+                                                " BuildID[sha1]=4026f118b83459584cc3d0f8eb6b549bf423872c,"
+                                                " stripped",
                                       "debian9.9": "/usr/bin/pgbackrest: ELF 64-bit LSB shared object,"
                                                    " x86-64,"
                                                    " version 1 (SYSV),"
