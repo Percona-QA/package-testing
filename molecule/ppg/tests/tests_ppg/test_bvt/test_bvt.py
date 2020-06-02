@@ -3,13 +3,11 @@ import pytest
 
 import testinfra.utils.ansible_runner
 
-from molecule.ppg.tests.settings import versions, MAJOR_VER
-
+from molecule.ppg.tests.settings import get_ppg_versions, MAJOR_VER
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
-
-pg_versions = versions[os.getenv("VERSION")]
+pg_versions = get_ppg_versions(os.environ['MOLECULE_SCENARIO_NAME'])[[os.getenv("VERSION")]]
 
 RHEL_FILES = pg_versions['rhel_files']
 RPM7_PACKAGES = pg_versions['rpm7_packages']

@@ -117,32 +117,30 @@ RHEL_FILES_TEMPLATE = ["/var/lib/pgsql/{}/data/postgresql.conf",
                        "/var/lib/pgsql/{}/data/pg_hba.conf",
                        "/var/lib/pgsql/{}/data/pg_ident.conf"]
 
-PG11_EXTENSIONS = [
-    'xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', 'hstore', 'plperlu', 'plperl', 'ltree',
-    'hstore_plperlu', 'dict_xsyn', 'autoinc', 'hstore_plpython3u', 'insert_username', 'intagg', 'adminpack',
-    'intarray', 'cube', 'lo', 'jsonb_plpython2u', 'jsonb_plperl', 'jsonb_plperlu', 'btree_gin', 'pgrowlocks',
-    'bloom', 'seg', 'pageinspect', 'btree_gist', 'sslinfo', 'pg_visibility', 'ltree_plpython2u', 'refint',
-    'jsonb_plpython3u', 'jsonb_plpythonu', 'moddatetime', 'ltree_plpythonu', 'dict_int', 'pg_freespacemap',
-    'pgstattuple', 'hstore_plpythonu', 'uuid-ossp', 'tsm_system_time', 'tsm_system_rows', 'unaccent',
+RPM_EXTENSIONS = [
+    'xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl',
+    'hstore', 'plperlu', 'plperl', 'ltree''hstore_plperlu', 'dict_xsyn',
+    'autoinc', 'hstore_plpython3u', 'insert_username', 'intagg', 'adminpack',
+    'intarray', 'cube', 'lo', 'jsonb_plpython2u', 'jsonb_plperl', 'jsonb_plperlu',
+    'btree_gin', 'pgrowlocks', 'bloom', 'seg', 'pageinspect', 'btree_gist', 'sslinfo',
+    'pg_visibility', 'ltree_plpython2u', 'refint', 'jsonb_plpython3u', 'jsonb_plpythonu',
+    'moddatetime', 'ltree_plpythonu', 'dict_int', 'pg_freespacemap', 'pgstattuple',
+    'hstore_plpythonu', 'uuid-ossp', 'tsm_system_time', 'tsm_system_rows', 'unaccent',
     'tablefunc', 'pgcrypto', 'pg_buffercache', 'amcheck', 'citext',  'timetravel',  'isn',
-    'hstore_plpython2u', 'ltree_plpython3u', 'fuzzystrmatch', 'earthdistance', 'hstore_plperl', 'pg_prewarm',
-    'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'postgres_fdw'
-]
+    'hstore_plpython2u', 'ltree_plpython3u', 'fuzzystrmatch', 'earthdistance', 'hstore_plperl',
+    'pg_prewarm', 'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'postgres_fdw']
 
-PG12_EXTENSIONS = [
-    'xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl', 'hstore', 'plperlu', 'plperl', 'ltree',
-    'hstore_plperlu', 'dict_xsyn', 'autoinc', 'hstore_plpython3u', 'insert_username', 'intagg', 'adminpack',
-    'intarray', 'cube', 'lo', 'jsonb_plpython2u', 'jsonb_plperl', 'jsonb_plperlu', 'btree_gin', 'pgrowlocks',
-    'bloom', 'seg', 'pageinspect', 'btree_gist', 'sslinfo', 'pg_visibility', 'ltree_plpython2u', 'refint',
-    'jsonb_plpython3u', 'jsonb_plpythonu', 'moddatetime', 'ltree_plpythonu', 'dict_int', 'pg_freespacemap',
-    'pgstattuple', 'hstore_plpythonu', 'uuid-ossp', 'tsm_system_time', 'tsm_system_rows', 'unaccent',
-    'tablefunc', 'pgcrypto', 'pg_buffercache', 'amcheck', 'citext', 'isn',
-    'hstore_plpython2u', 'ltree_plpython3u', 'fuzzystrmatch', 'earthdistance', 'hstore_plperl', 'pg_prewarm',
-    'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'postgres_fdw'
+DEB_EXTENSIONS = [
+    'xml2', 'tcn', 'plpython3u', 'pltcl', 'hstore', 'plperlu', 'plperl', 'ltree',
+    'hstore_plperlu', 'dict_xsyn', 'autoinc', 'hstore_plpython3u', 'insert_username', 'intagg',
+    'adminpack', 'intarray', 'cube', 'lo', 'jsonb_plperl', 'jsonb_plperlu', 'btree_gin',
+    'pgrowlocks', 'bloom', 'seg', 'pageinspect', 'btree_gist', 'sslinfo', 'pg_visibility',
+    'refint', 'jsonb_plpython3u', 'moddatetime', 'dict_int', 'pg_freespacemap', 'pgstattuple',
+    'uuid-ossp', 'tsm_system_time', 'tsm_system_rows', 'unaccent', 'tablefunc', 'pgcrypto',
+    'pg_buffercache', 'amcheck', 'citext', 'isn', 'ltree_plpython3u', 'fuzzystrmatch',
+    'earthdistance', 'hstore_plperl', 'pg_prewarm', 'dblink', 'pltclu', 'file_fdw',
+    'pg_stat_statements', 'postgres_fdw'
 ]
-
-PG12_DEB_EXENTSIONS = []
-PG11_DEB_EXTENSIONS = []
 
 LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", "plpython3u"]
 
@@ -218,12 +216,7 @@ def fill_package_versions(packages, distros):
     return result
 
 
-def get_extensions(distro_type, version):
-    if distro_type == "deb":
-        return PG12_DEB_EXENTSIONS
-
-
-def get_pg11_versions(distros, packages):
+def get_pg11_versions(distros, packages, distro_type):
     ppg_11_versions = {
         "deb_packages": fill_template_form(DEB_PACKAGES_TEMPLATE, "11"),
         "deb_provides": fill_provides_template_form(DEB_PROVIDES_TEMPLATE, "11"),
@@ -233,15 +226,17 @@ def get_pg11_versions(distros, packages):
         "rpm7_packages": fill_template_form(RPM7_PACKAGES_TEMPLATE, "11"),
         "rhel_files": fill_template_form(RHEL_FILES_TEMPLATE, "11"),
         "deb_files": fill_template_form(DEB_FILES_TEMPLATE, "11"),
-        "extensions": PG11_EXTENSIONS,
+        "extensions:": RPM_EXTENSIONS,
         "languages": LANGUAGES
                         }
+    if ("debian" or "ubuntu") in distro_type:
+        ppg_11_versions['extensions'] = DEB_EXTENSIONS
     ppg_11_versions.update({"deb_pkg_ver": fill_package_versions(packages=packages,
                                                                  distros=distros)})
     return ppg_11_versions
 
 
-def get_pg12_versions(distros, packages):
+def get_pg12_versions(distros, packages, distro_type):
     ppg_12_versions = {
                        "deb_packages": fill_template_form(DEB12_PACKAGES_TEMPLATE, "12"),
                        "deb_provides": fill_provides_template_form(DEB_PROVIDES_TEMPLATE, "12"),
@@ -251,22 +246,30 @@ def get_pg12_versions(distros, packages):
                        "rpm7_packages": fill_template_form(RPM7_PACKAGES_TEMPLATE, "12"),
                        "rhel_files": fill_template_form(RHEL_FILES_TEMPLATE, "12"),
                        "deb_files": fill_template_form(DEB_FILES_TEMPLATE, "12"),
-                       "extensions": PG12_EXTENSIONS,
+                       "extensions": RPM_EXTENSIONS,
                        "languages": LANGUAGES}
+    if ("debian" or "ubuntu") in distro_type:
+        ppg_12_versions['extensions'] = DEB_EXTENSIONS
     ppg_12_versions.update({"deb_pkg_ver": fill_package_versions(packages=packages,
                                                                  distros=distros)})
     return ppg_12_versions
 
 
-ppg = {"ppg-11.5": get_pg11_versions(packages=["11+204-1", "204-1", '1:11-5', '11+210-1'],
-                                     distros=DISTROS),
-       "ppg-11.6": get_pg11_versions(packages=["11+204-1", "204-1", '2:11-6.2', '11+210-1'],
-                                     distros=DISTROS),
-       "ppg-11.7": get_pg11_versions(packages=["11+214-1", "204-1", '2:11-7.2', '11+210-1'],
-                                     distros=DISTROS),
-       "ppg-11.8": get_pg11_versions(packages=["11+204-1", '2:11-8.1', '215-1', '11+215-1'],
-                                     distros=DISTROS),
-       "ppg-12.2": get_pg12_versions(packages=["2:12-3.1", "12+215-1", '215-1'],
-                                     distros=DISTROS),
-       "ppg-12.3": get_pg12_versions(packages=["2:12-3.1", "12+215-1", '215-1'],
-                                     distros=DISTROS)}
+def get_ppg_versions(distro_type):
+    """Get dictionary with versions
+    :param distro_type: deb or rpm
+    :return:
+    """
+
+    return {"ppg-11.5": get_pg11_versions(packages=["11+204-1", "204-1", '1:11-5', '11+210-1'],
+                                          distros=DISTROS, distro_type=distro_type),
+            "ppg-11.6": get_pg11_versions(packages=["11+204-1", "204-1", '2:11-6.2', '11+210-1'],
+                                          distros=DISTROS, distro_type=distro_type),
+            "ppg-11.7": get_pg11_versions(packages=["11+214-1", "204-1", '2:11-7.2', '11+210-1'],
+                                          distros=DISTROS, distro_type=distro_type),
+            "ppg-11.8": get_pg11_versions(packages=["11+204-1", '2:11-8.1', '215-1', '11+215-1'],
+                                          distros=DISTROS, distro_type=distro_type),
+            "ppg-12.2": get_pg12_versions(packages=["2:12-3.1", "12+215-1", '215-1'],
+                                          distros=DISTROS, distro_type=distro_type),
+            "ppg-12.3": get_pg12_versions(packages=["2:12-3.1", "12+215-1", '215-1'],
+                                          distros=DISTROS, distro_type=distro_type)}

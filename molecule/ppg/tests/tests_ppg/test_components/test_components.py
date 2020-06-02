@@ -3,7 +3,7 @@ import pytest
 
 import testinfra.utils.ansible_runner
 
-from molecule.ppg.tests.settings import versions, MAJOR_VER
+from molecule.ppg.tests.settings import get_ppg_versions, MAJOR_VER
 
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -13,7 +13,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 #             'libecpg6', "libpgtypes3", "libpgtypes3-dbgsym", "libpq-dev", "libpq5-dbgsym", "libpq5"]
 
 PACKAGES = ["libecpg-compat3",  "libecpg-dev", 'libecpg6', "libpgtypes3", "libpq-dev",  "libpq5"]
-pg_versions = versions[os.getenv("VERSION")]
+pg_versions = get_ppg_versions(os.environ['MOLECULE_SCENARIO_NAME'])[[os.getenv("VERSION")]]
 
 # @pytest.fixture()
 # def fdw_extension(host):
