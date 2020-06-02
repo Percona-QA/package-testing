@@ -226,7 +226,7 @@ def get_pg11_versions(distros, packages, distro_type):
         "rpm7_packages": fill_template_form(RPM7_PACKAGES_TEMPLATE, "11"),
         "rhel_files": fill_template_form(RHEL_FILES_TEMPLATE, "11"),
         "deb_files": fill_template_form(DEB_FILES_TEMPLATE, "11"),
-        "extensions:": RPM_EXTENSIONS,
+        "extensions": get_extensions(distro_type),
         "languages": LANGUAGES
                         }
     if ("debian" or "ubuntu") in distro_type:
@@ -234,6 +234,12 @@ def get_pg11_versions(distros, packages, distro_type):
     ppg_11_versions.update({"deb_pkg_ver": fill_package_versions(packages=packages,
                                                                  distros=distros)})
     return ppg_11_versions
+
+
+def get_extensions(distro_type):
+    if ("debian" or "ubuntu") in distro_type:
+        return DEB_EXTENSIONS
+    return RPM_EXTENSIONS
 
 
 def get_pg12_versions(distros, packages, distro_type):
@@ -246,10 +252,9 @@ def get_pg12_versions(distros, packages, distro_type):
                        "rpm7_packages": fill_template_form(RPM7_PACKAGES_TEMPLATE, "12"),
                        "rhel_files": fill_template_form(RHEL_FILES_TEMPLATE, "12"),
                        "deb_files": fill_template_form(DEB_FILES_TEMPLATE, "12"),
-                       "extensions": RPM_EXTENSIONS,
+                       "extensions": get_extensions(distro_type),
                        "languages": LANGUAGES}
-    if ("debian" or "ubuntu") in distro_type:
-        ppg_12_versions['extensions'] = DEB_EXTENSIONS
+
     ppg_12_versions.update({"deb_pkg_ver": fill_package_versions(packages=packages,
                                                                  distros=distros)})
     return ppg_12_versions
