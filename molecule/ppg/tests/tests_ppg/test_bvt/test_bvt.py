@@ -8,7 +8,7 @@ from molecule.ppg.tests.settings import get_ppg_versions, MAJOR_VER
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 pg_versions = get_ppg_versions(os.environ['MOLECULE_SCENARIO_NAME'])[os.getenv("VERSION")]
-
+print(pg_versions)
 RHEL_FILES = pg_versions['rhel_files']
 RPM7_PACKAGES = pg_versions['rpm7_packages']
 RPM_PACKAGES = pg_versions['rpm_packages']
