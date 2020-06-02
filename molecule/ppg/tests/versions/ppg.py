@@ -128,7 +128,7 @@ RPM_EXTENSIONS = [
     'hstore_plpythonu', 'uuid-ossp', 'tsm_system_time', 'tsm_system_rows', 'unaccent',
     'tablefunc', 'pgcrypto', 'pg_buffercache', 'amcheck', 'citext',  'timetravel',  'isn',
     'hstore_plpython2u', 'ltree_plpython3u', 'fuzzystrmatch', 'earthdistance', 'hstore_plperl',
-    'pg_prewarm', 'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'postgres_fdw']
+    'pg_prewarm', 'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'postgres_fdw', 'ltreehstore_plperlu']
 
 DEB_EXTENSIONS = [
     'xml2', 'tcn', 'plpython3u', 'pltcl', 'hstore', 'plperlu', 'plperl', 'ltree',
@@ -139,7 +139,7 @@ DEB_EXTENSIONS = [
     'uuid-ossp', 'tsm_system_time', 'tsm_system_rows', 'unaccent', 'tablefunc', 'pgcrypto',
     'pg_buffercache', 'amcheck', 'citext', 'isn', 'ltree_plpython3u', 'fuzzystrmatch',
     'earthdistance', 'hstore_plperl', 'pg_prewarm', 'dblink', 'pltclu', 'file_fdw',
-    'pg_stat_statements', 'postgres_fdw'
+    'pg_stat_statements', 'postgres_fdw', 'ltreehstore_plperlu'
 ]
 
 LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", "plpython3u"]
@@ -216,6 +216,14 @@ def fill_package_versions(packages, distros):
     return result
 
 
+def get_extensions(distro_type):
+    if ("debian" or "ubuntu" or "ubuntu-bionic" or "ubuntu-focal") in distro_type:
+        print("Return deb extensions")
+        return DEB_EXTENSIONS
+    print("Return RPM extensions")
+    return RPM_EXTENSIONS
+
+
 def get_pg11_versions(distros, packages, distro_type):
     ppg_11_versions = {
         "deb_packages": fill_template_form(DEB_PACKAGES_TEMPLATE, "11"),
@@ -232,12 +240,6 @@ def get_pg11_versions(distros, packages, distro_type):
     ppg_11_versions.update({"deb_pkg_ver": fill_package_versions(packages=packages,
                                                                  distros=distros)})
     return ppg_11_versions
-
-
-def get_extensions(distro_type):
-    if ("debian" or "ubuntu") in distro_type:
-        return DEB_EXTENSIONS
-    return RPM_EXTENSIONS
 
 
 def get_pg12_versions(distros, packages, distro_type):
