@@ -126,7 +126,7 @@ RPM_EXTENSIONS = [
     'pg_visibility', 'ltree_plpython2u', 'refint', 'jsonb_plpython3u', 'jsonb_plpythonu',
     'moddatetime', 'ltree_plpythonu', 'dict_int', 'pg_freespacemap', 'pgstattuple',
     'hstore_plpythonu', 'uuid-ossp', 'tsm_system_time', 'tsm_system_rows', 'unaccent',
-    'tablefunc', 'pgcrypto', 'pg_buffercache', 'amcheck', 'citext',  'timetravel',  'isn',
+    'tablefunc', 'pgcrypto', 'pg_buffercache', 'amcheck', 'citext',  'time', 'travel',  'isn',
     'hstore_plpython2u', 'ltree_plpython3u', 'fuzzystrmatch', 'earthdistance', 'hstore_plperl',
     'pg_prewarm', 'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'postgres_fdw']
 
@@ -139,7 +139,7 @@ DEB_EXTENSIONS = [
     'uuid-ossp', 'tsm_system_time', 'tsm_system_rows', 'unaccent', 'tablefunc', 'pgcrypto',
     'pg_buffercache', 'amcheck', 'citext', 'isn', 'ltree_plpython3u', 'fuzzystrmatch',
     'earthdistance', 'hstore_plperl', 'pg_prewarm', 'dblink', 'pltclu', 'file_fdw',
-    'pg_stat_statements', 'postgres_fdw'
+    'pg_stat_statements', 'postgres_fdw', 'time', 'travel'
 ]
 
 LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", "plpython3u"]

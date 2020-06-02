@@ -205,5 +205,13 @@ pgrepack = {"ppg-11.5": {"version": "1.4.4",
                                                  " for GNU/Linux 2.6.32,"
                                                  " BuildID[sha1]=c17dde3971672590d4f56a226115dece9f249784,"
                                                  " stripped",
-                                    "rhel": ""}}
+                                    "rhel": "/usr/pgsql-12/bin/pg_repack:"
+                                            " ELF 64-bit LSB executable,"
+                                            " x86-64,"
+                                            " version 1 (SYSV),"
+                                            " dynamically linked,"
+                                            " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                            " for GNU/Linux 3.2.0,"
+                                            " BuildID[sha1]=04ba10e674fd9d0299f8c33ddc74b9cd43a79f39,"
+                                            " not stripped"}}
             }

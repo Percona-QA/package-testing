@@ -203,6 +203,15 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                                                    " for GNU/Linux 2.6.32,"
                                                    " BuildID[sha1]=afff89426e403f643252c4e274a443ddb77a4445,"
                                                    " stripped",
-                                      "rhel": ""}
+                                      "rhel": "/usr/bin/pgbackrest:"
+                                              " ELF 64-bit LSB executable,"
+                                              " x86-64,"
+                                              " version 1 (SYSV),"
+                                              " dynamically linked,"
+                                              " interpreter /lib64/ld-linux-x86-64.so.2,"
+                                              " for GNU/Linux 3.2.0,"
+                                              " BuildID[sha1]=92def0ac491a7baf9256dcb307ceb95809a76412,"
+                                              " not stripped,"
+                                              " too many notes (256)"}
                           }
               }
