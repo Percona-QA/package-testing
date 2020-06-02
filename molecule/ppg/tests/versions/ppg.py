@@ -229,8 +229,6 @@ def get_pg11_versions(distros, packages, distro_type):
         "extensions": get_extensions(distro_type),
         "languages": LANGUAGES
                         }
-    if ("debian" or "ubuntu") in distro_type:
-        ppg_11_versions['extensions'] = DEB_EXTENSIONS
     ppg_11_versions.update({"deb_pkg_ver": fill_package_versions(packages=packages,
                                                                  distros=distros)})
     return ppg_11_versions
