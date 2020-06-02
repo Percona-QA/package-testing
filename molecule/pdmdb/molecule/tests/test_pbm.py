@@ -1,6 +1,5 @@
 import os
 import pytest
-import time
 import yaml
 try:
     from StringIO import StringIO
