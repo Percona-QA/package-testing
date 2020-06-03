@@ -60,9 +60,8 @@
   - name: install plugins, import world database
     command: /package-testing/plugins_test.sh
 
-  # Disable PT version check due to PT-1850
-  # - name: check that Percona Toolkit version is correct
-  #  command: /package-testing/version_check.sh pt
+  - name: check that Percona Toolkit version is correct
+    command: /package-testing/version_check.sh pt
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb80
