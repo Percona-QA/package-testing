@@ -126,7 +126,7 @@ def get_settings(distro_type):
                          "patroni": patroni['ppg-12.3'],
                          "pgrepack": pgrepack['ppg-12.3'],
                          "pgrepack_package_rpm": 'percona-pg_repack12',
-                         "pgrepack_package_deb": "percona-postgresql-11-repack",
+                         "pgrepack_package_deb": "percona-postgresql-12-repack",
                          "libpq": "Version of libpq: 120003",
                          "deb_provides":  ppg_versions["ppg-12.3"]['deb_provides'],
                          "rpm7_provides": ppg_versions["ppg-12.3"]['rpm7_provides'],
