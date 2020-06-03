@@ -247,10 +247,10 @@ def test_pgrepack_package(host):
     os = host.system_info.distribution
     pkgn = ""
     if os.lower() in ["redhat", "centos", 'rhel']:
-        pkgn = "percona-pg_repack12"
+        pkgn = pg_versions['pgrepack_package_rpm']
     elif os in ["debian", "ubuntu"]:
-        pkgn = "percona-postgresql-{}-repack".format(MAJOR_VER)
-        pkg_dbgsym = host.package("percona-postgresql-{}-repack-dbgsym".format(MAJOR_VER))
+        pkgn = pg_versions['pgrepack_package_deb']
+        pkg_dbgsym = host.package("{}-dbgsym".format(pg_versions['pgrepack_package_deb']))
         assert pkg_dbgsym.is_installed
     if pkgn == "":
         pytest.fail("Unsupported operating system")

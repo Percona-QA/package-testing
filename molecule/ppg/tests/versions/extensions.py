@@ -154,7 +154,6 @@ DEB11_EXTENSIONS = ['pageinspect',
                     ]
 
 RPM11_EXTENSIONS = ['fuzzystrmatch',
-                    'plpgsql',
                     'citext',
                     'pltcl',
                     'pltclu',
