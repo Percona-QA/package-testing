@@ -167,7 +167,14 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                                               " too many notes (256)"}},
               "ppg-12.3": {"version": "2.27",
                            "binary_version": "pgBackRest 2.27",
-                           "binary": {"centos": "",
+                           "binary": {"centos": "/usr/bin/pgbackrest:"
+                                                " ELF 64-bit LSB executable,"
+                                                " x86-64,"
+                                                " version 1 (SYSV),"
+                                                " dynamically linked (uses shared libs),"
+                                                " for GNU/Linux 2.6.32,"
+                                                " BuildID[sha1]=5888123a5df933751e2bfae0e30235c48afa17dd,"
+                                                " not stripped",
                                       "ubuntu": "/usr/bin/pgbackrest:"
                                                 " ELF 64-bit LSB shared object,"
                                                 " x86-64,"
@@ -185,7 +192,7 @@ pgbackrest = {"ppg-11.5": {"version": "2.16",
                                                       " interpreter /lib64/ld-linux-x86-64.so.2,"
                                                       " BuildID[sha1]=3baeb49fc6b4d8c80dc908af45a5a03dc0d605f2,"
                                                       " for GNU/Linux 3.2.0,"
-                                                      " stripped",
+                                                      " stripped",
                                       "debian": "/usr/bin/pgbackrest:"
                                                 " ELF 64-bit LSB shared object,"
                                                 " x86-64,"
