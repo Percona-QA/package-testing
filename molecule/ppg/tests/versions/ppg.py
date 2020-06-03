@@ -129,7 +129,7 @@ DEB_PROVIDES_TEMPLATE = [("percona-postgresql-{}", "postgresql-{}"),
                          ("percona-postgresql-server-dev-all", "postgresql-server-dev-all"),
                          ('percona-postgresql-plperl-{}', 'postgresql-plperl-{}'),
                          ("percona-postgresql-common", "postgresql-common"),
-                         ("percona-postgresql-plpython3-{}", "postgresql-plpython3-{}"),
+                         ("percona-postgresql-plpython3-{}", "postgresql-plpython3"),
                          ("percona-postgresql-pltcl-{}", "postgresql-{}-pltcl"),
                          ("percona-postgresql-all", "postgresql-all"),
                          ("percona-postgresql-server-dev-{}", 'postgresql-server-dev-all-{}')]
