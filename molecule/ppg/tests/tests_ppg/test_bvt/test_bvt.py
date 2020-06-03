@@ -199,7 +199,7 @@ def test_extenstions_list(extension_list, host):
         if ds.lower() in ['centos', 'redhat', 'rhel']:
             if "python3" in extension:
                 pytest.skip("Skipping python3 extensions for Centos or RHEL")
-        if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") in ['ppg-12.2', 'ppg-12.3']:
+        if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") in ["ppg-11.8", 'ppg-12.2', 'ppg-12.3']:
             if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                              'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
                 pytest.skip("Skipping python2 extensions for DEB based in 12.2 pg")
@@ -212,7 +212,7 @@ def test_enable_extension(host, extension):
     if ds.lower() in ["redhat", "centos", 'rhel']:
         if "python3" in extension:
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
-    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") in ['ppg-12.2', 'ppg-12.3']:
+    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") in ["ppg-11.8", 'ppg-12.2', 'ppg-12.3']:
         if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                          'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
             pytest.skip("Skipping python2 extensions for DEB based in 12.2 pg")
@@ -233,7 +233,7 @@ def test_drop_extension(host, extension):
     if ds.lower() in ["redhat", "centos", 'rhel']:
         if "python3" in extension:
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
-    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") in ['ppg-12.2', 'ppg-12.3']:
+    if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") in ["ppg-11.8", 'ppg-12.2', 'ppg-12.3']:
         if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                          'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
             pytest.skip("Skipping python2 extensions for DEB based in 12.2 pg")
