@@ -1,3 +1,5 @@
+from molecule.ppg.tests.versions.extensions import get_extensions_ppg11, get_extensions_ppg12
+
 DISTROS = ['buster', 'stretch', 'bionic', 'focal']
 DEB116_PACKAGES_TEMPLATE = ["percona-postgresql-{}",
                             "percona-postgresql-client",
@@ -117,31 +119,6 @@ RHEL_FILES_TEMPLATE = ["/var/lib/pgsql/{}/data/postgresql.conf",
                        "/var/lib/pgsql/{}/data/pg_hba.conf",
                        "/var/lib/pgsql/{}/data/pg_ident.conf"]
 
-RPM_EXTENSIONS = [
-    'xml2', 'tcn', 'plpythonu', 'plpython3u', 'plpython2u', 'pltcl',
-    'hstore', 'plperlu', 'plperl', 'ltree''hstore_plperlu', 'dict_xsyn',
-    'autoinc', 'hstore_plpython3u', 'insert_username', 'intagg', 'adminpack',
-    'intarray', 'cube', 'lo', 'jsonb_plpython2u', 'jsonb_plperl', 'jsonb_plperlu',
-    'btree_gin', 'pgrowlocks', 'bloom', 'seg', 'pageinspect', 'btree_gist', 'sslinfo',
-    'pg_visibility', 'ltree_plpython2u', 'refint', 'jsonb_plpython3u', 'jsonb_plpythonu',
-    'moddatetime', 'ltree_plpythonu', 'dict_int', 'pg_freespacemap', 'pgstattuple',
-    'hstore_plpythonu', 'uuid-ossp', 'tsm_system_time', 'tsm_system_rows', 'unaccent',
-    'tablefunc', 'pgcrypto', 'pg_buffercache', 'amcheck', 'citext',  'time', 'travel',  'isn',
-    'hstore_plpython2u', 'ltree_plpython3u', 'fuzzystrmatch', 'earthdistance', 'hstore_plperl',
-    'pg_prewarm', 'dblink', 'pltclu', 'file_fdw', 'pg_stat_statements', 'postgres_fdw']
-
-DEB_EXTENSIONS = [
-    'xml2', 'tcn', 'plpython3u', 'pltcl', 'hstore', 'plperlu', 'plperl', 'ltree',
-    'hstore_plperlu', 'dict_xsyn', 'autoinc', 'hstore_plpython3u', 'insert_username', 'intagg',
-    'adminpack', 'intarray', 'cube', 'lo', 'jsonb_plperl', 'jsonb_plperlu', 'btree_gin',
-    'pgrowlocks', 'bloom', 'seg', 'pageinspect', 'btree_gist', 'sslinfo', 'pg_visibility',
-    'refint', 'jsonb_plpython3u', 'moddatetime', 'dict_int', 'pg_freespacemap', 'pgstattuple',
-    'uuid-ossp', 'tsm_system_time', 'tsm_system_rows', 'unaccent', 'tablefunc', 'pgcrypto',
-    'pg_buffercache', 'amcheck', 'citext', 'isn', 'ltree_plpython3u', 'fuzzystrmatch',
-    'earthdistance', 'hstore_plperl', 'pg_prewarm', 'dblink', 'pltclu', 'file_fdw',
-    'pg_stat_statements', 'postgres_fdw', 'time', 'travel'
-]
-
 LANGUAGES = ["pltcl", "pltclu", "plperl", "plperlu", "plpythonu", "plpython2u", "plpython3u"]
 
 DEB_PROVIDES_TEMPLATE = [("percona-postgresql-{}", "postgresql-{}"),
@@ -216,12 +193,6 @@ def fill_package_versions(packages, distros):
     return result
 
 
-def get_extensions(distro_type):
-    if ("debian" or "ubuntu" or "ubuntu-bionic" or "ubuntu-focal") in distro_type:
-        return DEB_EXTENSIONS
-    return RPM_EXTENSIONS
-
-
 def get_pg11_versions(distros, packages, distro_type):
     ppg_11_versions = {
         "deb_packages": fill_template_form(DEB_PACKAGES_TEMPLATE, "11"),
@@ -232,7 +203,7 @@ def get_pg11_versions(distros, packages, distro_type):
         "rpm7_packages": fill_template_form(RPM7_PACKAGES_TEMPLATE, "11"),
         "rhel_files": fill_template_form(RHEL_FILES_TEMPLATE, "11"),
         "deb_files": fill_template_form(DEB_FILES_TEMPLATE, "11"),
-        "extensions": get_extensions(distro_type),
+        "extensions": get_extensions_ppg11(distro_type),
         "languages": LANGUAGES
                         }
     ppg_11_versions.update({"deb_pkg_ver": fill_package_versions(packages=packages,
@@ -250,7 +221,7 @@ def get_pg12_versions(distros, packages, distro_type):
                        "rpm7_packages": fill_template_form(RPM7_PACKAGES_TEMPLATE, "12"),
                        "rhel_files": fill_template_form(RHEL_FILES_TEMPLATE, "12"),
                        "deb_files": fill_template_form(DEB_FILES_TEMPLATE, "12"),
-                       "extensions": get_extensions(distro_type),
+                       "extensions": get_extensions_ppg12(distro_type),
                        "languages": LANGUAGES}
 
     ppg_12_versions.update({"deb_pkg_ver": fill_package_versions(packages=packages,
