@@ -37,9 +37,9 @@ scenario:
     - cleanup
   test_sequence:
     - destroy
-    - dependency
     - create
     - prepare
     - converge
     - verify
+    - cleanup
     - destroy
