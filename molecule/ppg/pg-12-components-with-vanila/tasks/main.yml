@@ -17,11 +17,6 @@
 - name: Configure repository
   include_tasks: ../../common/tasks/enable_repo.yml
 
-- name: enable tools repo
-  command: percona-release enable tools {{ repo }}
-  vars:
-    repo: "{{ lookup('env', 'REPO') }}"
-
 - name: Install vanila postgresql
   include_tasks: ../../common/tasks/install_pg12.yml
 
