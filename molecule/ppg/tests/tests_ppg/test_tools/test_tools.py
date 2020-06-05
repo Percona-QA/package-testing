@@ -26,7 +26,7 @@ def load_data(host):
 
 @pytest.fixture()
 def pgaudit(host):
-    os = host.system_info.distribution
+    ds = host.system_info.distribution
     with host.sudo("postgres"):
         enable_library = "psql -c \'ALTER SYSTEM SET shared_preload_libraries=\'pgaudit\'\';"
         result = host.check_output(enable_library)
@@ -50,9 +50,9 @@ def pgaudit(host):
         assert result.rc == 0
         assert result.stdout.strip("\n") == "CREATE TABLE"
         log_file = "/var/log/postgresql/postgresql-{}-main.log".format(MAJOR_VER)
-        if os.lower() in ["debian", "ubuntu"]:
+        if ds.lower() in ["debian", "ubuntu"]:
             log_file = "/var/log/postgresql/postgresql-{}-main.log".format(MAJOR_VER)
-        elif os.lower() in ["redhat", "centos", 'rhel']:
+        elif ds.lower() in ["redhat", "centos", 'rhel']:
             log_files = "ls /var/lib/pgsql/{}/data/log/".format(MAJOR_VER)
             file_name = host.check_output(log_files).strip("\n")
             log_file = "".join(["/var/lib/pgsql/{}/data/log/".format(MAJOR_VER), file_name])
@@ -63,7 +63,10 @@ def pgaudit(host):
         drop_pgaudit = "psql -c 'DROP EXTENSION pgaudit;'"
         result = host.check_output(drop_pgaudit)
         assert result.strip("\n") == "DROP EXTENSION"
-    cmd = "sudo systemctl restart postgresql"
+    if ds.lower() in ["debian", "ubuntu"]:
+        cmd = "sudo systemctl restart postgresql"
+    elif ds.lower() in ["redhat", "centos", 'rhel']:
+        cmd = "sudo systemctl restart postgresql-{}".format(MAJOR_VER)
     result = host.run(cmd)
     assert result.rc == 0
 

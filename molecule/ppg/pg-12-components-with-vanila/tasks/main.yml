@@ -14,11 +14,12 @@
 
 ### temp part until percona-release is updated for PPG project
 
-- name: Configure repository
-  include_tasks: ../../common/tasks/enable_repo.yml
-
 - name: Install vanila postgresql
   include_tasks: ../../common/tasks/install_pg12.yml
+
+
+- name: Configure repository
+  include_tasks: ../../common/tasks/enable_repo.yml
 
 - name: Initialize Postgres RHEL
   command: /usr/pgsql-12/bin/postgresql-12-setup initdb
@@ -33,5 +34,5 @@
     enabled: yes
   when: ansible_os_family == "RedHat"
 
-- name: Install ppg11 tools
+- name: Install ppg12 tools
   include_tasks: ../../common/tasks/install_ppg12_tools.yml
