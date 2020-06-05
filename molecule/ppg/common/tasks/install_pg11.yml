@@ -35,6 +35,7 @@
   - name: Install vanila postgres DEB
     apt:
       name: "{{ packages }}"
+      update_cache: yes
     vars:
       packages:
         - postgresql-11
