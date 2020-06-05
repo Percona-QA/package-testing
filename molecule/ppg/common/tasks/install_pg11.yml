@@ -31,6 +31,7 @@
         - postgresql11
         - postgresql11-server
         - postgresql11-contrib
+        - postgresql-contrib
     when: ansible_os_family == "RedHat"
 
   - name: Install vanila postgres DEB
