@@ -3,11 +3,6 @@
 - name: Configure repository
   include_tasks: ../../common/tasks/enable_repo.yml
 
-- name: enable tools repo
-  command: percona-release enable tools {{ repo }}
-  vars:
-    repo: "{{ lookup('env', 'REPO') }}"
-
 
 - name: install Percona Platform for PostgreSQL deb packages
   apt:
