@@ -36,6 +36,7 @@
       name: "{{ packages }}"
     vars:
       packages:
+        - postgresql12
         - postgresql12-server
         - postgresql12-contrib
     when: ansible_os_family == "RedHat"
