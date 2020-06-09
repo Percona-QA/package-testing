@@ -56,6 +56,12 @@
     state: stopped
   when: ansible_os_family == "Debian"
 
+- name: Disable old repository
+  command: percona-release disable {{ pg_version }} {{ repo }}
+  vars:
+    repo: "{{ lookup('env', 'FROM_REPO') }}"
+    pg_version: "{{ lookup('env', 'FROM_VERSION') }}"
+
 - name: Setup new repository
   command: percona-release enable {{ pg_version }} {{ repo }}
   vars:
