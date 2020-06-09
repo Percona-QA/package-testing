@@ -131,8 +131,8 @@ DEB_PROVIDES_TEMPLATE = [("percona-postgresql-{}", "postgresql-{}"),
                          ("percona-postgresql-common", "postgresql-common"),
                          ("percona-postgresql-plpython3-{}", "postgresql-plpython3"),
                          ("percona-postgresql-pltcl-{}", "postgresql-{}-pltcl"),
-                         ("percona-postgresql-all", "postgresql-all"),
-                         ("percona-postgresql-server-dev-{}", 'postgresql-server-dev-all-{}')]
+                         ("percona-postgresql-all", "postgresql-all")
+                         ]
 
 RPM7_PROVIDES_TEMPLATE = [("percona-postgresql{}", 'postgresql{}'),
                           ("percona-postgresql{}-contrib", 'postgresql{}-contrib'),
