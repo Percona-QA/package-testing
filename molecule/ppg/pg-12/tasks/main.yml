@@ -18,7 +18,7 @@
     enabled: yes
   when: ansible_os_family == "RedHat"
 
-- name: Install vanila postgresql
+- name: Install PPG tools
   include_tasks: ../../common/tasks/install_ppg12_tools.yml
 
 - name: Install GCC Deb
