@@ -1,8 +1,3 @@
-#  - name: Enable tools repo
-#    command: percona-release enable tools {{ repo }}
-#    vars:
-#      repo: "{{ lookup('env', 'REPO') }}"
-
   - name: Clean dnf RHEL8
     become: true
     command: dnf clean all -y
@@ -58,6 +53,7 @@
     yum:
       name: "{{ packages }}"
       state: latest
+      update_cache: yes
     vars:
       packages:
       - percona-postgresql-client-common
@@ -86,6 +82,7 @@
     yum:
       name: "{{ packages }}"
       state: latest
+      update_cache: yes
     vars:
       packages:
         - percona-postgresql-client-common

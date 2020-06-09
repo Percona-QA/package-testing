@@ -1,6 +1,7 @@
   - name: Install pgaudit Debian
     apt:
       name: "{{ packages }}"
+      state: latest
       update_cache: yes
     vars:
       packages:
@@ -11,6 +12,8 @@
   - name: Install pgaudit RHEL
     yum:
       name: percona-pgaudit
+      state: latest
+      update_cache: yes
     when: ansible_os_family == "RedHat"
 
   - name: Enable pgaudit for Debian
@@ -40,6 +43,7 @@
   - name: Install pgbackrest Debian
     apt:
       name: "{{ packages }}"
+      state: latest
       update_cache: yes
     vars:
       packages:
@@ -48,15 +52,12 @@
         - percona-pgbackrest-dbgsym
     when: ansible_os_family == "Debian"
 
-  #- name: Install pgbackrest RHEL
-  #  yum:
-  #    name: percona-pgbackrest
-  #  when: ansible_os_family == "RedHat"
   - name: Install pgbackrest RHEL
     yum:
       name: percona-pgbackrest
+      state: latest
+      update_cache: yes
     when: ansible_os_family == "RedHat"
-
 
   - name: Create pgbackrest directory
     file:
@@ -126,6 +127,8 @@
   - name: Install pgrepack Debian
     apt:
       name: "{{ packages }}"
+      state: latest
+      update_cache: yes
     vars:
       packages:
         - percona-postgresql-12-repack
@@ -135,20 +138,23 @@
   - name: Install pgrepack RHEL
     yum:
       name: percona-pg_repack12
+      state: latest
+      update_cache: yes
     when: ansible_os_family == "RedHat"
 
-  #- name: Install patroni RPM
-  #  yum:
-  #    name: percona-patroni
-  #  when: ansible_os_family == "RedHat"
+
   - name: Install patroni RPM
     yum:
       name: percona-patroni
+      state: latest
+      update_cache: yes
     when: ansible_os_family == "RedHat"
 
   - name: Install patroni debian
     apt:
       name: "{{ packages }}"
+      state: latest
+      update_cache: yes
     vars:
       packages:
         - percona-patroni

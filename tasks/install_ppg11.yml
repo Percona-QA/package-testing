@@ -1,9 +1,4 @@
 # This task installs Percona Platform for PostgreSQL on CentOS and Debian/Ubuntu
-#
-#  - name: Enable tools repo
-#    command: percona-release enable tools {{ repo }}
-#    vars:
-#      repo: "{{ lookup('env', 'REPO') }}"
 
   - name: Clean dnf RHEL8
     become: true
@@ -62,6 +57,7 @@
     yum:
       name: "{{ packages }}"
       state: latest
+      update_cache: yes
     vars:
       packages:
       - percona-postgresql-client-common
@@ -90,6 +86,7 @@
     yum:
       name: "{{ packages }}"
       state: latest
+      update_cache: yes
     vars:
       packages:
         - percona-postgresql-client-common

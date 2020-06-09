@@ -73,7 +73,7 @@
     update_cache: yes
   when: ansible_os_family == "Debian"
 
-- name: install Percona Platform for PostgreSQL 11 packages
+- name: Install Percona Platform for PostgreSQL 11 packages
   include_tasks: ../../../../tasks/install_ppg11.yml
 
 - name: Start postgresql service for RHEL based
