@@ -76,12 +76,6 @@
 - name: install Percona Platform for PostgreSQL 11 packages
   include_tasks: ../../../../tasks/install_ppg11.yml
 
-- name: Initialize Postgres RHEL
-  command: /usr/pgsql-11/bin/postgresql-11-setup initdb
-  environment:
-    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-  when: ansible_os_family == "RedHat"
-
 - name: Start postgresql service for RHEL based
   service:
     name: postgresql-11
