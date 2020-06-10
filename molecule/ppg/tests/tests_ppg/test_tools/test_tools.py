@@ -72,11 +72,6 @@ def pgaudit(host):
 
 
 @pytest.fixture()
-def pgbackrest(host):
-    return host.run("file /usr/bin/pgbackrest")
-
-
-@pytest.fixture()
 def pgbackrest_version(host, operating_system):
     return host.check_output("pgbackrest version").strip("\n")
 
@@ -161,10 +156,10 @@ def pgbackrest_restore(pgbackrest_delete_data, host):
 def pgrepack(host):
     os = host.system_info.distribution
     if os.lower() in ["redhat", "centos", 'rhel']:
-        cmd = "file /usr/pgsql-{}/bin/pg_repack ".format(MAJOR_VER)
+        cmd = "/usr/pgsql-{}/bin/pg_repack ".format(MAJOR_VER)
     else:
         # TODO need to be in PATH?
-        cmd = "file /usr/lib/postgresql/{}/bin/pg_repack".format(MAJOR_VER)
+        cmd = "/usr/lib/postgresql/{}/bin/pg_repack".format(MAJOR_VER)
     return host.check_output(cmd)
 
 
@@ -262,25 +257,6 @@ def test_pgrepack_package(host):
     assert pg_versions['pgrepack']['version'] in pkg.version
 
 
-def test_pgrepack_binary(host, pgrepack):
-    os = host.system_info.distribution
-    if os.lower() == "centos":
-        assert pgrepack == pg_versions['pgrepack']['binary']['centos'], pgrepack
-    elif os.lower() in ['redhat', 'rhel']:
-        assert pgrepack == pg_versions['pgrepack']['binary']['rhel'], pgrepack
-    elif os.lower() == "debian":
-        if host.system_info.release == '9.9':
-            assert pgrepack == pg_versions['pgrepack']['binary']['debian9.9'], pgrepack
-        else:
-            assert pgrepack == pg_versions['pgrepack']['binary']['debian'], pgrepack
-    elif os.lower() == "ubuntu":
-        rel_name = host.system_info.release
-        if rel_name == '18.04':
-            assert pgrepack == pg_versions['pgrepack']['binary']['ubuntu'], pgrepack
-        else:
-            assert pgrepack == pg_versions['pgrepack']['binary']['ubuntu-focal'], pgrepack
-
-
 def test_pgrepack(host):
     with host.sudo("postgres"):
         install_extension = host.run("psql -c 'CREATE EXTENSION \"pg_repack\";'")
@@ -341,31 +317,6 @@ def test_pgbackrest_package(host):
 
 def test_pgbackrest_version(pgbackrest_version):
     assert pgbackrest_version == pg_versions['pgbackrest']['binary_version']
-
-
-def test_pgbackrest_binary(pgbackrest, operating_system, host):
-    assert pgbackrest.rc == 0
-    if operating_system.lower() == "centos":
-        assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['centos'],\
-            pgbackrest.stdout.strip("\n")
-    elif operating_system.lower() in ["redhat", 'rhel']:
-        assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['rhel'],\
-            pgbackrest.stdout.strip("\n")
-    elif operating_system.lower() == 'debian':
-        if host.system_info.release == "9.9":
-            assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['debian9.9'],\
-                pgbackrest.stdout.strip("\n")
-        else:
-            assert pgbackrest.stdout.strip("\n") == pg_versions['pgbackrest']['binary']['debian'],\
-                pgbackrest.stdout.strip("\n")
-    elif operating_system.lower() == "ubuntu":
-        rel_name = host.system_info.release
-        actual = pgbackrest.stdout.strip("\n")
-        if rel_name == '18.04':
-            expected = pg_versions['pgbackrest']['binary']['ubuntu']
-        else:
-            expected = pg_versions['pgbackrest']['binary']['ubuntu-focal']
-        assert actual == expected, actual
 
 
 def test_pgbackrest_create_stanza(create_stanza):
