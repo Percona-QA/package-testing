@@ -85,6 +85,21 @@
 - name: Install PPG tools
   include_tasks: ../../common/tasks/install_ppg11_tools.yml
 
+- name: Upgrade debian development packages
+  apt:
+    update_cache: yes
+    state: latest
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - libecpg6
+      - libecpg-compat3
+      - libecpg6
+      - libecpg-dev
+      - libpgtypes3
+      - libpq-dev
+      - libpq5
+  when: ansible_os_family == "Debian"
 
 - name: Start postgresql service for Debian based
   service:
