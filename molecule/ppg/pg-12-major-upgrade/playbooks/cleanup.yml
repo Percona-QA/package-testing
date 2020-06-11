@@ -1,0 +1,93 @@
+---
+- name: Cleanup
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: remove Postgresql deb packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+        update_cache: yes
+      vars:
+        packages:
+          - percona-postgresql-11
+          - percona-postgresql-client-11
+          - percona-postgresql-doc-11
+          - percona-postgresql-plperl-11
+          - percona-postgresql-plpython3-11
+          - percona-postgresql-pltcl-11
+          - percona-postgresql-server-dev-11
+          - percona-postgresql-server-dev-all
+          - percona-postgresql-11-dbgsym
+          - percona-postgresql-client-11-dbgsym
+          - percona-postgresql-plperl-11-dbgsym
+          - percona-postgresql-plpython3-11-dbgsym
+          - percona-postgresql-pltcl-11-dbgsym
+      when: ansible_os_family == "Debian"
+
+    - name: Remove Percona Platform for PostgreSQL deb packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+        - percona-postgresql-plpython-11
+        - percona-postgresql-plpython-11-dbgsym
+        - percona-postgresql-server-dev-11-dbgsym
+      when:
+        - ansible_os_family == "Debian"
+        - lookup('env', 'PG_VERSION') == "ppg-11.5"
+
+    - name: remove Postgresql rpm packages
+      yum:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+          - percona-postgresql11
+          - percona-postgresql11
+          - percona-postgresql11-contrib
+          - percona-postgresql11-debuginfo
+          - percona-postgresql11-devel
+          - percona-postgresql11-docs
+          - percona-postgresql11-libs
+          - percona-postgresql11-llvmjit
+          - percona-postgresql11-plperl
+          - percona-postgresql11-plpython
+          - percona-postgresql11-pltcl
+          - percona-postgresql11-server
+          - percona-postgresql11-test
+          - percona-postgresql11-debuginfo
+          - percona-postgresql11-debugsource
+          - percona-postgresql11-devel-debuginfo
+          - percona-postgresql11-libs-debuginfo
+          - percona-postgresql11-plperl-debuginfo
+          - percona-postgresql11-plpython-debuginfo
+          - percona-postgresql11-plpython3-debuginfo
+          - percona-postgresql11-pltcl-debuginfo
+          - percona-postgresql11-server-debuginfo
+          - percona-postgresql11-test-debuginfo
+      when: ansible_os_family == "RedHat"
+
+    - name: remove pgaudit deb packages
+      apt:
+        name: percona-postgresql-11-pgaudit
+        state: absent
+      when: ansible_os_family == "Debian"
+
+    - name: remove pg_repack deb packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+          - percona-postgresql-11-repack
+          - percona-postgresql-11-repack-dbgsym
+      when: ansible_os_family == "Debian"
+
+    - name: remove pg_repack rpm packages
+      yum:
+        name: percona-pg_repack11
+        state: absent
+      when: ansible_os_family == "RedHat"
