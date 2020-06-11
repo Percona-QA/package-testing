@@ -45,7 +45,7 @@
 
 - name: Stop postgresql service for RHEL based
   service:
-    name: postgresql-12
+    name: postgresql-11
     state: stopped
   when: ansible_os_family == "RedHat"
 
@@ -70,6 +70,13 @@
 
 - name: install Percona Platform for PostgreSQL 12 packages
   include_tasks: ../../../../tasks/install_ppg12.yml
+
+- name: Initialize Postgres RHEL
+  command: /usr/pgsql-12/bin/postgresql-12-setup initdb
+  environment:
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  when: ansible_os_family == "RedHat"
+
 
 - name: Execute pg_upgrade RHEL
   command: /usr/pgsql-12/bin/pg_upgrade --old-bindir /usr/pgsql-11/bin --new-bindir /usr/pgsql-12/bin --old-datadir /var/lib/pgsql/11/data --new-datadir /var/lib/pgsql/12/data --link
