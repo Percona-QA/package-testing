@@ -29,13 +29,6 @@
     enabled: yes
   when: ansible_os_family == "RedHat"
 
-- name: Enable and start postgresql service for RHEL based
-  service:
-    name: postgresql-11
-    state: started
-    enabled: yes
-  when: ansible_os_family == "RedHat"
-
 - name: Enable and start postgresql service for Debian based
   service:
     name: postgresql
