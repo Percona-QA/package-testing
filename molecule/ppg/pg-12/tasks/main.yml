@@ -1,4 +1,5 @@
 ---
+
 - name: Configure repository
   include_tasks: ../../common/tasks/enable_repo.yml
 

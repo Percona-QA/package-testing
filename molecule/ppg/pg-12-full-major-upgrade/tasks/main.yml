@@ -12,7 +12,7 @@
 
 - name: install Percona Platform for PostgreSQL 11 packages
   include_tasks: ../../../../tasks/install_ppg11.yml
-  when: {{ pg_version }} is match("ppg-11*")
+  when: pg_version is match("ppg-11*")
 
 - name: Initialize Postgres RHEL
   command: /usr/pgsql-11/bin/postgresql-11-setup initdb
