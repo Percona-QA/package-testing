@@ -22,6 +22,7 @@ provisioner:
     prepare: ../../../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
     cleanup: ../../playbooks/cleanup.yml
+    side_effect: ../../playbooks/side_effect.yml
 verifier:
   name: testinfra
   directory: ../../../tests/tests_ppg
