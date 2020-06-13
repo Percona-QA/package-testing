@@ -4,18 +4,6 @@
   become: true
   become_method: sudo
   tasks:
-    - name: Stop postgresql service for RHEL based
-      service:
-        name: postgresql-11
-        state: stopped
-      when: ansible_os_family == "RedHat"
-
-    - name: Stop postgresql service for Debian based
-      service:
-        name: postgresql
-        state: stopped
-      when: ansible_os_family == "Debian"
-
     - name: Setup repository
       command: percona-release enable {{ pg_version }} {{ repo }}
       vars:
@@ -111,6 +99,18 @@
 
     - name: Install PPG tools
       include_tasks: ../../common/tasks/install_ppg12_tools.yml
+
+    - name: Stop postgresql service for RHEL based
+      service:
+        name: postgresql-11
+        state: stopped
+      when: ansible_os_family == "RedHat"
+
+    - name: Stop postgresql service for Debian based
+      service:
+        name: postgresql
+        state: stopped
+      when: ansible_os_family == "Debian"
 
     - name: Execute pg_upgrade RHEL
       command: /usr/pgsql-12/bin/pg_upgrade --old-bindir /usr/pgsql-11/bin --new-bindir /usr/pgsql-12/bin --old-datadir /var/lib/pgsql/11/data --new-datadir /var/lib/pgsql/12/data --link
