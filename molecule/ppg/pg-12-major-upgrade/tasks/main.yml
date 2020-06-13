@@ -81,7 +81,8 @@
   become: true
   become_method: sudo
   become_user: postgres
-
+  args:
+    chdir: /tmp
   when: ansible_os_family == "Debian"
 
 - name: Change postgresql 11 port in config Debian
