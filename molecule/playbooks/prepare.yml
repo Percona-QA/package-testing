@@ -45,6 +45,7 @@
           - gnupg
           - gnupg2
           - rsync
+          - acl
       retries: 60
       delay: 10
       register: result
