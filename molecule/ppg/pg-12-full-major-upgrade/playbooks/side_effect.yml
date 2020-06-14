@@ -34,7 +34,6 @@
       vars:
         packages:
           - percona-postgresql-plpython3-12
-          - percona-postgresql-plpython3-12-dbgsym
       when:
         - ansible_os_family == "Debian"
 
@@ -67,7 +66,6 @@
         packages:
           - percona-postgresql12
           - percona-postgresql12-contrib
-          - percona-postgresql12-debuginfo
           - percona-postgresql12-devel
           - percona-postgresql12-docs
           - percona-postgresql12-libs
@@ -84,9 +82,6 @@
       environment:
         PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       when: ansible_os_family == "RedHat"
-
-#    - name: Install PPG tools
-#      include_tasks: ../../common/tasks/install_ppg12_tools.yml
 
     - name: Stop postgresql service for RHEL based
       service:
@@ -109,7 +104,7 @@
       when: ansible_os_family == "RedHat"
 
     - name: Execute pg_upgrade Deb
-      command: /usr/lib/postgresql/12/bin/pg_upgrade --old-datadir=/var/lib/postgresql/11/main --new-datadir=/var/lib/postgresql/12/main --old-bindir=/usr/lib/postgresql/11/bin --new-bindir=/usr/lib/postgresql/12/bin --link
+      command: /usr/lib/postgresql/12/bin/pg_upgrade --old-datadir=/var/lib/postgresql/11/main --new-datadir=/var/lib/postgresql/12/main --old-bindir=/usr/lib/postgresql/11/bin --new-bindir=/usr/lib/postgresql/12/bin '-c config_file=/etc/postgresql/11/main/postgresql.conf\' --new-options '-c config_file=/etc/postgresql/12/main/postgresql.conf'
       become: true
       become_user: postgres
       become_method: sudo
@@ -145,8 +140,8 @@
           port = 5432
       when: ansible_os_family == "RedHat"
 
-    - name: Install PPG tools
-      include_tasks: ../../common/tasks/install_ppg12_tools.yml
+#    - name: Install PPG tools
+#      include_tasks: ../../common/tasks/install_ppg12_tools.yml
 
     - name: Upgrade debian development packages
       apt:
