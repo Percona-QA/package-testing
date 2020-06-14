@@ -25,7 +25,7 @@ provisioner:
     side_effect: ../../playbooks/side_effect.yml
 verifier:
   name: testinfra
-  directory: ../../../tests/tests_ppg
+  directory: ../../../tests/tests_ppg/test_bvt
   options:
     verbose: true
     s: true
