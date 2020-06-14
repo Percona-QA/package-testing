@@ -79,6 +79,12 @@
           - percona-postgresql12-test
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
+    - name: Initialize Postgres RHEL
+      command: /usr/pgsql-12/bin/postgresql-12-setup initdb
+      environment:
+        PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      when: ansible_os_family == "RedHat"
+
 #    - name: Install PPG tools
 #      include_tasks: ../../common/tasks/install_ppg12_tools.yml
 
