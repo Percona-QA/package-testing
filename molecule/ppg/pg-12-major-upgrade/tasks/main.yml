@@ -28,7 +28,7 @@
     state: started
   when: ansible_os_family == "RedHat"
 
-- name: Enable and start postgresql service for Debian based
+- name: Start postgresql service for Debian based
   service:
     name: postgresql
     state: started

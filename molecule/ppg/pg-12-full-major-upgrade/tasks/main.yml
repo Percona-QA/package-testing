@@ -26,6 +26,12 @@
     enabled: yes
   when: ansible_os_family == "RedHat"
 
+- name: Start postgresql service for Debian based
+  service:
+    name: postgresql
+    state: started
+  when: ansible_os_family == "Debian"
+
 - name: Install PPG tools
   include_tasks: ../../common/tasks/install_ppg11_tools.yml
 
