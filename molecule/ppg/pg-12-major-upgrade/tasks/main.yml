@@ -151,6 +151,10 @@
     state: stopped
   when: ansible_os_family == "Debian"
 
+- name: Stop postgresql service for Debian based
+  command: sudo systemctl stop postgresql.service
+  when: ansible_os_family == "Debian"
+
 - name: Execute pg_upgrade RHEL
   command: /usr/pgsql-12/bin/pg_upgrade --old-bindir /usr/pgsql-11/bin --new-bindir /usr/pgsql-12/bin --old-datadir /var/lib/pgsql/11/data --new-datadir /var/lib/pgsql/12/data
   become: true
