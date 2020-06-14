@@ -24,11 +24,6 @@
           - percona-postgresql-plpython3-12
           - percona-postgresql-pltcl-12
           - percona-postgresql-server-dev-12
-          - percona-postgresql-12-dbgsym
-          - percona-postgresql-client-12-dbgsym
-          - percona-postgresql-plperl-12-dbgsym
-          - percona-postgresql-plpython3-12-dbgsym
-          - percona-postgresql-pltcl-12-dbgsym
       when: ansible_os_family == "Debian"
 
     - name: install Percona Platform for PostgreSQL deb packages
@@ -52,7 +47,6 @@
         packages:
           - percona-postgresql12
           - percona-postgresql12-contrib
-          - percona-postgresql12-debuginfo
           - percona-postgresql12-devel
           - percona-postgresql12-docs
           - percona-postgresql12-libs
@@ -62,7 +56,6 @@
           - percona-postgresql12-pltcl
           - percona-postgresql12-server
           - percona-postgresql12-test
-          - percona-postgresql12-debuginfo
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
     - name: install Percona Platform for PostgreSQL rpm packages for RHEL
@@ -84,17 +77,6 @@
           - percona-postgresql12-pltcl
           - percona-postgresql12-server
           - percona-postgresql12-test
-          - percona-postgresql12-contrib-debuginfo
-          - percona-postgresql12-debuginfo
-          - percona-postgresql12-debugsource
-          - percona-postgresql12-devel-debuginfo
-          - percona-postgresql12-libs-debuginfo
-          - percona-postgresql12-plperl-debuginfo
-          - percona-postgresql12-plpython-debuginfo
-          - percona-postgresql12-plpython3-debuginfo
-          - percona-postgresql12-pltcl-debuginfo
-          - percona-postgresql12-server-debuginfo
-          - percona-postgresql12-test-debuginfo
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
 #    - name: Install PPG tools

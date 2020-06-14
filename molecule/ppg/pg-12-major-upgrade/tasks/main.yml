@@ -118,8 +118,14 @@
     state: started
   when: ansible_os_family == "RedHat"
 
-- name: Install PPG tools
-  include_tasks: ../../common/tasks/install_ppg12_tools.yml
+- name: Start postgresql service for Debian based
+  service:
+    name: postgresql
+    state: started
+  when: ansible_os_family == "Debian"
+
+#- name: Install PPG tools
+#  include_tasks: ../../common/tasks/install_ppg12_tools.yml
 
 - name: Upgrade debian development packages
   apt:
@@ -135,12 +141,6 @@
       - libpgtypes3
       - libpq-dev
       - libpq5
-  when: ansible_os_family == "Debian"
-
-- name: Start postgresql service for Debian based
-  service:
-    name: postgresql
-    state: started
   when: ansible_os_family == "Debian"
 
 - name: Install GCC Deb
