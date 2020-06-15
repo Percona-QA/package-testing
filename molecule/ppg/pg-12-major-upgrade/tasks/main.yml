@@ -26,12 +26,14 @@
   service:
     name: postgresql-11
     state: started
+    enabled: true
   when: ansible_os_family == "RedHat"
 
 - name: Start postgresql service for Debian based
   service:
     name: postgresql
     state: started
+    enabled: true
   when: ansible_os_family == "Debian"
 
 - name: Disable old repository
@@ -207,12 +209,14 @@
   service:
     name: postgresql-12
     state: started
+    enabled: true
   when: ansible_os_family == "RedHat"
 
 - name: Start postgresql service for Debian based
   service:
     name: postgresql
     state: started
+    enabled: true
   when: ansible_os_family == "Debian"
 
 #- name: Install PPG tools
@@ -227,6 +231,26 @@
       - percona-postgresql-12-pgaudit
       - percona-postgresql-12-pgaudit-dbgsym
   when: ansible_os_family == "Debian"
+
+- name: Install pgaudit RHEL
+  yum:
+    name: percona-pgaudit
+    state: latest
+    update_cache: yes
+  when: ansible_os_family == "RedHat"
+
+- name: Enable pgaudit for Debian
+  lineinfile:
+    path: /etc/postgresql/12/main/postgresql.conf
+    line: shared_preload_libraries = 'pgaudit'
+  when: ansible_os_family == "Debian"
+
+- name: Enable pgaudit for RHEL
+  lineinfile:
+    path: /var/lib/pgsql/12/data/postgresql.conf
+    line: shared_preload_libraries = 'pgaudit'
+  when: ansible_os_family == "RedHat"
+
 
 - name: Install pgbackrest Debian
   apt:
