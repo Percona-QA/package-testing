@@ -108,7 +108,7 @@ def pgbackrest_check(host):
     with host.sudo("postgres"):
         cmd = "pgbackrest check --stanza=testing --log-level-console=info"
         result = host.run(cmd)
-        assert result.rc == 0
+        assert result.rc == 0, result.stderr
         return [l.split("INFO:")[-1] for l in result.stdout.split("\n") if "INFO" in l]
 
 
