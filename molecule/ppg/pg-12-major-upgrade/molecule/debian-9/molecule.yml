@@ -24,7 +24,7 @@ provisioner:
     cleanup: ../../playbooks/cleanup.yml
 verifier:
   name: testinfra
-  directory: ../../../tests/tests_ppg
+  directory: ../../../tests/test_upgrade
   options:
     verbose: true
     s: true
