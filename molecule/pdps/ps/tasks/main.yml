@@ -1,7 +1,5 @@
 ---
 # tasks file for pdps
-#  - name: include tasks for test env setup
-#    include_tasks: ../../../tasks/test_prep.yml
 
   - name: include tasks for local vault setup
     include_tasks: ../../../tasks/setup_local_vault.yml
@@ -12,20 +10,7 @@
               mode=0664 owner=root group=root
 
   - name: include tasks for enabling main repo
-    include: ../../pdmysql_tasks/enable_original_repo.yml
-    when: lookup('env', 'REPO') == "main"
-
-  - name: include tasks for enabling PDPS 8 test repo
-    include: ../../pdmysql_tasks/enable_main_repo.yml
-    when: lookup('env', 'REPO') == "main"
-
-  - name: include tasks for enabling PDPS 8 test repo
-    include: ../../pdmysql_tasks/enable_testing_repo.yml
-    when: lookup('env', 'REPO') == "testing" or lookup('env', 'REPO') == ""
-
-  - name: include tasks for enabling PDPS 8 experimental repo
-    include: ../../pdmysql_tasks/enable_experimental_repo.yml
-    when: lookup('env', 'REPO') == "experimental"
+    include: ../../common/enable_repo.yml
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -44,7 +29,6 @@
 
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../../../tasks/install_pxb80.yml
-    when: lookup('env', 'REPO') != "experimental"
 
   - name: start mysql service
     service: name=mysql state=started
@@ -125,10 +109,6 @@
 
   - name: run bats integration tests for ps-admin script
     command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
-
-# TODO: PAM test fails in AWS
-#  - name: run PAM test
-#    include_tasks: ../../../tasks/pam_test.yml
 
   - name: install 3rd party packages with apt
     apt:

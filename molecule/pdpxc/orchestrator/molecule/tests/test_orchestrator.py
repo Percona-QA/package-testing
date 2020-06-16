@@ -27,3 +27,6 @@ def test_check_rpm_package(host):
     pkg = host.package('percona-orchestrator')
     assert pkg.is_installed
     assert '3.1.4' in pkg.version, pkg.version
+
+def test_orchestrator_binary(host):
+    pass
