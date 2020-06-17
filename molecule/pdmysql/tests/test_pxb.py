@@ -48,7 +48,7 @@ def test_binary_version(host):
     cmd = "xtrabackup --version"
     result = host.run(cmd)
     assert result.rc == 0, result.stderr
-    assert '8.0.11' in result.stderr, (result.stdout, result.stdout)
+    assert '8.0.13' in result.stderr, (result.stdout, result.stdout)
 
 
 @pytest.mark.parametrize("pt_bin", PTBINS)
