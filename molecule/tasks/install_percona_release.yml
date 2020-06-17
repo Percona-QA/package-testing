@@ -10,7 +10,7 @@
 ## Delete this task for release testing
   - name: download newer percona-release script
     get_url:
-      url: https://raw.githubusercontent.com/percona/percona-repositories/1.0/scripts/percona-release.sh
+      url: https://raw.githubusercontent.com/EvgeniyPatlan/percona-repositories/1.0/scripts/percona-release.sh
       dest: /usr/bin/percona-release
       mode: '755'
       force: true
