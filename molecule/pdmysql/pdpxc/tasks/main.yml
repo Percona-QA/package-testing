@@ -7,13 +7,10 @@
 - name: Install percona release
   include: ../../tasks/install_percona_release.yml
 
-- name: enable the PDMYSQL-80 main repo
+- name: enable the PDMYSQL-80 repo
   command: percona-release enable pdpxc-8.0.19 {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
-
-- name: download and extract world database
-  command: wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
 - name: install PXC 8 deb packages
   apt:
@@ -28,6 +25,7 @@
     - percona-xtradb-cluster-dbg
     - percona-xtradb-cluster-garbd-debug
     - percona-xtradb-cluster-garbd
+    - percona-xtradb-cluster-server
     - percona-xtradb-cluster-server-debug
     - percona-xtradb-cluster-test
     - percona-xtradb-cluster
@@ -66,6 +64,7 @@
   vars:
     packages:
       - proxysql2
+      - proxysql2-dbgsym
   when: ansible_os_family == "Debian"
 
 - name: install proxysql new rpm packages
