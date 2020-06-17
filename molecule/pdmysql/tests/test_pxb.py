@@ -31,7 +31,7 @@ def test_check_deb_package(host, package):
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert '8.0.11' in pkg.version, pkg.version
+    assert '8.0.13' in pkg.version, pkg.version
 
 
 @pytest.mark.parametrize("package", RPMPACKAGES)
@@ -41,7 +41,7 @@ def test_check_rpm_package(host, package):
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert '8.0.11' in pkg.version, pkg.version
+    assert '8.0.13' in pkg.version, pkg.version
 
 
 def test_binary_version(host):

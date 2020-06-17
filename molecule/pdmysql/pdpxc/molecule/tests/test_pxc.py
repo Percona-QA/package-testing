@@ -97,7 +97,7 @@ def test_binary_version(host):
 @pytest.mark.parametrize('component', ['@@INNODB_VERSION', '@@VERSION'])
 def test_mysql_version(host, component):
     with host.sudo("root"):
-        cmd = "mysql -e \"SELECT {}; \"| grep -c \"{}\"".format(component, '8.0.18')
+        cmd = "mysql -e \"SELECT {}; \"| grep -c \"{}\"".format(component, '8.0.19')
         result = host.run(cmd)
         assert result.rc == 0, result.stderr
         assert int(result.stdout) == 1, result.stdout
