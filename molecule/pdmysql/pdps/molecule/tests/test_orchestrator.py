@@ -29,5 +29,13 @@ def test_check_rpm_package(host):
     assert '3.1.4' in pkg.version, pkg.version
 
 
-def test_orchestrator_binary(host):
-    pass
+def test_orchestrator_version(host):
+    cmd = 'orchestrator --version'
+    result = host.run(cmd)
+    assert result.rc == 0, result.stderr
+
+
+def test_orchestrator_client(host):
+    cmd = 'orchestrator-client --help'
+    result = host.run(cmd)
+    assert result.rc == 0, result.stderr
