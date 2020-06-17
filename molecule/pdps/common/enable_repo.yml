@@ -1,22 +1,10 @@
   - name: include playbook for removing Percona repo
     include: ../../../tasks/remove_percona_repository.yml
 
-  - name: Install percona repository package
-    apt:
-     deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
-    when: ansible_os_family == "Debian"
-
-  - name: add the Percona testing yum repos for centos 6 and 7
-    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-    when: ansible_os_family == "RedHat"
+  - name: Install percona release
+    include: ../../tasks/install_percona_release.yml
 
   - name: enable the PDMYSQL-80 main repo
-    command: percona-release enable pdps {{ repo }}
+    command: percona-release enable pdps-8.0.19 {{ repo }}
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
-
-  - name: clean and update yum cache
-    shell: |
-      yum clean all
-      yum makecache
-    when: ansible_os_family == "RedHat"
