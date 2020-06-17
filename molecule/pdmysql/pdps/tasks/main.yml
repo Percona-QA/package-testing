@@ -1,0 +1,234 @@
+---
+# tasks file for pdps
+  - name: include playbook for removing Percona repo
+    include: ../../../tasks/remove_percona_repository.yml
+
+  - name: Install percona release
+    include: ../../tasks/install_percona_release.yml
+
+  - name: enable the PDMYSQL-80 main repo
+    command: percona-release enable pdps-8.0.19 {{ repo }}
+    vars:
+      repo: "{{ lookup('env', 'REPO') }}"
+
+  - name: include tasks for local vault setup
+    include_tasks: ../../../tasks/setup_local_vault.yml
+
+  - name: setup config file for keyring vault
+    template: src=../../../scripts/ps_keyring_plugins_test/keyring_vault_test_v2.j2
+              dest=/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
+              mode=0664 owner=root group=root
+
+  - name: include tasks for enabling main repo
+    include: ../../common/enable_repo.yml
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: install Percona Toolkit new deb packages
+    include_tasks: ../../../tasks/install_pt.yml
+
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: yum module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+
+  - name: disable the mariadb module on RHEL/CentOS 8
+    command: yum module disable mariadb -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+
+  - name: DNF clean RHEL
+    command: sudo dnf clean all -y
+    when: ansible_distribution == "RedHat"
+
+  - name: install Percona Server deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-server-server
+      - percona-server-test
+      - percona-server-dbg
+      - percona-server-source
+      - percona-server-client
+      - percona-server-tokudb
+      - percona-server-rocksdb
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona Server rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+      disablerepo: "epel"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-server-server
+      - percona-server-client
+      - percona-server-test
+      - percona-server-debuginfo
+      - percona-server-devel
+      - percona-server-tokudb
+      - percona-server-rocksdb
+    when: ansible_os_family == "RedHat"
+
+  - name: install sysbench new deb packages
+    include_tasks: ../../../tasks/install_sysbench.yml
+    when: lookup('env', 'REPO') != "experimental"
+
+  - name: install Percona XtraBackup 8.0 packages
+    include_tasks: ../../../tasks/install_pxb80.yml
+
+  - name: install proxysql new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+        - proxysql2
+    when: ansible_os_family == "Debian"
+
+  - name: install proxysql new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+        - proxysql2
+    when: ansible_os_family == "RedHat"
+
+  - name: check that proxysql version is correct
+    command: /package-testing/version_check.sh proxysql2
+
+  - name: start proxysql service
+    service: name=proxysql state=started
+
+  - name: stop proxysql service
+    service: name=proxysql state=stopped
+
+  - name: start proxysql service
+    service: name=proxysql state=started
+
+  - name: install orchestrator new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+        - percona-orchestrator-cli
+        - percona-orchestrator-client
+        - percona-orchestrator
+    when: ansible_os_family == "Debian"
+
+  - name: install orchestrator new rpm packages
+    yum:
+      name: percona-orchestrator
+      state: latest
+    when: ansible_os_family == "RedHat"
+
+  - name: start mysql service
+    service: name=mysql state=started
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: disable selinux on centos for TokuDB to work
+    shell: setenforce 0 || true
+    when: ansible_os_family == "RedHat"
+
+  - name: run Group Replication tests
+    include_tasks: ../../../tasks/gr_test.yml
+
+  - name: install tokudb and restart server
+    command: /usr/bin/ps-admin --enable-tokudb
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+
+  - name: re-run ps-admin to finish tokudb install
+    command: /usr/bin/ps-admin --enable-tokudb
+
+  - name: install percona-mysql-shell package for CentOS
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - percona-mysql-shell
+    when: ansible_os_family == "RedHat"
+
+  - name: install percona-mysql-shell package for Debian/Ubuntu
+    apt:
+      update_cache: yes
+      state: present
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - percona-mysql-shell
+    when: ansible_os_family == "Debian"
+
+  - name: install percona-mysql-router package for CentOS
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - percona-mysql-router
+    when: ansible_os_family == "RedHat"
+
+  - name: install percona-mysql-router package for Debian/Ubuntu
+    apt:
+      update_cache: yes
+      state: present
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - percona-mysql-router
+    when: ansible_os_family == "Debian"
+
+  - name: keyring plugins test
+    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
+
+  - name: re-run ps_admin to install rocksdb
+    command: /usr/bin/ps-admin --enable-rocksdb
+
+  - name: check the clone and data masking plugins
+    command: /package-testing/scripts/ps_clone_dm_plugin_test.sh
+
+  - name: run some MyRocks tests
+    command: /package-testing/scripts/ps_myrocks_test.sh
+
+  - name: run mysql compression tests script
+    command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps80
+
+  - name: run bats unit tests for ps-admin script
+    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
+
+  - name: run bats integration tests for ps-admin script
+    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
+
+  - name: install 3rd party packages with apt
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "Debian"
+
+  - name: install 3rd party packages with yum
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "RedHat"
+
+  - name: run bats tests for mysql init scripts
+    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+
+  - name: start mysql service
+    service: name=mysql state=started enabled=yes
