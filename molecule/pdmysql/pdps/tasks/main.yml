@@ -11,9 +11,6 @@
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
 
-  - name: include tasks for local vault setup
-    include_tasks: ../../../tasks/setup_local_vault.yml
-
   - name: install Percona Toolkit new deb packages
     include_tasks: ../../../tasks/install_pt.yml
 
