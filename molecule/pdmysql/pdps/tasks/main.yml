@@ -48,7 +48,7 @@
     yum:
       name: "{{ packages }}"
       state: latest
-      disablerepo: "epel"
+#      disablerepo: "epel"
       update_cache: yes
     vars:
       packages:
@@ -104,7 +104,7 @@
         - percona-orchestrator
     when: ansible_os_family == "Debian"
 
-  - name: install orchestrator new rpm packages
+  - name: install orchestrator rpm packages
     yum:
       name: percona-orchestrator
       state: latest
