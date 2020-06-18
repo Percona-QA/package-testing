@@ -56,17 +56,3 @@ def test_pt_binaries(host, pt_bin):
     cmd = '{} --version'.format(pt_bin)
     result = host.run(cmd)
     assert '3.2.0' in result.stdout, result.stdout
-
-
-def test_run_backup(host):
-    with host.sudo("root"):
-        cmd = "/usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/"
-        result = host.run(cmd)
-        assert result.rc == 0, result.stderr
-
-
-def test_run_prepare(host):
-    with host.sudo("root"):
-        cmd = "/usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/"
-        result = host.run(cmd)
-        assert result.rc == 0, result.stderr
