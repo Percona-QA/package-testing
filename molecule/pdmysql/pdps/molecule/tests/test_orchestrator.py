@@ -31,11 +31,17 @@ def test_check_rpm_package(host):
 
 def test_orchestrator_version(host):
     cmd = 'orchestrator --version'
+    dist = host.system_info.distribution
+    if dist.lower() in ["redhat", "centos", 'rhel']:
+        cmd = "/usr/local/orchestrator/orchestrator --version"
     result = host.run(cmd)
     assert result.rc == 0, result.stderr
 
 
 def test_orchestrator_client(host):
     cmd = 'orchestrator-client --help'
+    dist = host.system_info.distribution
+    if dist.lower() in ["redhat", "centos", 'rhel']:
+        cmd = "/usr/local/orchestrator/resources/bin/orchestrator-client --help"
     result = host.run(cmd)
     assert result.rc == 0, result.stderr
