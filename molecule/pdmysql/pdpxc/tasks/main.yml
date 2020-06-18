@@ -33,7 +33,6 @@
   vars:
     packages:
     - percona-xtradb-cluster-full
-#    - python-mysqldb
     - percona-xtradb-cluster-client
     - percona-xtradb-cluster-common
     - percona-xtradb-cluster-dbg
@@ -61,7 +60,6 @@
     - percona-xtradb-cluster-shared
     - percona-xtradb-cluster-shared-compat
     - percona-xtradb-cluster-test
-#    - MySQL-python
   when: ansible_os_family == "RedHat"
 
 - name: install HA Proxy RHEL Packages
@@ -74,7 +72,6 @@
     - percona-haproxy-debuginfo
   when: ansible_os_family == "RedHat"
 
-
 - name: install HA Proxy 8 deb packages
   apt:
     name: "{{ packages }}"
@@ -86,6 +83,11 @@
     - percona-vim-haproxy
     - percona-haproxy-dbgsym
   when: ansible_os_family == "Debian"
+
+- name: clean dnf cache
+  shell: |
+    dnf clean all
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
 - name: install Percona XtraBackup 8.0 packages
   include_tasks: ../../../tasks/install_pxb80.yml
