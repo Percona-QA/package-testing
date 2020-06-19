@@ -81,7 +81,6 @@
     - percona-haproxy
     - percona-haproxy-doc
     - percona-vim-haproxy
-    - percona-haproxy-dbgsym
   when: ansible_os_family == "Debian"
 
 - name: clean dnf cache

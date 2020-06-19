@@ -6,7 +6,7 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-DEBPACKAGES = ['percona-haproxy', 'percona-haproxy-doc', 'percona-vim-haproxy', 'percona-haproxy-dbgsym']
+DEBPACKAGES = ['percona-haproxy', 'percona-haproxy-doc', 'percona-vim-haproxy']
 
 RPMPACKAGES = ['percona-haproxy', 'percona-haproxy-debuginfo']
 
