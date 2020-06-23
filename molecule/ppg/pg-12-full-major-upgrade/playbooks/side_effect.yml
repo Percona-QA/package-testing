@@ -117,31 +117,27 @@
       when: ansible_os_family == "Debian"
 
     - name: Change postgresql 11 port in config Debian
-      blockinfile:
+      lineinfile:
         path: /etc/postgresql/11/main/postgresql.conf
-        block: |
-          port = 5433
+        line: port = 5433
       when: ansible_os_family == "Debian"
 
     - name: Change postgresql 11 port in config RHEL
-      blockinfile:
+      lineinfile:
         path: /var/lib/pgsql/11/data/postgresql.conf
-        block: |
-          port = 5433
+        line: port = 5433
       when: ansible_os_family == "RedHat"
 
     - name: Change postgresql 12 port in config Debian
-      blockinfile:
+      lineinfile:
         path: /etc/postgresql/12/main/postgresql.conf
-        block: |
-          port = 5432
+        line: port = 5432
       when: ansible_os_family == "Debian"
 
     - name: Change postgresql 12 port in config RHEL
-      blockinfile:
+      lineinfile:
         path: /var/lib/pgsql/12/data/postgresql.conf
-        block: |
-          port = 5432
+        line: port = 5432
       when: ansible_os_family == "RedHat"
 
     - name: Install PPG tools
