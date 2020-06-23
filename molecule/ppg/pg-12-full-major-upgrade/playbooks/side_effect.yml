@@ -95,7 +95,7 @@
         state: stopped
       when: ansible_os_family == "Debian"
 
-    - name: Stop postgresql service for Debian based
+    - name: Kill postmaster for Debian based
       command: sudo pkill postgres
       when: ansible_os_family == "Debian"
 
