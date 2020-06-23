@@ -182,9 +182,9 @@
       when: ansible_os_family == "RedHat"
 
     - name: Create temporary directory for compilation
-      command: mkdir /tmp/libpq_command_temp_dir
+      command: mkdir /tmp/libpq12_command_temp_dir
 
     - name: Copy libpq source file
       copy:
         src: ../../common/files/lib_version.c
-        dest: /tmp/libpq_command_temp_dir
+        dest: /tmp/libpq12_command_temp_dir
