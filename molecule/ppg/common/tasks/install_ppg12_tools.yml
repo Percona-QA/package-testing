@@ -28,10 +28,15 @@
       line: shared_preload_libraries = 'pgaudit'
     when: ansible_os_family == "RedHat"
 
+#  - name: Restart Postgres RHEL
+#    service:
+#      name: postgresql-12
+#      state: restarted
+#    when: ansible_os_family == "RedHat"
   - name: Restart Postgres RHEL
-    service:
-      name: postgresql-12
-      state: restarted
+    command: sudo systemctl restart postgresql-12
+    environment:
+      PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     when: ansible_os_family == "RedHat"
 
   - name: Retart Postgres Debian
