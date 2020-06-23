@@ -144,8 +144,8 @@
           port = 5432
       when: ansible_os_family == "RedHat"
 
-#    - name: Install PPG tools
-#      include_tasks: ../../common/tasks/install_ppg12_tools.yml
+    - name: Install PPG tools
+      include_tasks: ../../common/tasks/install_ppg12_tools.yml
 
     - name: Upgrade debian development packages
       apt:
