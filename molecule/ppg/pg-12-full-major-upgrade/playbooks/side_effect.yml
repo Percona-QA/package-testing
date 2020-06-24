@@ -140,9 +140,6 @@
         line: port = 5432
       when: ansible_os_family == "RedHat"
 
-    - name: Install PPG tools
-      include_tasks: ../../common/tasks/install_ppg12_tools.yml
-
     - name: Upgrade debian development packages
       apt:
         update_cache: yes
@@ -170,7 +167,7 @@
         name: postgresql-12
         state: started
       when: ansible_os_family == "RedHat"
-
+      
     - name: Install GCC Deb
       apt:
         name: gcc
@@ -188,3 +185,6 @@
       copy:
         src: ../../common/files/lib_version.c
         dest: /tmp/libpq12_command_temp_dir
+
+    - name: Install PPG tools
+      include_tasks: ../../common/tasks/install_ppg12_tools.yml
