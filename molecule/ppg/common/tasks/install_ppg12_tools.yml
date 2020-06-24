@@ -35,9 +35,6 @@
     when: ansible_os_family == "RedHat"
     register: out
 
-  - debug: var=out.stdout_lines
-  - debug: var=out.stderr_lines
-
   - name: Retart Postgres Debian
     command: sudo systemctl restart postgresql
     environment:

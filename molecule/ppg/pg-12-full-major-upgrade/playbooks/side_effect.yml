@@ -5,7 +5,13 @@
   become_method: sudo
   tasks:
     - name: Setup repository
-      command: percona-release enable {{ pg_version }} {{ repo }}
+      command: percona-release disable {{ pg_version }} {{ repo }}
+      vars:
+        repo: "{{ lookup('env', 'REPO') }}"
+        pg_version: "{{ lookup('env', 'FROM_VERSION') }}"
+
+    - name: Setup repository
+      command: percona-release enable-only  {{ pg_version }} {{ repo }}
       vars:
         repo: "{{ lookup('env', 'REPO') }}"
         pg_version: "{{ lookup('env', 'VERSION') }}"
@@ -167,7 +173,7 @@
         name: postgresql-12
         state: started
       when: ansible_os_family == "RedHat"
-      
+
     - name: Install GCC Deb
       apt:
         name: gcc
