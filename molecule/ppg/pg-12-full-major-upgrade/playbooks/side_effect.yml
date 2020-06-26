@@ -4,7 +4,7 @@
   become: true
   become_method: sudo
   tasks:
-    - name: Setup repository
+    - name: Disable old repository
       command: percona-release disable {{ pg_version }} {{ repo }}
       vars:
         repo: "{{ lookup('env', 'REPO') }}"
@@ -191,6 +191,13 @@
       copy:
         src: ../../common/files/lib_version.c
         dest: /tmp/libpq12_command_temp_dir
+
+    - name: Delete percona-pgaudit for PPG11 on RHEL
+      yum:
+        name: percona-pgaudit
+        state: absent
+        update_cache: yes
+      when: ansible_os_family == "RedHat"
 
     - name: Install PPG tools
       include_tasks: ../../common/tasks/install_ppg12_tools.yml
