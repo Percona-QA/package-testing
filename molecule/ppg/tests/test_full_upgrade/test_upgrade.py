@@ -75,7 +75,6 @@ def test_postgresql_is_running_and_enabled(host):
     else:
         postgresql = host.service("postgresql")
     assert postgresql.is_running
-    assert postgresql.is_enabled
 
 
 def test_postgres_binary(postgresql_binary):
