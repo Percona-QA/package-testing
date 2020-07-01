@@ -6,56 +6,73 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
+APT_REPO_FILE = "/etc/apt/sources.list.d/percona-{}-{}"
+
 COMMANDS = ['enable', 'enable-only']
-PRODUCTS = ["ps56", "ps57", "ps80", "psmdb34", "psmdb36", "psmdb40", "psmdb42",
-            "pxb80", "pxc56", "pxc57", "pxc80", "ppg11", "ppg11.5", "ppg11.6",
-            "ppg11.7", "ppg12", "ppg12.2", "pdmdb4.2", "pdmdb4.2.6", "pdmysql8.0.18", "pdmysql8.0"]
+PRODUCTS = ["ps56", "ps57", "ps80",
+            "psmdb34", "psmdb36", "psmdb40", "psmdb42",
+            "pxb80", "pxc56", "pxc57", "pxc80",
+            "ppg11", "ppg11.5", "ppg11.6",
+            "ppg11.7", "ppg11.8", "ppg12", "ppg12.2", "ppg12.3",
+            "pdmdb4.2", "pdmdb4.2.6", "pdpxc8.0.19", 'pdps8.0.19'
+            "pdpxc-8.0", "pdps-8.0"]
 REPOSITORIES = ["original", "ps-80", "pxc-80", "psmdb-40", "psmdb-42",
-                "tools", "ppg-11", "ppg-11.5", "ppg-11.6", "ppg-11.7",
-                "ppg-12", "ppg-12.2", "pdmdb-4.2", "pdmdb-4.2.6", "pdmysql-8.0",
-                "pdmysql-8.0.18"]
-COMPONENTS = ['testing', 'release', 'experimental']
+                "tools", "ppg-11", "ppg-11.5", "ppg-11.6", "ppg-11.7", "ppg-11.8",
+                "ppg-12", "ppg-12.2", "ppg-12.3",
+                "pdmdb-4.2", "pdmdb-4.2.6", "pdpxc-8.0", "pdpxc-8.0.19"
+                "pdps-8.0.19", "pdps-8.0"]
+COMPONENTS = ['testing',
+              'release',
+              'experimental']
 TEST_REPOSITORIES_DATA = [(repo, component) for repo in REPOSITORIES for component in PRODUCTS]
 
 
-"""
--> Available commands:       enable enable-only setup disable
--> Available setup products: ps56 ps57 ps80 psmdb34 psmdb36 psmdb40 psmdb42 pxb80 pxc56 pxc57 pxc80 ppg11 ppg11.5 ppg11.6 ppg11.7 ppg12 ppg12.2 pdmdb4.2 pdmdb4.2.6 pdmysql8.0.18 pdmysql8.0
--> Available repositories:   original ps-80 pxc-80 psmdb-40 psmdb-42 tools ppg-11 ppg-11.5 ppg-11.6 ppg-11.7 ppg-12 ppg-12.2 pdmdb-4.2 pdmdb-4.2.6 pdmysql-8.0 pdmysql-8.0.18
--> Available components:     release testing experimental
+def get_package_by_repo(repo_name):
+    if "ppg" in repo_name:
+        return "percona-postgresql"
+    elif "psmdb" in repo_name:
+        return "percona-server-mongodb"
+    elif "pxc" in repo_name:
+        return "percona-xtradb-cluster"
+    elif "ps" in repo_name:
+        return "percona-server"
+    else:
+        return "Unsupported"
 
-"""
+
+@pytest.fixture()
+def repo_file_template(host):
+    dist_name = host.system_info.distribution
+    repo_file = "/etc/apt/sources.list.d/percona-{}-{}"
+    if dist_name.lower() in ["redhat", "centos", 'rhel']:
+        repo_file = "/etc/yum.repos.d/percona-{}-{}"
+    return repo_file
 
 
-def remove_percona_repository():
-    """
-  # This removes any percona repositories on the system
-  - name: remove the Percona apt main repository
-    apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_lsb.codename }} main' state=absent update_cache=yes
-    when: ansible_os_family == "Debian"
+def apt_update(host):
+    """Execute apt-get update on host
 
-  - name: remove the Percona apt testing repositories
-    apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_lsb.codename }} testing' state=absent update_cache=yes
-    when: ansible_os_family == "Debian"
-
-  - name: remove the Percona yum repositories
-    yum: name=percona-release state=absent
-    when: ansible_os_family == "RedHat"
-
-  - name: remove saved repo files in yum
-    file: path={{ item }} state=absent
-    with_items:
-      - /etc/yum.repos.d/percona-release.repo
-      - /etc/yum.repos.d/percona-release.repo.rpmsave
-    when: ansible_os_family == "RedHat"
+    :param host:
     :return:
     """
-    pass
+    dist_name = host.system_info.distribution
+    if dist_name.lower() not in ["redhat", "centos", 'rhel']:
+        with host.sudo("root"):
+            result = host.run("apt-get update -y")
+            assert result.rc == 0, result.stderr
+            return result
+
+
+def remove_percona_repository(host, repo_file):
+    """Delete repository file
+    """
+    cmd = "sudo rm -f {}".format(repo_file)
+    result = host.run(cmd)
+    assert result.rc == 0, result.stderr
 
 
 def execute_percona_release_command(host, command, name, arg=None):
     """Execute percona release command
-
     :param host:
     :param command:
     :param name:
@@ -63,40 +80,35 @@ def execute_percona_release_command(host, command, name, arg=None):
     :return:
     """
     cmd = "percona-release {} {} {}".format(command, name, arg)
-    return host.run(cmd)
+    result = host.run(cmd)
+    assert result.rc == 0, result.stderr
+    return result
 
 
-def assert_repository_syntax(repo_name):
-    pass
-
-
-def assert_repo_file(host, repo_name, repo_type):
-    pass
-
-
-def check_list_of_packages(host):
-    pass
-
-
-def test_repository_managment_debian(host):
-    """Scenario:
-    1. Enable repository
-    2. Check that repository file was created
-    3. Check repository file access rights
-    4. Check repository file name
-    5. Check repository file content
-    6. Check packages from repository
-    7. Disable repository
-    8. Check that repository file moved to backup
-    """
+def assert_repo_file(host, repo_name, repo_type=None):
     dist_name = host.system_info.distribution
+    repo_dir = "/etc/apt/sources.list.d/"
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
-        pytest.skip("This test only for Debian based platforms")
+        repo_dir = "/etc/yum/yum.repos.d/"
+    repo_file = "percona-{}".format(repo_name)
+    if repo_type:
+        repo_file = "percona-{}-{}".format(repo_name, repo_type)
+    cmd = "ls {} | grep {}".format(repo_dir, repo_file)
+    result = host.run(cmd)
+    assert result.rc == 0, result.stdout
+
+
+def check_list_of_packages(host, product_name):
+    dist_name = host.system_info.distribution
+    cmd = "apt-cache search percona*"
+    if dist_name.lower() in ["redhat", "centos", 'rhel']:
+        cmd = "yum list percona* | grep {}".format(product_name)
 
 
 @pytest.mark.parametrize("repository, component", TEST_REPOSITORIES_DATA)
-def test_repository_managment_rpm(host, repository, component):
-    """Scenario:
+def test_enable_repo(host, repository, component):
+    """Check enable repository command
+    Scenario:
     1. Enable repository
     2. Check that repository file was created
     3. Check repository file access rights
@@ -107,16 +119,29 @@ def test_repository_managment_rpm(host, repository, component):
     8. Check that repository file moved to backup
     """
     dist_name = host.system_info.distribution
-    if dist_name.lower() not in ["redhat", "centos", 'rhel']:
-        pytest.skip("This test only for RPM based platforms")
-
-
-def test_product_management_debian(host):
-    dist_name = host.system_info.distribution
+    execute_percona_release_command(host, "enable", component, repository)
+    apt_update(host)
+    repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}".format(component, repository))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
-        pytest.skip("This test only for Debian based platforms")
+        repo_file = host.file("/etc/yum/yum.repos.d/percona-{}-{}".format(component, repository))
+    assert repo_file.user == "root"
+    assert repo_file.group == "root"
+    execute_percona_release_command(host, "disable", component, repository)
+    backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.bak".format(component, repository))
+    if dist_name.lower() in ["redhat", "centos", 'rhel']:
+        backup_repo_file = host.file("/etc/yum/yum.repos.d/percona-{}-{}.bak".format(component, repository))
+    assert backup_repo_file.user == "root"
+    assert backup_repo_file.group == "root"
 
-def test_product_management_rpm(host):
+
+@pytest.mark.parametrize("product", PRODUCTS)
+def test_setup_product(host, product):
     dist_name = host.system_info.distribution
-    if dist_name.lower() not in ["redhat", "centos", 'rhel']:
-        pytest.skip("This test only for RPM based platforms")
+    execute_percona_release_command(host, "setup", product)
+
+
+@pytest.mark.parametrize("repository, component", TEST_REPOSITORIES_DATA)
+def test_enable_only(host, repository, component):
+    pass
+
+
