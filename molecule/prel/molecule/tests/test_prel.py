@@ -6,9 +6,6 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-APT_REPO_FILE = "/etc/apt/sources.list.d/percona-{}-{}"
-
-COMMANDS = ['enable', 'enable-only']
 PRODUCTS = ["ps56", "ps57", "ps80",
             "psmdb34", "psmdb36", "psmdb40", "psmdb42",
             "pxb80", "pxc56", "pxc57", "pxc80",
@@ -24,7 +21,7 @@ REPOSITORIES = ["original", "ps-80", "pxc-80", "psmdb-40", "psmdb-42",
 COMPONENTS = ['testing',
               'release',
               'experimental']
-TEST_REPOSITORIES_DATA = [(repo, component) for repo in REPOSITORIES for component in PRODUCTS]
+TEST_REPOSITORIES_DATA = [(repo, component) for repo in REPOSITORIES for component in COMPONENTS]
 
 
 def get_package_by_repo(repo_name):
