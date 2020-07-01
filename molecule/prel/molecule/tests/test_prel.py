@@ -66,9 +66,10 @@ def apt_update(host):
 def remove_percona_repository(host, repo_file):
     """Delete repository file
     """
-    cmd = "sudo rm -f {}".format(repo_file)
-    result = host.run(cmd)
-    assert result.rc == 0, result.stderr
+    with host.sudo("root"):
+        cmd = "sudo rm -f {}".format(repo_file)
+        result = host.run(cmd)
+        assert result.rc == 0, result.stderr
 
 
 def execute_percona_release_command(host, command, name, arg=None):
@@ -79,10 +80,11 @@ def execute_percona_release_command(host, command, name, arg=None):
     :param arg:
     :return:
     """
-    cmd = "percona-release {} {} {}".format(command, name, arg)
-    result = host.run(cmd)
-    assert result.rc == 0, result.stderr
-    return result
+    with host.sudo("root"):
+        cmd = "percona-release {} {} {}".format(command, name, arg)
+        result = host.run(cmd)
+        assert result.rc == 0, result.stderr
+        return result
 
 
 def assert_repo_file(host, repo_name, repo_type=None):
@@ -103,6 +105,11 @@ def check_list_of_packages(host, product_name):
     cmd = "apt-cache search percona*"
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
         cmd = "yum list percona* | grep {}".format(product_name)
+
+
+def test_package_installed(host):
+    pkg = host.package('percona-release')
+    assert pkg.is_installed
 
 
 @pytest.mark.parametrize("repository, component", TEST_REPOSITORIES_DATA)
