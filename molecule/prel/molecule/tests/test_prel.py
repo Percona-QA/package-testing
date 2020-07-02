@@ -139,13 +139,13 @@ def test_enable_repo(host, repository, component, command):
                                     component=component,
                                     repository=repository)
     apt_update(host)
-    repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}".format(component, repository))
+    repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list".format(component, repository))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
         repo_file = host.file("/etc/yum/yum.repos.d/percona-{}-{}".format(component, repository))
-    assert repo_file.user == "root"
-    assert repo_file.group == "root"
+    assert repo_file.user == "root", repo_file.user
+    assert repo_file.group == "root", repo_file.group
     execute_percona_release_command(host, "disable", component, repository)
-    backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.bak".format(component, repository))
+    backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list.bak".format(component, repository))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
         backup_repo_file = host.file("/etc/yum/yum.repos.d/percona-{}-{}.bak".format(component, repository))
     assert backup_repo_file.user == "root"
