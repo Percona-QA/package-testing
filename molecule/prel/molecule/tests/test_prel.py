@@ -74,18 +74,20 @@ def remove_percona_repository(host, repo_file):
 
 
 def execute_percona_release_command(host,
-                                    product,
-                                    command="enable",
-                                    repository=""):
+                                    repository="",
+                                    component="",
+                                    command="enable"):
     """Execute percona release command
     :param host:
-    :param product:
+    :param component:
     :param command:
     :param repository:
     :return:
     """
     with host.sudo("root"):
-        cmd = "percona-release {} {} {}".format(command, product, repository)
+        cmd = "percona-release {command} {repository} {component}".format(command=command,
+                                                                          repository=repository,
+                                                                          component=component)
         result = host.run(cmd)
         assert result.rc == 0, (result.stdout, result.stderr)
         return result
@@ -132,7 +134,10 @@ def test_enable_repo(host, repository, component, command):
     8. Check that repository file moved to backup
     """
     dist_name = host.system_info.distribution
-    execute_percona_release_command(host, command, component, repository)
+    execute_percona_release_command(host,
+                                    command=command,
+                                    component=component,
+                                    repository=repository)
     apt_update(host)
     repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}".format(component, repository))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
@@ -150,6 +155,6 @@ def test_enable_repo(host, repository, component, command):
 @pytest.mark.parametrize("product", PRODUCTS)
 def test_setup_product(host, product):
     dist_name = host.system_info.distribution
-    execute_percona_release_command(host, "setup", product)
+    execute_percona_release_command(host, command="setup", repository=product)
 
 
