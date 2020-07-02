@@ -21,7 +21,11 @@ REPOSITORIES = ["original", "ps-80", "pxc-80", "psmdb-40", "psmdb-42",
 COMPONENTS = ['testing',
               'release',
               'experimental']
-TEST_REPOSITORIES_DATA = [(repo, component) for repo in REPOSITORIES for component in COMPONENTS]
+TEST_REPOSITORIES_DATA = [
+    (
+        repo, component, command
+    ) for repo in REPOSITORIES for component in COMPONENTS for command in [
+        "enable", 'enable-only']]
 
 
 def get_package_by_repo(repo_name):
@@ -69,16 +73,19 @@ def remove_percona_repository(host, repo_file):
         assert result.rc == 0, result.stderr
 
 
-def execute_percona_release_command(host, command, name, arg=""):
+def execute_percona_release_command(host,
+                                    product,
+                                    command="enable",
+                                    repository=""):
     """Execute percona release command
     :param host:
+    :param product:
     :param command:
-    :param name:
-    :param arg:
+    :param repository:
     :return:
     """
     with host.sudo("root"):
-        cmd = "percona-release {} {} {}".format(command, name, arg)
+        cmd = "percona-release {} {} {}".format(command, product, repository)
         result = host.run(cmd)
         assert result.rc == 0, (result.stdout, result.stderr)
         return result
@@ -111,8 +118,8 @@ def test_package_installed(host):
     assert pkg.is_installed
 
 
-@pytest.mark.parametrize("repository, component", TEST_REPOSITORIES_DATA)
-def test_enable_repo(host, repository, component):
+@pytest.mark.parametrize("repository, component, command", TEST_REPOSITORIES_DATA)
+def test_enable_repo(host, repository, component, command):
     """Check enable repository command
     Scenario:
     1. Enable repository
@@ -125,7 +132,7 @@ def test_enable_repo(host, repository, component):
     8. Check that repository file moved to backup
     """
     dist_name = host.system_info.distribution
-    execute_percona_release_command(host, "enable", component, repository)
+    execute_percona_release_command(host, command, component, repository)
     apt_update(host)
     repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}".format(component, repository))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
@@ -144,10 +151,5 @@ def test_enable_repo(host, repository, component):
 def test_setup_product(host, product):
     dist_name = host.system_info.distribution
     execute_percona_release_command(host, "setup", product)
-
-
-@pytest.mark.parametrize("repository, component", TEST_REPOSITORIES_DATA)
-def test_enable_only(host, repository, component):
-    pass
 
 
