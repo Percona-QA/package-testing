@@ -16,7 +16,7 @@ PRODUCTS = ["ps56", "ps57", "ps80",
 REPOSITORIES = ["original", "ps-80", "pxc-80", "psmdb-40", "psmdb-42",
                 "tools", "ppg-11", "ppg-11.5", "ppg-11.6", "ppg-11.7", "ppg-11.8",
                 "ppg-12", "ppg-12.2", "ppg-12.3",
-                "pdmdb-4.2", "pdmdb-4.2.6", "pdpxc-8.0", "pdpxc-8.0.19"
+                "pdmdb-4.2", "pdmdb-4.2.6", "pdpxc-8.0", "pdpxc-8.0.19",
                 "pdps-8.0.19", "pdps-8.0"]
 COMPONENTS = ['testing',
               'release',
