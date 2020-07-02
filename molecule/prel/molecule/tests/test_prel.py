@@ -144,7 +144,9 @@ def test_enable_repo(host, repository, component, command):
         repo_file = host.file("/etc/yum/yum.repos.d/percona-{}-{}".format(repository, component))
     assert repo_file.user == "root", repo_file.user
     assert repo_file.group == "root", repo_file.group
-    execute_percona_release_command(host, "disable", repository, component)
+    execute_percona_release_command(host, command="disable",
+                                    repository=repository,
+                                    component=component)
     backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list.bak".format(repository, component))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
         backup_repo_file = host.file("/etc/yum/yum.repos.d/percona-{}-{}.bak".format(repository, component))
