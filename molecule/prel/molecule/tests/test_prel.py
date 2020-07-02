@@ -11,7 +11,7 @@ PRODUCTS = ["ps56", "ps57", "ps80",
             "pxb80", "pxc56", "pxc57", "pxc80",
             "ppg11", "ppg11.5", "ppg11.6",
             "ppg11.7", "ppg11.8", "ppg12", "ppg12.2", "ppg12.3",
-            "pdmdb4.2", "pdmdb4.2.6", "pdpxc8.0.19", 'pdps8.0.19'
+            "pdmdb4.2", "pdmdb4.2.6", "pdpxc8.0.19", 'pdps8.0.19',
             "pdpxc-8.0", "pdps-8.0"]
 REPOSITORIES = ["original", "ps-80", "pxc-80", "psmdb-40", "psmdb-42",
                 "tools", "ppg-11", "ppg-11.5", "ppg-11.6", "ppg-11.7", "ppg-11.8",
@@ -139,15 +139,15 @@ def test_enable_repo(host, repository, component, command):
                                     component=component,
                                     repository=repository)
     apt_update(host)
-    repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list".format(component, repository))
+    repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list".format(repository, component))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
-        repo_file = host.file("/etc/yum/yum.repos.d/percona-{}-{}".format(component, repository))
+        repo_file = host.file("/etc/yum/yum.repos.d/percona-{}-{}".format(repository, component))
     assert repo_file.user == "root", repo_file.user
     assert repo_file.group == "root", repo_file.group
-    execute_percona_release_command(host, "disable", component, repository)
-    backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list.bak".format(component, repository))
+    execute_percona_release_command(host, "disable", repository, component)
+    backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list.bak".format(repository, component))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
-        backup_repo_file = host.file("/etc/yum/yum.repos.d/percona-{}-{}.bak".format(component, repository))
+        backup_repo_file = host.file("/etc/yum/yum.repos.d/percona-{}-{}.bak".format(repository, component))
     assert backup_repo_file.user == "root"
     assert backup_repo_file.group == "root"
 
