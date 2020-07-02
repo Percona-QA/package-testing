@@ -69,7 +69,7 @@ def remove_percona_repository(host, repo_file):
         assert result.rc == 0, result.stderr
 
 
-def execute_percona_release_command(host, command, name, arg=None):
+def execute_percona_release_command(host, command, name, arg=""):
     """Execute percona release command
     :param host:
     :param command:
@@ -80,7 +80,7 @@ def execute_percona_release_command(host, command, name, arg=None):
     with host.sudo("root"):
         cmd = "percona-release {} {} {}".format(command, name, arg)
         result = host.run(cmd)
-        assert result.rc == 0, result.stdout
+        assert result.rc == 0, (result.stdout, result.stderr)
         return result
 
 
