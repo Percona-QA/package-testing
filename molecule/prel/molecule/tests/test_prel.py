@@ -178,7 +178,7 @@ def test_setup_product(host, product):
         assert repo_file.user == "root", repo_file.user
         assert repo_file.group == "root", repo_file.group
     for repo in PRODUCT_REPOS[product]:
-        execute_percona_release_command(host, command="disable", repository=product,
+        execute_percona_release_command(host, command="disable", repository=repo,
                                         component="release")
         backup_repo_file = host.file(
             "/etc/apt/sources.list.d/percona-{}-release.list.bak".format(repo))
