@@ -6,13 +6,33 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-PRODUCTS = ["ps56", "ps57", "ps80",
-            "psmdb34", "psmdb36", "psmdb40", "psmdb42",
-            "pxb80", "pxc56", "pxc57", "pxc80",
-            "ppg11", "ppg11.5", "ppg11.6",
-            "ppg11.7", "ppg11.8", "ppg12", "ppg12.2", "ppg12.3",
-            "pdmdb4.2", "pdmdb4.2.6", "pdpxc8.0.19", 'pdps8.0.19',
-            "pdpxc-8.0", "pdps-8.0"]
+PRODUCT_REPOS = {"ps56": ["original", "tools"],
+                 "ps57": ["original", "tools"],
+                 "ps80": ["ps-80", "tools"],
+                 "pxc56": ["original", "tools"],
+                 "pxc57": ["original", "tools"],
+                 "pxc80": ["pxc-80", "tools"],
+                 "pxb80": ["tools"],
+                 "psmdb34": ["original", "tools"],
+                 "psmdb36": ["original", "tools"],
+                 "psmdb40": ['psmdb-40', "tools"],
+                 "psmdb42": ['psmdb-42', "tools"],
+                 "ppg11": ["ppg-11"],
+                 "ppg11.5": ["ppg-11.5"],
+                 "ppg11.6": ["ppg-11.6"],
+                 "ppg11.7": ["ppg-11.7"],
+                 "ppg12": ["ppg-12"],
+                 "ppg12.2": ["ppg-12.2"],
+                 "ppg12.3": ["ppg-12.3"],
+                 "pdmdb4.2": ["pdmdb-4.2"],
+                 "pdmdb4.2.6": ["pdmdb-4.2.6"],
+                 "pdpxc8.0.19": ["pdpxc-8.0.19"],
+                 "pdpxc8.0": ["pdpxc-8.0"],
+                 "pdps8.0.19": ["pdps-8.0.19"],
+                 "pdps8.0": ["pdps-8.0"]
+                 }
+
+
 REPOSITORIES = ["original", "ps-80", "pxc-80", "psmdb-40", "psmdb-42",
                 "tools", "ppg-11", "ppg-11.5", "ppg-11.6", "ppg-11.7", "ppg-11.8",
                 "ppg-12", "ppg-12.2", "ppg-12.3",
@@ -141,24 +161,28 @@ def test_enable_repo(host, repository, component, command):
     assert backup_repo_file.user == "root"
     assert backup_repo_file.group == "root"
     # check_list_of_packages(host, repository)
+    remove_percona_repository(host, "percona*")
 
 
-@pytest.mark.parametrize("product", PRODUCTS)
+@pytest.mark.parametrize("product", PRODUCT_REPOS.keys())
 def test_setup_product(host, product):
     dist_name = host.system_info.distribution
     execute_percona_release_command(host, command="setup", repository=product)
     apt_update(host)
-    repo_file = host.file("/etc/apt/sources.list.d/percona-{}-release.list".format(product))
-    if dist_name.lower() in ["redhat", "centos", 'rhel']:
-        repo_file = host.file("/etc/yum.repos.d/percona-{}-release.repo".format(product))
-    assert repo_file.user == "root", repo_file.user
-    assert repo_file.group == "root", repo_file.group
+    for repo in PRODUCT_REPOS[product]:
+        repo_file = host.file("/etc/apt/sources.list.d/percona-{}-release.list".format(repo))
+        if dist_name.lower() in ["redhat", "centos", 'rhel']:
+            repo_file = host.file("/etc/yum.repos.d/percona-{}-release.repo".format(repo))
+        assert repo_file.user == "root", repo_file.user
+        assert repo_file.group == "root", repo_file.group
     execute_percona_release_command(host, command="disable", repository=product)
-    backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-release.list.bak".format(product))
-    if dist_name.lower() in ["redhat", "centos", 'rhel']:
-        backup_repo_file = host.file("/etc/yum.repos.d/percona-{}-release.repo.bak".format(product))
-    assert backup_repo_file.user == "root"
-    assert backup_repo_file.group == "root"
+    for repo in PRODUCT_REPOS[product]:
+        backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-release.list.bak".format(repo))
+        if dist_name.lower() in ["redhat", "centos", 'rhel']:
+            backup_repo_file = host.file("/etc/yum.repos.d/percona-{}-release.repo.bak".format(repo))
+        assert backup_repo_file.user == "root"
+        assert backup_repo_file.group == "root"
     # check_list_of_packages(host, product)
+    remove_percona_repository(host, "percona*")
 
 
