@@ -147,9 +147,11 @@ def test_enable_repo(host, repository, component, command):
                                     component=component,
                                     repository=repository)
     apt_update(host)
-    repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list".format(repository, component))
+    repo_file = host.file(
+        "/etc/apt/sources.list.d/percona-{}-{}.list".format(repository, component))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
-        repo_file = host.file("/etc/yum.repos.d/percona-{}-{}.repo".format(repository, component))
+        repo_file = host.file(
+            "/etc/yum.repos.d/percona-{}-{}.repo".format(repository, component))
     assert repo_file.user == "root", repo_file.user
     assert repo_file.group == "root", repo_file.group
     execute_percona_release_command(host, command="disable",
@@ -175,9 +177,11 @@ def test_setup_product(host, product):
             repo_file = host.file("/etc/yum.repos.d/percona-{}-release.repo".format(repo))
         assert repo_file.user == "root", repo_file.user
         assert repo_file.group == "root", repo_file.group
-    execute_percona_release_command(host, command="disable", repository=product)
     for repo in PRODUCT_REPOS[product]:
-        backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-release.list.bak".format(repo))
+        execute_percona_release_command(host, command="disable", repository=product,
+                                        component="release")
+        backup_repo_file = host.file(
+            "/etc/apt/sources.list.d/percona-{}-release.list.bak".format(repo))
         if dist_name.lower() in ["redhat", "centos", 'rhel']:
             backup_repo_file = host.file("/etc/yum.repos.d/percona-{}-release.repo.bak".format(repo))
         assert backup_repo_file.user == "root"
