@@ -129,7 +129,7 @@ def test_enable_repo(host, repository, component, command):
     apt_update(host)
     repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list".format(repository, component))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
-        repo_file = host.file("/etc/yum/yum.repos.d/percona-{}-{}.repo".format(repository, component))
+        repo_file = host.file("/etc/yum.repos.d/percona-{}-{}.repo".format(repository, component))
     assert repo_file.user == "root", repo_file.user
     assert repo_file.group == "root", repo_file.group
     execute_percona_release_command(host, command="disable",
@@ -137,7 +137,7 @@ def test_enable_repo(host, repository, component, command):
                                     component=component)
     backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list.bak".format(repository, component))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
-        backup_repo_file = host.file("/etc/yum/yum.repos.d/percona-{}-{}.repo.bak".format(repository, component))
+        backup_repo_file = host.file("/etc/yum.repos.d/percona-{}-{}.repo.bak".format(repository, component))
     assert backup_repo_file.user == "root"
     assert backup_repo_file.group == "root"
     check_list_of_packages(host, repository)
@@ -150,13 +150,13 @@ def test_setup_product(host, product):
     apt_update(host)
     repo_file = host.file("/etc/apt/sources.list.d/percona-{}.list".format(product))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
-        repo_file = host.file("/etc/yum/yum.repos.d/percona-{}.repo".format(product))
+        repo_file = host.file("/etc/yum.repos.d/percona-{}.repo".format(product))
     assert repo_file.user == "root", repo_file.user
     assert repo_file.group == "root", repo_file.group
     execute_percona_release_command(host, command="disable", repository=product)
     backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}.list.bak".format(product))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
-        backup_repo_file = host.file("/etc/yum/yum.repos.d/percona-{}.repo.bak".format(product))
+        backup_repo_file = host.file("/etc/yum.repos.d/percona-{}.repo.bak".format(product))
     assert backup_repo_file.user == "root"
     assert backup_repo_file.group == "root"
     check_list_of_packages(host, product)
