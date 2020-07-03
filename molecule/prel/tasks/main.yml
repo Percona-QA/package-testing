@@ -15,6 +15,3 @@
     yum clean all
     yum makecache
   when: ansible_os_family == "RedHat"
-
-- name: include playbook for removing Percona repo
-  include: ../../../../tasks/remove_percona_repository.yml
