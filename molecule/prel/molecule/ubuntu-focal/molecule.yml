@@ -20,8 +20,8 @@ provisioner:
     create: ../../../playbooks/create.yml
     destroy: ../../../playbooks/destroy.yml
     prepare: ../../../playbooks/prepare.yml
-    cleanup: ../,,/playbooks/cleanup.yml
-    converge: ../,,/playbooks/playbook.yml
+    cleanup: ../../playbooks/cleanup.yml
+    converge: ../../playbooks/playbook.yml
 verifier:
   name: testinfra
   directory: ../tests/
