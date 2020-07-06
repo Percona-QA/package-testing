@@ -1,0 +1,43 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+servers=[
+  { :hostname => "d-jessie-64-@@hostname@@", :box => "bento/debian-8" },
+  { :hostname => "d-stretch-64-@@hostname@@", :box => "bento/debian-9" },
+  { :hostname => "d-buster-64-@@hostname@@", :box => "bento/debian-10" },
+  { :hostname => "centos-6-64-@@hostname@@", :box => "bento/centos-6" },
+  { :hostname => "centos-7-64-@@hostname@@", :box => "bento/centos-7" },
+  { :hostname => "centos-8-64-@@hostname@@", :box => "bento/centos-8" },
+  { :hostname => "u-xenial-64-@@hostname@@", :box => "bento/ubuntu-16.04" },
+  { :hostname => "u-bionic-64-@@hostname@@", :box => "bento/ubuntu-18.04" },
+  { :hostname => "u-focal-64-@@hostname@@", :box => "bento/ubuntu-20.04" },
+]
+
+Vagrant.configure("2") do |config|
+  # All Vagrant configuration is done here. The most pxb configuration
+  # options are documented and commented below. For a complete reference,
+  # please see the online documentation at vagrantup.com.
+
+  servers.each do |machine|
+    config.vm.define machine[:hostname] do |node|
+      node.vm.box = machine[:box]
+      node.vm.hostname = machine[:hostname]
+      node.vm.provider "virtualbox" do |vb|
+          vb.customize ["modifyvm", :id, "--cpus", 2]
+          vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on"]
+#         vb.customize ["modifyvm", :id, "--nictype1", "virtio"]
+#         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+#         vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+      end
+      config.vm.provision "ansible" do |ansible|
+        ansible.playbook = "@@playbook_full@@"
+        ansible.become = "true"
+        # ansible.verbose = "vvvv"
+        ansible.host_key_checking = "false"
+      end
+      config.vm.synced_folder '.', '/vagrant', :disabled => true
+      config.vm.synced_folder '.', '/home/vagrant/sync', :disabled => true
+    end
+  end
+
+end
