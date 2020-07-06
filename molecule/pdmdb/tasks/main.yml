@@ -63,7 +63,7 @@
 #  when: ansible_os_family == "RedHat"
 
 - name: enable pdmdb repo
-  command: percona-release enable pdmdb-4.2.7 {{ repo }}
+  command: percona-release enable pdmdb-4.2.8 {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
 
