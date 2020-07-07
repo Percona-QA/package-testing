@@ -120,6 +120,7 @@ def check_list_of_packages(host, repository):
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
         cmd = "yum list percona* | grep {}".format(product_name)
     result = host.run(cmd)
+    print(result.stdout)
     assert product_name in result.stdout
 
 
@@ -157,12 +158,13 @@ def test_enable_repo(host, repository, component, command):
     execute_percona_release_command(host, command="disable",
                                     repository=repository,
                                     component=component)
+    check_list_of_packages(host, repository)
     backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list.bak".format(repository, component))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
         backup_repo_file = host.file("/etc/yum.repos.d/percona-{}-{}.repo.bak".format(repository, component))
     assert backup_repo_file.user == "root"
     assert backup_repo_file.group == "root"
-    # check_list_of_packages(host, repository)
+    apt_update(host)
     remove_percona_repository(host, "percona*")
 
 
@@ -177,6 +179,7 @@ def test_setup_product(host, product):
             repo_file = host.file("/etc/yum.repos.d/percona-{}-release.repo".format(repo))
         assert repo_file.user == "root", repo_file.user
         assert repo_file.group == "root", repo_file.group
+    check_list_of_packages(host, product)
     for repo in PRODUCT_REPOS[product]:
         execute_percona_release_command(host, command="disable", repository=repo,
                                         component="release")
@@ -186,7 +189,6 @@ def test_setup_product(host, product):
             backup_repo_file = host.file("/etc/yum.repos.d/percona-{}-release.repo.bak".format(repo))
         assert backup_repo_file.user == "root"
         assert backup_repo_file.group == "root"
-    # check_list_of_packages(host, product)
     remove_percona_repository(host, "percona*")
 
 
