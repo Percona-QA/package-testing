@@ -176,6 +176,14 @@
       - percona-toolkit
     when: ansible_os_family == "RedHat"
 
+  - name: upgrade Percona release to new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-release
+
   - name: upgrade Percona Server to new rpm packages on CentOS
     yum:
       name: "{{ packages }}"

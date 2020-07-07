@@ -123,6 +123,13 @@
 #
 # Upgrade packages
 #
+  - name: upgrade Percona release to new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-release
 
   - name: install PS 5.7 packages from main repos
     include_tasks: ../tasks/install_ps57.yml
