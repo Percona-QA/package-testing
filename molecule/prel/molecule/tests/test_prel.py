@@ -117,7 +117,7 @@ def check_list_of_packages(host, repository):
     dist_name = host.system_info.distribution
     product_name = get_package_by_repo(repository)
     with host.sudo("root"):
-        cmd = "apt-cache search percona* | grep {}".format(product_name)
+        cmd = "apt-cache search percona | grep {}".format(product_name)
         if dist_name.lower() in ["redhat", "centos", 'rhel']:
             cmd = "yum list percona* | grep {}".format(product_name)
         result = host.run(cmd)
