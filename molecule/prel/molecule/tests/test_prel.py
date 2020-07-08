@@ -163,10 +163,11 @@ def test_enable_repo(host, repository, component, command):
             "/etc/yum.repos.d/percona-{}-{}.repo".format(repository, component))
     assert repo_file.user == "root", repo_file.user
     assert repo_file.group == "root", repo_file.group
+    check_list_of_packages(host, repository)
     execute_percona_release_command(host, command="disable",
                                     repository=repository,
                                     component=component)
-    check_list_of_packages(host, repository)
+    apt_update(host)
     backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list.bak".format(repository, component))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
         backup_repo_file = host.file("/etc/yum.repos.d/percona-{}-{}.repo.bak".format(repository, component))
