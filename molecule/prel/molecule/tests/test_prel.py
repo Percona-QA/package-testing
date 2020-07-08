@@ -116,13 +116,14 @@ def execute_percona_release_command(host,
 def check_list_of_packages(host, repository):
     dist_name = host.system_info.distribution
     product_name = get_package_by_repo(repository)
+    print(product_name)
     with host.sudo("root"):
         cmd = "apt-cache search percona | grep {}".format(product_name)
         if dist_name.lower() in ["redhat", "centos", 'rhel']:
             cmd = "yum list percona* | grep {}".format(product_name)
         result = host.run(cmd)
         print(result.stdout)
-        assert product_name in result.stdout
+        assert product_name in (result.stdout, result.stderr)
 
 
 def test_package_installed(host):
