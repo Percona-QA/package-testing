@@ -51,12 +51,20 @@ TEST_REPOSITORIES_DATA = [
 def get_package_by_repo(repo_name):
     if "ppg" in repo_name:
         return "percona-postgresql"
+    elif "pdmdb" in repo_name:
+        return "percona-server-mongodb"
     elif "psmdb" in repo_name:
         return "percona-server-mongodb"
     elif "pxc" in repo_name:
         return "percona-xtradb-cluster"
     elif "ps" in repo_name:
         return "percona-server"
+    elif "original" in repo_name:
+        return "percona-toolkit"
+    elif "pxb" in repo_name:
+        return "percona-xtrabackup"
+    elif "tools" in repo_name:
+        return "percona-toolkit"
     else:
         return "Unsupported"
 
@@ -123,7 +131,8 @@ def check_list_of_packages(host, repository):
             cmd = "yum list percona* | grep {}".format(product_name)
         result = host.run(cmd)
         print(result.stdout)
-        assert product_name in (result.stdout, result.stderr)
+        print(result.stderr)
+        assert product_name in result.stderr, (result.stdout, result.stderr)
 
 
 def test_package_installed(host):
