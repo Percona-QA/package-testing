@@ -6,6 +6,8 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
+SKIPPED_REPOSITORIES = ["ppg", "pdmdb", "pdps", "pdpxc", "psmdb-42"]
+
 PRODUCT_REPOS = {"ps56": ["original", "tools"],
                  "ps57": ["original", "tools"],
                  "ps80": ["ps-80", "tools"],
@@ -150,6 +152,8 @@ def test_enable_repo(host, repository, component, command):
     7. Disable repository
     8. Check that repository file moved to backup
     """
+    if repository in SKIPPED_REPOSITORIES and component == 'experimental':
+        pytest.skip("Unsupported repository {} for component".format(repository, component))
     dist_name = host.system_info.distribution
     execute_percona_release_command(host,
                                     command=command,
