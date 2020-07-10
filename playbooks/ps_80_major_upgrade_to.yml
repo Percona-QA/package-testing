@@ -248,12 +248,6 @@
   - name: start mysql service
     service: name=mysql state=started
 
-  - name: check that Percona Server version is correct
-    command: /package-testing/version_check.sh ps80
-
-  - name: check that Percona Server package versions are correct
-    command: /package-testing/package_check.sh ps80
-
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
 
@@ -272,6 +266,12 @@
 
   - name: run bats tests for mysql init scripts
     command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+
+  - name: check that Percona Server version is correct
+    command: /package-testing/version_check.sh ps80
+
+  - name: check that Percona Server package versions are correct
+    command: /package-testing/package_check.sh ps80
 
   - name: remove PS 8.0 packages
     include_tasks: ../tasks/remove_ps80.yml
