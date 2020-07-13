@@ -110,6 +110,9 @@
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
 
+  - name: disable redo log
+    command: /package-testing/disable_redo.sh
+
   - name: install plugins, import world database
     command: /package-testing/plugins_test.sh
 
