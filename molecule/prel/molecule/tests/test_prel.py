@@ -154,6 +154,8 @@ def test_enable_repo(host, repository, component, command):
     """
     if any(rep in repository for rep in SKIPPED_REPOSITORIES) and component == 'experimental':
         pytest.skip("Unsupported repository {} for component".format(repository, component))
+    if repository in ("ppg-12", "pdpxc-8.0", "pdps-8.0") and component == "testing":
+        pytest.skip()
     dist_name = host.system_info.distribution
     execute_percona_release_command(host,
                                     command=command,
