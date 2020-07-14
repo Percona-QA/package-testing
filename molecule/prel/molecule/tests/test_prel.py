@@ -157,6 +157,9 @@ def test_enable_repo(host, repository, component, command):
     if repository in ("ppg-12", "pdpxc-8.0", "pdps-8.0") and component == "testing":
         pytest.skip()
     dist_name = host.system_info.distribution
+    codename = host.system_info.codename
+    if "ppg-11" in repository and codename == "focal":
+        pytest.skip("Not supported by focal")
     execute_percona_release_command(host,
                                     command=command,
                                     component=component,
@@ -186,6 +189,9 @@ def test_enable_repo(host, repository, component, command):
 @pytest.mark.parametrize("product", PRODUCT_REPOS.keys())
 def test_setup_product(host, product):
     dist_name = host.system_info.distribution
+    codename = host.system_info.codename
+    if ("ppg-11" or "pdmdb-4.2" in product) and codename == "focal":
+        pytest.skip("Not supported by focal")
     execute_percona_release_command(host, command="setup", repository=product)
     apt_update(host)
     for repo in PRODUCT_REPOS[product]:
