@@ -158,7 +158,7 @@ def test_enable_repo(host, repository, component, command):
         pytest.skip()
     dist_name = host.system_info.distribution
     codename = host.system_info.codename
-    if "ppg-11" in repository and codename == "focal":
+    if ("ppg-11" or "pdmdb-4.2" in repository) and codename == "focal":
         pytest.skip("Not supported by focal")
     execute_percona_release_command(host,
                                     command=command,
