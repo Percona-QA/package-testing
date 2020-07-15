@@ -154,6 +154,13 @@ def execute_percona_release_command(host,
 def check_list_of_packages(host, repository):
     dist_name = host.system_info.distribution
     product_name = PRODUCT_PACKAGES[repository]
+    if dist_name in ['debian', 'ubuntu']:
+        if repository in ['psmdb34', "psmdb36"]:
+            product_name = "percona-server-mongodb"
+        if repository in ['pxc57', 'pxc56']:
+            product_name = "percona-xtradb-cluster"
+        if repository in ['ps56', 'ps57']:
+            product_name = "percona-server"
     with host.sudo("root"):
         cmd = "apt-cache search percona | grep {}".format(product_name)
         if dist_name.lower() in ["redhat", "centos", 'rhel']:
