@@ -56,8 +56,12 @@ def get_package_by_repo(repo_name):
     elif "pdmdb" in repo_name:
         return "percona-server-mongodb"
     elif "psmdb" in repo_name:
-        return "percona-server-mongodb"
+        if "4" in repo_name:
+            return "percona-server-mongodb"
+        return "Percona-Server-MongoDB"
     elif "pxc" in repo_name:
+        if "57" or "56" in repo_name:
+            return "Percona-Server"
         return "percona-xtradb-cluster"
     elif "ps" in repo_name:
         return "percona-server"
