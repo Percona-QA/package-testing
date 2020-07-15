@@ -34,6 +34,34 @@ PRODUCT_REPOS = {"ps56": ["original", "tools"],
                  "pdps8.0": ["pdps-8.0"]
                  }
 
+PRODUCT_PACKAGES = {"ps56": "Percona-Server",
+                    "ps57": "Percona-Server",
+                    "ps80": "percona-server",
+                    "pxc56": "Percona-XtraDB-Cluster",
+                    "pxc57": "Percona-XtraDB-Cluster",
+                    "pxc80": "percona-xtradb-cluster",
+                    "pxb80": "percona-xtrabackup",
+                    "psmdb34": "Percona-Server-MongoDB",
+                    "psmdb36": "Percona-Server-MongoDB",
+                    "psmdb40": "percona-server-mongodb",
+                    "psmdb42": "percona-server-mongodb",
+                    "ppg11": "percona-postgresql",
+                    "ppg11.5": "percona-postgresql",
+                    "ppg11.6": "percona-postgresql",
+                    "ppg11.7": "percona-postgresql",
+                    "ppg12": "percona-postgresql",
+                    "ppg12.2": "percona-postgresql",
+                    "ppg12.3": "percona-postgresql",
+                    "pdmdb4.2": "percona-server-mongodb",
+                    "pdmdb4.2.6": "percona-server-mongodb",
+                    "pdpxc8.0.19": "percona-xtradb-cluster",
+                    "pdpxc8.0": "percona-xtradb-cluster",
+                    "pdps8.0.19": "percona-server",
+                    "pdps8.0": "percona-server",
+                    "tools": "percona-toolkit",
+                    "original": "percona-toolkit"
+                 }
+
 
 REPOSITORIES = ["original", "ps-80", "pxc-80", "psmdb-40", "psmdb-42",
                 "tools", "ppg-11", "ppg-11.5", "ppg-11.6", "ppg-11.7", "ppg-11.8",
@@ -48,31 +76,6 @@ TEST_REPOSITORIES_DATA = [
         repo, component, command
     ) for repo in REPOSITORIES for component in COMPONENTS for command in [
         "enable", 'enable-only']]
-
-
-def get_package_by_repo(repo_name):
-    if "ppg" in repo_name:
-        return "percona-postgresql"
-    elif "pdmdb" in repo_name:
-        return "percona-server-mongodb"
-    elif "psmdb" in repo_name:
-        if "4" in repo_name:
-            return "percona-server-mongodb"
-        return "Percona-Server-MongoDB"
-    elif "pxc" in repo_name:
-        if "57" or "56" in repo_name:
-            return "Percona-Server"
-        return "percona-xtradb-cluster"
-    elif "ps" in repo_name:
-        return "percona-server"
-    elif "original" in repo_name:
-        return "percona-toolkit"
-    elif "pxb" in repo_name:
-        return "percona-xtrabackup"
-    elif "tools" in repo_name:
-        return "percona-toolkit"
-    else:
-        return "Unsupported"
 
 
 @pytest.fixture()
@@ -129,7 +132,7 @@ def execute_percona_release_command(host,
 
 def check_list_of_packages(host, repository):
     dist_name = host.system_info.distribution
-    product_name = get_package_by_repo(repository)
+    product_name = PRODUCT_PACKAGES[repository]
     with host.sudo("root"):
         cmd = "apt-cache search percona | grep {}".format(product_name)
         if dist_name.lower() in ["redhat", "centos", 'rhel']:
@@ -215,5 +218,3 @@ def test_setup_product(host, product):
         assert backup_repo_file.user == "root"
         assert backup_repo_file.group == "root"
     remove_percona_repository(host, "percona*")
-
-
