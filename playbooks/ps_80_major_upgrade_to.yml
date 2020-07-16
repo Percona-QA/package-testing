@@ -273,7 +273,7 @@
   - name: run bats tests for mysql init scripts
     command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
 
- - name: remove PS 8.0 packages
+  - name: remove PS 8.0 packages
     include_tasks: ../tasks/remove_ps80.yml
 
   - name: check if process is stopped after package removal
