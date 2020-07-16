@@ -19,8 +19,8 @@ pipeline {
               sh '''
                 PS_MAJOR_VERSION="$(echo ${PS_VERSION}|cut -d'.' -f1,2)"
                 if [ "${PS_MAJOR_VERSION}" = "8.0" ]; then
-                  TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.ssl102.deb.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release/label_exp=min-stretch-x64/lastSuccessfulBuild/artifact/tarball/"
+                  TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.12.tar.gz" 
+                  JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release/label_exp=min-centos-6-x64/lastSuccessfulBuild/artifact/tarball/"
                 elif [ "${PS_MAJOR_VERSION}" = "5.7" ]; then
                   TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.ssl102.tar.gz"
                   JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release-rocks-new/label_exp=min-stretch-x64/lastSuccessfulBuild/artifact/tarball/"
@@ -48,8 +48,8 @@ pipeline {
               sh '''
                 PS_MAJOR_VERSION="$(echo ${PS_VERSION}|cut -d'.' -f1,2)"
                 if [ "${PS_MAJOR_VERSION}" = "8.0" ]; then
-                  TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.ssl100.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release/label_exp=min-xenial-x64/lastSuccessfulBuild/artifact/tarball/"
+                  TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.12.tar.gz" 
+                  JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release/label_exp=min-centos-6-x64/lastSuccessfulBuild/artifact/tarball/"
                 elif [ "${PS_MAJOR_VERSION}" = "5.7" ]; then
                   TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.ssl100.tar.gz"
                   JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release-rocks-new/label_exp=min-jessie-x64/lastSuccessfulBuild/artifact/tarball/"
