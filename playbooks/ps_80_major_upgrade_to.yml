@@ -238,6 +238,12 @@
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
 
+  - name: check that Percona Server version is correct
+    command: /package-testing/version_check.sh ps80
+
+  - name: check that Percona Server package versions are correct
+    command: /package-testing/package_check.sh ps80
+ 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb80
     when: lookup('env', 'install_repo') != "experimental"
@@ -267,13 +273,7 @@
   - name: run bats tests for mysql init scripts
     command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
 
-  - name: check that Percona Server version is correct
-    command: /package-testing/version_check.sh ps80
-
-  - name: check that Percona Server package versions are correct
-    command: /package-testing/package_check.sh ps80
-
-  - name: remove PS 8.0 packages
+ - name: remove PS 8.0 packages
     include_tasks: ../tasks/remove_ps80.yml
 
   - name: check if process is stopped after package removal
