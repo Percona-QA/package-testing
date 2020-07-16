@@ -123,7 +123,7 @@ def test_check_deb_package(host, package):
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert '8.0.20' in pkg.version, pkg.version
+    assert '8.0.19' in pkg.version, pkg.version
 
 
 @pytest.mark.parametrize("package", RPMPACKAGES)
@@ -133,7 +133,7 @@ def test_check_rpm_package(host, package):
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert '8.0.20' in pkg.version, pkg.version
+    assert '8.0.19' in pkg.version, pkg.version
 
 
 @pytest.mark.parametrize("binary", ['mysqlsh', 'mysql', 'mysqlrouter'])
@@ -142,7 +142,7 @@ def test_binary_version(host, binary):
     result = host.run(cmd)
     print(result.stdout)
     assert result.rc == 0, result.stderr
-    assert '8.0.20' in result.stdout, result.stdout
+    assert '8.0.19' in result.stdout, result.stdout
 
 
 @pytest.mark.parametrize('component', ['@@INNODB_VERSION', '@@VERSION'])
