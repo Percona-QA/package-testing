@@ -1,8 +1,8 @@
 pipeline {
   agent any
   parameters {
-    string(name: 'PS_VERSION', defaultValue: '8.0.17-8', description: 'PS full version')
-    string(name: 'PS_REVISION', defaultValue: 'e52ea8e', description: 'PS revision')
+    string(name: 'PS_VERSION', defaultValue: '8.0.20-11', description: 'PS full version')
+    string(name: 'PS_REVISION', defaultValue: '159f0eb', description: 'PS revision')
   }
   stages {
     stage('Binary tarball test') {
@@ -77,8 +77,8 @@ pipeline {
               sh '''
                 PS_MAJOR_VERSION="$(echo ${PS_VERSION}|cut -d'.' -f1,2)"
                 if [ "${PS_MAJOR_VERSION}" = "8.0" ]; then
-                  TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.ssl102.deb.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release/label_exp=min-stretch-x64/lastSuccessfulBuild/artifact/tarball/"
+                  TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.12.tar.gz" 
+                  JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release/label_exp=min-centos-6-x64/lastSuccessfulBuild/artifact/tarball/"
                 elif [ "${PS_MAJOR_VERSION}" = "5.7" ]; then
                   TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.ssl102.tar.gz"
                   JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release-rocks-new/label_exp=min-stretch-x64/lastSuccessfulBuild/artifact/tarball/"
@@ -106,8 +106,8 @@ pipeline {
               sh '''
                 PS_MAJOR_VERSION="$(echo ${PS_VERSION}|cut -d'.' -f1,2)"
                 if [ "${PS_MAJOR_VERSION}" = "8.0" ]; then
-                  TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.ssl102.deb.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release/label_exp=min-stretch-x64/lastSuccessfulBuild/artifact/tarball/"
+                  TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.12.tar.gz" 
+                  JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release/label_exp=min-centos-6-x64/lastSuccessfulBuild/artifact/tarball/"
                 elif [ "${PS_MAJOR_VERSION}" = "5.7" ]; then
                   TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.ssl102.tar.gz"
                   JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release-rocks-new/label_exp=min-stretch-x64/lastSuccessfulBuild/artifact/tarball/"
@@ -135,8 +135,8 @@ pipeline {
               sh '''
                 PS_MAJOR_VERSION="$(echo ${PS_VERSION}|cut -d'.' -f1,2)"
                 if [ "${PS_MAJOR_VERSION}" = "8.0" ]; then
-                  TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.ssl102.rpm.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release/label_exp=min-centos-7-x64/lastSuccessfulBuild/artifact/tarball/"
+                  TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.12.tar.gz" 
+                  JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release/label_exp=min-centos-6-x64/lastSuccessfulBuild/artifact/tarball/"
                 elif [ "${PS_MAJOR_VERSION}" = "5.7" ]; then
                   TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.ssl101.tar.gz"
                   JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release-rocks-new/label_exp=min-centos-6-x64/lastSuccessfulBuild/artifact/tarball/"
@@ -164,7 +164,7 @@ pipeline {
               sh '''
                 PS_MAJOR_VERSION="$(echo ${PS_VERSION}|cut -d'.' -f1,2)"
                 if [ "${PS_MAJOR_VERSION}" = "8.0" ]; then
-                  TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.ssl101.tar.gz"
+                  TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.12.tar.gz" 
                   JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release/label_exp=min-centos-6-x64/lastSuccessfulBuild/artifact/tarball/"
                 elif [ "${PS_MAJOR_VERSION}" = "5.7" ]; then
                   TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.ssl101.tar.gz"
