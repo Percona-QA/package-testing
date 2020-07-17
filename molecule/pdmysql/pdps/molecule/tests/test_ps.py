@@ -58,52 +58,12 @@ PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    " connection_control SONAME 'connection_control.so';\"",
                    "mysql -e \"INSTALL PLUGIN"
                    " connection_control_failed_login_attempts SONAME 'connection_control.so';\""]
-# PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
-#                    " fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so';\"",
-#                    "mysql -e \"CREATE FUNCTION"
-#                    " fnv_64 RETURNS INTEGER SONAME 'libfnv_udf.so';\"",
-#                    "mysql -e \"CREATE FUNCTION"
-#                    " murmur_hash RETURNS INTEGER SONAME 'libmurmur_udf.so';\"",
-#                    "mysql -e \"INSTALL PLUGIN"
-#                    " audit_log SONAME \'audit_log.so\';\"",
-#                    "mysql -e \"CREATE FUNCTION"
-#                    " version_tokens_set RETURNS STRING SONAME 'version_token.so';\"",
-#                    "mysql -e \"CREATE FUNCTION"
-#                    " version_tokens_show RETURNS STRING SONAME 'version_token.so';\"",
-#                    "mysql -e \"CREATE FUNCTION"
-#                    " version_tokens_edit RETURNS STRING SONAME 'version_token.so';\"",
-#                    "mysql -e \"CREATE FUNCTION"
-#                    " version_tokens_delete RETURNS STRING SONAME 'version_token.so';\"",
-#                    "mysql -e \"CREATE FUNCTION"
-#                    " version_tokens_lock_shared RETURNS INT SONAME 'version_token.so';\"",
-#                    "mysql -e \"CREATE FUNCTION"
-#                    " version_tokens_lock_exclusive RETURNS INT SONAME 'version_token.so';\"",
-#                    "mysql -e \"CREATE FUNCTION"
-#                    " version_tokens_unlock RETURNS INT SONAME 'version_token.so';\"",
-#                    "mysql -e \"INSTALL PLUGIN"
-#                    " mysql_no_login SONAME 'mysql_no_login.so';\"",
-#                    "mysql -e \"CREATE FUNCTION"
-#                    " service_get_read_locks RETURNS INT SONAME 'locking_service.so';\"",
-#                    "mysql -e \"CREATE FUNCTION"
-#                    " service_get_write_locks RETURNS INT SONAME 'locking_service.so';\"",
-#                    "mysql -e \"CREATE FUNCTION"
-#                    " service_release_locks RETURNS INT SONAME 'locking_service.so';\"",
-#                    "mysql -e \"INSTALL PLUGIN"
-#                    " validate_password SONAME 'validate_password.so';\"",
-#                    "mysql -e \"INSTALL PLUGIN"
-#                    " version_tokens SONAME 'version_token.so';\"",
-#                    "mysql -e \"INSTALL PLUGIN"
-#                    " rpl_semi_sync_master SONAME 'semisync_master.so';\"",
-#                    "mysql -e \"INSTALL PLUGIN"
-#                    " rpl_semi_sync_slave SONAME 'semisync_slave.so';\"",
-#                    "mysql -e \"INSTALL PLUGIN"
-#                    " connection_control SONAME 'connection_control.so';\"",
-#                    "mysql -e \"INSTALL PLUGIN"
-#                    " connection_control_failed_login_attempts SONAME 'connection_control.so';\""]
 
 COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_log_sink_json', 'component_log_filter_dragnet',
               'component_audit_api_message_emit']
+
+VERSION = '8.0.20'
 
 
 def is_running(host):
@@ -123,7 +83,7 @@ def test_check_deb_package(host, package):
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert '8.0.20' in pkg.version, pkg.version
+    assert VERSION in pkg.version, pkg.version
 
 
 @pytest.mark.parametrize("package", RPMPACKAGES)
@@ -133,7 +93,7 @@ def test_check_rpm_package(host, package):
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert '8.0.20' in pkg.version, pkg.version
+    assert VERSION in pkg.version, pkg.version
 
 
 @pytest.mark.parametrize("binary", ['mysqlsh', 'mysql', 'mysqlrouter'])
@@ -142,13 +102,13 @@ def test_binary_version(host, binary):
     result = host.run(cmd)
     print(result.stdout)
     assert result.rc == 0, result.stderr
-    assert '8.0.20' in result.stdout, result.stdout
+    assert VERSION in result.stdout, result.stdout
 
 
 @pytest.mark.parametrize('component', ['@@INNODB_VERSION', '@@VERSION'])
 def test_mysql_version(host, component):
     with host.sudo("root"):
-        cmd = "mysql -e \"SELECT {}; \"| grep -c \"{}\"".format(component, '8.0.19')
+        cmd = "mysql -e \"SELECT {}; \"| grep -c \"{}\"".format(component, VERSION)
         result = host.run(cmd)
         print(result.stdout)
         assert result.rc == 0, result.stderr
