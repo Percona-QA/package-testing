@@ -173,7 +173,7 @@ elif [ ${product} = "pmm2" ]; then
     echo "${product} version is not good!"
     exit 1
   else
-    sleep 60
+    sleep 120
     echo "${product} version is correct and ${version}" >> "${log}"
   fi
 
