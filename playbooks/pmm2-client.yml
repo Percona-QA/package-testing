@@ -42,7 +42,7 @@
     command: /package-testing/version_check.sh pmm2
 
   - name: check agent-log
-    command: tail -100 /var/log/pmm-agent.log
+    command: journalctl -u pmm-agent -n 100
     register: log
     ignore_errors: yes
     when: ansible_os_family == "RedHat"
