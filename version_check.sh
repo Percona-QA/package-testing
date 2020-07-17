@@ -173,7 +173,12 @@ elif [ ${product} = "pmm2" ]; then
     echo "${product} version is not good!"
     exit 1
   else
-    sleep 120
+    sleep 60
+    status_check=$(pmm-admin status 2>&1|grep -c running)
+    if [ ${status_check} -eq 0 ]; then
+      echo "${product} agent status is not running!"
+      exit 1
+    fi
     echo "${product} version is correct and ${version}" >> "${log}"
   fi
 
