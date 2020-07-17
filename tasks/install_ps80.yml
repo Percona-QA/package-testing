@@ -15,6 +15,7 @@
       - percona-server-client
       - percona-server-tokudb
       - percona-server-rocksdb
+      - percona-mysql-router
     when: ansible_os_family == "Debian"
 
   - name: get list of enabled dnf modules on centos 8
@@ -44,6 +45,7 @@
     vars:
       packages:
       - percona-server-server
+      - percona-mysql-router
       - percona-server-client
       - percona-server-test
       - percona-server-debuginfo
