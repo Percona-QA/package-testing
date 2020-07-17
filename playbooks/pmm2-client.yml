@@ -41,6 +41,13 @@
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2
 
+  - name: check agent-log
+    command: tail -100 /var/log/pmm-agent.log
+    register: log
+    ignore_errors: yes
+    when: ansible_os_family == "RedHat"
+  - debug: var=log.stderr_lines
+
   - name: Print PMM2-Client Status
     command: pmm-admin status
     register: status
