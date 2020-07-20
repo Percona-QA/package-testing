@@ -3,7 +3,7 @@ set -e
 
 #check if service is running
 function is_running {
-  if [ $(ps auxww| grep -v grep  | grep -c "mysql") -gt 0 ]; then
+  if [ $(ps auxww| grep -v grep  |grep -v "router" | grep -c "mysql") -gt 0 ]; then
     # "service is running"
     echo 1
   else
