@@ -28,6 +28,12 @@
   - name: install Percona Toolkit new deb packages
     include_tasks: ../../../tasks/install_pt.yml
 
+  - name: clean yum
+    shell: |
+      yum clean all
+      yum makecache
+    when: ansible_os_family == "RedHat"
+
   - name: install Percona Server deb packages
     apt:
       name: "{{ packages }}"
