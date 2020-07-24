@@ -64,7 +64,7 @@ COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_log_sink_json', 'component_log_filter_dragnet',
               'component_audit_api_message_emit']
 
-VERSION = os.environ['TO_VERSION']
+VERSION = os.environ['VERSION']
 
 
 def is_running(host):
