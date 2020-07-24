@@ -21,7 +21,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
   - name: Setup initial (old) repository
-    command: percona-release enable-only {{ pdmysql_version }} {{ repo }}
+    command: percona-release enable-only pdps-{{ pdmysql_version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'FROM_REPO') }}"
       pdmysql_version: "{{ lookup('env', 'FROM_VERSION') }}"
@@ -160,15 +160,14 @@
   - name: start mysql service
     service: name=mysql state=started enabled=yes
 
-
   - name: Disable old repository
-    command: percona-release disable {{ pdmysql_version }} {{ repo }}
+    command: percona-release disable pdps-{{ pdmysql_version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'FROM_REPO') }}"
       pdmysql_version: "{{ lookup('env', 'FROM_VERSION') }}"
 
   - name: Setup new repository
-    command: percona-release enable {{ pdmysql_version }} {{ repo }}
+    command: percona-release enable pdps-{{ pdmysql_version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'TO_REPO') }}"
       pdmysql_version: "{{ lookup('env', 'VERSION') }}"
