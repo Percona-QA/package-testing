@@ -4,4 +4,4 @@
   become: true
   become_method: sudo
   roles:
-    - role: pdpxc
+    - role: pdpxc-minor-upgrade

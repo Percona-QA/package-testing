@@ -8,9 +8,10 @@
   include: ../../tasks/install_percona_release.yml
 
 - name: enable the PDMYSQL-80 repo
-  command: percona-release enable-only pdpxc-8.0.19 {{ repo }}
-  vars:
-    repo: "{{ lookup('env', 'REPO') }}"
+  command: percona-release enable-only pdpxc-{{ pdmysql_version }} {{ repo }}
+    vars:
+      repo: "{{ lookup('env', 'FROM_REPO') }}"
+      pdmysql_version: "{{ lookup('env', 'FROM_VERSION') }}"
 
 - name: clean and update yum cache
   shell: |
@@ -141,3 +142,103 @@
 - name: start mysql service
   service: name=mysql state=started
   when: ansible_os_family == "Debian"
+
+- name: Disable old repository
+  command: percona-release disable pdpxc-{{ pdmysql_version }} {{ repo }}
+  vars:
+    repo: "{{ lookup('env', 'FROM_REPO') }}"
+    pdmysql_version: "{{ lookup('env', 'FROM_VERSION') }}"
+
+- name: Setup new repository
+  command: percona-release enable pdpxc-{{ pdmysql_version }} {{ repo }}
+  vars:
+    repo: "{{ lookup('env', 'TO_REPO') }}"
+    pdmysql_version: "{{ lookup('env', 'VERSION') }}"
+
+
+- name: install PXC 8 deb packages
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+  vars:
+    packages:
+    - percona-xtradb-cluster-full
+    - percona-xtradb-cluster-client
+    - percona-xtradb-cluster-common
+    - percona-xtradb-cluster-dbg
+    - percona-xtradb-cluster-garbd-debug
+    - percona-xtradb-cluster-garbd
+    - percona-xtradb-cluster-server
+    - percona-xtradb-cluster-server-debug
+    - percona-xtradb-cluster-test
+    - percona-xtradb-cluster
+  when: ansible_os_family == "Debian"
+
+- name: install PXC 8 rpm packages
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+    - percona-xtradb-cluster-full
+    - percona-xtradb-cluster
+    - percona-xtradb-cluster-client
+    - percona-xtradb-cluster-debuginfo
+    - percona-xtradb-cluster-devel
+    - percona-xtradb-cluster-garbd
+    - percona-xtradb-cluster-server
+    - percona-xtradb-cluster-shared
+    - percona-xtradb-cluster-shared-compat
+    - percona-xtradb-cluster-test
+  when: ansible_os_family == "RedHat"
+
+- name: install HA Proxy RHEL Packages
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+    - percona-haproxy
+    - percona-haproxy-debuginfo
+  when: ansible_os_family == "RedHat"
+
+- name: install HA Proxy 8 deb packages
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+  vars:
+    packages:
+    - percona-haproxy
+    - percona-haproxy-doc
+    - percona-vim-haproxy
+  when: ansible_os_family == "Debian"
+
+- name: clean dnf cache
+  shell: |
+    dnf clean all
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+
+- name: install Percona XtraBackup 8.0 packages
+  include_tasks: ../../../tasks/install_pxb80.yml
+
+- name: install Percona Toolkit new deb packages
+  include_tasks: ../../../tasks/install_pt.yml
+
+- name: install proxysql new deb packages
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+    state: latest
+  vars:
+    packages:
+      - proxysql2
+  when: ansible_os_family == "Debian"
+
+- name: install proxysql new rpm packages
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+      - proxysql2
+  when: ansible_os_family == "RedHat"

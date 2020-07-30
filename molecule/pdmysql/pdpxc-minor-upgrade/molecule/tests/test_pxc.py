@@ -65,6 +65,8 @@ COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_log_sink_json', 'component_log_filter_dragnet',
               'component_audit_api_message_emit']
 
+VERSION = os.environ['VERSION']
+
 
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
@@ -73,7 +75,7 @@ def test_check_deb_package(host, package):
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert '8.0.19' in pkg.version, pkg.version
+    assert VERSION in pkg.version, pkg.version
 
 
 @pytest.mark.parametrize("package", RPMPACKAGES)
@@ -83,7 +85,7 @@ def test_check_rpm_package(host, package):
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert '8.0.19' in pkg.version, pkg.version
+    assert VERSION in pkg.version, pkg.version
 
 
 def test_binary_version(host):
@@ -91,13 +93,13 @@ def test_binary_version(host):
         cmd = "mysql --version"
         result = host.run(cmd)
         assert result.rc == 0, result.stderr
-        assert '8.0.19' in result.stdout, result.stdout
+        assert VERSION in result.stdout, result.stdout
 
 
 @pytest.mark.parametrize('component', ['@@INNODB_VERSION', '@@VERSION'])
 def test_mysql_version(host, component):
     with host.sudo("root"):
-        cmd = "mysql -e \"SELECT {}; \"| grep -c \"{}\"".format(component, '8.0.19')
+        cmd = "mysql -e \"SELECT {}; \"| grep -c \"{}\"".format(component, VERSION)
         result = host.run(cmd)
         assert result.rc == 0, result.stderr
         assert int(result.stdout) == 1, result.stdout
