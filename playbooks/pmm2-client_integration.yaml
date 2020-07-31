@@ -69,8 +69,14 @@
   - name: add mysql metrics and queries to monitoring
     command: /package-testing/scripts/pmm2_add_instance.sh mysql
 
-  - name: check if mysql metrics and queries are running
-    command: /package-testing/scripts/pmm2_service_check.sh mysql
+  - name: check if mysql monitoring running
+    command: pmm-admin list
+    register: list_output
+
+  - name: Assert if the pmm-admin list contains mysql
+    assert:
+      that:
+        - "'mysql_package_testing' in list_output.stdout"
 ### end PS
 
 ### start PSMDB
@@ -93,8 +99,14 @@
     command: pmm-admin add mongodb mongodb_package_testing
     when: ansible_distribution_release != "wheezy"
 
-  - name: check if mongodb metrics and queries are running
-    command: /package-testing/scripts/pmm2_service_check.sh mongodb
+  - name: check if mongodb monitoring is running
+    command: pmm-admin list
+    register: list_output
+
+  - name: Assert if the pmm-admin list contains mongodb instance
+    assert:
+      that:
+        - "'mongodb_package_testing' in list_output.stdout"
 ### end PSMDB
 
   - name: run pmm-admin list
