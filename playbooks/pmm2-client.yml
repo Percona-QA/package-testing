@@ -41,12 +41,6 @@
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2
 
-  - name: Print PMM2-Client Status
-    command: pmm-admin status
-    register: status
-    ignore_errors: yes
-  - debug: var=status.stderr_lines
-
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
     with_items:
