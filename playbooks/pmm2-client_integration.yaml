@@ -48,6 +48,9 @@
   - name: install Percona Server 5.7 packages
     include_tasks: ../tasks/install_ps57.yml
 
+  - name: start mysql service
+    service: name=mysql state=started
+
   - name: start mysql service with service command
     command: service mysql start
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
@@ -68,6 +71,11 @@
 
   - name: add mysql metrics and queries to monitoring
     command: /package-testing/scripts/pmm2_add_instance.sh mysql
+    when: ansible_os_family == "RedHat"
+
+  - name: add mysql instance for monitoring
+    command: pmm-admin add mysql --socket=/var/run/mysqld/mysqld.sock
+    when: ansible_os_family != "RedHat"
 
   - name: check if mysql monitoring running
     command: pmm-admin list
@@ -76,7 +84,7 @@
   - name: Assert if the pmm-admin list contains mysql
     assert:
       that:
-        - "'mysql_package_testing' in list_output.stdout"
+        - "'MySQL' in list_output.stdout"
 ### end PS
 
 ### start PSMDB
@@ -96,7 +104,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: add mongodb metrics to monitoring
-    command: pmm-admin add mongodb mongodb_package_testing
+    command: pmm-admin add mongodb
     when: ansible_distribution_release != "wheezy"
 
   - name: check if mongodb monitoring is running
@@ -106,17 +114,11 @@
   - name: Assert if the pmm-admin list contains mongodb instance
     assert:
       that:
-        - "'mongodb_package_testing' in list_output.stdout"
+        - "'MongoDB' in list_output.stdout"
 ### end PSMDB
 
   - name: run pmm-admin list
     command: pmm-admin list
-
-  - name: run pmm-admin remove mysql
-    command: pmm-admin remove mysql mysql_package_testing
-
-  - name: run pmm-admin remove mongodb
-    command: pmm-admin remove mongodb mongodb_package_testing
 
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent

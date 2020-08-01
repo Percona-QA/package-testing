@@ -7,14 +7,14 @@ if [ "$#" -ne 1 ]; then
 fi
 
 if [ "$1" = "mysql" ]; then
-  if [[ $(pmm-admin add mysql --password='U?fY)9s7|3gxUm' mysql_package_testing) ]]; then
+  if [[ $(pmm-admin add mysql --password='U?fY)9s7|3gxUm') ]]; then
     echo "All Good"
   else
     echo "MySQL Instance Not added for Monitoring"
     exit 1
   fi
 elif [ "$1" = "mongodb" ]; then
-  if [ $(pmm-admin add mongodb mongodb_package_testing) ]; then
+  if [ $(pmm-admin add mongodb) ]; then
     echo "All Good"
 
   else

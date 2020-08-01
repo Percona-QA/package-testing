@@ -31,12 +31,20 @@
     - pmm2-client
     when: ansible_os_family == "RedHat"
 
+  - name: Wait for port 7777 to become open on the host, don't start checking for 10 seconds, PMM-Agent Port
+    wait_for:
+      port: 7777
+      delay: 10
+
   - name: configure pmm client to connect to server
     shell: pmm-agent setup --server-address={{ pmm_server_address }}:443 --server-insecure-tls --server-username=admin --server-password=admin $(ip addr show|grep "inet 10."|grep -o "10.*/"|sed 's:/::')
 
 ### start PS
   - name: install Percona Server 5.7 packages
     include_tasks: ../tasks/install_ps57.yml
+
+  - name: start mysql service
+    service: name=mysql state=started
 
   - name: start mysql service with service command
     command: service mysql start
@@ -59,6 +67,10 @@
   - name: add mysql metrics and queries to monitoring
     command: /package-testing/scripts/pmm2_add_instance.sh mysql
 
+  - name: add mysql instance for monitoring
+    command: pmm-admin add mysql --socket=/var/run/mysqld/mysqld.sock
+    when: ansible_os_family != "RedHat"
+
   - name: check if mysql monitoring running
     command: pmm-admin list
     register: list_output
@@ -66,7 +78,7 @@
   - name: Assert if the pmm-admin list contains mysql
     assert:
       that:
-        - "'mysql_package_testing' in list_output.stdout"
+        - "'MySQL' in list_output.stdout"
 ### end PS
 
 ### start PSMDB
@@ -86,7 +98,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: add mongodb metrics to monitoring
-    command: pmm-admin add mongodb mongodb_package_testing
+    command: pmm-admin add mongodb
     when: ansible_distribution_release != "wheezy"
 
   - name: check if mongodb monitoring is running
@@ -96,7 +108,7 @@
   - name: Assert if the pmm-admin list contains mongodb instance
     assert:
       that:
-        - "'mongodb_package_testing' in list_output.stdout"
+        - "'MongoDB' in list_output.stdout"
 ### end PSMDB
 
   - name: run pmm-admin list
@@ -125,14 +137,19 @@
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm
 
-  - name: run pmm-admin list
+  - name: check if mongodb is still being monitored
     command: pmm-admin list
+    register: list_output
 
-  - name: run pmm-admin remove mysql
-    command: pmm-admin remove mysql mysql_package_testing
+  - name: Assert if the pmm-admin list contains mongodb instance
+    assert:
+      that:
+        - "'MongoDB' in list_output.stdout"
 
-  - name: run pmm-admin remove mongodb
-    command: pmm-admin remove mongodb mongodb_package_testing
+  - name: Assert if the pmm-admin list contains mysql after upgrade
+    assert:
+      that:
+        - "'MySQL' in list_output.stdout"
 
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
