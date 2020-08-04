@@ -34,7 +34,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: enable pdmdb repo
-  command: percona-release enable pdmdb4.2
+  command: percona-release enable pdmdb-4.2
 
 - name: install psmdb deb packages
   apt:
