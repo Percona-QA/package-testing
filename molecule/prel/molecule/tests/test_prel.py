@@ -9,14 +9,13 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 SKIPPED_REPOSITORIES = ["ppg", "pdmdb", "pdps", "pdpxc", "psmdb-42", ""]
 
 PRODUCT_REPOS = {"ps56": ["ps-56", "tools"],
-                 "ps57": ["ps-57", "tools"],
+                 "ps57": ["ps-57"],
                  "ps80": ["ps-80", "tools"],
                  "pxc56": ["pxc-56", "tools"],
-                 "pxc57": ["pxc-57", "tools"],
+                 "pxc57": ["pxc-57"],
                  "pxc80": ["pxc-80", "tools"],
                  "pxb80": ["pxb-80"],
-                 "psmdb34": ["psmdb-34", "tools"],
-                 "psmdb36": ["psmdb-36", "tools"],
+                 "psmdb36": ["psmdb-36"],
                  "psmdb40": ['psmdb-40', "tools"],
                  "psmdb42": ['psmdb-42', "tools"],
                  "ppg11": ["ppg-11"],
