@@ -63,11 +63,11 @@
   - name: check that PSMDB 4.4 version is correct
     command: /package-testing/version_check.sh psmdb44
 
-  - name: test perconadecrypt with keyfile
-    command: /package-testing/scripts/psmdb_encryption/perconadecrypt-test.sh 4.4 keyfile
+#  - name: test perconadecrypt with keyfile
+#    command: /package-testing/scripts/psmdb_encryption/perconadecrypt-test.sh 4.4 keyfile
 
-  - name: test perconadecrypt with vault
-    command: /package-testing/scripts/psmdb_encryption/perconadecrypt-test.sh 4.4 vault
+#  - name: test perconadecrypt with vault
+#    command: /package-testing/scripts/psmdb_encryption/perconadecrypt-test.sh 4.4 vault
 
   - name: test SE change, import data, restart service
     command: /package-testing/scripts/psmdb_test.sh 4.4
