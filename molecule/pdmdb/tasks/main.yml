@@ -1,5 +1,5 @@
 ---
-# tasks file for pbm
+# tasks file for PDMDB
 #- name: include tasks for test env setup
 #  include_tasks: ../../../tasks/test_prep.yml
 ###############################################
@@ -33,45 +33,18 @@
 #  yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
   when: ansible_os_family == "RedHat"
 
-#- name: enable main repo
-#  command: percona-release enable original
 
 - name: clean and update yum cache
   shell: |
     yum clean all
     yum makecache
   when: ansible_os_family == "RedHat"
-######################
-#- name: include tasks for enabling main repo (do this just for GPG key)
-#  include: ../../../tasks/enable_main_repo.yml
-
-#- name: download newer percona-release script
-#  get_url:
-#    url: https://raw.githubusercontent.com/EvgeniyPatlan/percona-repositories/master/scripts/percona-release.sh
-#    dest: /usr/bin/percona-release
-#    mode: '755'
-#    force: true
-
-
-#- name: install Percona repository package on debian/ubuntu
-#  apt:
-#    deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-15.generic_all.deb
-#  when: ansible_os_family == "Debian"
-#
-#- name: install Percona repository package on centos
-#  yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-#  when: ansible_os_family == "RedHat"
 
 - name: enable pdmdb repo
-  command: percona-release enable pdmdb-4.2.8 {{ repo }}
+  command: percona-release enable {{ version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
-
-#- name: clean and update yum cache
-#  shell: |
-#    yum clean all
-#    yum makecache
-#  when: ansible_os_family == "RedHat"
+    version: "{{ lookup('env', 'VERSION') }}"
 
 - name: install psmdb deb packages
   apt:

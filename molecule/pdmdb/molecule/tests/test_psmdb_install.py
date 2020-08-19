@@ -17,7 +17,7 @@ RPM_NEW_CENTOS_PACKAGES = ['percona-server-mongodb', 'percona-server-mongodb-mon
 BINARIES = ['mongo', 'mongod', 'mongos', 'bsondump', 'mongoexport',
             'mongofiles', 'mongoimport', 'mongorestore', 'mongotop', 'mongostat']
 
-PSMDB42_VER = "4.2.8"
+PSMDB_VER = os.environ.get("VERSION")
 
 
 def test_mongod_service(host):
@@ -32,7 +32,7 @@ def test_deb_packages(host, package):
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert PSMDB42_VER in pkg.version
+    assert PSMDB_VER in pkg.version
 
 
 # TODO add check that minor version is correct
@@ -45,7 +45,7 @@ def test_rpm_packages(host, package):
         pytest.skip("Only for centos7 tests")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert PSMDB42_VER in pkg.version
+    assert PSMDB_VER in pkg.version
 
 
 @pytest.mark.parametrize("package", RPM_NEW_CENTOS_PACKAGES)
@@ -57,11 +57,11 @@ def test_rpm8_packages(host, package):
         pytest.skip("Only for centos7 tests")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert PSMDB42_VER in pkg.version
+    assert PSMDB_VER in pkg.version
 
 
 @pytest.mark.parametrize("binary", BINARIES)
 def test_binary_version(host, binary):
-    cmd = '{} --version|head -n1|grep -c "{}"'.format(binary, PSMDB42_VER)
+    cmd = '{} --version|head -n1|grep -c "{}"'.format(binary, PSMDB_VER)
     result = host.run(cmd)
     assert result.rc == 0, result.stdout
