@@ -3,41 +3,31 @@
 - name: include tasks for test env setup
   include_tasks: ../../../tasks/test_prep.yml
 
-- name: include tasks for enabling test repo
-  include_tasks: ../../../tasks/enable_testing_repo.yml
-  when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+- name: Install percona repository package
+  apt:
+  deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-23.generic_all.deb
+  when: ansible_os_family == "Debian"
 
-- name: include tasks for enabling experimental repo
-  include_tasks: ../../../tasks/enable_experimental_repo.yml
-  when: lookup('env', 'install_repo') == "experimental"
+- name: add the Percona testing yum repos for centos 6 and 7
+  yum: name=https://repo.percona.com/yum/testing/latest/RPMS/noarch/percona-release-1.0-23.noarch.rpm
+  when: ansible_os_family == "RedHat"
 
-- name: include tasks for enabling main repo
-  include_tasks: ../../../tasks/enable_main_repo.yml
-  when: lookup('env', 'install_repo') == "main"
+- name: clean and update yum cache
+  shell: |
+    yum clean all
+    yum makecache
+  when: ansible_os_family == "RedHat"
 
-- name: include tasks for enabling tools testing repo
-  command: percona-release enable tools testing
-  when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+- name: setup psmdb repo with percona-release
+  command: percona-release enable {{ psmdb_to_test }} {{ install_repo }}
+  vars:
+    install_repo: "{{ lookup('env', 'install_repo') }}"
+    psmdb_to_test: "{{ lookup('env', 'psmdb_to_test') }}"
 
-- name: include tasks for enabling tools main repo
-  command: percona-release enable tools release
-  when: lookup('env', 'install_repo') == "main"
-
-- name: include tasks for enabling tools main repo
-  command: percona-release enable tools experimental
-  when: lookup('env', 'install_repo') == "experimental"
-
-- name: enable the PSMDB 4.0 testing repo
-  command: percona-release enable psmdb-40
-  when: lookup('env', 'psmdb_to_test') == "psmdb40"
-
-- name: enable the PSMDB 4.2 testing repo
-  command: percona-release enable psmdb-42
-  when: lookup('env', 'psmdb_to_test') == "psmdb42"
-
-- name: enable the PSMDB 4.4 testing repo
-  command: percona-release enable psmdb-44
-  when: lookup('env', 'psmdb_to_test') == "psmdb44"
+- name: setup tools repo with percona-release
+  command: percona-release enable tools {{ install_repo }}
+  vars:
+    install_repo: "{{ lookup('env', 'install_repo') }}"
 
 - name: include tasks for PSMDB 4.0 and 4.2 install
   include_tasks: install_psmdb_full.yml
