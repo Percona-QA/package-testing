@@ -78,6 +78,7 @@
 - name: add storage for pbm-agent
   blockinfile:
     path: /etc/pbm-agent-storage.conf
+    mode: '0666'
     create: true
     block: |
       storage:
@@ -95,6 +96,7 @@
 - name: add GCP storage for pbm-agent
   blockinfile:
     path: /etc/pbm-agent-storage-gcp.conf
+    mode: '0666'
     create: true
     block: |
       storage:
@@ -113,6 +115,7 @@
 - name: add local storage for pbm-agent
   blockinfile:
     path: /etc/pbm-agent-storage-local.conf
+    mode: '0666'
     create: true
     block: |
       storage:
