@@ -70,8 +70,8 @@ ps57_files = (
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
 ps57_symlinks = (
-  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.15'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.15')
+  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.18'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.18')
 )
 
 # 5.6
