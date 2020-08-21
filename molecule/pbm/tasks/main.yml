@@ -4,7 +4,8 @@
   include_tasks: ../../../tasks/test_prep.yml
 
 - name: Install percona repository package
-  deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-23.generic_all.deb
+  apt:
+    deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-23.generic_all.deb
   when: ansible_os_family == "Debian"
 
 - name: add the Percona testing yum repos for centos 6 and 7
