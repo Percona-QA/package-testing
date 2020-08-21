@@ -63,8 +63,8 @@ ps57_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 ps57_files = (
-  'lib/libHotBackup.so', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.20.3.15' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libHotBackup.so', 'lib/libmysqlservices.a', 'lib/libcoredumper.a',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.20.3.18' ,'lib/mysql/libjemalloc.so.1',
   'lib/mysql/plugin/ha_tokudb.so', 'lib/mysql/plugin/ha_rocksdb.so', 'lib/mysql/plugin/audit_log.so',
   'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so', 'lib/mysql/plugin/tokudb_backup.so',
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
