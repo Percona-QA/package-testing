@@ -20,11 +20,11 @@
 
 - name: Install percona repository package
   apt:
-    deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-23.generic_all.deb
+    deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-24.generic_all.deb
   when: ansible_os_family == "Debian"
 
 - name: add the main Percona yum repos for centos 6 and 7
-  yum: name=https://repo.percona.com/yum/testing/latest/RPMS/noarch/percona-release-1.0-23.noarch.rpm
+  yum: name=https://repo.percona.com/yum/testing/latest/RPMS/noarch/percona-release-1.0-24.noarch.rpm
   when: ansible_os_family == "RedHat"
 
 - name: clean and update yum cache
