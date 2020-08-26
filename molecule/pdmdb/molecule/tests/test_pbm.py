@@ -199,5 +199,5 @@ def test_show_store(show_store):
     :return:
     """
     assert show_store['storage']['s3']
-    assert show_store['s3']['region'] == 'us-east-1'
-    assert show_store['s3']['bucket'] == 'operator-testing'
+    assert show_store['storage']['s3']['region'] == 'us-east-1'
+    assert show_store['storage']['s3']['bucket'] == 'operator-testing'
