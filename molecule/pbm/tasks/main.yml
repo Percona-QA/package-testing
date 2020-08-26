@@ -23,11 +23,25 @@
   vars:
     install_repo: "{{ lookup('env', 'install_repo') }}"
     psmdb_to_test: "{{ lookup('env', 'psmdb_to_test') }}"
+  when: lookup('env', 'install_repo') == "testing"
+
+- name: setup psmdb repo with percona-release
+  command: percona-release enable {{ psmdb_to_test }}
+  vars:
+    psmdb_to_test: "{{ lookup('env', 'psmdb_to_test') }}"
+  when: lookup('env', 'install_repo') == "main"
 
 - name: setup tools repo with percona-release
   command: percona-release enable tools {{ install_repo }}
   vars:
     install_repo: "{{ lookup('env', 'install_repo') }}"
+  when: lookup('env', 'install_repo') == "testing"
+
+- name: setup tools repo with percona-release
+  command: percona-release enable tools
+  vars:
+    install_repo: "{{ lookup('env', 'install_repo') }}"
+  when: lookup('env', 'install_repo') == "main"
 
 - name: include tasks for PSMDB 4.0 and 4.2 install
   include_tasks: install_psmdb_full.yml
