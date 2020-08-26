@@ -33,7 +33,7 @@
     yum makecache
   when: ansible_os_family == "RedHat"
 
-- name: enable pdmdb repo
+- name: Setup pdmdb repo
   command: percona-release setup {{ version }}
   vars:
     version: "{{ lookup('env', 'VERSION') }}"

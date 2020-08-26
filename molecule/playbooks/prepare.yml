@@ -5,18 +5,6 @@
   become_method: sudo
   gather_facts: true
   tasks:
-#    - name: setup epel 6 repo
-#      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm state=present
-#      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-#
-#    - name: setup epel 7 repo
-#      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
-#      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-#
-#    - name: setup epel 7 repo for Amazon Linux 2
-#      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
-#      when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2"
-#
     - name: setup epel 8 repo
       yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
@@ -34,18 +22,6 @@
         update_cache: yes
         state: present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "8"
-
-    - name: fix jessie repos
-      template: src=../templates/jessie.repo
-                dest=/etc/apt/sources.list
-                mode=0640 owner=root group=root
-      when: ansible_os_family == "Debian" and ansible_distribution_release == "jessie"
-
-    - name: fix backports repo on jessie in aws image
-      file:
-        path: /etc/apt/sources.list.d/backports.list
-        state: absent
-      when: ansible_os_family == "Debian" and ansible_distribution_release == "jessie"
 
     - name: install needed packages for running tests with apt
       apt:
@@ -98,24 +74,6 @@
         - unzip
         - wget
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
-
-    - name: download package-testing repo with wget
-      command: "{{ item }}"
-      with_items:
-        - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
-        - unzip master.zip
-        - rm -f master.zip
-        - mv package-testing-master /package-testing
-
-    - name: install latest bats from github
-      command: "{{ item }}"
-      with_items:
-        - rm -f master.zip
-        - wget --no-check-certificate -O master.zip https://github.com/sstephenson/bats/archive/master.zip
-        - unzip master.zip
-        - rm -f master.zip
-        - bats-master/install.sh /usr/local
-        - rm -rf bats-master
 
     - name: get list of installed packages on Debian/Ubuntu
       shell: dpkg -l|grep -iE "percona|sysbench|mysql|mongo|proxysql|maria" || true
