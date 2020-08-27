@@ -161,7 +161,7 @@ def test_pbm_version(host):
     assert result.rc == 0, result.stdout
     lines = result.stdout.split("\n")
     parsed_config = {line.split(":")[0]: line.split(":")[1].strip() for line in lines[0:-1]}
-    assert parsed_config['Version'] == '1.2.0', parsed_config
+    assert parsed_config['Version'] == '1.3.0', parsed_config
     assert parsed_config['Platform'], parsed_config
     assert parsed_config['GitCommit'], parsed_config
     assert parsed_config['GitBranch'], parsed_config
@@ -199,5 +199,5 @@ def test_show_store(show_store):
     :return:
     """
     assert show_store['storage']['s3']
-    assert show_store['s3']['region'] == 'us-east-1'
-    assert show_store['s3']['bucket'] == 'operator-testing'
+    assert show_store['storage']['s3']['region'] == 'us-east-1'
+    assert show_store['storage']['s3']['bucket'] == 'operator-testing'
