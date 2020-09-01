@@ -168,7 +168,8 @@ def percona_release_show(host):
         cmd = "percona-release show"
         result = host.run(cmd)
         assert result.rc == 0, (result.stdout, result.stderr)
-        return result
+        print(result.stdout)
+        return result.stdout.split("\n")
 
 
 def check_list_of_packages(host, repository):
