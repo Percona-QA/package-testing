@@ -223,7 +223,7 @@ def test_enable_repo(host, repository, component, command):
                                     component=component,
                                     repository=repository)
     show_before = percona_release_show(host)
-    assert repository in show_before.stdout, show_before.stdout
+    assert repository in show_before, show_before
     apt_update(host)
     repo_file = host.file(
         "/etc/apt/sources.list.d/percona-{}-{}.list".format(repository, component))
@@ -237,7 +237,7 @@ def test_enable_repo(host, repository, component, command):
                                     repository=repository,
                                     component=component)
     show_after = percona_release_show(host)
-    assert repository not in show_after.stdout, show_before.stdout
+    assert repository not in show_after, show_before
     apt_update(host)
     backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list.bak".format(repository, component))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
@@ -258,7 +258,7 @@ def test_setup_product(host, product):
         pytest.skip("Not supported by xenial")
     execute_percona_release_command(host, command="setup", repository=product)
     show_before = percona_release_show(host)
-    assert product in show_before.stdout, show_before.stdout
+    assert product in show_before, show_before
     apt_update(host)
     for repo in PRODUCT_REPOS[product]:
         repo_file = host.file("/etc/apt/sources.list.d/percona-{}-release.list".format(repo))
@@ -271,7 +271,7 @@ def test_setup_product(host, product):
         execute_percona_release_command(host, command="disable", repository=repo,
                                         component="release")
         show_after = percona_release_show(host)
-        assert product not in show_after.stdout, show_before.stdout
+        assert product not in show_after, show_before
         backup_repo_file = host.file(
             "/etc/apt/sources.list.d/percona-{}-release.list.bak".format(repo))
         if dist_name.lower() in ["redhat", "centos", 'rhel']:
