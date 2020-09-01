@@ -161,6 +161,16 @@ def execute_percona_release_command(host,
         return result
 
 
+def percona_release_show(host):
+    """Execute percona release command
+    """
+    with host.sudo("root"):
+        cmd = "percona-release show"
+        result = host.run(cmd)
+        assert result.rc == 0, (result.stdout, result.stderr)
+        return result
+
+
 def check_list_of_packages(host, repository):
     dist_name = host.system_info.distribution
     product_name = PRODUCT_PACKAGES[repository]
@@ -211,6 +221,8 @@ def test_enable_repo(host, repository, component, command):
                                     command=command,
                                     component=component,
                                     repository=repository)
+    show_before = percona_release_show(host)
+    assert repository in show_before.stdout, show_before.stdout
     apt_update(host)
     repo_file = host.file(
         "/etc/apt/sources.list.d/percona-{}-{}.list".format(repository, component))
@@ -223,6 +235,8 @@ def test_enable_repo(host, repository, component, command):
     execute_percona_release_command(host, command="disable",
                                     repository=repository,
                                     component=component)
+    show_after = percona_release_show(host)
+    assert repository not in show_after.stdout, show_before.stdout
     apt_update(host)
     backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list.bak".format(repository, component))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
@@ -242,6 +256,8 @@ def test_setup_product(host, product):
     if ("ppg" or "pdmdb") in product and codename == 'xenial':
         pytest.skip("Not supported by xenial")
     execute_percona_release_command(host, command="setup", repository=product)
+    show_before = percona_release_show(host)
+    assert product in show_before.stdout, show_before.stdout
     apt_update(host)
     for repo in PRODUCT_REPOS[product]:
         repo_file = host.file("/etc/apt/sources.list.d/percona-{}-release.list".format(repo))
@@ -253,6 +269,8 @@ def test_setup_product(host, product):
     for repo in PRODUCT_REPOS[product]:
         execute_percona_release_command(host, command="disable", repository=repo,
                                         component="release")
+        show_after = percona_release_show(host)
+        assert product not in show_after.stdout, show_before.stdout
         backup_repo_file = host.file(
             "/etc/apt/sources.list.d/percona-{}-release.list.bak".format(repo))
         if dist_name.lower() in ["redhat", "centos", 'rhel']:
