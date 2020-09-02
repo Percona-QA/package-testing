@@ -257,8 +257,6 @@ def test_setup_product(host, product):
     if ("ppg" or "pdmdb") in product and codename == 'xenial':
         pytest.skip("Not supported by xenial")
     execute_percona_release_command(host, command="setup", repository=product)
-    show_before = percona_release_show(host)
-    assert product in show_before, show_before
     apt_update(host)
     for repo in PRODUCT_REPOS[product]:
         repo_file = host.file("/etc/apt/sources.list.d/percona-{}-release.list".format(repo))
@@ -270,8 +268,6 @@ def test_setup_product(host, product):
     for repo in PRODUCT_REPOS[product]:
         execute_percona_release_command(host, command="disable", repository=repo,
                                         component="release")
-        show_after = percona_release_show(host)
-        assert product not in show_after, show_before
         backup_repo_file = host.file(
             "/etc/apt/sources.list.d/percona-{}-release.list.bak".format(repo))
         if dist_name.lower() in ["redhat", "centos", 'rhel']:
