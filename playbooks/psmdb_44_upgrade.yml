@@ -35,7 +35,7 @@
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_psmdb_repo.yml
     vars:
-      psmdb_repo: "psmdb-44 testing"
+      psmdb_repo: "psmdb-44"
 
   - name: install Percona Server for MongoDB 4.4 packages from main repos
     include_tasks: ../tasks/install_psmdb.yml
