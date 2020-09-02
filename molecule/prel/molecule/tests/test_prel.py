@@ -237,7 +237,8 @@ def test_enable_repo(host, repository, component, command):
                                     repository=repository,
                                     component=component)
     show_after = percona_release_show(host)
-    assert repository not in show_after, show_before
+    if repository != "original" and component != "testing":
+        assert repository not in show_after, show_before
     apt_update(host)
     backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list.bak".format(repository, component))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
