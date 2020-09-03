@@ -15,6 +15,7 @@
       rpm_key:
         state: present
         key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
     - name: setup epel 8 repo
       yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
