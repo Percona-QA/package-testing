@@ -1,0 +1,42 @@
+---
+# Tasks for install PPG 11 packages
+
+- name: Configure repository
+  include_tasks: ../../common/tasks/setup_repo.yml
+
+- name: install Percona Platform for PostgreSQL 11 packages
+  include_tasks: ../../../../tasks/install_ppg11.yml
+
+- name: Initialize Postgres RHEL
+  command: /usr/pgsql-11/bin/postgresql-11-setup initdb
+  environment:
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  when: ansible_os_family == "RedHat"
+
+- name: Start Postgres RHEL
+  service:
+    name: postgresql-11
+    state: started
+    enabled: yes
+  when: ansible_os_family == "RedHat"
+
+- name: Install PPG tools
+  include_tasks: ../../common/tasks/install_ppg11_tools.yml
+
+- name: Install GCC Deb
+  apt:
+    name: gcc
+  when: ansible_os_family == "Debian"
+
+- name: Install GCC RHEL
+  yum:
+    name: gcc
+  when: ansible_os_family == "RedHat"
+
+- name: Create temporary directory for compilation
+  command: mkdir /tmp/libpq_command_temp_dir
+
+- name: Copy libpq source file
+  copy:
+    src: ../../common/files/lib_version.c
+    dest: /tmp/libpq_command_temp_dir
