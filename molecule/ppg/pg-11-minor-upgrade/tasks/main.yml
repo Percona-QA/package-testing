@@ -43,7 +43,6 @@
     enabled: yes
   when: ansible_os_family == "Debian"
 
-
 - name: Stop postgresql service for RHEL based
   service:
     name: postgresql-11

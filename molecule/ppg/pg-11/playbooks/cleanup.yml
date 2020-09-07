@@ -45,7 +45,6 @@
           - percona-postgresql-all
           - percona-postgresql-client
           - percona-postgresql-client-11
-          - percona-postgresql-client-common
           - percona-postgresql-common
           - percona-postgresql-contrib
           - percona-postgresql-doc
@@ -175,6 +174,13 @@
         name: percona-patroni
         state: absent
       when: ansible_distribution == "Ubuntu"
+
+    - name: remove postgresql-client-common deb package
+      apt:
+        name: percona-postgresql-client-common
+        state: absent
+        update_cache: yes
+      when: ansible_os_family == "Debian"
 
     - name: Remove postgresql Debian developer packages
       apt:
