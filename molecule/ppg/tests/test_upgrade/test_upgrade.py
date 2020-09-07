@@ -39,7 +39,7 @@ def insert_data(host):
     with host.sudo("postgres"):
         pgbench = "pgbench -i -s 1"
         result = host.run(pgbench)
-        assert result.rc == 0
+        assert result.rc == 0, result.stderr
         select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $1}'"
         result = host.check_output(select)
     yield result.strip("\n")

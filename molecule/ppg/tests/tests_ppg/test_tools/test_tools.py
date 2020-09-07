@@ -18,10 +18,11 @@ def operating_system(host):
 
 @pytest.fixture()
 def load_data(host):
-    pgbench = "pgbench -i -s 1"
-    assert host.run(pgbench).rc == 0
-    select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $3}'"
-    assert host.run(select).rc == 0
+    with host.sudo("postgres"):
+        pgbench = "pgbench -i -s 1"
+        assert host.run(pgbench).rc == 0
+        select = "psql -c 'SELECT COUNT(*) FROM pgbench_accounts;' | awk 'NR==3{print $3}'"
+        assert host.run(select).rc == 0
 
 
 @pytest.fixture()
