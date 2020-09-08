@@ -40,10 +40,8 @@
         update_cache: yes
       vars:
         packages:
-          - percona-postgresql
           - percona-postgresql-11
           - percona-postgresql-all
-          - percona-postgresql-client
           - percona-postgresql-client-11
           - percona-postgresql-contrib
           - percona-postgresql-doc
@@ -183,6 +181,9 @@
         packages:
           - percona-postgresql-client-common
           - percona-postgresql-common
+          - percona-postgresql
+          - percona-postgresql-client
+
       when: ansible_os_family == "Debian"
 
     - name: Remove postgresql Debian developer packages
