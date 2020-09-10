@@ -4,31 +4,6 @@
   become: true
   become_method: sudo
   tasks:
-#    - apt_repository:
-#        repo: "{{ item }}"
-#        state: absent
-#      with_items:
-#          - deb http://cdn-aws.deb.debian.org/debian stretch-updates main
-#          - deb http://cdn-aws.deb.debian.org/debian stretch main
-#          - deb http://security.debian.org/debian-security stretch/updates main
-
-
-#    - name: Get list of repositories for Debian
-#      shell: grep -r --include '*.list' '^deb ' /etc/apt/sources.list*
-#      register: sources_list
-#      when: ansible_os_family == "Debian"
-#
-#    - debug:
-#        msg: "{{ sources_list.stdout_lines }}"
-
-#    - name: Gather the rpm package facts
-#      package_facts:
-#        manager: auto
-#
-#    - name: Print the package facts
-#      debug:
-#        var: ansible_facts.packages
-
     - name: Clean apt-cache before package deletion
       command: apt-get clean
       when: ansible_os_family == "Debian"

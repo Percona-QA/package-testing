@@ -117,8 +117,10 @@ def test_deb_package_is_installed(host, package):
     if os.lower() in ["redhat", "centos", 'rhel']:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
+    print()
     assert pkg.is_installed
-    assert pkg.version in pg_versions['deb_pkg_ver']
+    assert pkg.version in pg_versions['deb_pkg_ver'],\
+        f"Expected version {pg_versions['deb_pkg_ver']}. Actual version {pkg.version}"
 
 
 def test_build_libpq_programm(host, build_libpq_programm):
