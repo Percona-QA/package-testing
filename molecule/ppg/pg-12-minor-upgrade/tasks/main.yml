@@ -24,14 +24,14 @@
 
 - name: Start Postgres RHEL
   service:
-    name: postgresql-11
+    name: postgresql-12
     state: started
     enabled: yes
   when: ansible_os_family == "RedHat"
 
 - name: Enable and start postgresql service for RHEL based
   service:
-    name: postgresql-11
+    name: postgresql-12
     state: started
     enabled: yes
   when: ansible_os_family == "RedHat"
@@ -46,7 +46,7 @@
 
 - name: Stop postgresql service for RHEL based
   service:
-    name: postgresql-11
+    name: postgresql-12
     state: stopped
   when: ansible_os_family == "RedHat"
 
