@@ -9,9 +9,6 @@ from molecule.ppg.tests.settings import get_settings, MAJOR_VER
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-# PACKAGES = ["libecpg-compat3", "libecpg-compat3-dbgsym", "libecpg-dev-dbgsym", "libecpg-dev", "libecpg6-dbgsym",
-#             'libecpg6', "libpgtypes3", "libpgtypes3-dbgsym", "libpq-dev", "libpq5-dbgsym", "libpq5"]
-
 PACKAGES = ["libecpg-compat3",  "libecpg-dev", 'libecpg6', "libpgtypes3", "libpq-dev",  "libpq5"]
 pg_versions = get_settings(os.environ['MOLECULE_SCENARIO_NAME'])[os.getenv("VERSION")]
 
