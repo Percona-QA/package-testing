@@ -1,0 +1,61 @@
+---
+- name: Cleanup
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: remove Postgresql deb packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+          - percona-postgresql-12
+          - percona-postgresql-all
+          - percona-postgresql-client-12
+          - percona-postgresql-contrib
+          - percona-postgresql-doc
+          - percona-postgresql-doc-12
+          - percona-postgresql-plperl-12
+          - percona-postgresql-plpython3-12
+          - percona-postgresql-pltcl-12
+          - percona-postgresql-server-dev-12
+          - percona-postgresql-server-dev-all
+          - percona-postgresql-12-dbgsym
+          - percona-postgresql-client-12-dbgsym
+          - percona-postgresql-plperl-12-dbgsym
+          - percona-postgresql-plpython3-12-dbgsym
+          - percona-postgresql-pltcl-12-dbgsym
+          - percona-postgresql-12-pgaudit
+          - percona-postgresql-12-repack
+          - percona-postgresql-12-repack-dbgsym
+          - percona-pgbackrest
+          - percona-pgbackrest-doc
+          - percona-patroni
+          - percona-patroni-dbgsym
+      when: ansible_distribution == "Debian"
+
+    - name: remove patroni ubuntu
+      apt:
+        name: percona-patroni
+        state: absent
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Remove postgresql Debian developer packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+        - libecpg-compat3
+        - libecpg-compat3-dbgsym
+        - libecpg-dev-dbgsym
+        - libecpg-dev
+        - libecpg6-dbgsym
+        - libecpg6
+        - libpgtypes3
+        - libpgtypes3-dbgsym
+        - libpq-dev
+        - libpq5-dbgsym
+        - libpq5
+      when: ansible_os_family == "Debian"
