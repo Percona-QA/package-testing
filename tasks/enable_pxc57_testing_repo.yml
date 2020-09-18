@@ -19,6 +19,9 @@
   - name: change the default repo to testing
     command: percona-release enable pxc-57 testing
 
+  - name: enable pxb24 repo
+    command: percona-release enable pxb-24 release
+
   - name: clean and update yum cache
     shell: |
       yum clean all

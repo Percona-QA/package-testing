@@ -17,6 +17,9 @@
   - name: change the default repo to experimental
     command: percona-release enable pxc-57 experimental
 
+  - name: enable pxb24 repo
+    command: percona-release enable pxb-24 release
+
   - name: add the experimental tools repo
     command: percona-release enable tools experimental
 
