@@ -23,7 +23,7 @@
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
   - name: include tasks for enabling main repo
-    include: ../tasks/enable_main_repo.yml
+    include: ../tasks/enable_pxc57_main_repo.yml
 
   - name: disable selinux
     selinux: state=disabled

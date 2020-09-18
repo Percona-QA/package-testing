@@ -18,10 +18,10 @@
     include: ../tasks/test_prep.yml
 
   - name: include tasks for enabling testing repo
-    include: ../tasks/enable_testing_repo.yml
+    include: ../tasks/enable_pxc57_testing_repo.yml
 
 # - name: include tasks for enabling experimental repo
-#   include: ../tasks/enable_experimental_repo.yml
+#   include: ../tasks/enable_pxc57_experimental_repo.yml
 
   - name: disable selinux
     selinux: state=disabled
