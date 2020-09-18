@@ -200,9 +200,6 @@ pipeline {
                 elif [ "${PS_MAJOR_VERSION}" = "5.7" ]; then
                   TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
                   JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release-rocks-new/lastSuccessfulBuild/label_exp=min-centos-6-x64-new/artifact/tarball/"
-                elif [ "${PS_MAJOR_VERSION}" = "5.6" ]; then
-                  TARBALL_NAME="Percona-Server-$(echo ${PS_VERSION}|sed 's/-/-rel/')-Linux.x86_64.ssl101.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-server-${PS_MAJOR_VERSION}-binaries-release-new/label_exp=min-centos-6-x64/lastSuccessfulBuild/artifact/tarball/"
                 fi
                 rm -rf package-testing
                 sudo yum install -y git wget
