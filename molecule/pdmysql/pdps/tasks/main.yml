@@ -21,9 +21,11 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
   - name: enable the PDMYSQL-80 repo
-    command: percona-release enable-only pdps-8.0.20 {{ repo }}
+    command: percona-release enable-only pdps-{{ version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
+      version: "{{ lookup('env', 'VERSION') }}"
+
 
   - name: install Percona Toolkit new deb packages
     include_tasks: ../../../tasks/install_pt.yml
@@ -129,7 +131,7 @@
     - rm -f master.zip
     - mv package-testing-master /package-testing
     when: ansible_os_family == "RedHat"
-    
+
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
     when: ansible_os_family == "RedHat"
