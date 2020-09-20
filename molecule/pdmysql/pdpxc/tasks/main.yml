@@ -137,6 +137,17 @@
   - mv package-testing-master /package-testing
   when: ansible_os_family == "RedHat"
 
+- name: install latest bats from github
+  command: "{{ item }}"
+  with_items:
+  - rm -f master.zip
+  - wget --no-check-certificate -O master.zip https://github.com/sstephenson/bats/archive/master.zip
+  - unzip master.zip
+  - rm -f master.zip
+  - bats-master/install.sh /usr/local
+  - rm -rf bats-master
+  when: ansible_os_family == "RedHat"
+
 - name: set root password on centos
   command: /package-testing/setpass_57.sh
   when: ansible_os_family == "RedHat"
