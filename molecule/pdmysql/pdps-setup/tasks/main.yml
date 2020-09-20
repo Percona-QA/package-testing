@@ -128,7 +128,6 @@
     - unzip master.zip
     - rm -f master.zip
     - mv package-testing-master /package-testing
-    when: ansible_os_family == "RedHat"
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh

@@ -134,7 +134,6 @@
   - unzip master.zip
   - rm -f master.zip
   - mv package-testing-master /package-testing
-  when: ansible_os_family == "RedHat"
 
 - name: install latest bats from github
   command: "{{ item }}"
