@@ -7,10 +7,9 @@
 - name: Install percona release
   include: ../../tasks/install_percona_release.yml
 
-- name: enable the PDMYSQL-80 repo
-  command: percona-release enable-only pdpxc-{{ version }} {{ repo }}
+- name: enable the PDMYSQL repo
+  command: percona-release setup pdpxc-{{ version }}
   vars:
-    repo: "{{ lookup('env', 'REPO') }}"
     version: "{{ lookup('env', 'VERSION') }}"
 
 - name: clean and update yum cache

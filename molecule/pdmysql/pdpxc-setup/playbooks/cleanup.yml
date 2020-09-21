@@ -1,0 +1,44 @@
+---
+- name: Cleanup
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: remove Percona Server deb packages
+      apt:
+        name: "{{ packages }}"
+        update_cache: no
+        state: absent
+      vars:
+        packages:
+          - percona-xtradb-cluster-full
+          - percona-xtradb-cluster-source
+          - python-mysqldb
+          - percona-xtradb-cluster-client
+          - percona-xtradb-cluster-common
+          - percona-xtradb-cluster-dbg
+          - percona-xtradb-cluster-garbd-debug
+          - percona-xtradb-cluster-garbd
+          - percona-xtradb-cluster-server-debug
+          - percona-xtradb-cluster-test
+          - percona-xtradb-cluster
+      when: ansible_os_family == "Debian"
+
+    - name: remove Percona Server rpm packages
+      yum:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+       packages:
+          - percona-xtradb-cluster-full
+          - percona-xtradb-cluster-source
+          - percona-xtradb-cluster
+          - percona-xtradb-cluster-client
+          - percona-xtradb-cluster-debuginfo
+          - percona-xtradb-cluster-devel
+          - percona-xtradb-cluster-garbd
+          - percona-xtradb-cluster-server
+          - percona-xtradb-cluster-shared
+          - percona-xtradb-cluster-shared-compat
+          - percona-xtradb-cluster-test
+      when: ansible_os_family == "RedHat"

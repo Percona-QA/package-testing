@@ -6,17 +6,17 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-DEBPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-client',
-               'percona-xtradb-cluster-common', 'percona-xtradb-cluster-dbg',
-               'percona-xtradb-cluster-garbd-debug', 'percona-xtradb-cluster-garbd',
-               'percona-xtradb-cluster-server-debug', 'percona-xtradb-cluster-test',
-               'percona-xtradb-cluster']
+DEBPACKAGES = ['percona-server-server', 'percona-server-test',
+               'percona-server-dbg', 'percona-server-source',
+               'percona-server-client', 'percona-server-tokudb',
+               'percona-server-rocksdb', 'percona-mysql-router',
+               'percona-mysql-shell']
 
-RPMPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster',
-               'percona-xtradb-cluster-client', 'percona-xtradb-cluster-debuginfo',
-               'percona-xtradb-cluster-devel', 'percona-xtradb-cluster-garbd',
-               'percona-xtradb-cluster-server', 'percona-xtradb-cluster-shared',
-               'percona-xtradb-cluster-shared-compat', 'percona-xtradb-cluster-test']
+RPMPACKAGES = ['percona-server-server', 'percona-server-client',
+               'percona-server-test', 'percona-server-debuginfo',
+               'percona-server-devel', 'percona-server-tokudb',
+               'percona-server-rocksdb', 'percona-mysql-router',
+               'percona-mysql-shell']
 
 PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    " fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so';\"",
@@ -24,8 +24,6 @@ PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    " fnv_64 RETURNS INTEGER SONAME 'libfnv_udf.so';\"",
                    "mysql -e \"CREATE FUNCTION"
                    " murmur_hash RETURNS INTEGER SONAME 'libmurmur_udf.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " audit_log SONAME \'audit_log.so\';\"",
                    "mysql -e \"CREATE FUNCTION"
                    " version_tokens_set RETURNS STRING SONAME 'version_token.so';\"",
                    "mysql -e \"CREATE FUNCTION"
@@ -68,6 +66,16 @@ COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
 VERSION = os.environ.get("VERSION")
 
 
+def is_running(host):
+    cmd = 'ps auxww| grep -v grep  | grep -c "mysql"'
+    result = host.run(cmd)
+    print(result.stdout)
+    stdout = int(result.stdout)
+    if stdout == 0:
+        return True
+    return False
+
+
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
     dist = host.system_info.distribution
@@ -88,42 +96,31 @@ def test_check_rpm_package(host, package):
     assert VERSION in pkg.version, pkg.version
 
 
-def test_binary_version(host):
-    with host.sudo("root"):
-        cmd = "mysql --version"
-        result = host.run(cmd)
-        assert result.rc == 0, result.stderr
-        assert VERSION in result.stdout, result.stdout
+@pytest.mark.parametrize("binary", ['mysqlsh', 'mysql', 'mysqlrouter'])
+def test_binary_version(host, binary):
+    cmd = "{} --version".format(binary)
+    result = host.run(cmd)
+    print(result.stdout)
+    assert result.rc == 0, result.stderr
+    assert VERSION in result.stdout, result.stdout
 
 
 @pytest.mark.parametrize('component', ['@@INNODB_VERSION', '@@VERSION'])
 def test_mysql_version(host, component):
     with host.sudo("root"):
-        cmd = "mysql -e \"SELECT {}; \"| grep -c \"{}\"".format(component, '8.0.19')
+        cmd = "mysql -e \"SELECT {}; \"| grep -c \"{}\"".format(component, VERSION)
         result = host.run(cmd)
+        print(result.stdout)
         assert result.rc == 0, result.stderr
         assert int(result.stdout) == 1, result.stdout
-
-
-def test_version_commnet(host):
-    with host.sudo("root"):
-        cmd = "mysql -e \"SELECT @@VERSION_COMMENT;\""
-        result = host.run(cmd)
-        assert result.rc == 0, result.stdout
-
-
-def test_wresp_version(host):
-    with host.sudo("root"):
-        cmd = "mysql -e \"SHOW STATUS LIKE 'wsrep_provider_version';\""
-        result = host.run(cmd)
-        assert result.rc == 0, result.stdout
 
 
 @pytest.mark.parametrize('plugin_command', PLUGIN_COMMANDS)
 def test_plugins(host, plugin_command):
     with host.sudo("root"):
         result = host.run(plugin_command)
-        assert result.rc == 0, (result.stderr, result.stdout)
+        print(result.stdout)
+        assert result.rc == 0, result.stderr
 
 
 @pytest.mark.parametrize("component", COMPONENTS)
@@ -139,3 +136,14 @@ def test_components(component, host):
             component)
         check_result = host.run(check_cmd)
         assert check_result.rc == 1, (check_result.rc, check_result.stderr, check_result.stdout)
+
+
+def test_madmin(host):
+    with host.sudo("root"):
+        mysql = host.service("mysql")
+        assert mysql.is_running
+        cmd = 'mysqladmin shutdown'
+        shutdown = host.run(cmd)
+        assert shutdown.rc == 0, shutdown.stdout
+        mysql = host.service("mysql")
+        assert not mysql.is_running

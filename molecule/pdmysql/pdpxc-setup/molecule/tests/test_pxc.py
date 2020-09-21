@@ -109,14 +109,16 @@ def test_version_commnet(host):
     with host.sudo("root"):
         cmd = "mysql -e \"SELECT @@VERSION_COMMENT;\""
         result = host.run(cmd)
-        assert result.rc == 0, result.stdout
+        print(result.stdout)
+        assert result.rc == 0
 
 
 def test_wresp_version(host):
     with host.sudo("root"):
         cmd = "mysql -e \"SHOW STATUS LIKE 'wsrep_provider_version';\""
         result = host.run(cmd)
-        assert result.rc == 0, result.stdout
+        print(result.stdout)
+        assert result.rc == 0
 
 
 @pytest.mark.parametrize('plugin_command', PLUGIN_COMMANDS)
