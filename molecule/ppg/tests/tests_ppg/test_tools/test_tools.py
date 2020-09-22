@@ -29,17 +29,17 @@ def load_data(host):
 def pgaudit(host):
     ds = host.system_info.distribution
     with host.sudo("postgres"):
-        enable_library = "psql -c \'ALTER SYSTEM SET shared_preload_libraries=\'pgaudit\'\';"
-        result = host.check_output(enable_library)
-        assert result.strip("\n") == "ALTER SYSTEM"
+        # enable_library = "psql -c \'ALTER SYSTEM SET shared_preload_libraries=\'pgaudit\'\';"
+        # result = host.check_output(enable_library)
+        # assert result.strip("\n") == "ALTER SYSTEM"
         enable_pgaudit = "psql -c 'CREATE EXTENSION pgaudit;'"
         result = host.check_output(enable_pgaudit)
         assert result.strip("\n") == "CREATE EXTENSION"
         cmd = """
-        psql -c \"SELECT setting FROM pg_settings WHERE name='shared_preload_libraries';\" | awk 'NR==3{print $1}'
+        psql -c \"SELECT setting FROM pg_settings WHERE name='shared_preload_libraries';\"
         """
         result = host.check_output(cmd)
-        assert result.strip("\n") == "pgaudit"
+        assert "pgaudit" in result, result
         enable_ddl = """psql -c \"ALTER SYSTEM SET pgaudit.log = 'all';\""""
         result = host.check_output(enable_ddl)
         assert result.strip("\n") == "ALTER SYSTEM"
