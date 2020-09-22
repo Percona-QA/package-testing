@@ -16,31 +16,6 @@
       update_cache: yes
     when: ansible_os_family == "RedHat"
 
-  - name: Enable pgaudit for Debian
-    lineinfile:
-      path: /etc/postgresql/12/main/postgresql.conf
-      line: shared_preload_libraries = 'pgaudit'
-    when: ansible_os_family == "Debian"
-
-  - name: Enable pgaudit for RHEL
-    lineinfile:
-      path: /var/lib/pgsql/12/data/postgresql.conf
-      line: shared_preload_libraries = 'pgaudit'
-    when: ansible_os_family == "RedHat"
-
-  - name: Restart Postgres RHEL
-    service:
-      name: postgresql-12
-      state: restarted
-    when: ansible_os_family == "RedHat"
-    register: out
-
-  - name: Retart Postgres Debian
-    command: sudo systemctl restart postgresql
-    environment:
-      PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-    when: ansible_os_family == "Debian"
-
   - name: Install pgbackrest Debian
     apt:
       name: "{{ packages }}"
@@ -160,4 +135,51 @@
       packages:
         - percona-patroni
         - percona-patroni-doc
+    when: ansible_os_family == "Debian"
+
+  - name: Install pg-stat-monitor RHEL
+    yum:
+      name: "{{ packages }}"
+      state: latest
+      update_cache: yes
+    vars:
+      packages:
+        - percona-pg-stat-monitor12
+        - percona-pg-stat-monitor12-debuginfo
+    when: ansible_os_family == "RedHat"
+
+  - name: Install pg-stat-monitor debian
+    apt:
+      name: "{{ packages }}"
+      state: latest
+      update_cache: yes
+    vars:
+      packages:
+        - percona-pg-stat-monitor12
+        - percona-pg-stat-monitor12-dbgsym
+    when: ansible_os_family == "Debian"
+
+  - name: Add extensions to postgresql.conf for Debian
+    lineinfile:
+      path: /etc/postgresql/12/main/postgresql.conf
+      line: shared_preload_libraries = 'pg_stat_monitor, pgaudit'
+    when: ansible_os_family == "Debian"
+
+  - name: Add extensions to postgresql.conf for RHEL
+    lineinfile:
+      path: /var/lib/pgsql/12/data/postgresql.conf
+      line: shared_preload_libraries = 'pg_stat_monitor, pgaudit'
+    when: ansible_os_family == "RedHat"
+
+  - name: Restart Postgres RHEL
+    service:
+      name: postgresql-12
+      state: restarted
+    when: ansible_os_family == "RedHat"
+    register: out
+
+  - name: Retart Postgres Debian
+    command: sudo systemctl restart postgresql
+    environment:
+      PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     when: ansible_os_family == "Debian"

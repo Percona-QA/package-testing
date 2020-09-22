@@ -46,7 +46,8 @@ DEB12_EXTENSIONS = ["pageinspect",
                     "hstore_plpython3u",
                     "adminpack",
                     "autoinc",
-                    "plperl"]
+                    "plperl",
+                    "pg_stat_monitor"]
 
 RPM12_EXTENSIONS = ['hstore',
                     'adminpack',
@@ -96,7 +97,8 @@ RPM12_EXTENSIONS = ['hstore',
                     'pltclu',
                     'plpython2u',
                     'plpythonu',
-                    'plperl'
+                    'plperl',
+                    'pg_stat_monitor'
                     ]
 
 
