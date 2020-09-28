@@ -15,4 +15,4 @@ def test_proxysql2_version(host):
     cmd = 'proxysql --version'
     result = host.run(cmd)
     assert result.rc == 0, result.stderr
-    assert '2.0.12' in result.stdout, result.stdout
+    assert '2.0.14' in result.stdout, result.stdout
