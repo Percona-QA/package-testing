@@ -15,10 +15,10 @@
     when: ansible_os_family == "RedHat"
 
   - name: change the default repo to experimental
-    command: percona-release enable pxc-80 experimental
+    command: percona-release enable pxc-80 testing
 
   - name: add the experimental tools repo
-    command: percona-release enable tools experimental
+    command: percona-release enable tools testing
 
   - name: clean and update yum cache
     shell: |
