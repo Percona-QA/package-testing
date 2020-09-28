@@ -27,7 +27,7 @@
       version: "{{ lookup('env', 'VERSION') }}"
 
 
-  - name: install Percona Toolkit new deb packages
+  - name: install Percona Toolkit
     include_tasks: ../../../tasks/install_pt.yml
 
   - name: clean yum
