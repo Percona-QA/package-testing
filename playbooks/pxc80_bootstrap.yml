@@ -30,6 +30,15 @@
     include: ../tasks/enable_pxc80_main_repo.yml
     when: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
 
+  - name: install python3-libselinux 
+    yum:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - python3-libselinux
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
   - name: disable selinux
     selinux: state=disabled
     when: ansible_os_family == "RedHat"
@@ -59,7 +68,6 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - MySQL-python
     when: ansible_os_family == "RedHat"
 
   - name: stop mysql service with service command
