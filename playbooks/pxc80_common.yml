@@ -17,8 +17,13 @@
   - name: include tasks for test env setup
     include: ../tasks/test_prep.yml
 
-  - name: include tasks for enabling PXC 8.0 experimental repo
-    include: ../tasks/enable_pxc80_experimental_repo.yml
+  - name: include tasks for enabling test repo
+    include_tasks: ../tasks/enable_pxc80_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling main repo
+    include: ../tasks/enable_pxc80_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
 
   - name: disable selinux
     selinux: state=disabled
@@ -50,20 +55,13 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - percona-xtradb-cluster-source
       - MySQL-python
     when: ansible_os_family == "RedHat"
 
-  - name: stop mysql service with service command
-    command: service mysql stop
-
-  - name: copy PXC config on centos 6
-    template: src=../templates/my_rpm.j2 dest=/etc/my.cnf
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
   - name: copy PXC config on centos 7
-    template: src=../templates/my_rpm_7.j2 dest=/etc/my.cnf
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    template: src=../templates/my_rpm_80.j2 
+              dest=/etc/my.cnf
+    when: ansible_os_family == "RedHat"
 
   - name: copy PXC config on debian/ubuntu
     template: src=../templates/my.j2
