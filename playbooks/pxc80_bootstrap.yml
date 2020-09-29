@@ -65,13 +65,9 @@
   - name: stop mysql service with service command
     command: service mysql stop
 
-  - name: copy pxc config on centos 6
-    template: src=../templates/my_rpm.j2 dest=/etc/my.cnf
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
-  - name: copy pxc config on centos 7
-    template: src=../templates/my_rpm_7.j2 dest=/etc/my.cnf
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+  - name: copy pxc config on centos
+    template: src=../templates/my_rpm_80.j2 dest=/etc/my.cnf
+    when: ansible_os_family == "RedHat"
 
   - name: configure PXC on debian/ubuntu
     template: src=../templates/my.j2
@@ -80,10 +76,6 @@
     when: ansible_os_family == "Debian"
 
   # bootstrap the cluster
-  - name: bootstrap cluster on RHEL6
-    command: /etc/init.d/mysql bootstrap-pxc
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
   - name: bootstrap cluster on RHEL7
     command: systemctl start mysql@bootstrap.service
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
@@ -102,19 +94,6 @@
               dest=/root/.my.cnf
               mode=0640 owner=root group=root
     when: ansible_os_family == "RedHat"
-
-  # add sstuser
-  - name: create backup user on centos 6
-    mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
-  - name: create backup user on centos 7
-    command: /package-testing/pxc_backup_user.sh
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-
-  - name: create backup user on debian/ubuntu
-    mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" state=present
-    when: ansible_os_family == "Debian"
 
   # other tests
   - name: install plugins
