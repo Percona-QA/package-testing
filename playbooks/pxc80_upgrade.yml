@@ -18,7 +18,7 @@
 #
   - name: restart the service
     command: service mysql restart
-    when: ansible_os_family == "Debian"
+#   when: ansible_os_family == "Debian"
 
   - name: restart the service
     command: service mysql restart
