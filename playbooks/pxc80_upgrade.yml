@@ -79,8 +79,8 @@
 # - name: run bats tests for mysql init scripts
 #   command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
 
-  - name: start mysql service
-    service: name=mysql state=started
+# - name: start mysql service
+#   service: name=mysql state=started
 
   - name: remove PXC deb packages
     apt:
