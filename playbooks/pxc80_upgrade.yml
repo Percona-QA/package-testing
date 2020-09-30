@@ -16,8 +16,8 @@
 
 # restart the bootstrapped node before upgrading
 #
-  - name: restart the service
-    command: service mysql restart
+# - name: restart the service
+#   command: service mysql restart
 #   when: ansible_os_family == "Debian"
 
   - name: restart the service
@@ -67,8 +67,8 @@
        - percona-xtradb-cluster-shared-compat
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: restart the service
-    command: service mysql restart
+# - name: restart the service
+#   command: service mysql restart
 
   - name: check that PXC version is correct
     command: /package-testing/version_check.sh pxc80
