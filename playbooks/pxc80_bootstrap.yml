@@ -30,6 +30,15 @@
     include: ../tasks/enable_pxc80_main_repo.yml
     when: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
 
+  - name: install python3-libselinux 
+    yum:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - python3-libselinux
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
   - name: disable selinux
     selinux: state=disabled
     when: ansible_os_family == "RedHat"
@@ -59,7 +68,6 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - MySQL-python
     when: ansible_os_family == "RedHat"
 
   - name: stop mysql service with service command
@@ -70,7 +78,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: configure PXC on debian/ubuntu
-    template: src=../templates/my.j2
+    template: src=../templates/my_8.j2
               dest=/etc/mysql/my.cnf
               mode=0640 owner=mysql group=root
     when: ansible_os_family == "Debian"
@@ -78,11 +86,6 @@
   # bootstrap the cluster
   - name: bootstrap cluster on CentOS
     command: systemctl start mysql@bootstrap.service
-    when: ansible_os_family == "RedHat"
-
-  - name: run the bootstrap service on debian/ubuntu
-    command: service mysql bootstrap-pxc
-    when: ansible_os_family == "Debian"
 
   # set root password on centos
   - name: set root password on centos

@@ -55,7 +55,6 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - MySQL-python
     when: ansible_os_family == "RedHat"
 
   - name: copy PXC config on centos 7
@@ -64,7 +63,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: copy PXC config on debian/ubuntu
-    template: src=../templates/my.j2
+    template: src=../templates/my_8.j2
               dest=/etc/mysql/my.cnf
               mode=0640 owner=mysql group=root
     when: ansible_os_family == "Debian"
