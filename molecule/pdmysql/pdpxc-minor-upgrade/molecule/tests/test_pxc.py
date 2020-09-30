@@ -101,7 +101,8 @@ def test_mysql_version(host, component):
     with host.sudo("root"):
         cmd = "mysql -e \"SELECT {}; \"| grep -c \"{}\"".format(component, VERSION)
         result = host.run(cmd)
-        assert result.rc == 0, result.stderr
+        version = host.check_output("mysql -e \"SELECT {}; \"".format(component))
+        assert result.rc == 0, version
         assert int(result.stdout) == 1, result.stdout
 
 
