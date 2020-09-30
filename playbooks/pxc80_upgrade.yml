@@ -14,16 +14,6 @@
     include: ../tasks/enable_pxc80_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
-# restart the bootstrapped node before upgrading
-#
-# - name: restart the service
-#   command: service mysql restart
-#   when: ansible_os_family == "Debian"
-
-  - name: restart the service
-    command: service mysql restart
-    when: ansible_os_family == "Debian"
-
   - name: upgrade PXC 8.0 to new deb packages
     apt:
       name: "{{ packages }}"
