@@ -111,7 +111,7 @@ def test_version_commnet(host):
         cmd = "mysql -e \"SELECT @@VERSION_COMMENT;\""
         result = host.run(cmd)
         print(result.stdout)
-        assert result.rc == 0
+        assert result.rc == 0, result.stdout
 
 
 def test_wresp_version(host):
@@ -119,7 +119,7 @@ def test_wresp_version(host):
         cmd = "mysql -e \"SHOW STATUS LIKE 'wsrep_provider_version';\""
         result = host.run(cmd)
         print(result.stdout)
-        assert result.rc == 0
+        assert result.rc == 0, result.stdout
 
 
 @pytest.mark.parametrize('plugin_command', PLUGIN_COMMANDS)
