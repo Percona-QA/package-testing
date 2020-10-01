@@ -11,7 +11,7 @@
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
     when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2"
 
-    - name: install needed packages for RHEL8 tests with yum
+  - name: install needed packages for RHEL8 tests with yum
     yum:
       name: "{{ packages }}"
       state: latest
