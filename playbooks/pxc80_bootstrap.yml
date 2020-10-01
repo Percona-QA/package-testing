@@ -106,6 +106,6 @@
     command: /package-testing/plugins_test_80.sh pxc
 
   - name: check PXC 8.0 version
-    command: /vagrant/version_check.sh pxc80
+    command: /package-testing/version_check.sh pxc80
     when: lookup('env', 'install_repo') == "main"
 
