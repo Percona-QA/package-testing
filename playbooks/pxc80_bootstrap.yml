@@ -58,7 +58,8 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - python-mysqldb
+      - percona-xtrabackup-80
+      - percona-toolkit
     when: ansible_os_family == "Debian"
 
   - name: install PXC 8 rpm packages
@@ -68,6 +69,8 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
+      - percona-xtrabackup-80
+      - percona-toolkit
     when: ansible_os_family == "RedHat"
 
   - name: stop mysql service with service command

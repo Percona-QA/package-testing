@@ -45,7 +45,8 @@
       packages:
       - percona-xtradb-cluster-full
       - percona-xtradb-cluster-source
-      - python-mysqldb
+      - percona-toolkit
+      - percona-xtrabackup-80
     when: ansible_os_family == "Debian"
 
   - name: install PXC 8 rpm packages
@@ -55,6 +56,8 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
+      - percona-toolkit
+      - percona-xtrabackup-80
     when: ansible_os_family == "RedHat"
 
   - name: copy PXC config on centos 7
