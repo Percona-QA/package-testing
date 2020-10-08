@@ -22,6 +22,7 @@
     rpm_key:
      state: present
      key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
+    when: ansible_os_family == "RedHat"
 
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
