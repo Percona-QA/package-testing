@@ -32,7 +32,7 @@
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_psmdb_repo.yml
     vars:
-      psmdb_repo: "original"
+      psmdb_repo: "original testing"
 
   - name: install Percona Server for MongoDB 3.6 deb packages previous version
     include_tasks: ../tasks/install_psmdb_36.yml
