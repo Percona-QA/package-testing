@@ -11,14 +11,17 @@
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
     when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2"
 
-  - name: install needed packages for RHEL8 tests with yum
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - centos-gpg-keys
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
+  - name: install GPG key for epel 8
+    rpm_key:
+     state: present
+     key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: install GPG key for Percona repos
+    rpm_key:
+     state: present
+     key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: setup epel 8 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
