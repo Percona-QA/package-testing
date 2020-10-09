@@ -1,0 +1,254 @@
+---
+# Tasks for test major upgrade for PPG 12 packages
+
+- name: Configure repository
+  include_tasks: ../../../tasks/install_percona_release.yml
+
+- name: Setup initial (old) repository
+  command: percona-release enable {{ pg_version }} {{ repo }}
+  vars:
+    repo: "{{ lookup('env', 'FROM_REPO') }}"
+    pg_version: "{{ lookup('env', 'FROM_VERSION') }}"
+
+- name: install Percona Platform for PostgreSQL 12 packages
+  include_tasks: ../../../../tasks/install_ppg12.yml
+
+- name: Initialize Postgres RHEL
+  command: /usr/pgsql-12/bin/postgresql-12-setup initdb
+  environment:
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  when: ansible_os_family == "RedHat"
+
+- name: Install PPG tools
+  include_tasks: ../../common/tasks/install_ppg12_tools.yml
+
+- name: Start Postgres RHEL
+  service:
+    name: postgresql-12
+    state: started
+    enabled: true
+  when: ansible_os_family == "RedHat"
+
+- name: Start postgresql service for Debian based
+  service:
+    name: postgresql
+    state: started
+    enabled: true
+  when: ansible_os_family == "Debian"
+
+- name: Disable old repository
+  command: percona-release disable {{ pg_version }} {{ repo }}
+  vars:
+    repo: "{{ lookup('env', 'FROM_REPO') }}"
+    pg_version: "{{ lookup('env', 'FROM_VERSION') }}"
+
+- name: Setup new repository
+  command: percona-release enable {{ pg_version }} {{ repo }}
+  vars:
+    repo: "{{ lookup('env', 'TO_REPO') }}"
+    pg_version: "{{ lookup('env', 'VERSION') }}"
+
+- name: install Percona Platform for PostgreSQL deb packages
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+    state: latest
+  vars:
+    packages:
+    - percona-postgresql-13
+    - percona-postgresql-client-13
+    - percona-postgresql-doc-13
+    - percona-postgresql-plperl-13
+    - percona-postgresql-plpython3-13
+    - percona-postgresql-pltcl-13
+    - percona-postgresql-server-dev-13
+    - percona-postgresql-13-dbgsym
+    - percona-postgresql-client-13-dbgsym
+    - percona-postgresql-plperl-13-dbgsym
+    - percona-postgresql-plpython3-13-dbgsym
+    - percona-postgresql-pltcl-13-dbgsym
+  when: ansible_os_family == "Debian"
+
+- name: install Percona Platform for PostgreSQL deb packages
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+    state: latest
+  vars:
+    packages:
+    - percona-postgresql-plpython3-13
+    - percona-postgresql-plpython3-13-dbgsym
+  when:
+    - ansible_os_family == "Debian"
+
+- name: install Percona Platform for PostgreSQL rpm packages for RHEL
+  yum:
+    name: "{{ packages }}"
+    state: latest
+    update_cache: yes
+  vars:
+    packages:
+    - percona-postgresql13
+    - percona-postgresql13-contrib
+    - percona-postgresql13-debuginfo
+    - percona-postgresql13-devel
+    - percona-postgresql13-docs
+    - percona-postgresql13-libs
+    - percona-postgresql13-llvmjit
+    - percona-postgresql13-plperl
+    - percona-postgresql13-plpython
+    - percona-postgresql13-pltcl
+    - percona-postgresql13-server
+    - percona-postgresql13-test
+    - percona-postgresql13-debuginfo
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+- name: install Percona Platform for PostgreSQL rpm packages for RHEL
+  yum:
+    name: "{{ packages }}"
+    state: latest
+    update_cache: yes
+  vars:
+    packages:
+      - percona-postgresql13
+      - percona-postgresql13-contrib
+      - percona-postgresql13-debuginfo
+      - percona-postgresql13-devel
+      - percona-postgresql13-docs
+      - percona-postgresql13-libs
+      - percona-postgresql13-llvmjit
+      - percona-postgresql13-plperl
+      - percona-postgresql13-plpython
+      - percona-postgresql13-pltcl
+      - percona-postgresql13-server
+      - percona-postgresql13-test
+      - percona-postgresql13-contrib-debuginfo
+      - percona-postgresql13-debuginfo
+      - percona-postgresql13-debugsource
+      - percona-postgresql13-devel-debuginfo
+      - percona-postgresql13-libs-debuginfo
+      - percona-postgresql13-plperl-debuginfo
+      - percona-postgresql13-plpython-debuginfo
+      - percona-postgresql13-plpython3-debuginfo
+      - percona-postgresql13-pltcl-debuginfo
+      - percona-postgresql13-server-debuginfo
+      - percona-postgresql13-test-debuginfo
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+- name: Initialize Postgres RHEL
+  command: /usr/pgsql-13/bin/postgresql-13-setup initdb
+  environment:
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  when: ansible_os_family == "RedHat"
+
+- name: Stop postgresql service for RHEL based
+  service:
+    name: postgresql-12
+    state: stopped
+  when: ansible_os_family == "RedHat"
+
+- name: Stop postgresql service for Debian based
+  service:
+    name: postgresql
+    state: stopped
+  when: ansible_os_family == "Debian"
+
+- name: Stop postgresql service for Debian based
+  command: sudo pkill postgres
+  when: ansible_os_family == "Debian"
+
+- pause:
+    minutes: 1
+
+- name: Execute pg_upgrade RHEL
+  command: /usr/pgsql-13/bin/pg_upgrade --old-bindir /usr/pgsql-12/bin --new-bindir /usr/pgsql-13/bin --old-datadir /var/lib/pgsql/12/data --new-datadir /var/lib/pgsql/13/data
+  become: true
+  become_user: postgres
+  args:
+    chdir: /tmp
+  when: ansible_os_family == "RedHat"
+
+- name: Execute pg_upgrade Deb
+  command: /usr/lib/postgresql/13/bin/pg_upgrade --old-datadir=/var/lib/postgresql/12/main --new-datadir=/var/lib/postgresql/13/main --old-bindir=/usr/lib/postgresql/12/bin --new-bindir=/usr/lib/postgresql/13/bin --old-options '-c config_file=/etc/postgresql/12/main/postgresql.conf' --new-options '-c config_file=/etc/postgresql/13/main/postgresql.conf'
+  become: true
+  become_method: sudo
+  become_user: postgres
+  args:
+    chdir: /tmp
+  when: ansible_os_family == "Debian"
+
+- name: Change postgresql 12 port in config Debian
+  blockinfile:
+    path: /etc/postgresql/12/main/postgresql.conf
+    block: |
+      port = 5433
+  when: ansible_os_family == "Debian"
+
+- name: Change postgresql 12 port in config RHEL
+  blockinfile:
+    path: /var/lib/pgsql/12/data/postgresql.conf
+    block: |
+      port = 5433
+  when: ansible_os_family == "RedHat"
+
+- name: Change postgresql 13 port in config Debian
+  blockinfile:
+    path: /etc/postgresql/13/main/postgresql.conf
+    block: |
+      port = 5432
+  when: ansible_os_family == "Debian"
+
+- name: Change postgresql 13 port in config RHEL
+  blockinfile:
+    path: /var/lib/pgsql/13/data/postgresql.conf
+    block: |
+      port = 5432
+  when: ansible_os_family == "RedHat"
+
+- name: Start postgresql service for RHEL based
+  service:
+    name: postgresql-13
+    state: started
+    enabled: true
+  when: ansible_os_family == "RedHat"
+
+- name: Start postgresql service for Debian based
+  service:
+    name: postgresql
+    state: started
+    enabled: true
+  when: ansible_os_family == "Debian"
+
+- name: Upgrade debian development packages
+  apt:
+    update_cache: yes
+    state: latest
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - libecpg6
+      - libecpg-compat3
+      - libecpg6
+      - libecpg-dev
+      - libpgtypes3
+      - libpq-dev
+      - libpq5
+  when: ansible_os_family == "Debian"
+
+- name: Install GCC Deb
+  apt:
+    name: gcc
+  when: ansible_os_family == "Debian"
+
+- name: Install GCC RHEL
+  yum:
+    name: gcc
+  when: ansible_os_family == "RedHat"
+
+- name: Create temporary directory for compilation
+  command: mkdir /tmp/libpq_command_temp_dir
+
+- name: Copy libpq source file
+  copy:
+    src: ../../common/files/lib_version.c
+    dest: /tmp/libpq_command_temp_dir
