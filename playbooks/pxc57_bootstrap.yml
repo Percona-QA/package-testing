@@ -150,3 +150,8 @@
   # other tests
   - name: install plugins
     command: /package-testing/plugins_test_57.sh pxc
+
+  - name: check PXC 5.7 version
+    command: /package-testing/version_check.sh pxc57
+    when: lookup('env', 'install_repo') == "main"
+
