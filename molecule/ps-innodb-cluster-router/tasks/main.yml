@@ -52,7 +52,6 @@
     vars:
       packages:
       - percona-mysql-router
-      - percona-mysql-router-dev
       - percona-mysql-shell
       - sysbench
       - jq
