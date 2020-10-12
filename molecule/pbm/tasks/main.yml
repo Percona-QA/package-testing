@@ -43,14 +43,14 @@
     psmdb_to_test: "{{ lookup('env', 'psmdb_to_test') }}"
   when: lookup('env', 'install_repo') == "main"
 
-- name: setup tools repo with percona-release
-  command: percona-release enable tools {{ install_repo }}
+- name: setup pbm repo with percona-release
+  command: percona-release enable pbm {{ install_repo }}
   vars:
     install_repo: "{{ lookup('env', 'install_repo') }}"
   when: lookup('env', 'install_repo') == "testing"
 
-- name: setup tools repo with percona-release
-  command: percona-release enable tools
+- name: setup pbm repo with percona-release
+  command: percona-release enable pbm
   vars:
     install_repo: "{{ lookup('env', 'install_repo') }}"
   when: lookup('env', 'install_repo') == "main"
