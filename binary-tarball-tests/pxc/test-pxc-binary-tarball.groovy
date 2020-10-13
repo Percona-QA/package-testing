@@ -36,7 +36,7 @@ pipeline {
                 fi
                 rm -rf package-testing
                 sudo apt install -y git wget
-                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-pxc-package-testing-job --depth 1
+                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
                 cd package-testing/binary-tarball-tests/pxc
                 wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
                 ./run.sh || true
@@ -69,7 +69,7 @@ pipeline {
                 fi
                 rm -rf package-testing
                 sudo apt install -y git wget
-                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-pxc-package-testing-job --depth 1
+                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
                 cd package-testing/binary-tarball-tests/pxc
                 wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
                 ./run.sh || true
@@ -102,7 +102,7 @@ pipeline {
                 fi
                 rm -rf package-testing
                 sudo apt install -y git wget
-                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-pxc-package-testing-job --depth 1
+                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
                 cd package-testing/binary-tarball-tests/pxc
                 wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
                 ./run.sh || true
@@ -135,7 +135,7 @@ pipeline {
                 fi
                 rm -rf package-testing
                 sudo apt install -y git wget
-                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-pxc-package-testing-job --depth 1
+                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
                 cd package-testing/binary-tarball-tests/pxc
                 wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
                 ./run.sh || true
@@ -168,7 +168,7 @@ pipeline {
                 fi
                 rm -rf package-testing
                 sudo apt install -y git wget
-                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-pxc-package-testing-job --depth 1
+                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
                 cd package-testing/binary-tarball-tests/pxc
                 wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
                 ./run.sh || true
@@ -201,7 +201,7 @@ pipeline {
                 fi
                 rm -rf package-testing
                 sudo yum install -y git wget
-                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-pxc-package-testing-job --depth 1
+                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
                 cd package-testing/binary-tarball-tests/pxc
                 wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
                 ./run.sh || true
@@ -234,7 +234,7 @@ pipeline {
                 fi
                 rm -rf package-testing
                 sudo yum install -y git wget
-                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-pxc-package-testing-job --depth 1
+                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
                 cd package-testing/binary-tarball-tests/pxc
                 wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
                 ./run.sh || true
