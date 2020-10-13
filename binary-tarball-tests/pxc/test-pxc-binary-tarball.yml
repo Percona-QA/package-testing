@@ -25,6 +25,10 @@
         name: WSREP_VERSION
         default: "26.4.3"
         description: WSREP version
+    - string:
+        name: PXC57_PKG_VERSION
+        default: "5.7.31-rel34-43.2"
+        description: PXC-5.7 package version
     - bool:
         default: false
         description: Test minimal tarball
@@ -34,7 +38,7 @@
         - git:
             url: https://github.com/Percona-QA/package-testing.git
             branches:
-            - 'PXC-3447-PXC-package-testing-job'
+            - 'master'
             wipe-workspace: false
       lightweight-checkout: true
       script-path: binary-tarball-tests/pxc/test-pxc-binary-tarball.groovy

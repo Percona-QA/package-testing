@@ -36,6 +36,10 @@ if [ -z "${WSREP_VERSION}" ]; then
   echo "WSREP_VERSION environment variable needs to be set!"
   echo "export WSREP_VERSION=\"26.4.3\""
 fi
+if [ -z "${PXC57_PKG_VERSION}" ]; then
+  echo "PXC57_PKG_VERSION environment variable needs to be set!"
+  echo "export PXC57_PKG_VERSION=\"5.7.31-rel34-43.2\""
+fi
 tar xf "${TARBALL_NAME}"
 PXC_DIR_NAME=$(echo "${TARBALL_NAME}"|sed 's/.tar.gz$//'|sed 's/.deb$//'|sed 's/.rpm$//')
 export BASE_DIR="${PWD}/${PXC_DIR_NAME}"
