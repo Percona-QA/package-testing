@@ -137,27 +137,27 @@
         - percona-patroni-doc
     when: ansible_os_family == "Debian"
 
-  - name: Install pg-stat-monitor RHEL
-    yum:
-      name: "{{ packages }}"
-      state: latest
-      update_cache: yes
-    vars:
-      packages:
-        - percona-pg-stat-monitor13
-        - percona-pg-stat-monitor13-debuginfo
-    when: ansible_os_family == "RedHat"
-
-  - name: Install pg-stat-monitor debian
-    apt:
-      name: "{{ packages }}"
-      state: latest
-      update_cache: yes
-    vars:
-      packages:
-        - percona-pg-stat-monitor13
-        - percona-pg-stat-monitor13-dbgsym
-    when: ansible_os_family == "Debian"
+#  - name: Install pg-stat-monitor RHEL
+#    yum:
+#      name: "{{ packages }}"
+#      state: latest
+#      update_cache: yes
+#    vars:
+#      packages:
+#        - percona-pg-stat-monitor13
+#        - percona-pg-stat-monitor13-debuginfo
+#    when: ansible_os_family == "RedHat"
+#
+#  - name: Install pg-stat-monitor debian
+#    apt:
+#      name: "{{ packages }}"
+#      state: latest
+#      update_cache: yes
+#    vars:
+#      packages:
+#        - percona-pg-stat-monitor13
+#        - percona-pg-stat-monitor13-dbgsym
+#    when: ansible_os_family == "Debian"
 
   - name: Add extensions to postgresql.conf for Debian
     lineinfile:
