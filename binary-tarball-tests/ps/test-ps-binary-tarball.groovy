@@ -118,7 +118,7 @@ void run_test() {
       MINIMAL="-minimal"
     fi
     if [ "${PS_MAJOR_VERSION}" = "8.0" ]; then
-      TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.12.tar.gz"
+      TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
       TARBALL_LINK="https://www.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
     elif [ "${PS_MAJOR_VERSION}" = "5.7" ]; then
       TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
