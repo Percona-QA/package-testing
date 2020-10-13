@@ -227,6 +227,24 @@ def get_pg12_versions(distros, packages, distro_type):
     return ppg_12_versions
 
 
+def get_pg13_versions(distros, packages, distro_type):
+    ppg_13_versions = {
+                       "deb_packages": fill_template_form(DEB12_PACKAGES_TEMPLATE, "13"),
+                       "deb_provides": fill_provides_template_form(DEB_PROVIDES_TEMPLATE, "13"),
+                       "rpm7_provides": fill_provides_template_form(RPM7_PROVIDES_TEMPLATE, "13"),
+                       'rpm_provides': fill_provides_template_form(RPM_PROVIDES_TEMPLATE, "13"),
+                       "rpm_packages": fill_template_form(RPM_PACKAGES_TEMPLATE, "13"),
+                       "rpm7_packages": fill_template_form(RPM7_PACKAGES_TEMPLATE, "13"),
+                       "rhel_files": fill_template_form(RHEL_FILES_TEMPLATE, "13"),
+                       "deb_files": fill_template_form(DEB_FILES_TEMPLATE, "13"),
+                       "extensions": get_extensions_ppg12(distro_type),
+                       "languages": LANGUAGES}
+
+    ppg_13_versions.update({"deb_pkg_ver": fill_package_versions(packages=packages,
+                                                                 distros=distros)})
+    return ppg_13_versions
+
+
 def get_ppg_versions(distro_type):
     """Get dictionary with versions
     :param distro_type: deb or rpm
@@ -248,5 +266,7 @@ def get_ppg_versions(distro_type):
             "ppg-12.3": get_pg12_versions(packages=["2:12-3.1", "12+215-1", '215-1'],
                                           distros=DISTROS, distro_type=distro_type),
             "ppg-12.4": get_pg12_versions(packages=["2:12-4.2", "12+216-3", '216-3'],
+                                          distros=DISTROS, distro_type=distro_type),
+            "ppg-13.0": get_pg13_versions(packages=["2:13-0.2", "13+216-3", '216-3'],
                                           distros=DISTROS, distro_type=distro_type)
             }

@@ -16,25 +16,25 @@
     vars:
       packages:
       - percona-postgresql
-      - percona-postgresql-12
+      - percona-postgresql-13
       - percona-postgresql-all
       - percona-postgresql-client
-      - percona-postgresql-client-12
+      - percona-postgresql-client-13
       - percona-postgresql-client-common
       - percona-postgresql-common
       - percona-postgresql-contrib
       - percona-postgresql-doc
-      - percona-postgresql-doc-12
-      - percona-postgresql-plperl-12
-      - percona-postgresql-plpython3-12
-      - percona-postgresql-pltcl-12
-      - percona-postgresql-server-dev-12
+      - percona-postgresql-doc-13
+      - percona-postgresql-plperl-13
+      - percona-postgresql-plpython3-13
+      - percona-postgresql-pltcl-13
+      - percona-postgresql-server-dev-13
       - percona-postgresql-server-dev-all
-      - percona-postgresql-12-dbgsym
-      - percona-postgresql-client-12-dbgsym
-      - percona-postgresql-plperl-12-dbgsym
-      - percona-postgresql-plpython3-12-dbgsym
-      - percona-postgresql-pltcl-12-dbgsym
+      - percona-postgresql-13-dbgsym
+      - percona-postgresql-client-13-dbgsym
+      - percona-postgresql-plperl-13-dbgsym
+      - percona-postgresql-plpython3-13-dbgsym
+      - percona-postgresql-pltcl-13-dbgsym
     when: ansible_os_family == "Debian"
 
   - name: install Percona Platform for PostgreSQL deb packages
@@ -44,8 +44,8 @@
       state: latest
     vars:
       packages:
-      - percona-postgresql-plpython3-12
-      - percona-postgresql-plpython3-12-dbgsym
+      - percona-postgresql-plpython3-13
+      - percona-postgresql-plpython3-13-dbgsym
     when:
       - ansible_os_family == "Debian"
 
@@ -59,19 +59,19 @@
       - percona-postgresql-client-common
       - percona-postgresql-common
       - percona-postgresql-server-dev-all
-      - percona-postgresql12
-      - percona-postgresql12-contrib
-      - percona-postgresql12-debuginfo
-      - percona-postgresql12-devel
-      - percona-postgresql12-docs
-      - percona-postgresql12-libs
-      - percona-postgresql12-llvmjit
-      - percona-postgresql12-plperl
-      - percona-postgresql12-plpython
-      - percona-postgresql12-pltcl
-      - percona-postgresql12-server
-      - percona-postgresql12-test
-      - percona-postgresql12-debuginfo
+      - percona-postgresql13
+      - percona-postgresql13-contrib
+      - percona-postgresql13-debuginfo
+      - percona-postgresql13-devel
+      - percona-postgresql13-docs
+      - percona-postgresql13-libs
+      - percona-postgresql13-llvmjit
+      - percona-postgresql13-plperl
+      - percona-postgresql13-plpython
+      - percona-postgresql13-pltcl
+      - percona-postgresql13-server
+      - percona-postgresql13-test
+      - percona-postgresql13-debuginfo
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: DNF clean RHEL
@@ -88,27 +88,27 @@
         - percona-postgresql-client-common
         - percona-postgresql-common
         - percona-postgresql-server-dev-all
-        - percona-postgresql12
-        - percona-postgresql12-contrib
-        - percona-postgresql12-debuginfo
-        - percona-postgresql12-devel
-        - percona-postgresql12-docs
-        - percona-postgresql12-libs
-        - percona-postgresql12-llvmjit
-        - percona-postgresql12-plperl
-        - percona-postgresql12-plpython
-        - percona-postgresql12-pltcl
-        - percona-postgresql12-server
-        - percona-postgresql12-test
-        - percona-postgresql12-contrib-debuginfo
-        - percona-postgresql12-debuginfo
-        - percona-postgresql12-debugsource
-        - percona-postgresql12-devel-debuginfo
-        - percona-postgresql12-libs-debuginfo
-        - percona-postgresql12-plperl-debuginfo
-        - percona-postgresql12-plpython-debuginfo
-        - percona-postgresql12-plpython3-debuginfo
-        - percona-postgresql12-pltcl-debuginfo
-        - percona-postgresql12-server-debuginfo
-        - percona-postgresql12-test-debuginfo
+        - percona-postgresql13
+        - percona-postgresql13-contrib
+        - percona-postgresql13-debuginfo
+        - percona-postgresql13-devel
+        - percona-postgresql13-docs
+        - percona-postgresql13-libs
+        - percona-postgresql13-llvmjit
+        - percona-postgresql13-plperl
+        - percona-postgresql13-plpython
+        - percona-postgresql13-pltcl
+        - percona-postgresql13-server
+        - percona-postgresql13-test
+        - percona-postgresql13-contrib-debuginfo
+        - percona-postgresql13-debuginfo
+        - percona-postgresql13-debugsource
+        - percona-postgresql13-devel-debuginfo
+        - percona-postgresql13-libs-debuginfo
+        - percona-postgresql13-plperl-debuginfo
+        - percona-postgresql13-plpython-debuginfo
+        - percona-postgresql13-plpython3-debuginfo
+        - percona-postgresql13-pltcl-debuginfo
+        - percona-postgresql13-server-debuginfo
+        - percona-postgresql13-test-debuginfo
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
