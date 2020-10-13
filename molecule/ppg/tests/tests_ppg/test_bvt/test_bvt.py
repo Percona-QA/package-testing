@@ -14,7 +14,7 @@ RPM_PACKAGES = pg_versions['rpm_packages']
 EXTENSIONS = pg_versions['extensions']
 LANGUAGES = pg_versions['languages']
 DEB_FILES = pg_versions['deb_files']
-SKIPPED_DEBIAN = ["ppg-11.8", "ppg-11.9", 'ppg-12.2', 'ppg-12.3', "ppg-12.4"]
+SKIPPED_DEBIAN = ["ppg-11.8", "ppg-11.9", 'ppg-12.2', 'ppg-12.3', "ppg-12.4", "ppg-13.0"]
 
 
 @pytest.fixture()

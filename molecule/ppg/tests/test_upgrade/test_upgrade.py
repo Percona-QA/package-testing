@@ -9,7 +9,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 pg_versions = get_settings(os.environ['MOLECULE_SCENARIO_NAME'])[os.getenv("VERSION")]
 EXTENSIONS = pg_versions['extensions']
-SKIPPED_DEBIAN = ["ppg-11.8", "ppg-11.9", 'ppg-12.2', 'ppg-12.3', "ppg-12.4"]
+SKIPPED_DEBIAN = ["ppg-11.8", "ppg-11.9", 'ppg-12.2', 'ppg-12.3', "ppg-12.4", "ppg-13.0"]
 
 
 @pytest.fixture()
