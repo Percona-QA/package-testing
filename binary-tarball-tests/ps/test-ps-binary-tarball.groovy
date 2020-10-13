@@ -125,7 +125,7 @@ void run_test() {
       TARBALL_LINK="https://www.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
     fi
     rm -rf package-testing
-    if [[ -f /usr/bin/yum ]]; then
+    if [ -f /usr/bin/yum ]; then
       sudo yum install -y git wget
     else
       sudo apt install -y git wget
