@@ -183,5 +183,28 @@ def get_settings(distro_type):
                          "deb_files": ppg_versions["ppg-12.4"]['deb_files'],
                          "extensions": ppg_versions["ppg-12.4"]['extensions'],
                          "languages": ppg_versions["ppg-12.4"]['languages']
-                         }
+                         },
+            "ppg-13.0": {"version": "13.0",
+                         "deb_pkg_ver": ppg_versions["ppg-13.0"]['deb_pkg_ver'],
+                         "deb_packages": ppg_versions["ppg-13.0"]['deb_packages'],
+                         "percona-postgresql-common": '216',
+                         "percona-postgresql-client-common": "216",
+                         "libpq_version": "130000",
+                         "pgaudit": pgaudit['ppg-13.0'],
+                         "pgbackrest": pgbackrest['ppg-13.0'],
+                         "patroni": patroni['ppg-13.0'],
+                         "pgrepack": pgrepack['ppg-13.0'],
+                         "pgrepack_package_rpm": 'percona-pg_repack12',
+                         "pgrepack_package_deb": "percona-postgresql-12-repack",
+                         "libpq": "Version of libpq: 130000",
+                         "deb_provides": ppg_versions["ppg-13.0"]['deb_provides'],
+                         "rpm7_provides": ppg_versions["ppg-13.0"]['rpm7_provides'],
+                         'rpm_provides': ppg_versions["ppg-13.0"]['rpm_provides'],
+                         "rpm_packages": ppg_versions["ppg-13.0"]['rpm_packages'],
+                         "rpm7_packages": ppg_versions["ppg-13.0"]['rpm7_packages'],
+                         "rhel_files": ppg_versions["ppg-13.0"]['rhel_files'],
+                         "deb_files": ppg_versions["ppg-13.0"]['deb_files'],
+                         "extensions": ppg_versions["ppg-13.0"]['extensions'],
+                         "languages": ppg_versions["ppg-13.0"]['languages']
             }
+    }
