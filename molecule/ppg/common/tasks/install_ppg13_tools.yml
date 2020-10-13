@@ -159,16 +159,27 @@
 #        - percona-pg-stat-monitor13-dbgsym
 #    when: ansible_os_family == "Debian"
 
+#  - name: Add extensions to postgresql.conf for Debian
+#    lineinfile:
+#      path: /etc/postgresql/13/main/postgresql.conf
+#      line: shared_preload_libraries = 'pg_stat_monitor, pgaudit'
+#    when: ansible_os_family == "Debian"
+#
+#  - name: Add extensions to postgresql.conf for RHEL
+#    lineinfile:
+#      path: /var/lib/pgsql/13/data/postgresql.conf
+#      line: shared_preload_libraries = 'pg_stat_monitor, pgaudit'
+#    when: ansible_os_family == "RedHat"
   - name: Add extensions to postgresql.conf for Debian
     lineinfile:
       path: /etc/postgresql/13/main/postgresql.conf
-      line: shared_preload_libraries = 'pg_stat_monitor, pgaudit'
+      line: shared_preload_libraries = 'pgaudit'
     when: ansible_os_family == "Debian"
 
   - name: Add extensions to postgresql.conf for RHEL
     lineinfile:
       path: /var/lib/pgsql/13/data/postgresql.conf
-      line: shared_preload_libraries = 'pg_stat_monitor, pgaudit'
+      line: shared_preload_libraries = 'pgaudit'
     when: ansible_os_family == "RedHat"
 
   - name: Restart Postgres RHEL
