@@ -6,7 +6,7 @@ driver:
 platforms:
   - name: centos7-${BUILD_NUMBER}-${JOB_NAME}
     region: eu-central-1
-    image: ami-04cf43aca3e6f3de3
+    image: ami-095e1a4d3d632d215
     vpc_subnet_id: subnet-085deaca8c1c59a4f
     instance_type: t2.micro
     ssh_user: centos

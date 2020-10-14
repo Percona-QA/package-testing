@@ -112,11 +112,15 @@ def test_rpm_package_is_installed(host, package):
 @pytest.mark.parametrize("package", RPM7_PACKAGES)
 def test_rpm7_package_is_installed(host, package):
     with host.sudo():
-        os = host.system_info.distribution
-        if os in ["debian", "ubuntu"]:
+        ds = host.system_info.distribution
+        if ds in ["debian", "ubuntu"]:
             pytest.skip("This test only for RHEL based platforms")
         if host.system_info.release == "8.0":
             pytest.skip("Only for centos7 tests")
+        print(host.run("which dpkg-query").stdout)
+        print(host.run("rpm -qf /bin/dpkg-query").stdout)
+        print(host.run("yum whatprovides /bin/dpkg-query").stdout)
+
         pkg = host.package(package)
         assert pkg.is_installed
         if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
