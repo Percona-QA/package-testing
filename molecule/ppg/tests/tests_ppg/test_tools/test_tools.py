@@ -220,22 +220,23 @@ def patroni_version(host):
 
 
 def test_pgaudit_package(host):
-    os = host.system_info.distribution
-    pkgn = ""
-    if os.lower() in ["redhat", "centos", 'rhel']:
-        pkgn = "percona-pgaudit"
-        # pkgn = "percona-pgaudit14_12"
-    elif os in ["debian", "ubuntu"]:
-        pkgn = "percona-postgresql-{}-pgaudit".format(MAJOR_VER)
-        dbgsym_pkgn = "percona-postgresql-{}-pgaudit-dbgsym".format(MAJOR_VER)
-        dbgsym_pkg = host.package(dbgsym_pkgn)
-        assert dbgsym_pkg.is_installed
-        assert pg_versions['pgaudit']['version'] in dbgsym_pkg.version
-    if pkgn == "":
-        pytest.fail("Unsupported operating system")
-    pkg = host.package(pkgn)
-    assert pkg.is_installed
-    assert pg_versions['pgaudit']['version'] in pkg.version
+    with host.sudo():
+        os = host.system_info.distribution
+        pkgn = ""
+        if os.lower() in ["redhat", "centos", 'rhel']:
+            pkgn = "percona-pgaudit"
+            # pkgn = "percona-pgaudit14_12"
+        elif os in ["debian", "ubuntu"]:
+            pkgn = "percona-postgresql-{}-pgaudit".format(MAJOR_VER)
+            dbgsym_pkgn = "percona-postgresql-{}-pgaudit-dbgsym".format(MAJOR_VER)
+            dbgsym_pkg = host.package(dbgsym_pkgn)
+            assert dbgsym_pkg.is_installed
+            assert pg_versions['pgaudit']['version'] in dbgsym_pkg.version
+        if pkgn == "":
+            pytest.fail("Unsupported operating system")
+        pkg = host.package(pkgn)
+        assert pkg.is_installed
+        assert pg_versions['pgaudit']['version'] in pkg.version
 
 
 def test_pgaudit(pgaudit):
@@ -243,19 +244,21 @@ def test_pgaudit(pgaudit):
 
 
 def test_pgrepack_package(host):
-    os = host.system_info.distribution
-    pkgn = ""
-    if os.lower() in ["redhat", "centos", 'rhel']:
-        pkgn = pg_versions['pgrepack_package_rpm']
-    elif os in ["debian", "ubuntu"]:
-        pkgn = pg_versions['pgrepack_package_deb']
-        pkg_dbgsym = host.package("{}-dbgsym".format(pg_versions['pgrepack_package_deb']))
-        assert pkg_dbgsym.is_installed
-    if pkgn == "":
-        pytest.fail("Unsupported operating system")
-    pkg = host.package(pkgn)
-    assert pkg.is_installed
-    assert pg_versions['pgrepack']['version'] in pkg.version
+    with host.sudo():
+
+        os = host.system_info.distribution
+        pkgn = ""
+        if os.lower() in ["redhat", "centos", 'rhel']:
+            pkgn = pg_versions['pgrepack_package_rpm']
+        elif os in ["debian", "ubuntu"]:
+            pkgn = pg_versions['pgrepack_package_deb']
+            pkg_dbgsym = host.package("{}-dbgsym".format(pg_versions['pgrepack_package_deb']))
+            assert pkg_dbgsym.is_installed
+        if pkgn == "":
+            pytest.fail("Unsupported operating system")
+        pkg = host.package(pkgn)
+        assert pkg.is_installed
+        assert pg_versions['pgrepack']['version'] in pkg.version
 
 
 def test_pgrepack(host):
@@ -295,25 +298,26 @@ def test_pg_repack_dry_run(pg_repack_dry_run):
 
 
 def test_pgbackrest_package(host):
-    os = host.system_info.distribution
-    pkgn = ""
-    if os.lower() in ["redhat", "centos", 'rhel']:
-        pkgn = "percona-pgbackrest"
-    elif os in ["debian", "ubuntu"]:
-        pkgn = "percona-pgbackrest"
-        doc_pkgn = "percona-pgbackrest-doc"
-        docs_pkg = host.package(doc_pkgn)
-        assert docs_pkg.is_installed
-        assert pg_versions['pgbackrest']['version'] in docs_pkg.version
-        dbg_pkg = "percona-pgbackrest-dbgsym"
-        dbg = host.package(dbg_pkg)
-        assert dbg.is_installed
-        assert pg_versions['pgbackrest']['version'] in dbg.version
-    if pkgn == "":
-        pytest.fail("Unsupported operating system")
-    pkg = host.package(pkgn)
-    assert pkg.is_installed
-    assert pg_versions['pgbackrest']['version'] in pkg.version
+    with host.sudo():
+        os = host.system_info.distribution
+        pkgn = ""
+        if os.lower() in ["redhat", "centos", 'rhel']:
+            pkgn = "percona-pgbackrest"
+        elif os in ["debian", "ubuntu"]:
+            pkgn = "percona-pgbackrest"
+            doc_pkgn = "percona-pgbackrest-doc"
+            docs_pkg = host.package(doc_pkgn)
+            assert docs_pkg.is_installed
+            assert pg_versions['pgbackrest']['version'] in docs_pkg.version
+            dbg_pkg = "percona-pgbackrest-dbgsym"
+            dbg = host.package(dbg_pkg)
+            assert dbg.is_installed
+            assert pg_versions['pgbackrest']['version'] in dbg.version
+        if pkgn == "":
+            pytest.fail("Unsupported operating system")
+        pkg = host.package(pkgn)
+        assert pkg.is_installed
+        assert pg_versions['pgbackrest']['version'] in pkg.version
 
 
 def test_pgbackrest_version(pgbackrest_version):
@@ -349,17 +353,19 @@ def test_pgbackrest_restore(host):
 
 
 def test_patroni_package(host):
-    os = host.system_info.distribution
-    pkgn = ""
-    if os.lower() in ["ubuntu", "redhat", "centos", 'rhel']:
-        pkgn = "percona-patroni"
-    elif os == "debian":
-        pkgn = "percona-patroni"
-    if pkgn == "":
-        pytest.fail("Unsupported operating system")
-    pkg = host.package(pkgn)
-    assert pkg.is_installed
-    assert pg_versions['patroni']['version'] in pkg.version
+    with host.sudo():
+
+        os = host.system_info.distribution
+        pkgn = ""
+        if os.lower() in ["ubuntu", "redhat", "centos", 'rhel']:
+            pkgn = "percona-patroni"
+        elif os == "debian":
+            pkgn = "percona-patroni"
+        if pkgn == "":
+            pytest.fail("Unsupported operating system")
+        pkg = host.package(pkgn)
+        assert pkg.is_installed
+        assert pg_versions['patroni']['version'] in pkg.version
 
 
 def test_patroni_version(patroni_version):

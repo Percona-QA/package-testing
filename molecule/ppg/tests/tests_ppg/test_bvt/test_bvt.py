@@ -95,32 +95,34 @@ def test_deb_package_is_installed(host, package):
 
 @pytest.mark.parametrize("package", RPM_PACKAGES)
 def test_rpm_package_is_installed(host, package):
-    os = host.system_info.distribution
-    if os in ["debian", "ubuntu"]:
-        pytest.skip("This test only for RHEL based platforms")
-    if host.system_info.release == "7":
-        pytest.skip("Only for RHEL8 tests")
-    pkg = host.package(package)
-    assert pkg.is_installed
-    if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
-        assert pkg.version == pg_versions['version']
-    else:
-        assert pkg.version == pg_versions[package]
+    with host.sudo():
+        os = host.system_info.distribution
+        if os in ["debian", "ubuntu"]:
+            pytest.skip("This test only for RHEL based platforms")
+        if host.system_info.release == "7":
+            pytest.skip("Only for RHEL8 tests")
+        pkg = host.package(package)
+        assert pkg.is_installed
+        if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
+            assert pkg.version == pg_versions['version']
+        else:
+            assert pkg.version == pg_versions[package]
 
 
 @pytest.mark.parametrize("package", RPM7_PACKAGES)
 def test_rpm7_package_is_installed(host, package):
-    os = host.system_info.distribution
-    if os in ["debian", "ubuntu"]:
-        pytest.skip("This test only for RHEL based platforms")
-    if host.system_info.release == "8.0":
-        pytest.skip("Only for centos7 tests")
-    pkg = host.package(package)
-    assert pkg.is_installed
-    if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
-        assert pkg.version == pg_versions['version']
-    else:
-        assert pkg.version == pg_versions[package]
+    with host.sudo():
+        os = host.system_info.distribution
+        if os in ["debian", "ubuntu"]:
+            pytest.skip("This test only for RHEL based platforms")
+        if host.system_info.release == "8.0":
+            pytest.skip("Only for centos7 tests")
+        pkg = host.package(package)
+        assert pkg.is_installed
+        if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
+            assert pkg.version == pg_versions['version']
+        else:
+            assert pkg.version == pg_versions[package]
 
 
 def test_postgresql_client_version(host):
