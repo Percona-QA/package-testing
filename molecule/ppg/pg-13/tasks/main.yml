@@ -39,3 +39,9 @@
   copy:
     src: ../../common/files/lib_version.c
     dest: /tmp/libpq_command_temp_dir
+
+- name: Delete dpkg-query for RHEL
+  yum:
+    name: dpkg
+    state: absent
+  when: ansible_os_family == "RedHat"
