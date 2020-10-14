@@ -101,6 +101,56 @@ RPM12_EXTENSIONS = ['hstore',
                     'pg_stat_monitor'
                     ]
 
+RPM13_EXTENSIONS = ['hstore',
+                    'adminpack',
+                    'amcheck',
+                    'cube',
+                    'insert_username',
+                    'autoinc',
+                    'bloom',
+                    'earthdistance',
+                    'intagg',
+                    'btree_gin',
+                    'file_fdw',
+                    'fuzzystrmatch',
+                    'btree_gist',
+                    'intarray',
+                    'citext',
+                    'dblink',
+                    'dict_xsyn',
+                    'lo',
+                    'dict_int',
+                    'isn',
+                    'ltree',
+                    'moddatetime',
+                    'pgrowlocks',
+                    'pageinspect',
+                    'pg_trgm',
+                    'tcn',
+                    'pgstattuple',
+                    'pg_buffercache',
+                    'xml2',
+                    'postgres_fdw',
+                    'pg_freespacemap',
+                    'pg_prewarm',
+                    'pg_visibility',
+                    'refint',
+                    'pgcrypto',
+                    'pg_stat_statements',
+                    'seg',
+                    'sslinfo',
+                    'tablefunc',
+                    'tsm_system_rows',
+                    'tsm_system_time',
+                    'plperlu',
+                    'unaccent',
+                    'uuid-ossp',
+                    'pltcl',
+                    'pltclu',
+                    'plperl',
+                    'pg_stat_monitor'
+                    ]
+
 
 DEB11_EXTENSIONS = ['pageinspect',
                     'plpython3u',
@@ -221,3 +271,9 @@ def get_extensions_ppg12(distro_type):
     if ("debian" or "ubuntu" or "ubuntu-bionic" or "ubuntu-focal") in distro_type:
         return DEB12_EXTENSIONS
     return RPM12_EXTENSIONS
+
+
+def get_extensions_ppg13(distro_type):
+    if ("debian" or "ubuntu" or "ubuntu-bionic" or "ubuntu-focal") in distro_type:
+        return DEB12_EXTENSIONS
+    return RPM13_EXTENSIONS
