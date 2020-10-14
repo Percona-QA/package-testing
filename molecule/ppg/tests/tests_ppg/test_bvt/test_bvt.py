@@ -138,7 +138,7 @@ def test_postgresql_version(host):
     if os.lower() in ["redhat", "centos", 'rhel']:
         pkg = "percona-postgresql{}".format(MAJOR_VER)
     pkg = host.package(pkg)
-    assert MAJOR_VER in pkg.version
+    assert MAJOR_VER in pkg.version, pkg.version
 
 
 def test_postgresql_is_running_and_enabled(host):
@@ -213,6 +213,9 @@ def test_enable_extension(host, extension):
     if ds.lower() in ["redhat", "centos", 'rhel']:
         if "python3" in extension:
             pytest.skip("Skipping python3 extensions for Centos or RHEL")
+        if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
+                         'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u'] and "13" in MAJOR_VER:
+            pytest.skip("Skipping extensions for Centos or RHEL")
     if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") in SKIPPED_DEBIAN:
         if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                          'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
