@@ -38,8 +38,11 @@
     - name: Delete dpkg-query for RHEL
       yum:
         name: dpkg
-        update_cache: yes
         state: absent
+      when: ansible_os_family == "RedHat"
+
+    - name: Delete dpkg query manually
+      command: rpm -e --nodeps dpkg
       when: ansible_os_family == "RedHat"
 
     - name: install needed packages for running tests with apt
@@ -93,43 +96,3 @@
         - unzip
         - wget
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
-
-    - name: get list of installed packages on Debian/Ubuntu
-      shell: dpkg -l|grep -iE "percona|sysbench|mysql|mongo|proxysql|maria" || true
-      register: installed_packages
-      when: ansible_os_family == "Debian"
-
-    - name: list installed packages on Debian/Ubuntu
-      debug:
-        var: installed_packages
-      when: ansible_os_family == "Debian"
-
-    - name: get list of installed packages on Centos
-      shell: yum list installed|grep -iE "percona|sysbench|mysql|mongo|proxysql|maria" || true
-      register: installed_packages
-      when: ansible_os_family == "RedHat"
-
-    - name: list installed packages on Centos
-      debug:
-        var: installed_packages
-      when: ansible_os_family == "RedHat"
-
-    - name: get selinux status
-      command: sestatus
-      register: selinux_status
-      when: ansible_os_family == "RedHat"
-
-    - name: list selinux status
-      debug:
-        var: selinux_status
-      when: ansible_os_family == "RedHat"
-
-    - name: get list of enabled dnf modules on centos 8
-      command: dnf module list --enabled
-      register: enabled_dnf_modules
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
-    - name: list enabled dnf modules on centos 8
-      debug:
-        var: enabled_dnf_modules
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
