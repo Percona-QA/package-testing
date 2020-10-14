@@ -299,7 +299,7 @@ def test_language(host, language):
             pytest.skip("Skipping python2 extensions for DEB based in 12.* and all centos 13")
         lang = host.run("psql -c 'CREATE LANGUAGE {};'".format(language))
         assert lang.rc == 0, lang.stderr
-        assert lang.stdout.strip("\n") == "CREATE LANGUAGE", lang.stdout
+        assert lang.stdout.strip("\n") in ["CREATE LANGUAGE", "CREATE EXTENSION"], lang.stdout
         drop_lang = host.run("psql -c 'DROP LANGUAGE {};'".format(language))
         assert drop_lang.rc == 0, drop_lang.stderr
         assert drop_lang.stdout.strip("\n") == "DROP LANGUAGE", lang.stdout
