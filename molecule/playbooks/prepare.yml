@@ -41,9 +41,6 @@
         state: absent
       when: ansible_os_family == "RedHat"
 
-    - name: Delete dpkg query manually
-      command: rpm -e --nodeps dpkg
-      when: ansible_os_family == "RedHat"
 
     - name: install needed packages for running tests with apt
       apt:
