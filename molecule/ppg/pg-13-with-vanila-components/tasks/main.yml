@@ -11,14 +11,14 @@
   vars:
     packages:
     - percona-postgresql
-    - percona-postgresql-12
+    - percona-postgresql-13
     - percona-postgresql-all
     - percona-postgresql-client
-    - percona-postgresql-client-12
+    - percona-postgresql-client-13
     - percona-postgresql-client-common
     - percona-postgresql-common
     - percona-postgresql-contrib
-    - percona-postgresql-server-dev-12
+    - percona-postgresql-server-dev-13
     - percona-postgresql-server-dev-all
   when: ansible_os_family == "Debian"
 
@@ -39,30 +39,30 @@
       - percona-postgresql-client-common
       - percona-postgresql-common
       - percona-postgresql-server-dev-all
-      - percona-postgresql12
-      - percona-postgresql12-contrib
-      - percona-postgresql12-devel
-      - percona-postgresql12-libs
-      - percona-postgresql12-llvmjit
-      - percona-postgresql12-server
+      - percona-postgresql13
+      - percona-postgresql13-contrib
+      - percona-postgresql13-devel
+      - percona-postgresql13-libs
+      - percona-postgresql13-llvmjit
+      - percona-postgresql13-server
   when: ansible_os_family == "RedHat"
 
 - name: Initialize Postgres RHEL
-  command: /usr/pgsql-12/bin/postgresql-12-setup initdb
+  command: /usr/pgsql-13/bin/postgresql-13-setup initdb
   environment:
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   when: ansible_os_family == "RedHat"
 
 - name: Start Postgres RHEL
   service:
-    name: postgresql-12
+    name: postgresql-13
     state: started
     enabled: yes
   when: ansible_os_family == "RedHat"
 
 - name: Restart Postgres RHEL
   service:
-    name: postgresql-12
+    name: postgresql-13
     state: restarted
   when: ansible_os_family == "RedHat"
 
