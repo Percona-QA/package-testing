@@ -4,4 +4,4 @@
   become: true
   become_method: sudo
   roles:
-    - role: pg-12-with-vanila-components
+    - role: pg-13-with-vanila-components
