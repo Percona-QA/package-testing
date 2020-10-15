@@ -6,4 +6,4 @@
   vars:
     pg_version: "{{ lookup('env', 'VERSION') }}"
   roles:
-    - role: pg-12-major-upgrade
+    - role: pg-13-major-upgrade

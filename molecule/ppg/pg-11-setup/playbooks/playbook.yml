@@ -4,4 +4,4 @@
   become: true
   become_method: sudo
   roles:
-    - role: pg-11
+    - role: pg-11-setup
