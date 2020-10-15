@@ -117,10 +117,6 @@ def test_rpm7_package_is_installed(host, package):
             pytest.skip("This test only for RHEL based platforms")
         if host.system_info.release == "8.0":
             pytest.skip("Only for centos7 tests")
-        print(host.run("which dpkg-query").stdout)
-        print(host.run("rpm -qf /bin/dpkg-query").stdout)
-        print(host.run("yum whatprovides /bin/dpkg-query").stdout)
-
         pkg = host.package(package)
         assert pkg.is_installed
         if package not in ["percona-postgresql-client-common", "percona-postgresql-common"]:
@@ -206,6 +202,9 @@ def test_extenstions_list(extension_list, host):
         if ds.lower() in ['centos', 'redhat', 'rhel']:
             if "python3" in extension:
                 pytest.skip("Skipping python3 extensions for Centos or RHEL")
+            if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
+                             'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u'] and "13" in MAJOR_VER:
+                pytest.skip("Skipping extensions for Centos or RHEL")
         if ds.lower() in ['debian', 'ubuntu'] and os.getenv("VERSION") in SKIPPED_DEBIAN:
             if extension in ['plpythonu', "plpython2u", 'jsonb_plpython2u', 'ltree_plpython2u', 'jsonb_plpythonu',
                              'ltree_plpythonu', 'hstore_plpythonu', 'hstore_plpython2u']:
