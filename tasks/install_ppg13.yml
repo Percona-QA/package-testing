@@ -67,6 +67,7 @@
       - percona-postgresql13-libs
       - percona-postgresql13-llvmjit
       - percona-postgresql13-plperl
+      - percona-postgresql13-plpython3
       - percona-postgresql13-pltcl
       - percona-postgresql13-server
       - percona-postgresql13-test
@@ -94,6 +95,7 @@
         - percona-postgresql13-docs
         - percona-postgresql13-libs
         - percona-postgresql13-llvmjit
+        - percona-postgresql13-plpython3
         - percona-postgresql13-plperl
         - percona-postgresql13-pltcl
         - percona-postgresql13-server
