@@ -126,7 +126,6 @@
       - percona-postgresql13-devel-debuginfo
       - percona-postgresql13-libs-debuginfo
       - percona-postgresql13-plperl-debuginfo
-      - percona-postgresql13-plpython-debuginfo
       - percona-postgresql13-plpython3-debuginfo
       - percona-postgresql13-pltcl-debuginfo
       - percona-postgresql13-server-debuginfo
