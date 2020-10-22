@@ -27,7 +27,7 @@ pipeline {
                 fi
                 if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
                   TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64/lastSuccessfulBuild/artifact/test/tarball/"
+                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/test/tarball/"
                 elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
                   TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
                   JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binary-tarball/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/tarball/"
@@ -60,7 +60,7 @@ pipeline {
                 fi
                 if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
                   TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64/lastSuccessfulBuild/artifact/test/tarball/"
+                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/test/tarball/"
                 elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
                   TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
                   JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binary-tarball/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/tarball/"
@@ -93,7 +93,7 @@ pipeline {
                 fi
                 if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
                   TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64/lastSuccessfulBuild/artifact/test/tarball/"
+                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/test/tarball/"
                 elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
                   TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
                   JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binary-tarball/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/tarball/"
@@ -126,7 +126,7 @@ pipeline {
                 fi
                 if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
                   TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64/lastSuccessfulBuild/artifact/test/tarball/"
+                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/test/tarball/"
                 elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
                   TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
                   JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binary-tarball/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/tarball/"
@@ -159,7 +159,7 @@ pipeline {
                 fi
                 if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
                   TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64/lastSuccessfulBuild/artifact/test/tarball/"
+                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/test/tarball/"
                 elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
                   TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
                   JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binary-tarball/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/tarball/"
@@ -192,7 +192,7 @@ pipeline {
                 fi
                 if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
                   TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64/lastSuccessfulBuild/artifact/test/tarball/"
+                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/test/tarball/"
                 elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
                   TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
                   JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binary-tarball/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/tarball/"
@@ -225,7 +225,7 @@ pipeline {
                 fi
                 if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
                   TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64/lastSuccessfulBuild/artifact/test/tarball/"
+                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/test/tarball/"
                 elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
                   TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
                   JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binary-tarball/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/tarball/"
