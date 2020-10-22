@@ -144,7 +144,6 @@
   - rm -f master.zip
   - bats-master/install.sh /usr/local
   - rm -rf bats-master
-  when: ansible_os_family == "RedHat"
 
 - name: set root password on centos
   command: /package-testing/setpass_57.sh
