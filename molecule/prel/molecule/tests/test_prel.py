@@ -276,3 +276,21 @@ def test_setup_product(host, product):
         assert backup_repo_file.user == "root"
         assert backup_repo_file.group == "root"
     remove_percona_repository(host, "percona*")
+
+
+def test_enably_only(host):
+    """Check that all other repos will be disabled if execute enable-only command
+    Scenario:
+    1. Enable multiple different repos
+    2. Enable-only for one repo
+    3. Check that previously enabled repos was disabled
+    """
+    dist_name = host.system_info.distribution
+    execute_percona_release_command(host, command="enable", repository="psmdb-44")
+    execute_percona_release_command(host, command="enable-only", repository="psmdb-42")
+    assert host.file("/etc/apt/sources.list.d/percona-{}.list.bak".format("psmdb-44"))
+    assert host.file("/etc/apt/sources.list.d/percona-{}.list".format("psmdb-42"))
+    if dist_name.lower() in ["redhat", "centos", 'rhel']:
+        assert host.file("/etc/yum.repos.d/percona-{}.repo.bak".format("psmdb-44"))
+        assert host.file("/etc/yum.repos.d/percona-{}.repo".format("psmdb-42"))
+    remove_percona_repository(host, "percona*")
