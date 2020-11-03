@@ -30,7 +30,6 @@ verifier:
     s: true
     junitxml: report.xml
 scenario:
-  name: ubuntu-bionic
   destroy_sequence:
     - destroy
   clenup_sequence:
