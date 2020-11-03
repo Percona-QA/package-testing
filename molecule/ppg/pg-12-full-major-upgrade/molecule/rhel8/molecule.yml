@@ -31,7 +31,6 @@ verifier:
     s: true
     junitxml: report.xml
 scenario:
-  name: rhel8
   destroy_sequence:
     - destroy
   clenup_sequence:
