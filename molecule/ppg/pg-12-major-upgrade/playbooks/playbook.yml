@@ -1,9 +1,0 @@
----
-- name: Converge
-  hosts: all
-  become: true
-  become_method: sudo
-  vars:
-    pg_version: "{{ lookup('env', 'VERSION') }}"
-  roles:
-    - role: pg-12-major-upgrade
