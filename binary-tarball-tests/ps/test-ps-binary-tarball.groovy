@@ -112,6 +112,7 @@ pipeline {
 
 void run_test() {
   sh '''
+    echo BUILD_TYPE_MINIMAL
     PS_MAJOR_VERSION="$(echo ${PS_VERSION}|cut -d'.' -f1,2)"
     MINIMAL=""
     if [ BUILD_TYPE_MINIMAL == true]; then
