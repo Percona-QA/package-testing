@@ -128,7 +128,7 @@ void run_test() {
     if [ -f /usr/bin/yum ]; then
       sudo yum install -y git wget
     else
-      sudo apt install -y git wget
+      sudo apt install -y git wget lsb-release
     fi
     git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
     cd package-testing/binary-tarball-tests/ps
