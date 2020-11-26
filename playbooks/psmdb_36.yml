@@ -77,8 +77,8 @@
   - name: test perconadecrypt with keyfile
     command: /package-testing/scripts/psmdb_encryption/perconadecrypt-test.sh 3.6 keyfile
 
-  - name: test perconadecrypt with vault
-    command: /package-testing/scripts/psmdb_encryption/perconadecrypt-test.sh 3.6 vault
+#  - name: test perconadecrypt with vault
+#    command: /package-testing/scripts/psmdb_encryption/perconadecrypt-test.sh 3.6 vault
 
   - name: test SE change, import data, restart service
     command: /package-testing/scripts/psmdb_test.sh 3.6
@@ -86,8 +86,8 @@
   - name: test encryption with keyfile
     command: /package-testing/scripts/psmdb_encryption/psmdb-encryption-test.sh keyfile
 
-  - name: test encryption with vault
-    command: /package-testing/scripts/psmdb_encryption/psmdb-encryption-test.sh vault
+#  - name: test encryption with vault
+#    command: /package-testing/scripts/psmdb_encryption/psmdb-encryption-test.sh vault
 
   - name: set pass and enable auth
     command: /package-testing/scripts/psmdb_set_auth.sh
