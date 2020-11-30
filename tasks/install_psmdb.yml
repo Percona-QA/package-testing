@@ -18,7 +18,6 @@
     vars:
       packages:
       - percona-server-mongodb
-      - percona-server-mongodb-debuginfo
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int < 8
 
   - name: install Percona Server for MongoDB 4.x new rpm packages on Centos8 and greater
