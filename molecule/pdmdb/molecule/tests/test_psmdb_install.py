@@ -14,7 +14,7 @@ RPM_NEW_CENTOS_PACKAGES = ['percona-server-mongodb', 'percona-server-mongodb-mon
                            'percona-server-mongodb-server-debuginfo', 'percona-server-mongodb-shell-debuginfo',
                            'percona-server-mongodb-tools-debuginfo', 'percona-server-mongodb-debugsource']
 
-BINARIES = ['mongo', 'mongod', 'mongos', 'bsondump', 'mongoexport',
+BINARIES = ['mongo', 'mongod', 'mongos', 'bsondump', 'mongoexport', 'mongobridge',
             'mongofiles', 'mongoimport', 'mongorestore', 'mongotop', 'mongostat']
 
 PSMDB_VER = os.environ.get("VERSION").lstrip("pdmdb-")
