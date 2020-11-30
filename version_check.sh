@@ -229,13 +229,18 @@ elif [ ${product} = "pbm" ]; then
   fi
 
 elif [ ${product} = "psmdb34" -o ${product} = "psmdb36" -o ${product} = "psmdb40" -o ${product} = "psmdb42" -o ${product} = "psmdb44" ]; then
-  for binary in mongo mongod mongos bsondump mongoexport mongofiles mongoimport mongorestore mongotop mongostat mongobridge perconadecrypt; do
-    if [ $(command -v "${binary}") ]; then
-       binary_version_check=$(${binary} --version|head -n1|grep -c "${version}")
-       if [ ${binary_version_check} -eq 0  ]; then
-          echo "${product} version is not good for binary ${binary}!"
-          exit 1
-       fi
+  ##PSMDB-544
+  declare -A new_bin_version=(["3.6"]="21" ["4.0"]="21" ["4.2"]="11" ["4.4"]="2")
+  ver="${version%-*}"; major_ver="${ver%.*}"; minor_ver="${ver##*.}"
+  binary=(mongo mongod mongos bsondump mongoexport mongofiles mongoimport mongorestore mongotop mongostat)
+  if (( $minor_ver >= "${new_bin_version[$major_ver]}" )); then
+     binary+=(mongobridge perconadecrypt)
+  fi
+  for binary in ${binary[@]}; do
+    binary_version_check=$(${binary} --version|head -n1|grep -c "${version}")
+    if [ ${binary_version_check} -eq 0  ]; then
+       echo "${product} version is not good for binary ${binary}!"
+       exit 1
     fi
   done
 
