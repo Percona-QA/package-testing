@@ -228,8 +228,8 @@ elif [ ${product} = "pbm" ]; then
     echo "${product} revision is correct and ${revision}" >> "${log}"
   fi
 
-elif [ ${product} = "psmdb34" -o ${product} = "psmdb36" -o ${product} = "psmdb40" -o ${product} = "psmdb42" ]; then
-  for binary in mongo mongod mongos bsondump mongoexport mongofiles mongoimport mongorestore mongotop mongostat; do
+elif [ ${product} = "psmdb34" -o ${product} = "psmdb36" -o ${product} = "psmdb40" -o ${product} = "psmdb42" -o ${product} = "psmdb44" ]; then
+  for binary in mongo mongod mongos bsondump mongoexport mongofiles mongoimport mongorestore mongotop mongostat mongobridge perconadecrypt; do
     binary_version_check=$(${binary} --version|head -n1|grep -c "${version}")
     if [ ${binary_version_check} -eq 0  ]; then
       echo "${product} version is not good for binary ${binary}!"
