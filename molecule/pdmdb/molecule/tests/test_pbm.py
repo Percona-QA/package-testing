@@ -11,6 +11,8 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
+PBM_VERSION = '1.3.4'
+
 storage_configs = ['/etc/pbm-agent-storage.conf', '/etc/pbm-agent-storage-gcp.conf',
                    '/etc/pbm-agent-storage-local.conf']
 
@@ -85,7 +87,7 @@ def test_package(host):
     """
     package = host.package("percona-backup-mongodb")
     assert package.is_installed
-    assert "1.3.2" in package.version, package.version
+    assert PBM_VERSION in package.version, package.version
 
 
 def test_service(host):
@@ -161,7 +163,7 @@ def test_pbm_version(host):
     assert result.rc == 0, result.stdout
     lines = result.stdout.split("\n")
     parsed_config = {line.split(":")[0]: line.split(":")[1].strip() for line in lines[0:-1]}
-    assert parsed_config['Version'] == '1.3.2', parsed_config
+    assert parsed_config['Version'] == PBM_VERSION, parsed_config
     assert parsed_config['Platform'], parsed_config
     assert parsed_config['GitCommit'], parsed_config
     assert parsed_config['GitBranch'], parsed_config
