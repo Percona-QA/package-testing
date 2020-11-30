@@ -64,4 +64,4 @@ def test_rpm8_packages(host, package):
 def test_binary_version(host, binary):
     cmd = '{} --version|head -n1|grep -c "{}"'.format(binary, PSMDB_VER)
     result = host.run(cmd)
-    assert result.rc == 0, result.stdout
+    assert result.rc == 0, host.run(f"{binary} --version | head -n1").stdout
