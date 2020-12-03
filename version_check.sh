@@ -230,7 +230,7 @@ elif [ ${product} = "pbm" ]; then
 
 elif [ ${product} = "psmdb34" -o ${product} = "psmdb36" -o ${product} = "psmdb40" -o ${product} = "psmdb42" -o ${product} = "psmdb44" ]; then
   ##PSMDB-544
-  declare -A new_bin_version=(["3.6"]="21" ["4.0"]="21" ["4.2"]="11" ["4.4"]="2")
+  declare -A new_bin_version=(["3.6"]="21" ["4.0"]="22" ["4.2"]="11" ["4.4"]="2")
   ver="${version%-*}"; major_ver="${ver%.*}"; minor_ver="${ver##*.}"
   binary=(mongo mongod mongos bsondump mongoexport mongofiles mongoimport mongorestore mongotop mongostat)
   if (( $minor_ver >= "${new_bin_version[$major_ver]}" )); then
