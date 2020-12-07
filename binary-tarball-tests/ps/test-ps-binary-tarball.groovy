@@ -94,17 +94,17 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Centos7
-        stage('Centos6') {
-          agent {
-            label "min-centos-6-x64"
-          }
-          steps {
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
-            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-          } //End steps
-        } //End stage Centos6
+//      stage('Centos6') {
+//        agent {
+//          label "min-centos-6-x64"
+//        }
+//        steps {
+//          withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+//            run_test()
+//          }
+//          junit 'package-testing/binary-tarball-tests/ps/report.xml'
+//        } //End steps
+//      } //End stage Centos6
       } //End parallel
     } //End stage Run tests
   } //End stages
