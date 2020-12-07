@@ -5,9 +5,9 @@ export PS_NODE1_IP="192.168.33.50"
 export PS_NODE2_IP="192.168.33.51"
 export PS_NODE3_IP="192.168.33.52"
 export MYSQL_ROUTER_IP="192.168.33.53"
-export UPSTREAM_VERSION="8.0.21"
-export PS_VERSION="12"
-export PS_REVISION="e3f3855"
+export UPSTREAM_VERSION="8.0.22"
+export PS_VERSION="13"
+export PS_REVISION="e3e71c5"
 
 if [ "$1" == "setup" ]; then
   molecule create
