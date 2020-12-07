@@ -1,8 +1,8 @@
 pipeline {
   agent any
   parameters {
-    string(name: 'PS_VERSION', defaultValue: '8.0.21-12', description: 'PS full version')
-    string(name: 'PS_REVISION', defaultValue: '7ddfdfe', description: 'PS revision')
+    string(name: 'PS_VERSION', defaultValue: '8.0.22-13', description: 'PS full version')
+    string(name: 'PS_REVISION', defaultValue: 'e3e71c5', description: 'PS revision')
     booleanParam( 
       defaultValue: false,
       name: 'BUILD_TYPE_MINIMAL'
