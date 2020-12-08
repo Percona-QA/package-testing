@@ -1,5 +1,5 @@
 pipeline {
-  agent 'docker'
+  agent {docker}
   parameters {
     string(name: 'PS_VERSION', defaultValue: '8.0.22-13', description: 'PS full version')
     string(name: 'PS_REVISION', defaultValue: 'e3e71c5', description: 'PS revision')
