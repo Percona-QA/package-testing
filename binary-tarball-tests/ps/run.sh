@@ -26,7 +26,7 @@ else
   fi
   sudo apt install -y libaio1 libnuma1
 fi
-pip3 install --user testinfra pytest
+pip3 install --user pytest-testinfra pytest
 
 TARBALL_NAME=$(basename "$(find . -maxdepth 1 -name '*.tar.gz'|head -n1)")
 if [ -z "${TARBALL_NAME}" ]; then
