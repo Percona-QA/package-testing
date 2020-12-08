@@ -44,6 +44,9 @@ pipeline {
             label "min-xenial-x64"
           }
           steps {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+              }
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
               run_test()
             }
@@ -55,6 +58,9 @@ pipeline {
             label "min-buster-x64"
           }
           steps {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+              }
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
               run_test()
             }
@@ -66,6 +72,9 @@ pipeline {
             label "min-stretch-x64"
           }
           steps {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+              }
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
               run_test()
             }
@@ -77,6 +86,9 @@ pipeline {
             label "min-centos-8-x64"
           }
           steps {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+              }
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
               run_test()
             }
@@ -88,23 +100,15 @@ pipeline {
             label "min-centos-7-x64"
           }
           steps {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+              }
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
               run_test()
             }
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Centos7
-//      stage('Centos6') {
-//        agent {
-//          label "min-centos-6-x64"
-//        }
-//        steps {
-//          withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-//            run_test()
-//          }
-//          junit 'package-testing/binary-tarball-tests/ps/report.xml'
-//        } //End steps
-//      } //End stage Centos6
       } //End parallel
     } //End stage Run tests
   } //End stages
