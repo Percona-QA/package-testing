@@ -39,8 +39,8 @@ ps80_files = (
   'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
 ps80_symlinks = (
-  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.1.21'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.1.21'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.1.22'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.1.22'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 
 # 5.7
