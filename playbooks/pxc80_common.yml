@@ -91,8 +91,8 @@
   - name: check that PXC package versions are correct
     command: /package-testing/package_check.sh pxc80
 
-  - name: install plugins
-    command: /package-testing/plugins_test_80.sh pxc
+# - name: install plugins
+#   command: /package-testing/plugins_test_80.sh pxc
 
   - name: run bats tests for mysql init scripts
     command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
