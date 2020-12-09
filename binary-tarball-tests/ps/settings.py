@@ -27,7 +27,9 @@ ps80_functions = (
   ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
   ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_exclusive', 'version_token.so', 'INT'),
   ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'),
-  ('service_release_locks', 'locking_service.so', 'INT')
+  ('service_release_locks', 'locking_service.so', 'INT'), ('get_binlog_by_gtid', 'binlog_utils_udf.so', 'STRING'), ('get_last_gtid_from_binlog', 'binlog_utils_udf.so', 'STRING'),
+  ('get_gtid_set_by_binlog', 'binlog_utils_udf.so', 'STRING'), ('get_binlog_by_gtid_set', 'binlog_utils_udf.so', 'STRING'), ('get_first_record_timestamp_by_binlog', 'binlog_utils_udf.so', 'STRING'),
+  ('get_last_record_timestamp_by_binlog', 'binlog_utils_udf.so', 'STRING')
 )
 ps80_files = (
   'lib/libcoredumper.a', 'lib/libHotBackup.so', 
