@@ -31,7 +31,7 @@ ps80_functions = (
 )
 ps80_files = (
   'lib/libcoredumper.a', 'lib/libHotBackup.so', 
-  'lib/libmysqlrouter_http.so.1', 'lib/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
+  'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
   'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.1.17' ,'lib/mysql/libjemalloc.so.1',
   'lib/mysql/plugin/ha_tokudb.so', 'lib/mysql/plugin/ha_rocksdb.so', 'lib/mysql/plugin/audit_log.so',
   'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so', 'lib/mysql/plugin/data_masking.so',
