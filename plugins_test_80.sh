@@ -53,13 +53,13 @@ for component in component_validate_password component_log_sink_syseventlog comp
 done
 
 mysql -e "SHOW PLUGINS;"
-mysql -e "CREATE DATABASE world;"
+mysql -e "CREATE DATABASE IF NOT EXISTS world;"
 sed -i '18,21 s/^/-- /' /package-testing/world.sql
 cat /package-testing/world.sql | mysql -D world
 if [ ! -z "$1" ]; then
   if [ "$1" = "ps" ]; then
-    mysql -e "CREATE DATABASE world2;"
-    mysql -e "CREATE DATABASE world3;"
+    mysql -e "CREATE DATABASE IF NOT EXISTS world2;"
+    mysql -e "CREATE DATABASE IF NOT EXISTS world3;"
     cat /package-testing/world.sql | mysql -D world2
     cat /package-testing/world.sql | mysql -D world3
     mysql < /package-testing/tokudb_compression.sql
