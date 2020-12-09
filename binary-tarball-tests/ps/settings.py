@@ -33,10 +33,10 @@ ps80_files = (
   'lib/libcoredumper.a', 'lib/libHotBackup.so', 
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
   'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.1.22' ,'lib/mysql/libjemalloc.so.1',
-  'lib/mysql/plugin/ha_tokudb.so', 'lib/mysql/plugin/ha_rocksdb.so', 'lib/mysql/plugin/audit_log.so',
-  'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so', 'lib/mysql/plugin/data_masking.so',
-  'lib/mysql/plugin/data_masking.ini', 'lib/mysql/plugin/tokudb_backup.so','lib/mysql/plugin/keyring_file.so',
-  'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
+  'lib/plugin/ha_tokudb.so', 'lib/plugin/ha_rocksdb.so', 'lib/plugin/audit_log.so',
+  'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
+  'lib/plugin/data_masking.ini', 'lib/plugin/tokudb_backup.so','lib/plugin/keyring_file.so',
+  'lib/plugin/keyring_udf.so', 'lib/plugin/keyring_vault.so', 'lib/plugin/binlog_utils_udf.so'
 )
 ps80_symlinks = (
   ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.1.22'),
