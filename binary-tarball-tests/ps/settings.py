@@ -30,7 +30,7 @@ ps80_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 ps80_files = (
-  'lib/libcoredumper.a', 'lib/libHotBackup.so', 'lib/libmysqlharness.a', 'lib/libmysqlharness.so.1',
+  'lib/libcoredumper.a', 'lib/libHotBackup.so', 
   'lib/libmysqlrouter_http.so.1', 'lib/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
   'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.1.17' ,'lib/mysql/libjemalloc.so.1',
   'lib/mysql/plugin/ha_tokudb.so', 'lib/mysql/plugin/ha_rocksdb.so', 'lib/mysql/plugin/audit_log.so',
