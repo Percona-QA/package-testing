@@ -4,7 +4,7 @@ pipeline {
   }
   parameters {
     string(name: 'PS_VERSION', defaultValue: '8.0.22-13', description: 'PS full version')
-    string(name: 'PS_REVISION', defaultValue: 'b168cf9', description: 'PS revision')
+    string(name: 'PS_REVISION', defaultValue: '0cc556b', description: 'PS revision')
     booleanParam( 
       defaultValue: false,
       name: 'BUILD_TYPE_MINIMAL'
