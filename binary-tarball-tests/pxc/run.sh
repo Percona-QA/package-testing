@@ -15,6 +15,15 @@ if [ -f /etc/redhat-release ]; then
   fi
 else
   UCF_FORCE_CONFOLD=1 DEBIAN_FRONTEND=noninteractive sudo -E apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -qq -y install openssl
+  if [[ $(lsb_release -sc) == 'xenial' ]]; then
+    DEBIAN_FRONTEND=noninteractive sudo add-apt-repository -y ppa:deadsnakes/ppa
+    DEBIAN_FRONTEND=noninteractive sudo apt update
+    DEBIAN_FRONTEND=noninteractive sudo apt -y install python3.6
+    sudo rm /usr/bin/python3 && sudo ln -sf /usr/bin/python3.6 /usr/bin/python3
+    wget -O get-pip.py "https://bootstrap.pypa.io/get-pip.py" && sudo python3 get-pip.py
+  else
+    sudo apt install -y python3 python3-pip
+  fi
   sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof
 fi
 pip3 install --user pytest-testinfra pytest
