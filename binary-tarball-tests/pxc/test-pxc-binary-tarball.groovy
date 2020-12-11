@@ -1,8 +1,10 @@
 pipeline {
-  agent any
+  agent {
+    label 'docker'
+  }
   parameters {
-    string(name: 'PXC_VERSION', defaultValue: '8.0.20-11.1', description: 'PXC full version')
-    string(name: 'PXC_REVISION', defaultValue: '683b26a', description: 'PXC revision')
+    string(name: 'PXC_VERSION', defaultValue: '8.0.21-12.1', description: 'PXC full version')
+    string(name: 'PXC_REVISION', defaultValue: 'c25872b', description: 'PXC revision')
     string(name: 'WSREP_VERSION', defaultValue: '26.4.3', description: 'WSREP version')
     string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.31-rel34-43.2', description: 'PXC-5.7 package version')
     booleanParam( 
@@ -18,30 +20,11 @@ pipeline {
             label "min-xenial-x64"
           }
           steps {
+            script {
+              currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
+            }
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              sh '''
-                PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
-                MINIMAL=""
-                if [ BUILD_TYPE_MINIMAL ]; then
-                  MINIMAL="-minimal"
-                fi
-                if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/test/tarball/"
-                elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binary-tarball/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/tarball/"
-                elif [ "${PXC_MAJOR_VERSION}" = "5.6" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster_$(echo ${PXC_VERSION}|sed 's/-/-rel/')-Linux.x86_64.ssl102.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/Percona-XtraDB-Cluster_${PXC_MAJOR_VERSION}-binaries-release-new/label_exp=min-stretch-x64/lastSuccessfulBuild/artifact/tarball/"
-                fi
-                rm -rf package-testing
-                sudo apt install -y git wget
-                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
-                cd package-testing/binary-tarball-tests/pxc
-                wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
-                ./run.sh || true
-              '''
+              run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
@@ -52,29 +35,7 @@ pipeline {
           }
           steps {
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              sh '''
-                PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
-                MINIMAL=""
-                if [ BUILD_TYPE_MINIMAL ]; then
-                  MINIMAL="-minimal"
-                fi
-                if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/test/tarball/"
-                elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binary-tarball/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/tarball/"
-                elif [ "${PXC_MAJOR_VERSION}" = "5.6" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster_$(echo ${PXC_VERSION}|sed 's/-/-rel/')-Linux.x86_64.ssl102.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/Percona-XtraDB-Cluster_${PXC_MAJOR_VERSION}-binaries-release-new/label_exp=min-stretch-x64/lastSuccessfulBuild/artifact/tarball/"
-                fi
-                rm -rf package-testing
-                sudo apt install -y git wget
-                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
-                cd package-testing/binary-tarball-tests/pxc
-                wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
-                ./run.sh || true
-              '''
+              run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
@@ -85,29 +46,7 @@ pipeline {
           }
           steps {
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              sh '''
-                PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
-                MINIMAL=""
-                if [ BUILD_TYPE_MINIMAL ]; then
-                  MINIMAL="-minimal"
-                fi
-                if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/test/tarball/"
-                elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binary-tarball/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/tarball/"
-                elif [ "${PXC_MAJOR_VERSION}" = "5.6" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster_$(echo ${PXC_VERSION}|sed 's/-/-rel/')-Linux.x86_64.ssl102.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/Percona-XtraDB-Cluster_${PXC_MAJOR_VERSION}-binaries-release-new/label_exp=min-stretch-x64/lastSuccessfulBuild/artifact/tarball/"
-                fi
-                rm -rf package-testing
-                sudo apt install -y git wget
-                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
-                cd package-testing/binary-tarball-tests/pxc
-                wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
-                ./run.sh || true
-              '''
+              run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
@@ -118,29 +57,7 @@ pipeline {
           }
           steps {
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              sh '''
-                PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
-                MINIMAL=""
-                if [ BUILD_TYPE_MINIMAL ]; then
-                  MINIMAL="-minimal"
-                fi
-                if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/test/tarball/"
-                elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binary-tarball/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/tarball/"
-                elif [ "${PXC_MAJOR_VERSION}" = "5.6" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster_$(echo ${PXC_VERSION}|sed 's/-/-rel/')-Linux.x86_64.ssl102.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/Percona-XtraDB-Cluster_${PXC_MAJOR_VERSION}-binaries-release-new/label_exp=min-stretch-x64/lastSuccessfulBuild/artifact/tarball/"
-                fi
-                rm -rf package-testing
-                sudo apt install -y git wget
-                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
-                cd package-testing/binary-tarball-tests/pxc
-                wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
-                ./run.sh || true
-              '''
+              run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
@@ -151,29 +68,7 @@ pipeline {
           }
           steps {
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              sh '''
-                PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
-                MINIMAL=""
-                if [ BUILD_TYPE_MINIMAL ]; then
-                  MINIMAL="-minimal"
-                fi
-                if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/test/tarball/"
-                elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binary-tarball/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/tarball/"
-                elif [ "${PXC_MAJOR_VERSION}" = "5.6" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster_$(echo ${PXC_VERSION}|sed 's/-/-rel/')-Linux.x86_64.ssl102.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/Percona-XtraDB-Cluster_${PXC_MAJOR_VERSION}-binaries-release-new/label_exp=min-stretch-x64/lastSuccessfulBuild/artifact/tarball/"
-                fi
-                rm -rf package-testing
-                sudo apt install -y git wget
-                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
-                cd package-testing/binary-tarball-tests/pxc
-                wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
-                ./run.sh || true
-              '''
+              run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
@@ -184,29 +79,7 @@ pipeline {
           }
           steps {
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              sh '''
-                PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
-                MINIMAL=""
-                if [ BUILD_TYPE_MINIMAL ]; then
-                  MINIMAL="-minimal"
-                fi
-                if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/test/tarball/"
-                elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binary-tarball/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/tarball/"
-                elif [ "${PXC_MAJOR_VERSION}" = "5.6" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster_$(echo ${PXC_VERSION}|sed 's/-/-rel/')-Linux.x86_64.ssl102.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/Percona-XtraDB-Cluster_${PXC_MAJOR_VERSION}-binaries-release-new/label_exp=min-stretch-x64/lastSuccessfulBuild/artifact/tarball/"
-                fi
-                rm -rf package-testing
-                sudo yum install -y git wget
-                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
-                cd package-testing/binary-tarball-tests/pxc
-                wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
-                ./run.sh || true
-              '''
+              run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
@@ -217,29 +90,7 @@ pipeline {
           }
           steps {
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              sh '''
-                PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
-                MINIMAL=""
-                if [ BUILD_TYPE_MINIMAL ]; then
-                  MINIMAL="-minimal"
-                fi
-                if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binaries-release-cve/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/test/tarball/"
-                elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/percona-xtradb-cluster-${PXC_MAJOR_VERSION}-binary-tarball/label_exp=min-centos-6-x64-new/lastSuccessfulBuild/artifact/tarball/"
-                elif [ "${PXC_MAJOR_VERSION}" = "5.6" ]; then
-                  TARBALL_NAME="Percona-XtraDB-Cluster_$(echo ${PXC_VERSION}|sed 's/-/-rel/')-Linux.x86_64.ssl102.tar.gz"
-                  JENKINS_JOB="https://jenkins.percona.com/job/Percona-XtraDB-Cluster_${PXC_MAJOR_VERSION}-binaries-release-new/label_exp=min-stretch-x64/lastSuccessfulBuild/artifact/tarball/"
-                fi
-                rm -rf package-testing
-                sudo yum install -y git wget
-                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
-                cd package-testing/binary-tarball-tests/pxc
-                wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
-                ./run.sh || true
-              '''
+              run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
@@ -248,3 +99,31 @@ pipeline {
     } //End stage Run tests
   } //End stages
 } //End pipeline
+
+void run_test() {
+  sh '''
+    echo ${BUILD_TYPE_MINIMAL}
+    PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
+    MINIMAL=""
+    if [ BUILD_TYPE_MINIMAL ]; then
+      MINIMAL="-minimal"
+    fi
+    if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
+      TARBALL_NAME="Percona-XtraDB-Cluster-${PXC_VERSION}-Linux.x86_64.glibc2.17${MINIMAL}.tar.gz"
+      TARBALL_LINK="https://www.percona.com/downloads/TESTING/pxc-8.0.21/"
+    elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
+      TARBALL_NAME="Percona-XtraDB-Cluster-${PXC_VERSION}-Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
+      TARBALL_LINK="https://www.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
+    fi
+    rm -rf package-testing
+    if [ -f /usr/bin/yum ]; then
+      sudo yum install -y git wget
+    else
+      sudo apt install -y git wget lsb-release
+    fi
+    git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+    cd package-testing/binary-tarball-tests/pxc
+    wget -q ${TARBALL_LINK}${TARBALL_NAME}
+    ./run.sh || true
+  '''
+}
