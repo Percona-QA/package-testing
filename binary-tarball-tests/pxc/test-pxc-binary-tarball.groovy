@@ -105,7 +105,7 @@ void run_test() {
     echo ${BUILD_TYPE_MINIMAL}
     PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
     MINIMAL=""
-    if [ BUILD_TYPE_MINIMAL ]; then
+    if [ "${BUILD_TYPE_MINIMAL}" == "true" ]; then
       MINIMAL="-minimal"
     fi
     if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
