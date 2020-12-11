@@ -17,7 +17,7 @@ else
   UCF_FORCE_CONFOLD=1 DEBIAN_FRONTEND=noninteractive sudo -E apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -qq -y install openssl
   sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof
 fi
-pip3 install --user testinfra pytest
+pip3 install --user pytest-testinfra pytest
 
 TARBALL_NAME=$(basename "$(find . -maxdepth 1 -name '*.tar.gz'|head -n1)")
 if [ -z "${TARBALL_NAME}" ]; then
