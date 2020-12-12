@@ -5,7 +5,7 @@ pipeline {
   parameters {
     choice(name: 'DOCKER_ACC', choices: ['percona','perconalab'], description: 'Docker repo to use: percona or perconalab')
     string(name: 'PS_VERSION', defaultValue: '8.0.22-13', description: 'Full PS version')
-    string(name: 'PS_REVISION', defaultValue: '0cc556b', description: 'Short git hash for release')
+    string(name: 'PS_REVISION', defaultValue: '6f7822f', description: 'Short git hash for release')
   }
   stages {
     stage('Run test') {
