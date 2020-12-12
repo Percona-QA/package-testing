@@ -23,7 +23,7 @@ provisioner:
   lint:
     name: ansible-lint
 verifier:
-  name: pytest-testinfra
+  name: testinfra
   options:
     verbose: true
     s: true
