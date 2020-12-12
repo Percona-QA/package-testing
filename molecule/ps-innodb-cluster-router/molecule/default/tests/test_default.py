@@ -42,13 +42,13 @@ def test_packages(host):
     assert host.package("percona-mysql-shell").is_installed
     assert os.environ['UPSTREAM_VERSION'] in host.package("percona-mysql-shell").version
 
-def test_database_checksums(host):
-    node1 = host.run("mysqlsh root@ps-node1:3306 --password=Test1234# --sql --database sbtest -e 'CHECKSUM TABLE sbtest1, sbtest2;'")
-    node2 = host.run("mysqlsh root@ps-node2:3306 --password=Test1234# --sql --database sbtest -e 'CHECKSUM TABLE sbtest1, sbtest2;'")
-    node3 = host.run("mysqlsh root@ps-node3:3306 --password=Test1234# --sql --database sbtest -e 'CHECKSUM TABLE sbtest1, sbtest2;'")
-    assert node1.stdout != ""
-    assert node1.stdout == node2.stdout
-    assert node1.stdout == node3.stdout
+#def test_database_checksums(host):
+#    node1 = host.run("mysqlsh root@ps-node1:3306 --password=Test1234# --sql --database sbtest -e 'CHECKSUM TABLE sbtest1, sbtest2;'")
+#    node2 = host.run("mysqlsh root@ps-node2:3306 --password=Test1234# --sql --database sbtest -e 'CHECKSUM TABLE sbtest1, sbtest2;'")
+#    node3 = host.run("mysqlsh root@ps-node3:3306 --password=Test1234# --sql --database sbtest -e 'CHECKSUM TABLE sbtest1, sbtest2;'")
+#    assert node1.stdout != ""
+#    assert node1.stdout == node2.stdout
+#    assert node1.stdout == node3.stdout
 
 def test_cluster_status(host):
     assert host.check_output("mysqlsh root@localhost:6446 --password=Test1234# -- cluster status | jq -r '.defaultReplicaSet.status'") == "OK"
