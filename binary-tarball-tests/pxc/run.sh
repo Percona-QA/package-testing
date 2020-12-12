@@ -30,7 +30,7 @@ pip3 install --user pytest-testinfra pytest
 
 TARBALL_NAME=$(basename "$(find . -maxdepth 1 -name '*.tar.gz'|head -n1)")
 if [ -z "${TARBALL_NAME}" ]; then
-  echo "Please put PS tarball into this directory!"
+  echo "Please put PXC tarball into this directory!"
   exit 1
 fi
 if [ -z "${PXC_VERSION}" ]; then
