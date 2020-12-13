@@ -1,3 +1,4 @@
 .vagrant
 world_innodb.sql
 world.sql
+docker-image-tests/pxc/.DS_Store

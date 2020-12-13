@@ -34,6 +34,13 @@ mysql -e "INSTALL PLUGIN rpl_semi_sync_slave SONAME 'semisync_slave.so';"
 mysql -e "INSTALL PLUGIN connection_control SONAME 'connection_control.so';"
 mysql -e "INSTALL PLUGIN connection_control_failed_login_attempts SONAME 'connection_control.so';"
 mysql -e "INSTALL PLUGIN authentication_ldap_simple SONAME 'authentication_ldap_simple.so';"
+#mysql -e "INSTALL PLUGIN binlog_utils_udf SONAME 'binlog_utils_udf.so';"
+#mysql -e "CREATE FUNCTION get_binlog_by_gtid RETURNS STRING SONAME 'binlog_utils_udf.so';"
+#mysql -e "CREATE FUNCTION get_last_gtid_from_binlog RETURNS STRING SONAME 'binlog_utils_udf.so';"
+#mysql -e "CREATE FUNCTION get_gtid_set_by_binlog RETURNS STRING SONAME 'binlog_utils_udf.so';"
+#mysql -e "CREATE FUNCTION get_binlog_by_gtid_set RETURNS STRING SONAME 'binlog_utils_udf.so';"
+#mysql -e "CREATE FUNCTION get_first_record_timestamp_by_binlog RETURNS STRING SONAME 'binlog_utils_udf.so';"
+#mysql -e "CREATE FUNCTION get_last_record_timestamp_by_binlog RETURNS STRING SONAME 'binlog_utils_udf.so';"
 
 for component in component_validate_password component_log_sink_syseventlog component_log_sink_json component_log_filter_dragnet component_audit_api_message_emit; do
   if [ $(mysql -Ns -e "select count(*) from mysql.component where component_urn=\"file://${component}\";") -eq 0 ]; then
@@ -46,13 +53,13 @@ for component in component_validate_password component_log_sink_syseventlog comp
 done
 
 mysql -e "SHOW PLUGINS;"
-mysql -e "CREATE DATABASE world;"
+mysql -e "CREATE DATABASE IF NOT EXISTS world;"
 sed -i '18,21 s/^/-- /' /package-testing/world.sql
 cat /package-testing/world.sql | mysql -D world
 if [ ! -z "$1" ]; then
   if [ "$1" = "ps" ]; then
-    mysql -e "CREATE DATABASE world2;"
-    mysql -e "CREATE DATABASE world3;"
+    mysql -e "CREATE DATABASE IF NOT EXISTS world2;"
+    mysql -e "CREATE DATABASE IF NOT EXISTS world3;"
     cat /package-testing/world.sql | mysql -D world2
     cat /package-testing/world.sql | mysql -D world3
     mysql < /package-testing/tokudb_compression.sql

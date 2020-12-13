@@ -1,7 +1,7 @@
 
-  - name: setup epel 6 repo
-    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+# - name: setup epel 6 repo
+#   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm state=present
+#   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
   - name: setup epel 7 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present

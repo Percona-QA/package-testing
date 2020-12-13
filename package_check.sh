@@ -295,7 +295,7 @@ elif [ "${product}" = "psmdb30" -o "${product}" = "psmdb32" -o "${product}" = "p
         fi
       done
     else
-      if [ "${product}" = "psmdb40" -o "${product}" = "psmdb42" ]; then
+      if [ "${product}" = "psmdb40" -o "${product}" = "psmdb42" -o "${product}" = "psmdb44" ]; then
         psmdb_name="percona-server-mongodb"
       else
         psmdb_name=""

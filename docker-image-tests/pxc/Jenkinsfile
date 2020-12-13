@@ -5,9 +5,9 @@ pipeline {
   parameters {
     choice(name: 'DOCKER_ACC', choices: ['percona','perconalab'], description: 'Docker repo to use: percona or perconalab')
     string(name: 'DOCKER_PRODUCT', defaultValue: 'percona-xtradb-cluster', description: 'Product to test')
-    string(name: 'DOCKER_TAG', defaultValue: '8.0.18', description: 'Docker tag to test')
-    string(name: 'PXC_VERSION', defaultValue: '8.0.18-9', description: 'Full PXC version')
-    string(name: 'PXC_REVISION', defaultValue: '4e16e1c', description: 'Short git hash for release')
+    string(name: 'DOCKER_TAG', defaultValue: '8.0.21', description: 'Docker tag to test')
+    string(name: 'PXC_VERSION', defaultValue: '8.0.21-12', description: 'Full PXC version')
+    string(name: 'PXC_REVISION', defaultValue: 'c25872b', description: 'Short git hash for release')
     string(name: 'PXC_WSREP_VERSION', defaultValue: '26.4.3', description: 'Galera WSREP version')
   }
   stages {
