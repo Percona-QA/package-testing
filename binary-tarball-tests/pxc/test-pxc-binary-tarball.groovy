@@ -1,7 +1,5 @@
 pipeline {
-  agent {
-    label 'docker'
-  }
+  agent any 
   parameters {
     string(name: 'PXC_VERSION', defaultValue: '8.0.21-12.1', description: 'PXC full version')
     string(name: 'PXC_REVISION', defaultValue: 'c25872b', description: 'PXC revision')
