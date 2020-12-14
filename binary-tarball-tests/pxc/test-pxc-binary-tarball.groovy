@@ -111,7 +111,7 @@ void run_test() {
       TARBALL_LINK="https://www.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
     elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
       TARBALL_NAME="Percona-XtraDB-Cluster-${PXC_VERSION}-Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-      TARBALL_LINK="https://www.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
+      TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
     fi
     rm -rf package-testing
     if [ -f /usr/bin/yum ]; then
