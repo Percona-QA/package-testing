@@ -22,7 +22,7 @@ pxc80_binaries = (
   'bin/pxc_extra/pxb-8.0/bin/xbcrypt', 'bin/pxc_extra/pxb-8.0/bin/xbstream',
   'bin/mysql', 'bin/mysqld', 'bin/ps-admin', 'bin/mysqladmin', 'bin/mysqlbinlog',
   'bin/mysqldump', 'bin/mysqldumpslow', 'bin/mysqlimport', 'bin/mysqlpump', 'bin/mysqlshow',
-  'bin/mysqlslap', 'bin/mysqlcheck', 'bin/mysql_config_editor', 'bin/mysql_config', 'bin/mysql_ldb',
+  'bin/mysqlslap', 'bin/mysqlcheck', 'bin/mysql_config_editor', 'bin/mysql_config',
   'bin/mysqlrouter', 'bin/mysqlrouter_passwd', 'bin/mysqlrouter_plugin_info', 'bin/mysql_secure_installation', 'bin/mysql_ssl_rsa_setup',
   'bin/mysql_upgrade', 'bin/mysql_tzinfo_to_sql'
 )
@@ -39,15 +39,15 @@ pxc80_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 pxc80_files = (
-  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.1.20' ,
+  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.1.21' ,
   'lib/libmysqlservices.a' , 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini', 'lib/plugin/keyring_file.so',
   'lib/plugin/keyring_udf.so', 'lib/plugin/keyring_vault.so'
 )
 pxc80_symlinks = (
-  ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.1e'), ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
-  ('lib/libgcrypt.so','lib/private/libgcrypt.so.11.5.3'), ('lib/libgssapi_krb5.so','lib/private/libgssapi_krb5.so.2.2'),
+  ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'), ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
+  ('lib/libgcrypt.so','lib/private/libgcrypt.so.11.8.2'), ('lib/libgssapi_krb5.so','lib/private/libgssapi_krb5.so.2.2'),
   ('lib/libk5crypto.so','lib/private/libk5crypto.so.3.1'), ('lib/libkrb5.so','lib/private/libkrb5.so.3.3'),
   ('lib/libkrb5support.so','lib/private/libkrb5support.so.0.1'), ('lib/libnspr4.so','lib/private/libnspr4.so'),
   ('lib/libnss3.so','lib/private/libnss3.so'),  ('lib/libnssutil3.so','lib/private/libnssutil3.so'),
