@@ -17,10 +17,10 @@
     when: ansible_os_family == "RedHat"
 
   - name: enable the PS-80 main repo
-    command: percona-release enable-only ps-80 release
+    command: percona-release setup ps-80
 
-  - name: enable the tools main repo
-    command: percona-release enable tools release
+# - name: enable the tools main repo
+#   command: percona-release enable tools release
 
   - name: clean and update yum cache
     shell: |
