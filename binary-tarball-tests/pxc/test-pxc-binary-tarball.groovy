@@ -44,7 +44,7 @@ pipeline {
           }
           steps {
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              echo "Missing platform"
+              run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
@@ -77,7 +77,7 @@ pipeline {
           }
           steps {
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              echo "Missing platform"
+              run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
