@@ -48,8 +48,7 @@ pxc80_files = (
 pxc80_symlinks = (
   ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'), ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
   ('lib/libgcrypt.so','lib/private/libgcrypt.so.11.8.2'), ('lib/libgssapi_krb5.so','lib/private/libgssapi_krb5.so.2.2'),
-  ('lib/libk5crypto.so','lib/private/libk5crypto.so.3.1'), ('lib/libkrb5.so','lib/private/libkrb5.so.3.3'),
-  ('lib/libkrb5support.so','lib/private/libkrb5support.so.0.1'), ('lib/libnspr4.so','lib/private/libnspr4.so'),
+  ('lib/libk5crypto.so','lib/private/libk5crypto.so.3.1'), ('lib/libnspr4.so','lib/private/libnspr4.so'),
   ('lib/libnss3.so','lib/private/libnss3.so'),  ('lib/libnssutil3.so','lib/private/libnssutil3.so'),
   ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.1.20'), ('lib/libplc4.so','lib/private/libplc4.so'),
   ('lib/libplds4.so','lib/private/libplds4.so'), ('lib/libsasl2.so','lib/private/libsasl2.so.2.0.23'),
