@@ -55,4 +55,4 @@ export BASE_DIR="${PWD}/${PXC_DIR_NAME}"
 cp conf/*cnf $BASE_DIR/
 
 echo "Running tests..."
-python3 -m pytest --ignore=/mnt/jenkins/workspace/test-pxc-binary-tarball/package-testing/binary-tarball-tests/pxc/"${PXC_DIR_NAME}"/percona-xtradb-cluster-tests/ -v --junit-xml report.xml $@
+python3 -m pytest --ignore=percona-xtradb-cluster-tests -v --junit-xml report.xml $@
