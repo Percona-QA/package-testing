@@ -28,7 +28,7 @@ class PxcNode:
              '-e', 'CLUSTER_NAME='+cluster_name, '-e', 'CLUSTER_JOIN='+base_node_name+'1', 
              '--net='+docker_network,'-v', test_pwd+'/config:/etc/percona-xtradb-cluster.conf.d', 
              '-v', test_pwd+'/cert:/cert', '-d', docker_image]).decode().strip()
-            time.sleep(30)
+            time.sleep(60)
         self.ti_host = testinfra.get_host("docker://root@" + self.docker_id)
 
     def destroy(self):
