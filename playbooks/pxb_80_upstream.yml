@@ -88,12 +88,6 @@
       - mysql-community-server
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
 
-    #  - name: Import key for mysql-repo
-    #rpm_key:
-    #  state: present
-    #  key: http://repo.mysql.com/RPM-GPG-KEY-mysql
-    #when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
   - name: install packages in rhel/centos 8
     yum:
       name: "{{ packages }}"
