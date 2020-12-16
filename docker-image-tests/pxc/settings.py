@@ -11,6 +11,7 @@ test_pwd = os.path.dirname(os.path.realpath(__file__))
 
 pxc_version_upstream, pxc_version_percona = pxc_version.split('-')
 pxc_version_major = pxc_version_upstream.split('.')[0] + '.' + pxc_version_upstream.split('.')[1]
+pxc_rel=pxc_version_percona.split('.')[0]
 
 docker_image = docker_acc + "/" + docker_product + ":" + docker_tag
 docker_network = 'pxc-network'
