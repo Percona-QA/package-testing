@@ -55,4 +55,5 @@ export BASE_DIR="${PWD}/${PXC_DIR_NAME}"
 cp conf/*cnf $BASE_DIR/
 
 echo "Running tests..."
-python3 -m pytest --ignore=percona-xtradb-cluster-tests -v --junit-xml report.xml $@
+echo "${PXC_DIR_NAME}"
+python3 -m pytest --ignore="${PXC_DIR_NAME}"/percona-xtradb-cluster-tests -v --junit-xml report.xml $@
