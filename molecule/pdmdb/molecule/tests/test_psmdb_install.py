@@ -62,8 +62,5 @@ def test_rpm8_packages(host, package):
 
 @pytest.mark.parametrize("binary", BINARIES)
 def test_binary_version(host, binary):
-    # cmd = '{} --version|head -n1|grep -c "{}"'.format(binary, PSMDB_VER)
-    # result = host.run(cmd)
     result = host.run(f"{binary} --version")
     assert PSMDB_VER in result.stdout, result.stdout
-    # assert result.rc == 0, host.run(f"{binary} --version").stdout

@@ -14,7 +14,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 storage_configs = ['/etc/pbm-agent-storage.conf', '/etc/pbm-agent-storage-gcp.conf',
                    '/etc/pbm-agent-storage-local.conf']
 
-PBM_VERSION = "1.3.4"
+PBM_VERSION = os.environ['PBM_VERSION']
 
 
 def parse_yaml_string(ys):
