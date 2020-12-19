@@ -139,6 +139,7 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" -o ${product} = "pxc80" ]; t
     echo "@@VERSION COMMENT is correct" >> "${log}"
   else
     echo "@@VERSION_COMMENT is incorrect"
+    mysql -e "SELECT @@VERSION_COMMENT;"
     exit 1
   fi
 
