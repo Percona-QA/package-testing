@@ -30,7 +30,7 @@
   - name: Enable testing repository
     include_tasks: ../tasks/enable_psmdb_repo.yml
     vars:
-      psmdb_repo: "original testing"
+      psmdb_repo: "psmdb-36 testing"
 
   - name: install Percona Server for MongoDB 3.6 deb packages previous version
     apt: name={{item}} update_cache=yes state=latest

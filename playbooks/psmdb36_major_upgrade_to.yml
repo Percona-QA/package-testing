@@ -86,7 +86,7 @@
   - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_psmdb_repo.yml
     vars:
-      psmdb_repo: "original testing"
+      psmdb_repo: "psmdb-36 testing"
 
 #
 # Upgrade packages

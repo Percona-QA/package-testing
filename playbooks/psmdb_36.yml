@@ -42,19 +42,19 @@
   - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_psmdb_repo.yml
     vars:
-      psmdb_repo: "original testing"
+      psmdb_repo: "psmdb-36 testing"
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_psmdb_repo.yml
     vars:
-      psmdb_repo: "original"
+      psmdb_repo: "psmdb-36"
     when: lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling experimental repo
     include_tasks: ../tasks/enable_psmdb_repo.yml
     vars:
-      psmdb_repo: "original experimental"
+      psmdb_repo: "psmdb-36 experimental"
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: install Percona Server for MongoDB 3.6 new rpm packages
