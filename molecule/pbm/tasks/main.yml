@@ -31,17 +31,9 @@
   when: ansible_os_family == "RedHat"
 
 - name: setup psmdb repo with percona-release
-  command: percona-release enable {{ psmdb_to_test }} {{ install_repo }}
-  vars:
-    install_repo: "{{ lookup('env', 'install_repo') }}"
-    psmdb_to_test: "{{ lookup('env', 'psmdb_to_test') }}"
-  when: lookup('env', 'install_repo') == "testing"
-
-- name: setup psmdb repo with percona-release
   command: percona-release enable {{ psmdb_to_test }}
   vars:
     psmdb_to_test: "{{ lookup('env', 'psmdb_to_test') }}"
-  when: lookup('env', 'install_repo') == "main"
 
 - name: setup pbm repo with percona-release
   command: percona-release enable pbm {{ install_repo }}
