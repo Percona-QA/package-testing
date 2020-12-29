@@ -11,58 +11,34 @@ SCRIPT_PWD=$(cd `dirname $0` && pwd)
 log="/tmp/binary_check.log"
 >${log}
 
-source ${SCRIPT_PWD}/VERSIONS
+source "${SCRIPT_PWD}"/VERSIONS
 
-if [ $1 = "pxb80" ]; then
+if [ "$1" = "pxb80" ]; then
     product=pxb80
     version=${PXB80_VER}
-    major_version=$(echo ${version}| cut -f1-2 -d.)
-    minor_version=$(echo ${version}|cut -f3 -d.)
-    if [ -f /etc/redhat-release ]; then
-        centos_version=$(cat /etc/redhat-release | grep -o "[0-9]" | head -n 1)
-        if [ "${centos_version}" -gt 7 ]; then
-            lib="libgcrypt183"
-        elif [ "${centos_version}" -eq 7 ]; then
-            lib="libgcrypt153"
-        else
-            lib="libgcrypt145" # for centos version 6
-        fi
-    else
-        lib="libgcrypt20" # for debian/ubuntu
-    fi
+    major_version="${PXB80_VER}"
+    minor_version="${PXB80PKG_VER}"
     echo "Downloading ${1} latest version..." >> "${log}"
-    wget https://www.percona.com/downloads/Percona-XtraBackup-LATEST/Percona-XtraBackup-${major_version}-${minor_version}/binary/tarball/percona-xtrabackup-${version}-Linux-x86_64.${lib}.tar.gz
-    tarball_dir="percona-xtrabackup-${version}-Linux-x86_64"
+    wget https://www.percona.com/downloads/Percona-XtraBackup-LATEST/Percona-XtraBackup-${major_version}-${minor_version}/binary/tarball/percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17.tar.gz
+    tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17"
 
     echo "Extracting binary" >> "${log}"
-    tar -xf percona-xtrabackup-${version}-Linux-x86_64.${lib}.tar.gz
+    tar -xf percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17.tar.gz
     mv ${tarball_dir} ${product}
     tarball_dir=${product}
 
     exec_files="xbcloud xbcrypt xbstream xtrabackup"
 
 elif [ $1 = "pxb24" ]; then
-    product=pxb24
-    version=${PXB24_VER}
-    if [ -f /etc/redhat-release ]; then
-        centos_version=$(cat /etc/redhat-release | grep -o "[0-9]" | head -n 1)
-        if [ "${centos_version}" -gt 7 ]; then
-            lib="libgcrypt183"
-        elif [ "${centos_version}" -eq 7 ]; then
-            lib="libgcrypt153"
-        else
-            lib="libgcrypt145" # for centos version 6
-        fi
-    else
-        lib="libgcrypt20" # for debian/ubuntu
-    fi
+    product="pxb24"
+    version="${PXB24_VER}"
 
     echo "Downloading ${1} latest version..." >> "${log}"
-    wget https://www.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-${version}/binary/tarball/percona-xtrabackup-${version}-Linux-x86_64.${lib}.tar.gz
-    tarball_dir="percona-xtrabackup-${version}-Linux-x86_64"
+    wget https://www.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-${version}/binary/tarball/percona-xtrabackup-${version}-Linux-x86_64.glibc2.12.tar.gz
+    tarball_dir="percona-xtrabackup-${version}-Linux-x86_64.glibc2.12"
 
     echo "Extracting binary" >> "${log}"
-    tar -xf percona-xtrabackup-${version}-Linux-x86_64.${lib}.tar.gz
+    tar -xf percona-xtrabackup-${version}-Linux-x86_64.glibc2.12.tar.gz
     mv ${tarball_dir} ${product}
     tarball_dir=${product}
 
@@ -130,8 +106,8 @@ for binary in $exec_files; do
     fi
 done
 
-echo "Check version for binaries in tarball: ${product}" >> "${log}"
-if [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; then
+echo "Check version for binaries in tarball: ${tarball_dir}" >> "${log}"
+if [ ${product} = "pxb24" -o ${product} = "pxb80" ]; then
   version_check=$(${tarball_dir}/bin/xtrabackup --version 2>&1|grep -c ${version})
     if [ ${version_check} -eq 0 ]; then
       echo "xtrabackup version is incorrect! Expected version: ${version}"
