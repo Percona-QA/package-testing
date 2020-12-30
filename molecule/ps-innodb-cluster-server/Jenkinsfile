@@ -3,9 +3,9 @@ pipeline {
       label "pkgtest"
   }
   parameters {
-    string(name: 'UPSTREAM_VERSION', defaultValue: '8.0.20', description: 'Upstream MySQL version')
-    string(name: 'PS_VERSION', defaultValue: '11', description: 'Percona part of version')
-    string(name: 'PS_REVISION', defaultValue: '5b5a5d2', description: 'Short git hash for release')
+    string(name: 'UPSTREAM_VERSION', defaultValue: '8.0.22', description: 'Upstream MySQL version')
+    string(name: 'PS_VERSION', defaultValue: '13', description: 'Percona part of version')
+    string(name: 'PS_REVISION', defaultValue: '6f7822f', description: 'Short git hash for release')
     choice(name: 'TEST_DIST', choices: ['bento/ubuntu-20.04','bento/ubuntu-18.04','bento/ubuntu-16.04','bento/debian-10','bento/debian-9','bento/centos-8','bento/centos-7','bento/centos-6'], description: 'On which image to run test.')
     choice(name: 'INSTALL_REPO', choices: ['testing','main','experimental'], description: 'Repo to install packages from.')
   }

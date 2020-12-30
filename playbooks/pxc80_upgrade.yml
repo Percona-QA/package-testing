@@ -6,18 +6,13 @@
   become_method: sudo
 
   tasks:
-  - name: include tasks for enabling experimental repo
-    include: ../tasks/enable_pxc80_experimental_repo.yml
+  - name: include tasks for enabling test repo
+    include_tasks: ../tasks/enable_pxc80_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
-# restart the bootstrapped node before upgrading
-#
-  - name: restart the service
-    command: service mysql restart
-    when: ansible_os_family == "Debian"
-
-  - name: restart the service
-    command: service mysql restart
-    when: ansible_os_family == "Debian"
+  - name: include tasks for enabling main repo
+    include: ../tasks/enable_pxc80_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
 
   - name: upgrade PXC 8.0 to new deb packages
     apt:
@@ -43,16 +38,14 @@
       state: latest
     vars:
       packages:
-      - percona-xtradb-cluster-full
-      - percona-xtradb-cluster-test
       - percona-xtradb-cluster-shared
-      - percona-xtradb-cluster-server
       - percona-xtradb-cluster-garbd
+      - percona-xtradb-cluster-test
       - percona-xtradb-cluster-devel
-      - percona-xtradb-cluster-client
       - percona-xtradb-cluster-debuginfo
-      - percona-xtradb-cluster-devel-57
-      - percona-xtradb-cluster-57
+      - percona-xtradb-cluster-server
+      - percona-xtradb-cluster-full
+      - percona-xtradb-cluster-client
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Server new rpm packages
@@ -64,17 +57,11 @@
        - percona-xtradb-cluster-shared-compat
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-# PXC-2317 workaround
-  - name: start mysql service
-    service: name=mysql state=started
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-# PXC-2317 workaround
+# - name: restart the service
+#   command: service mysql restart
 
-  - name: run mysql_upgrade
-    command: /usr/bin/mysql_upgrade
-
-  - name: restart the service
-    command: service mysql restart
+  - name: install plugins
+    command: /package-testing/plugins_test_80.sh pxc
 
   - name: check that PXC version is correct
     command: /package-testing/version_check.sh pxc80
@@ -82,11 +69,11 @@
   - name: check that PXC package versions are correct
     command: /package-testing/package_check.sh pxc80
 
-  - name: run bats tests for mysql init scripts
-    command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
+# - name: run bats tests for mysql init scripts
+#   command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
 
-  - name: start mysql service
-    service: name=mysql state=started
+# - name: start mysql service
+#   service: name=mysql state=started
 
   - name: remove PXC deb packages
     apt:

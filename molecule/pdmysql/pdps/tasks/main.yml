@@ -21,11 +21,13 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
   - name: enable the PDMYSQL-80 repo
-    command: percona-release enable-only pdps-8.0.20 {{ repo }}
+    command: percona-release enable-only pdps-{{ version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
+      version: "{{ lookup('env', 'VERSION') }}"
 
-  - name: install Percona Toolkit new deb packages
+
+  - name: install Percona Toolkit
     include_tasks: ../../../tasks/install_pt.yml
 
   - name: clean yum
@@ -118,6 +120,16 @@
 
   - name: start mysql service
     service: name=mysql state=started
+
+  - name: download package-testing repo with wget
+    command: "{{ item }}"
+    with_items:
+    - rm -rf /package-testing
+    - rm -f master.zip
+    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+    - unzip master.zip
+    - rm -f master.zip
+    - mv package-testing-master /package-testing
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh

@@ -23,7 +23,7 @@
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
   - name: include tasks for enabling main repo
-    include: ../tasks/enable_main_repo.yml
+    include: ../tasks/enable_pxc57_main_repo.yml
 
   - name: disable selinux
     selinux: state=disabled
@@ -150,3 +150,8 @@
   # other tests
   - name: install plugins
     command: /package-testing/plugins_test_57.sh pxc
+
+  - name: check PXC 5.7 version
+    command: /package-testing/version_check.sh pxc57
+    when: lookup('env', 'install_repo') == "main"
+

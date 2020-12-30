@@ -6,7 +6,7 @@ driver:
 platforms:
   - name: ufocal-${BUILD_NUMBER}-${JOB_NAME}
     region: eu-central-1
-    image: ami-00ffef8efdbc08528
+    image: ami-0be656e75e69af1a9
     vpc_subnet_id: subnet-085deaca8c1c59a4f
     instance_type: t2.micro
     ssh_user: ubuntu
@@ -29,8 +29,6 @@ verifier:
     verbose: true
     s: true
     junitxml: report.xml
-  additional_files_or_dirs:
-    - ../../../tests/test_pxb.py
 scenario:
   name: ubuntu-focal
   destroy_sequence:

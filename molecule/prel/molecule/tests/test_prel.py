@@ -8,15 +8,14 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 SKIPPED_REPOSITORIES = ["ppg", "pdmdb", "pdps", "pdpxc", "psmdb-42", ""]
 
-PRODUCT_REPOS = {"ps56": ["original", "tools"],
-                 "ps57": ["original", "tools"],
+PRODUCT_REPOS = {"ps56": ["ps-56", "tools"],
+                 "ps57": ["ps-57"],
                  "ps80": ["ps-80", "tools"],
-                 "pxc56": ["original", "tools"],
-                 "pxc57": ["original", "tools"],
+                 "pxc56": ["pxc-56", "tools"],
+                 "pxc57": ["pxc-57"],
                  "pxc80": ["pxc-80", "tools"],
-                 "pxb80": ["tools"],
-                 "psmdb34": ["original", "tools"],
-                 "psmdb36": ["original", "tools"],
+                 "pxb80": ["pxb-80"],
+                 "psmdb36": ["psmdb-36"],
                  "psmdb40": ['psmdb-40', "tools"],
                  "psmdb42": ['psmdb-42', "tools"],
                  "ppg11": ["ppg-11"],
@@ -29,6 +28,8 @@ PRODUCT_REPOS = {"ps56": ["original", "tools"],
                  "ppg12.3": ["ppg-12.3"],
                  "pdmdb4.2": ["pdmdb-4.2"],
                  "pdmdb4.2.6": ["pdmdb-4.2.6"],
+                 "pdmdb4.2.8": ["pdmdb-4.2.8"],
+                 "pdmdb4.4.0": ["pdmdb-4.4.0"],
                  "pdpxc8.0.19": ["pdpxc-8.0.19"],
                  "pdpxc8.0": ["pdpxc-8.0"],
                  "pdps8.0.19": ["pdps-8.0.19"],
@@ -51,6 +52,7 @@ PRODUCT_PACKAGES = {"ps56": "Percona-Server",
                     "psmdb42": "percona-server-mongodb",
                     "psmdb-40": "percona-server-mongodb",
                     "psmdb-42": "percona-server-mongodb",
+                    "psmdb-44": "percona-server-mongodb",
                     "ppg11": "percona-postgresql",
                     "ppg11.5": "percona-postgresql",
                     "ppg11.6": "percona-postgresql",
@@ -69,6 +71,8 @@ PRODUCT_PACKAGES = {"ps56": "Percona-Server",
                     "ppg-12.3": "percona-postgresql",
                     "pdmdb4.2": "percona-server-mongodb",
                     "pdmdb4.2.6": "percona-server-mongodb",
+                    "pdmdb4.2.8": "percona-server-mongodb",
+                    "pdmdb4.4.0": "percona-server-mongodb",
                     "pdpxc8.0.19": "percona-xtradb-cluster",
                     "pdpxc8.0.20": "percona-xtradb-cluster",
                     "pdpxc8.0": "percona-xtradb-cluster",
@@ -79,6 +83,8 @@ PRODUCT_PACKAGES = {"ps56": "Percona-Server",
                     "original": "percona-toolkit",
                     "pdmdb-4.2": "percona-server-mongodb",
                     "pdmdb-4.2.6": "percona-server-mongodb",
+                    "pdmdb-4.2.8": "percona-server-mongodb",
+                    "pdmdb-4.4.0": "percona-server-mongodb",
                     "pdpxc-8.0.19": "percona-xtradb-cluster",
                     "pdpxc-8.0.20": "percona-xtradb-cluster",
                     "pdpxc-8.0": "percona-xtradb-cluster",
@@ -91,7 +97,7 @@ PRODUCT_PACKAGES = {"ps56": "Percona-Server",
 REPOSITORIES = ["original", "ps-80", "pxc-80", "psmdb-40", "psmdb-42",
                 "tools", "ppg-11", "ppg-11.5", "ppg-11.6", "ppg-11.7", "ppg-11.8",
                 "ppg-12", "ppg-12.2", "ppg-12.3",
-                "pdmdb-4.2", "pdmdb-4.2.6", "pdpxc-8.0", "pdpxc-8.0.19",
+                "pdmdb-4.2", "pdmdb-4.2.6", "pdmdb-4.2.8", "pdpxc-8.0", "pdpxc-8.0.19",
                 "pdps-8.0.19", "pdps-8.0"]
 COMPONENTS = ['testing',
               'release',
@@ -155,6 +161,17 @@ def execute_percona_release_command(host,
         return result
 
 
+def percona_release_show(host):
+    """Execute percona release command
+    """
+    with host.sudo("root"):
+        cmd = "percona-release show"
+        result = host.run(cmd)
+        assert result.rc == 0, (result.stdout, result.stderr)
+        print(result.stdout)
+        return result.stdout
+
+
 def check_list_of_packages(host, repository):
     dist_name = host.system_info.distribution
     product_name = PRODUCT_PACKAGES[repository]
@@ -205,6 +222,8 @@ def test_enable_repo(host, repository, component, command):
                                     command=command,
                                     component=component,
                                     repository=repository)
+    show_before = percona_release_show(host)
+    assert repository in show_before, show_before
     apt_update(host)
     repo_file = host.file(
         "/etc/apt/sources.list.d/percona-{}-{}.list".format(repository, component))
@@ -217,6 +236,9 @@ def test_enable_repo(host, repository, component, command):
     execute_percona_release_command(host, command="disable",
                                     repository=repository,
                                     component=component)
+    show_after = percona_release_show(host)
+    if repository != "original" and component != "testing":
+        assert repository not in show_after, show_before
     apt_update(host)
     backup_repo_file = host.file("/etc/apt/sources.list.d/percona-{}-{}.list.bak".format(repository, component))
     if dist_name.lower() in ["redhat", "centos", 'rhel']:
@@ -253,4 +275,22 @@ def test_setup_product(host, product):
             backup_repo_file = host.file("/etc/yum.repos.d/percona-{}-release.repo.bak".format(repo))
         assert backup_repo_file.user == "root"
         assert backup_repo_file.group == "root"
+    remove_percona_repository(host, "percona*")
+
+
+def test_enably_only(host):
+    """Check that all other repos will be disabled if execute enable-only command
+    Scenario:
+    1. Enable multiple different repos
+    2. Enable-only for one repo
+    3. Check that previously enabled repos was disabled
+    """
+    dist_name = host.system_info.distribution
+    execute_percona_release_command(host, command="enable", repository="psmdb-44")
+    execute_percona_release_command(host, command="enable-only", repository="psmdb-42")
+    assert host.file("/etc/apt/sources.list.d/percona-{}.list.bak".format("psmdb-44"))
+    assert host.file("/etc/apt/sources.list.d/percona-{}.list".format("psmdb-42"))
+    if dist_name.lower() in ["redhat", "centos", 'rhel']:
+        assert host.file("/etc/yum.repos.d/percona-{}.repo.bak".format("psmdb-44"))
+        assert host.file("/etc/yum.repos.d/percona-{}.repo".format("psmdb-42"))
     remove_percona_repository(host, "percona*")

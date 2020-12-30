@@ -25,11 +25,9 @@ def test_tokudb_install(host, mysql_server):
         host.run('sudo '+mysql_server.psadmin+' --user=root -S'+mysql_server.socket+' --enable --enable-backup')
         mysql_server.restart()
         host.run('sudo '+mysql_server.psadmin+' --user=root -S'+mysql_server.socket+' --enable --enable-backup')
+        assert mysql_server.check_engine_active('TokuDB')
     else:
-        host.run('sudo '+mysql_server.psadmin+' --user=root -S'+mysql_server.socket+' --enable-tokudb --enable-tokubackup')
-        mysql_server.restart()
-        host.run('sudo '+mysql_server.psadmin+' --user=root -S'+mysql_server.socket+' --enable-tokudb --enable-tokubackup')
-    assert mysql_server.check_engine_active('TokuDB')
+        pytest.skip('TokuDB is skipped from 5.7!')
 
 def test_install_functions(mysql_server):
     for function in ps_functions:

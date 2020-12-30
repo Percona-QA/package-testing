@@ -1,0 +1,169 @@
+---
+# This playbook does following:
+#   enables Percona main repository
+#   installs previous version of PMM client
+#   enables Percona testing repository
+#   upgrades PMM client
+#   does some tests
+
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
+
+  tasks:
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_main_repo.yml
+
+  - name: install PMM client old deb packages
+    apt: name={{item}} update_cache=yes state=latest
+    with_items:
+    - pmm2-client
+    when: ansible_os_family == "Debian"
+
+  - name: install PMM client old rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - pmm2-client
+    when: ansible_os_family == "RedHat"
+
+  - name: Wait for port 7777 to become open on the host, don't start checking for 10 seconds, PMM-Agent Port
+    wait_for:
+      port: 7777
+      delay: 10
+
+  - name: configure pmm client to connect to server
+    shell: pmm-agent setup --server-address={{ pmm_server_address }}:443 --server-insecure-tls --server-username=admin --server-password=admin $(ip addr show|grep "inet 10."|grep -o "10.*/"|sed 's:/::')
+
+### start PS
+  - name: install Percona Server 5.7 packages
+    include_tasks: ../tasks/install_ps57.yml
+
+  - name: start mysql service
+    service: name=mysql state=started
+
+  - name: start mysql service with service command
+    command: service mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
+
+  - name: add mysql metrics and queries to monitoring
+    command: /package-testing/scripts/pmm2_add_instance.sh mysql
+
+  - name: add mysql instance for monitoring
+    command: pmm-admin add mysql --socket=/var/run/mysqld/mysqld.sock
+    when: ansible_os_family != "RedHat"
+
+  - name: check if mysql monitoring running
+    command: pmm-admin list
+    register: list_output
+
+  - name: Assert if the pmm-admin list contains mysql
+    assert:
+      that:
+        - "'MySQL' in list_output.stdout"
+### end PS
+
+### start PSMDB
+  - name: install Percona Server for MongoDB 3.6
+    include_tasks: ../tasks/install_psmdb_36.yml
+
+  - name: start mongod with init script
+    command: /etc/init.d/mongod start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+
+  - name: start mongod with service
+    command: service mongod start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mongod with systemctl
+    command: systemctl start mongod
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+
+  - name: add mongodb metrics to monitoring
+    command: pmm-admin add mongodb
+    when: ansible_distribution_release != "wheezy"
+
+  - name: check if mongodb monitoring is running
+    command: pmm-admin list
+    register: list_output
+
+  - name: Assert if the pmm-admin list contains mongodb instance
+    assert:
+      that:
+        - "'MongoDB' in list_output.stdout"
+### end PSMDB
+
+  - name: run pmm-admin list
+    command: pmm-admin list
+
+  - name: include tasks for enabling testing repo
+    include: ../tasks/enable_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../tasks/enable_experimental_repo.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: upgrade PMM client to the latest deb packages
+    apt: name={{item}} update_cache=yes state=latest
+    with_items:
+    - pmm2-client
+    when: ansible_os_family == "Debian"
+
+  - name: upgrade PMM client to the latest rpm packages
+    yum: name={{item}} state=latest
+    with_items:
+    - pmm2-client
+    when: ansible_os_family == "RedHat"
+
+  - name: Wait for port 7777 to become open on the host, don't start checking for 10 seconds, PMM-Agent Port
+    wait_for:
+      port: 7777
+      delay: 10
+
+  - name: check that PMM client version is correct
+    command: /package-testing/version_check.sh pmm2
+
+  - name: check if mongodb is still being monitored
+    command: pmm-admin list
+    register: list_output
+
+  - name: Assert if the pmm-admin list contains mongodb instance
+    assert:
+      that:
+        - "'MongoDB' in list_output.stdout"
+
+  - name: Assert if the pmm-admin list contains mysql after upgrade
+    assert:
+      that:
+        - "'MySQL' in list_output.stdout"
+
+  - name: remove PMM client deb packages
+    apt: name={{item}} state=absent
+    with_items:
+    - pmm2-client
+    when: ansible_os_family == "Debian"
+
+  - name: remove PMM client rpm packages
+    yum: name={{item}} state=absent
+    with_items:
+    - pmm2-client
+    when: ansible_os_family == "RedHat"

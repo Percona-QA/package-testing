@@ -36,6 +36,10 @@ elif [ $1 = "pxc57" ]; then
   version=${PXC57_VER}
   release=${PXC57_VER#*-}
   revision=${PXC57_REV}
+elif [ $1 = "pxc80" ]; then
+  version=${PXC80_VER}
+  release=${PXC80_VER#*-}
+  revision=${PXC80_REV}
 elif [ $1 = "pt" ]; then
   version=${PT_VER}
 elif [ $1 = "pxb23" ]; then
@@ -59,6 +63,8 @@ elif [ $1 = "psmdb40" ]; then
   version=${PSMDB40_VER}
 elif [ $1 = "psmdb42" ]; then
   version=${PSMDB42_VER}
+elif [ $1 = "psmdb44" ]; then
+  version=${PSMDB44_VER}
 elif [ $1 = "pmm" ]; then
   version=${PMM_VER}
 elif [ $1 = "pbm" ]; then
@@ -207,6 +213,10 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
     fi
   fi
 
+elif [ ${product} = "pxc80" ]; then
+  echo "Package check for PXC-80 is not implemented!"
+  exit 0
+
 elif [ ${product} = "pt" ]; then
   echo "Package check for PT is not implemented!"
   exit 1
@@ -285,7 +295,7 @@ elif [ "${product}" = "psmdb30" -o "${product}" = "psmdb32" -o "${product}" = "p
         fi
       done
     else
-      if [ "${product}" = "psmdb40" -o "${product}" = "psmdb42" ]; then
+      if [ "${product}" = "psmdb40" -o "${product}" = "psmdb42" -o "${product}" = "psmdb44" ]; then
         psmdb_name="percona-server-mongodb"
       else
         psmdb_name=""

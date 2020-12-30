@@ -63,13 +63,12 @@ COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_log_sink_json', 'component_log_filter_dragnet',
               'component_audit_api_message_emit']
 
-VERSION = '8.0.20'
+VERSION = os.environ.get("VERSION")
 
 
 def is_running(host):
     cmd = 'ps auxww| grep -v grep  | grep -c "mysql"'
     result = host.run(cmd)
-    print(result.stdout)
     stdout = int(result.stdout)
     if stdout == 0:
         return True
@@ -100,8 +99,7 @@ def test_check_rpm_package(host, package):
 def test_binary_version(host, binary):
     cmd = "{} --version".format(binary)
     result = host.run(cmd)
-    print(result.stdout)
-    assert result.rc == 0, result.stderr
+    assert result.rc == 0, (result.stderr, result.stdout)
     assert VERSION in result.stdout, result.stdout
 
 
@@ -110,8 +108,7 @@ def test_mysql_version(host, component):
     with host.sudo("root"):
         cmd = "mysql -e \"SELECT {}; \"| grep -c \"{}\"".format(component, VERSION)
         result = host.run(cmd)
-        print(result.stdout)
-        assert result.rc == 0, result.stderr
+        assert result.rc == 0, (result.stderr, result.stdout)
         assert int(result.stdout) == 1, result.stdout
 
 
@@ -119,8 +116,7 @@ def test_mysql_version(host, component):
 def test_plugins(host, plugin_command):
     with host.sudo("root"):
         result = host.run(plugin_command)
-        print(result.stdout)
-        assert result.rc == 0, result.stderr
+        assert result.rc == 0, (result.stderr, result.stdout)
 
 
 @pytest.mark.parametrize("component", COMPONENTS)

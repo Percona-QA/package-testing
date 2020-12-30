@@ -9,9 +9,9 @@
 
 - name: enable the PDMYSQL-80 repo
   command: percona-release enable-only pdpxc-{{ pdmysql_version }} {{ repo }}
-    vars:
-      repo: "{{ lookup('env', 'FROM_REPO') }}"
-      pdmysql_version: "{{ lookup('env', 'FROM_VERSION') }}"
+  vars:
+    repo: "{{ lookup('env', 'FROM_REPO') }}"
+    pdmysql_version: "{{ lookup('env', 'FROM_VERSION') }}"
 
 - name: clean and update yum cache
   shell: |

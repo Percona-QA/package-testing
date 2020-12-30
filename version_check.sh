@@ -73,6 +73,8 @@ elif [ "$1" = "psmdb40" ]; then
   version=${PSMDB40_VER}
 elif [ "$1" = "psmdb42" ]; then
   version=${PSMDB42_VER}
+elif [ "$1" = "psmdb44" ]; then
+  version=${PSMDB44_VER}
 else
   echo "Illegal product selected!"
   exit 1
@@ -137,6 +139,7 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" -o ${product} = "pxc80" ]; t
     echo "@@VERSION COMMENT is correct" >> "${log}"
   else
     echo "@@VERSION_COMMENT is incorrect"
+    mysql -e "SELECT @@VERSION_COMMENT;"
     exit 1
   fi
 
@@ -173,12 +176,6 @@ elif [ ${product} = "pmm2" ]; then
     echo "${product} version is not good!"
     exit 1
   else
-    sleep 60
-    status_check=$(pmm-admin status 2>&1|grep -c running)
-    if [ ${status_check} -eq 0 ]; then
-      echo "${product} agent status is not running!"
-      exit 1
-    fi
     echo "${product} version is correct and ${version}" >> "${log}"
   fi
 
@@ -232,12 +229,19 @@ elif [ ${product} = "pbm" ]; then
     echo "${product} revision is correct and ${revision}" >> "${log}"
   fi
 
-elif [ ${product} = "psmdb34" -o ${product} = "psmdb36" -o ${product} = "psmdb40" -o ${product} = "psmdb42" ]; then
-  for binary in mongo mongod mongos bsondump mongoexport mongofiles mongoimport mongorestore mongotop mongostat; do
+elif [ ${product} = "psmdb34" -o ${product} = "psmdb36" -o ${product} = "psmdb40" -o ${product} = "psmdb42" -o ${product} = "psmdb44" ]; then
+  ##PSMDB-544
+  declare -A new_bin_version=(["3.6"]="21" ["4.0"]="22" ["4.2"]="11" ["4.4"]="2")
+  ver="${version%-*}"; major_ver="${ver%.*}"; minor_ver="${ver##*.}"
+  binary=(mongo mongod mongos bsondump mongoexport mongofiles mongoimport mongorestore mongotop mongostat)
+  if (( $minor_ver >= "${new_bin_version[$major_ver]}" )); then
+     binary+=(mongobridge perconadecrypt)
+  fi
+  for binary in ${binary[@]}; do
     binary_version_check=$(${binary} --version|head -n1|grep -c "${version}")
     if [ ${binary_version_check} -eq 0  ]; then
-      echo "${product} version is not good for binary ${binary}!"
-      exit 1
+       echo "${product} version is not good for binary ${binary}!"
+       exit 1
     fi
   done
 

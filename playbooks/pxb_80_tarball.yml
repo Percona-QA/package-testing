@@ -72,18 +72,22 @@
   - name: install plugins, import world database
     command: /package-testing/plugins_test.sh
 
-  - name: run backup
+  - name: run backup for Redhat/Centos
     command: pxb80/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
     when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian
     command: pxb80/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
     when: ansible_os_family == "Debian"
 
   - name: prepare backup
     command: pxb80/bin/xtrabackup --prepare --target-dir=/tmp/backups/
 
-  - name: run backup with streaming and encryption enabled
+  - name: run backup for Redhat/Centos with streaming and encryption enabled
     shell: pxb80/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
     when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian with streaming and encryption enabled
     shell: pxb80/bin/xtrabackup --backup --user=root --target-dir=backups/ --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
     when: ansible_os_family == "Debian"
 

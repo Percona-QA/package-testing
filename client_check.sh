@@ -53,9 +53,9 @@ if [ -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
   fi
 else
  if [ "${product}" = "ps55" ] || [ "${product}" = "ps56" ] || [ "${product}" = "ps57" ]; then
-    apt-get install -y percona-server-client${deb_version}
+    apt-get update; apt-get install -y percona-server-client${deb_version}
   elif [ "${product}" = "ps80" ]; then
-    apt-get install -y percona-server-client percona-mysql-router percona-mysql-shell
+    apt-get update; apt-get install -y percona-server-client percona-mysql-router percona-mysql-shell
   elif [ "${product}" = "pxc56" ] || [ "${product}" = "pxc57" ]; then
     apt-get install -y percona-xtradb-cluster-client${deb_version}
   else
