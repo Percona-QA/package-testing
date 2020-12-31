@@ -90,7 +90,7 @@
 
 - name: install PBM new deb packages
   apt:
-    name: {{ DEB_PACKAGE }}
+    name: "{{ DEB_PACKAGE }}"
     update_cache: yes
   vars:
     version: "{{ lookup('env', 'FROM_VERSION') }}"
@@ -98,7 +98,7 @@
 
 - name: install PBM new rpm packages
   yum:
-    name: {{ RPM_PACKAGE }}
+    name: "{{ RPM_PACKAGE }}"
   when: ansible_os_family == "RedHat"
 
 - name: add storage for pbm-agent
