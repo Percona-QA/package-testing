@@ -7,4 +7,4 @@
     RPM_PACKAGE: "percona-backup-mongodb-{{ lookup('env', 'FROM_VERSION') }}"
     DEB_PACKAGE: "percona-backup-mongodb={{ lookup('env', 'FROM_VERSION') }}"
   roles:
-    - role: pbm
+    - role: pbm-upgrade
