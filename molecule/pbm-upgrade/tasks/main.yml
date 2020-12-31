@@ -80,15 +80,19 @@
 
 - name: install PBM new deb packages
   apt:
-    name: percona-backup-mongodb={{ lookup('env', 'FROM_VERSION') }}"
+    name: percona-backup-mongodb={{ version }}
     update_cache: yes
     state: latest
+  vars:
+    version: "{{ lookup('env', 'FROM_VERSION') }}"
   when: ansible_os_family == "Debian"
 
 - name: install PBM new rpm packages
   yum:
-    name: percona-backup-mongodb-"{{ lookup('env', 'FROM_VERSION') }}"
+    name: percona-backup-mongodb-{{ version }}
     state: latest
+  vars:
+    version: "{{ lookup('env', 'FROM_VERSION') }}"
   when: ansible_os_family == "RedHat"
 
 - name: add storage for pbm-agent
