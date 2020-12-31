@@ -3,5 +3,8 @@
   hosts: all
   become: true
   become_method: sudo
+  vars:
+    RPM_PACKAGE: "percona-backup-mongodb-{{ lookup('env', 'FROM_VERSION') }}"
+    DEB_PACKAGE: "percona-backup-mongodb={{ lookup('env', 'FROM_VERSION') }}"
   roles:
     - role: pbm

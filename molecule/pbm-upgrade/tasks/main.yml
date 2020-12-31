@@ -78,9 +78,19 @@
 - name: initiate mongod replica set
   command: mongo --eval 'rs.initiate()'
 
+- name: Print PBM debian package name
+  debug:
+    msg: Package for install {{ DEB_PACKAGE }}
+  when: ansible_os_family == "Debian"
+
+- name: Print PBM centos based package name
+  debug:
+    msg: Package for install {{ RPM_PACKAGE }}
+  when: ansible_os_family == "RedHat"
+
 - name: install PBM new deb packages
   apt:
-    name: percona-backup-mongodb={{ version }}
+    name: {{ DEB_PACKAGE }}
     update_cache: yes
   vars:
     version: "{{ lookup('env', 'FROM_VERSION') }}"
@@ -88,9 +98,7 @@
 
 - name: install PBM new rpm packages
   yum:
-    name: percona-backup-mongodb-{{ version }}
-  vars:
-    version: "{{ lookup('env', 'FROM_VERSION') }}"
+    name: {{ RPM_PACKAGE }}
   when: ansible_os_family == "RedHat"
 
 - name: add storage for pbm-agent
