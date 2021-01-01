@@ -14,7 +14,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 storage_configs = ['/etc/pbm-agent-storage.conf', '/etc/pbm-agent-storage-gcp.conf',
                    '/etc/pbm-agent-storage-local.conf']
 
-VERSION = os.getenv("VERSION")
+VERSION = os.getenv("VERSION").split("-")[0]
 
 
 def parse_yaml_string(ys):
