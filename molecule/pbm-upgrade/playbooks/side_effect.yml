@@ -3,6 +3,9 @@
   hosts: all
   become: true
   become_method: sudo
+  vars:
+    RPM_PACKAGE: "percona-backup-mongodb-{{ lookup('env', 'VERSION') }}"
+    DEB_PACKAGE: "percona-backup-mongodb={{ lookup('env', 'VERSION') }}.{{ ansible_distribution_release }}"
   tasks:
     - name: Stop pbm-agent service
       service:
@@ -11,13 +14,13 @@
 
     - name: Install new PBM version (APT)
       apt:
-        name: percona-backup-mongodb={{ lookup('env', 'VERSION') }}
+        name: "{{ DEB_PACKAGE }}"
         update_cache: yes
       when: ansible_os_family == "Debian"
 
     - name: Install new PBM version (YUM)
       yum:
-        name: percona-backup-mongodb-{{ lookup('env', 'VERSION') }}
+        name: "{{ RPM_PACKAGE }}"
       when: ansible_os_family == "RedHat"
 
     - name: Start pbm-agent service
