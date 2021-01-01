@@ -13,13 +13,11 @@
       apt:
         name: percona-backup-mongodb={{ lookup('env', 'VERSION') }}
         update_cache: yes
-        state: latest
       when: ansible_os_family == "Debian"
 
     - name: Install new PBM version (YUM)
       yum:
         name: percona-backup-mongodb-{{ lookup('env', 'VERSION') }}
-        state: latest
       when: ansible_os_family == "RedHat"
 
     - name: Start pbm-agent service
