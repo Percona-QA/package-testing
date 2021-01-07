@@ -4,7 +4,7 @@
   become: true
   become_method: sudo
   vars:
-    RPM_PACKAGE: "percona-backup-mongodb-{{ lookup('env', 'VERSION') }}"
+    RPM_PACKAGE: "percona-backup-mongodb-{{ lookup('env', 'VERSION') }}.el{{ ansible_distribution_major_version }}"
     DEB_PACKAGE: "percona-backup-mongodb={{ lookup('env', 'VERSION') }}.{{ ansible_distribution_release }}"
   tasks:
     - name: Stop pbm-agent service
