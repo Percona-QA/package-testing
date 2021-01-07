@@ -4,7 +4,7 @@
   become: true
   become_method: sudo
   vars:
-    RPM_PACKAGE: "percona-backup-mongodb-{{ lookup('env', 'FROM_VERSION') }}"
+    RPM_PACKAGE: "percona-backup-mongodb-{{ lookup('env', 'FROM_VERSION') }}.el{{ ansible_distribution_major_version }}"
     DEB_PACKAGE: "percona-backup-mongodb={{ lookup('env', 'FROM_VERSION') }}.{{ ansible_distribution_release }}"
   roles:
     - role: pbm-upgrade
