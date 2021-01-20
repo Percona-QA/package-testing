@@ -111,7 +111,7 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Centos7
-         stage('Centos6') {
+        stage('Centos6') {
           agent {
             label "min-centos-6-x64"
           }
