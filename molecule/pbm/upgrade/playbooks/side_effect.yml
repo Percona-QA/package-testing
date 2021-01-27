@@ -22,6 +22,7 @@
     - name: Install new PBM version (YUM)
       yum:
         name: "{{ RPM_PACKAGE }}"
+        allow_downgrade: yes
       when: ansible_os_family == "RedHat"
 
     - name: Start pbm-agent service
