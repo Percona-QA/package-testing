@@ -16,6 +16,7 @@
       apt:
         name: "{{ DEB_PACKAGE }}"
         update_cache: yes
+        force: yes
       when: ansible_os_family == "Debian"
 
     - name: Install new PBM version (YUM)
