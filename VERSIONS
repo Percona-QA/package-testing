@@ -1,7 +1,7 @@
 # This file includes all the latest versions of the products
 PT_VER="3.3.0"
 PMM_VER="1.17.4"
-PMM2_VER="2.14.0"
+PMM2_VER="2.14.1"
 PXB23_VER="2.3.10"
 PXB23_PKG_VER="1"
 PXB24_VER="2.4.21"
