@@ -1,8 +1,8 @@
-pipeline {
+m:pipeline {
   agent any
   parameters {
-    string(name: 'PXC_VERSION', defaultValue: '8.0.20-11.1', description: 'PXC full version')
-    string(name: 'PXC_REVISION', defaultValue: '683b26a', description: 'PXC revision')
+    string(name: 'PXC_VERSION', defaultValue: '5.6.50-28.44', description: 'PXC full version')
+    string(name: 'PXC_REVISION', defaultValue: '93ea5c8', description: 'PXC revision')
     string(name: 'WSREP_VERSION', defaultValue: '26.4.3', description: 'WSREP version')
     string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.31-rel34-43.2', description: 'PXC-5.7 package version')
     booleanParam( 
@@ -244,6 +244,35 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage CentOS7
+        stage('Centos6') {
+          agent {
+            label "min-centos-6-x64"
+          }
+          steps {
+            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+              sh '''
+                PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
+                MINIMAL=""
+                if [ BUILD_TYPE_MINIMAL ]; then
+                  MINIMAL="-minimal"
+                fi
+                if [ "${PXC_MAJOR_VERSION}" = "5.6" ]; then
+                  TARBALL_NAME="https://downloads.percona.com/downloads/TESTING/pxc56_centos6/Percona-XtraDB-Cluster-5.6.50-rel90.0-28.44.1.Linux.x86_64.ssl101.tar.gz"
+                  TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
+		else
+		  echo "ERROR: Wrong PXC version"
+		  exit 1
+                fi
+                rm -rf package-testing
+                sudo yum install -y git wget
+                git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
+                cd package-testing/binary-tarball-tests/pxc
+                ./run.sh || true
+              '''
+            }
+            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+          } //End steps
+        } //End stage CentOS6
        } //End parallel
     } //End stage Run tests
   } //End stages
