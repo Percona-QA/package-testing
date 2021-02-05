@@ -40,7 +40,9 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: disable selinux
-    selinux: state=enforcing
+    selinux:
+      policy: targeted
+      state: enforcing
     when: ansible_os_family == "RedHat"
 
   - name: add firewall rules

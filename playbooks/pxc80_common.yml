@@ -31,7 +31,9 @@
     when: lookup('env', 'install_repo') == "main"
 
   - name: disable selinux
-    selinux: state=enforcing
+    selinux: 
+      policy: targeted
+      state: enforcing
     when: ansible_os_family == "RedHat"
 
   - name: add firewall rules
