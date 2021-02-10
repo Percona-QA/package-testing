@@ -39,11 +39,11 @@
       - python3-libselinux
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: disable selinux
-    selinux:
-      policy: targeted
-      state: enforcing
-    when: ansible_os_family == "RedHat"
+# - name: disable selinux
+#   selinux:
+#     policy: targeted
+#     state: enforcing
+#   when: ansible_os_family == "RedHat"
 
   - name: add firewall rules
     command: /sbin/iptables -I INPUT -s {{item}} -p tcp -j ACCEPT
