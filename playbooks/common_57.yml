@@ -107,13 +107,9 @@
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps57
 
-  - name: check that Percona Toolkit version is correct
-    command: /package-testing/version_check.sh pt
+  - name: check that sysbench version is correct
+    command: /package-testing/version_check.sh sysbench
     when: lookup('env', 'install_repo') != "experimental"
-
-# - name: check that sysbench version is correct
-#   command: /package-testing/version_check.sh sysbench
-#   when: lookup('env', 'install_repo') != "experimental"
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
