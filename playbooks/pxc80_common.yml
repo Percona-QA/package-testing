@@ -30,11 +30,11 @@
     include: ../tasks/enable_pxc80_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
-  - name: disable selinux
-    selinux: 
-      policy: targeted
-      state: enforcing
-    when: ansible_os_family == "RedHat"
+# - name: disable selinux
+#   selinux: 
+#     policy: targeted
+#     state: enforcing
+#   when: ansible_os_family == "RedHat"
 
   - name: add firewall rules
     command: /sbin/iptables -I INPUT -s {{item}} -p tcp -j ACCEPT
