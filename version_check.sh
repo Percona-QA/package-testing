@@ -104,7 +104,7 @@ if [ "${product}" = "ps55" -o "${product}" = "ps56" -o "${product}" = "ps57" -o 
     elif [ "$(mysql -e "SELECT ${i}; "| grep -c "${version}")" = 1 ]; then
       echo "${i} is correct" >> "${log}"
     else
-      echo "${i} is incorrect"
+      echo "${i} is incorrect it shows $(mysql -e "SELECT ${i};")"
       exit 1
     fi
  done
