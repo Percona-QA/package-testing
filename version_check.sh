@@ -181,8 +181,9 @@ elif [ ${product} = "pmm2" ]; then
 
 elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; then
   version_check=$(xtrabackup --version 2>&1|grep -c ${version})
+  installed_version=$(xtrabackup --version 2>&1|tail -1|awk '{print $3}')
     if [ ${version_check} -eq 0 ]; then
-      echo "${product} version is not good!"
+      echo "${product} version is not good! Installed version: ${installed_version} Expected version: ${version}"
       exit 1
     else
       echo "${product} version is correct and ${version}" >> "${log}"
