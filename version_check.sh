@@ -80,19 +80,6 @@ else
   exit 1
 fi
 
-# This function checks that pxb 8.0 tools have correct version
-function xbt_test {
-  for i in xbstream xbcloud xbcrypt; do
-    version_check=$($i --help | grep -c "${version}")
-    if [ "${version_check}" -eq 0 ]; then
-       echo "${i} version is not good!"
-       exit 1
-    else
-       echo "${i} version is correct and ${version}" >> "${log}"
-    fi
-  done
-}
-
 product=$1
 log="/tmp/${product}_version_check.log"
 echo -n > "${log}"
@@ -179,18 +166,17 @@ elif [ ${product} = "pmm2" ]; then
     echo "${product} version is correct and ${version}" >> "${log}"
   fi
 
-elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; then
-  version_check=$(xtrabackup --version 2>&1|grep -c ${version})
-  installed_version=$(xtrabackup --version 2>&1|tail -1|awk '{print $3}')
-    if [ ${version_check} -eq 0 ]; then
-      echo "${product} version is not good! Installed version: ${installed_version} Expected version: ${version}"
-      exit 1
-    else
-      echo "${product} version is correct and ${version}" >> "${log}"
-    fi
-    if [ ${product} = "pxb80" ]; then
-      xbt_test
-    fi
+elif [ "${product}" = "pxb24" -o "${product}" = "pxb80" ]; then
+    for binary in xtrabackup xbstream xbcloud xbcrypt; do
+        version_check=$($binary --version 2>&1| grep -c "${version}")
+        installed_version=$($binary --version 2>&1|tail -1|awk '{print $3}')
+        if [ "${version_check}" -eq 0 ]; then
+            echo "${binary} version is incorrect! Expected version: ${version} Installed version: ${installed_version}"
+            exit 1
+        else
+            echo "${binary} version is correctly displayed as: ${version}" >> "${log}"
+        fi
+    done
 
 elif [ ${product} = "proxysql" -o ${product} = "proxysql2" ]; then
   version_check=$(proxysql --version 2>&1|grep -c ${version})

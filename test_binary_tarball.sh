@@ -2,7 +2,7 @@
 
 if [ "$#" -ne 3 ]; then
   echo "This script requires the product parameter: pxb24/pxb80 main/testing normal/minimal!"
-  echo "Usage: ./$0 <product> <repo> <binary type>"
+  echo "Usage: $0 <product> <repo> <binary type>"
   exit 1
 fi
 
@@ -145,26 +145,17 @@ for binary in $exec_files; do
 done
 
 echo "Check version for binaries in tarball: ${tarball_dir}" >> "${log}"
-if [ ${product} = "pxb24" -o ${product} = "pxb80" ]; then
-  version_check=$(${tarball_dir}/bin/xtrabackup --version 2>&1|grep -c ${version})
-    if [ ${version_check} -eq 0 ]; then
-      echo "xtrabackup version is incorrect! Expected version: ${version}"
-      exit 1
-    else
-      echo "xtrabackup version is correctly displayed as: ${version}" >> "${log}"
-    fi
-
-    if [ ${product} = "pxb80" ]; then
-        for i in xbstream xbcloud xbcrypt; do
-            version_check=$(${tarball_dir}/bin/$i --help | grep -c "${version}")
-            if [ "${version_check}" -eq 0 ]; then
-                echo "${i} version is incorrect! Expected version: ${version}"
-                exit 1
-            else
-                echo "${i} version is correctly displayed as: ${version}" >> "${log}"
-            fi
-        done
-    fi
+if [ "${product}" = "pxb24" -o "${product}" = "pxb80" ]; then
+    for binary in xtrabackup xbstream xbcloud xbcrypt; do
+        version_check=$("${tarball_dir}"/bin/$binary --version 2>&1| grep -c "${version}")
+        installed_version=$("${tarball_dir}"/bin/$binary --version 2>&1|tail -1|awk '{print $3}')
+        if [ "${version_check}" -eq 0 ]; then
+            echo "${binary} version is incorrect! Expected version: ${version} Installed version: ${installed_version}"
+            exit 1
+        else
+            echo "${binary} version is correctly displayed as: ${version}" >> "${log}"
+        fi
+    done
 fi
 
 if [ ${product} = "psmdb40" -o ${product} = "psmdb42" ]; then
