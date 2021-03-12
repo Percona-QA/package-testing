@@ -55,7 +55,7 @@
     include_tasks: ../tasks/install_ps80.yml
 
   - name: install and check Percona XtraBackup 8.0 tarball
-    command: /package-testing/test_binary_tarball.sh pxb80
+    command: /package-testing/test_binary_tarball.sh pxb80 testing normal
 
   - name: start mysql service with service command
     command: service mysql start
