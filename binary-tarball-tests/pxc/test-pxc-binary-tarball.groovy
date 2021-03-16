@@ -115,9 +115,9 @@ void run_test() {
     fi
     rm -rf package-testing
     if [ -f /usr/bin/yum ]; then
-      sudo yum install -y git wget
+      sudo yum install -y git wget percona-xtrabackup-24
     else
-      sudo apt install -y git wget lsb-release
+      sudo apt install -y git wget lsb-release percona-xtrabackup-24
     fi
     git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
     cd package-testing/binary-tarball-tests/pxc
