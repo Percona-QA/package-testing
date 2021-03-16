@@ -13,7 +13,7 @@ if pxc_version_major == "5.7":
   print(pxc_version)
   print(pxc57_pkg_version)
   pxc57_client_version = pxc_version.split('-')[0] + '-' + pxc_version.split('-')[1]
-  pxc57_server_version = pxc57_pkg_version.split('-')[0] + '-rel' + pxc_version.split('-')[1] + '-' + pxc_version.split('-')[2]
+  pxc57_server_version = pxc57_pkg_version.split('-')[0] + '-rel' + pxc57_pkg_version.split('-')[1] + '-' + pxc57_pkg_version.split('-')[2]
 
 # 8.0
 pxc80_binaries = (
@@ -79,13 +79,13 @@ pxc57_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 pxc57_files = (
-  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.20.3.18' ,
+  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.20.3.20' ,
   'lib/libmysqlservices.a' , 'lib/libcoredumper.a', 'lib/mysql/plugin/audit_log.so',
   'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so',
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
 pxc57_symlinks = (
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.18'), ('lib/libncurses.so','lib/private/libncurses.so.5.7'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.20'), ('lib/libncurses.so','lib/private/libncurses.so.5.7'),
   ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.1e'), ('lib/libssl.so','lib/private/libssl.so.1.0.1e'),
   ('lib/libk5crypto.so','lib/private/libk5crypto.so.3.1'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.7'),
   ('lib/libsasl2.so','lib/private/libsasl2.so.2.0.23'), ('lib/libreadline.so','lib/private/libreadline.so.6.0'),
