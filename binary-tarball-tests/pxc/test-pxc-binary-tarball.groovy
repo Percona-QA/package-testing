@@ -110,7 +110,7 @@ void run_test() {
       TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.17${MINIMAL}.tar.gz"
       TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
     elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
-      TARBALL_NAME="Percona-XtraDB-Cluster-${PXC_VERSION}.Linux.x86_64.glibc2.17${MINIMAL}.tar.gz"
+      TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.17${MINIMAL}.tar.gz"
       TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
     fi
     rm -rf package-testing
