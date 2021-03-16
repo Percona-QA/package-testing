@@ -10,6 +10,8 @@ wsrep_version = os.getenv('WSREP_VERSION')
 pxc_version_percona = pxc_version.split('-')[0]
 pxc_version_major = pxc_version_percona.split('.')[0] + '.' + pxc_version_percona.split('.')[1]
 if pxc_version_major == "5.7":
+  print(pxc_version)
+  print(pxc57_pkg_version)
   pxc57_client_version = pxc_version.split('-')[0] + '-' + pxc_version.split('-')[1]
   pxc57_server_version = pxc57_pkg_version.split('-')[0] + '-rel' + pxc_version.split('-')[1] + '-' + pxc_version.split('-')[2]
 
