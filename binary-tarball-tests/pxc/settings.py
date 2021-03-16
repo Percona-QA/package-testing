@@ -4,7 +4,7 @@ import os
 base_dir = os.getenv('BASE_DIR')
 pxc_version = os.getenv('PXC_VERSION')
 pxc_revision = os.getenv('PXC_REVISION')
-pxc_57_pkg_version = os.getenv('PXC57_PKG_VERSION')
+pxc57_pkg_version = os.getenv('PXC57_PKG_VERSION')
 wsrep_version = os.getenv('WSREP_VERSION')
 
 pxc_version_percona = pxc_version.split('-')[0]
