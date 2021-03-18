@@ -84,6 +84,11 @@
               mode=0640 owner=root group=root
     when: ansible_os_family == "RedHat"
 
+  - name: copy pxc certs
+    copy:
+      src: /package-testing/support-files/certs/
+      dest: /etc/mysql/certs/
+
   - name: start mysql service
     service: name=mysql state=started
 
