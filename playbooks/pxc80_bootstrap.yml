@@ -84,7 +84,7 @@
 
   - name: copy pxc certs
     copy:
-      src: /package-testing/support-files/certs/
+      src: ../support-files/certs/
       dest: /etc/mysql/certs/
 
   - name: configure PXC on debian/ubuntu
