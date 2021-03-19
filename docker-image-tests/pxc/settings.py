@@ -49,8 +49,8 @@ pxc80_functions = (
 
 # 5.7
 pxc57_packages = (
-  'Percona-Server-client-57', 'Percona-Server-rocksdb-57', 'Percona-Server-server-57',
-  'Percona-Server-shared-57', 'Percona-Server-tokudb-57'
+  'Percona-Server-shared-compat-57', 'Percona-XtraDB-Cluster-shared-57', 'Percona-XtraDB-Cluster-server-57',
+  'Percona-Server-shared-57', 'Percona-XtraDB-Cluster-client-57', 'percona-xtrabackup-24'
 )
 pxc57_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/ps-admin', '/usr/bin/mysqladmin', '/usr/bin/mysqlbinlog',
