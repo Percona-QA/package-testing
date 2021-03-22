@@ -17,7 +17,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: change the default repo to testing
-    command: percona-release enable original testing
+    command: percona-release enable-only pxc-57 testing
 
   - name: enable pxb24 repo
     command: percona-release enable pxb-24 release
