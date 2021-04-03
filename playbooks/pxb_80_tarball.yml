@@ -7,6 +7,9 @@
 - hosts: all
   become: true
   become_method: sudo
+  vars:
+    binary_type: "{{ lookup('env', 'binary_type') }}"
+    install_repo: "{{ lookup('env', 'install_repo') }}"
 
   tasks:
   - name: include tasks for test env setup
@@ -55,7 +58,7 @@
     include_tasks: ../tasks/install_ps80.yml
 
   - name: install and check Percona XtraBackup 8.0 tarball
-    command: /package-testing/test_binary_tarball.sh pxb80
+    command: /package-testing/test_binary_tarball.sh pxb80 {{ install_repo }} {{ binary_type }}
 
   - name: start mysql service with service command
     command: service mysql start

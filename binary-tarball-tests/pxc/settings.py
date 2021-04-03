@@ -4,14 +4,16 @@ import os
 base_dir = os.getenv('BASE_DIR')
 pxc_version = os.getenv('PXC_VERSION')
 pxc_revision = os.getenv('PXC_REVISION')
+pxc57_pkg_version = os.getenv('PXC57_PKG_VERSION')
 wsrep_version = os.getenv('WSREP_VERSION')
 
 pxc_version_percona = pxc_version.split('-')[0]
 pxc_version_major = pxc_version_percona.split('.')[0] + '.' + pxc_version_percona.split('.')[1]
-if pxc_version_major != "8.0":
+if pxc_version_major == "5.7":
+  print(pxc_version)
+  print(pxc57_pkg_version)
   pxc57_client_version = pxc_version.split('-')[0] + '-' + pxc_version.split('-')[1]
-  pxc57_server_version = pxc_version.split('-')[0] + '-rel' + pxc_version.split('-')[1] + '-' + pxc_version.split('-')[
-    2]
+  pxc57_server_version = pxc57_pkg_version.split('-')[0] + '-rel' + pxc57_pkg_version.split('-')[1] + '-' + pxc57_pkg_version.split('-')[2]
 
 # 8.0
 pxc80_binaries = (
@@ -39,7 +41,7 @@ pxc80_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 pxc80_files = (
-  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.1.21' ,
+  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.1.22' ,
   'lib/libmysqlservices.a' , 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini', 'lib/plugin/keyring_file.so',
@@ -49,7 +51,7 @@ pxc80_symlinks = (
   ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'), ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
   ('lib/libgcrypt.so','lib/private/libgcrypt.so.11.8.2'), ('lib/libnspr4.so','lib/private/libnspr4.so'),
   ('lib/libnss3.so','lib/private/libnss3.so'),  ('lib/libnssutil3.so','lib/private/libnssutil3.so'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.1.21'), ('lib/libplc4.so','lib/private/libplc4.so'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.1.22'), ('lib/libplc4.so','lib/private/libplc4.so'),
   ('lib/libplds4.so','lib/private/libplds4.so'), ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
   ('lib/libsmime3.so','lib/private/libsmime3.so'), ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
   ('lib/libssl3.so','lib/private/libssl3.so'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
@@ -77,13 +79,13 @@ pxc57_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 pxc57_files = (
-  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.20.3.18' ,
+  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.20.3.20' ,
   'lib/libmysqlservices.a' , 'lib/libcoredumper.a', 'lib/mysql/plugin/audit_log.so',
   'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so',
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
 pxc57_symlinks = (
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.18'), ('lib/libncurses.so','lib/private/libncurses.so.5.7'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.20'), ('lib/libncurses.so','lib/private/libncurses.so.5.9'),
   ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.1e'), ('lib/libssl.so','lib/private/libssl.so.1.0.1e'),
   ('lib/libk5crypto.so','lib/private/libk5crypto.so.3.1'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.7'),
   ('lib/libsasl2.so','lib/private/libsasl2.so.2.0.23'), ('lib/libreadline.so','lib/private/libreadline.so.6.0'),

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ "$#" -ne 1 ]; then
-  echo "This script requires the product parameter: pxb24, pxb80!"
-  echo "Usage: ./$0 <product>"
+if [ "$#" -ne 3 ]; then
+  echo "This script requires the product parameter: pxb24/pxb80 main/testing normal/minimal!"
+  echo "Usage: $0 <product> <repo> <binary type>"
   exit 1
 fi
 
@@ -19,26 +19,64 @@ if [ "$1" = "pxb80" ]; then
     major_version="${PXB80_VER}"
     minor_version="${PXB80PKG_VER}"
     echo "Downloading ${1} latest version..." >> "${log}"
-    wget https://www.percona.com/downloads/Percona-XtraBackup-LATEST/Percona-XtraBackup-${major_version}-${minor_version}/binary/tarball/percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17.tar.gz
-    tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17"
+    if [ "$2" = "main" ]; then
+        if [ "$3" = "normal" ]; then
+            wget https://www.percona.com/downloads/Percona-XtraBackup-LATEST/Percona-XtraBackup-${major_version}-${minor_version}/binary/tarball/percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17.tar.gz
+            tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17"
+        else
+            # Download minimal version
+            wget https://www.percona.com/downloads/Percona-XtraBackup-LATEST/Percona-XtraBackup-${major_version}-${minor_version}/binary/tarball/percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17-minimal.tar.gz
+            tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17-minimal"
+        fi
+
+    else
+        # Use testing repo/link to download tarball
+        if [ "$3" = "normal" ]; then
+            wget https://downloads.percona.com/downloads/TESTING/pxb-${major_version}-${minor_version}/percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17.tar.gz
+            tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17"
+        else
+            # Download minimal version
+            wget https://downloads.percona.com/downloads/TESTING/pxb-${major_version}-${minor_version}/percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17-minimal.tar.gz
+            tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17-minimal"
+        fi
+    fi
 
     echo "Extracting binary" >> "${log}"
-    tar -xf percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17.tar.gz
+    tar -xf ${tarball_dir}.tar.gz
     mv ${tarball_dir} ${product}
     tarball_dir=${product}
 
     exec_files="xbcloud xbcrypt xbstream xtrabackup"
 
-elif [ $1 = "pxb24" ]; then
+elif [ "$1" = "pxb24" ]; then
     product="pxb24"
     version="${PXB24_VER}"
 
     echo "Downloading ${1} latest version..." >> "${log}"
-    wget https://www.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-${version}/binary/tarball/percona-xtrabackup-${version}-Linux-x86_64.glibc2.12.tar.gz
-    tarball_dir="percona-xtrabackup-${version}-Linux-x86_64.glibc2.12"
+    if [ "$2" = "main" ]; then
+        if [ "$3" = "normal" ]; then
+            wget https://www.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-${version}/binary/tarball/percona-xtrabackup-${version}-Linux-x86_64.glibc2.12.tar.gz
+            tarball_dir="percona-xtrabackup-${version}-Linux-x86_64.glibc2.12"
+        else
+            # Download minimal version
+            wget https://www.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-${version}/binary/tarball/percona-xtrabackup-${version}-Linux-x86_64.glibc2.12-minimal.tar.gz
+            tarball_dir="percona-xtrabackup-${version}-Linux-x86_64.glibc2.12-minimal"
+        fi
+
+    else
+        # Use testing repo/link to download tarball
+        if [ "$3" = "normal" ]; then
+            wget https://downloads.percona.com/downloads/TESTING/pxb-${version}/percona-xtrabackup-${version}-Linux-x86_64.glibc2.12.tar.gz
+            tarball_dir="percona-xtrabackup-${version}-Linux-x86_64.glibc2.12"
+        else
+            # Download minimal version
+            wget https://downloads.percona.com/downloads/TESTING/pxb-${version}/percona-xtrabackup-${version}-Linux-x86_64.glibc2.12-minimal.tar.gz
+            tarball_dir="percona-xtrabackup-${version}-Linux-x86_64.glibc2.12-minimal"
+        fi
+    fi
 
     echo "Extracting binary" >> "${log}"
-    tar -xf percona-xtrabackup-${version}-Linux-x86_64.glibc2.12.tar.gz
+    tar -xf ${tarball_dir}.tar.gz
     mv ${tarball_dir} ${product}
     tarball_dir=${product}
 
@@ -107,26 +145,17 @@ for binary in $exec_files; do
 done
 
 echo "Check version for binaries in tarball: ${tarball_dir}" >> "${log}"
-if [ ${product} = "pxb24" -o ${product} = "pxb80" ]; then
-  version_check=$(${tarball_dir}/bin/xtrabackup --version 2>&1|grep -c ${version})
-    if [ ${version_check} -eq 0 ]; then
-      echo "xtrabackup version is incorrect! Expected version: ${version}"
-      exit 1
-    else
-      echo "xtrabackup version is correctly displayed as: ${version}" >> "${log}"
-    fi
-
-    if [ ${product} = "pxb80" ]; then
-        for i in xbstream xbcloud xbcrypt; do
-            version_check=$(${tarball_dir}/bin/$i --help | grep -c "${version}")
-            if [ "${version_check}" -eq 0 ]; then
-                echo "${i} version is incorrect! Expected version: ${version}"
-                exit 1
-            else
-                echo "${i} version is correctly displayed as: ${version}" >> "${log}"
-            fi
-        done
-    fi
+if [ "${product}" = "pxb24" -o "${product}" = "pxb80" ]; then
+    for binary in xtrabackup xbstream xbcloud xbcrypt; do
+        version_check=$("${tarball_dir}"/bin/$binary --version 2>&1| grep -c "${version}")
+        installed_version=$("${tarball_dir}"/bin/$binary --version 2>&1|tail -1|awk '{print $3}')
+        if [ "${version_check}" -eq 0 ]; then
+            echo "${binary} version is incorrect! Expected version: ${version} Installed version: ${installed_version}"
+            exit 1
+        else
+            echo "${binary} version is correctly displayed as: ${version}" >> "${log}"
+        fi
+    done
 fi
 
 if [ ${product} = "psmdb40" -o ${product} = "psmdb42" ]; then

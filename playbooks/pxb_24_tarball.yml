@@ -47,8 +47,13 @@
   - name: install Percona Server 5.7 packages
     include_tasks: ../tasks/install_ps57.yml
 
-  - name: install and check Percona XtraBackup 2.4 tarball
-    command: /package-testing/test_binary_tarball.sh pxb24
+  - name: install and check Percona XtraBackup 2.4 normal tarball from testing downloads area
+    command: /package-testing/test_binary_tarball.sh pxb24 testing normal
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: install and check Percona XtraBackup 2.4 normal tarball from main downloads area
+    command: /package-testing/test_binary_tarball.sh pxb24 main normal
+    when: lookup('env', 'install_repo') == "main"
 
   - name: start mysql service with service command
     command: service mysql start
@@ -64,6 +69,42 @@
 
   - name: install plugins, import world database
     command: /package-testing/plugins_test.sh
+
+  - name: run backup for Redhat/Centos
+    command: pxb24/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian
+    command: pxb24/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
+    when: ansible_os_family == "Debian"
+
+  - name: prepare backup
+    command: pxb24/bin/xtrabackup --prepare --target-dir=/tmp/backups/
+
+  - name: run backup for Redhat/Centos with streaming and encryption enabled
+    shell: pxb24/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian with streaming and encryption enabled
+    shell: pxb24/bin/xtrabackup --backup --user=root --target-dir=backups/ --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "Debian"
+
+  - name: extract and decrypt backup
+    shell: pxb24/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream
+
+  - name: prepare backup
+    command: pxb24/bin/xtrabackup --prepare --target-dir=backups/
+
+  - name: remove backup files
+    command: rm -r pxb24 backups /tmp/backups
+
+  - name: install and check Percona XtraBackup 2.4 minimal tarball from testing downloads area
+    command: /package-testing/test_binary_tarball.sh pxb24 testing minimal
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: install and check Percona XtraBackup 2.4 minimal tarball from main downloads area
+    command: /package-testing/test_binary_tarball.sh pxb24 main minimal
+    when: lookup('env', 'install_repo') == "main"
 
   - name: run backup for Redhat/Centos
     command: pxb24/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock

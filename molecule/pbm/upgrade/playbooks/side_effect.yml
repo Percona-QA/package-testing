@@ -1,0 +1,32 @@
+---
+- name: Side Effect
+  hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    RPM_PACKAGE: "percona-backup-mongodb-{{ lookup('env', 'VERSION') }}.el{{ ansible_distribution_major_version }}"
+    DEB_PACKAGE: "percona-backup-mongodb={{ lookup('env', 'VERSION') }}.{{ ansible_distribution_release }}"
+  tasks:
+    - name: Stop pbm-agent service
+      service:
+        name: pbm-agent
+        state: stopped
+
+    - name: Install new PBM version (APT)
+      apt:
+        name: "{{ DEB_PACKAGE }}"
+        update_cache: yes
+        force: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install new PBM version (YUM)
+      yum:
+        name: "{{ RPM_PACKAGE }}"
+        allow_downgrade: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Start pbm-agent service
+      service:
+        name: pbm-agent
+        state: started
+        enabled: yes

@@ -21,6 +21,10 @@
       yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
+#    - name: setup epel 6 repo
+#      yum: name=http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm state=present
+#      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
     - name: setup ca-certificates release
       yum:
         name: ca-certificates
@@ -28,12 +32,12 @@
         state: present
       when: ansible_os_family == "RedHat"
 
-    - name: setup epel release
+    - name: setup epel release centos 7
       yum:
         name: epel-release
         update_cache: yes
         state: present
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "8"
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
 
     - name: install needed packages for running tests with apt

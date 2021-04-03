@@ -1,10 +1,10 @@
 pipeline {
   agent any 
   parameters {
-    string(name: 'PXC_VERSION', defaultValue: '8.0.21-12.1', description: 'PXC full version')
-    string(name: 'PXC_REVISION', defaultValue: '53aeb90', description: 'PXC revision')
+    string(name: 'PXC_VERSION', defaultValue: '8.0.22-13.1', description: 'PXC full version')
+    string(name: 'PXC_REVISION', defaultValue: '428f061', description: 'PXC revision')
     string(name: 'WSREP_VERSION', defaultValue: '26.4.3', description: 'WSREP version')
-    string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.31-rel34-43.2', description: 'PXC-5.7 package version')
+    string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.33-rel36-49.1', description: 'PXC-5.7 package version')
     booleanParam( 
       defaultValue: false,
       name: 'BUILD_TYPE_MINIMAL'
@@ -110,14 +110,14 @@ void run_test() {
       TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.17${MINIMAL}.tar.gz"
       TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
     elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
-      TARBALL_NAME="Percona-XtraDB-Cluster-${PXC_VERSION}-Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
+      TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc2.17${MINIMAL}.tar.gz"
       TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
     fi
     rm -rf package-testing
     if [ -f /usr/bin/yum ]; then
       sudo yum install -y git wget
     else
-      sudo apt install -y git wget lsb-release
+      sudo apt install -y git wget
     fi
     git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
     cd package-testing/binary-tarball-tests/pxc
