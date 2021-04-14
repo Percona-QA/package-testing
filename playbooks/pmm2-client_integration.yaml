@@ -9,8 +9,17 @@
   become_method: sudo
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
+    metrics_mode: "{{ lookup('env', 'METRICS_MODE') }}"
 
   tasks:
+  - name: Register Instance IP
+    shell: echo $(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
+    register: instance_ip
+
+  - name: Register Instance IP as a variable
+    set_fact:
+      instance_ip: "{{ instance_ip.stdout }}"
+
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
@@ -40,11 +49,21 @@
 
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
-  - name: configure pmm client to connect to server
-    shell: pmm-agent setup --server-address={{ pmm_server_address }}:443 --server-insecure-tls --server-username=admin --server-password=admin $(ip addr show|grep "inet 10."|grep -o "10.*/"|sed 's:/::')
+  - name: check that PMM client version is correct
+    command: /package-testing/version_check.sh pmm2-rc
+    when: lookup('env', 'install_repo') == "experimental"
 
-### start PS
+  - name: configure pmm client to connect to server in push/auto Mode
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --server-url=http://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic linode_{{ instance_ip }}
+    when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
+
+  - name: configure pmm client to connect to server in pull Mode
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --server-url=http://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic linode_{{ instance_ip }}
+    when: lookup('env', 'metrics_mode') == "pull"
+
+### start PS5.7
   - name: install Percona Server 5.7 packages
     include_tasks: ../tasks/install_ps57.yml
 
@@ -74,7 +93,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: add mysql instance for monitoring
-    command: pmm-admin add mysql --socket=/var/run/mysqld/mysqld.sock
+    command: pmm-admin add mysql --query-source=perfschema --socket=/var/run/mysqld/mysqld.sock --service-name=mysql_{{ instance_ip }}
     when: ansible_os_family != "RedHat"
 
   - name: check if mysql monitoring running
@@ -85,15 +104,16 @@
     assert:
       that:
         - "'MySQL' in list_output.stdout"
-### end PS
+## end PS
 
-### start PSMDB
-  - name: install Percona Server for MongoDB 3.6
-    include_tasks: ../tasks/install_psmdb_36.yml
+### start PSMDB4.4
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_psmdb_repo.yml
+    vars:
+      psmdb_repo: "psmdb-44"
 
-  - name: start mongod with init script
-    command: /etc/init.d/mongod start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "5"
+  - name: install PSMDB packages
+    include_tasks: ../tasks/install_psmdb.yml
 
   - name: start mongod with service
     command: service mongod start
@@ -101,11 +121,10 @@
 
   - name: start mongod with systemctl
     command: systemctl start mongod
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 6
 
   - name: add mongodb metrics to monitoring
-    command: pmm-admin add mongodb
-    when: ansible_distribution_release != "wheezy"
+    command: pmm-admin add mongodb --service-name=mongodb_{{ instance_ip }}
 
   - name: check if mongodb monitoring is running
     command: pmm-admin list
@@ -116,6 +135,68 @@
       that:
         - "'MongoDB' in list_output.stdout"
 ### end PSMDB
+
+### start pgsql13
+
+  - name: Enable postgresql repository
+    command: percona-release setup -y ppg-13
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+
+  - name: include tasks for setting up pg13
+    include_tasks: ../ppg-testing/tasks/install_ppg13.yml
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+
+  - name: Initialize Postgres RHEL
+    command: /usr/pgsql-13/bin/postgresql-13-setup initdb
+    environment:
+      PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    when: ansible_os_family == "RedHat"
+
+  - name: Start Postgres RHEL
+    service:
+      name: postgresql-13
+      state: started
+      enabled: true
+    when: ansible_os_family == "RedHat"
+
+  - name: Start postgresql service for Debian based
+    service:
+      name: postgresql
+      state: started
+      enabled: true
+    when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
+
+  - name: create lowercase 8 character password for pgsql
+    set_fact:
+      random_pgsql_password: "psql-{{ lookup('password', '/tmp/pgsqlpassword chars=ascii_lowercase,digits length=8') }}"
+
+  - name: Change Postgresql Password
+    command: psql -c "ALTER USER postgres PASSWORD '{{ random_pgsql_password }}';"
+    become: yes
+    become_user: postgres
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+
+  - name: add postgresql metrics to monitoring
+    command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }}
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+
+  - name: check if postgresql monitoring is running
+    command: pmm-admin list
+    register: list_output
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+
+  - name: Print the pmm-admin list value
+    ansible.builtin.debug:
+      msg: System {{ list_output.stdout }}
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+
+  - name: Assert if the pmm-admin list contains postgreSQL instance
+    assert:
+      that:
+        - "'PostgreSQL' in list_output.stdout"
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+
+## end PG
 
   - name: run pmm-admin list
     command: pmm-admin list
