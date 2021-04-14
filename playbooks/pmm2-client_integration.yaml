@@ -52,7 +52,7 @@
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: check that PMM client version is correct
-    command: /package-testing/version_check.sh pmm2 rc
+    command: /package-testing/version_check.sh pmm2-rc
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: configure pmm client to connect to server in push/auto Mode

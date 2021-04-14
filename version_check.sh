@@ -55,11 +55,9 @@ elif [ "$1" = "pxb80" ]; then
 elif [ "$1" = "pmm" ]; then
   version=${PMM_VER}
 elif [ "$1" = "pmm2" ]; then
-  if [ "$2" = "rc" ]; then
-    version=${PMM2_RC_VER}
-  else
-    version=${PMM2_VER}
-  fi
+  version=${PMM2_VER}
+elif [ "$1" = "pmm2-rc" ]; then
+  version=${PMM2_RC_VER}
 elif [ "$1" = "proxysql" ]; then
   version=${PROXYSQL_VER}
 elif [ "$1" = "proxysql2" ]; then
