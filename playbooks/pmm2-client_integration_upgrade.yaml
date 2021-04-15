@@ -125,11 +125,11 @@
 
   - name: Enable postgresql repository
     command: percona-release setup -y ppg-13
-    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+    when: ansible_distribution_release != 'xenial'
 
   - name: include tasks for setting up pg13
     include_tasks: ../ppg-testing/tasks/install_ppg13.yml
-    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+    when: ansible_distribution_release != 'xenial'
 
   - name: Initialize Postgres RHEL
     command: /usr/pgsql-13/bin/postgresql-13-setup initdb
@@ -159,27 +159,27 @@
     command: psql -c "ALTER USER postgres PASSWORD '{{ random_pgsql_password }}';"
     become: yes
     become_user: postgres
-    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+    when: ansible_distribution_release != 'xenial'
 
   - name: add postgresql metrics to monitoring
     command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }}
-    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+    when: ansible_distribution_release != 'xenial'
 
   - name: check if postgresql monitoring is running
     command: pmm-admin list
     register: list_output
-    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+    when: ansible_distribution_release != 'xenial'
 
   - name: Print the pmm-admin list value
     ansible.builtin.debug:
       msg: System {{ list_output.stdout }}
-    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+    when: ansible_distribution_release != 'xenial'
 
   - name: Assert if the pmm-admin list contains postgreSQL instance
     assert:
       that:
         - "'PostgreSQL' in list_output.stdout"
-    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+    when: ansible_distribution_release != 'xenial'
 
 ## end PG
 
