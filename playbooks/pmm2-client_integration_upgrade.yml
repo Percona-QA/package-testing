@@ -247,6 +247,13 @@
      that:
       - "'Connected' in pmm_agent_status.stdout"
 
+  - name: Wait for node_exporter to be Running Status After Upgrade
+    shell: pmm-admin list | grep node_exporter | awk -F" " '{print $2}'
+    register: ne_status
+    until: ne_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
+
   - name: check if node_exporter is Running
     shell: pmm-admin list | grep node_exporter | awk -F" " '{print $2}'
     register: node_exporter_status
@@ -259,6 +266,13 @@
     assert:
      that:
       - "'Running' in node_exporter_status.stdout"
+
+  - name: Wait for vmagent to be Running Status After Upgrade
+    shell: pmm-admin list | grep vmagent | awk -F" " '{print $2}'
+    register: vm_status
+    until: vm_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
 
   - name: check if vmagent is Running
     shell: pmm-admin list | grep vmagent | awk -F" " '{print $2}'
