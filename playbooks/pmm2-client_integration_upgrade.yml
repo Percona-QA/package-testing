@@ -34,6 +34,12 @@
     - pmm2-client
     when: ansible_os_family == "Debian"
 
+  - name: install acl package
+    apt: name={{item}} update_cache=yes state=latest
+    with_items:
+    - acl
+    when: ansible_os_family == "Debian"
+
   - name: install PMM client old rpm packages
     yum: name={{item}} state=latest
     with_items:
