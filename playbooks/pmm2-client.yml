@@ -12,6 +12,7 @@
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') }}"
+    pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
 
   tasks:
   - name: Register Instance IP
@@ -75,11 +76,14 @@
     shell: pmm-admin status | grep pmm-admin | awk -F' ' '{print $3}'
     register: pmm_admin_version
 
+  - name: Print the PMM-Admin Version on Status command
+    ansible.builtin.debug:
+      msg: pmm-admin version is {{ pmm_admin_version.stdout }}
+
   - name: Assert if the version output value is strict matched with expected version
     assert:
      that:
-      - "'{{ PMM_VERSION }}' in pmm_admin_version.stdout"
-    when: PMM_VERSION is defined
+      - "'{{ pmm_version }}' in pmm_admin_version.stdout"
 
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
