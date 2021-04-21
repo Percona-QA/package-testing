@@ -78,6 +78,16 @@
     register: version_new
   - debug: var=version_new.stderr_lines
 
+  - name: Fetch PMM-Admin version via pmm-admin status output
+    shell: pmm-admin status | grep pmm-admin | awk -F' ' '{print $3}'
+    register: pmm_admin_version
+
+  - name: Assert if the version output value is strict matched with expected version
+    assert:
+     that:
+      - "'{{ PMM_VERSION }}' in pmm_admin_version.stdout"
+    when: PMM_VERSION is defined
+
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
     with_items:
