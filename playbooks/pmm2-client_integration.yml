@@ -237,6 +237,13 @@
      that:
       - "'Running' in node_exporter_status.stdout"
 
+  - name: Wait for vmagent to be Running Status.
+    shell: pmm-admin list | grep vmagent | awk -F" " '{print $2}'
+    register: vm_status
+    until: vm_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
+
   - name: check if vmagent is Running
     shell: pmm-admin list | grep vmagent | awk -F" " '{print $2}'
     register: vmagent_status
