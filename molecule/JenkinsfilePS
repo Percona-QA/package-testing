@@ -57,12 +57,16 @@ ubuntu-bionic'''
         }
         checkout scm
         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'AMI/OVF', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
-          sh '''#!/bin/bash
+          sh '''#!/bin/bash -e
+              echo 'Installing dependencies'
               sudo yum install -y gcc python3-pip python3-devel libselinux-python openssl-devel
               sudo mkdir -p /usr/local/lib64/python3.7/site-packages
               sudo rsync -aHv /usr/lib64/python2.7/site-packages/*selinux* /usr/local/lib64/python3.7/site-packages/
-              pip3 install --user pytest molecule==2.22 ansible wheel boto boto3 paramiko selinux 'molecule[ec2]'
+              python3 -m pip install --user --upgrade pip setuptools
+              python3 -m pip install --user pytest molecule==2.22 ansible wheel boto boto3 paramiko selinux 'molecule[ec2]'
+          '''
 
+          sh '''#!/bin/bash
               # remove this because otherwise molecule will fail to validate
               rm -f molecule/${ROLE_NAME}/molecule/default/molecule.yml
 
