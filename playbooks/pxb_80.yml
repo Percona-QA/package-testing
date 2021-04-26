@@ -60,10 +60,6 @@
   - name: install plugins, import world database
     command: /package-testing/plugins_test.sh
 
-  - name: check that Percona Toolkit version is correct
-    command: /package-testing/version_check.sh pt
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "6"
-
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb80
 
