@@ -8,7 +8,7 @@
   become: true
   become_method: sudo
   vars:
-    binary_type: "{{ lookup('env', 'binary_type') }}"
+#    binary_type: "{{ lookup('env', 'binary_type') }}"
     install_repo: "{{ lookup('env', 'install_repo') }}"
 
   tasks:
@@ -57,8 +57,8 @@
   - name: install Percona Server 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
 
-  - name: install and check Percona XtraBackup 8.0 tarball
-    command: /package-testing/test_binary_tarball.sh pxb80 {{ install_repo }} {{ binary_type }}
+  - name: install and check Percona XtraBackup 8.0 normal tarball from {{ install_repo }} downloads area
+    command: /package-testing/test_binary_tarball.sh pxb80 {{ install_repo }} normal
 
   - name: start mysql service with service command
     command: service mysql start
@@ -74,6 +74,37 @@
 
   - name: install plugins, import world database
     command: /package-testing/plugins_test.sh
+
+  - name: run backup for Redhat/Centos
+    command: pxb80/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian
+    command: pxb80/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
+    when: ansible_os_family == "Debian"
+
+  - name: prepare backup
+    command: pxb80/bin/xtrabackup --prepare --target-dir=/tmp/backups/
+
+  - name: run backup for Redhat/Centos with streaming and encryption enabled
+    shell: pxb80/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian with streaming and encryption enabled
+    shell: pxb80/bin/xtrabackup --backup --user=root --target-dir=backups/ --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "Debian"
+
+  - name: extract and decrypt backup
+    shell: pxb80/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream
+
+  - name: prepare backup
+    command: pxb80/bin/xtrabackup --prepare --target-dir=backups/
+
+  - name: remove backup files
+    command: rm -r pxb80 backups /tmp/backups
+
+  - name: install and check Percona XtraBackup 8.0 minimal tarball from {{ install_repo }} downloads area
+    command: /package-testing/test_binary_tarball.sh pxb80 {{ install_repo }} minimal
 
   - name: run backup for Redhat/Centos
     command: pxb80/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
