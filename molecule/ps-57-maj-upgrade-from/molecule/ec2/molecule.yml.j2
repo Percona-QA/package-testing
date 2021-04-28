@@ -22,20 +22,23 @@ driver:
 lint:
   name: yamllint
 platforms:
-##PLATFORM_PLACEHOLDER##
-#  - name: ps80-pkg-install-${PLATFORM}
-#    region: ${AWS_DEFAULT_REGION}
-#    image: ${IMAGE}
-#    vpc_subnet_id: ${SUBNET}
-#    instance_type: ${INSTANCE_TYPE}
-#    root_device_name: ${ROOT_DEVICE_NAME}
-#    ssh_user: ${USER}
-#    instance_tags:
-#      iit-billing-tag: jenkins-ps-pkg-worker
+{%- set role = "ps-57-maj-upgrade-from" %}
+{%- set platforms = env("PLATFORMS").split() %}
+{%- for platform, vm in vms.items() if platform in roles[role] and platform in platforms %}
+  - name: {{role}}-{{platform}}
+    region: {{vm.aws_default_region}}
+    image: {{vm.image}}
+    vpc_subnet_id: {{vm.subnet}}
+    instance_type: {{vm.instance_type}}
+    root_device_name: {{vm.root_device_name}}
+    ssh_user: {{vm.user}}
+    instance_tags:
+      iit-billing-tag: jenkins-ps-pkg-worker
+{%- endfor %}
 provisioner:
   name: ansible
   env:
-    MOLECULE_KEY_NAME: molecule-${ROLE_NAME}
+    MOLECULE_KEY_NAME: molecule-{{role}}
   playbooks:
     create: ../../../playbooks/create.yml
     cleanup: ../../../ps-80-install/molecule/default/cleanup.yml

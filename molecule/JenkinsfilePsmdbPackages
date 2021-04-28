@@ -74,13 +74,13 @@ pipeline {
     stage ('Setup Environment Variables') {
       steps {
        script {
-       vms = readYaml (file: 'molecule/configuration.yml')
-       env.IMAGE = vms."${PLATFORM}".image
-       env.USER = vms."${PLATFORM}".user
-       env.SUBNET = vms."${PLATFORM}".subnet
-       env.AWS_DEFAULT_REGION = vms."${PLATFORM}".aws_default_region
-       env.INSTANCE_TYPE = vms."${PLATFORM}".instance_type
-       env.ROOT_DEVICE_NAME = vms."${PLATFORM}".root_device_name
+       config = readYaml (file: 'molecule/configuration.yml')
+       env.IMAGE = config.vms."${PLATFORM}".image
+       env.USER = config.vms."${PLATFORM}".user
+       env.SUBNET = config.vms."${PLATFORM}".subnet
+       env.AWS_DEFAULT_REGION = config.vms."${PLATFORM}".aws_default_region
+       env.INSTANCE_TYPE = config.vms."${PLATFORM}".instance_type
+       env.ROOT_DEVICE_NAME = config.vms."${PLATFORM}".root_device_name
         }
        }
       }
