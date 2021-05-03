@@ -76,11 +76,11 @@
 
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when: lookup('env', 'install_repo') == "experimental" or lookup('env', 'install_repo') == ""
 
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2-rc
-    when: lookup('env', 'install_repo') == "experimental"
+    when: lookup('env', 'install_repo') == "testing"
 
   - name: Print PMM2-Client Version After upgrade
     command: pmm-admin --version
@@ -105,6 +105,7 @@
     assert:
      that:
       - "'{{ pmm_version }}' in pmm_admin_version.stdout"
+    when: lookup('env', 'install_repo') == "testing"
 
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
