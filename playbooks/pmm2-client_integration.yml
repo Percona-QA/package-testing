@@ -56,11 +56,11 @@
 
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when: lookup('env', 'install_repo') == "experimental" or lookup('env', 'install_repo') == ""
 
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2-rc
-    when: lookup('env', 'install_repo') == "experimental"
+    when: lookup('env', 'install_repo') == "testing"
 
   - name: configure pmm client to connect to server in push/auto Mode
     shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --server-url=http://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
@@ -269,6 +269,7 @@
     assert:
      that:
       - "'{{ pmm_version }}' in pmm_admin_version.stdout"
+    when: lookup('env', 'install_repo') == "testing"
   
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
