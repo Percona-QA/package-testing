@@ -9,7 +9,7 @@ ps_version_upstream, ps_version_percona = ps_version.split('-')
 ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
 
 docker_product = 'percona-server'
-docker_tag = ps_version_percona
+docker_tag = ps_version
 docker_image = docker_acc + "/" + docker_product + ":" + docker_tag
 
 # 8.0
