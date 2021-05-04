@@ -24,6 +24,7 @@ pipeline {
             export PATH=${PATH}:~/.local/bin
             python3 -m venv ${WORKSPACE}/python-venv-molecule
             source ${WORKSPACE}/python-venv-molecule/bin/activate
+	    python -m pip install -U pip
             pip3 install wheel
             pip3 install molecule==2.22 ansible python-vagrant testinfra pytest
             rm -rf package-testing
