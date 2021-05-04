@@ -184,7 +184,7 @@ check_rocksdb_exists() {
   [ "$result" -eq 1 ]
 
   result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like BINARY "%ROCKSDB%" and PLUGIN_STATUS like "ACTIVE";')
-  [ "$result" -eq 13 ]
+  [ "$result" -eq 15 ]
 }
 
 uninstall_rocksdb() {
