@@ -98,6 +98,10 @@
         group_replication_start_on_boot=OFF
         relay_log={{ ansible_hostname }}-relay-bin
         innodb_dedicated_server=ON
+        binlog_transaction_dependency_tracking=WRITESET
+        slave_preserve_commit_order=ON
+        slave_parallel_type=LOGICAL_CLOCK
+        transaction_write_set_extraction=XXHASH64
     when: ansible_os_family == "Debian"
 
   - name: add options to my.cnf on Centos/RedHat
@@ -113,6 +117,10 @@
         group_replication_start_on_boot=OFF
         relay_log={{ ansible_hostname }}-relay-bin
         innodb_dedicated_server=ON
+        binlog_transaction_dependency_tracking=WRITESET
+        slave_preserve_commit_order=ON
+        slave_parallel_type=LOGICAL_CLOCK
+        transaction_write_set_extraction=XXHASH64
     when: ansible_os_family == "RedHat"
 
   - name: restart mysql service
