@@ -35,6 +35,16 @@
       state: enforcing
     when: ansible_os_family == "RedHat"
 
+  - name: get selinux status
+    command: sestatus
+    register: selinux_status
+    when: ansible_os_family == "RedHat"
+
+  - name: list selinux status
+    debug:
+      var: selinux_status
+    when: ansible_os_family == "RedHat"
+
   - name: include tasks for enabling PS 8 test repo
     include: ../tasks/enable_ps8_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
