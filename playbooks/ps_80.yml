@@ -29,6 +29,12 @@
       dest: /package-testing/scripts/ps_keyring_plugins_test/test.cer
     when: lookup('env', 'PS_SKIP_KEYRING') == "" or lookup('env', 'PS_SKIP_KEYRING') == "0"
 
+  - name: enforce SELinux on CentOS
+    selinux:
+      policy: targeted
+      state: enforcing
+    when: ansible_os_family == "RedHat"
+
   - name: include tasks for enabling PS 8 test repo
     include: ../tasks/enable_ps8_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
