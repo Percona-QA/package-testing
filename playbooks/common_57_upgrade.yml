@@ -12,9 +12,6 @@
 - hosts: all
   become: true
   become_method: sudo
-  vars:
-    vault_token: "{{ lookup('env', 'VAULT_TEST_TOKEN') }}"
-    vault_cert: "{{ lookup('env', 'VAULT_TEST_CERT') }}"
 
   tasks:
   - name: include tasks for test env setup
@@ -26,16 +23,13 @@
   - name: include tasks for enabling main repo
     include: ../tasks/enable_main_repo.yml
 
+  - name: include tasks for local vault setup
+    include_tasks: ../tasks/setup_local_vault.yml
+
   - name: setup config file for keyring vault
-    template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test.j2
+    template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test_v2.j2
               dest=/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
               mode=0664 owner=root group=root
-
-  - name: copy certificate for keyring vault
-    copy:
-      src: "{{ vault_cert }}"
-      dest: /package-testing/scripts/ps_keyring_plugins_test/test.cer
-    when: lookup('env', 'PS_SKIP_KEYRING') == "" or lookup('env', 'PS_SKIP_KEYRING') == "0"
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -169,7 +163,6 @@
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps57
-    when: lookup('env', 'PS_SKIP_KEYRING') == "" or lookup('env', 'PS_SKIP_KEYRING') == "0"
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
