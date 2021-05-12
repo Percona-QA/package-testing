@@ -3,7 +3,7 @@
 set -e
 
 if [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps55, ps56, ps57 or ps80!"
+  echo "This script requires product parameter: ps56, ps57 or ps80!"
   echo "Usage: ./package_check.sh <prod>"
   exit 1
 fi
@@ -12,11 +12,7 @@ SCRIPT_PWD=$(cd `dirname $0` && pwd)
 
 source ${SCRIPT_PWD}/VERSIONS
 
-if [ $1 = "ps55" ]; then
-  version=${PS55_VER}
-  release=${PS55_VER#*-}
-  revision=${PS55_REV}
-elif [ $1 = "ps56" ]; then
+if [ $1 = "ps56" ]; then
   version=${PS56_VER}
   release=${PS56_VER#*-}
   revision=${PS56_REV}
@@ -81,7 +77,7 @@ product=$1
 log="/tmp/${product}_package_check.log"
 echo -n > $log
 
-if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
+if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
   if [ -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
     if [ -f /etc/system-release -a $(grep -c Amazon /etc/system-release) -eq 1 ]; then
       centos_maj_version="7"
@@ -94,10 +90,7 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" -o ${prod
     else
       rpm_version=$(echo ${version} | sed 's/-/-rel/') # 5.6.32-rel78.0
     fi
-    if [ "${product}" = "ps55" ]; then
-      rpm_num_pkgs="6"
-      rpm_opt_package=""
-    elif [ "${product}" = "ps56" ]; then
+    if [ "${product}" = "ps56" ]; then
       rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-selinux-${rpm_maj_version}"
       rpm_num_pkgs="8"
     elif [ "${product}" = "ps57" ]; then
@@ -131,11 +124,7 @@ if [ ${product} = "ps55" -o ${product} = "ps56" -o ${product} = "ps57" -o ${prod
     fi
   else
     deb_maj_version=$(echo ${product} | sed 's/^[a-z]*//' | sed 's/./&\./') # 5.6
-    if [ ${product} = "ps55" ]; then
-      version=$(echo ${version} | sed 's/-/-rel/') # 5.5.53-rel38.5
-      deb_opt_package=""
-      deb_num_pkgs="6"
-    elif [ ${product} = "ps56" ]; then
+    if [ ${product} = "ps56" ]; then
       deb_opt_package="percona-server-tokudb-${deb_maj_version}"
       deb_num_pkgs="7"
     else

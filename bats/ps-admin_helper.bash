@@ -201,9 +201,7 @@ check_rocksdb_notexists() {
 }
 
 install_all() {
-  if [ ${MYSQL_VERSION} = "5.5" ]; then
-    OPT="--enable-qrt"
-  elif [ ${MYSQL_VERSION} = "5.6" ]; then
+  if [ ${MYSQL_VERSION} = "5.6" ]; then
     OPT="--enable-qrt --enable-tokudb --enable-tokubackup"
   elif [ ${MYSQL_VERSION} = "5.7" ]; then
     OPT="--enable-qrt --enable-mysqlx --enable-tokudb --enable-tokubackup --enable-rocksdb"
@@ -232,9 +230,7 @@ install_all() {
 }
 
 uninstall_all() {
-  if [ ${MYSQL_VERSION} = "5.5" ]; then
-    OPT="--disable-qrt"
-  elif [ ${MYSQL_VERSION} = "5.6" ]; then
+  if [ ${MYSQL_VERSION} = "5.6" ]; then
     OPT="--disable-qrt --disable-tokudb --disable-tokubackup"
   elif [ ${MYSQL_VERSION} = "5.7" ]; then
     OPT="--disable-qrt --disable-mysqlx --disable-tokudb --disable-tokubackup --disable-rocksdb"
