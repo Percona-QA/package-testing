@@ -10,6 +10,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 DEBPACKAGES = ['percona-orchestrator-cli', 'percona-orchestrator-client', 'percona-orchestrator']
 VERSION = os.getenv("ORCHESTRATOR_VERSION")
 
+
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
     dist = host.system_info.distribution
@@ -42,6 +43,6 @@ def test_orchestrator_client(host):
     cmd = 'orchestrator-client --help'
     dist = host.system_info.distribution
     if dist.lower() in ["redhat", "centos", 'rhel']:
-        cmd = "/usr/local/orchestrator/resources/bin/orchestrator-client --help"
+        cmd = "/usr/local/orchestrator/resources/bin/orchestrator-client --help h"
     result = host.run(cmd)
     assert result.rc == 0, result.stderr
