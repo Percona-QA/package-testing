@@ -95,7 +95,6 @@
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps57
-    when: lookup('env', 'PS_SKIP_KEYRING') == "" or lookup('env', 'PS_SKIP_KEYRING') == "0"
 
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
