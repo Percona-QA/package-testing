@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps55, ps56, ps57 or ps80!"
+  echo "This script requires product parameter: ps56, ps57 or ps80!"
   echo "Usage: ./version_check.sh <prod>"
   exit 1
 fi
@@ -10,11 +10,7 @@ SCRIPT_PWD=$(cd $(dirname "$0") && pwd)
 
 source "${SCRIPT_PWD}"/VERSIONS
 
-if [ "$1" = "ps55" ]; then
-  version=${PS55_VER}
-  release=${PS55_VER#*-}
-  revision=${PS55_REV}
-elif [ "$1" = "ps56" ]; then
+if [ "$1" = "ps56" ]; then
   version=${PS56_VER}
   release=${PS56_VER#*-}
   revision=${PS56_REV}
@@ -88,11 +84,9 @@ product=$1
 log="/tmp/${product}_version_check.log"
 echo -n > "${log}"
 
-if [ "${product}" = "ps55" -o "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" ]; then
+if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" ]; then
   for i in @@INNODB_VERSION @@VERSION @@TOKUDB_VERSION; do
-    if [ "${product}" = "ps55" -a ${i} = "@@TOKUDB_VERSION" ]; then
-      echo "${i} is empty" >> "${log}"
-    elif [ "$(mysql -e "SELECT ${i}; "| grep -c "${version}")" = 1 ]; then
+    if [ "$(mysql -e "SELECT ${i}; "| grep -c "${version}")" = 1 ]; then
       echo "${i} is correct" >> "${log}"
     else
       echo "${i} is incorrect it shows $(mysql -e "SELECT ${i};")"

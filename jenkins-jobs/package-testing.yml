@@ -44,13 +44,6 @@
         elif [ ${test_type} = "upgrade" ]; then
         ansible_playbook="common_56_upgrade.yml"
         fi
-        elif [ ${product_to_test} = "ps55" ]; then
-        distro_matrix=("d-jessie-64" "d-stretch-64" "centos-6-64" "centos-7-64" "u-trusty-64" "u-xenial-64" "u-artful-64" "u-bionic-64")
-        if [ ${test_type} = "install" ]; then
-        ansible_playbook="common_55.yml"
-        elif [ ${test_type} = "upgrade" ]; then
-        ansible_playbook="common_55_upgrade.yml"
-        fi
         elif [ ${product_to_test} = "ps56" ]; then
         distro_matrix=("d-jessie-64" "d-stretch-64" "centos-6-64" "centos-7-64" "u-trusty-64" "u-xenial-64" "u-artful-64" "u-bionic-64")
         if [ ${test_type} = "install" ]; then
@@ -263,7 +256,6 @@
         - pmm-client-integration
         - ps57
         - ps56
-        - ps55
         - psmdb36
         - psmdb34
         - psmdb32
@@ -276,7 +268,6 @@
         description: |-
           <b>Product and major version for which the packages will be tested</b><br>
           <b>Following ansible playbooks are used:</b><br>
-          common_55, common_55_upgrade (pt, ps55, pxb23)<br>
           common_56, common_56_upgrade (pt, ps56, pxb23)<br>
           common_57, common_57_upgrade (pt, ps57, pxb24)<br>
           psmdb_30, psmdb_30_upgrade (psmdb30)<br>
@@ -297,7 +288,6 @@
         name: install_repo
     - choice:
         choices:
-        - ps55
         - ps56
         - ps57
         - pxc56

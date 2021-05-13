@@ -10,11 +10,9 @@ load ps-admin_helper
   check_audit_notexists
 # check_pam_notexists
 # check_pam_compat_notexists
-  if [ ${MYSQL_VERSION} != "5.5" ]; then
-    check_tokubackup_notexists
-    check_tokudb_notexists
-  fi
-  if [ ${MYSQL_VERSION} != "5.5" -a ${MYSQL_VERSION} != "5.6" -a ${MYSQL_VERSION} != "8.0" ]; then
+  check_tokubackup_notexists
+  check_tokudb_notexists
+  if [ ${MYSQL_VERSION} != "5.6" -a ${MYSQL_VERSION} != "8.0" ]; then
     check_mysqlx_notexists
     check_rocksdb_notexists
   fi
@@ -67,7 +65,7 @@ load ps-admin_helper
 #
 
 @test "install MySQL X plugin" {
-  if [ ${MYSQL_VERSION} = "5.5" -o ${MYSQL_VERSION} = "5.6" -o ${MYSQL_VERSION} = "8.0" ]; then
+  if [ ${MYSQL_VERSION} = "5.6" -o ${MYSQL_VERSION} = "8.0" ]; then
     skip "MySQL version is not 5.7"
   fi
   install_mysqlx
@@ -75,7 +73,7 @@ load ps-admin_helper
 }
 
 @test "uninstall MySQL X plugin" {
-  if [ ${MYSQL_VERSION} = "5.5" -o ${MYSQL_VERSION} = "5.6" -o ${MYSQL_VERSION} = "8.0" ]; then
+  if [ ${MYSQL_VERSION} = "5.6" -o ${MYSQL_VERSION} = "8.0" ]; then
     skip "MySQL version is not 5.7"
   fi
   uninstall_mysqlx
@@ -83,9 +81,7 @@ load ps-admin_helper
 }
 
 @test "install TokuDB plugin" {
-  if [ ${MYSQL_VERSION} = "5.5" ]; then
-    skip "MySQL version is not 5.6+"
-  elif [ $(id -u) -ne 0 ]; then
+  if [ $(id -u) -ne 0 ]; then
     skip "This test requires that the current user is root!"
   fi
   install_tokudb
@@ -93,17 +89,12 @@ load ps-admin_helper
 }
 
 @test "uninstall TokuDB plugin" {
-  if [ ${MYSQL_VERSION} = "5.5" ]; then
-    skip "MySQL version is not 5.6+"
-  fi
   uninstall_tokudb
   check_tokudb_notexists
 }
 
 @test "install TokuBackup plugin" {
-  if [ ${MYSQL_VERSION} = "5.5" ]; then
-    skip "MySQL version is not 5.6+"
-  elif [ $(id -u) -ne 0 ]; then
+  if [ $(id -u) -ne 0 ]; then
     skip "This test requires that the current user is root!"
   fi
   install_tokubackup
@@ -112,16 +103,13 @@ load ps-admin_helper
 }
 
 @test "uninstall TokuDB and TokuBackup plugin" {
-  if [ ${MYSQL_VERSION} = "5.5" ]; then
-    skip "MySQL version is not 5.6+"
-  fi
   uninstall_tokudb
   check_tokubackup_notexists
   check_tokudb_notexists
 }
 
 @test "install RocksDB plugin" {
-  if [ ${MYSQL_VERSION} = "5.5" -o ${MYSQL_VERSION} = "5.6" ]; then
+  if [ ${MYSQL_VERSION} = "5.6" ]; then
     skip "MySQL version is not 5.7+"
   fi
   install_rocksdb
@@ -129,7 +117,7 @@ load ps-admin_helper
 }
 
 @test "uninstall RocksDB plugin" {
-  if [ ${MYSQL_VERSION} = "5.5" -o ${MYSQL_VERSION} = "5.6" ]; then
+  if [ ${MYSQL_VERSION} = "5.6" ]; then
     skip "MySQL version is not 5.7+"
   fi
   uninstall_rocksdb
@@ -144,11 +132,9 @@ load ps-admin_helper
   check_audit_exists
 # check_pam_exists
 # check_pam_compat_exists
-  if [ ${MYSQL_VERSION} != "5.5" ]; then
-    check_tokudb_exists
-    check_tokubackup_exists
-  fi
-  if [ ${MYSQL_VERSION} != "5.5" -a ${MYSQL_VERSION} != "5.6" ]; then
+  check_tokudb_exists
+  check_tokubackup_exists
+  if [ ${MYSQL_VERSION} != "5.6" ]; then
     check_mysqlx_exists
     check_rocksdb_exists
   fi
@@ -160,11 +146,9 @@ load ps-admin_helper
   check_audit_notexists
 # check_pam_notexists
 # check_pam_compat_notexists
-  if [ ${MYSQL_VERSION} != "5.5" ]; then
-    check_tokubackup_notexists
-    check_tokudb_notexists
-  fi
-  if [ ${MYSQL_VERSION} != "5.5" -a ${MYSQL_VERSION} != "5.6" ]; then
+  check_tokubackup_notexists
+  check_tokudb_notexists
+  if [ ${MYSQL_VERSION} != "5.6" ]; then
     check_mysqlx_notexists
     check_rocksdb_notexists
   fi
@@ -178,11 +162,9 @@ load ps-admin_helper
   check_audit_exists
 # check_pam_exists
 # check_pam_compat_exists
-  if [ ${MYSQL_VERSION} != "5.5" ]; then
-    check_tokudb_exists
-    check_tokubackup_exists
-  fi
-  if [ ${MYSQL_VERSION} != "5.5" -a ${MYSQL_VERSION} != "5.6" ]; then
+  check_tokudb_exists
+  check_tokubackup_exists
+  if [ ${MYSQL_VERSION} != "5.6" ]; then
     check_mysqlx_exists
     check_rocksdb_exists
   fi

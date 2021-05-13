@@ -35,14 +35,7 @@
         #
         # select ansible playbook based on the product tested and test type
         ansible_playbook=""
-        if [ ${product_to_test} = "ps55" ]; then
-        distro_matrix=("d-jessie-64" "d-stretch-64" "centos-6-64" "centos-7-64" "u-trusty-64" "u-xenial-64" "u-bionic-64")
-        if [ ${test_type} = "install" ]; then
-        ansible_playbook="common_55.yml"
-        elif [ ${test_type} = "upgrade" ]; then
-        ansible_playbook="common_55_upgrade.yml"
-        fi
-        elif [ ${product_to_test} = "ps56" ]; then
+        if [ ${product_to_test} = "ps56" ]; then
         distro_matrix=("d-jessie-64" "d-stretch-64" "centos-6-64" "centos-7-64" "u-trusty-64" "u-xenial-64" "u-bionic-64")
         if [ ${test_type} = "install" ]; then
         ansible_playbook="common_56.yml"
@@ -159,12 +152,10 @@
         - ps80
         - ps57
         - ps56
-        - ps55
         - client_test
         description: |-
           <b>Product and major version for which the packages will be tested</b><br>
           <b>Following ansible playbooks are used:</b><br>
-          common_55, common_55_upgrade (ps55, pxb23)<br>
           common_56, common_56_upgrade (ps56, pxb23)<br>
           common_57, common_57_upgrade (ps57, pxb24)<br>
           ps_80, ps_80_upgrade (ps80, pxb80)<br>
