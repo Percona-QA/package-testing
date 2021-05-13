@@ -170,7 +170,6 @@
         name: install_repo
     - choice:
         choices:
-        - ps55
         - ps56
         - ps57
         - ps80
