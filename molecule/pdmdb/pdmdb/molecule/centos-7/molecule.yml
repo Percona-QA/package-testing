@@ -15,7 +15,7 @@ platforms:
       iit-billing-tag: jenkins-pg-worker
 provisioner:
   name: ansible
-  log: True
+  log: true
   playbooks:
     create: ../../../../playbooks/create.yml
     destroy: ../../../../playbooks/destroy.yml
