@@ -11,8 +11,8 @@ def test_binaries_exist(host):
 
 def test_binaries_version(host):
     if pxc_version_major in ['5.7','5.6']:
-        assert 'mysql  Ver 14.14 Distrib '+pxc57_client_version+', for Linux (x86_64) using  6.0' in host.check_output(base_dir+'/bin/mysql --version')
-        assert 'mysqld  Ver '+pxc_version+' for Linux on x86_64 (Percona XtraDB Cluster binary (GPL) '+pxc57_server_version+', Revision '+pxc_revision+', wsrep_'+wsrep_version+')' in host.check_output(base_dir+'/bin/mysqld --version')
+        assert 'mysql  Ver 14.14 Distrib '+pxc57_client_version+', for Linux (x86_64) using  6.2' in host.check_output(base_dir+'/bin/mysql --version')
+        assert 'mysqld  Ver '+pxc57_server_version_norel+' for Linux on x86_64 (Percona XtraDB Cluster binary (GPL) '+pxc57_server_version+', Revision '+pxc_revision+', wsrep_'+wsrep_version+')' in host.check_output(base_dir+'/bin/mysqld --version')
     else:
         assert 'mysql  Ver '+ pxc_version +' for Linux on x86_64 (Percona XtraDB Cluster binary (GPL) '+ pxc_version_percona +', Revision '+ pxc_revision +', WSREP version '+wsrep_version+')' in host.check_output(base_dir+'/bin/mysql --version')
         assert 'mysqld  Ver '+ pxc_version +' for Linux on x86_64 (Percona XtraDB Cluster binary (GPL) '+ pxc_version_percona +', Revision '+ pxc_revision +', WSREP version '+wsrep_version+')' in host.check_output(base_dir+'/bin/mysqld --version')

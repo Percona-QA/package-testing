@@ -12,8 +12,9 @@ pxc_version_major = pxc_version_percona.split('.')[0] + '.' + pxc_version_percon
 if pxc_version_major == "5.7":
   print(pxc_version)
   print(pxc57_pkg_version)
-  pxc57_client_version = pxc_version.split('-')[0] + '-' + pxc_version.split('-')[1]
-  pxc57_server_version = pxc57_pkg_version.split('-')[0] + '-rel' + pxc57_pkg_version.split('-')[1] + '-' + pxc57_pkg_version.split('-')[2]
+  pxc57_client_version = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1][3:]
+  pxc57_server_version_norel = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1][3:] + '-' + pxc57_pkg_version.split('-')[2].split('.')[0]
+  pxc57_server_version = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1] + '-' + pxc57_pkg_version.split('-')[2].split('.')[0]
 
 # 8.0
 pxc80_binaries = (
