@@ -89,12 +89,14 @@ pxc57_files = (
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
 pxc57_symlinks = (
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.20'), ('lib/libncurses.so','lib/private/libncurses.so.5.9'),
-  ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.1e'), ('lib/libssl.so','lib/private/libssl.so.1.0.1e'),
-  ('lib/libk5crypto.so','lib/private/libk5crypto.so.3.1'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.7'),
-  ('lib/libsasl2.so','lib/private/libsasl2.so.2.0.23'), ('lib/libreadline.so','lib/private/libreadline.so.6.0'),
-  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.18'), ('lib/libkrb5support.so','lib/private/libkrb5support.so.0.1'),
-  ('lib/libkrb5.so','lib/private/libkrb5.so.3.3'), ('lib/libgssapi_krb5.so','lib/private/libgssapi_krb5.so.2.2')
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.20'),
+  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.20'),
+  ('lib/libncurses.so','lib/private/libncurses.so.5.9'),
+  ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'),
+  ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
+  ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
+  ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
+  ('lib/libreadline.so','lib/private/libreadline.so.6.2'),
 )
 
 # 5.6
