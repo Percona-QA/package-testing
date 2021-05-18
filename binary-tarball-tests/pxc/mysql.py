@@ -123,11 +123,3 @@ class MySQL:
         query = 'SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = "{}";'.format(pname)
         output = self.run_query(query, node="node3")
         assert 'ACTIVE' in output
-
-    def check_engine_active(self, engine):
-        query = '"select SUPPORT from information_schema.ENGINES where ENGINE = \\\"{}\\\";"'.format(engine)
-        output = self.run_query(query)
-        if 'YES' in output:
-            return True
-        else:
-            return False
