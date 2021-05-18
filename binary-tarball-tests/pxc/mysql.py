@@ -5,6 +5,16 @@ import os
 import time
 import shlex
 
+def retry(func, times, wait):
+    for _ in range(times):
+        try:
+            func()
+            break
+        except AssertionError:
+            time.sleep(wait)
+    else:
+        func()
+
 class MySQL:
     def __init__(self, base_dir):
         self.basedir = base_dir
@@ -114,12 +124,16 @@ class MySQL:
         query = 'CREATE FUNCTION {} RETURNS {} SONAME "{}";'.format(fname, return_type, soname)
         self.run_query(query)
         query = 'SELECT name FROM mysql.func WHERE dl = "{}";'.format(soname)
-        output = self.run_query(query, node="node2")
-        assert fname in output
+        def _assert_function():
+            output = self.run_query(query, node="node2")
+            assert fname in output
+        retry(_assert_function, times=5, wait=0.2)
 
     def install_plugin(self, pname, soname):
         query = 'INSTALL PLUGIN {} SONAME "{}";'.format(pname,soname)
         self.run_query(query)
         query = 'SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = "{}";'.format(pname)
-        output = self.run_query(query, node="node3")
-        assert 'ACTIVE' in output
+        def _assert_plugin():
+            output = self.run_query(query, node="node3")
+            assert 'ACTIVE' in output
+        retry(_assert_plugin, times=5, wait=0.2)
