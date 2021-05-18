@@ -37,9 +37,9 @@ class MySQL:
         x = re.search(r"[0-9]+\.[0-9]+", output)
         self.major_version = x.group()
         if self.major_version != "8.0":
-            self.sst_opts = "--wsrep_sst_method=xtrabackup-v2 --wsrep_sst_auth=root:"
+            self.sst_opts = ["--wsrep_sst_method=xtrabackup-v2", "--wsrep_sst_auth=root:"]
         else:
-            self.sst_opts = "--wsrep_sst_method=xtrabackup-v2"
+            self.sst_opts = ["--wsrep_sst_method=xtrabackup-v2"]
         if self.major_version == "5.6":
             subprocess.check_call([self.mysql_install_db, '--no-defaults', '--basedir=' + self.basedir,
                                    '--datadir='+ self.node1_datadir])
@@ -70,21 +70,21 @@ class MySQL:
                           '--datadir=' + self.node1_datadir,
                           '--tmpdir=' + self.node1_datadir, '--socket=' + self.node1_socket,
                           '--log-error=' + self.node1_logfile, '--wsrep_provider=' + self.wsrep_provider,
-                          self.sst_opts, '--wsrep-new-cluster'], env=os.environ)
+                          *self.sst_opts, '--wsrep-new-cluster'], env=os.environ)
         self.startup_check(self.node1_socket)
         os.system("cat " + self.node1_logfile)
         subprocess.Popen([self.mysqld, '--defaults-file=' + self.node2_cnf, '--basedir=' + self.basedir,
                           '--datadir=' + self.node2_datadir,
                           '--tmpdir=' + self.node2_datadir, '--socket=' + self.node2_socket,
                           '--log-error=' + self.node2_logfile, '--wsrep_provider=' + self.wsrep_provider,
-                          self.sst_opts], env=os.environ)
+                          *self.sst_opts], env=os.environ)
         self.startup_check(self.node2_socket)
         os.system("cat " + self.node2_logfile)
         subprocess.Popen([self.mysqld, '--defaults-file=' + self.node3_cnf, '--basedir=' + self.basedir,
                           '--datadir=' + self.node3_datadir,
                           '--tmpdir=' + self.node3_datadir, '--socket=' + self.node3_socket,
                           '--log-error=' + self.node3_logfile, '--wsrep_provider=' + self.wsrep_provider,
-                          self.sst_opts], env=os.environ)
+                          *self.sst_opts], env=os.environ)
         self.startup_check(self.node3_socket)
         os.system("cat " + self.node3_logfile)
 
