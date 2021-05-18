@@ -107,22 +107,29 @@ class MySQL:
         subprocess.call(['rm', '-f', self.node2_logfile])
         subprocess.call(['rm', '-f', self.node3_logfile])
 
-    def run_query(self,query):
-        command = self.mysql+' --user=root -S'+self.node1_socket+' -s -N -e '+query
+    def run_query(self,query,node="node1"):
+        node_sockets = {
+            "node1": self.node1_socket,
+            "node2": self.node2_socket,
+            "node3": self.node3_socket,
+        }
+        socket = node_sockets[node]
+
+        command = self.mysql+' --user=root -S'+socket+' -s -N -e '+query
         return subprocess.check_output(command, shell=True, universal_newlines=True)
 
     def install_function(self, fname, soname, return_type):
         query = '"CREATE FUNCTION {} RETURNS {} SONAME \\\"{}\\\";"'.format(fname, return_type, soname)
         self.run_query(query)
         query = '"SELECT name FROM mysql.func WHERE dl = \\\"{}\\\";"'.format(soname)
-        output = self.run_query(query)
+        output = self.run_query(query, node="node2")
         assert fname in output
 
     def install_plugin(self, pname, soname):
         query = '"INSTALL PLUGIN {} SONAME \\\"{}\\\";"'.format(pname,soname)
         self.run_query(query)
         query = '"SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = \\\"{}\\\";"'.format(pname)
-        output = self.run_query(query)
+        output = self.run_query(query, node="node3")
         assert 'ACTIVE' in output
 
     def check_engine_active(self, engine):
