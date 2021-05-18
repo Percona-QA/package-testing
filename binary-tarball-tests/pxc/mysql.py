@@ -103,7 +103,6 @@ class MySQL:
         subprocess.check_call([self.mysqladmin, '-uroot', '-S'+self.node3_socket, 'shutdown'])
         subprocess.check_call([self.mysqladmin, '-uroot', '-S'+self.node2_socket, 'shutdown'])
         subprocess.check_call([self.mysqladmin, '-uroot', '-S'+self.node1_socket, 'shutdown'])
-        subprocess.call(['sleep', '5'])
 
     def restart(self):
         self.stop()
