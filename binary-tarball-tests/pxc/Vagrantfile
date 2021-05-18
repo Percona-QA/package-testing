@@ -33,8 +33,6 @@ Vagrant.configure("2") do |config|
     rm -rf package-testing
     if [ -f /usr/bin/yum ]; then
       sudo yum install -y git wget
-      sudo yum install -y https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-      sudo yum install -y percona-xtrabackup-24
     else
       sudo apt install -y git wget
     fi
