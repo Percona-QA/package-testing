@@ -2,6 +2,7 @@
 import subprocess
 import re
 import os
+import shlex
 
 class MySQL:
     def __init__(self, base_dir):
@@ -49,25 +50,25 @@ class MySQL:
         subprocess.call(['rm','-f',self.logfile])
 
     def run_query(self,query):
-        command = self.mysql+' --user=root -S'+self.socket+' -s -N -e '+query
+        command = self.mysql+' --user=root -S'+self.socket+' -s -N -e '+shlex.quote(query)
         return subprocess.check_output(command,shell=True,universal_newlines=True)
 
     def install_function(self, fname, soname, return_type):
-        query = '"CREATE FUNCTION {} RETURNS {} SONAME \\\"{}\\\";"'.format(fname,return_type,soname)
+        query = 'CREATE FUNCTION {} RETURNS {} SONAME "{}";'.format(fname,return_type,soname)
         self.run_query(query)
-        query = '"SELECT name FROM mysql.func WHERE dl = \\\"{}\\\";"'.format(soname)
+        query = 'SELECT name FROM mysql.func WHERE dl = "{}";'.format(soname)
         output = self.run_query(query)
         assert fname in output
 
     def install_plugin(self, pname, soname):
-        query = '"INSTALL PLUGIN {} SONAME \\\"{}\\\";"'.format(pname,soname)
+        query = 'INSTALL PLUGIN {} SONAME "{}";'.format(pname,soname)
         self.run_query(query)
-        query = '"SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = \\\"{}\\\";"'.format(pname)
+        query = 'SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = "{}";'.format(pname)
         output = self.run_query(query)
         assert 'ACTIVE' in output
 
     def check_engine_active(self, engine):
-        query = '"select SUPPORT from information_schema.ENGINES where ENGINE = \\\"{}\\\";"'.format(engine)
+        query = 'select SUPPORT from information_schema.ENGINES where ENGINE = "{}";'.format(engine)
         output = self.run_query(query)
         if 'YES' in output:
             return True
