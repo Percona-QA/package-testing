@@ -11,7 +11,7 @@ def mysql_server(request):
     mysql_server = mysql.MySQL(base_dir)
     mysql_server.start()
     yield mysql_server
-    mysql_server.purge()
+    mysql_server.stop()
 
 def test_install_functions(mysql_server):
     for function in pxc_functions:

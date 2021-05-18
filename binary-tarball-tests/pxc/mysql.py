@@ -98,15 +98,6 @@ class MySQL:
         self.stop()
         self.start()
 
-    def purge(self):
-        self.stop()
-        subprocess.call(['rm', '-Rf', self.node1_datadir])
-        subprocess.call(['rm', '-Rf', self.node2_datadir])
-        subprocess.call(['rm', '-Rf', self.node3_datadir])
-        subprocess.call(['rm', '-f', self.node1_logfile])
-        subprocess.call(['rm', '-f', self.node2_logfile])
-        subprocess.call(['rm', '-f', self.node3_logfile])
-
     def run_query(self,query,node="node1"):
         node_sockets = {
             "node1": self.node1_socket,
