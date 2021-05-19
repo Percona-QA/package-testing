@@ -12,8 +12,9 @@ pxc_version_major = pxc_version_percona.split('.')[0] + '.' + pxc_version_percon
 if pxc_version_major == "5.7":
   print(pxc_version)
   print(pxc57_pkg_version)
-  pxc57_client_version = pxc_version.split('-')[0] + '-' + pxc_version.split('-')[1]
-  pxc57_server_version = pxc57_pkg_version.split('-')[0] + '-rel' + pxc57_pkg_version.split('-')[1] + '-' + pxc57_pkg_version.split('-')[2]
+  pxc57_client_version = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1][3:]
+  pxc57_server_version_norel = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1][3:] + '-' + pxc57_pkg_version.split('-')[2].split('.')[0]
+  pxc57_server_version = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1] + '-' + pxc57_pkg_version.split('-')[2].split('.')[0]
 
 # 8.0
 pxc80_binaries = (
@@ -59,12 +60,15 @@ pxc80_symlinks = (
 
 # 5.7
 pxc57_binaries = (
-  'bin/clustercheck', 'bin/garbd', 'bin/wsrep_sst_common', 'bin/wsrep_sst_xtrabackup-v2',
-  'bin/wsrep_sst_mysqldump', 'bin/wsrep_sst_rsync', 'bin/pyclustercheck',
-  'bin/mysql', 'bin/mysqld', 'bin/ps-admin', 'bin/mysqladmin', 'bin/mysqlbinlog',
-  'bin/mysqldump', 'bin/mysqldumpslow', 'bin/mysqlimport', 'bin/mysqlpump', 'bin/mysqlshow',
-  'bin/mysqlslap', 'bin/mysqlcheck', 'bin/mysql_config_editor', 'bin/mysql_config', 'bin/mysql_ldb',
-  'bin/mysql_secure_installation', 'bin/mysql_ssl_rsa_setup', 'bin/mysql_upgrade', 'bin/mysql_tzinfo_to_sql'
+  'bin/clustercheck', 'bin/garbd', 'bin/innochecksum', 'bin/lz4_decompress', 'bin/my_print_defaults',
+  'bin/myisam_ftdump','bin/myisamchk', 'bin/myisamlog', 'bin/myisampack', 'bin/mysql', 'bin/mysql_client_test',
+  'bin/mysql_config', 'bin/mysql_config_editor', 'bin/mysql_install_db', 'bin/mysql_plugin', 'bin/mysql_secure_installation',
+  'bin/mysql_ssl_rsa_setup', 'bin/mysql_tzinfo_to_sql', 'bin/mysql_upgrade', 'bin/mysqladmin', 'bin/mysqlbinlog',
+  'bin/mysqlcheck', 'bin/mysqld', 'bin/mysqld_multi', 'bin/mysqld_safe', 'bin/mysqldump', 'bin/mysqldumpslow',
+  'bin/mysqlimport', 'bin/mysqlpump', 'bin/mysqlshow', 'bin/mysqlslap', 'bin/mysqltest', 'bin/mysqlxtest', 'bin/perror',
+  'bin/ps-admin', 'bin/ps_mysqld_helper', 'bin/ps_tokudb_admin', 'bin/pyclustercheck', 'bin/replace', 'bin/resolve_stack_dump',
+  'bin/resolveip', 'bin/wsrep_sst_common', 'bin/wsrep_sst_mysqldump', 'bin/wsrep_sst_rsync', 'bin/wsrep_sst_xtrabackup-v2',
+  'bin/zlib_decompress'
 )
 pxc57_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
@@ -85,12 +89,14 @@ pxc57_files = (
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
 pxc57_symlinks = (
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.20'), ('lib/libncurses.so','lib/private/libncurses.so.5.9'),
-  ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.1e'), ('lib/libssl.so','lib/private/libssl.so.1.0.1e'),
-  ('lib/libk5crypto.so','lib/private/libk5crypto.so.3.1'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.7'),
-  ('lib/libsasl2.so','lib/private/libsasl2.so.2.0.23'), ('lib/libreadline.so','lib/private/libreadline.so.6.0'),
-  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.18'), ('lib/libkrb5support.so','lib/private/libkrb5support.so.0.1'),
-  ('lib/libkrb5.so','lib/private/libkrb5.so.3.3'), ('lib/libgssapi_krb5.so','lib/private/libgssapi_krb5.so.2.2')
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.20'),
+  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.20'),
+  ('lib/libncurses.so','lib/private/libncurses.so.5.9'),
+  ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'),
+  ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
+  ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
+  ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
+  ('lib/libreadline.so','lib/private/libreadline.so.6.2'),
 )
 
 # 5.6

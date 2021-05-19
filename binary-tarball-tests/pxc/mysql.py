@@ -3,6 +3,17 @@ import subprocess
 import re
 import os
 import time
+import shlex
+
+def retry(func, times, wait):
+    for _ in range(times):
+        try:
+            func()
+            break
+        except AssertionError:
+            time.sleep(wait)
+    else:
+        func()
 
 class MySQL:
     def __init__(self, base_dir):
@@ -37,9 +48,9 @@ class MySQL:
         x = re.search(r"[0-9]+\.[0-9]+", output)
         self.major_version = x.group()
         if self.major_version != "8.0":
-            self.sst_opts = "--wsrep_sst_method=xtrabackup-v2 --wsrep_sst_auth=root:"
+            self.sst_opts = ["--wsrep_sst_method=xtrabackup-v2", "--wsrep_sst_auth=root:"]
         else:
-            self.sst_opts = "--wsrep_sst_method=xtrabackup-v2"
+            self.sst_opts = ["--wsrep_sst_method=xtrabackup-v2"]
         if self.major_version == "5.6":
             subprocess.check_call([self.mysql_install_db, '--no-defaults', '--basedir=' + self.basedir,
                                    '--datadir='+ self.node1_datadir])
@@ -70,21 +81,21 @@ class MySQL:
                           '--datadir=' + self.node1_datadir,
                           '--tmpdir=' + self.node1_datadir, '--socket=' + self.node1_socket,
                           '--log-error=' + self.node1_logfile, '--wsrep_provider=' + self.wsrep_provider,
-                          self.sst_opts, '--wsrep-new-cluster'], env=os.environ)
+                          *self.sst_opts, '--wsrep-new-cluster'], env=os.environ)
         self.startup_check(self.node1_socket)
         os.system("cat " + self.node1_logfile)
         subprocess.Popen([self.mysqld, '--defaults-file=' + self.node2_cnf, '--basedir=' + self.basedir,
                           '--datadir=' + self.node2_datadir,
                           '--tmpdir=' + self.node2_datadir, '--socket=' + self.node2_socket,
                           '--log-error=' + self.node2_logfile, '--wsrep_provider=' + self.wsrep_provider,
-                          self.sst_opts], env=os.environ)
+                          *self.sst_opts], env=os.environ)
         self.startup_check(self.node2_socket)
         os.system("cat " + self.node2_logfile)
         subprocess.Popen([self.mysqld, '--defaults-file=' + self.node3_cnf, '--basedir=' + self.basedir,
                           '--datadir=' + self.node3_datadir,
                           '--tmpdir=' + self.node3_datadir, '--socket=' + self.node3_socket,
                           '--log-error=' + self.node3_logfile, '--wsrep_provider=' + self.wsrep_provider,
-                          self.sst_opts], env=os.environ)
+                          *self.sst_opts], env=os.environ)
         self.startup_check(self.node3_socket)
         os.system("cat " + self.node3_logfile)
 
@@ -92,43 +103,36 @@ class MySQL:
         subprocess.check_call([self.mysqladmin, '-uroot', '-S'+self.node3_socket, 'shutdown'])
         subprocess.check_call([self.mysqladmin, '-uroot', '-S'+self.node2_socket, 'shutdown'])
         subprocess.check_call([self.mysqladmin, '-uroot', '-S'+self.node1_socket, 'shutdown'])
-        subprocess.call(['sleep', '5'])
 
     def restart(self):
         self.stop()
         self.start()
 
-    def purge(self):
-        self.stop()
-        subprocess.call(['rm', '-Rf', self.node1_datadir])
-        subprocess.call(['rm', '-Rf', self.node2_datadir])
-        subprocess.call(['rm', '-Rf', self.node3_datadir])
-        subprocess.call(['rm', '-f', self.node1_logfile])
-        subprocess.call(['rm', '-f', self.node2_logfile])
-        subprocess.call(['rm', '-f', self.node3_logfile])
+    def run_query(self,query,node="node1"):
+        node_sockets = {
+            "node1": self.node1_socket,
+            "node2": self.node2_socket,
+            "node3": self.node3_socket,
+        }
+        socket = node_sockets[node]
 
-    def run_query(self,query):
-        command = self.mysql+' --user=root -S'+self.node1_socket+' -s -N -e '+query
+        command = self.mysql+' --user=root -S'+socket+' -s -N -e '+shlex.quote(query)
         return subprocess.check_output(command, shell=True, universal_newlines=True)
 
     def install_function(self, fname, soname, return_type):
-        query = '"CREATE FUNCTION {} RETURNS {} SONAME \\\"{}\\\";"'.format(fname, return_type, soname)
+        query = 'CREATE FUNCTION {} RETURNS {} SONAME "{}";'.format(fname, return_type, soname)
         self.run_query(query)
-        query = '"SELECT name FROM mysql.func WHERE dl = \\\"{}\\\";"'.format(soname)
-        output = self.run_query(query)
-        assert fname in output
+        query = 'SELECT name FROM mysql.func WHERE dl = "{}";'.format(soname)
+        def _assert_function():
+            output = self.run_query(query, node="node2")
+            assert fname in output
+        retry(_assert_function, times=5, wait=0.2)
 
     def install_plugin(self, pname, soname):
-        query = '"INSTALL PLUGIN {} SONAME \\\"{}\\\";"'.format(pname,soname)
+        query = 'INSTALL PLUGIN {} SONAME "{}";'.format(pname,soname)
         self.run_query(query)
-        query = '"SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = \\\"{}\\\";"'.format(pname)
-        output = self.run_query(query)
-        assert 'ACTIVE' in output
-
-    def check_engine_active(self, engine):
-        query = '"select SUPPORT from information_schema.ENGINES where ENGINE = \\\"{}\\\";"'.format(engine)
-        output = self.run_query(query)
-        if 'YES' in output:
-            return True
-        else:
-            return False
+        query = 'SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = "{}";'.format(pname)
+        def _assert_plugin():
+            output = self.run_query(query, node="node3")
+            assert 'ACTIVE' in output
+        retry(_assert_plugin, times=5, wait=0.2)

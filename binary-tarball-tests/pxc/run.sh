@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 export PATH=${HOME}/.local/bin:${PATH}
 
+PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
+
 echo "Installing dependencies..."
 if [ -f /etc/redhat-release ]; then
   sudo yum install -y libaio numactl openssl socat lsof
@@ -13,6 +15,10 @@ if [ -f /etc/redhat-release ]; then
   else
     sudo yum install -y python3 python3-pip
   fi
+  if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
+    sudo yum install -y https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    sudo yum install -y percona-xtrabackup-24
+  fi
 else
   UCF_FORCE_CONFOLD=1 DEBIAN_FRONTEND=noninteractive sudo -E apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -qq -y install openssl
   if [[ $(lsb_release -sc) == 'xenial' ]]; then
@@ -24,7 +30,13 @@ else
   else
     sudo apt install -y python3 python3-pip
   fi
-  sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof
+  sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof curl
+  if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
+    wget -q https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb
+    sudo dpkg -i percona-release_latest.$(lsb_release -sc)_all.deb
+    sudo apt update
+    sudo apt-get install -y percona-xtrabackup-24
+  fi
 fi
 pip3 install --user pytest-testinfra pytest
 
