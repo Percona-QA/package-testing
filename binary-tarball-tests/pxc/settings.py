@@ -6,6 +6,7 @@ pxc_version = os.getenv('PXC_VERSION')
 pxc_revision = os.getenv('PXC_REVISION')
 pxc57_pkg_version = os.getenv('PXC57_PKG_VERSION')
 wsrep_version = os.getenv('WSREP_VERSION')
+glibc_version = os.getenv('GLIBC_VERSION')
 
 pxc_version_percona = pxc_version.split('-')[0]
 pxc_version_major = pxc_version_percona.split('.')[0] + '.' + pxc_version_percona.split('.')[1]
@@ -15,6 +16,7 @@ if pxc_version_major == "5.7":
   pxc57_client_version = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1][3:]
   pxc57_server_version_norel = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1][3:] + '-' + pxc57_pkg_version.split('-')[2].split('.')[0]
   pxc57_server_version = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1] + '-' + pxc57_pkg_version.split('-')[2].split('.')[0]
+  pxc57_client_version_using = "6.0" if glibc_version == "2.12" else "6.2"
 
 # 8.0
 pxc80_binaries = (
@@ -88,16 +90,28 @@ pxc57_files = (
   'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so',
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
-pxc57_symlinks = (
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.20'),
-  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.20'),
-  ('lib/libncurses.so','lib/private/libncurses.so.5.9'),
-  ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'),
-  ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
-  ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
-  ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
-  ('lib/libreadline.so','lib/private/libreadline.so.6.2'),
-)
+
+if glibc_version == "2.12":
+  pxc57_symlinks = (
+    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.20'),
+    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.20'),
+    ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.1e'),
+    ('lib/libssl.so','lib/private/libssl.so.1.0.1e'),
+    ('lib/libtinfo.so','lib/private/libtinfo.so.5.7'),
+    ('lib/libsasl2.so','lib/private/libsasl2.so.2.0.23'),
+    ('lib/libreadline.so','lib/private/libreadline.so.6.0'),
+  )
+else:
+  pxc57_symlinks = (
+    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.20'),
+    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.20'),
+    ('lib/libncurses.so','lib/private/libncurses.so.5.9'),
+    ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'),
+    ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
+    ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
+    ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
+    ('lib/libreadline.so','lib/private/libreadline.so.6.2'),
+  )
 
 # 5.6
 pxc56_binaries = (
