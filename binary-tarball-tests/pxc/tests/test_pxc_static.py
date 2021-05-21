@@ -11,7 +11,10 @@ def test_binaries_exist(host):
 
 def test_mysql_version(host):
     if pxc_version_major in ['5.7','5.6']:
-        expected = 'mysql  Ver 14.14 Distrib ' + pxc57_client_version + ', for Linux (x86_64) using  6.2'
+        expected = (
+            'mysql  Ver 14.14 Distrib ' + pxc57_client_version + ', for Linux (x86_64) using  ' +
+            pxc57_client_version_using
+        )
         assert expected in host.check_output(base_dir+'/bin/mysql --version')
     else:
         expected = (
