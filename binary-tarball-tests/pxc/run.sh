@@ -9,8 +9,8 @@ if [ -f /etc/redhat-release ]; then
   # below needed for 5.6 mysql_install_db
   sudo yum install -y perl-Data-Dumper
   if [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
-    sudo yum install -y epel-release centos-release-scl libev
-    sudo sed -i -e 's/^mirrorlist/#mirrorlist/g' -e 's/^# *baseurl=http:\/\/mirror.centos.org\//baseurl=http:\/\/vault.centos.org\//g' /etc/yum.repos.d/CentOS-SCLo-scl*
+    sudo ../../centos6.sh
+    sudo yum install -y libev
     sudo yum install -y rh-python36 rh-python36-python-pip
     source /opt/rh/rh-python36/enable
   else
