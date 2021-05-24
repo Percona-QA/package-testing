@@ -4,10 +4,10 @@ import testinfra
 
 from settings import *
 
-def test_binaries_exist(host):
-    for binary in pxc_binaries:
-        assert host.file(base_dir+'/'+binary).exists
-        assert oct(host.file(base_dir+'/'+binary).mode) == '0o755'
+def test_executables_exist(host):
+    for executable in pxc_executables:
+        assert host.file(base_dir+'/'+executable).exists
+        assert oct(host.file(base_dir+'/'+executable).mode) == '0o755'
 
 def test_mysql_version(host):
     if pxc_version_major in ['5.7','5.6']:
@@ -48,3 +48,7 @@ def test_symlinks(host):
         assert host.file(base_dir+'/'+symlink[0]).is_symlink
         assert host.file(base_dir+'/'+symlink[0]).linked_to == base_dir+'/'+symlink[1]
         assert host.file(base_dir+'/'+symlink[1]).exists
+
+def test_binaries_linked_libraries(host):
+    for binary in pxc_binaries:
+        assert '=> not found' not in host.check_output('ldd ' + base_dir + '/' + binary)
