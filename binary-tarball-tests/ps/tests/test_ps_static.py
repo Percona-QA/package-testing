@@ -26,3 +26,4 @@ def test_symlinks(host):
     for symlink in ps_symlinks:
         assert host.file(base_dir+'/'+symlink[0]).is_symlink
         assert host.file(base_dir+'/'+symlink[0]).linked_to == base_dir+'/'+symlink[1]
+        assert host.file(base_dir+'/'+symlink[1]).exists
