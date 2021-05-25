@@ -31,7 +31,7 @@ else
   else
     sudo apt install -y python3 python3-pip
   fi
-  sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof curl libev
+  sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof curl libev4
   if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     wget -q https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb
     sudo dpkg -i percona-release_latest.$(lsb_release -sc)_all.deb
