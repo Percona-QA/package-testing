@@ -183,8 +183,13 @@ check_rocksdb_exists() {
   result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.ENGINES where ENGINE="ROCKSDB" and SUPPORT <> "NO";')
   [ "$result" -eq 1 ]
 
-  result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like BINARY "%ROCKSDB%" and PLUGIN_STATUS like "ACTIVE";')
-  [ "$result" -eq 15 ]
+  if [ ${MYSQL_VERSION} = "8.0" ]; then
+    result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like BINARY "%ROCKSDB%" and PLUGIN_STATUS like "ACTIVE";')
+    [ "$result" -eq 15 ]
+  else
+    result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like BINARY "%ROCKSDB%" and PLUGIN_STATUS like "ACTIVE";')
+    [ "$result" -eq 13 ]
+  fi
 }
 
 uninstall_rocksdb() {
