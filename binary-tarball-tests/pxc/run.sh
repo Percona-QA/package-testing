@@ -28,10 +28,11 @@ else
     DEBIAN_FRONTEND=noninteractive sudo apt -y install python3.6
     sudo rm /usr/bin/python3 && sudo ln -sf /usr/bin/python3.6 /usr/bin/python3
     wget -O get-pip.py "https://bootstrap.pypa.io/get-pip.py" && sudo python3 get-pip.py
+    sudo apt install -y libcurl4-openssl-dev
   else
     sudo apt install -y python3 python3-pip
   fi
-  sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof curl libev
+  sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof curl libev4
   if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     wget -q https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb
     sudo dpkg -i percona-release_latest.$(lsb_release -sc)_all.deb
