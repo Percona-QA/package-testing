@@ -19,18 +19,27 @@ if pxc_version_major == "5.7":
   pxc57_client_version_using = "6.0" if glibc_version == "2.12" else "6.2"
 
 # 8.0
-pxc80_binaries = (
-  'bin/clustercheck', 'bin/garbd', 'bin/wsrep_sst_common', 'bin/wsrep_sst_xtrabackup-v2',
-  'bin/pxc_extra/pxb-2.4/bin/xtrabackup', 'bin/pxc_extra/pxb-2.4/bin/xbcloud', 'bin/pxc_extra/pxb-2.4/bin/xbcloud_osenv',
+
+pxc80_binaries = [
+  'bin/garbd',
+  'bin/pxc_extra/pxb-2.4/bin/xtrabackup', 'bin/pxc_extra/pxb-2.4/bin/xbcloud',
   'bin/pxc_extra/pxb-2.4/bin/xbcrypt', 'bin/pxc_extra/pxb-2.4/bin/xbstream',
-  'bin/pxc_extra/pxb-8.0/bin/xtrabackup', 'bin/pxc_extra/pxb-8.0/bin/xbcloud', 'bin/pxc_extra/pxb-8.0/bin/xbcloud_osenv',
+  'bin/pxc_extra/pxb-8.0/bin/xtrabackup', 'bin/pxc_extra/pxb-8.0/bin/xbcloud',
   'bin/pxc_extra/pxb-8.0/bin/xbcrypt', 'bin/pxc_extra/pxb-8.0/bin/xbstream',
-  'bin/mysql', 'bin/mysqld', 'bin/ps-admin', 'bin/mysqladmin', 'bin/mysqlbinlog',
-  'bin/mysqldump', 'bin/mysqldumpslow', 'bin/mysqlimport', 'bin/mysqlpump', 'bin/mysqlshow',
-  'bin/mysqlslap', 'bin/mysqlcheck', 'bin/mysql_config_editor', 'bin/mysql_config',
+  'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog',
+  'bin/mysqldump', 'bin/mysqlimport', 'bin/mysqlpump', 'bin/mysqlshow',
+  'bin/mysqlslap', 'bin/mysqlcheck', 'bin/mysql_config_editor',
   'bin/mysqlrouter', 'bin/mysqlrouter_passwd', 'bin/mysqlrouter_plugin_info', 'bin/mysql_secure_installation', 'bin/mysql_ssl_rsa_setup',
   'bin/mysql_upgrade', 'bin/mysql_tzinfo_to_sql'
-)
+]
+pxc80_executables = pxc80_binaries + [
+  'bin/clustercheck', 'bin/wsrep_sst_common', 'bin/wsrep_sst_xtrabackup-v2',
+  'bin/pxc_extra/pxb-2.4/bin/xbcloud_osenv',
+  'bin/pxc_extra/pxb-8.0/bin/xbcloud_osenv',
+  'bin/ps-admin',
+  'bin/mysqldumpslow',
+  'bin/mysql_config',
+]
 pxc80_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
@@ -61,17 +70,24 @@ pxc80_symlinks = (
 )
 
 # 5.7
-pxc57_binaries = (
-  'bin/clustercheck', 'bin/garbd', 'bin/innochecksum', 'bin/lz4_decompress', 'bin/my_print_defaults',
+pxc57_binaries = [
+  'bin/garbd', 'bin/innochecksum', 'bin/lz4_decompress', 'bin/my_print_defaults',
   'bin/myisam_ftdump','bin/myisamchk', 'bin/myisamlog', 'bin/myisampack', 'bin/mysql', 'bin/mysql_client_test',
-  'bin/mysql_config', 'bin/mysql_config_editor', 'bin/mysql_install_db', 'bin/mysql_plugin', 'bin/mysql_secure_installation',
+  'bin/mysql_config_editor', 'bin/mysql_install_db', 'bin/mysql_plugin', 'bin/mysql_secure_installation',
   'bin/mysql_ssl_rsa_setup', 'bin/mysql_tzinfo_to_sql', 'bin/mysql_upgrade', 'bin/mysqladmin', 'bin/mysqlbinlog',
-  'bin/mysqlcheck', 'bin/mysqld', 'bin/mysqld_multi', 'bin/mysqld_safe', 'bin/mysqldump', 'bin/mysqldumpslow',
+  'bin/mysqlcheck', 'bin/mysqld', 'bin/mysqldump',
   'bin/mysqlimport', 'bin/mysqlpump', 'bin/mysqlshow', 'bin/mysqlslap', 'bin/mysqltest', 'bin/mysqlxtest', 'bin/perror',
-  'bin/ps-admin', 'bin/ps_mysqld_helper', 'bin/ps_tokudb_admin', 'bin/pyclustercheck', 'bin/replace', 'bin/resolve_stack_dump',
-  'bin/resolveip', 'bin/wsrep_sst_common', 'bin/wsrep_sst_mysqldump', 'bin/wsrep_sst_rsync', 'bin/wsrep_sst_xtrabackup-v2',
+  'bin/replace', 'bin/resolve_stack_dump',
+  'bin/resolveip',
   'bin/zlib_decompress'
-)
+]
+pxc57_executables = pxc57_binaries + [
+  'bin/clustercheck',
+  'bin/mysql_config',
+  'bin/mysqld_multi', 'bin/mysqld_safe', 'bin/mysqldumpslow',
+  'bin/ps-admin', 'bin/ps_mysqld_helper', 'bin/ps_tokudb_admin', 'bin/pyclustercheck',
+  'bin/wsrep_sst_common', 'bin/wsrep_sst_mysqldump', 'bin/wsrep_sst_rsync', 'bin/wsrep_sst_xtrabackup-v2',
+]
 pxc57_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),
@@ -114,10 +130,14 @@ else:
   )
 
 # 5.6
-pxc56_binaries = (
+pxc56_binaries = [
   'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog', 'bin/mysqldump',
-  'bin/mysqldumpslow', 'bin/mysqlimport', 'bin/mysqlshow', 'bin/mysqlslap', 'bin/mysqlcheck',
-  'bin/mysql_config_editor', 'bin/mysql_secure_installation', 'bin/mysql_upgrade', 'bin/mysql_tzinfo_to_sql')
+  'bin/mysqlimport', 'bin/mysqlshow', 'bin/mysqlslap', 'bin/mysqlcheck',
+  'bin/mysql_config_editor', 'bin/mysql_secure_installation', 'bin/mysql_upgrade', 'bin/mysql_tzinfo_to_sql'
+]
+pxc56_executables = pxc56_binaries + [
+  'bin/mysqldumpslow'
+]
 pxc56_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so')
@@ -140,18 +160,21 @@ pxc56_symlinks = (
 
 if pxc_version_major == '8.0':
     pxc_binaries = pxc80_binaries
+    pxc_executables = pxc80_executables
     pxc_plugins = pxc80_plugins
     pxc_functions = pxc80_functions
     pxc_files = pxc80_files
     pxc_symlinks = pxc80_symlinks
 elif pxc_version_major == '5.7':
     pxc_binaries = pxc57_binaries
+    pxc_executables = pxc57_executables
     pxc_plugins = pxc57_plugins
     pxc_functions = pxc57_functions
     pxc_files = pxc57_files
     pxc_symlinks = pxc57_symlinks
 elif pxc_version_major == '5.6':
     pxc_binaries = pxc56_binaries
+    pxc_executables = pxc56_executables
     pxc_plugins = pxc56_plugins
     pxc_functions = pxc56_functions
     pxc_files = pxc56_files

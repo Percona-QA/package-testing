@@ -10,12 +10,12 @@ if [ -f /etc/redhat-release ]; then
   sudo yum install -y perl-Data-Dumper
   if [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
     sudo ../../centos6.sh
-    sudo yum install -y libev
     sudo yum install -y rh-python36 rh-python36-python-pip
     source /opt/rh/rh-python36/enable
   else
     sudo yum install -y python3 python3-pip
   fi
+  sudo yum install -y libev
   if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     sudo yum install -y https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     sudo yum install -y percona-xtrabackup-24
@@ -31,7 +31,7 @@ else
   else
     sudo apt install -y python3 python3-pip
   fi
-  sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof curl
+  sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof curl libev
   if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     wget -q https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb
     sudo dpkg -i percona-release_latest.$(lsb_release -sc)_all.deb
