@@ -53,10 +53,9 @@ pxc57_packages = (
   'Percona-Server-shared-57', 'Percona-XtraDB-Cluster-client-57', 'percona-xtrabackup-24'
 )
 pxc57_binaries = (
-  '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/ps-admin', '/usr/bin/mysqladmin', '/usr/bin/mysqlbinlog',
-  '/usr/sbin/mysqld-debug', '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow', '/usr/bin/mysqlimport', '/usr/bin/mysqlpump',
-  '/usr/bin/mysqlshow', '/usr/bin/mysqlslap', '/usr/bin/mysqlcheck', '/usr/bin/mysql_config_editor', '/usr/bin/mysql_config',
-  '/usr/bin/mysql_config-64', '/usr/bin/mysql_ldb', '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade',
+  '/usr/bin/mysql', '/usr/sbin/mysqld',
+  '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow',
+  '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade',
   '/usr/bin/mysql_tzinfo_to_sql'
 )
 pxc57_plugins = (
