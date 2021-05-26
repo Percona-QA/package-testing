@@ -21,7 +21,7 @@ class PxcNode:
             subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/server-key.pem', test_pwd+'/cert'])
             subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/client-cert.pem', test_pwd+'/cert'])
             subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/client-key.pem', test_pwd+'/cert'])
-            subprocess.check_call(['chmod','a+r','-R', test_pwd+'/cert'])
+            subprocess.check_call(['chmod','-R','a+r', test_pwd+'/cert'])
         else:
             self.docker_id = subprocess.check_output(
             ['docker', 'run', '--name', node_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd, 
