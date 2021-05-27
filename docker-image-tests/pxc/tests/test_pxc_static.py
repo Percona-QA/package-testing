@@ -23,10 +23,10 @@ def host():
 
 
 class TestMysqlEnvironment:
-    @pytest.mark.parametrize("pkg_name", pxc_packages)
-    def test_packages(self, host, pkg_name):
+    @pytest.mark.parametrize("pkg_name,pkg_version", pxc_packages)
+    def test_packages(self, host, pkg_name, pkg_version):
         assert host.package(pkg_name).is_installed
-        assert host.package(pkg_name).version == pxc_version_upstream
+        assert host.package(pkg_name).version == pkg_version
 
     @pytest.mark.parametrize("binary", pxc_binaries)
     def test_binaries_exist(self, host, binary):
