@@ -6,6 +6,7 @@ docker_product = os.getenv('DOCKER_PRODUCT')
 docker_tag = os.getenv('DOCKER_TAG')
 pxc_version = os.getenv('PXC_VERSION')
 pxc_revision = os.getenv('PXC_REVISION')
+pxc57_pkg_version = os.getenv('PXC57_PKG_VERSION')
 pxc_pxb_version = os.getenv('PXC_PXB_VERSION')
 pxc_wsrep_version = os.getenv('PXC_WSREP_VERSION')
 test_pwd = os.path.dirname(os.path.realpath(__file__))
@@ -13,6 +14,10 @@ test_pwd = os.path.dirname(os.path.realpath(__file__))
 pxc_version_upstream, pxc_version_percona = pxc_version.split('-')
 pxc_version_major = pxc_version_upstream.split('.')[0] + '.' + pxc_version_upstream.split('.')[1]
 pxc_rel=pxc_version_percona.split('.')[0]
+
+pxc57_client_version = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1][3:]
+pxc57_server_release = pxc57_pkg_version.split('-')[1]
+pxc57_server_version_norel = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1][3:] + '-' + pxc_version_major.replace('.', '')
 
 docker_image = docker_acc + "/" + docker_product + ":" + docker_tag
 docker_network = 'pxc-network'
