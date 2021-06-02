@@ -9,6 +9,8 @@ pipeline {
     string(name: 'PXC_VERSION', defaultValue: '8.0.22-13.1', description: 'Full PXC version')
     string(name: 'PXC_REVISION', defaultValue: '428f061', description: 'Short git hash for release')
     string(name: 'PXC_WSREP_VERSION', defaultValue: '26.4.3', description: 'Galera WSREP version')
+    string(name: 'PXC_PXB_VERSION', defaultValue: '2.4.22', description: 'PXB version installed (only for PXC 5.7)')
+    string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.33-rel36-49.1', description: 'PXC package version (only for PXC 5.7)')
   }
   stages {
     stage('Run test') {
