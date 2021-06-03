@@ -94,3 +94,8 @@ class TestCluster:
             cmd = node.ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "select count(*) from test.t1;"')
             assert cmd.succeeded
             assert '4' in cmd.stdout
+
+    def test_cluster_size(self, cluster):
+        cmd = cluster[0].ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "SHOW STATUS LIKE \'wsrep_cluster_size\';"')
+        assert cmd.succeeded
+        assert cmd.stdout.split('\t')[1].strip() == "3"
