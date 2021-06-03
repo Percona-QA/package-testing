@@ -3,6 +3,7 @@ import pytest
 import subprocess
 import testinfra
 import time
+import shlex
 from settings import *
 
 
@@ -42,6 +43,11 @@ class PxcNode:
         if self.bootstrap_node:
             subprocess.check_call(['rm', '-rf', test_pwd+'/cert'])
 
+    def run_query(self, query):
+        cmd = self.ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e ' + shlex.quote(query))
+        assert cmd.succeeded
+        return cmd.stdout
+
 
 @pytest.fixture(scope='module')
 def cluster():
@@ -64,39 +70,29 @@ def cluster():
 class TestCluster:
     @pytest.mark.parametrize("fname,soname,return_type", pxc_functions)
     def test_install_functions(self, cluster, fname, soname, return_type):
-        cmd = cluster[0].ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "CREATE FUNCTION '+fname+' RETURNS '+return_type+' SONAME \''+soname+'\';"')
-        assert cmd.succeeded
+        cluster[0].run_query('CREATE FUNCTION '+fname+' RETURNS '+return_type+' SONAME "'+soname+'";')
         for node in cluster:
-            cmd = node.ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "SELECT name FROM mysql.func WHERE dl = \''+soname+'\';"')
-            assert cmd.succeeded
-            assert fname in cmd.stdout
+            output = node.run_query('SELECT name FROM mysql.func WHERE dl = "'+soname+'";')
+            assert fname in output
 
     @pytest.mark.parametrize("pname,soname", pxc_plugins)
     def test_install_plugin(self, cluster, pname, soname):
         if pname == "group_replication":
             for node in cluster:
-                cmd = node.ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "set global pxc_strict_mode=\'PERMISSIVE\';"')
-                assert cmd.succeeded
-        cmd = cluster[0].ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "INSTALL PLUGIN '+pname+' SONAME \''+soname+'\';"')
-        assert cmd.succeeded
+                node.run_query('set global pxc_strict_mode="PERMISSIVE";')
+        cluster[0].run_query('INSTALL PLUGIN '+pname+' SONAME "'+soname+'";')
         for node in cluster:
-            cmd = node.ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = \''+pname+'\';"')
-            assert cmd.succeeded
-            assert 'ACTIVE' in cmd.stdout
+            output = node.run_query('SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = "'+pname+'";')
+            assert 'ACTIVE' in output
 
     def test_replication(self, cluster):
-        cmd = cluster[0].ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "create database test;"')
-        assert cmd.succeeded
-        cmd = cluster[0].ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "create table t1 (a int primary key);" test')
-        assert cmd.succeeded
-        cmd = cluster[0].ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "insert into t1 values (1),(2),(3),(4);" test')
-        assert cmd.succeeded
+        cluster[0].run_query('create database test;')
+        cluster[0].run_query('create table test.t1 (a int primary key);')
+        cluster[0].run_query('insert into test.t1 values (1),(2),(3),(4);')
         for node in cluster:
-            cmd = node.ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "select count(*) from test.t1;"')
-            assert cmd.succeeded
-            assert '4' in cmd.stdout
+            output = node.run_query('select count(*) from test.t1;')
+            assert '4' in output
 
     def test_cluster_size(self, cluster):
-        cmd = cluster[0].ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e "SHOW STATUS LIKE \'wsrep_cluster_size\';"')
-        assert cmd.succeeded
-        assert cmd.stdout.split('\t')[1].strip() == "3"
+        output = cluster[0].run_query('SHOW STATUS LIKE "wsrep_cluster_size";')
+        assert output.split('\t')[1].strip() == "3"
