@@ -14,7 +14,7 @@ class PxcNode:
             self.docker_id = subprocess.check_output(
                 ['docker', 'run', '--name', node_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd, 
                  '-e', 'CLUSTER_NAME='+cluster_name, '--net='+docker_network,'-d', docker_image]).decode().strip()
-            time.sleep(120)
+            time.sleep(20)
             if pxc_version_major == "8.0":
                 subprocess.check_call(['mkdir', '-p', test_pwd+'/cert'])
                 subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/ca.pem', test_pwd+'/cert'])
@@ -35,7 +35,6 @@ class PxcNode:
                 ['docker', 'run', '--name', node_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd,
                 '-e', 'CLUSTER_NAME='+cluster_name, '-e', 'CLUSTER_JOIN='+base_node_name+'1',
                 '--net='+docker_network, '-d', docker_image]).decode().strip()
-            time.sleep(120)
         self.ti_host = testinfra.get_host("docker://root@" + self.docker_id)
 
     def destroy(self):
@@ -47,6 +46,7 @@ class PxcNode:
 @pytest.fixture(scope='module')
 def cluster():
     cluster = []
+    subprocess.check_call(['docker', 'pull', docker_image])
     subprocess.check_call(['docker', 'network', 'create', docker_network])
     node1 = PxcNode(base_node_name+'1',True)
     cluster.append(node1)
@@ -54,6 +54,7 @@ def cluster():
     cluster.append(node2)
     node3 = PxcNode(base_node_name+'3',False)
     cluster.append(node3)
+    time.sleep(40)
     yield cluster
     for node in cluster:
         node.destroy()
