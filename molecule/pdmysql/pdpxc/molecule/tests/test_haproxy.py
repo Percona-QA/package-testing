@@ -8,7 +8,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 DEBPACKAGES = ['percona-haproxy', 'percona-haproxy-doc', 'percona-vim-haproxy']
 RPMPACKAGES = ['percona-haproxy', 'percona-haproxy-debuginfo']
-HAPROXY_VERSION = os.environ.get("HAPPROXY_VERSION")
+HAPROXY_VERSION = os.environ.get("HAPROXY_VERSION")
 
 
 @pytest.mark.parametrize("package", DEBPACKAGES)
