@@ -12,29 +12,37 @@ container_name = 'pxc-docker-test-static'
 def host():
     docker_id = subprocess.check_output(
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd, '-d', docker_image]).decode().strip()
-    subprocess.check_call(['docker','exec','--user','root',container_name,'yum','install','-y','net-tools'])
+    if pxc_version_major in ['5.7','5.6']:
+        exec_command = ['microdnf', 'install', 'net-tools']
+    else:
+        exec_command = ['yum', 'install', '-y', 'net-tools']
+    subprocess.check_call(['docker','exec','--user','root',container_name] + exec_command)
     time.sleep(20)
     yield testinfra.get_host("docker://root@" + docker_id)
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
 
 
 class TestMysqlEnvironment:
-    @pytest.mark.parametrize("pkg_name", pxc_packages)
-    def test_packages(self, host, pkg_name):
+    @pytest.mark.parametrize("pkg_name,pkg_version", pxc_packages)
+    def test_packages(self, host, pkg_name, pkg_version):
         assert host.package(pkg_name).is_installed
-        assert host.package(pkg_name).version == pxc_version_upstream
+        assert host.package(pkg_name).version == pkg_version
 
     @pytest.mark.parametrize("binary", pxc_binaries)
     def test_binaries_exist(self, host, binary):
         assert host.file(binary).exists
         assert oct(host.file(binary).mode) == '0o755'
 
-    def test_binaries_version(self, host):
+    def test_mysql_version(self, host):
         if pxc_version_major in ['5.7','5.6']:
-            assert host.check_output('mysql --version') == 'mysql  Ver 14.14 Distrib '+pxc_version+', for Linux (x86_64) using  6.2'
-            assert host.check_output('mysqld --version') == 'mysqld  Ver '+pxc_version+' for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release rel'+pxc_version_percona+', Revision '+pxc_revision+')'
+            assert host.check_output('mysql --version') == 'mysql  Ver 14.14 Distrib '+pxc57_client_version+', for Linux (x86_64) using  7.0'
         else:
             assert host.check_output('mysql --version') == 'mysql  Ver '+ pxc_version +' for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release rel'+ pxc_rel +', Revision '+ pxc_revision +', WSREP version '+ pxc_wsrep_version +')'
+
+    def test_mysqld_version(self, host):
+        if pxc_version_major in ['5.7','5.6']:
+            assert host.check_output('mysqld --version') == 'mysqld  Ver '+pxc57_server_version_norel+' for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release '+pxc57_server_release+', Revision '+pxc_revision+', WSREP version '+ pxc_wsrep_version +', wsrep_'+ pxc_wsrep_version +')'
+        else:
             assert host.check_output('mysqld --version') == '/usr/sbin/mysqld  Ver '+ pxc_version +' for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release rel'+ pxc_rel +', Revision '+ pxc_revision +', WSREP version '+ pxc_wsrep_version +')'
 
     def test_process_running(self, host):

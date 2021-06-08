@@ -40,6 +40,9 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
+  - name: clear apt/yum logs
+    command: /package-testing/scripts/log-clear.sh
+
   - name: install Percona Server 5.7 packages
     include_tasks: ../tasks/install_ps57.yml
 
