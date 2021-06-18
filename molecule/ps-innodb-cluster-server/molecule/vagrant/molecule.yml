@@ -40,6 +40,7 @@ provisioner:
     name: ansible-lint
 verifier:
   name: testinfra
+  directory: ../../tests/
   options:
     verbose: true
     s: true
