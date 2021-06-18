@@ -1,6 +1,6 @@
 ---
 scenario:
-  name: default
+  name: vagrant
 dependency:
   name: galaxy
 driver:
@@ -10,14 +10,30 @@ driver:
 lint:
   name: yamllint
 platforms:
-  - name: mysql-router
+  - name: ps-node1
     box: "${TEST_DIST}"
     groups:
-      - router
+      - writer
     memory: 1024
     interfaces:
       - network_name: private_network
-        ip: ${MYSQL_ROUTER_IP}
+        ip: ${PS_NODE1_IP}
+  - name: ps-node2
+    box: "${TEST_DIST}"
+    groups:
+      - reader
+    memory: 1024
+    interfaces:
+      - network_name: private_network
+        ip: ${PS_NODE2_IP}
+  - name: ps-node3
+    box: "${TEST_DIST}"
+    groups:
+      - reader
+    memory: 1024
+    interfaces:
+      - network_name: private_network
+        ip: ${PS_NODE3_IP}
 provisioner:
   name: ansible
   lint:

@@ -10,22 +10,22 @@ export PS_VERSION="13"
 export PS_REVISION="e3e71c5"
 
 if [ "$1" == "setup" ]; then
-  molecule create
+  molecule create -s vagrant
   cd ../ps-innodb-cluster-router
-  molecule create
+  molecule create -s vagrant
   cd -
-  molecule converge
+  molecule converge -s vagrant
   cd ../ps-innodb-cluster-router
-  molecule converge
+  molecule converge -s vagrant
   cd -
 elif [ "$1" == "verify" ]; then
-  molecule verify
+  molecule verify -s vagrant
   cd ../ps-innodb-cluster-router
-  molecule verify
+  molecule verify -s vagrant
   cd -
 elif [ "$1" == "destroy" ]; then
-  molecule destroy
+  molecule destroy -s vagrant
   cd ../ps-innodb-cluster-router
-  molecule destroy
+  molecule destroy -s vagrant
   cd -
 fi
