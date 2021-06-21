@@ -1,0 +1,54 @@
+---
+scenario:
+  name: debian-10
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+lint:
+  name: yamllint
+platforms:
+  - name: ps-node1-debian-10
+    region: eu-central-1
+    image: ami-0be88f8d647409e61
+    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    instance_type: t2.micro
+    ssh_user: admin
+    root_device_name: xvda
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+  - name: ps-node2-debian-10
+    region: eu-central-1
+    image: ami-0be88f8d647409e61
+    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    instance_type: t2.micro
+    ssh_user: admin
+    root_device_name: xvda
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+  - name: ps-node3-debian-10
+    region: eu-central-1
+    image: ami-0be88f8d647409e61
+    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    instance_type: t2.micro
+    ssh_user: admin
+    root_device_name: xvda
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  playbooks:
+    create: ../../../playbooks/create.yml
+    destroy: ../../../playbooks/destroy.yml
+    prepare: ../../../playbooks/prepare.yml
+verifier:
+  name: testinfra
+  directory: ../../tests/
+  options:
+    verbose: true
+    s: true
+    junitxml: report.xml
+  lint:
+    name: flake8
