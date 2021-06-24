@@ -22,6 +22,8 @@ provisioner:
   name: ansible
   lint:
     name: ansible-lint
+  playbooks:
+    converge: ../../playbooks/playbook.yml
 verifier:
   name: testinfra
   directory: ../../tests/
