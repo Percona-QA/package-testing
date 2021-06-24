@@ -112,6 +112,10 @@
       that:
         - "'MySQL' in list_output.stdout"
 
+  - name: Wait 10 seconds for running agents
+    wait_for:
+      timeout: 10
+
   - name: check if mysqld_exporter is Running
     shell: pmm-admin list | grep 'mysqld_exporter' | awk -F" " '{print $2}'
     register: mysqld_exporter_status
@@ -167,6 +171,10 @@
     assert:
       that:
         - "'MongoDB' in list_output.stdout"
+
+  - name: Wait 10 seconds for running agents
+    wait_for:
+      timeout: 10
 
   - name: check if mongodb_exporter is Running
     shell: pmm-admin list | grep 'mongodb_exporter' | awk -F" " '{print $2}'
@@ -237,6 +245,10 @@
       that:
         - "'PostgreSQL' in list_output.stdout"
     when: ansible_distribution_release != 'xenial'
+
+  - name: Wait 10 seconds for running agents
+    wait_for:
+      timeout: 10
 
   - name: check if postgres_exporter is Running
     shell: pmm-admin list | grep 'postgres_exporter' | awk -F" " '{print $2}'
