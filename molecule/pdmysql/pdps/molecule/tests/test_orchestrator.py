@@ -40,7 +40,7 @@ def test_version(host):
 
 
 def test_client(host):
-    cmd = 'orchestrator-client --help'
+    cmd = 'orchestrator-client --help h'
     dist = host.system_info.distribution
     if dist.lower() in ["redhat", "centos", 'rhel']:
         cmd = "/usr/local/orchestrator/resources/bin/orchestrator-client --help h"
@@ -50,9 +50,9 @@ def test_client(host):
 
 def test_integration(host):
     # command = "mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';\""
-    with host.sudo("root"):
+    with host.sudo():
         # result = host.run(command)
         # assert result.rc == 0, (result.stderr, result.stdout)
-        test_cmd = "cd /tmp/orchestrator/tests/integration && ./test.sh mysql"
+        test_cmd = "cd /tmp/orchestrator/tests/integration; ./test.sh mysql"
         test = host.run(test_cmd)
-        assert test.rc ==0, (test.stderr, test.stdout)
+        assert test.rc == 0, (test.stderr, test.stdout)
