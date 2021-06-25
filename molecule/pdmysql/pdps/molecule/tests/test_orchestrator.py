@@ -54,4 +54,6 @@ def test_integration(host):
     # assert result.rc == 0, (result.stderr, result.stdout)
     test_cmd = "cd /root/orchestrator/tests/integration && ./test.sh mysql"
     test = host.run(test_cmd)
-    assert test.rc == 0, test.stdout
+    print(test.stdout)
+    print(test.stderr)
+    assert test.rc == 0
