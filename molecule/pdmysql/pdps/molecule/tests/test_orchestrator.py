@@ -49,10 +49,10 @@ def test_client(host):
 
 
 def test_integration(host):
-    command = "mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';\""
+    # command = "mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';\""
     with host.sudo("root"):
-        result = host.run(command)
-        assert result.rc == 0, (result.stderr, result.stdout)
-        test_cmd = "cd /tmp/orchestrator/tests/integration && test.sh mysql"
+        # result = host.run(command)
+        # assert result.rc == 0, (result.stderr, result.stdout)
+        test_cmd = "cd /tmp/orchestrator/tests/integration && ./test.sh mysql"
         test = host.run(test_cmd)
         assert test.rc ==0, (test.stderr, test.stdout)
