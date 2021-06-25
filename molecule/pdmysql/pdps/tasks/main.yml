@@ -200,12 +200,12 @@
     git:
       repo: https://github.com/openark/orchestrator.git
       version: master
-      dest: /tmp/orchestrator
+      dest: /root/orchestrator
 
   - name: Copy test.sh for orchestrator
     copy:
       src: test.sh
-      dest: /tmp/orchestrator/tests/integration/test.sh
+      dest: /root/orchestrator/tests/integration/test.sh
       mode: 0644
     when: ansible_os_family == "Debian"
     become: yes

@@ -53,6 +53,6 @@ def test_integration(host):
     with host.sudo():
         # result = host.run(command)
         # assert result.rc == 0, (result.stderr, result.stdout)
-        test_cmd = "cd /tmp/orchestrator/tests/integration; ./test.sh mysql"
+        test_cmd = "cd /root/orchestrator/tests/integration && ./test.sh mysql"
         test = host.run(test_cmd)
         assert test.rc == 0, (test.stderr, test.stdout)
