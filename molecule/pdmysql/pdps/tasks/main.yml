@@ -206,6 +206,6 @@
     copy:
       src: test.sh
       dest: /root/orchestrator/tests/integration/test.sh
-      mode: 0644
+      mode: 0744
     when: ansible_os_family == "Debian"
     become: yes
