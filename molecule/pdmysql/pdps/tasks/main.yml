@@ -176,3 +176,35 @@
 
   - name: start mysql service
     service: name=mysql state=started enabled=yes
+
+  - name: download golang tar
+    get_url:
+      url: "https://golang.org/dl/go1.16.5.linux-amd64.tar.gz"
+      dest: "/tmp"
+      mode: 0440
+
+  - name: Remove old installation of Go
+    file:
+      path: /usr/local/go
+      state: absent
+    become: yes
+
+  - name: Extract the Go tarball
+    unarchive:
+      src: "/tmp/go1.16.5.linux-amd64.tar.gz"
+      dest: /usr/local
+      copy: no
+    become: yes
+
+  - name: Clone orchestrator sources
+    git:
+      repo: https://github.com/openark/orchestrator.git
+      version: master
+      dest: /tmp/orchestrator
+
+  - name: Copy test.sh for orchestrator
+    copy:
+      src: tests.sh
+      dest: /tmp/orchestrator/tests/integration/test.sh
+      mode: 0644
+    when: ansible_os_family == "Debian"
