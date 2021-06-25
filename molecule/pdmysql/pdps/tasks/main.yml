@@ -204,7 +204,7 @@
 
   - name: Copy test.sh for orchestrator
     copy:
-      src: tests.sh
+      src: test.sh
       dest: /tmp/orchestrator/tests/integration/test.sh
       mode: 0644
     when: ansible_os_family == "Debian"
