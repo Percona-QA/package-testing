@@ -148,3 +148,8 @@ def test_madmin(host):
         assert shutdown.rc == 0, shutdown.stdout
         mysql = host.service("mysql")
         assert not mysql.is_running
+        cmd = 'service mysql start'
+        start = host.run(cmd)
+        assert start.rc == 0, start.stdout
+        mysql = host.service("mysql")
+        assert mysql.is_running
