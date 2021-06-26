@@ -152,6 +152,6 @@ def test_madmin(host):
 
 def test_disable_validate_password_plugin(host):
     with host.sudo():
-        cmd = "mysql -e \"UNINSTALL PLUGIN validate_password SONAME 'validate_password.so';\""
+        cmd = "mysql -e \"UNINSTALL PLUGIN validate_password;\""
         plugin = host.run(cmd)
         assert plugin.rc == 0, plugin.stdout
