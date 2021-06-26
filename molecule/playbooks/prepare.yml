@@ -53,6 +53,7 @@
           - gnupg2
           - rsync
           - acl
+          - git
       retries: 60
       delay: 10
       register: result
@@ -80,6 +81,7 @@
           - unzip
           - wget
           - rsync
+          - git
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
 
     - name: install needed packages for running tests with yum on RHEL8
@@ -89,5 +91,6 @@
       vars:
         packages:
         - unzip
+        - git
         - wget
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
