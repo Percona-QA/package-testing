@@ -148,3 +148,10 @@ def test_madmin(host):
         assert start.rc == 0, start.stdout
         mysql = host.service("mysql")
         assert mysql.is_running
+
+
+def test_disable_validate_password_plugin(host):
+    with host.sudo():
+        cmd = "mysql -e \"UNINSTALL PLUGIN validate_password SONAME 'validate_password.so';\""
+        plugin = host.run(cmd)
+        assert plugin.rc == 0, plugin.stdout
