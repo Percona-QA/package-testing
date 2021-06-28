@@ -202,9 +202,17 @@
       version: master
       dest: /root/orchestrator
 
-  - name: Copy test.sh for orchestrator
+  - name: Copy test.sh for orchestrator Debian
     copy:
       src: test.sh
+      dest: /root/orchestrator/tests/integration/test.sh
+      mode: 0744
+    when: ansible_os_family == "Debian"
+    become: yes
+
+  - name: Copy test.sh for orchestrator RHEL
+    copy:
+      src: test_centos.sh
       dest: /root/orchestrator/tests/integration/test.sh
       mode: 0744
     when: ansible_os_family == "Debian"
