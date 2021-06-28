@@ -23,9 +23,9 @@ provisioner:
   lint:
     name: ansible-lint
   playbooks:
-    create: ../../../playbooks/create.yml
-    destroy: ../../../playbooks/destroy.yml
-    prepare: ../../../playbooks/prepare.yml
+    create: ../../../../playbooks/create.yml
+    destroy: ../../../../playbooks/destroy.yml
+    prepare: ../../../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
 verifier:
   name: testinfra

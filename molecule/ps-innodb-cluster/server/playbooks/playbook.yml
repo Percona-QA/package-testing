@@ -4,4 +4,4 @@
   become: true
   become_method: sudo
   roles:
-    - role: ps-innodb-cluster-router
+    - role: server

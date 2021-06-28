@@ -36,9 +36,9 @@ pipeline {
       steps {
           sh '''
             source ${WORKSPACE}/python-venv-molecule/bin/activate
-            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-server
+            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster/server
             molecule create -s vagrant
-            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-router
+            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster/router
             molecule create -s vagrant
           '''
       } //end steps
@@ -47,7 +47,7 @@ pipeline {
       steps {
           sh '''
             source ${WORKSPACE}/python-venv-molecule/bin/activate
-            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-server
+            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster/server
             molecule converge -s vagrant
           '''
       } //end steps
@@ -56,7 +56,7 @@ pipeline {
       steps {
           sh '''
             source ${WORKSPACE}/python-venv-molecule/bin/activate
-            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-router
+            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster/router
             molecule converge -s vagrant
           '''
       } //end steps
@@ -65,20 +65,20 @@ pipeline {
       steps {
           sh '''
             source ${WORKSPACE}/python-venv-molecule/bin/activate
-            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-server
+            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster/server
             molecule verify -s vagrant
           '''
-          junit 'package-testing/molecule/ps-innodb-cluster-server/molecule/default/report.xml'
+          junit 'package-testing/molecule/ps-innodb-cluster/server/molecule/vagrant/report.xml'
       } //end steps
     } //end Install router/shell and setup cluster
     stage('Verify router and cluster setup') {
       steps {
           sh '''
             source ${WORKSPACE}/python-venv-molecule/bin/activate
-            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-router
+            cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster/router
             molecule verify -s vagrant
           '''
-          junit 'package-testing/molecule/ps-innodb-cluster-router/molecule/default/report.xml'
+          junit 'package-testing/molecule/ps-innodb-cluster/router/molecule/vagrant/report.xml'
       } //end steps
     } //end Install router/shell and setup cluster
   } //end stages
@@ -86,9 +86,9 @@ pipeline {
     always {
       sh '''
         source ${WORKSPACE}/python-venv-molecule/bin/activate
-        cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-server
+        cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster/server
         molecule destroy -s vagrant
-        cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster-router
+        cd ${WORKSPACE}/package-testing/molecule/ps-innodb-cluster/router
         molecule destroy -s vagrant
       '''
     }

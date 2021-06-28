@@ -1,18 +1,18 @@
 ---
 # tasks file for ps-innodb-cluster-router
   - name: include tasks for test env setup
-    include_tasks: ../../../tasks/test_prep.yml
+    include_tasks: ../../../../tasks/test_prep.yml
 
   - name: include tasks for enabling PS 8 main repo
-    include: ../../../tasks/enable_ps8_main_repo.yml
+    include: ../../../../tasks/enable_ps8_main_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "main"
 
   - name: include tasks for enabling PS 8 test repo
-    include: ../../../tasks/enable_ps8_testing_repo.yml
+    include: ../../../../tasks/enable_ps8_testing_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "testing" or lookup('env', 'INSTALL_REPO') == ""
 
   - name: include tasks for enabling PS 8 experimental repo
-    include: ../../../tasks/enable_ps8_experimental_repo.yml
+    include: ../../../../tasks/enable_ps8_experimental_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "experimental"
 
   - name: enable tools main repo
