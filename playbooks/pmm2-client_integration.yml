@@ -120,14 +120,6 @@
     shell: pmm-admin list | grep 'mysqld_exporter' | awk -F" " '{print $2}'
     register: mysqld_exporter_status
 
-  - name: Print the list_output
-    ansible.builtin.debug:
-      msg: list_output is {{ list_output.stdout }}
-
-  - name: Print the mysqld_exporter Status
-    ansible.builtin.debug:
-      msg: mysqld_exporter status is {{ mysqld_exporter_status.stdout }}
-
   - name: Assert if the pmm-admin list contains mysqld_exporter with Running state
     assert:
      that:
