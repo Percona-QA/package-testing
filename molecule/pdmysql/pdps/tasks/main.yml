@@ -182,12 +182,16 @@
       url: "https://golang.org/dl/go1.16.5.linux-amd64.tar.gz"
       dest: "/tmp"
       mode: 0440
+    when: ansible_os_family == "Debian"
+
 
   - name: Remove old installation of Go
     file:
       path: /usr/local/go
       state: absent
     become: yes
+    when: ansible_os_family == "Debian"
+
 
   - name: Extract the Go tarball
     unarchive:
@@ -195,6 +199,13 @@
       dest: /usr/local
       copy: no
     become: yes
+    when: ansible_os_family == "Debian"
+
+  - name: install needed packages for running tests with yum
+    yum:
+      name: golang
+      state: latest
+    when: ansible_os_family == "RedHat"
 
   - name: Clone orchestrator sources
     git:
