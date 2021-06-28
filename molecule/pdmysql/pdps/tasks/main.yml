@@ -226,5 +226,5 @@
       src: test_centos.sh
       dest: /root/orchestrator/tests/integration/test.sh
       mode: 0744
-    when: ansible_os_family == "Debian"
+    when: ansible_os_family == "RedHat"
     become: yes
