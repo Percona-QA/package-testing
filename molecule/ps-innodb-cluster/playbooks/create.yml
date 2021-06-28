@@ -1,0 +1,179 @@
+---
+- name: Create
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  no_log: "{{ not (lookup('env', 'MOLECULE_DEBUG') | bool or molecule_yml.provisioner.log|default(false) | bool) }}"
+  vars:
+    ssh_user: ubuntu
+    ssh_port: 22
+    default_region: "{{ lookup('env', 'AWS_DEFAULT_REGION') | default('us-east-1', true) }}"
+    security_group_name: molecule-ps-innodb-cluster
+    security_group_description: Testing PS InnoDB Cluster with Molecule
+    security_group_rules:
+      - proto: tcp
+        from_port: "{{ ssh_port }}"
+        to_port: "{{ ssh_port }}"
+        cidr_ip: '0.0.0.0/0'
+      - proto: icmp
+        from_port: 8
+        to_port: -1
+        cidr_ip: '0.0.0.0/0'
+      - proto: -1
+        from_port: -1
+        to_port: -1
+        group_name: "{{ security_group_name }}"
+    security_group_rules_egress:
+      - proto: -1
+        from_port: 0
+        to_port: 0
+        cidr_ip: '0.0.0.0/0'
+    keypair_name: "molecule-pkg-tests"
+    keypair_path: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/ssh_key"
+
+  tasks:
+    - name: Check subnet
+      ec2_vpc_subnet_info:
+        region: "{{ item.region|default(default_region) }}"
+        filters:
+          subnet-id: "{{ item.vpc_subnet_id }}"
+      with_items: "{{ molecule_yml.platforms }}"
+      register: subnet_facts
+
+    - name: Populate subnet vpc
+      set_fact:
+        subnet_dict: "{{ subnet_dict|default({}) | combine({ item.subnets[0].id: item.subnets[0].vpc_id }) }}"
+      with_items: "{{ subnet_facts.results }}"
+
+    - name: Create security group
+      ec2_group:
+        name: "{{ security_group_name }}"
+        description: "{{ security_group_description }}"
+        rules: "{{ security_group_rules }}"
+        rules_egress: "{{ security_group_rules_egress }}"
+        vpc_id: "{{ subnet_dict[item.vpc_subnet_id] }}"
+        region: "{{ item.region|default(default_region) }}"
+      with_items: "{{ molecule_yml.platforms }}"
+
+#    - name: Delete remote keypair
+#      ec2_key:
+#        name: "{{ keypair_name }}"
+#        state: absent
+#        region: "{{ item.item.region|default(default_region) }}"
+#      with_items: "{{ keypair_local.results}}"
+#      when: not item.stat.exists
+
+#    - name: Create keypair
+#      ec2_key:
+#        name: "{{ keypair_name }}"
+#        region: "{{ item.region|default(default_region) }}"
+#      with_items: "{{ molecule_yml.platforms }}"
+#      register: keypair
+
+    - name: Setup keypair for molecule ec2
+      copy:
+        dest: "{{ keypair_path }}-{{ item.region|default(default_region) }}"
+        src: "{{ lookup('env', 'MOLECULE_AWS_PRIVATE_KEY') }}"
+        mode: 0600
+      no_log: True
+      with_items: "{{ molecule_yml.platforms }}"
+
+#    - name: Get the ec2 ami(s) by owner and name, if image not set
+#      ec2_ami_facts:
+#        owners: "{{ item.image_owner }}"
+#        filters:
+#          name: "{{ item.image_name }}"
+#        region: "{{ item.region|default(default_region) }}"
+#      loop: "{{ molecule_yml.platforms }}"
+#      when: item.image is not defined
+#      register: ami_facts
+
+    - name: Create molecule instance(s)
+      ec2:
+        key_name: "{{ keypair_name }}"
+        image: "{{ item.image }}"
+        instance_type: "{{ item.instance_type }}"
+        vpc_subnet_id: "{{ item.vpc_subnet_id }}"
+        group: "{{ security_group_name }}"
+        instance_tags: "{{
+            item.instance_tags | combine({
+              'Name': item.name,
+              'ssh_user': item.ssh_user|default(ssh_user)
+            })
+            if item.instance_tags is defined
+            else {
+                'Name': item.name,
+                'ssh_user': item.ssh_user|default(ssh_user)
+            }
+        }}"
+        wait: true
+        assign_public_ip: true
+        private_ip: "{{ item.private_ip | default(omit) }}"
+        exact_count: 1
+        count_tag:
+          Name: "{{ item.name }}"
+        region: "{{ item.region|default(default_region) }}"
+        volumes:
+          - device_name: "{{ item.root_device_name }}"
+            volume_type: gp2
+            volume_size: 30
+            delete_on_termination: true
+      register: server
+      loop: "{{ molecule_yml.platforms }}"
+      loop_control:
+        index_var: index
+      async: 7200
+      poll: 0
+
+    - name: Wait for instance(s) creation to complete
+      async_status:
+        jid: "{{ item.ansible_job_id }}"
+      register: ec2_jobs
+      until: ec2_jobs.finished
+      retries: 300
+      with_items: "{{ server.results }}"
+
+    # Mandatory configuration for Molecule to function.
+
+    - name: Populate instance config dict
+      set_fact:
+        instance_conf_dict: {
+          'instance': "{{ item.tagged_instances[0].tags.Name }}",
+          'address': "{{ item.tagged_instances[0].public_ip }}",
+          'user': "{{ item.tagged_instances[0].tags.ssh_user }}",
+          'port': "{{ ssh_port }}",
+          'identity_file': "{{ keypair_path }}-{{ item.tagged_instances[0].region }}",
+          'instance_id': "{{ item.tagged_instances[0].id }}",
+          'region': "{{ item.tagged_instances[0].region }}",
+        }
+      with_items: "{{ ec2_jobs.results }}"
+      register: instance_config_dict
+      when: server.changed | bool
+
+    - name: Convert instance config dict to a list
+      set_fact:
+        instance_conf: "{{ instance_config_dict.results | map(attribute='ansible_facts.instance_conf_dict') | list }}"
+      when: server.changed | bool
+
+    - name: Dump instance config
+      copy:
+        content: "{{ instance_conf | to_json | from_json | to_yaml }}"
+        dest: "{{ molecule_instance_config }}"
+      when: server.changed | bool
+
+    - name: Print config dict
+      debug:
+        var: instance_config_dict
+
+    - name: Wait for SSH
+      wait_for:
+        port: "{{ ssh_port }}"
+        host: "{{ item.address }}"
+        search_regex: SSH
+        delay: 10
+        timeout: 320
+      with_items: "{{ lookup('file', molecule_instance_config) | from_yaml }}"
+
+    - name: Wait for boot process to finish
+      pause:
+        minutes: 2
