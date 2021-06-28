@@ -125,11 +125,6 @@
     until: mysql_perfschema_agent_status.stdout.find('Running') != -1
     delay: 5
     retries: 5
-
-  - name: Assert if the pmm-admin list contains mysql_perfschema_agent with Running state
-    assert:
-     that:
-      - "'Running' in mysql_perfschema_agent_status.stdout"
 ## end PS
 
 ### start PSMDB4.4
@@ -167,15 +162,6 @@
     until: mongodb_exporter_status.stdout.find('Running') != -1
     delay: 5
     retries: 5
-
-  - name: check if mongodb_exporter is Running
-    shell: pmm-admin list | grep 'mongodb_exporter' | awk -F" " '{print $2}'
-    register: mongodb_exporter_status
-
-  - name: Assert if the pmm-admin list contains mongodb_exporter with Running state
-    assert:
-      that:
-        - "'Running' in mysqld_exporter_status.stdout"
 ### end PSMDB
 
 ### start pgsql13
@@ -245,17 +231,6 @@
     until: postgres_exporter_status.stdout.find('Running') != -1
     delay: 5
     retries: 5
-
-  - name: check if postgres_exporter is Running
-    shell: pmm-admin list | grep 'postgres_exporter' | awk -F" " '{print $2}'
-    register: postgres_exporter_status
-    when: ansible_distribution_release != 'xenial'
-
-  - name: Assert if the pmm-admin list contains postgres_exporter with Running state
-    assert:
-      that:
-        - "'Running' in postgres_exporter_status.stdout"
-    when: ansible_distribution_release != 'xenial'
 
 ## end PG
 
