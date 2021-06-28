@@ -132,9 +132,9 @@
     retries: 5
 
   - name: Assert if the pmm-admin list contains mysql_perfschema_agent with Running state
-      assert:
-        that:
-          - "'Running' in mysql_perfschema_agent_status.stdout"
+    assert:
+      that:
+        - "'Running' in mysql_perfschema_agent_status.stdout"
 ## end PS
 
 ### start PSMDB4.4
