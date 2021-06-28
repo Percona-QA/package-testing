@@ -112,22 +112,19 @@
       that:
         - "'MySQL' in list_output.stdout"
 
-  - name: Wait 10 seconds for running agents
-    wait_for:
-      timeout: 10
-
-  - name: check if mysqld_exporter is Running
+  - name: Wait for mysqld_exporter to have Running Status.
     shell: pmm-admin list | grep 'mysqld_exporter' | awk -F" " '{print $2}'
-    register: mysqld_exporter_status
+    register: mysql_status
+    until: mysql_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
 
-  - name: Assert if the pmm-admin list contains mysqld_exporter with Running state
-    assert:
-     that:
-      - "'Running' in mysqld_exporter_status.stdout"
-
-  - name: check if mysql_perfschema_agent is Running
+  - name: Wait for mysql_perfschema_agent to have Running Status.
     shell: pmm-admin list | grep 'mysql_perfschema_agent' | awk -F" " '{print $2}'
     register: mysql_perfschema_agent_status
+    until: mysql_perfschema_agent_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
 
   - name: Assert if the pmm-admin list contains mysql_perfschema_agent with Running state
     assert:
@@ -164,9 +161,12 @@
       that:
         - "'MongoDB' in list_output.stdout"
 
-  - name: Wait 10 seconds for running agents
-    wait_for:
-      timeout: 10
+  - name: Wait for mongodb_exporter to have Running Status.
+    shell: pmm-admin list | grep 'mongodb_exporter' | awk -F" " '{print $2}'
+    register: mongodb_exporter_status
+    until: mongodb_exporter_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
 
   - name: check if mongodb_exporter is Running
     shell: pmm-admin list | grep 'mongodb_exporter' | awk -F" " '{print $2}'
@@ -238,9 +238,13 @@
         - "'PostgreSQL' in list_output.stdout"
     when: ansible_distribution_release != 'xenial'
 
-  - name: Wait 10 seconds for running agents
-    wait_for:
-      timeout: 10
+  - name: Wait for postgres_exporter to have Running Status.
+    shell: pmm-admin list | grep 'postgres_exporter' | awk -F" " '{print $2}'
+    when: ansible_distribution_release != 'xenial'
+    register: postgres_exporter_status
+    until: postgres_exporter_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
 
   - name: check if postgres_exporter is Running
     shell: pmm-admin list | grep 'postgres_exporter' | awk -F" " '{print $2}'
