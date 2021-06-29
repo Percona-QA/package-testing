@@ -10,9 +10,9 @@ lint:
 platforms:
   - name: ps-node1-debian-10
     private_ip: ${PS_NODE1_IP}
-    region: eu-central-1
-    image: ami-0be88f8d647409e61
-    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    region: us-west-2
+    image: ami-0f5d8e2951e3f83a5
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.micro
     ssh_user: admin
     root_device_name: xvda
@@ -20,9 +20,9 @@ platforms:
       iit-billing-tag: jenkins-ps-worker
   - name: ps-node2-debian-10
     private_ip: ${PS_NODE2_IP}
-    region: eu-central-1
-    image: ami-0be88f8d647409e61
-    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    region: us-west-2
+    image: ami-0f5d8e2951e3f83a5
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.micro
     ssh_user: admin
     root_device_name: xvda
@@ -30,9 +30,9 @@ platforms:
       iit-billing-tag: jenkins-ps-worker
   - name: ps-node3-debian-10
     private_ip: ${PS_NODE3_IP}
-    region: eu-central-1
-    image: ami-0be88f8d647409e61
-    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    region: us-west-2
+    image: ami-0f5d8e2951e3f83a5
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.micro
     ssh_user: admin
     root_device_name: xvda
