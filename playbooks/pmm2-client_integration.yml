@@ -111,6 +111,30 @@
     assert:
       that:
         - "'MySQL' in list_output.stdout"
+
+  - name: Wait for mysqld_exporter to have Running Status.
+    shell: pmm-admin list | grep 'mysqld_exporter' | awk -F" " '{print $2}'
+    register: mysqld_exporter_status
+    until: mysqld_exporter_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
+
+  - name: Assert if the pmm-admin list contains mysqld_exporter with Running state
+    assert:
+      that:
+        - "'Running' in mysqld_exporter_status.stdout"
+
+  - name: Wait for mysql_perfschema_agent to have Running Status.
+    shell: pmm-admin list | grep 'mysql_perfschema_agent' | awk -F" " '{print $2}'
+    register: mysql_perfschema_agent_status
+    until: mysql_perfschema_agent_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
+
+  - name: Assert if the pmm-admin list contains mysql_perfschema_agent with Running state
+    assert:
+      that:
+        - "'Running' in mysql_perfschema_agent_status.stdout"
 ## end PS
 
 ### start PSMDB4.4
@@ -141,6 +165,18 @@
     assert:
       that:
         - "'MongoDB' in list_output.stdout"
+
+  - name: Wait for mongodb_exporter to have Running Status.
+    shell: pmm-admin list | grep 'mongodb_exporter' | awk -F" " '{print $2}'
+    register: mongodb_exporter_status
+    until: mongodb_exporter_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
+
+  - name: Assert if the pmm-admin list contains mongodb_exporter with Running state
+    assert:
+      that:
+        - "'Running' in mongodb_exporter_status.stdout"
 ### end PSMDB
 
 ### start pgsql13
@@ -203,6 +239,19 @@
         - "'PostgreSQL' in list_output.stdout"
     when: ansible_distribution_release != 'xenial'
 
+  - name: Wait for postgres_exporter to have Running Status.
+    shell: pmm-admin list | grep 'postgres_exporter' | awk -F" " '{print $2}'
+    when: ansible_distribution_release != 'xenial'
+    register: postgres_exporter_status
+    until: postgres_exporter_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
+
+  - name: Assert if the pmm-admin list contains postgres_exporter with Running state
+    assert:
+      that:
+        - "'Running' in postgres_exporter_status.stdout"
+    when: ansible_distribution_release != 'xenial'
 ## end PG
 
   - name: run pmm-admin list
@@ -270,7 +319,7 @@
      that:
       - "'{{ pmm_version }}' in pmm_admin_version.stdout"
     when: lookup('env', 'install_repo') == "testing"
-  
+
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
     with_items:
