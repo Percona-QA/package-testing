@@ -23,10 +23,6 @@
     include: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
-  - name: include tasks for enabling main repo
-    include: ../tasks/enable_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
-
   - name: install proxysql new deb packages
     apt:
       name: "{{ packages }}"
@@ -34,7 +30,7 @@
       state: latest
     vars:
       packages:
-      - proxysql21
+      - proxysql
     when: ansible_os_family == "Debian"
 
   - name: install proxysql new rpm packages
@@ -43,11 +39,42 @@
       state: latest
     vars:
       packages:
-      - proxysql21
+      - proxysql
     when: ansible_os_family == "RedHat"
 
   - name: check that proxysql version is correct
-    command: /package-testing/version_check.sh proxysql21
+    command: /package-testing/version_check.sh proxysql
+
+  - name: start proxysql service
+    service: name=proxysql state=started
+
+  - name: stop proxysql service
+    service: name=proxysql state=stopped
+
+# - name: start proxysql service
+#   service: name=proxysql state=started
+
+  - name: install proxysql new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - proxysql2
+    when: ansible_os_family == "Debian"
+
+  - name: install proxysql new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - proxysql2
+    when: ansible_os_family == "RedHat"
+
+  - name: check that proxysql version is correct
+    command: /package-testing/version_check.sh proxysql2
 
   - name: start proxysql service
     service: name=proxysql state=started
@@ -64,7 +91,7 @@
       state: absent
     vars:
       packages:
-      - proxysql21
+      - proxysql2
     when: ansible_os_family == "Debian"
 
   - name: remove proxysql rpm packages
@@ -73,8 +100,9 @@
       state: absent
     vars:
       packages:
-      - proxysql21
+      - proxysql2
     when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh proxysql stopped
+
