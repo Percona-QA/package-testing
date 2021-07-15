@@ -12,7 +12,7 @@ container_name = 'pxc-docker-test-static'
 def host():
     docker_id = subprocess.check_output(
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd, '-d', docker_image]).decode().strip()
-    time.sleep(120)
+    time.sleep(200)
     yield testinfra.get_host("docker://root@" + docker_id)
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
 
