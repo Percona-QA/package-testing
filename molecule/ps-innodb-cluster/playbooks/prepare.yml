@@ -1,0 +1,103 @@
+---
+- name: Prepare node for running tests
+  hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: true
+  tasks:
+    - name: add the Vault and epel CentOS 6 repos
+      shell: |
+        curl https://www.getpagespeed.com/files/centos6-eol.repo --output /etc/yum.repos.d/CentOS-Base.repo
+        curl https://www.getpagespeed.com/files/centos6-epel-eol.repo --output /etc/yum.repos.d/epel.repo
+        yum -y install centos-release-scl
+        curl https://www.getpagespeed.com/files/centos6-scl-eol.repo --output /etc/yum.repos.d/CentOS-SCLo-scl.repo
+        curl https://www.getpagespeed.com/files/centos6-scl-rh-eol.repo --output /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
+        yum -y install epel-release.noarch
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+    - name: install GPG key for epel 8
+      rpm_key:
+        state: present
+        key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+    - name: install GPG key for Percona repos
+      rpm_key:
+        state: present
+        key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+    - name: setup epel 8 repo
+      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+#    - name: setup epel 6 repo
+#      yum: name=http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm state=present
+#      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+    - name: setup ca-certificates release
+      yum:
+        name: ca-certificates
+        update_cache: yes
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: setup epel release centos 7
+      yum:
+        name: epel-release
+        update_cache: yes
+        state: present
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+
+    - name: install needed packages for running tests with apt
+      apt:
+        name: "{{ packages }}"
+        update_cache: yes
+        state: latest
+      vars:
+        packages:
+          - unzip
+          - wget
+          - gnupg
+          - gnupg2
+          - rsync
+          - acl
+      retries: 60
+      delay: 10
+      register: result
+      until: result is not failed
+      when: ansible_os_family == "Debian"
+
+    - name: update systemd-sysv integration on debian/ubuntu
+      apt:
+        name: "{{ packages }}"
+        update_cache: yes
+        state: latest
+      vars:
+        packages:
+        - systemd-sysv
+      when: ansible_os_family == "Debian" and ansible_distribution_release != "trusty"
+
+    - name: install needed packages for running tests with yum
+      yum:
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+          - pv
+          - libselinux-python
+          - unzip
+          - wget
+          - rsync
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
+
+    - name: install needed packages for running tests with yum on RHEL8
+      yum:
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+        - unzip
+        - wget
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
