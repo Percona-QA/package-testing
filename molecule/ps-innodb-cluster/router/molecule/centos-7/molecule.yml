@@ -1,0 +1,38 @@
+---
+scenario:
+  name: centos-7
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+lint:
+  name: yamllint
+platforms:
+  - name: mysql-router-centos-7
+    private_ip: ${MYSQL_ROUTER_IP}
+    region: us-west-2
+    image: ami-036d2cdf95d86d256
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t2.micro
+    ssh_user: centos
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  playbooks:
+    create: ../../../playbooks/create.yml
+    destroy: ../../../../playbooks/destroy.yml
+    prepare: ../../../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../tests/
+  options:
+    verbose: true
+    s: true
+    junitxml: report.xml
+  lint:
+    name: flake8
