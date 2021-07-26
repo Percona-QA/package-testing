@@ -154,16 +154,12 @@
     service: name=haproxy state=started
 
   - name: Unarchive a consul
-    unarchive:
-      src: /root/orchestrator-ci-env/bin/linux/consul.gz
-      dest: /usr/local/bin
-      remote_src: yes
+    shell: gunzip consul.gz
+      chdir: /root/orchestrator-ci-env/bin/linux/
 
   - name: Unarchive a consul-template
-    unarchive:
-      src: /root/orchestrator-ci-env/bin/linux/consul-template.gz
-      dest: /usr/local/bin
-      remote_src: yes
+    shell: gunzip consul-template.gz
+      chdir: /root/orchestrator-ci-env/bin/linux/
 
   - name: Deploy consul
     script:
