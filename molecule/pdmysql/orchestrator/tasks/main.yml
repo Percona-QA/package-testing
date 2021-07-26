@@ -155,21 +155,21 @@
 
   - name: Unarchive a consul
     shell: gunzip consul.gz
-      chdir: /root/orchestrator-ci-env/bin/linux/
+      chdir: "/root/orchestrator-ci-env/bin/linux/"
 
   - name: Unarchive a consul-template
     shell: gunzip consul-template.gz
-      chdir: /root/orchestrator-ci-env/bin/linux/
+      chdir: "/root/orchestrator-ci-env/bin/linux/"
 
   - name: Deploy consul
     script:
       cmd: script/deploy-consul
-      chdir: /root/orchestrator-ci-env
+      chdir: "/root/orchestrator-ci-env"
 
   - name: Run consul
     script:
       cmd: script/run-consul
-      chdir: /root/orchestrator-ci-env
+      chdir: "/root/orchestrator-ci-env"
 
   - name: Test consul
     shell: sudo systemctl status consul
@@ -183,7 +183,7 @@
   - name: Deploy consul-template
     script:
       cmd: script/deploy-consul-template
-      chdir: /root/orchestrator-ci-env
+      chdir: "/root/orchestrator-ci-env"
 
   - name: test consul template binary
     shell: /usr/local/bin/consul-template --version
@@ -191,7 +191,7 @@
   - name: Run consul-template
     script:
       cmd: script/run-consul-template || (sudo journalctl -u consul-template.service ; exit 1)
-      chdir: /root/orchestrator-ci-env
+      chdir: "/root/orchestrator-ci-env"
 
   - name: Test consul-template service
     shell: sudo systemctl status consul-template || (sudo journalctl -u consul-template.service ; exit 1)
@@ -382,7 +382,7 @@
   - name: Deploy mysql heartbeat
     script:
       cmd: script/deploy-heartbeat
-      chdir: /root/orchestrator-ci-env
+      chdir: "/root/orchestrator-ci-env"
 
   - name: Start mysql heartbeat service
     script: script/run-heartbeat || (sudo journalctl -u mysql-heartbeat.service ; exit 1)
@@ -403,7 +403,7 @@
   - name: Copy orchestrator service file
     shell:
       cmd: sudo cp etc/systemd/orchestrator.service /etc/systemd/system/
-      chdir: /root/orchestrator/
+      chdir: "/root/orchestrator/"
 
   - name: Create orchestrator local directory
     shell:
@@ -416,7 +416,7 @@
   - name: Copy orchestrator configuration file
     shell:
       cmd: sudo cp tests/system/orchestrator-ci-system.conf.json /etc/orchestrator.conf.json
-      chdir: /root/orchestrator/
+      chdir: "/root/orchestrator/"
 
   - name: reload systemctl
     service:
