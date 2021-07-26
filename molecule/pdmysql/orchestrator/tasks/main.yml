@@ -155,13 +155,13 @@
 
   - name: Unarchive a consul
     unarchive:
-      src: /root/orchestrator-ci-env/bin/consul.gz
+      src: /root/orchestrator-ci-env/bin/linux/consul.gz
       dest: /usr/local/bin
       remote_src: yes
 
   - name: Unarchive a consul-template
     unarchive:
-      src: /root/orchestrator-ci-env/bin/consul-template.gz
+      src: /root/orchestrator-ci-env/bin/linux/consul-template.gz
       dest: /usr/local/bin
       remote_src: yes
 
@@ -407,7 +407,7 @@
   - name: Copy orchestrator service file
     shell:
       cmd: sudo cp etc/systemd/orchestrator.service /etc/systemd/system/
-      chdir: /root/orchestrator-ci-env
+      chdir: /root/orchestrator/
 
   - name: Create orchestrator local directory
     shell:
@@ -420,7 +420,7 @@
   - name: Copy orchestrator configuration file
     shell:
       cmd: sudo cp tests/system/orchestrator-ci-system.conf.json /etc/orchestrator.conf.json
-      chdir: /root/orchestrator-ci-env
+      chdir: /root/orchestrator/
 
   - name: reload systemctl
     service:
