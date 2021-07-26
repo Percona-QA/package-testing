@@ -184,7 +184,6 @@
       mode: 0440
     when: ansible_os_family == "Debian"
 
-
   - name: Remove old installation of Go
     file:
       path: /usr/local/go
@@ -210,7 +209,7 @@
   - name: Clone orchestrator sources
     git:
       repo: https://github.com/openark/orchestrator.git
-      version: master
+      version: v3.2.4
       dest: /root/orchestrator
 
   - name: Copy test.sh for orchestrator Debian
