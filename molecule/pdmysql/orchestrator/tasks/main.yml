@@ -267,10 +267,10 @@
   - name: Initialize data directory
     shell: "mysqld --no-defaults  --user=root --basedir=/usr/bin --datadir={{ item }}/data --tmpdir=/root/sandboxes/ci/{{ item }}/tmp --initialize-insecure"
     with_items:
-      - /root/sandboxes/ci/master/
-      - /root/sandboxes/ci/node1/
-      - /root/sandboxes/ci/node2/
-      - /root/sandboxes/ci/node3/
+      - /root/sandboxes/ci/master
+      - /root/sandboxes/ci/node1
+      - /root/sandboxes/ci/node2
+      - /root/sandboxes/ci/node3
 
   - name: Start mysql
     shell: "mysqld_safe --defaults-file={{ item }}/my.sandbox.cnf &"
