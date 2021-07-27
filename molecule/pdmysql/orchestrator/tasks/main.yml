@@ -391,6 +391,7 @@
       mode: getreplica
       login_user: root
       login_port: 10114
+      login_host: 127.0.0.1
     register: slave3_status
 
   - name: Print slave3_status
