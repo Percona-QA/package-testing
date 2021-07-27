@@ -255,7 +255,6 @@
     copy:
       src: "my.sandbox.cn_{{ item }}"
       dest: "/root/sandboxes/ci/{{ item }}/my.sandbox.cnf"
-      lstrip_blocks: yes
       owner: root
       group: root
       mode: 0644
