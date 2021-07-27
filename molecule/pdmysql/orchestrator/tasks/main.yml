@@ -280,6 +280,12 @@
       - /root/sandboxes/ci/node2/
       - /root/sandboxes/ci/node3/
 
+  - name: Install ansible python3 mysql dependency
+    apt:
+      name: python3-mysqldb
+      state: latest
+
+
   - name: Create CI user
     mysql_query:
       query: CREATE USER 'ci'@'localhost' IDENTIFIED BY 'ci';
