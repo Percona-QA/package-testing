@@ -265,7 +265,7 @@
       - node3
 
   - name: Initialize data directory
-    shell: "mysqld --no-defaults  --user=root --basedir=/usr/bin --datadir={{ item }}/data --tmpdir=/root/sandboxes/ci/{{ item }}/tmp --initialize-insecure"
+    shell: "mysqld --no-defaults  --user=root --basedir=/usr/bin --datadir={{ item }}/data --tmpdir={{ item }}/tmp --initialize-insecure"
     with_items:
       - /root/sandboxes/ci/master
       - /root/sandboxes/ci/node1
