@@ -190,7 +190,7 @@
     shell: /usr/local/bin/consul-template --version
     register: consul_version
 
-  - name: Print test consul service status
+  - name: Print test consul-template version
     debug:
       var: consul_version
 
@@ -203,7 +203,7 @@
     shell: sudo systemctl status consul-template || (sudo journalctl -u consul-template.service ; exit 1)
     register: consul_template_status
 
-  - name: Print test consul service status
+  - name: Print test consul template service status
     debug:
       var: consul_template_status
 
@@ -271,10 +271,10 @@
   - name: Start mysql
     shell: "mysqld_safe --defaults-file={{ item }}/my.sandbox.cnf &"
     with_items:
-      - /root/sandboxes/ci/master/
-      - /root/sandboxes/ci/node1/
-      - /root/sandboxes/ci/node2/
-      - /root/sandboxes/ci/node3/
+      - /root/sandboxes/ci/master
+      - /root/sandboxes/ci/node1
+      - /root/sandboxes/ci/node2
+      - /root/sandboxes/ci/node3
 
   - name: Install ansible python3 mysql dependency
     apt:
@@ -465,7 +465,7 @@
     debug:
       var: orchestrator_client_status
 
-  - name: graceful sleep
+  - name: Sleep for orchestrator
     pause:
       seconds: 20
 
