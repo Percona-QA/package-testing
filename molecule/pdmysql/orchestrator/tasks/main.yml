@@ -317,6 +317,8 @@
       login_port: 10111
       login_host: 127.0.0.1
 
+  - name: Start master
+    shell: mysql -uroot -h 127.0.0.1 --port 10111 -s -s -e "start master"
 
   - name: Configure slaves
     mysql_replication:
