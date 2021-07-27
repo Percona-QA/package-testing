@@ -254,7 +254,7 @@
       - /root/sandboxes/ci/node3
 
   - name: Start mysql
-    shell: "mysqld_safe --defaults-file={{ item }}/my.sandbox.cnf >/dev/null 2>&1 &"
+    shell: "sleep 5 && mysqld_safe --defaults-file={{ item }}/my.sandbox.cnf &"
     with_items:
       - /root/sandboxes/ci/master
       - /root/sandboxes/ci/node1
@@ -264,6 +264,14 @@
   - name: Sleep for mysql
     pause:
       seconds: 5
+
+  - name: Get mysql processes
+    shell: ps aux | grep mysql
+    register: mysql_ps_status
+
+  - name: Print mysql_ps_status
+    debug:
+      var: mysql_ps_status
 
   - name: Install ansible python3 mysql dependency
     apt:
@@ -307,12 +315,15 @@
       query: CREATE DATABASE test;
       login_user: root
       login_port: 10111
+      login_host: 127.0.0.1
+
 
   - name: Configure slaves
     mysql_replication:
       mode: changeprimary
       login_user: root
       login_port: "{{ item }}"
+      login_host: 127.0.0.1
       primary_host: localhost
       primary_port: 10111
       primary_user: ci
@@ -330,6 +341,7 @@
       mode: startreplica
       login_user: root
       login_port: "{{ item }}"
+      login_host: 127.0.0.1
     with_items:
       - 10112
       - 10113
@@ -340,6 +352,7 @@
       mode: getprimary
       login_user: root
       login_port: 10111
+      login_host: 127.0.0.1
     register: master_status
 
   - name: Print master_status
@@ -351,6 +364,7 @@
       mode: getreplica
       login_user: root
       login_port: 10112
+      login_host: 127.0.0.1
     register: slave1_status
 
   - name: Print slave1_status
@@ -362,6 +376,7 @@
       mode: getreplica
       login_user: root
       login_port: 10113
+      login_host: 127.0.0.1
     register: slave2_status
 
   - name: Print slave2_status
@@ -378,22 +393,6 @@
   - name: Print slave3_status
     debug:
       var: slave3_status
-
-  - name: Print slave 1 config
-    shell: cat /root/sandboxes/ci/node1/my.sandbox.cnf
-    register: slave1_config
-
-  - name: Print slave 1 config
-    debug:
-      var: slave1_config
-
-  - name:
-    shell: ps aux | grep mysql
-    register: mysql_ps_status
-
-  - name: Print slave3_status
-    debug:
-      var: mysql_ps_status
 
   - name: test mysql master
     shell: mysql -uci -pci -h 127.0.0.1 --port 10111 -s -s -e "select @@report_port" | grep -q 10111
