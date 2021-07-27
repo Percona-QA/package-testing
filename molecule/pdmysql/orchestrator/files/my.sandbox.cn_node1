@@ -1,3 +1,4 @@
+[mysql]
 prompt='slave1 [\h:10112] {\u} (\d) > '
 #
 
