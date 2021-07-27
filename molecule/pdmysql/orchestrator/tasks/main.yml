@@ -6,35 +6,14 @@
   - name: Install percona release
     include: ../../tasks/install_percona_release.yml
 
-  - name: clean and update yum cache
-    shell: |
-      yum clean all
-      yum makecache
-    when: ansible_os_family == "RedHat"
-
-  - name: disable the mysql module on RHEL/CentOS 8
-    command: yum module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
-
-  - name: disable the mariadb module on RHEL/CentOS 8
-    command: yum module disable mariadb -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
-
   - name: enable the PDMYSQL-80 repo
     command: percona-release enable-only pdps-{{ version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
       version: "{{ lookup('env', 'VERSION') }}"
 
-
-  - name: install Percona Toolkit
-    include_tasks: ../../../tasks/install_pt.yml
-
-  - name: clean yum
-    shell: |
-      yum clean all
-      yum makecache
-    when: ansible_os_family == "RedHat"
+#  - name: install Percona Toolkit
+#    include_tasks: ../../../tasks/install_pt.yml
 
   - name: install Percona Server deb packages
     apt:
@@ -52,27 +31,27 @@
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
 
-  - name: install Percona XtraBackup 8.0 packages
-    include_tasks: ../../../tasks/install_pxb80.yml
-
-  - name: install proxysql new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-        - proxysql2
-    when: ansible_os_family == "Debian"
-
-  - name: start proxysql service
-    service: name=proxysql state=started
-
-  - name: stop proxysql service
-    service: name=proxysql state=stopped
-
-  - name: start proxysql service
-    service: name=proxysql state=started
+#  - name: install Percona XtraBackup 8.0 packages
+#    include_tasks: ../../../tasks/install_pxb80.yml
+#
+#  - name: install proxysql new deb packages
+#    apt:
+#      name: "{{ packages }}"
+#      update_cache: yes
+#      state: latest
+#    vars:
+#      packages:
+#        - proxysql2
+#    when: ansible_os_family == "Debian"
+#
+#  - name: start proxysql service
+#    service: name=proxysql state=started
+#
+#  - name: stop proxysql service
+#    service: name=proxysql state=stopped
+#
+#  - name: start proxysql service
+#    service: name=proxysql state=started
 
   - name: install orchestrator new deb packages
     apt:
@@ -86,25 +65,31 @@
         - percona-orchestrator
     when: ansible_os_family == "Debian"
 
-  - name: install percona-mysql-shell package for Debian/Ubuntu
-    apt:
-      update_cache: yes
-      state: present
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - percona-mysql-shell
-    when: ansible_os_family == "Debian"
+  - name: Stop mysql service
+    service:
+      name: mysql
+      state: stopped
 
-  - name: install percona-mysql-router package for Debian/Ubuntu
-    apt:
-      update_cache: yes
-      state: present
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - percona-mysql-router
-    when: ansible_os_family == "Debian"
+
+#  - name: install percona-mysql-shell package for Debian/Ubuntu
+#    apt:
+#      update_cache: yes
+#      state: present
+#      name: "{{ packages }}"
+#    vars:
+#      packages:
+#      - percona-mysql-shell
+#    when: ansible_os_family == "Debian"
+#
+#  - name: install percona-mysql-router package for Debian/Ubuntu
+#    apt:
+#      update_cache: yes
+#      state: present
+#      name: "{{ packages }}"
+#    vars:
+#      packages:
+#      - percona-mysql-router
+#    when: ansible_os_family == "Debian"
 
   - name: download golang tar
     get_url:
@@ -261,7 +246,7 @@
       - node3
 
   - name: Initialize data directory
-    shell: "mysqld --no-defaults  --user=root --basedir=/usr/bin --datadir={{ item }}/data --tmpdir={{ item }}/tmp --initialize-insecure"
+    shell: "mysqld --no-defaults --user=root --basedir=/usr/bin --datadir={{ item }}/data --tmpdir={{ item }}/tmp --initialize-insecure"
     with_items:
       - /root/sandboxes/ci/master
       - /root/sandboxes/ci/node1
@@ -269,7 +254,7 @@
       - /root/sandboxes/ci/node3
 
   - name: Start mysql
-    shell: "mysqld_safe --defaults-file={{ item }}/my.sandbox.cnf &"
+    shell: "mysqld_safe --defaults-file={{ item }}/my.sandbox.cnf >/dev/null 2>&1 &"
     with_items:
       - /root/sandboxes/ci/master
       - /root/sandboxes/ci/node1
