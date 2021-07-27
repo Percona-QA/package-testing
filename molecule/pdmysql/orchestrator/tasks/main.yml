@@ -180,7 +180,7 @@
   - name: Print test consul service status
     debug:
       var: consul_status
-      verbosity: 2
+      verbosity: 4
 
   - name: Deploy consul-template
     shell: script/deploy-consul-template
@@ -189,6 +189,12 @@
 
   - name: test consul template binary
     shell: /usr/local/bin/consul-template --version
+    register: consul_version
+
+  - name: Print test consul service status
+    debug:
+      var: consul_version
+      verbosity: 4
 
   - name: Run consul-template
     shell: script/run-consul-template || (sudo journalctl -u consul-template.service ; exit 1)
@@ -198,6 +204,11 @@
   - name: Test consul-template service
     shell: sudo systemctl status consul-template || (sudo journalctl -u consul-template.service ; exit 1)
     register: consul_template_status
+
+  - name: Print test consul service status
+    debug:
+      var: consul_template_status
+      verbosity: 4
 
   - name: Populate consul kv
     shell: consul kv put "mysql/master/ci/hostname" "127.0.0.1"
@@ -212,7 +223,7 @@
   - name: Print test consul kv test
     debug:
       var: consul_test
-      verbosity: 2
+      verbosity: 4
 
   - name: Test consul kv API
     shell: curl -s http://127.0.0.1:8500/v1/kv/mysql/master/ci/port | jq -r '.[].Value' | base64 --decode | grep -q 10111
@@ -241,7 +252,7 @@
       - /root/sandboxes/ci/node3/tmp
 
   - name: Copy config files to sandboxes
-    template:
+    copy:
       src: "my.sandbox.cn_{{ item }}"
       dest: "/root/sandboxes/ci/{{ item }}/my.sandbox.cnf"
       lstrip_blocks: yes
@@ -435,7 +446,7 @@
   - name: Print orchestrator-client status
     debug:
       var: orchestrator_client_status
-      verbosity: 2
+      verbosity: 4
 
   - name: graceful sleep
     pause:
@@ -448,7 +459,7 @@
   - name: Print clusters-alias status
     debug:
       var: orchestrator_cluser_alias
-      verbosity: 2
+      verbosity: 4
 
   - name: Get orchestrator all instances
     shell: orchestrator-client -c all-instances
@@ -457,7 +468,7 @@
   - name: Print clusters-alias status
     debug:
       var: orchestrator_all_instances
-      verbosity: 2
+      verbosity: 4
 
   - name: Get replication-analysis
     shell: orchestrator-client -c replication-analysis
@@ -466,7 +477,7 @@
   - name: Print replication-analysis status
     debug:
       var: orchestrator_replication_analysis
-      verbosity: 2
+      verbosity: 4
 
   - name: Get orchestrator_topology_tabulated
     shell: orchestrator-client -c topology-tabulated -alias ci
@@ -475,7 +486,7 @@
   - name: Print orchestrator_topology_tabulated status
     debug:
       var: orchestrator_topology_tabulated
-      verbosity: 2
+      verbosity: 4
   - name: Get consul KV values
     shell: consul kv get -recurse mysql/master
     register: consul_kv_values
@@ -483,4 +494,4 @@
   - name: Print clusters-alias status
     debug:
       var: consul_kv_values
-      verbosity: 2
+      verbosity: 4
