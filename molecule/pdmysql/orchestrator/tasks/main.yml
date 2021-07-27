@@ -398,9 +398,9 @@
     shell: cat /root/sandboxes/ci/node1/my.sandbox.cnf
     register: slave1_config
 
-    - name: Print slave 1 config
-      debug:
-        var: slave1_config
+  - name: Print slave 1 config
+    debug:
+      var: slave1_config
 
   - name:
     shell: ps aux | grep mysql
