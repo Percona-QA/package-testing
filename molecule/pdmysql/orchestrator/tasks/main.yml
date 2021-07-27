@@ -286,28 +286,46 @@
       state: latest
 
   - name: Create CI user
-    mysql_query:
-      query: CREATE USER 'ci'@'localhost' IDENTIFIED BY 'ci';
-      login_user: root
+    mysql_user:
+      name: ci
+      password: ci
+      priv: '*.*:ALL'
+      state: present
       login_port: 10111
-
-  - name: Grant CI user
-    mysql_query:
-      query: GRANT ALL ON *.* TO 'ci'@'localhost';
       login_user: root
-      login_port: 10111
 
   - name: Create heartbeat user
-    mysql_query:
-      query: CREATE USER 'heartbeat'@'localhost' IDENTIFIED BY 'heartbeat';
-      login_user: root
+    mysql_user:
+      name: heartbeat
+      password: heartbeat
+      priv: 'test.*:ALL'
+      state: present
       login_port: 10111
+      login_user: root
 
-  - name: Grant heartbeat user
-    mysql_query:
-      query: GRANT ALL ON test.* TO 'heartbeat'@'localhost';
-      login_user: root
-      login_port: 10111
+#  - name: Create CI user
+#    mysql_query:
+#      query: CREATE USER 'ci'@'localhost' IDENTIFIED BY 'ci';
+#      login_user: root
+#      login_port: 10111
+
+#  - name: Grant CI user
+#    mysql_query:
+#      query: GRANT ALL ON *.* TO 'ci'@'localhost';
+#      login_user: root
+#      login_port: 10111
+
+#  - name: Create heartbeat user
+#    mysql_query:
+#      query: CREATE USER 'heartbeat'@'localhost' IDENTIFIED BY 'heartbeat';
+#      login_user: root
+#      login_port: 10111
+#
+#  - name: Grant heartbeat user
+#    mysql_query:
+#      query: GRANT ALL ON test.* TO 'heartbeat'@'localhost';
+#      login_user: root
+#      login_port: 10111
 
   - name: Set master global read_only
     mysql_query:
@@ -323,7 +341,7 @@
 
   - name: Configure slaves
     mysql_replication:
-      mode: changemaster
+      mode: changeprimary
       login_user: root
       login_port: "{{ item }}"
       primary_host: localhost
@@ -340,7 +358,7 @@
 
   - name: Start slaves
     mysql_replication:
-      mode: startslave
+      mode: startreplica
       login_user: root
       login_port: "{{ item }}"
     with_items:
@@ -350,28 +368,28 @@
 
   - name: Get master
     mysql_replication:
-      mode: getmaster
+      mode: getprimary
       login_user: root
       login_port: 10111
     register: slave1_status
 
   - name: Get slave1
     mysql_replication:
-      mode: getslave
+      mode: getreplica
       login_user: root
       login_port: 10112
     register: slave1_status
 
   - name: Get slave2
     mysql_replication:
-      mode: getslave
+      mode: getreplica
       login_user: root
       login_port: 10113
     register: slave2_status
 
   - name: Get slave3
     mysql_replication:
-      mode: getslave
+      mode: getreplica
       login_user: root
       login_port: 10114
     register: slave3_status
