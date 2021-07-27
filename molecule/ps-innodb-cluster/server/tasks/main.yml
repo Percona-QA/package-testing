@@ -127,6 +127,10 @@
         transaction_write_set_extraction=XXHASH64
     when: ansible_os_family == "RedHat"
 
+  - name: allow all users to connect to mysql
+    shell: setsebool -P mysql_connect_any 1
+    when: ansible_os_family == "RedHat"
+
   - name: restart mysql service
     service:
       name: mysql
