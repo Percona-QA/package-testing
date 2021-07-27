@@ -489,7 +489,7 @@
     shell: orchestrator-client -c all-instances
     register: orchestrator_all_instances
 
-  - name: Print clusters-alias status
+  - name: Print orchestrator_all_instances
     debug:
       var: orchestrator_all_instances
 
