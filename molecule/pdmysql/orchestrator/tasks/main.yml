@@ -394,6 +394,14 @@
     debug:
       var: slave3_status
 
+  - name: Print slave 1 config
+    shell: cat /root/sandboxes/ci/node1/my.sandbox.cnf
+    register: slave1_config
+
+    - name: Print slave 1 config
+      debug:
+        var: slave1_config
+
   - name:
     shell: ps aux | grep mysql
     register: mysql_ps_status
