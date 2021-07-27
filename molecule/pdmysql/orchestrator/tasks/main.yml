@@ -285,7 +285,6 @@
       name: python3-mysqldb
       state: latest
 
-
   - name: Create CI user
     mysql_query:
       query: CREATE USER 'ci'@'localhost' IDENTIFIED BY 'ci';
@@ -318,7 +317,7 @@
 
   - name: Create test DB
     mysql_query:
-      query: CREATTE DATABASE test;
+      query: CREATE DATABASE test;
       login_user: root
       login_port: 10111
 
