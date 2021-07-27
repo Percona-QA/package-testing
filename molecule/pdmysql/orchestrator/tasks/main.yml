@@ -164,12 +164,12 @@
       chdir: /root/orchestrator-ci-env/bin/linux/
 
   - name: Deploy consul
-    script: script/deploy-consul
+    shell: script/deploy-consul
     args:
       chdir: /root/orchestrator-ci-env
 
   - name: Run consul
-    script: script/run-consul
+    shell: script/run-consul
     args:
       chdir: /root/orchestrator-ci-env
 
@@ -183,8 +183,7 @@
       verbosity: 2
 
   - name: Deploy consul-template
-    script:
-      cmd: script/deploy-consul-template
+    shell: script/deploy-consul-template
     args:
       chdir: /root/orchestrator-ci-env
 
@@ -192,8 +191,7 @@
     shell: /usr/local/bin/consul-template --version
 
   - name: Run consul-template
-    script:
-      cmd: script/run-consul-template || (sudo journalctl -u consul-template.service ; exit 1)
+    shell: script/run-consul-template || (sudo journalctl -u consul-template.service ; exit 1)
     args:
       chdir: /root/orchestrator-ci-env
 
@@ -384,12 +382,14 @@
     shell: mysql -uci -pci -h 127.0.0.1 --port 13306 -s -s -e "select @@report_port" | grep -q 10111
 
   - name: Deploy mysql heartbeat
-    script: script/deploy-heartbeat
+    shell: script/deploy-heartbeat
     args:
       chdir: /root/orchestrator-ci-env
 
   - name: Start mysql heartbeat service
-    script: script/run-heartbeat || (sudo journalctl -u mysql-heartbeat.service ; exit 1)
+    shell: script/run-heartbeat || (sudo journalctl -u mysql-heartbeat.service ; exit 1)
+    args:
+      chdir: /root/orchestrator-ci-env
 
   - name: Check heartbeat
     shell: |
