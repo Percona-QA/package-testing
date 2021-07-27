@@ -254,7 +254,7 @@
       - /root/sandboxes/ci/node3
 
   - name: Start mysql
-    shell: "sleep 5 && mysqld_safe --defaults-file={{ item }}/my.sandbox.cnf &"
+    shell: "mysqld_safe --defaults-file={{ item }}/my.sandbox.cnf &"
     with_items:
       - /root/sandboxes/ci/master
       - /root/sandboxes/ci/node1
