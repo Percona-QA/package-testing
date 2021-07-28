@@ -97,5 +97,5 @@
     shell: mysqlsh root@localhost:6446 --password=Test1234# --sql -e 'create database sbtest;'
 
   - name: run sysbench
-    shell: sysbench --report-interval=1 --tables=2 --table-size=100000 --time=0 --events=0 --threads=1 --rand-type=pareto --db-driver=mysql --mysql-user=sysbench --mysql-password=Test1234# --mysql-host=mysql-router --mysql-port=6446 --mysql-db=sbtest --mysql-storage-engine=innodb /usr/share/sysbench/oltp_read_write.lua prepare
+    shell: sysbench --report-interval=1 --tables=2 --table-size=10000 --time=0 --events=0 --threads=1 --rand-type=pareto --db-driver=mysql --mysql-user=sysbench --mysql-password=Test1234# --mysql-host=mysql-router --mysql-port=6446 --mysql-db=sbtest --mysql-storage-engine=innodb /usr/share/sysbench/oltp_read_write.lua prepare
 
