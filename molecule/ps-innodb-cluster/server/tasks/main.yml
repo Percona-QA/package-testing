@@ -113,7 +113,7 @@
       path: /etc/my.cnf
       block: |
         plugin_load_add='group_replication.so'
-        server_id={{ 10000 | random }}
+        server_id={{ 4294967295 | random }}
         binlog_checksum=NONE
         enforce_gtid_consistency=ON
         gtid_mode=ON
