@@ -101,3 +101,8 @@
         - unzip
         - wget
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
+
+    - name: flush iptables
+      iptables:
+        flush: yes
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
