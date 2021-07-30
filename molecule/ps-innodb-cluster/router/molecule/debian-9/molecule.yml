@@ -9,7 +9,6 @@ lint:
   name: yamllint
 platforms:
   - name: mysql-router-debian-9
-    private_ip: ${MYSQL_ROUTER_IP}
     region: us-west-2
     image: ami-01d07e14f082b3ba1
     vpc_subnet_id: subnet-0430e63d7cdbcd237

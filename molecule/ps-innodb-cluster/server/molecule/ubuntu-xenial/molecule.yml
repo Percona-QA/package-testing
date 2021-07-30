@@ -9,7 +9,6 @@ lint:
   name: yamllint
 platforms:
   - name: ps-node1-ubuntu-xenial
-    private_ip: ${PS_NODE1_IP}
     region: us-west-2
     image: ami-0813245c0939ab3ca
     vpc_subnet_id: subnet-0430e63d7cdbcd237
@@ -19,7 +18,6 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
   - name: ps-node2-ubuntu-xenial
-    private_ip: ${PS_NODE2_IP}
     region: us-west-2
     image: ami-0813245c0939ab3ca
     vpc_subnet_id: subnet-0430e63d7cdbcd237
@@ -29,7 +27,6 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
   - name: ps-node3-ubuntu-xenial
-    private_ip: ${PS_NODE3_IP}
     region: us-west-2
     image: ami-0813245c0939ab3ca
     vpc_subnet_id: subnet-0430e63d7cdbcd237

@@ -9,7 +9,6 @@ lint:
   name: yamllint
 platforms:
   - name: ps-node1-debian-9
-    private_ip: ${PS_NODE1_IP}
     region: us-west-2
     image: ami-01d07e14f082b3ba1
     vpc_subnet_id: subnet-0430e63d7cdbcd237
@@ -19,7 +18,6 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
   - name: ps-node2-debian-9
-    private_ip: ${PS_NODE2_IP}
     region: us-west-2
     image: ami-01d07e14f082b3ba1
     vpc_subnet_id: subnet-0430e63d7cdbcd237
@@ -29,7 +27,6 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
   - name: ps-node3-debian-9
-    private_ip: ${PS_NODE3_IP}
     region: us-west-2
     image: ami-01d07e14f082b3ba1
     vpc_subnet_id: subnet-0430e63d7cdbcd237

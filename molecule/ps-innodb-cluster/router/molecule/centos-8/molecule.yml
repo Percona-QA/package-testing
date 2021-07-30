@@ -9,7 +9,6 @@ lint:
   name: yamllint
 platforms:
   - name: mysql-router-centos-8
-    private_ip: ${MYSQL_ROUTER_IP}
     region: us-west-2
     image: ami-0923359e80cfe4623
     vpc_subnet_id: subnet-0430e63d7cdbcd237

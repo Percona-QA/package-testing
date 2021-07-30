@@ -9,7 +9,6 @@ lint:
   name: yamllint
 platforms:
   - name: mysql-router-ubuntu-xenial
-    private_ip: ${MYSQL_ROUTER_IP}
     region: us-west-2
     image: ami-0813245c0939ab3ca
     vpc_subnet_id: subnet-0430e63d7cdbcd237

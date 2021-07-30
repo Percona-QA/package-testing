@@ -9,7 +9,6 @@ lint:
   name: yamllint
 platforms:
   - name: mysql-router-ubuntu-bionic
-    private_ip: ${MYSQL_ROUTER_IP}
     region: us-west-2
     image: ami-06ffade19910cbfc0
     vpc_subnet_id: subnet-0430e63d7cdbcd237

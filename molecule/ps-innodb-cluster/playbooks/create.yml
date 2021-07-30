@@ -108,7 +108,6 @@
         }}"
         wait: true
         assign_public_ip: true
-        private_ip: "{{ item.private_ip | default(omit) }}"
         exact_count: 1
         count_tag:
           Name: "{{ item.name }}"

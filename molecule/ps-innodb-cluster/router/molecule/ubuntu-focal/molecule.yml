@@ -9,7 +9,6 @@ lint:
   name: yamllint
 platforms:
   - name: mysql-router-ubuntu-focal
-    private_ip: ${MYSQL_ROUTER_IP}
     region: us-west-2
     image: ami-09dd2e08d601bff67
     vpc_subnet_id: subnet-0430e63d7cdbcd237
