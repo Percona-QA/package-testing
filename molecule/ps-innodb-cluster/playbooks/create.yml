@@ -133,6 +133,28 @@
       retries: 300
       with_items: "{{ server.results }}"
 
+    - name: Populate instance private IP dict
+      set_fact:
+        instance_priv_ip_dict: {
+          'instance': "{{ item.tagged_instances[0].tags.Name }}",
+          'private_ip': "{{ item.tagged_instances[0].private_ip }}",
+        }
+      with_items: "{{ ec2_jobs.results }}"
+      register: instance_private_ip_dict
+
+    - name: Convert instance private IP dict to a list
+      set_fact:
+        instance_priv_ip: "{{ instance_private_ip_dict.results | map(attribute='ansible_facts.instance_priv_ip_dict') | list }}"
+
+    - name: Dump instance private IPs
+      copy:
+        content: "{{ instance_priv_ip | to_json }}"
+        dest: "{{ lookup('env', 'INSTANCE_PRIVATE_IP') }}"
+
+    - name: Print instance private IPs
+      debug:
+        msg: "{{ lookup('file', lookup('env', 'INSTANCE_PRIVATE_IP')) }}"
+
     # Mandatory configuration for Molecule to function.
 
     - name: Populate instance config dict
