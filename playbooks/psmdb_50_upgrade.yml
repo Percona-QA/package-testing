@@ -47,7 +47,7 @@
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_psmdb_repo.yml
     vars:
-      psmdb_repo: "psmdb-50"
+      psmdb_repo: "psmdb-50 testing"
 
   - name: install Percona Server for MongoDB 5.0 packages from main repos
     include_tasks: ../tasks/install_psmdb.yml
