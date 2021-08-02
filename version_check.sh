@@ -73,6 +73,8 @@ elif [ "$1" = "psmdb42" ]; then
   version=${PSMDB42_VER}
 elif [ "$1" = "psmdb44" ]; then
   version=${PSMDB44_VER}
+elif [ "$1" = "psmdb50" ]; then
+  version=${PSMDB50_VER}
 else
   echo "Illegal product selected!"
   exit 1
