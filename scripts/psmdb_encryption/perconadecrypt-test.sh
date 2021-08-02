@@ -218,6 +218,7 @@ if [ "${VERSION}" == "4.4" -a "${KEY_STORE}" == "vault" ]; then
   pushd ${ROLLBACK_DIR}/44-gcm/ycsb_test.usertable
   md5sum -c ${ROLLBACK_DIR}/44-gcm/ycsb_test.usertable/removed.2019-09-03T08-03-44.0.bson.aes256-gcm-json.md5
   popd
+fi
 
 if [ "${VERSION}" == "5.0" -a "${KEY_STORE}" == "keyfile" ]; then
   # 5.0 CBC
