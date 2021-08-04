@@ -4,13 +4,13 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: rhel8-${BUILD_NUMBER}-${JOB_NAME}
+  - name: debian11-${BUILD_NUMBER}-${JOB_NAME}
     region: eu-central-1
-    image: ami-0badcc5b522737046
+    image: ami-0c73439315515be7d
     vpc_subnet_id: subnet-085deaca8c1c59a4f
     instance_type: t2.micro
-    ssh_user: ec2-user
-    root_device_name: /dev/sda1
+    ssh_user: admin
+    root_device_name: xvda
     instance_tags:
       iit-billing-tag: jenkins-pg-worker
 provisioner:
@@ -30,7 +30,7 @@ verifier:
     s: true
     junitxml: report.xml
 scenario:
-  name: rhel8
+  name: debian-11
   destroy_sequence:
     - destroy
   clenup_sequence:

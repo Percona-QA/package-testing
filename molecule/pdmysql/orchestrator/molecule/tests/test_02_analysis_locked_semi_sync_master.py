@@ -29,16 +29,16 @@ def semi_sync_analysis_locked(semi_sync_master):
     time.sleep(15)
 
 
-def test_analysis_locked_hypothesis(host, analysis_locked_semi_sync_master):
-    _ = analysis_locked_semi_sync_master
+def test_analysis_locked_hypothesis(host, semi_sync_master):
+    _ = semi_sync_master
     cmd = "orchestrator-client -c replication-analysis"
     result = host.run(cmd)
     expected_output = "127.0.0.1:10111 (cluster 127.0.0.1:10111): LockedSemiSyncMasterHypothesis"
     assert expected_output in result.stdout, result.stdout
 
 
-def test_analysis_locked(host, analysis_locked_semi_sync_analysis_locked):
-    _ = analysis_locked_semi_sync_analysis_locked
+def test_analysis_locked(host, semi_sync_analysis_locked):
+    _ = semi_sync_analysis_locked
     expected_output = "127.0.0.1:10111 (cluster 127.0.0.1:10111): LockedSemiSyncMaster"
     cmd = "orchestrator-client -c replication-analysis"
     result = host.run(cmd)

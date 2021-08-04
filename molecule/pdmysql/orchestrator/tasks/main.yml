@@ -31,28 +31,6 @@
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
 
-#  - name: install Percona XtraBackup 8.0 packages
-#    include_tasks: ../../../tasks/install_pxb80.yml
-#
-#  - name: install proxysql new deb packages
-#    apt:
-#      name: "{{ packages }}"
-#      update_cache: yes
-#      state: latest
-#    vars:
-#      packages:
-#        - proxysql2
-#    when: ansible_os_family == "Debian"
-#
-#  - name: start proxysql service
-#    service: name=proxysql state=started
-#
-#  - name: stop proxysql service
-#    service: name=proxysql state=stopped
-#
-#  - name: start proxysql service
-#    service: name=proxysql state=started
-
   - name: install orchestrator new deb packages
     apt:
       name: "{{ packages }}"
@@ -69,27 +47,6 @@
     service:
       name: mysql
       state: stopped
-
-
-#  - name: install percona-mysql-shell package for Debian/Ubuntu
-#    apt:
-#      update_cache: yes
-#      state: present
-#      name: "{{ packages }}"
-#    vars:
-#      packages:
-#      - percona-mysql-shell
-#    when: ansible_os_family == "Debian"
-#
-#  - name: install percona-mysql-router package for Debian/Ubuntu
-#    apt:
-#      update_cache: yes
-#      state: present
-#      name: "{{ packages }}"
-#    vars:
-#      packages:
-#      - percona-mysql-router
-#    when: ansible_os_family == "Debian"
 
   - name: download golang tar
     get_url:
