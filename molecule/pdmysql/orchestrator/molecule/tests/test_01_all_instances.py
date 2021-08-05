@@ -22,10 +22,10 @@ def test_all_instances_replicas(host):
     result = host.run(cmd)
     assert result.rc == 0
     result_stdout = result.stdout.split("\n")
-    assert 3 in result_stdout, result_stdout
-    assert 0 in result_stdout, result_stdout
+    assert '3' in result_stdout, result_stdout
+    assert '0' in result_stdout, result_stdout
     zero_cts = 0
     for val in result_stdout:
-        if val == zero_cts:
+        if val == '0':
             zero_cts += 1
     assert zero_cts == 3, result_stdout

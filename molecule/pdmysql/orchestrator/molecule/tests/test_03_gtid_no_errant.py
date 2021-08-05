@@ -21,11 +21,12 @@ def test_reset_master(host):
     expect_failure = "gtid-errant-reset-master will not operate on 127.0.0.1:10112"
     cmd = "orchestrator-client -c gtid-errant-reset-master -i 127.0.0.1:10112"
     result = host.run(cmd)
-    assert expect_failure in result.stdout, result.stdout
+    print(result.stderr)
+    assert expect_failure in result.stderr, result.stderr
 
 
 def test_inject_empty(host):
     cmd = "orchestrator-client -c gtid-errant-inject-empty -i 127.0.0.1:10113"
     expect_failure = "gtid-errant-inject-empty will not operate on 127.0.0.1:10113"
     result = host.run(cmd)
-    assert expect_failure in result.stdout, result.stdout
+    assert expect_failure in result.stderr, result.stderr
