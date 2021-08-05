@@ -10,18 +10,18 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 @pytest.fixture
 def semi_sync_master(host):
-    host.run_expect(0, "orchestrator-client -c enable-semi-sync-master -i 127.0.0.1:10111")
+    host.run_expect([0], "orchestrator-client -c enable-semi-sync-master -i 127.0.0.1:10111")
     time.sleep(2)
-    host.run_expect(0, "orchestrator-client -c enable-semi-sync-replica -i 127.0.0.1:10112")
+    host.run_expect([0], "orchestrator-client -c enable-semi-sync-replica -i 127.0.0.1:10112")
     time.sleep(2)
-    host.run_expect(0, "orchestrator-client -c disable-semi-sync-replica -i 127.0.0.1:10112")
+    host.run_expect([0], "orchestrator-client -c disable-semi-sync-replica -i 127.0.0.1:10112")
     time.sleep(5)
     yield
     all_instances = host.run("orchestrator-client -c all-instances")
     all_instances_stdout = all_instances.stdout.split("\n")
     for instance in all_instances_stdout:
-        host.run_expect(0, f"orchestrator-client -c disable-semi-sync-master -i {instance}")
-        host.run_expect(0, f"orchestrator-client -c disable-semi-sync-replica -i {instance}")
+        host.run_expect([0], f"orchestrator-client -c disable-semi-sync-master -i {instance}")
+        host.run_expect([0], f"orchestrator-client -c disable-semi-sync-replica -i {instance}")
 
 
 @pytest.fixture
