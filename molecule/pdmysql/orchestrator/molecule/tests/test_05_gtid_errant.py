@@ -25,9 +25,7 @@ mysql -uci -pci -h 127.0.0.1 --port=10112 -e "update test.heartbeat set hint='gt
     host.run_test(setup_cmd)
     time.sleep(3)
     expected_output = "10112"
-    cmd = "orchestrator-client -c api -path all-instances " \
-          "| jq -r '.[] " \
-          "| select(.GtidErrant != "") | .Key.Port'"
+    cmd = "orchestrator-client -c api -path all-instances | jq -r \'.[] | select(.GtidErrant != \"\") | .Key.Port\'"
     result = host.run(cmd)
     assert result.rc == 0, result.stderr
     assert expected_output in result.stdout, result.stdout
