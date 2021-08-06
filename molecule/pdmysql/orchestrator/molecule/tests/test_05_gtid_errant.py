@@ -53,8 +53,7 @@ def test_no_errant_2(host):
 
 def test_inject_errant_2(host):
     expected_result = "10113"
-    cmd = "orchestrator-client -c api -path all-instances " \
-          "| jq -r '.[] | select(.GtidErrant != "") | .Key.Port'"
+    cmd = "orchestrator-client -c api -path all-instances | jq -r \'.[] | select(.GtidErrant != \"\") | .Key.Port\'"
     setup_1 = "orchestrator-client -c relocate -i 127.0.0.1:10114 -d 127.0.0.1:10113"
     setup_2 = """
     mysql -uci -pci -h 127.0.0.1 --port=10113 -e "update test.heartbeat set hint='gtid-errant'"
@@ -67,10 +66,7 @@ def test_inject_errant_2(host):
 
 
 def test_relocate_nested_replica(host):
-    cmd = "orchestrator-client -c api -path all-instances " \
-          "| jq -r '.[] " \
-          "| select(.GtidErrant != "") " \
-          "| .Key.Port'"
+    cmd = "orchestrator-client -c api -path all-instances | jq -r \'.[] | select(.GtidErrant != \"\") | .Key.Port\'"
     setup_cmd = "orchestrator-client -c relocate -i 127.0.0.1:10114 -d 127.0.0.1:10111"
     host.run_test(setup_cmd)
     time.sleep(2)

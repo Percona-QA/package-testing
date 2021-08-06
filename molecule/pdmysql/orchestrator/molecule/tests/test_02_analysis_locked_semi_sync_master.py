@@ -19,6 +19,7 @@ def semi_sync_master(host):
     yield
     all_instances = host.run("orchestrator-client -c all-instances")
     all_instances_stdout = all_instances.stdout.split("\n")
+    print(all_instances_stdout)
     for instance in all_instances_stdout:
         host.run_expect([0], f"orchestrator-client -c disable-semi-sync-master -i {instance}")
         host.run_expect([0], f"orchestrator-client -c disable-semi-sync-replica -i {instance}")
