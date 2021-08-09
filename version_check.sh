@@ -186,8 +186,9 @@ elif [ "${product}" = "pxb24" -o "${product}" = "pxb80" ]; then
     done
 elif [ ${product} = "proxysql" -o ${product} = "proxysql2" ]; then
   version_check=$(proxysql --version 2>&1|grep -c ${version})
+  installed_version=$(proxysql --version)
   if [ ${version_check} -eq 0 ]; then
-    echo "${product} version is not good!"
+    echo "${product} version ${version} is not good!. Installed version: ${installed_version}"
     exit 1
   else
     echo "${product} version is correct and ${version}" >> "${log}"
