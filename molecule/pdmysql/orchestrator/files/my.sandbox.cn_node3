@@ -1,0 +1,54 @@
+[mysql]
+prompt='slave3 [\h:10114] {\u} (\d) > '
+#
+
+[client]
+user               = msandbox
+password           = msandbox
+port               = 10114
+socket             = /tmp/mysql_sandbox10114.sock
+
+[mysqld]
+user               = root
+port               = 10114
+socket             = /tmp/mysql_sandbox10114.sock
+basedir            = /usr/bin
+datadir            = /root/sandboxes/ci/node3/data
+tmpdir             = /root/sandboxes/ci/node3/tmp
+pid-file           = /root/sandboxes/ci/node3/data/mysql_sandbox10114.pid
+bind-address       = 127.0.0.1
+report-host = node-4
+report-port=10114
+log-error=/root/sandboxes/ci/node3/data/msandbox.err
+server-id=10114
+
+# basic replication options
+relay-log-index=mysql-relay
+relay-log=mysql-relay
+log-bin=mysql-bin
+
+
+# GTID options for 5.7 +
+gtid_mode=ON
+enforce-gtid-consistency
+
+
+# replication crash-safe options
+master-info-repository=table
+relay-log-info-repository=table
+relay-log-recovery=on
+
+
+
+
+report_host=127.0.0.1
+bind_address=0.0.0.0
+log_bin
+log_slave_updates
+performance_schema=0
+innodb_buffer_pool_size=32M
+slave_net_timeout=2
+read_only=1
+plugin-load-add=semisync_master.so
+plugin-load-add=semisync_slave.so
+rpl_semi_sync_master_timeout=60000

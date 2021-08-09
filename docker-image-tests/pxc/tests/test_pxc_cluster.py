@@ -15,7 +15,7 @@ class PxcNode:
             self.docker_id = subprocess.check_output(
                 ['docker', 'run', '--name', node_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd, 
                  '-e', 'CLUSTER_NAME='+cluster_name, '--net='+docker_network,'-d', docker_image]).decode().strip()
-            time.sleep(20)
+            time.sleep(120)
             if pxc_version_major == "8.0":
                 subprocess.check_call(['mkdir', '-p', test_pwd+'/cert'])
                 subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/ca.pem', test_pwd+'/cert'])

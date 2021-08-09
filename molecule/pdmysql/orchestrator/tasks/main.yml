@@ -1,0 +1,474 @@
+---
+# tasks file for pdps
+  - name: include playbook for removing Percona repo
+    include: ../../../tasks/remove_percona_repository.yml
+
+  - name: Install percona release
+    include: ../../tasks/install_percona_release.yml
+
+  - name: enable the PDMYSQL-80 repo
+    command: percona-release enable-only pdps-{{ version }} {{ repo }}
+    vars:
+      repo: "{{ lookup('env', 'REPO') }}"
+      version: "{{ lookup('env', 'VERSION') }}"
+
+#  - name: install Percona Toolkit
+#    include_tasks: ../../../tasks/install_pt.yml
+
+  - name: install Percona Server deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-server-server
+      - percona-server-test
+      - percona-server-dbg
+      - percona-server-source
+      - percona-server-client
+      - percona-server-tokudb
+      - percona-server-rocksdb
+    when: ansible_os_family == "Debian"
+
+  - name: install orchestrator new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+        - percona-orchestrator-cli
+        - percona-orchestrator-client
+        - percona-orchestrator
+    when: ansible_os_family == "Debian"
+
+  - name: Stop mysql service
+    service:
+      name: mysql
+      state: stopped
+
+  - name: download golang tar
+    get_url:
+      url: "https://golang.org/dl/go1.16.5.linux-amd64.tar.gz"
+      dest: "/tmp"
+      mode: 0440
+    when: ansible_os_family == "Debian"
+
+  - name: Remove old installation of Go
+    file:
+      path: /usr/local/go
+      state: absent
+    become: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Extract the Go tarball
+    unarchive:
+      src: "/tmp/go1.16.5.linux-amd64.tar.gz"
+      dest: /usr/local
+      copy: no
+    become: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Clone orchestrator sources
+    git:
+      repo: https://github.com/openark/orchestrator.git
+      version: v3.2.4
+      dest: /root/orchestrator
+
+  - name: Clone orchestrator-ci-env sources
+    git:
+      repo: https://github.com/openark/orchestrator-ci-env.git
+      version: master
+      dest: /root/orchestrator-ci-env
+
+  - name: Install haproxy for orchestrator system test debian
+    apt:
+      update_cache: yes
+      state: present
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - haproxy
+    when: ansible_os_family == "Debian"
+
+  - name: start haproxy service
+    service: name=haproxy state=started
+
+  - name: Unarchive a consul
+    shell: gunzip consul.gz
+    args:
+      chdir: /root/orchestrator-ci-env/bin/linux/
+
+  - name: Unarchive a consul-template
+    shell: gunzip consul-template.gz
+    args:
+      chdir: /root/orchestrator-ci-env/bin/linux/
+
+  - name: Deploy consul
+    shell: script/deploy-consul
+    args:
+      chdir: /root/orchestrator-ci-env
+
+  - name: Run consul
+    shell: script/run-consul
+    args:
+      chdir: /root/orchestrator-ci-env
+
+  - name: Test consul
+    shell: sudo systemctl status consul
+    register: consul_status
+
+  - name: Print test consul service status
+    debug:
+      var: consul_status
+
+  - name: Deploy consul-template
+    shell: script/deploy-consul-template
+    args:
+      chdir: /root/orchestrator-ci-env
+
+  - name: test consul template binary
+    shell: /usr/local/bin/consul-template --version
+    register: consul_version
+
+  - name: Print test consul-template version
+    debug:
+      var: consul_version
+
+  - name: Run consul-template
+    shell: script/run-consul-template || (sudo journalctl -u consul-template.service ; exit 1)
+    args:
+      chdir: /root/orchestrator-ci-env
+
+  - name: Test consul-template service
+    shell: sudo systemctl status consul-template || (sudo journalctl -u consul-template.service ; exit 1)
+    register: consul_template_status
+
+  - name: Print test consul template service status
+    debug:
+      var: consul_template_status
+
+  - name: Populate consul kv
+    shell: consul kv put "mysql/master/ci/hostname" "127.0.0.1"
+
+  - name: Populate consul  port
+    shell: consul kv put "mysql/master/ci/port" "10111"
+
+  - name: Test consul kv
+    shell: consul kv get "mysql/master/ci/port" | grep -q 10111
+    register: consul_test
+
+  - name: Print test consul kv test
+    debug:
+      var: consul_test
+
+  - name: Test consul kv API
+    shell: curl -s http://127.0.0.1:8500/v1/kv/mysql/master/ci/port | jq -r '.[].Value' | base64 --decode | grep -q 10111
+    register: consul_api_test
+
+  - name: test consul-template template
+    shell: grep 10111 /etc/haproxy/haproxy.cfg || (sudo journalctl -u consul-template.service ; exit 1)
+
+# Create replica
+
+  - name: Create test directories for orchestrator system test
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: root
+      group: root
+      recurse: yes
+    with_items:
+      - /root/sandboxes/ci/master/data
+      - /root/sandboxes/ci/master/tmp
+      - /root/sandboxes/ci/node1/data
+      - /root/sandboxes/ci/node1/tmp
+      - /root/sandboxes/ci/node2/data
+      - /root/sandboxes/ci/node2/tmp
+      - /root/sandboxes/ci/node3/data
+      - /root/sandboxes/ci/node3/tmp
+
+  - name: Copy config files to sandboxes
+    copy:
+      src: "my.sandbox.cn_{{ item }}"
+      dest: "/root/sandboxes/ci/{{ item }}/my.sandbox.cnf"
+      owner: root
+      group: root
+      mode: 0644
+    with_items:
+      - master
+      - node1
+      - node2
+      - node3
+
+  - name: Initialize data directory
+    shell: "mysqld --no-defaults --user=root --basedir=/usr/bin --datadir={{ item }}/data --tmpdir={{ item }}/tmp --initialize-insecure"
+    with_items:
+      - /root/sandboxes/ci/master
+      - /root/sandboxes/ci/node1
+      - /root/sandboxes/ci/node2
+      - /root/sandboxes/ci/node3
+
+  - name: Start mysql master
+    shell: "mysqld_safe --defaults-file=/root/sandboxes/ci/master/my.sandbox.cnf &"
+
+  - name: Start mysql slave1
+    shell: "mysqld_safe --defaults-file=/root/sandboxes/ci/node1/my.sandbox.cnf &"
+
+  - name: Start mysql slave2
+    shell: "mysqld_safe --defaults-file=/root/sandboxes/ci/node2/my.sandbox.cnf &"
+
+  - name: Start mysql slave3
+    shell: "mysqld_safe --defaults-file=/root/sandboxes/ci/node3/my.sandbox.cnf &"
+
+  - name: Sleep for mysql
+    pause:
+      seconds: 5
+
+  - name: Get mysql processes
+    shell: ps aux | grep mysql
+    register: mysql_ps_status
+
+  - name: Print mysql_ps_status
+    debug:
+      var: mysql_ps_status
+
+  - name: Install ansible python3 mysql dependency
+    apt:
+      name: python3-mysqldb
+      state: latest
+
+  - name: Create CI user
+    mysql_user:
+      name: ci
+      password: ci
+      priv: '*.*:ALL'
+      state: present
+      login_port: 10111
+      login_user: root
+      login_host: 127.0.0.1
+
+  - name: Create heartbeat user
+    mysql_user:
+      name: heartbeat
+      password: heartbeat
+      priv: 'test.*:ALL'
+      state: present
+      login_port: 10111
+      login_user: root
+      login_host: 127.0.0.1
+
+  - name: Set master global read_only
+    mysql_query:
+      query: set global read_only=0;
+      login_user: root
+      login_port: 10111
+      login_host: 127.0.0.1
+    register: ro_is_zero
+
+  - name: Print ro_is_zero
+    debug:
+      var: ro_is_zero
+
+  - name: Create test DB
+    mysql_query:
+      query: CREATE DATABASE test;
+      login_user: root
+      login_port: 10111
+      login_host: 127.0.0.1
+
+  - name: Configure slaves
+    mysql_replication:
+      mode: changeprimary
+      login_user: root
+      login_port: "{{ item }}"
+      login_host: 127.0.0.1
+      primary_host: localhost
+      primary_port: 10111
+      primary_user: ci
+      primary_password: ci
+      primary_ssl: no
+      master_connect_retry: 1
+      master_auto_position: no
+    with_items:
+      - 10112
+      - 10113
+      - 10114
+
+  - name: Start slaves
+    mysql_replication:
+      mode: startreplica
+      login_user: root
+      login_port: "{{ item }}"
+      login_host: 127.0.0.1
+    with_items:
+      - 10112
+      - 10113
+      - 10114
+
+  - name: Get master
+    mysql_replication:
+      mode: getprimary
+      login_user: root
+      login_port: 10111
+      login_host: 127.0.0.1
+    register: master_status
+
+  - name: Print master_status
+    debug:
+      var: master_status
+
+  - name: Get slave1
+    mysql_replication:
+      mode: getreplica
+      login_user: root
+      login_port: 10112
+      login_host: 127.0.0.1
+    register: slave1_status
+
+  - name: Print slave1_status
+    debug:
+      var: slave1_status
+
+  - name: Get slave2
+    mysql_replication:
+      mode: getreplica
+      login_user: root
+      login_port: 10113
+      login_host: 127.0.0.1
+    register: slave2_status
+
+  - name: Print slave2_status
+    debug:
+      var: slave2_status
+
+  - name: Get slave3
+    mysql_replication:
+      mode: getreplica
+      login_user: root
+      login_port: 10114
+      login_host: 127.0.0.1
+    register: slave3_status
+
+  - name: Print slave3_status
+    debug:
+      var: slave3_status
+
+  - name: test mysql master
+    shell: mysql -uci -pci -h 127.0.0.1 --port 10111 -s -s -e "select @@report_port" | grep -q 10111
+
+  - name: test read_only
+    shell: |
+      ro="$(mysql -uci -pci -h 127.0.0.1 --port 10111 -s -s -e "select @@global.read_only")"
+      if [ "$ro" != "0" ] ; then
+        echo "expected read_only=0 on master, got $ro"
+        exit 1
+      fi
+      ro="$(mysql -uci -pci -h 127.0.0.1 --port 10112 -s -s -e "select @@global.read_only")"
+      if [ "$ro" != "1" ] ; then
+        echo "expected read_only=1 on replica, got $ro"
+        exit 1
+      fi
+      echo "read_only" validated
+
+  - name: test haproxy routing to mysql master
+    shell: mysql -uci -pci -h 127.0.0.1 --port 13306 -s -s -e "select @@report_port" | grep -q 10111
+
+  - name: Deploy mysql heartbeat
+    shell: script/deploy-heartbeat
+    args:
+      chdir: /root/orchestrator-ci-env
+
+  - name: Start mysql heartbeat service
+    shell: script/run-heartbeat || (sudo journalctl -u mysql-heartbeat.service ; exit 1)
+    args:
+      chdir: /root/orchestrator-ci-env
+
+  - name: Check heartbeat
+    shell: |
+      sleep 1
+      ts1="$(mysql -uci -pci -h 127.0.0.1 --port 13306 -s -s -e "select ts from test.heartbeat")"
+      sleep 1
+      ts2="$(mysql -uci -pci -h 127.0.0.1 --port 13306 -s -s -e "select ts from test.heartbeat")"
+      if [ "$ts1" == "$ts2" ] ; then
+        echo "heartbeat test fail: '$ts1'=='$ts2'"
+        exit 1
+      fi
+      echo "heartbeat test success: '$ts1'!='$ts2'"
+    register: hb_ts1
+
+  - name: Copy orchestrator service file
+    shell: sudo cp etc/systemd/orchestrator.service /etc/systemd/system/
+    args:
+      chdir: /root/orchestrator/
+
+  - name: Create orchestrator local directory
+    shell:
+      cmd: sudo mkdir -p /usr/local/orchestrator
+
+  - name: Copy orchestrator binary
+    shell:
+      cmd: sudo cp /usr/bin/orchestrator /usr/local/orchestrator/
+
+  - name: Copy orchestrator configuration file
+    shell: sudo cp tests/system/orchestrator-ci-system.conf.json /etc/orchestrator.conf.json
+    args:
+      chdir: /root/orchestrator/
+
+  - name: reload systemctl
+    service:
+      daemon_reload: yes
+      name: orchestrator
+      state: started
+
+  - name: Get orchestrator-client status
+    shell: orchestrator-client -c api -path status | jq .
+    register: orchestrator_client_status
+
+  - name: Print orchestrator-client status
+    debug:
+      var: orchestrator_client_status
+
+  - name: Sleep for orchestrator
+    pause:
+      seconds: 20
+
+  - name: Get clusters-alias status
+    shell: orchestrator-client -c clusters-alias
+    register: orchestrator_cluser_alias
+
+  - name: Print clusters-alias status
+    debug:
+      var: orchestrator_cluser_alias
+
+  - name: Get orchestrator all instances
+    shell: orchestrator-client -c all-instances
+    register: orchestrator_all_instances
+
+  - name: Print orchestrator_all_instances
+    debug:
+      var: orchestrator_all_instances
+
+  - name: Get replication-analysis
+    shell: orchestrator-client -c replication-analysis
+    register: orchestrator_replication_analysis
+
+  - name: Print replication-analysis status
+    debug:
+      var: orchestrator_replication_analysis
+
+  - name: Get orchestrator_topology_tabulated
+    shell: orchestrator-client -c topology-tabulated -alias ci
+    register: orchestrator_topology_tabulated
+
+  - name: Print orchestrator_topology_tabulated status
+    debug:
+      var: orchestrator_topology_tabulated
+  - name: Get consul KV values
+    shell: consul kv get -recurse mysql/master
+    register: consul_kv_values
+
+  - name: Print clusters-alias status
+    debug:
+      var: consul_kv_values

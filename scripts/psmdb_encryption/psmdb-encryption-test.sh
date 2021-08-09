@@ -52,7 +52,7 @@ if [ "$1" == "keyfile" ]; then
     fi
     echo "adding some data and indexes with cipher ${cipher}" | tee -a ${LOG}
     mongo localhost:27017/test --eval "for(i=1; i <= 100000; i++) { db.series.insert( { id: i, name: 'series'+i })}" >> ${LOG}
-    mongo localhost:27017/test --eval "db.series.ensureIndex({ name: 1 })" >> ${LOG}
+    mongo localhost:27017/test --eval "db.series.createIndex({ name: 1 })" >> ${LOG}
     echo "testing the hotbackup functionality with ${cipher}" | tee -a ${LOG}
     test_hotbackup
   done
@@ -95,7 +95,7 @@ if [ "$1" == "vault" ]; then
     fi
     echo "adding some data and indexes with cipher ${cipher}" | tee -a ${LOG}
     mongo localhost:27017/test --eval "for(i=1; i <= 100000; i++) { db.series.insert( { id: i, name: 'series'+i })}" >> ${LOG}
-    mongo localhost:27017/test --eval "db.series.ensureIndex({ name: 1 })" >> ${LOG}
+    mongo localhost:27017/test --eval "db.series.createIndex({ name: 1 })" >> ${LOG}
     echo "testing the hotbackup functionality with ${cipher}" | tee -a ${LOG}
     test_hotbackup
   done
