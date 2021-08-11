@@ -100,7 +100,7 @@ def show_store(host, set_store):
     command = "pbm config --list --mongodb-uri=mongodb://localhost:27017/?replicaSet=rs1"
     result = host.run(command)
     assert result.rc == 0, result.stdout
-    return parse_yaml_string(result.stdout.split("\n", 2)[2].strip())
+    return parse_yaml_string(result.stdout)
 
 
 def test_package(host):
