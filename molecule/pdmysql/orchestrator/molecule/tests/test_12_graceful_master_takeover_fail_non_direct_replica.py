@@ -15,9 +15,10 @@ def test_non_existing(host):
 
 
 def test_non_direct(host):
-    host.run_expect(
-        [0], "test-retry orchestrator-client -c relocate -i 127.0.0.1:10112 -d 127.0.0.1:10113"
-    )
+    for i in range(10):
+        host.run_expect(
+            [0], "orchestrator-client -c relocate -i 127.0.0.1:10112 -d 127.0.0.1:10113"
+        )
     expected_failure = "127.0.0.1:10112 must be directly replicating from the master"
     cmd = "orchestrator-client -c graceful-master-takeover -i 127.0.0.1:10111 -d 127.0.0.1:10112w"
     result = host.run(cmd)
