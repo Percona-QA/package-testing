@@ -187,6 +187,7 @@ def test_set_store(set_store):
     :param set_store:
     :return:
     """
+    print(set_store.stdout)
     assert set_store.rc == 0, set_store.stdout
     store_out = parse_yaml_string("\n".join(set_store.stdout.split("\n")[2:-2]))
     assert store_out['storage']['type'] == 's3'
