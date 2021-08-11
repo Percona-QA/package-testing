@@ -4,7 +4,7 @@
     when: ansible_os_family == "Debian"
 
   - name: Install percona release RHEL
-    yum: name=https://repo.percona.com/yum/main/latest/RPMS/noarch/percona-release-1.0-26.noarch.rpm
+    yum: name=https://repo.percona.com/yum/release/latest/RPMS/noarch/percona-release-1.0-26.noarch.rpm
     when: ansible_os_family == "RedHat"
 
 
