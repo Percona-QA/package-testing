@@ -15,6 +15,7 @@ storage_configs = ['/etc/pbm-agent-storage.conf', '/etc/pbm-agent-storage-gcp.co
                    '/etc/pbm-agent-storage-local.conf']
 
 VERSION = os.getenv("VERSION").split("-")[0]
+PBM_VERSION = float(".".join(os.getenv("VERSION").split(".")[0:2]))
 
 
 def parse_yaml_string(ys):
@@ -23,9 +24,6 @@ def parse_yaml_string(ys):
     :param ys:
     :return:
     """
-    pbm_ver = float(".".join(os.getenv("VERSION").split(".")[0:2]))
-    if pbm_ver < 1.6:
-        ys = ys.split("\n", 2)[2].strip()
     fd = StringIO(ys)
     dct = yaml.load(fd)
     return dct
@@ -103,6 +101,8 @@ def show_store(host, set_store):
     command = "pbm config --list --mongodb-uri=mongodb://localhost:27017/?replicaSet=rs1"
     result = host.run(command)
     assert result.rc == 0, result.stdout
+    if PBM_VERSION < 1.6:
+        return parse_yaml_string(result.stdout.split("\n", 2)[2].strip())
     return parse_yaml_string(result.stdout)
 
 
@@ -224,7 +224,10 @@ def test_set_store(set_store):
     :return:
     """
     assert set_store.rc == 0, set_store.stdout
-    store_out = parse_yaml_string(set_store.stdout)
+    if PBM_VERSION < 1.6:
+        store_out = parse_yaml_string("\n".join(set_store.stdout.split("\n")[2:-2]))
+    else:
+        store_out = parse_yaml_string(set_store.stdout)
     assert store_out['storage']['type'] == 's3'
     assert store_out['storage']['s3']['region'] == 'us-east-1'
     assert store_out['storage']['s3']['bucket'] == 'operator-testing'
