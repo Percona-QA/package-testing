@@ -23,6 +23,9 @@ def parse_yaml_string(ys):
     :param ys:
     :return:
     """
+    pbm_ver = float(".".join(PBM_VERSION.split(".")[0:2]))
+    if pbm_ver < 1.6:
+        ys = ys.split("\n", 2)[2].strip()
     fd = StringIO(ys)
     dct = yaml.load(fd)
     return dct
@@ -187,7 +190,6 @@ def test_set_store(set_store):
     :param set_store:
     :return:
     """
-    print(set_store.stdout)
     assert set_store.rc == 0, set_store.stdout
     store_out = parse_yaml_string(set_store.stdout)
     assert store_out['storage']['type'] == 's3'

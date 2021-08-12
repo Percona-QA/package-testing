@@ -23,6 +23,9 @@ def parse_yaml_string(ys):
     :param ys:
     :return:
     """
+    pbm_ver = float(".".join(os.getenv("VERSION").split(".")[0:2]))
+    if pbm_ver < 1.6:
+        ys = ys.split("\n", 2)[2].strip()
     fd = StringIO(ys)
     dct = yaml.load(fd)
     return dct
