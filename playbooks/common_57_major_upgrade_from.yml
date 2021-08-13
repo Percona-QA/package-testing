@@ -61,6 +61,10 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
+  - name: use Percona Server my.cnf
+    shell: update-alternatives --set my.cnf /etc/mysql/percona-server.cnf
+    when: ansible_os_family == "Debian" and ansible_distribution_release == "bullseye"
+
   - name: start mysql service
     service: name=mysql state=started
 
