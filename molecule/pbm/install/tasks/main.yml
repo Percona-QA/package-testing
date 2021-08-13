@@ -35,7 +35,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: setup psmdb repo with percona-release
-  command: percona-release enable {{ psmdb_to_test }}
+  command: percona-release enable {{ psmdb_to_test }} testing
   vars:
     psmdb_to_test: "{{ lookup('env', 'psmdb_to_test') }}"
 
