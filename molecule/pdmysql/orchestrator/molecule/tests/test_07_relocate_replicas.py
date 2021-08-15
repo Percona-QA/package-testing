@@ -1,5 +1,6 @@
 import os
 import pytest
+import time
 
 import testinfra.utils.ansible_runner
 
@@ -12,6 +13,8 @@ def teardown(host):
     yield
     cmd = "orchestrator-client -c relocate-replicas -i 127.0.0.1:10112 -d 127.0.0.1:10111"
     host.run_expect([0], cmd)
+    time.sleep(10)
+
 
 
 def test_relocate_replicas(host):
