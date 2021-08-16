@@ -37,6 +37,10 @@
       yum -y install epel-release.noarch
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
+  - name: allow release-info to change for apt repositories
+    command: apt-get update -y --allow-releaseinfo-change
+    when: ansible_os_family == "Debian"
+
   - name: install needed packages for running tests with apt
     apt:
       name: "{{ packages }}"
