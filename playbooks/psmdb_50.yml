@@ -20,15 +20,6 @@
      key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: install GPG key for Percona repos
-    rpm_key:
-     state: present
-     key: "{{ item }}"
-    with_items:
-        - https://repo.percona.com/yum/RPM-GPG-KEY-Percona
-        - https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
-    when: ansible_os_family == "RedHat"
-
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
