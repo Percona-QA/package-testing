@@ -7,7 +7,9 @@
     when: ansible_os_family == "Debian"
 
   - name: Install percona repository package for rpm based distros
-    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    command: yum -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    args:
+     warn: no
     when: ansible_os_family == "RedHat"
 
   - name: enable {{ psmdb_repo }} repo

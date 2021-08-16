@@ -24,7 +24,9 @@
   when: ansible_os_family == "Debian"
 
 - name: add the Percona testing yum repos for centos 6 and 7
-  yum: name=https://repo.percona.com/yum/percona-release-1.0-26.noarch.rpm
+  command: yum -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+  args:
+   warn: no
   when: ansible_os_family == "RedHat"
 
 - name: clean and update yum cache
