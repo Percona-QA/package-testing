@@ -1,0 +1,51 @@
+---
+scenario:
+  name: vagrant
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+lint:
+  name: yamllint
+platforms:
+  - name: ps-node1
+    box: "${TEST_DIST}"
+    groups:
+      - writer
+    memory: 1024
+    interfaces:
+      - network_name: private_network
+        ip: ${PS_NODE1_IP}
+  - name: ps-node2
+    box: "${TEST_DIST}"
+    groups:
+      - reader
+    memory: 1024
+    interfaces:
+      - network_name: private_network
+        ip: ${PS_NODE2_IP}
+  - name: ps-node3
+    box: "${TEST_DIST}"
+    groups:
+      - reader
+    memory: 1024
+    interfaces:
+      - network_name: private_network
+        ip: ${PS_NODE3_IP}
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  playbooks:
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../tests/
+  options:
+    verbose: true
+    s: true
+    junitxml: report.xml
+  lint:
+    name: flake8

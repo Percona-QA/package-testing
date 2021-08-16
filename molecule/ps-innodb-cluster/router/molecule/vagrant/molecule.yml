@@ -1,0 +1,35 @@
+---
+scenario:
+  name: vagrant
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+lint:
+  name: yamllint
+platforms:
+  - name: mysql-router
+    box: "${TEST_DIST}"
+    groups:
+      - router
+    memory: 1024
+    interfaces:
+      - network_name: private_network
+        ip: ${MYSQL_ROUTER_IP}
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  playbooks:
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../tests/
+  options:
+    verbose: true
+    s: true
+    junitxml: report.xml
+  lint:
+    name: flake8
