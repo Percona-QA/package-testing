@@ -39,7 +39,7 @@
 
   - name: allow release-info to change for apt repositories
     command: apt-get update -y --allow-releaseinfo-change
-    when: ansible_os_family == "Debian"
+    when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
 
   - name: install needed packages for running tests with apt
     apt:
