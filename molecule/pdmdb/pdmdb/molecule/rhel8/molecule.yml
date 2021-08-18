@@ -25,6 +25,8 @@ provisioner:
 verifier:
   name: testinfra
   directory: ../../../../pbm/tests/
+  additional_files_or_dirs:
+    - ../../pdmdb/tests/test_psmdb_install.py
   options:
     verbose: true
     s: true
