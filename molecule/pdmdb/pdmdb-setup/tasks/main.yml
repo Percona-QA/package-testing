@@ -24,7 +24,7 @@
 - name: Setup pdmdb repo
   command: percona-release setup {{ version }}
   vars:
-    version: "{{ lookup('env', 'VERSION') }}"
+    version: "{{ lookup('env', 'PDMDB_VERSION') }}"
 
 - name: install psmdb deb packages
   apt:
