@@ -26,7 +26,7 @@
   command: percona-release enable {{ version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
-    version: "{{ lookup('env', 'VERSION') }}"
+    version: "{{ lookup('env', 'PDMDB_VERSION') }}"
 
 - name: install psmdb deb packages
   apt:
