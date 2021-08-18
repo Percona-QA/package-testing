@@ -24,9 +24,9 @@ provisioner:
     converge: ../../playbooks/playbook.yml
 verifier:
   name: testinfra
-  directory: ../../../../pbm/tests/
+  directory: ../../../tests/
   additional_files_or_dirs:
-    - ../../pdmdb/tests/test_psmdb_install.py
+    - ../../pbm/tests/
   options:
     verbose: true
     s: true

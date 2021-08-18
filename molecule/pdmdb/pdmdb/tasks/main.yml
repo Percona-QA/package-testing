@@ -1,11 +1,11 @@
 ---
 # tasks file for PDMDB
 - name: remove the Percona apt main repository
-  apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_lsb.codename }} main' state=absent update_cache=yes
+  apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_distribution_release }} main' state=absent update_cache=yes
   when: ansible_os_family == "Debian"
 
 - name: remove the Percona apt testing repositories
-  apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_lsb.codename }} testing' state=absent update_cache=yes
+  apt_repository: repo='deb http://repo.percona.com/apt {{ ansible_distribution_release }} testing' state=absent update_cache=yes
   when: ansible_os_family == "Debian"
 
 - name: remove the Percona yum repositories
@@ -68,11 +68,11 @@
       - percona-server-mongodb-mongos
       - percona-server-mongodb-shell
       - percona-server-mongodb-tools
-      - percona-server-mongodb-debugsource
-      - percona-server-mongodb-shell-debuginfo
-      - percona-server-mongodb-tools-debuginfo
-      - percona-server-mongodb-mongos-debuginfo
-      - percona-server-mongodb-server-debuginfo
+#      - percona-server-mongodb-debugsource
+#      - percona-server-mongodb-shell-debuginfo
+#      - percona-server-mongodb-tools-debuginfo
+#      - percona-server-mongodb-mongos-debuginfo
+#      - percona-server-mongodb-server-debuginfo
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
 - name: stop mongod service
