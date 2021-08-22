@@ -10,11 +10,15 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 @pytest.fixture(scope="module")
 def teardown(host):
+    with host.sudo("root"):
+        host.run_expect([0], "service orchestrator restart")
+    time.sleep(5)
     yield
     cmd = "orchestrator-client -c relocate-replicas -i 127.0.0.1:10112 -d 127.0.0.1:10111"
     host.run_expect([0], cmd)
-    time.sleep(10)
-
+    with host.sudo("root"):
+        host.run_expect([0], "service orchestrator restart")
+    time.sleep(5)
 
 
 def test_relocate_replicas(host):
