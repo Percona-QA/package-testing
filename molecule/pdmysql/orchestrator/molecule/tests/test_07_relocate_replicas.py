@@ -21,7 +21,7 @@ def teardown(host):
     time.sleep(5)
 
 
-def test_relocate_replicas(host):
+def test_relocate_replicas(host, teardown):
     cmd = "orchestrator-client -c relocate-replicas -i 127.0.0.1:10111 -d 127.0.0.1:10112 | sort"
     result = host.run(cmd)
     assert result.rc == 0, result.stderr
