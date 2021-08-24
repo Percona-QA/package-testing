@@ -11,24 +11,25 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 @pytest.fixture()
 def redeploy(host):
     with host.sudo("root"):
+        print("Killing mysql")
         host.run("killall -9 mysqld_safe")
-        host.run("killall -9 mysqld")
         time.sleep(5)
+        print("Starting master")
         host.run(
-            "mysqld_safe --defaults-file=/root/sandboxes/ci/master/my.sandbox.cnf",
-            background=True,
+            "mysqld_safe --defaults-file=/root/sandboxes/ci/master/my.sandbox.cnf &",
         )
+        print("Starting node1")
         host.run(
-            "mysqld_safe --defaults-file=/root/sandboxes/ci/node1/my.sandbox.cnf",
-            background=True,
+            "mysqld_safe --defaults-file=/root/sandboxes/ci/node1/my.sandbox.cnf &",
         )
+        print("Starting node2")
+
         host.run(
-            "mysqld_safe --defaults-file=/root/sandboxes/ci/node2/my.sandbox.cnf",
-            background=True,
+            "mysqld_safe --defaults-file=/root/sandboxes/ci/node2/my.sandbox.cnf &",
         )
+        print("Starting node3")
         host.run(
-            "mysqld_safe --defaults-file=/root/sandboxes/ci/node3/my.sandbox.cnf",
-            background=True,
+            "mysqld_safe --defaults-file=/root/sandboxes/ci/node3/my.sandbox.cnf &",
         )
         time.sleep(10)
         print(host.run("ps aux | grep mysql").stdout)
