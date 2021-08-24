@@ -11,33 +11,27 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 @pytest.fixture()
 def redeploy(host):
     with host.sudo("root"):
-        host.run_expect([0], "killall -9 mysqld_safe")
-        host.run_expect([0], "killall -9 mysqld")
-        host.run_expect([0], "killall -9 mysql")
+        host.run("killall -9 mysqld_safe")
+        host.run("killall -9 mysqld")
         time.sleep(5)
-        host.run_expect(
-            [0],
+        host.run(
             "mysqld_safe --defaults-file=/root/sandboxes/ci/master/my.sandbox.cnf",
             background=True,
         )
-        host.run_expect(
-            [0],
+        host.run(
             "mysqld_safe --defaults-file=/root/sandboxes/ci/node1/my.sandbox.cnf",
             background=True,
         )
-        host.run_expect(
-            [0],
+        host.run(
             "mysqld_safe --defaults-file=/root/sandboxes/ci/node2/my.sandbox.cnf",
             background=True,
-
         )
-        host.run_expect(
-            [0],
+        host.run(
             "mysqld_safe --defaults-file=/root/sandboxes/ci/node3/my.sandbox.cnf",
             background=True,
         )
         time.sleep(10)
-
+        print(host.run("ps aux | grep mysql").stdout)
 
 @pytest.fixture(scope="module")
 def teardown(host):
