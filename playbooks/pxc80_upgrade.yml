@@ -8,11 +8,6 @@
   tasks:
   - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_pxc80_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-
-  - name: include tasks for enabling main repo
-    include: ../tasks/enable_pxc80_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
 
   - name: upgrade PXC 8.0 to new deb packages
     apt:
