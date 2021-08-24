@@ -17,19 +17,24 @@ def redeploy(host):
         time.sleep(5)
         host.run_expect(
             [0],
-            "mysqld_safe --defaults-file=/root/sandboxes/ci/master/my.sandbox.cnf &",
+            "mysqld_safe --defaults-file=/root/sandboxes/ci/master/my.sandbox.cnf",
+            background=True,
         )
         host.run_expect(
             [0],
-            "mysqld_safe --defaults-file=/root/sandboxes/ci/node1/my.sandbox.cnf &",
+            "mysqld_safe --defaults-file=/root/sandboxes/ci/node1/my.sandbox.cnf",
+            background=True,
         )
         host.run_expect(
             [0],
-            "mysqld_safe --defaults-file=/root/sandboxes/ci/node2/my.sandbox.cnf &",
+            "mysqld_safe --defaults-file=/root/sandboxes/ci/node2/my.sandbox.cnf",
+            background=True,
+
         )
         host.run_expect(
             [0],
-            "mysqld_safe --defaults-file=/root/sandboxes/ci/node3/my.sandbox.cnf &",
+            "mysqld_safe --defaults-file=/root/sandboxes/ci/node3/my.sandbox.cnf",
+            background=True,
         )
         time.sleep(10)
 
