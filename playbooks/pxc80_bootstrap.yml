@@ -118,5 +118,4 @@
 
   - name: check PXC 8.0 version
     command: /package-testing/version_check.sh pxc80
-    when: lookup('env', 'install_repo') == "main"
-
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""

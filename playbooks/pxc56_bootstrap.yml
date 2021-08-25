@@ -117,5 +117,5 @@
 
   - name: check PXC 5.6 version
     command: /package-testing/version_check.sh pxc56
-    when: lookup('env', 'install_repo') == "main"
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
