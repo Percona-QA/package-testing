@@ -30,6 +30,10 @@
     include: ../tasks/enable_pxc80_main_repo.yml
     when: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
 
+  - name: include tasks for enabling experimental repo
+    include: ../tasks/enable_pxc80_experimental_repo.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
   - name: install python3-libselinux 
     yum:
       name: "{{ packages }}"
