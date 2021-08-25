@@ -17,8 +17,17 @@
   - name: include tasks for test env setup
     include: ../tasks/test_prep.yml
 
-  - name: include tasks for enabling testing repo
-    include: ../tasks/enable_testing_repo.yml
+  - name: include tasks for enabling test repo
+    include_tasks: ../tasks/enable_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling main repo
+    include: ../tasks/enable_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling experimental repo
+    include: ../tasks/enable_experimental_repo.yml
+    when: lookup('env', 'install_repo') == "experimental"
 
   - name: disable selinux
     selinux: state=disabled
@@ -83,9 +92,11 @@
 
   - name: check that PXC version is correct
     command: /package-testing/version_check.sh pxc56
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: check that PXC package versions are correct
     command: /package-testing/package_check.sh pxc56
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: run bats tests for mysql init scripts
     command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats

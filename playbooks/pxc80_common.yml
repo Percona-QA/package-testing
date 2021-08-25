@@ -24,6 +24,15 @@
 
   - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_pxc80_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling main repo
+    include: ../tasks/enable_pxc80_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling experimental repo
+    include: ../tasks/enable_pxc80_experimental_repo.yml
+    when: lookup('env', 'install_repo') == "experimental"
 
 # - name: disable selinux
 #   selinux: 
@@ -89,9 +98,11 @@
 
   - name: check that PXC version is correct
     command: /package-testing/version_check.sh pxc80
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: check that PXC package versions are correct
     command: /package-testing/package_check.sh pxc80
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
 # - name: install plugins
 #   command: /package-testing/plugins_test_80.sh pxc
