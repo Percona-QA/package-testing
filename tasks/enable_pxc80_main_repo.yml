@@ -17,7 +17,7 @@
   - name: enable main repo
     command: percona-release enable-only pxc-80 release
 
-  - name: add the experimental tools repo
+  - name: add the main tools repo
     command: percona-release enable tools release
 
   - name: clean and update yum cache
