@@ -36,7 +36,7 @@
       - percona-xtradb-cluster
     when: ansible_os_family == "Debian"
 
-  - name: upgrade PXC 5.7 to new rpm packages
+  - name: upgrade PXC 8.0 to new rpm packages
     yum:
       name: "{{ packages }}"
       state: latest
