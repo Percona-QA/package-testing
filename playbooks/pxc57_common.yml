@@ -109,6 +109,15 @@
   - name: start mysql service
     service: name=mysql state=started
 
+  - name: register PXC version
+    shell: mysqld --version
+    register: pxc_version
+    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
+
+  - name: print PXC version
+    debug: var=pxc_version
+    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
+
   - name: check that PXC version is correct
     command: /package-testing/version_check.sh pxc57
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
