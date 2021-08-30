@@ -5,14 +5,14 @@ driver:
   name: ec2
 platforms:
   - name: centos6-${BUILD_NUMBER}-${JOB_NAME}
-    region: eu-central-1
-    image: ami-07fa74e425f2abf29
-    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    region: us-west-2
+    image: ami-0362922178e02e9f3
+    vpc_subnet_id: subnet-024be5829372c4f38f
     instance_type: t2.micro
     ssh_user: centos
     root_device_name: /dev/sda1
     instance_tags:
-      iit-billing-tag: jenkins-pg-worker
+      iit-billing-tag: jenkins-ps80-worker
 provisioner:
   name: ansible
   log: True

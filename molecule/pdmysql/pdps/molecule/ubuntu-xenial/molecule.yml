@@ -5,14 +5,14 @@ driver:
   name: ec2
 platforms:
   - name: uxenial-${BUILD_NUMBER}-${JOB_NAME}
-    region: eu-central-1
-    image: ami-44182caf
-    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    region: us-west-2
+    image: ami-0813245c0939ab3ca
+    vpc_subnet_id: subnet-024be5829372c4f38f
     instance_type: t2.micro
     ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
-      iit-billing-tag: jenkins-pg-worker
+      iit-billing-tag: jenkins-ps80-worker
 provisioner:
   name: ansible
   log: True
