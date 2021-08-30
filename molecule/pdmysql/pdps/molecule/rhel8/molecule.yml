@@ -7,7 +7,7 @@ platforms:
   - name: rhel8-${BUILD_NUMBER}-${JOB_NAME}
     region: us-west-2
     image: ami-087c2c50437d0b80d
-    vpc_subnet_id: subnet-024be5829372c4f38f
+    vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.micro
     ssh_user: ec2-user
     root_device_name: /dev/sda1
