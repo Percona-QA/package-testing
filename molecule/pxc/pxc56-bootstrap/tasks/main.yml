@@ -1,0 +1,117 @@
+---
+  - set_fact:
+      man_ip: "{{ lookup('env', ip_env) }}"
+  
+  - debug: var=man_ip
+
+  - name: include tasks for test env setup
+    include: ../../../../tasks/test_prep.yml
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: include tasks for enabling test repo
+    include_tasks: ../../../../tasks/enable_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing"
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../../../../tasks/enable_main_repo.yml
+    when: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../../../../tasks/enable_experimental_repo.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: disable selinux
+    selinux: state=disabled
+    when: ansible_os_family == "RedHat"
+
+  - name: flush iptables
+    iptables:
+      flush: yes
+    when: ansible_os_family == "RedHat"
+
+  - name: install PXC 5.6 previous deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtradb-cluster-full-56
+      - percona-xtradb-cluster-56
+      - python-mysqldb
+    when: ansible_os_family == "Debian"
+
+  - name: install PXC 5.6 previous rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - Percona-XtraDB-Cluster-full-56
+      - Percona-XtraDB-Cluster-56
+      - MySQL-python
+    when: ansible_os_family == "RedHat"
+
+  - name: stop mysql service with service command
+    command: service mysql stop
+
+  - name: copy pxc config on centos 5 and 6
+    template: src=../../../../templates/my_rpm.j2 dest=/etc/my.cnf
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version < "7"
+
+  - name: copy pxc config on centos 7
+    template: src=../../../../templates/my_rpm_7.j2 dest=/etc/my.cnf
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: configure PXC on debian/ubuntu
+    template: src=../../../../templates/my.j2
+              dest=/etc/mysql/my.cnf
+              mode=0640 owner=mysql group=root
+    when: ansible_os_family == "Debian"
+
+  # bootstrap the cluster
+  - name: bootstrap cluster on centos 5 and 6
+    command: /etc/init.d/mysql bootstrap-pxc
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version < "7"
+
+  - name: bootstrap cluster on centos 7
+    command: systemctl start mysql@bootstrap.service
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: run the bootstrap service on debian/ubuntu
+    command: service mysql bootstrap-pxc
+    when: ansible_os_family == "Debian"
+
+  # add sstuser
+  - name: create backup user on centos 6
+    mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: create backup user on centos 7
+    command: /package-testing/pxc_backup_user.sh
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: create backup user on debian/ubuntu
+    mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" state=present
+    when: ansible_os_family == "Debian"
+
+  # other tests
+  - name: install plugins
+    command: /package-testing/plugins_test_56.sh pxc
+
+  - name: register PXC version
+    shell: mysqld --version
+    register: pxc_version
+    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
+
+  - name: print PXC version
+    debug: var=pxc_version
+    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
+
+  - name: check PXC 5.6 version
+    command: /package-testing/version_check.sh pxc56
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
