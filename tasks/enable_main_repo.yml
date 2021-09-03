@@ -1,4 +1,3 @@
-
   - name: include playbook for removing Percona repo
     include: remove_percona_repository.yml
 
@@ -12,13 +11,13 @@
      deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
     when: ansible_os_family == "Debian"
 
-  - name: add the main Percona yum repos for centos 6 and 7
+  - name: add the main Percona yum repos for centos
 #   yum: name=https://repo.percona.com/yum/testing/latest/RPMS/noarch/percona-release-1.0-21.noarch.rpm
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
 
   - name: enable main repo
-    command: percona-release enable original release
+    command: percona-release enable-only original release
 
   - name: clean and update yum cache
     shell: |
