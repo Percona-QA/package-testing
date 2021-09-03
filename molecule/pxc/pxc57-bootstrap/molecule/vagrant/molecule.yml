@@ -27,5 +27,5 @@ provisioner:
     prepare: ../../../playbooks/vagrant.yml
   inventory:
     host_vars:
-      pxc1-bootstrap:
+      pxc1-57-bootstrap:
         ip_env: PXC1_IP

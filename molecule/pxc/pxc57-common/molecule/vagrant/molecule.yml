@@ -35,8 +35,8 @@ provisioner:
     prepare: ../../../playbooks/vagrant.yml
   inventory:
     host_vars:
-      pxc2-common:
+      pxc2-57-common:
         ip_env: PXC2_IP
-      pxc3-common:
+      pxc3-57-common:
         ip_env: PXC3_IP
         sleep_before_tests: 20
