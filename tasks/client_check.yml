@@ -45,15 +45,6 @@
       - vim
   when: ansible_os_family == "Debian"
 
-- name: install packages in centos
-  yum:
-    name: "{{ packages }}"
-    state: present
-  vars:
-    packages:
-      - pv
-  when: ansible_os_family == "RedHat"
-
 - name: install client for "{{ client }}" and run the check
   command: /package-testing/client_check.sh "{{ client }}"
   register: client_check_progress
