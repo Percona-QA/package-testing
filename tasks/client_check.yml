@@ -2,15 +2,15 @@
 # This task installs PS/PXC client and checks that it works correctly
 - name: include tasks for enabling main repo for client_test
   include: ../tasks/enable_main_repo.yml
-  when: (lookup('env', 'client_to_test') not in "ps80" "pxc80") and (lookup('env', 'repo_for_client_to_test') == "main") and (lookup('env', 'install_repo') != "main")
+  when: (lookup('env', 'client_to_test') not in ["ps80", "pxc80"]) and (lookup('env', 'repo_for_client_to_test') == "main") and (lookup('env', 'install_repo') != "main")
 
 - name: include tasks for enabling testing repo for client_test
   include: ../tasks/enable_testing_repo.yml
-  when: (lookup('env', 'client_to_test') not in "ps80" "pxc80") and (lookup('env', 'repo_for_client_to_test') == "testing") and (lookup('env', 'install_repo') != "testing")
+  when: (lookup('env', 'client_to_test') not in ["ps80", "pxc80"]) and (lookup('env', 'repo_for_client_to_test') == "testing") and (lookup('env', 'install_repo') != "testing")
 
 - name: include tasks for enabling experimental repo for client_test
   include: ../tasks/enable_experimental_repo.yml
-  when: (lookup('env', 'client_to_test') not in "ps80" "pxc80") and (lookup('env', 'repo_for_client_to_test') == "experimental") and (lookup('env', 'install_repo') != "experimental")
+  when: (lookup('env', 'client_to_test') not in ["ps80", "pxc80"]) and (lookup('env', 'repo_for_client_to_test') == "experimental") and (lookup('env', 'install_repo') != "experimental")
 
 - name: include tasks for enabling PS 8 main repo for client_test
   include: ../tasks/enable_ps8_main_repo.yml
