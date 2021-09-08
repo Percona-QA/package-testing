@@ -54,8 +54,8 @@
       - pv
   when: ansible_os_family == "RedHat"
 
-- name: install client for {{ client2 }} and run the check
-  command: /package-testing/client_check.sh {{ client2 }}
+- name: install client for "{{ client }}" and run the check
+  command: /package-testing/client_check.sh "{{ client }}"
   register: client_check_progress
 
 - name: verify progress of client_check.sh
