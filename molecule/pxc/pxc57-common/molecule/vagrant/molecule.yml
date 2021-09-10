@@ -39,4 +39,4 @@ provisioner:
         ip_env: PXC2_IP
       pxc3-57-common:
         ip_env: PXC3_IP
-        sleep_before_tests: 20
+        sleep_before_tests: 40
