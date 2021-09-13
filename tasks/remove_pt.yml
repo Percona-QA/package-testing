@@ -1,7 +1,7 @@
-# This task installs Percona Toolkit
+# This task removes Percona Toolkit
 #
 
-  - name: install Percona Toolkit new deb packages
+  - name: remove Percona Toolkit new deb packages
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -11,7 +11,7 @@
       - percona-toolkit
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Toolkit new rpm packages
+  - name: remove Percona Toolkit new rpm packages
     yum:
       name: "{{ packages }}"
       state: absent

@@ -1,4 +1,4 @@
-# This task installs Percona Server 5.6 packages on CentOS and Debian/Ubuntu
+# This task removes Percona Server 5.6 packages on CentOS and Debian/Ubuntu
 #
 
   - name: remove Percona Server 5.6 deb packages
