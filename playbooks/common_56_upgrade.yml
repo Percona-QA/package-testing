@@ -142,9 +142,13 @@
 # End PAM test
 
 #
-# Enable testing repository
+# Enable testing repository or laboratory repository
 #
   - include: ../tasks/enable_testing_repo.yml
+    when:  lookup('env', 'install_repo') != "laboratory"
+
+  - include: ../tasks/enable_laboratory_with_main_repo.yml
+    when:  lookup('env', 'install_repo') == "laboratory"
 
 #
 # Upgrade packages

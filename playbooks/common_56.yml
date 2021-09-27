@@ -27,6 +27,10 @@
     include: ../tasks/enable_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
+  - name: include tasks for enabling laboratory and main repos
+    include: ../tasks/enable_laboratory_with_main_repo.yml
+    when: lookup('env', 'install_repo') == "laboratory"
+
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
