@@ -30,13 +30,21 @@
     include_tasks: ../tasks/enable_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../tasks/enable_experimental_repo.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
-  - name: include tasks for enabling experimental repo
-    include_tasks: ../tasks/enable_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+  - name: include tasks for enabling tools main repo
+    include_tasks: ../tasks/enable_tools_main_repo.yml
+    when: lookup('env', 'install_repo') == "tools-main"
+
+  - name: include tasks for enabling pmm2-client main repo
+    include_tasks: ../tasks/enable_pmm2client_main_repo.yml
+    when: lookup('env', 'install_repo') == "pmm2-client-main"
 
   - name: install PMM client new deb packages
     apt: name={{item}} update_cache=yes state=latest
@@ -56,7 +64,7 @@
 
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2-rc
-    when: lookup('env', 'install_repo') == "testing"
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == "tools-main" or lookup('env', 'install_repo') == "pmm2-client-main" or lookup('env', 'install_repo') == "main"
 
   - name: Print PMM2-Client Status
     command: pmm-admin status
@@ -84,7 +92,7 @@
     assert:
      that:
       - "'{{ pmm_version }}' in pmm_admin_version.stdout"
-    when: lookup('env', 'install_repo') == "testing"
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == "tools-main" or lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == "pmm2-client-main"
 
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
