@@ -38,11 +38,11 @@
 
   - name: include tasks for enabling tools main repo
     include_tasks: ../tasks/enable_tools_main_repo.yml
-    when: lookup('env', 'install_repo') == "tools_main"
+    when: lookup('env', 'install_repo') == "tools-main"
 
   - name: include tasks for enabling experimental repo
     include_tasks: ../tasks/enable_pmm2client_main_repo.yml
-    when: lookup('env', 'install_repo') == "pmm2_client_main"
+    when: lookup('env', 'install_repo') == "pmm2-client-main"
 
   - name: install PMM client new deb packages
     apt: name={{item}} update_cache=yes state=latest
@@ -68,7 +68,7 @@
 
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2-rc
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == "tools_main" or lookup('env', 'install_repo') == "pmm2_client_main"
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == "tools-main" or lookup('env', 'install_repo') == "pmm2-client-main"
 
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2-rc
