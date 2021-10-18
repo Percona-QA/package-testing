@@ -74,7 +74,7 @@ if [ "${ERRORS_BEFORE}" != "${ERRORS_AFTER}" ]; then
   exit 1
 fi
 
-WARNINGS_AFTER=$(grep "\[Warning\]" ${ERROR_LOG} | grep -iv "tokudb" -c || true)
+WARNINGS_AFTER=$(grep -c "\[Warning\]" ${ERROR_LOG} || true)
 if [ "${WARNINGS_BEFORE}" != "${WARNINGS_AFTER}" ]; then
   echo "There's a difference in number of warnings before installing plugins and after!"
   exit 1
