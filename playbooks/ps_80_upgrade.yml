@@ -67,6 +67,12 @@
     command: /package-testing/setpass_57.sh
     when: ansible_os_family == "RedHat"
 
+  - name: append include for RedHat
+    lineinfile:
+        path: /etc/my.cnf
+        line: '!includedir /etc/my.cnf.d'
+    when: ansible_os_family == "RedHat"
+
   - name: copy .my.cnf with credentials on centos
     template: src=../templates/my_57.j2
               dest=/root/.my.cnf
@@ -127,12 +133,6 @@
   - name: copy the TokuDB config file on Debian/Ubuntu
     template: src=../templates/tokudb.j2 dest=/etc/mysql/conf.d/tokudb.cnf
     when: ansible_os_family == "Debian"
-
-  - name: append include for RedHat
-    lineinfile:
-        path: /etc/my.cnf
-        line: '!includedir /etc/my.cnf.d'
-    when: ansible_os_family == "RedHat"
 
   - name: copy the TokuDB config file on RHEL/CentOS/Amazon
     template: src=../templates/tokudb.j2 dest=/etc/my.cnf.d/tokudb.cnf
