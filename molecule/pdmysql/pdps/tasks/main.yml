@@ -209,7 +209,7 @@
   - name: Clone orchestrator sources
     git:
       repo: https://github.com/openark/orchestrator.git
-      version: v3.2.4
+      version: v3.2.5
       dest: /root/orchestrator
 
   - name: Copy test.sh for orchestrator Debian
