@@ -29,8 +29,8 @@ class TestDynamic:
     def test_tokudb_installed(self, host):
         if ps_version_major not in ['8.0']:
           cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "select SUPPORT from information_schema.ENGINES where ENGINE = \'TokuDB\';"')
-          assert cmd.succeeded
-          assert 'YES' in cmd.stdout
+            assert cmd.succeeded
+            assert 'YES' in cmd.stdout
         else:
             pytest.skip('TokuDB is available in 5.7!')
 
