@@ -26,7 +26,6 @@
       repo: "{{ lookup('env', 'REPO') }}"
       version: "{{ lookup('env', 'VERSION') }}"
 
-
   - name: install Percona Toolkit
     include_tasks: ../../../tasks/install_pt.yml
 
@@ -56,7 +55,6 @@
     yum:
       name: "{{ packages }}"
       state: latest
-#      disablerepo: "epel"
       update_cache: yes
     vars:
       packages:
