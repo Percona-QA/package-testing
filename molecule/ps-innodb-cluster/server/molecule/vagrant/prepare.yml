@@ -3,6 +3,12 @@
   hosts: all
   gather_facts: true
   tasks:
+    - name: Buster fix
+      raw: (sudo apt-get -y update --allow-releaseinfo-change || true)
+      become: true
+      changed_when: false
+      when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
+
     - name: Install python for Ansible
       raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
       become: true
