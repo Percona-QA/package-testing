@@ -34,7 +34,7 @@ verifier:
     - ../../../tests/test_pxb.py
     - ../../../tests/test_sources.py
 scenario:
-  name: debian-10
+  name: debian-11
   destroy_sequence:
     - destroy
   clenup_sequence:
