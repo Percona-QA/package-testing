@@ -17,7 +17,7 @@ def host():
     else:
         exec_command = ['yum', 'install', '-y', 'net-tools']
     subprocess.check_call(['docker','exec','--user','root',container_name] + exec_command)
-    time.sleep(20)
+    time.sleep(40)
     yield testinfra.get_host("docker://root@" + docker_id)
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
 
