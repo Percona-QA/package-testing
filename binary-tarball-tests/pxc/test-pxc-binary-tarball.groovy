@@ -74,7 +74,7 @@ pipeline {
         stage('Centos6') {
           when {
             expression {
-              params.PXC_VERSION[0..2] == "5.7"
+              params.PXC_VERSION[0..2] == "5.6"
             }
           }
           agent {
