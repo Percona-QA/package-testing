@@ -19,6 +19,10 @@
   - name: change the default repo to testing
     command: percona-release enable-only original testing
 
+  - name: enable original release repo for qpress dependancy for RHEL
+    command: percona-release enable original release
+    when: ansible_os_family == "RedHat"
+
   - name: enable pxb24 repo
     command: percona-release enable pxb-24 release
 
