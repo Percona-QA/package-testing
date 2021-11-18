@@ -18,7 +18,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: enable main repo
-    command: percona-release enable pxc-57 release
+    command: percona-release enable original release
 
   - name: enable pxb24 repo
     command: percona-release enable pxb-24 release
