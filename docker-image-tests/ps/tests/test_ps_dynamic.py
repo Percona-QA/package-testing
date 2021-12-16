@@ -10,8 +10,12 @@ container_name = 'ps-docker-test-dynamic'
 
 @pytest.fixture(scope='module')
 def host():
-    docker_id = subprocess.check_output(
+    if ps_version_major not in ['8.0']:
+        docker_id = subprocess.check_output(
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e', 'INIT_TOKUDB=1', '-e', 'INIT_ROCKSDB=1','-d', docker_image]).decode().strip()
+    else:
+        docker_id = subprocess.check_output(
+        ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e', 'INIT_ROCKSDB=1','-d', docker_image]).decode().strip()
     time.sleep(20)
     yield testinfra.get_host("docker://root@" + docker_id)
 #    subprocess.check_call(['docker', 'rm', '-f', docker_id])
