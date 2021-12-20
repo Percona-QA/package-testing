@@ -227,6 +227,20 @@
     include: ../tasks/enable_ps8_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
+
+#
+# Add TokuDB options so it can run
+#
+
+  - name: copy the TokuDB config file on Debian/Ubuntu
+    template: src=../templates/tokudb.j2 dest=/etc/mysql/conf.d/tokudb.cnf
+    when: ansible_os_family == "Debian"
+
+  - name: copy the TokuDB config file on RHEL/CentOS/Amazon
+    template: src=../templates/tokudb.j2 dest=/etc/my.cnf.d/tokudb.cnf
+    when: ansible_os_family == "RedHat"
+
+
   - name: enable tools testing repo
     command: percona-release enable tools testing
 
