@@ -15,7 +15,7 @@ docker_image = docker_acc + "/" + docker_product + ":" + docker_tag
 # 8.0
 ps80_packages = (
   'percona-server-client', 'percona-server-rocksdb', 'percona-server-server',
-  'percona-server-shared', 'percona-server-shared-compat', 'percona-server-tokudb'
+  'percona-server-shared', 'percona-server-shared-compat'
 )
 ps80_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/ps-admin', '/usr/bin/mysqladmin', '/usr/bin/mysqlbinlog',
