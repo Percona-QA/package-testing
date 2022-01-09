@@ -8,41 +8,6 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
 
-def clean_data_dir(host):
-    pass
-
-
-def init_data_dir(host):
-    pass
-
-
-def create_ci_user(host):
-    pass
-
-
-def create_hearbeat_user(host):
-    pass
-
-
-def set_global_master_ro(host):
-    pass
-
-
-def create_test_db(host):
-    pass
-
-
-def configure_slaves(host):
-    pass
-
-
-def start_slaves(host):
-    pass
-
-
-
-
-
 @pytest.fixture()
 def redeploy(host):
     with host.sudo("root"):

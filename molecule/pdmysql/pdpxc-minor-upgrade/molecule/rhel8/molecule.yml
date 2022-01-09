@@ -5,9 +5,9 @@ driver:
   name: ec2
 platforms:
   - name: rhel8-${BUILD_NUMBER}-${JOB_NAME}
-    region: us-west-1
+    region: eu-central-1
     image: ami-0badcc5b522737046
-    vpc_subnet_id: subnet-01d9a7d6b4722eb43
+    vpc_subnet_id: subnet-085deaca8c1c59a4f
     instance_type: t2.micro
     ssh_user: ec2-user
     root_device_name: /dev/sda1
