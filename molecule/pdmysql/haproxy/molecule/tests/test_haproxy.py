@@ -17,7 +17,7 @@ def create_user(host):
         assert result.rc == 0, result.stdout
 
 
-def test_haproxy_service(host, create_user):
+def test_haproxy_service(host):
     assert host.service("haproxy").is_running
 
 
