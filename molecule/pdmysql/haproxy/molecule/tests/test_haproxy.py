@@ -19,13 +19,9 @@ def create_user(host):
 
 def test_haproxy(host, create_user):
     with host.sudo("root"):
-        cmd = "curl http://localhost:9200"
-        curl = host.run(cmd)
-        print(curl.stdout)
-        assert curl.rc == 0, curl.stderr
         cmd = "mysql -e \"SELECT VERSION();\""
         result = host.run(cmd)
         assert result.rc == 0, result.stdout
-        cmd = "mysql -e \"SELECT VERSION();\" --port"
+        cmd = "mysql -e \"SELECT VERSION();\" --port 9200"
         result = host.run(cmd)
         assert result.rc == 0, result.stdout
