@@ -17,6 +17,10 @@ def create_user(host):
         assert result.rc == 0, result.stdout
 
 
+def test_haproxy_service(host, create_user):
+    assert host.service("haproxy").is_running
+
+
 def test_haproxy(host, create_user):
     with host.sudo("root"):
         cmd = "mysql -e \"SELECT VERSION();\""
@@ -24,4 +28,5 @@ def test_haproxy(host, create_user):
         assert result.rc == 0, result.stdout
         cmd = "mysql -e \"SELECT VERSION();\" --port 9200"
         result = host.run(cmd)
+        print(result.stdout)
         assert result.rc == 0, result.stdout
