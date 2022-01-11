@@ -26,7 +26,7 @@ def test_haproxy(host, create_user):
         cmd = "mysql -e \"SELECT VERSION();\""
         result = host.run(cmd)
         assert result.rc == 0, result.stdout
-        cmd = "mysql -e \"SELECT VERSION();\" --port 9201"
+        cmd = "mysql --port=9201 -e \"SELECT VERSION();\" "
         result = host.run(cmd)
         print(result.stdout)
         assert result.rc == 0, result.stdout
