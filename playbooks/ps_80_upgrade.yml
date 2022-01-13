@@ -82,6 +82,18 @@
   - name: disable selinux on centos7 for TokuDB to work
     shell: setenforce 0 || true
     when: ansible_os_family == "RedHat"
+#
+# Add TokuDB options so it can run
+#
+
+  - name: copy the TokuDB config file on Debian/Ubuntu
+    template: src=../templates/tokudb.j2 dest=/etc/mysql/conf.d/tokudb.cnf
+    when: ansible_os_family == "Debian"
+
+  - name: copy the TokuDB config file on RHEL/CentOS/Amazon
+    template: src=../templates/tokudb.j2 dest=/etc/my.cnf.d/tokudb.cnf
+    when: ansible_os_family == "RedHat"
+#
 
   - name: install tokudb and restart server
     command: /usr/bin/ps-admin --enable-tokudb
@@ -126,18 +138,6 @@
   - name: include tasks for enabling PS 8 testing repo
     include: ../tasks/enable_ps8_testing_repo.yml
 
-#
-# Add TokuDB options so it can run
-#
-
-  - name: copy the TokuDB config file on Debian/Ubuntu
-    template: src=../templates/tokudb.j2 dest=/etc/mysql/conf.d/tokudb.cnf
-    when: ansible_os_family == "Debian"
-
-  - name: copy the TokuDB config file on RHEL/CentOS/Amazon
-    template: src=../templates/tokudb.j2 dest=/etc/my.cnf.d/tokudb.cnf
-    when: ansible_os_family == "RedHat"
-#
 # Upgrade packages
 #
   - name: upgrade Percona Toolkit to new deb packages
