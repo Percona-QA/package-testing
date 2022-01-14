@@ -194,6 +194,7 @@
     vars:
       packages:
       - percona-release
+    when: ansible_os_family == "RedHat"
 
   - name: upgrade Percona Server to new rpm packages on CentOS
     yum:
