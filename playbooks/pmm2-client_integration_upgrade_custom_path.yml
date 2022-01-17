@@ -48,7 +48,10 @@
     when: ansible_os_family == "RedHat"
 
   - name: setup pmm2-client artifacts for custom path
-    command: /package-testing/scripts/pmm2_client_custom_path.sh
+    command: "{{item}}"
+    with_items:
+      - "chmod +x ../scripts/pmm2_client_custom_path.sh"
+      - "../scripts/pmm2_client_custom_path.sh"
 
   - name: configure pmm client to connect to server in push/auto Mode
     shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --paths-base=/pmm2-client-custom-path/ --server-url=http://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
@@ -59,7 +62,7 @@
     when: lookup('env', 'metrics_mode') == "pull"
 
   - name: Check if the configuration generated with paths-base is using the custom path
-    command: cat /usr/local/percona/pmm2/config/pmm-agent.yaml | grep -o -c /pmm2-client-custom-path
+    command: sudo cat /usr/local/percona/pmm2/config/pmm-agent.yaml | grep -o -c /pmm2-client-custom-path
 
 
 ### start PS5.7
@@ -226,7 +229,7 @@
     when: lookup('env', 'install_repo') == "testing"
 
   - name: Check if the configuration generated with paths-base is using the custom path after upgrade client
-    command: cat /usr/local/percona/pmm2/config/pmm-agent.yaml | grep -o -c /pmm2-client-custom-path
+    command: sudo cat /usr/local/percona/pmm2/config/pmm-agent.yaml | grep -o -c /pmm2-client-custom-path
 
   - name: check if mongodb is still being monitored
     command: pmm-admin list
