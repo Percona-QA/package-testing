@@ -62,7 +62,7 @@
     when: lookup('env', 'metrics_mode') == "pull"
 
   - name: Check if the configuration generated with paths-base is using the custom path
-    shell: cat /usr/local/percona/pmm2/config/pmm-agent.yaml | grep -o -c "/pmm2-client-custom-path"
+    shell: cat /usr/local/percona/pmm2/config/pmm-agent.yaml | grep -o -c "/pmm2-client-custom-path" | grep "14"
     become: yes
 
 ### start PS5.7
@@ -229,7 +229,7 @@
     when: lookup('env', 'install_repo') == "testing"
 
   - name: Check if the configuration generated with paths-base is using the custom path after upgrade client
-    shell: cat /usr/local/percona/pmm2/config/pmm-agent.yaml | grep -o -c /pmm2-client-custom-path
+    shell: cat /usr/local/percona/pmm2/config/pmm-agent.yaml | grep -o -c /pmm2-client-custom-path | grep "14"
     become: yes
 
   - name: check if mongodb is still being monitored
