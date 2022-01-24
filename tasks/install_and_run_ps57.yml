@@ -1,0 +1,32 @@
+# This task enables Percona-Server-57 (ps57) main repository, installs and starts percona-server.
+
+# Enable ps57 main repo and install ps57
+  - name: include tasks for enabling ps57 main repo
+    include_tasks: ../tasks/enable_main_repo.yml
+
+  - name: include tasks for installing ps57 packages
+    include_tasks: ../tasks/install_ps57.yml
+
+# Start mysql service
+  - name: start mysql service on Debian
+    service:
+      name: mysql
+      state: started
+    when: ansible_os_family == "Debian"
+
+  - name: start mysql service on CentOS
+    systemd:
+      name: mysql
+      state: started
+    when: ansible_os_family == "RedHat"
+
+# On Centos ps is started with random root password. Change ps root password and create cnf with new client password on centos
+  - name: set root password on CentOS
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on CentOS
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"

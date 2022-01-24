@@ -1,0 +1,44 @@
+---
+# This playbook does following:
+#   enables Percona main tools repository
+#   installs Percona-Toolkit
+#   enables Percona testing or experimental tools repository
+#   updates Percona-Toolkit to the latest version
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_only_main_repo_for_pt.yml
+    vars:
+      - repo_name: tools
+
+  - name: include tasks for pt installation
+    include_tasks: ../tasks/install_pt.yml
+
+  - name: include tasks for enabling testing repo
+    include_tasks: ../tasks/enable_only_testing_repo_for_pt.yml
+    vars:
+      - repo_name: tools
+    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../tasks/enable_only_experimental_repo_for_pt.yml
+    vars:
+      - repo_name: tools
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: include tasks for pt installation
+    include_tasks: ../tasks/install_pt.yml
+
+# will fail till the PT-1959 is fixed
+  - name: check that pt version is correct
+    command: /package-testing/version_check.sh pt
+
+  - name: remove pt packages
+    include: ../tasks/remove_pt.yml

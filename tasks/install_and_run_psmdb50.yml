@@ -1,0 +1,16 @@
+# This task enables Percona Server for MongoDB 50 (psmdb50) main repository, installs and starts modgodb.
+
+# Enable psmdb repo and install psmdb
+  - name: include tasks for enabling psmdb 50 repo
+    include_tasks: ../tasks/enable_psmdb_repo.yml
+    vars:
+      psmdb_repo: "psmdb-50 release"
+
+  - name: include tasks for installing psmdb 50 packages
+    include_tasks: ../tasks/install_psmdb.yml
+
+# Start psmdb service
+  - name: start mongod service
+    service: 
+      name: mongod
+      state: started

@@ -1,0 +1,80 @@
+# This task enables  Percona XtraDB Cluster 57 (pxc57) main repository, installs and bootstraps one node of Percona XtraDB Cluster-57.
+
+# Disable selinux, enable pxc main repo and install pxc packages
+  - name: disable selinux
+    selinux: state=disabled
+    when: ansible_os_family == "RedHat"
+
+  - name: include tasks for enabling pxc 57 repo
+    include_tasks: ../tasks/enable_pxc57_main_repo.yml
+
+  - name: install PXC 5.7 new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtradb-cluster-full-57
+      - percona-xtradb-cluster-57
+      - percona-xtradb-cluster-source-5.7
+    when: ansible_os_family == "Debian"
+
+  - name: install PXC 5.7 new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - Percona-XtraDB-Cluster-full-57
+      - Percona-XtraDB-Cluster-57
+    when: ansible_os_family == "RedHat"
+
+# Define node IP for PXC config
+  - debug: 
+      var: ansible_all_ipv4_addresses
+  
+  - set_fact:
+      man_ip: "{{ item }}"
+    with_items: "{{ ansible_all_ipv4_addresses }}"
+    when: "item.startswith('10.')"
+  
+  - name: output IP used to bootstrap pxc node
+    debug: 
+      var: man_ip
+
+# Stop mysql service and bootstrap pxc node
+  - name: stop mysql service with service command
+    command: service mysql stop
+
+  - name: copy pxc config on centos
+    template: src=../templates/my_rpm_7.j2 
+              dest=/etc/my.cnf
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+
+  - name: copy pxc config on debian/ubuntu
+    template: src=../templates/my.j2
+              dest=/etc/mysql/my.cnf
+              mode=0640 owner=mysql group=root
+    when: ansible_os_family == "Debian" 
+
+  # bootstrap pxc node
+  - name: bootstrap cluster on centos
+    systemd:
+      name: mysql@bootstrap.service
+      state: started
+    when: ansible_os_family == "RedHat"
+
+  - name: run the bootstrap service on debian/ubuntu
+    command: service mysql bootstrap-pxc
+    when: ansible_os_family == "Debian"
+
+# On Centos ps is started with random root password. Change ps root password and create cnf with new client password on centos.
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"

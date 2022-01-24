@@ -1,0 +1,22 @@
+# Enable only tools repo to install pt
+  - name: include tasks for enabling "{{ repo_name }}" test repo
+    include_tasks: ../tasks/enable_only_testing_repo_for_pt.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling "{{ repo_name }}" main repo
+    include_tasks: ../tasks/enable_only_main_repo_for_pt.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling  "{{ repo_name }}" experimental repo
+    include_tasks: ../tasks/enable_only_experimental_repo_for_pt.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: include tasks for pt installation
+    include_tasks: ../tasks/install_pt.yml
+
+# will fail till the PT-1959 is fixed
+  - name: check that pt version is correct
+    command: /package-testing/version_check.sh pt
+
+  - name: remove pt packages
+    include: ../tasks/remove_pt.yml

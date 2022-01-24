@@ -1,0 +1,21 @@
+  - name: include playbook for removing Percona repo
+    include: remove_percona_repository.yml
+
+  - name: install percona repository deb package 
+    apt:
+#     deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-21.generic_all.deb
+      deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+    when: ansible_os_family == "Debian"
+
+  - name: install percona repository yum package for CentOS
+    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    when: ansible_os_family == "RedHat"
+
+  - name: enable "{{repo_name}}" experimental repo
+    command: percona-release enable-only "{{repo_name}}" experimental
+
+  - name: clean and update yum cache
+    shell: |
+      yum clean all
+      yum makecache
+    when: ansible_os_family == "RedHat"

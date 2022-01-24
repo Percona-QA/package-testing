@@ -1,0 +1,85 @@
+---
+# This playbook does following:
+#   
+#   installs latest version of Percona-Server-57 (ps57), Percona-Server-80 (ps80), Percona-XtraDB-Cluster-57 (pxc57), Percona-XtraDB-Cluster-80 (pxc80), MysqL server 57 (upstream57), MySQL server 80 (upstream80), Percona Server for MongoDB 44 (psmdb44), Percona Server for MongoDB 50 (psmdb50).
+#   enables Percona tools repository
+#   installs latest version of Percona-Toolkit (pt) and runs one of the tools (pt-mysql-summary or pt-psmdb-summary)
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+# Include tasks to install and start [ps, pxc, MySQL, psmdb] products
+  - name: include tasks for installing and setup ps57
+    include_tasks: ../tasks/install_and_run_ps57.yml
+    when: lookup('env', 'install_with') == "ps57"
+
+  - name: include tasks for installing and setup ps80
+    include_tasks: ../tasks/install_and_run_ps80.yml
+    when: lookup('env', 'install_with') == "ps80"
+
+  - name: include tasks for installing and setup pxc57
+    include_tasks: ../tasks/install_and_run_pxc57.yml
+    when: lookup('env', 'install_with') == "pxc57"
+
+  - name: include tasks for installing and setup pxc80
+    include_tasks: ../tasks/install_and_run_pxc80.yml
+    when: lookup('env', 'install_with') == "pxc80"
+
+  - name: include tasks for installing and setup upstream57
+    include_tasks: ../tasks/install_and_run_upstream57.yml
+    when: lookup('env', 'install_with') == "upstream57"
+
+  - name: include tasks for installing and setup upstream 80
+    include_tasks: ../tasks/install_and_run_upstream80.yml
+    when: lookup('env', 'install_with') == "upstream80"
+
+  - name: include tasks for installing and setup psmdb 44
+    include_tasks: ../tasks/install_and_run_psmdb44.yml
+    when: lookup('env', 'install_with') == "psmdb44"
+
+  - name: include tasks for installing and setup psmdb 50
+    include_tasks: ../tasks/install_and_run_psmdb50.yml
+    when: lookup('env', 'install_with') == "psmdb50"
+
+# Enable only tools repo to install pt
+  - name: include tasks for enabling tools testing repo
+    include_tasks: ../tasks/enable_only_testing_repo_for_pt.yml
+    vars:
+      repo_name: tools
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling tools main repo
+    include_tasks: ../tasks/enable_only_main_repo_for_pt.yml
+    vars:
+      repo_name: tools
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling  tools experimental repo
+    include_tasks: ../tasks/enable_only_experimental_repo_for_pt.yml
+    vars:
+      repo_name: tools
+    when: lookup('env', 'install_repo') == "experimental"
+
+# Install pt and run tool
+  - name: include tasks for pt installation
+    include_tasks: ../tasks/install_pt.yml
+
+#   will fail till the PT-1959 is fixed
+  - name: check that pt version is correct
+    command: /package-testing/version_check.sh pt
+
+  - name: run pt-mongodb-summary
+    command: pt-mongodb-summary
+    when: lookup('env', 'install_with') is match('psmdb')
+
+  - name: run pt-mysql-summary
+    command: pt-mysql-summary
+    when: lookup('env', 'install_with') is match('(pxc|ps|upstream)(57|80)$')
+
+  - name: remove pt packages
+    include: ../tasks/remove_pt.yml

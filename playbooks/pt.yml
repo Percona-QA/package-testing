@@ -1,0 +1,24 @@
+---
+# This playbook does following:
+#   enables Percona tools, pt, original repository
+#   installs latest version of Percona-Toolkit (pt)
+
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+      install_repo: "{{ lookup('env', 'install_repo') }}"
+
+  tasks:
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+# Run task in loop that installs pt from {{ repo_name }} repo and then remove pt
+  - name: include tasks to install pt from [pt,tools, original] repos
+    include_tasks: ../tasks/enable_pt_repos_and_install.yml
+    vars:
+      - repo_name: "{{ item }}"
+    loop:
+      - tools
+      - pt
+      - original
