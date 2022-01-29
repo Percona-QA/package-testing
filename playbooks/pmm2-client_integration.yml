@@ -348,7 +348,7 @@
     when: lookup('env', 'install_repo') == "testing"
 
   - name: checking existence of all artifacts from pmm2-client
-    command: bash -xe /package-testing/scripts/check_artifacts.sh
+    command: bash -xe ../scripts/check_artifacts.sh
 
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
