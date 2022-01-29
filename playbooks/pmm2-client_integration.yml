@@ -132,7 +132,7 @@
     retries: 5
 
   - name: check if Metric End point with Auth works for Mysqld Exporter
-    shell: "{{items}}"
+    shell: "{{item}}"
     with_items:
       - "bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
 
@@ -196,7 +196,7 @@
         - "'Running' in mongodb_exporter_status.stdout"
 
   - name: check if Metric End point with Auth works for MongoDB Exporter
-    shell: "{{items}}"
+    shell: "{{item}}"
     with_items:
       - "bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
 
@@ -270,7 +270,7 @@
         - "'Running' in postgres_exporter_status.stdout"
 
   - name: check if Metric End point with Auth works for Postgres Exporter
-    shell: "{{items}}"
+    shell: "{{item}}"
     with_items:
       - "bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1"
 
@@ -300,7 +300,7 @@
     register: node_exporter_status
 
   - name: check if Metric End point with Auth works for Node Exporter
-    shell: "{{items}}"
+    shell: "{{item}}"
     with_items:
       - "bash -x ../scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0"
 
