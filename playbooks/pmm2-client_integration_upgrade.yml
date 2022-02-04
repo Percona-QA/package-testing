@@ -15,6 +15,25 @@
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
 
   tasks:
+  - name: Install JQ for exporter end point metric fetch
+    yum:
+      name: "{{ packages }}"
+      state: latest
+      update_cache: yes
+    vars:
+      packages:
+      - jq
+    when: ansible_os_family == "RedHat"
+  
+  - name: Install JQ for exporter end point metric fetch
+    apt:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - jq
+    when: ansible_os_family == "Debian"
+
   - name: Register Instance IP
     shell: echo $(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
     register: instance_ip
@@ -286,6 +305,14 @@
     assert:
      that:
       - "'Running' in vmagent_status.stdout"
+  
+  - name: check if Metric End point with Auth works for Node Exporter, MysqlD Exporter, MongoDB Exporter, Postgres Exporter
+    shell: "{{item}}"
+    with_items:
+      - "bash -xe ../scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0"
+      - "bash -xe ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1"
+      - "bash -xe ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
+      - "bash -xe ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
 
   - name: Fetch PMM-Admin version via pmm-admin status output
     shell: pmm-admin status | grep pmm-admin | awk -F' ' '{print $3}'
@@ -302,7 +329,7 @@
     when: lookup('env', 'install_repo') == "testing"
   
   - name: checking existence of all artifacts from pmm2-client
-    command: bash -xe /package-testing/scripts/check_artifacts.sh
+    command: bash -xe ../scripts/check_artifacts.sh
 
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent

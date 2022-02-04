@@ -13,6 +13,25 @@
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
 
   tasks:
+  - name: Install JQ for exporter end point metric fetch
+    yum:
+      name: "{{ packages }}"
+      state: latest
+      update_cache: yes
+    vars:
+      packages:
+      - jq
+    when: ansible_os_family == "RedHat"
+  
+  - name: Install JQ for exporter end point metric fetch
+    apt:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - jq
+    when: ansible_os_family == "Debian"
+
   - name: Register Instance IP
     shell: echo $(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
     register: instance_ip
@@ -131,6 +150,11 @@
     delay: 5
     retries: 5
 
+  - name: check if Metric End point with Auth works for Mysqld Exporter
+    shell: "{{item}}"
+    with_items:
+      - "bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
+
   - name: Assert if the pmm-admin list contains mysqld_exporter with Running state
     assert:
       that:
@@ -189,6 +213,12 @@
     assert:
       that:
         - "'Running' in mongodb_exporter_status.stdout"
+
+  - name: check if Metric End point with Auth works for MongoDB Exporter
+    shell: "{{item}}"
+    with_items:
+      - "bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
+
 ### end PSMDB
 
 ### start pgsql13
@@ -229,31 +259,25 @@
     command: psql -c "ALTER USER postgres PASSWORD '{{ random_pgsql_password }}';"
     become: yes
     become_user: postgres
-    when: ansible_distribution_release != 'xenial'
 
   - name: add postgresql metrics to monitoring
     command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }}
-    when: ansible_distribution_release != 'xenial'
 
   - name: check if postgresql monitoring is running
     command: pmm-admin list
     register: list_output
-    when: ansible_distribution_release != 'xenial'
 
   - name: Print the pmm-admin list value
     ansible.builtin.debug:
       msg: System {{ list_output.stdout }}
-    when: ansible_distribution_release != 'xenial'
 
   - name: Assert if the pmm-admin list contains postgreSQL instance
     assert:
       that:
         - "'PostgreSQL' in list_output.stdout"
-    when: ansible_distribution_release != 'xenial'
 
   - name: Wait for postgres_exporter to have Running Status.
     shell: pmm-admin list | grep 'postgres_exporter' | awk -F" " '{print $2}'
-    when: ansible_distribution_release != 'xenial'
     register: postgres_exporter_status
     until: postgres_exporter_status.stdout.find('Running') != -1
     delay: 5
@@ -263,7 +287,12 @@
     assert:
       that:
         - "'Running' in postgres_exporter_status.stdout"
-    when: ansible_distribution_release != 'xenial'
+
+  - name: check if Metric End point with Auth works for Postgres Exporter
+    shell: "{{item}}"
+    with_items:
+      - "bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1"
+
 ## end PG
 
   - name: run pmm-admin list
@@ -288,6 +317,11 @@
   - name: check if node_exporter is Running
     shell: pmm-admin list | grep node_exporter | awk -F" " '{print $2}'
     register: node_exporter_status
+
+  - name: check if Metric End point with Auth works for Node Exporter
+    shell: "{{item}}"
+    with_items:
+      - "bash -x ../scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0"
 
   - name: Print the node_exporter_status
     ansible.builtin.debug:
@@ -333,7 +367,7 @@
     when: lookup('env', 'install_repo') == "testing"
 
   - name: checking existence of all artifacts from pmm2-client
-    command: bash -xe /package-testing/scripts/check_artifacts.sh
+    command: bash -xe ../scripts/check_artifacts.sh
 
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
