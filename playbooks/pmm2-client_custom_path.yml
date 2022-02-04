@@ -134,7 +134,27 @@
   - name: Check if the configuration generated with paths-base is using the custom path
     shell: cat /usr/local/percona/pmm2/config/pmm-agent.yaml | grep -o -c "/usr/local/percona/pmm2" | grep "14"
     become: yes
-  
+
+  - name: PMM-8141 fix for deleted vmscrpconfig file, file being created with vmagent reload
+    command: "{{item}}"
+    with_items:
+      - "rm -r /tmp/vm_agent"
+      - "pkill -f vmagent"
+    become: yes
+
+  - name: PMM-8141 verify new vmscrpconfig folder is created at tmp after killing vmagent process
+    command: "{{item}}"
+    with_items:
+      - "ls -la /tmp/vm_agent"
+    become: yes
+
+  - name: Wait for VMAGENT to have Running Status.
+    shell: pmm-admin list | grep 'vmagent' | awk -F" " '{print $2}'
+    register: vmagent_status
+    until: vmagent_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
+
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
     with_items:
