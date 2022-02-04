@@ -25,7 +25,7 @@ if [ -z "$pmm_client_ip" ]; then
 fi
 
 export token=$(printf '%s' pmm:${agent_password} | base64)
-export listen_port=$(curl -s "http://${pmm_server_ip}/v1/inventory/Agents/List" -H 'Authorization: Basic YWRtaW46YWRtaW4=' --data-raw '{"promise":{}}' --compressed --insecure | jq ".${agent_type}[] | select(.agent_id == "\"${agent_id}"\") | .listen_port")
+export listen_port=$(curl -s "http://${pmm_server_ip}/v1/inventory/Agents/List" -H 'Authorization: Basic YWRtaW46YWRtaW4=' --data '{"promise":{}}' --compressed --insecure | jq ".${agent_type}[] | select(.agent_id == "\"${agent_id}"\") | .listen_port")
 if curl -s "http://${pmm_client_ip}:${listen_port}/metrics" | grep -q "${metric_name} ${metric_value}"; then
         echo "Authentication for exporter Broken, metrics fetched without basic auth"
         exit 1;
