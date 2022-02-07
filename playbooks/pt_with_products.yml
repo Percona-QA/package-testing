@@ -39,30 +39,33 @@
     when: lookup('env', 'install_with') == "upstream80"
 
   - name: include tasks for installing and setup psmdb 44
-    include_tasks: ../tasks/install_and_run_psmdb44.yml
+    include_tasks: ../tasks/install_and_run_psmdb.yml
     when: lookup('env', 'install_with') == "psmdb44"
 
   - name: include tasks for installing and setup psmdb 50
-    include_tasks: ../tasks/install_and_run_psmdb50.yml
+    include_tasks: ../tasks/install_and_run_psmdb.yml
     when: lookup('env', 'install_with') == "psmdb50"
 
 # Enable only tools repo to install pt
   - name: include tasks for enabling tools testing repo
-    include_tasks: ../tasks/enable_only_testing_repo_for_pt.yml
+    include_tasks: ../tasks/enable_only_repo_for_pt.yml
     vars:
       repo_name: tools
+      repo_type: testing
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling tools main repo
-    include_tasks: ../tasks/enable_only_main_repo_for_pt.yml
+    include_tasks: ../tasks/enable_only_repo_for_pt.yml
     vars:
       repo_name: tools
+      repo_type: release
     when: lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling  tools experimental repo
-    include_tasks: ../tasks/enable_only_experimental_repo_for_pt.yml
+    include_tasks: ../tasks/enable_only_repo_for_pt.yml
     vars:
       repo_name: tools
+      repo_type: experimental
     when: lookup('env', 'install_repo') == "experimental"
 
 # Install pt and run tool
@@ -71,7 +74,7 @@
 
 #   will fail till the PT-1959 is fixed
   - name: check that pt version is correct
-    command: /package-testing/version_check.sh pt
+    command: ../version_check.sh pt
 
   - name: run pt-mongodb-summary
     command: pt-mongodb-summary

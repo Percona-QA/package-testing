@@ -65,7 +65,7 @@
 
 # On Centos mysql is started with random root password. Change myssql root password and create cnf with new client password on centos.
   - name: set root password on centos
-    command: /package-testing/setpass_57.sh
+    command: ../setpass_57.sh
     when: ansible_os_family == "RedHat"
 
   - name: copy .my.cnf with credentials on centos

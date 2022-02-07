@@ -1,5 +1,5 @@
   - name: include playbook for removing Percona repo
-    include: remove_percona_repository.yml
+    include_tasks: ../tasks/remove_percona_repository.yml
 
   - name: install Percona repository package on debian/ubuntu
     apt:
@@ -10,8 +10,8 @@
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
 
-  - name: enable {{repo_name}} release repo
-    command: percona-release enable-only {{repo_name}} release
+  - name: enable {{ repo_name }} {{ repo_type }} repo
+    command: percona-release enable-only {{ repo_name }} {{ repo_type }}
 
   - name: clean and update yum cache
     shell: |

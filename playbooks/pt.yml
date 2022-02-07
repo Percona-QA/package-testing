@@ -17,8 +17,10 @@
   - name: include tasks to install pt from [pt,tools, original] repos
     include_tasks: ../tasks/enable_pt_repos_and_install.yml
     vars:
-      - repo_name: "{{ item }}"
+      repo_name: "{{ repo }}"
     loop:
       - tools
       - pt
       - original
+    loop_control:
+      loop_var: repo
