@@ -1,0 +1,75 @@
+# This task enables  MysqL server 57 (upstream57) repository, installs and starts latest MySQL57 community server.
+
+# Enable MySQL repo and install MySQL packages
+# Enable MySQL repo and install MySQL package
+  - name: Install old MySQL apt repository package for Debian 9
+    apt:
+      deb: https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
+    when: ansible_os_family == "Debian" and ansible_distribution_major_version == "9"
+
+  - name: Install MySQL apt repository package
+    apt:
+      deb: https://dev.mysql.com/get/mysql-apt-config_0.8.22-1_all.deb
+    when: ansible_os_family == "Debian" and ansible_distribution_major_version |int >= 10
+
+  - name: replace the default MySQL 8.0 repo with 5.7
+    replace:
+      path: /etc/apt/sources.list.d/mysql.list
+      regexp: 'mysql-8.0'
+      replace: 'mysql-5.7'
+      backup: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Install MySQL RHEL 7 yum repository package
+    yum: name=https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    # Note: Mysql 5.7 packages for RHEL8/CentOS8 do not exist in mysql80-community-release-el8-1.noarch.rpm, hence we can't run the upstream script for CentOS8 till the packages are available. Uncomment following section after MS5.7 packages are available for Centos8.
+    #- name: Install MySQL RHEL 8 yum repository package
+    #  yum: name=https://dev.mysql.com/get/mysql80-community-release-el8-1.noarch.rpm state=present
+    # when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: install MySQL Community deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - mysql-community-server
+    when: ansible_os_family == "Debian"
+
+  - name: install MySQL Community rpm packages in centos
+    yum:
+      disablerepo: mysql80-community
+      enablerepo: mysql57-community
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - mysql-community-server
+    when: ansible_os_family == "RedHat"
+
+
+# Start mysql service
+  - name: start mysql service
+    service: 
+      name: mysql
+      state: started
+    when: ansible_os_family == "Debian"
+
+  - name: start mysqld service on CentOS for upstream
+    systemd: 
+      name: mysqld
+      state: started
+    when: ansible_os_family == "RedHat"
+
+# On Centos mysql is started with random root password. Change myssql root password and create cnf with new client password on centos.
+  - name: set root password on centos
+    command: ../setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"

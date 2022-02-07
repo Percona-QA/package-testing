@@ -38,7 +38,11 @@ wsrep_log_conflicts
 innodb_autoinc_lock_mode=2
 
 # Node IP address
+{% if ansible_eth1.ipv4.address is defined %}
 wsrep_node_address={{ansible_eth1.ipv4.address}}
+{% else %}
+wsrep_node_address={{ansible_eth0.ipv4.address}}
+{% endif %}
 
 # Cluster name
 wsrep_cluster_name=pxc-cluster
