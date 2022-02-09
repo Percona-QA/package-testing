@@ -109,8 +109,8 @@ pxc57_files = (
 
 if glibc_version == "2.12":
   pxc57_symlinks = (
-    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.22'),
-    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.22'),
+    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.23'),
+    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.23'),
     ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.1e'),
     ('lib/libssl.so','lib/private/libssl.so.1.0.1e'),
     ('lib/libtinfo.so','lib/private/libtinfo.so.5.7'),
