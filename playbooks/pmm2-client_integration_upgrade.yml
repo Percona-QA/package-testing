@@ -136,6 +136,9 @@
 
   - name: add mongodb metrics to monitoring
     command: pmm-admin add mongodb --service-name=mongodb_{{ instance_ip }}
+  
+  - name: add mongodb metrics to monitoring using socket
+    command: pmm-admin add mongodb --socket=/tmp --service-name=mongodb_{{ instance_ip }}_socket
 
   - name: check if mongodb monitoring is running
     command: pmm-admin list
@@ -151,11 +154,9 @@
 
   - name: Enable postgresql repository
     command: percona-release setup -y ppg-13
-    when: ansible_distribution_release != 'xenial'
 
   - name: include tasks for setting up pg13
     include_tasks: ../ppg-testing/tasks/install_ppg13.yml
-    when: ansible_distribution_release != 'xenial'
 
   - name: Initialize Postgres RHEL
     command: /usr/pgsql-13/bin/postgresql-13-setup initdb
@@ -175,7 +176,7 @@
       name: postgresql
       state: started
       enabled: true
-    when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
+    when: ansible_os_family == "Debian"
 
   - name: create lowercase 8 character password for pgsql
     set_fact:
@@ -185,27 +186,25 @@
     command: psql -c "ALTER USER postgres PASSWORD '{{ random_pgsql_password }}';"
     become: yes
     become_user: postgres
-    when: ansible_distribution_release != 'xenial'
 
   - name: add postgresql metrics to monitoring
     command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }}
-    when: ansible_distribution_release != 'xenial'
+  
+  - name: add postgresql metrics to monitoring using socket
+    command: pmm-admin add postgresql --password={{ random_pgsql_password }} --socket=/var/run/postgresql --service-name=pgsql_{{ instance_ip }}_socket
 
   - name: check if postgresql monitoring is running
     command: pmm-admin list
     register: list_output
-    when: ansible_distribution_release != 'xenial'
 
   - name: Print the pmm-admin list value
     ansible.builtin.debug:
       msg: System {{ list_output.stdout }}
-    when: ansible_distribution_release != 'xenial'
 
   - name: Assert if the pmm-admin list contains postgreSQL instance
     assert:
       that:
         - "'PostgreSQL' in list_output.stdout"
-    when: ansible_distribution_release != 'xenial'
 
 ## end PG
 
@@ -313,6 +312,9 @@
       - "bash -xe ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1"
       - "bash -xe ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
       - "bash -xe ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
+      - "bash -xe ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }}_socket --metric_name pg_up --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1"
+      - "bash -xe ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }}_socket --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
+      
 
   - name: Fetch PMM-Admin version via pmm-admin status output
     shell: pmm-admin status | grep pmm-admin | awk -F' ' '{print $3}'
