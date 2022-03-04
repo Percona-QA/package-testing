@@ -206,8 +206,8 @@
 
   - name: Clone orchestrator sources
     git:
-      repo: https://github.com/openark/orchestrator.git
-      version: v3.2.5
+      repo: https://github.com/percona/orchestrator
+      version: v3.2.6
       dest: /root/orchestrator
 
   - name: Copy test.sh for orchestrator Debian

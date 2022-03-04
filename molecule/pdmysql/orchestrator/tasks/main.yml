@@ -72,8 +72,8 @@
 
   - name: Clone orchestrator sources
     git:
-      repo: https://github.com/openark/orchestrator.git
-      version: v3.2.4
+      repo: https://github.com/percona/orchestrator.git
+      version: v3.2.6
       dest: /root/orchestrator
 
   - name: Clone orchestrator-ci-env sources
