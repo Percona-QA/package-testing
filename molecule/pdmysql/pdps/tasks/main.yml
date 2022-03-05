@@ -207,7 +207,7 @@
   - name: Clone orchestrator sources
     git:
       repo: https://github.com/percona/orchestrator
-      version: master
+      version: "{{ lookup('env', 'ORCHESTRATOR_TESTS_VERSION') }}"
       dest: /root/orchestrator
 
   - name: Copy test.sh for orchestrator Debian
