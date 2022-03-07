@@ -206,7 +206,7 @@
 
   - name: Clone orchestrator sources
     git:
-      repo: https://github.com/percona/orchestrator
+      repo: https://github.com/percona/orchestrator.git
       version: "{{ lookup('env', 'ORCHESTRATOR_TESTS_VERSION') }}"
       dest: /root/orchestrator
 
