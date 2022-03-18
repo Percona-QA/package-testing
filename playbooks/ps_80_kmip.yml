@@ -123,5 +123,5 @@
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps80
 
-  - name: import world database on bullseye
+  - name: import world database
     command: /package-testing/plugins_test.sh
