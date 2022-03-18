@@ -123,15 +123,5 @@
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps80
 
-  - name: run sysbench to add data in mysql
-    command: "{{ item }}"
-    with_items:
-    - mysql -e "CREATE DATABASE IF NOT EXISTS test;"
-    - sysbench /usr/share/sysbench/oltp_insert.lua --table-size=1000 --tables=10 --mysql-db=test --mysql-user=root --threads=100 --db-driver=mysql prepare
-    when: ansible_distribution_release != "bullseye"
-
-# There is an issue installing sysbench on bullseye, hence using world database
-
   - name: import world database on bullseye
     command: /package-testing/plugins_test.sh
-    when: ansible_os_family == "Debian" and ansible_distribution_release == "bullseye"
