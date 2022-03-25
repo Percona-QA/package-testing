@@ -68,9 +68,6 @@
     - pmm-client
     when: ansible_os_family == "RedHat"
 
-  - name: check that Percona Toolkit version is correct
-    command: /package-testing/version_check.sh pt
-
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm
 
