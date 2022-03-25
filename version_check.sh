@@ -85,7 +85,7 @@ log="/tmp/${product}_version_check.log"
 echo -n > "${log}"
 
 if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" ]; then
-  for i in @@INNODB_VERSION @@VERSION @@TOKUDB_VERSION; do
+  for i in @@INNODB_VERSION @@VERSION; do
     if [ "$(mysql -e "SELECT ${i}; "| grep -c "${version}")" = 1 ]; then
       echo "${i} is correct" >> "${log}"
     else
@@ -93,6 +93,13 @@ if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" ]; 
       exit 1
     fi
  done
+ if [ "${product}" = "ps56" -o "${product}" = "ps57" ]; then
+    if [ "$(mysql -e "SELECT @@TOKUDB_VERSION; "| grep -c "${version}")" = 1 ]; then
+      echo "@@TOKUDB_VERSION is correct" >> "${log}"
+    else
+      echo "@@TOKUDB_VERSION is incorrect it shows $(mysql -e "SELECT @@TOKUDB_VERSION;")"
+    fi
+  fi
 
   if [ "$(mysql -e "SELECT @@VERSION_COMMENT;" | grep ${revision} | grep -c ${release})" = 1 ]; then
     echo "@@VERSION COMMENT is correct" >> "${log}"
