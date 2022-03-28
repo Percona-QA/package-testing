@@ -153,7 +153,7 @@
   - name: check if Metric End point with Auth works for Mysqld Exporter
     shell: "{{item}}"
     with_items:
-      - "bash -x package-testing/scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
+      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
 
   - name: Assert if the pmm-admin list contains mysqld_exporter with Running state
     assert:
@@ -217,7 +217,7 @@
   - name: check if Metric End point with Auth works for MongoDB Exporter
     shell: "{{item}}"
     with_items:
-      - "bash -x package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
+      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
 
 ### end PSMDB
 
@@ -291,7 +291,7 @@
   - name: check if Metric End point with Auth works for Postgres Exporter
     shell: "{{item}}"
     with_items:
-      - "bash -x package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1"
+      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1"
 
 ## end PG
 
@@ -321,7 +321,7 @@
   - name: check if Metric End point with Auth works for Node Exporter
     shell: "{{item}}"
     with_items:
-      - "bash -x package-testing/scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0"
+      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0"
 
   - name: Print the node_exporter_status
     ansible.builtin.debug:
