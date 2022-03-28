@@ -57,8 +57,8 @@
   - name: setup pmm2-client artifacts for custom path
     command: "{{item}}"
     with_items:
-      - "chmod +x ../scripts/pmm2_client_custom_path.sh"
-      - "../scripts/pmm2_client_custom_path.sh"
+      - "chmod +x /package-testing/scripts/pmm2_client_custom_path.sh"
+      - "/package-testing/scripts/pmm2_client_custom_path.sh"
 
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2
