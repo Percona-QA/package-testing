@@ -135,15 +135,18 @@
       perms: yes
     when: lookup('env', 'USE_LOCAL_PKG_TEST') == "1"
 
-  - name: download package-testing repo with wget
+  - set_fact:
+      package_testing_custom_branch: "{{ lookup('vars', 'extra_package_testing_branch', default=lookup('env','GIT_BRANCH') | default('master', true) ) }}"
+
+  - name: download package-testing repo branch with wget
     command: "{{ item }}"
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
-    - unzip master.zip
-    - rm -f master.zip
-    - mv package-testing-master /package-testing
+    - wget --no-check-certificate -O {{ package_testing_custom_branch }}.zip https://github.com/Percona-QA/package-testing/archive/{{ package_testing_custom_branch }}.zip
+    - unzip {{ package_testing_custom_branch }}.zip
+    - rm -f {{ package_testing_custom_branch }}.zip
+    - mv package-testing-{{ package_testing_custom_branch }} /package-testing
     when: lookup('env', 'USE_LOCAL_PKG_TEST') == "" or lookup('env', 'USE_LOCAL_PKG_TEST') == "0"
 
   - name: install latest bats from github
