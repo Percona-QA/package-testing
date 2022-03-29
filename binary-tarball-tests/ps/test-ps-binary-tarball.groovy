@@ -41,20 +41,6 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Ubuntu Bionic
-        stage('Ubuntu Xenial') {
-          agent {
-            label "min-xenial-x64"
-          }
-          steps {
-            script {
-                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-              }
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
-            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-          } //End steps
-        } //End stage Ubuntu Xenial
         stage('Debian Bullseye') {
           agent {
             label "min-bullseye-x64"
@@ -125,20 +111,6 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Centos7
-        stage('Centos6') {
-          agent {
-            label "min-centos-6-x64"
-          }
-          steps {
-            script {
-                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-              }
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
-            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-          } //End steps
-        } //End stage Centos6
       } //End parallel
     } //End stage Run tests
   } //End stages
