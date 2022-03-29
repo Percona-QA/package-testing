@@ -125,7 +125,7 @@
         - "'MySQL' in list_output.stdout"
 
   - name: Wait for mysqld_exporter to have Running Status.
-    shell: "{{ cmd_admin_list }} | grep 'mysqld_exporter' | awk -F" " '{print $2}'"
+    shell: "{{ cmd_admin_list }} | grep 'mysqld_exporter' | awk -F' ' '{print $2}'"
     register: mysqld_exporter_status
     until: mysqld_exporter_status.stdout.find('Running') != -1
     delay: 5
