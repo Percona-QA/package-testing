@@ -124,17 +124,9 @@ void run_test() {
     if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
       MINIMAL="-minimal"
     fi
-    if [ "${PS_MAJOR_VERSION}" = "8.0" ]; then
-      export GLIBC_VERSION="2.17"
-      if [ -f /etc/redhat-release ] && [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
-        export GLIBC_VERSION="2.12"
-      fi
-      TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
-      TARBALL_LINK="https://www.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
-    elif [ "${PS_MAJOR_VERSION}" = "5.7" ]; then
-      TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-      TARBALL_LINK="https://www.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
-    fi
+    export GLIBC_VERSION="2.17"
+    TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
+    TARBALL_LINK="https://www.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
     rm -rf package-testing
     if [ -f /usr/bin/yum ]; then
       sudo yum install -y git wget
