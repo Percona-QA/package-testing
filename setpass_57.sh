@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-init_pass=$(grep "temporary password" /var/log/mysqld.log | awk '{print $NF}')
+init_pass=$(grep "temporary password" /var/log/mysqld.log | awk '{print $NF}' | tail -1)
 
 mysql --connect-expired-password -uroot --password="$init_pass" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'U?fY)9s7|3gxUm';"
 
