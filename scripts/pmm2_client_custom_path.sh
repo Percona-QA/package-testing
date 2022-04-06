@@ -29,7 +29,6 @@ while getopts ":hlp:" option; do
         exit 0
         ;;
       l) # listening custom port  starts from 2.27
-        echo "-l was triggered!"
         version=${PMM_VERSION:-2.27.0}
         ;;
       p) # Enter a custom path
@@ -41,8 +40,6 @@ while getopts ":hlp:" option; do
          ;;
    esac
 done
-
-echo "path='$custom_path', version='$version'"
 
 ### Main program
 wget https://downloads.percona.com/downloads/TESTING/pmm/pmm2-client-${version}.tar.gz
