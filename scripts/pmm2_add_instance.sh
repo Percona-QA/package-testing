@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -lt 1 ]; then
   echo "This script requires product parameter: mysql or mongodb !"
   echo "Usage: ./pmm_service_check.sh <prod>"
   exit 1
