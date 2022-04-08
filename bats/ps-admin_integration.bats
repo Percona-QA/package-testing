@@ -6,12 +6,12 @@ load ps-admin_helper
   uninstall_all
   if [ ${MYSQL_VERSION} != "8.0" ]; then
     check_qrt_notexists
+    check_tokubackup_notexists
+    check_tokudb_notexists
   fi
   check_audit_notexists
 # check_pam_notexists
 # check_pam_compat_notexists
-  check_tokubackup_notexists
-  check_tokudb_notexists
   if [ ${MYSQL_VERSION} != "5.6" -a ${MYSQL_VERSION} != "8.0" ]; then
     check_mysqlx_notexists
     check_rocksdb_notexists
@@ -81,6 +81,9 @@ load ps-admin_helper
 }
 
 @test "install TokuDB plugin" {
+  if [ ${MYSQL_VERSION} = "8.0" ]; then
+    skip "PS 8 doesn't have TokuDB"
+  fi
   if [ $(id -u) -ne 0 ]; then
     skip "This test requires that the current user is root!"
   fi
@@ -89,6 +92,9 @@ load ps-admin_helper
 }
 
 @test "uninstall TokuDB plugin" {
+  if [ ${MYSQL_VERSION} = "8.0" ]; then
+    skip "PS 8 doesn't have TokuDB"
+  fi
   uninstall_tokudb
   check_tokudb_notexists
 }
@@ -97,12 +103,18 @@ load ps-admin_helper
   if [ $(id -u) -ne 0 ]; then
     skip "This test requires that the current user is root!"
   fi
+  if [ ${MYSQL_VERSION} = "8.0" ]; then
+    skip "PS 8 doesn't have TokuDB"
+  fi
   install_tokubackup
   check_tokudb_exists
   check_tokubackup_exists
 }
 
 @test "uninstall TokuDB and TokuBackup plugin" {
+  if [ ${MYSQL_VERSION} = "8.0" ]; then
+    skip "PS 8 doesn't have TokuDB"
+  fi
   uninstall_tokudb
   check_tokubackup_notexists
   check_tokudb_notexists
@@ -128,12 +140,12 @@ load ps-admin_helper
   install_all
   if [ ${MYSQL_VERSION} != "8.0" ]; then
     check_qrt_exists
+    check_tokudb_exists
+    check_tokubackup_exists
   fi
   check_audit_exists
 # check_pam_exists
 # check_pam_compat_exists
-  check_tokudb_exists
-  check_tokubackup_exists
   if [ ${MYSQL_VERSION} != "5.6" ]; then
     check_mysqlx_exists
     check_rocksdb_exists
@@ -146,8 +158,10 @@ load ps-admin_helper
   check_audit_notexists
 # check_pam_notexists
 # check_pam_compat_notexists
-  check_tokubackup_notexists
-  check_tokudb_notexists
+  if [ ${MYSQL_VERSION} != "8.0" ]; then
+    check_tokubackup_notexists
+    check_tokudb_notexists
+  fi
   if [ ${MYSQL_VERSION} != "5.6" ]; then
     check_mysqlx_notexists
     check_rocksdb_notexists
@@ -158,12 +172,12 @@ load ps-admin_helper
   install_all
   if [ ${MYSQL_VERSION} != "8.0" ]; then
     check_qrt_exists
+    check_tokudb_exists
+    check_tokubackup_exists
   fi
   check_audit_exists
 # check_pam_exists
 # check_pam_compat_exists
-  check_tokudb_exists
-  check_tokubackup_exists
   if [ ${MYSQL_VERSION} != "5.6" ]; then
     check_mysqlx_exists
     check_rocksdb_exists
