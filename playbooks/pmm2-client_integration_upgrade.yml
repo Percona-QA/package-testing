@@ -137,6 +137,9 @@
   - name: add mongodb metrics to monitoring
     command: pmm-admin add mongodb --service-name=mongodb_{{ instance_ip }}
 
+  - name: add mongodb metrics to monitoring using socket
+    command: pmm-admin add mongodb --socket=/tmp/mongodb-27017.sock --service-name=mongodb_socket_{{ instance_ip }}
+
   - name: check if mongodb monitoring is running
     command: pmm-admin list
     register: list_output
@@ -187,9 +190,35 @@
     become_user: postgres
     when: ansible_distribution_release != 'xenial'
 
+  - name: Enable pg_stat_statements via shared_preload_libraries
+    command: echo "shared_preload_libraries = 'pg_stat_statements'" >> /etc/postgresql/*/main/postgresql.conf
+    become: yes
+    become_user: postgres
+
+  - name: Enable Socket Based Connection for pgsql via pgsql configuration
+    command: sed -i 's/local   all             postgres                                peer/local   all             postgres                                trust/' /etc/postgresql/13/main/pg_hba.conf
+    become: yes
+
+  - name: Start Postgres RHEL
+    service:
+      name: postgresql-13
+      state: restarted
+      enabled: true
+    when: ansible_os_family == "RedHat"
+
+  - name: Start postgresql service for Debian based
+    service:
+      name: postgresql
+      state: restarted
+      enabled: true
+    when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
+
   - name: add postgresql metrics to monitoring
     command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }}
     when: ansible_distribution_release != 'xenial'
+
+  - name: add postgresql metrics to monitoring via socket
+    command: pmm-admin add postgresql --socket /var/run/postgresql/ --username=postgres --service-name=pgsql_socket_{{ instance_ip }}
 
   - name: check if postgresql monitoring is running
     command: pmm-admin list
@@ -311,11 +340,20 @@
     with_items:
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1
+      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+
+  - name: check if Metric End point with Auth works after upgrade for Postgres exporter when service was added via socket before upgrade
+    shell: "{{item}}"
+    with_items:
+      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
 
   - name: Fetch PMM-Admin version via pmm-admin status output
     shell: pmm-admin status | grep pmm-admin | awk -F' ' '{print $3}'
