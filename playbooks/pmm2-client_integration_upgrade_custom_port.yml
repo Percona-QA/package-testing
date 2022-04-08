@@ -4,7 +4,7 @@
 #   installs previous version of PMM client
 #   enables Percona testing repository
 #   upgrades PMM client
-#   does some tests
+#   does some tests of custom port listening
 
 - hosts: all
   become: true
@@ -15,25 +15,6 @@
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
 
   tasks:
-  - name: Install JQ for exporter end point metric fetch
-    yum:
-      name: "{{ packages }}"
-      state: latest
-      update_cache: yes
-    vars:
-      packages:
-      - jq
-    when: ansible_os_family == "RedHat"
-  
-  - name: Install JQ for exporter end point metric fetch
-    apt:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - jq
-    when: ansible_os_family == "Debian"
-
   - name: Register Instance IP
     shell: echo $(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
     register: instance_ip
@@ -69,15 +50,15 @@
   - name: setup pmm2-client artifacts for custom path
     command: "{{item}}"
     with_items:
-      - "chmod +x /package-testing/scripts/pmm2_client_custom_path.sh"
-      - "/package-testing/scripts/pmm2_client_custom_path.sh"
+      - "chmod +x ../scripts/pmm2_client_custom_path.sh"
+      - "../scripts/pmm2_client_custom_path.sh"
 
   - name: configure pmm client to connect to server in push/auto Mode
-    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --paths-base=/pmm2-client-custom-path/ --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --paths-base=/pmm2-client-custom-path/ --pmm-agent-listen-port=17789 --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
 
   - name: configure pmm client to connect to server in pull Mode
-    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --paths-base=/pmm2-client-custom-path/ --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --paths-base=/pmm2-client-custom-path/ --pmm-agent-listen-port=17789 --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "pull"
 
   - name: Check if the configuration generated with paths-base is using the custom path
@@ -114,11 +95,11 @@
     when: ansible_os_family == "RedHat"
 
   - name: add mysql instance for monitoring
-    command: pmm-admin add mysql --query-source=perfschema --socket=/var/run/mysqld/mysqld.sock --service-name=mysql_{{ instance_ip }}
+    command: pmm-admin add mysql --pmm-agent-listen-port=17789 --query-source=perfschema --socket=/var/run/mysqld/mysqld.sock --service-name=mysql_{{ instance_ip }}
     when: ansible_os_family != "RedHat"
 
   - name: check if mysql monitoring running
-    command: pmm-admin list
+    command: pmm-admin list --pmm-agent-listen-port=17789
     register: list_output
 
   - name: Assert if the pmm-admin list contains mysql
@@ -145,10 +126,10 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 6
 
   - name: add mongodb metrics to monitoring
-    command: pmm-admin add mongodb --service-name=mongodb_{{ instance_ip }}
+    command: pmm-admin add mongodb --pmm-agent-listen-port=17789 --service-name=mongodb_{{ instance_ip }}
 
   - name: check if mongodb monitoring is running
-    command: pmm-admin list
+    command: pmm-admin list --pmm-agent-listen-port=17789
     register: list_output
 
   - name: Assert if the pmm-admin list contains mongodb instance
@@ -198,11 +179,11 @@
     when: ansible_distribution_release != 'xenial'
 
   - name: add postgresql metrics to monitoring
-    command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }}
+    command: pmm-admin add postgresql --pmm-agent-listen-port=17789 --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }}
     when: ansible_distribution_release != 'xenial'
 
   - name: check if postgresql monitoring is running
-    command: pmm-admin list
+    command: pmm-admin list --pmm-agent-listen-port=17789
     register: list_output
     when: ansible_distribution_release != 'xenial'
 
@@ -252,7 +233,7 @@
     become: yes
 
   - name: check if mongodb is still being monitored
-    command: pmm-admin list
+    command: pmm-admin list --pmm-agent-listen-port=17789
     register: list_output
 
   - name: Assert if the pmm-admin list contains mongodb instance
@@ -272,7 +253,7 @@
     when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
 
   - name: check if pmm_agent is connected
-    shell: pmm-admin list | grep pmm_agent | awk -F" " '{print $2}'
+    shell: pmm-admin list --pmm-agent-listen-port=17789 | grep pmm_agent | awk -F" " '{print $2}'
     register: pmm_agent_status
 
   - name: Assert if the pmm-admin list contains pmm_agent type and Connected
@@ -281,14 +262,14 @@
       - "'Connected' in pmm_agent_status.stdout"
 
   - name: Wait for node_exporter to be Running Status After Upgrade
-    shell: pmm-admin list | grep node_exporter | awk -F" " '{print $2}'
+    shell: pmm-admin list --pmm-agent-listen-port=17789 | grep node_exporter | awk -F" " '{print $2}'
     register: ne_status
     until: ne_status.stdout.find('Running') != -1
     delay: 5
     retries: 5
 
   - name: check if node_exporter is Running
-    shell: pmm-admin list | grep node_exporter | awk -F" " '{print $2}'
+    shell: pmm-admin list --pmm-agent-listen-port=17789 | grep node_exporter | awk -F" " '{print $2}'
     register: node_exporter_status
 
   - name: Print the node_exporter_status
@@ -301,14 +282,14 @@
       - "'Running' in node_exporter_status.stdout"
 
   - name: Wait for vmagent to be Running Status After Upgrade
-    shell: pmm-admin list | grep vmagent | awk -F" " '{print $2}'
+    shell: pmm-admin list --pmm-agent-listen-port=17789 | grep vmagent | awk -F" " '{print $2}'
     register: vm_status
     until: vm_status.stdout.find('Running') != -1
     delay: 5
     retries: 5
 
   - name: check if vmagent is Running
-    shell: pmm-admin list | grep vmagent | awk -F" " '{print $2}'
+    shell: pmm-admin list --pmm-agent-listen-port=17789 | grep vmagent | awk -F" " '{print $2}'
     register: vmagent_status
 
   - name: Print the vmagent Status
@@ -321,20 +302,12 @@
       - "'Running' in vmagent_status.stdout"
 
   - name: Fetch PMM-Admin version via pmm-admin status output
-    shell: pmm-admin status | grep pmm-admin | awk -F' ' '{print $3}'
+    shell: pmm-admin status --pmm-agent-listen-port=17789 | grep pmm-admin | awk -F' ' '{print $3}'
     register: pmm_admin_version
 
   - name: Print the PMM-Admin Version on Status command
     ansible.builtin.debug:
       msg: pmm-admin version is {{ pmm_admin_version.stdout }}
-
-  - name: check if Metric End point with Auth works for Node Exporter, MysqlD Exporter, MongoDB Exporter, Postgres Exporter
-    shell: "{{item}}"
-    with_items:
-      - "bash -xe /package-testing/scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0"
-      - "bash -xe /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1"
-      - "bash -xe /package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
-      - "bash -xe /package-testing/scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
 
   - name: Assert if the version output value is strict matched with expected version
     assert:

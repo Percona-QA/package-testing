@@ -135,7 +135,7 @@
       perms: yes
     when: lookup('env', 'USE_LOCAL_PKG_TEST') == "1"
 
-  - name: download package-testing repo with wget
+  - name: download package-testing repo branch with wget
     command: "{{ item }}"
     with_items:
     - rm -rf /package-testing
