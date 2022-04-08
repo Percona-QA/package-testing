@@ -129,8 +129,11 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
     if [ ${product} = "ps56" ]; then
       deb_opt_package="percona-server-tokudb-${deb_maj_version}"
       deb_num_pkgs="7"
-    else
+    elif [ "${product}" = "ps57" ]; then
       deb_opt_package="percona-server-tokudb-${deb_maj_version} percona-server-rocksdb-${deb_maj_version}"
+      deb_num_pkgs="8"
+    elif [ "${product}" = "ps80" ]; then
+      deb_opt_package="percona-server-rocksdb-${deb_maj_version}"
       deb_num_pkgs="8"
     fi
     if [ "$(dpkg -l | grep percona-server | grep -c ${version})" == "${deb_num_pkgs}" ]; then

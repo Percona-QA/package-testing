@@ -56,6 +56,8 @@ for se in TokuDB RocksDB; do
     if [[ ${se} = "TokuDB" && " ${tokudb_comp_lib[@]} " =~ " ${comp_lib} " ]] || [[ ${se} = "RocksDB" && " ${rocksdb_comp_lib[@]} " =~ " ${comp_lib} " ]]; then
       if [ $1 = "ps56" -a ${se} = "RocksDB" ]; then
         echo "Skipping RocksDB since not supported in PS 5.6"
+      elif [ $1 = "ps80" -a ${se} = "TokuDB" ]; then
+	echo "Skipping TokuDB since not supported in PS 8.0"
       else
         if [ ${comp_lib} != "dummy" ]; then
           old="${new}"
