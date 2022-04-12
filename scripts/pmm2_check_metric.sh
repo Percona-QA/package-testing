@@ -30,4 +30,4 @@ if curl -s "http://${pmm_client_ip}:${listen_port}/metrics" | grep -q "${metric_
         echo "Authentication for exporter Broken, metrics fetched without basic auth"
         exit 1;
 fi
-curl -s -H "Authorization: Basic ${token}" "http://${pmm_client_ip}:${listen_port}/metrics" | grep '${metric_name} ${metric_value}'
+curl -s -H "Authorization: Basic ${token}" "http://${pmm_client_ip}:${listen_port}/metrics" | grep "${metric_name} ${metric_value}"
