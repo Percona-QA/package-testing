@@ -105,7 +105,7 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
       fi
     elif [ "${product}" = "ps80" ]; then
         rpm_num_pkgs="8"
-        rpm_opt_package="percona-server-rocksdb-${rpm_maj_version} percona-server-shared-compat-${rpm_maj_version}"
+        rpm_opt_package="percona-server-rocksdb percona-server-shared-compat"
     fi
     if [ "${product}" = "ps80" ]; then
       ps_name="percona-server"
@@ -115,11 +115,11 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
     if [ "$(rpm -qa | grep "${ps_name}" | grep -c "${version}")" == "${rpm_num_pkgs}" ]; then
       echo "all packages are installed"
     else
-      for package in ${ps_name}-server-${rpm_maj_version} ${ps_name}-test-${rpm_maj_version} ${ps_name}-${rpm_maj_version}-debuginfo ${ps_name}-devel-${rpm_maj_version} ${ps_name}-shared-${rpm_maj_version} ${ps_name}-client-${rpm_maj_version} ${rpm_opt_package}; do
+      for package in ${ps_name}-server ${ps_name}-test ${ps_name}-debuginfo ${ps_name}-devel ${ps_name}-shared ${ps_name}-client ${rpm_opt_package}; do
         if [ "$(rpm -qa | grep -c ${package}-${rpm_version})" -gt 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
         else
-          echo "WARNING: ${package}-${rpm_version} is not installed"
+          echo "WARNING: ${package} is not installed"
           exit 1
         fi
       done
