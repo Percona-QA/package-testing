@@ -104,8 +104,8 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
         rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-rocksdb-${rpm_maj_version}"
       fi
     elif [ "${product}" = "ps80" ]; then
-        rpm_num_pkgs="9"
-        rpm_opt_package="percona-server-tokudb-${rpm_maj_version} percona-server-rocksdb-${rpm_maj_version} percona-server-shared-compat-${rpm_maj_version}"
+        rpm_num_pkgs="8"
+        rpm_opt_package="percona-server-rocksdb-${rpm_maj_version} percona-server-shared-compat-${rpm_maj_version}"
     fi
     if [ "${product}" = "ps80" ]; then
       ps_name="percona-server"
@@ -134,7 +134,7 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
       deb_num_pkgs="8"
     elif [ "${product}" = "ps80" ]; then
       deb_opt_package="percona-server-rocksdb-${deb_maj_version}"
-      deb_num_pkgs="8"
+      deb_num_pkgs="7"
     fi
     if [ "$(dpkg -l | grep percona-server | grep -c ${version})" == "${deb_num_pkgs}" ]; then
       echo "all packages are installed"
