@@ -133,13 +133,13 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
       deb_opt_package="percona-server-tokudb-${deb_maj_version} percona-server-rocksdb-${deb_maj_version}"
       deb_num_pkgs="8"
     elif [ "${product}" = "ps80" ]; then
-      deb_opt_package="percona-server-rocksdb-${deb_maj_version}"
+      deb_opt_package="percona-server-rocksdb"
       deb_num_pkgs="7"
     fi
     if [ "$(dpkg -l | grep percona-server | grep -c ${version})" == "${deb_num_pkgs}" ]; then
       echo "all packages are installed"
     else
-      for package in percona-server-server-${deb_maj_version} percona-server-client-${deb_maj_version} percona-server-test-${deb_maj_version} percona-server-${deb_maj_version}-dbg percona-server-source-${deb_maj_version} percona-server-common-${deb_maj_version} ${deb_opt_package}; do
+      for package in percona-server-server percona-server-client percona-server-test percona-server-dbg percona-server-source percona-server-common ${deb_opt_package}; do
         if [ "$(dpkg -l | grep ${package} | grep -c ${version})" != 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed"
         else
