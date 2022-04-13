@@ -101,8 +101,8 @@
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
 
-    #  - name: check that Percona Server version is correct
-    #    command: /package-testing/version_check.sh ps80
+  - name: check that Percona Server version is correct
+    command: /package-testing/version_check.sh ps80
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps80
@@ -113,7 +113,7 @@
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
 
-  - name: install plugins, import world database, test tokudb
+  - name: install plugins, import world database
     command: /package-testing/plugins_test_80.sh ps
 
   - name: check the clone and data masking plugins
@@ -122,8 +122,8 @@
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
 
-  - name: run mysql compression tests script
-    command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps80
+    #  - name: run mysql compression tests script
+    #    command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps80
 
   - name: run bats unit tests for ps-admin script
     command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
