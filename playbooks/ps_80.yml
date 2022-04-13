@@ -98,8 +98,11 @@
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
 
-  - name: check that Percona Server version is correct
-    command: /package-testing/version_check.sh ps80
+  - name: install percona-mysql-shell package
+    include_tasks: ../tasks/install_pshell.yml
+
+    #  - name: check that Percona Server version is correct
+    #    command: /package-testing/version_check.sh ps80
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps80
