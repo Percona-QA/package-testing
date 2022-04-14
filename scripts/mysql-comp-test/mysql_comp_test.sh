@@ -106,9 +106,12 @@ for se in TokuDB RocksDB; do
             sed -i "s/ @@COMMENT_PARTITIONED@@/ ${new_comment_partitioned}/g" /tmp/create_table.sql
             sed -i "s/ @@COMMENT@@/ ${new_comment}/g" /tmp/create_table.sql
           fi
-
-          mysql -e "set global tokudb_row_format=${new_row_format};"
-          mysql < /tmp/create_table.sql
+          if [ $1 != "ps80" ]; then
+            mysql -e "set global tokudb_row_format=${new_row_format};"
+            mysql < /tmp/create_table.sql
+          else
+	    echo "Skipping TokuDB since not supported in PS 8.0"
+	  fi  
         fi
 
         if [ ${comp_lib} = "no" ]; then
