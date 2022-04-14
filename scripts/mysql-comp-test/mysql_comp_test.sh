@@ -203,11 +203,18 @@ sed -i '/^rocksdb/d' ${MYCNF}
 nr1=$(grep -c "e7821682046d961fb2b5ff5d11894491" /tmp/comp_test_md5.sum)
 nr2=$(grep -c "3284a0c3a1f439892f6e07f75408b2c2" /tmp/comp_test_md5.sum)
 nr3=$(grep -c "72f7e51a16c2f0af31e39586b571b902" /tmp/comp_test_md5.sum)
-
-if [ ${nr1} -ne 24 -o ${nr2} -ne 24 -o ${nr3} -ne 24 ]; then
+if [ $1 != "ps80" ]; then
+  if [ ${nr1} -ne 24 -o ${nr2} -ne 24 -o ${nr3} -ne 24 ]; then
+    echo "md5sums of test files do not match. check files in ${secure_file_priv}"
+    exit 1
+  else
+    echo "md5sums of test files match"
+    exit 0
+  fi
+elif [ ${nr1} -ne 11 -o ${nr2} -ne 11 -o ${nr3} -ne 11 ]; then 
   echo "md5sums of test files do not match. check files in ${secure_file_priv}"
   exit 1
 else
   echo "md5sums of test files match"
-  exit 0
+  exit 0	
 fi
