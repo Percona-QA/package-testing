@@ -176,16 +176,19 @@ for file in /var/lib/mysql/.rocksdb/*.sst; do
 done
 
 # check if TokuDB files contain proper compression libraries used
-for file in /var/lib/mysql/comp_test/*TokuDB*_main_*.tokudb;
-do
-  filename_comp=$(echo "${file}" | sed "s:/.*/::" | sed "s:.*TokuDB_::" | sed "s:_main_.*::" | sed "s:_P_.*::")
-  file_comp=$(tokuftdump --header ${file}|grep "compression_method"|sed 's/ compression_method=//';)
-  if [ ${filename_comp} != "no"  ]; then
-    if [[ "${filename_comp}" = "quicklz" && "${file_comp}" -ne "9" ]] || [[ "${filename_comp}" = "zlib" && "${file_comp}" -ne "11" ]] || [[ "${filename_comp}" = "lzma" && "${file_comp}" -ne "10" ]] || [[ "${filename_comp}" = "snappy" && "${file_comp}" -ne "7" ]] || [[ "${filename_comp}" = "default" && "${file_comp}" -ne "9" ]]; then
-      echo "TokuDB file ${file} has compression algorithm ${file_comp} and it should be ${filename_comp} which seems incorrect!"
-      exit 1
+if [$1 ! = "ps80"]; then 
+  for file in /var/lib/mysql/comp_test/*TokuDB*_main_*.tokudb;
+  do
+    filename_comp=$(echo "${file}" | sed "s:/.*/::" | sed "s:.*TokuDB_::" | sed "s:_main_.*::" | sed "s:_P_.*::")
+    file_comp=$(tokuftdump --header ${file}|grep "compression_method"|sed 's/ compression_method=//';)
+    if [ ${filename_comp} != "no"  ]; then
+      if [[ "${filename_comp}" = "quicklz" && "${file_comp}" -ne "9" ]] || [[ "${filename_comp}" = "zlib" && "${file_comp}" -ne "11" ]] || [[ "${filename_comp}" = "lzma" && "${file_comp}" -ne "10" ]] || [[ "${filename_comp}" = "snappy" && "${file_comp}" -ne "7" ]] || [[ "${filename_comp}" = "default" && "${file_comp}" -ne "9" ]]; then
+        echo "TokuDB file ${file} has compression algorithm ${file_comp} and it should be ${filename_comp} which seems incorrect!"
+        exit 1
+      fi
     fi
-  fi
+else    
+  echo "SKIP"
 done
 
 md5sum ${secure_file_priv}/*.txt > /tmp/comp_test_md5.sum
