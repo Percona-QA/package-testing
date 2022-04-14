@@ -108,10 +108,10 @@ for se in TokuDB RocksDB; do
           fi
           if [ $1 != "ps80" ]; then
             mysql -e "set global tokudb_row_format=${new_row_format};"
-            mysql < /tmp/create_table.sql
           else
 	    echo "Skipping TokuDB since not supported in PS 8.0"
 	  fi  
+	  mysql < /tmp/create_table.sql
         fi
 
         if [ ${comp_lib} = "no" ]; then
