@@ -35,7 +35,9 @@ pxc80_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/mysqladmin',
   '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow',
   '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade',
-  '/usr/bin/mysql_tzinfo_to_sql'
+  '/usr/bin/mysql_tzinfo_to_sql','/usr/bin/mysql_keyring_encryption_test','/usr/bin/mysql_migrate_keyring',
+  '/usr/bin/mysqld_multi','/usr/bin/mysqld_safe','/usr/bin/mysql-systemd',
+  '/usr/bin/mysqlbinlog'
 )
 pxc80_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
