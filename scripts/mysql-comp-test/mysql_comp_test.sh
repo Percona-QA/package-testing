@@ -179,7 +179,7 @@ for file in /var/lib/mysql/.rocksdb/*.sst; do
 done
 
 # check if TokuDB files contain proper compression libraries used
-if [$1 ! = "ps80"]; then 
+if [ $1 != "ps80" ]; then
   for file in /var/lib/mysql/comp_test/*TokuDB*_main_*.tokudb;
   do
     filename_comp=$(echo "${file}" | sed "s:/.*/::" | sed "s:.*TokuDB_::" | sed "s:_main_.*::" | sed "s:_P_.*::")
@@ -190,9 +190,10 @@ if [$1 ! = "ps80"]; then
         exit 1
       fi
     fi
-else    
-  echo "SKIP"
-done
+  done
+else 
+  echo "Tokudb is deprecated in PS8.0"
+fi  
 
 md5sum ${secure_file_priv}/*.txt > /tmp/comp_test_md5.sum
 
