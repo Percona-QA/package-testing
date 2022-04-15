@@ -130,7 +130,7 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
       deb_opt_package="percona-server-tokudb-${deb_maj_version}"
       deb_num_pkgs="7"
     elif [ ${product} = "ps57" ]; then 
-      deb_opt_package="percona-server-rocksdb percona-server-tokudb"
+      deb_opt_package="percona-server-rocksdb-${deb_maj_version} percona-server-tokudb-${deb_maj_version}"
       deb_num_pkgs="8"
     else
       deb_opt_package="percona-server-rocksdb"
