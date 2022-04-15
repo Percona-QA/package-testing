@@ -141,6 +141,10 @@
       - "rm -r /tmp/vm_agent"
       - "pkill -f vmagent"
     become: yes
+  
+  - name: Pause for 10 seconds to create config file
+    pause:
+      seconds: 10
 
   - name: PMM-8141 verify new vmscrpconfig folder is created at tmp after killing vmagent process
     command: "{{item}}"
