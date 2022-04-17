@@ -13,6 +13,14 @@
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
 
   tasks:
+  - name: Install Needed Packages, update repo for redhat
+    shell: "{{item}}"
+    with_items:
+      - "yum install epel-release -y"
+      - "yum update -y"
+    when: ansible_os_family == "RedHat"
+    become: true
+
   - name: Install JQ for exporter end point metric fetch
     yum:
       name: "{{ packages }}"
@@ -268,13 +276,23 @@
     become: yes
     become_user: postgres
 
-  - name: setup postgresql pg_stat_statements
+  - name: setup postgresql pg_stat_statements for Debian based Systems
     shell: "{{item}}"
     with_items:
       - chmod a+w /etc/postgresql/13/main/postgresql.conf
       - echo "shared_preload_libraries = 'pg_stat_statements'" >> /etc/postgresql/13/main/postgresql.conf
       - cat /etc/postgresql/13/main/postgresql.conf | grep "pg_stat_statements"
     become: yes
+    when: ansible_os_family == "Debian"
+
+  - name: setup postgresql pg_stat_statements for redhat based systems
+    shell: "{{item}}"
+    with_items:
+      - chmod a+w /var/lib/pgsql/13/data/postgresql.conf
+      - echo "shared_preload_libraries = 'pg_stat_statements'" >> /var/lib/pgsql/13/data/postgresql.conf
+      - cat /var/lib/pgsql/13/data/postgresql.conf | grep "pg_stat_statements"
+    become: yes
+    when: ansible_os_family == "RedHat"
 
   - name: Enable Socket Based Connection for pgsql via pgsql configuration
     command: sed -i 's/local   all             postgres                                peer/local   all             postgres                                trust/' /etc/postgresql/13/main/pg_hba.conf
