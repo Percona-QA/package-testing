@@ -300,7 +300,7 @@
     when: ansible_os_family == "Debian"
 
   - name: Enable Socket Based Connection for pgsql via pgsql configuration for redhat based systems
-    command: sed -i 's/local   all             postgres                                peer/local   all             postgres                                trust/' /var/lib/pgsql/13/data/pg_hba.conf
+    command: sed -i 's/local   all             all                                     peer/local   all             all                                     trust/' /var/lib/pgsql/13/data/pg_hba.conf
     become: yes
     when: ansible_os_family == "RedHat"
 
