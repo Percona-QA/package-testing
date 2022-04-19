@@ -182,6 +182,9 @@
       remote_src: yes
     when: mycnf.stat.exists and ansible_os_family == "RedHat"
 
+  - name: Disable tokudb and tokubackup
+    command: /usr/bin/ps_tokudb_admin --disable --disable-backup
+
   - name: remove PS 5.7 packages
     include_tasks: ../tasks/remove_ps57.yml
 
