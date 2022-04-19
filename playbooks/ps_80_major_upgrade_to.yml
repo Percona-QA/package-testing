@@ -245,8 +245,8 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: start mysql service
-    service: name=mysql state=started
+    #  - name: start mysql service
+    #    service: name=mysql state=started
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps80
