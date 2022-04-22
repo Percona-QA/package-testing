@@ -19,7 +19,7 @@
     when: ansible_os_family == "Debian"
 
   - name: Add an apt key by id from a keyserver
-    apt_key:
+    apt_key: data: | -----BEGIN PGP PUBLIC KEY BLOCK-----
       keyserver: http://pgp.mit.edu/
       id: 3A79BD29
 
