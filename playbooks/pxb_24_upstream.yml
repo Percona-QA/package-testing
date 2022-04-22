@@ -19,8 +19,7 @@
     when: ansible_os_family == "Debian"
 
   - name: Install gpg key
-    apt:
-      deb: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 467B942D3A79BD29
+    command: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 467B942D3A79BD29
     when: ansible_os_family == "Debian"
 
   - name: replace the default 8.0 repo with 5.7
