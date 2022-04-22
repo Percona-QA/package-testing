@@ -19,9 +19,9 @@
     when: ansible_os_family == "Debian"
 
   - name: Add an apt key by id from a keyserver
-    apt_key: data: | -----BEGIN PGP PUBLIC KEY BLOCK-----
-      keyserver: http://pgp.mit.edu/
-      id: 3A79BD29
+    apt_key: mysql-build@oss.oracle.com
+      keyserver: https://keyserver.ubuntu.com/
+      id: 467b942d3a79bd29
 
   - name: replace the default 8.0 repo with 5.7
     replace:
