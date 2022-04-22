@@ -18,9 +18,10 @@
       deb: https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
     when: ansible_os_family == "Debian"
 
-  - name: Install gpg key
-    command: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 467B942D3A79BD29
-    when: ansible_os_family == "Debian"
+  - name: Add an apt key by id from a keyserver
+    apt_key:
+      keyserver: http://pgp.mit.edu/
+      id: 3A79BD29
 
   - name: replace the default 8.0 repo with 5.7
     replace:
