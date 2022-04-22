@@ -17,6 +17,11 @@
       deb: https://dev.mysql.com/get/mysql-apt-config_0.8.22-1_all.deb
     when: ansible_os_family == "Debian"
 
+  - name: Install gpg key
+    apt:
+      deb: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 467B942D3A79BD29
+    when: ansible_os_family == "Debian"  
+
   - name: Install MySQL RHEL 6 yum repository package
     yum: name=https://dev.mysql.com/get/mysql80-community-release-el6-1.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
