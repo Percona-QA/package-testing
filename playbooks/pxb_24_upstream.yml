@@ -18,10 +18,11 @@
       deb: https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
     when: ansible_os_family == "Debian"
 
-  - name: Add an apt key by id from a keyserver
-    apt_key: mysql-build@oss.oracle.com
-      keyserver: https://keyserver.ubuntu.com/
-      id: 467b942d3a79bd29
+  - name: Import key for mysql-repo
+    apt_key:
+      state: present
+      key: http://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+    when: ansible_os_family == "Debian"
 
   - name: replace the default 8.0 repo with 5.7
     replace:
