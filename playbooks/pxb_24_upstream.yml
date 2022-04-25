@@ -21,7 +21,7 @@
   - name: Import key for mysql-repo
     apt_key:
       state: present
-      key: http://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+      url: http://repo.mysql.com/RPM-GPG-KEY-mysql-2022
     when: ansible_os_family == "Debian"
 
   - name: replace the default 8.0 repo with 5.7
