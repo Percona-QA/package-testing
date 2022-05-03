@@ -13,7 +13,6 @@
       - percona-server-dbg
       - percona-server-source
       - percona-server-client
-      - percona-server-tokudb
       - percona-server-rocksdb
       - percona-mysql-router
     when: ansible_os_family == "Debian"
@@ -50,6 +49,5 @@
       - percona-server-test
       - percona-server-debuginfo
       - percona-server-devel
-      - percona-server-tokudb
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
