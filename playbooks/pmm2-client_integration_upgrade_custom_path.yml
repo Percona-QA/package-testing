@@ -15,6 +15,21 @@
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
 
   tasks:
+  - name: Install Needed Packages, update repo for redhat
+    shell: "{{item}}"
+    with_items:
+      - "yum install epel-release -y"
+      - "yum update -y"
+    when: ansible_os_family == "RedHat"
+    become: true
+
+  - name: Install Needed Packages, update repo for debian
+    shell: "{{item}}"
+    with_items:
+      - "apt-get update"
+    when: ansible_os_family == "Debian"
+    become: true
+
   - name: Install JQ for exporter end point metric fetch
     yum:
       name: "{{ packages }}"
@@ -238,6 +253,11 @@
     with_items:
     - pmm2-client
     when: ansible_os_family == "RedHat"
+
+  - name: Get Exporter Binaries for the new version
+    shell: "{{item}}"
+    with_items:
+      - "bash -xe /package-testing/scripts/pmm2_get_exporter_binaries.sh"
 
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2
