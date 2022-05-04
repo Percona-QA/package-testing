@@ -64,7 +64,6 @@ if [ ! -z "$1" ]; then
     mysql -e "CREATE DATABASE IF NOT EXISTS world3;"
     cat /package-testing/world.sql | mysql -D world2
     cat /package-testing/world.sql | mysql -D world3
-    mysql < /package-testing/tokudb_compression.sql
     mysql < /package-testing/rocksdb_test.sql
   fi
 fi
