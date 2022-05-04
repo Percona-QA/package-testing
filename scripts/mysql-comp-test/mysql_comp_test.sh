@@ -56,6 +56,8 @@ for se in TokuDB RocksDB; do
     if [[ ${se} = "TokuDB" && " ${tokudb_comp_lib[@]} " =~ " ${comp_lib} " ]] || [[ ${se} = "RocksDB" && " ${rocksdb_comp_lib[@]} " =~ " ${comp_lib} " ]]; then
       if [ $1 = "ps56" -a ${se} = "RocksDB" ]; then
         echo "Skipping RocksDB since not supported in PS 5.6"
+      elif [ $1 = "ps80" -a ${se} = "TokuDB" ]; then
+        echo "Skipping TokuDB since not supported in PS 8.0"
       else
         if [ ${comp_lib} != "dummy" ]; then
           old="${new}"
@@ -104,9 +106,12 @@ for se in TokuDB RocksDB; do
             sed -i "s/ @@COMMENT_PARTITIONED@@/ ${new_comment_partitioned}/g" /tmp/create_table.sql
             sed -i "s/ @@COMMENT@@/ ${new_comment}/g" /tmp/create_table.sql
           fi
-
-          mysql -e "set global tokudb_row_format=${new_row_format};"
-          mysql < /tmp/create_table.sql
+          if [ $1 != "ps80" ]; then
+            mysql -e "set global tokudb_row_format=${new_row_format};"
+          else
+	    echo "Skipping TokuDB since not supported in PS 8.0"
+	  fi  
+	  mysql < /tmp/create_table.sql
         fi
 
         if [ ${comp_lib} = "no" ]; then
@@ -174,17 +179,21 @@ for file in /var/lib/mysql/.rocksdb/*.sst; do
 done
 
 # check if TokuDB files contain proper compression libraries used
-for file in /var/lib/mysql/comp_test/*TokuDB*_main_*.tokudb;
-do
-  filename_comp=$(echo "${file}" | sed "s:/.*/::" | sed "s:.*TokuDB_::" | sed "s:_main_.*::" | sed "s:_P_.*::")
-  file_comp=$(tokuftdump --header ${file}|grep "compression_method"|sed 's/ compression_method=//';)
-  if [ ${filename_comp} != "no"  ]; then
-    if [[ "${filename_comp}" = "quicklz" && "${file_comp}" -ne "9" ]] || [[ "${filename_comp}" = "zlib" && "${file_comp}" -ne "11" ]] || [[ "${filename_comp}" = "lzma" && "${file_comp}" -ne "10" ]] || [[ "${filename_comp}" = "snappy" && "${file_comp}" -ne "7" ]] || [[ "${filename_comp}" = "default" && "${file_comp}" -ne "9" ]]; then
-      echo "TokuDB file ${file} has compression algorithm ${file_comp} and it should be ${filename_comp} which seems incorrect!"
-      exit 1
+if [ $1 != "ps80" ]; then
+  for file in /var/lib/mysql/comp_test/*TokuDB*_main_*.tokudb;
+  do
+    filename_comp=$(echo "${file}" | sed "s:/.*/::" | sed "s:.*TokuDB_::" | sed "s:_main_.*::" | sed "s:_P_.*::")
+    file_comp=$(tokuftdump --header ${file}|grep "compression_method"|sed 's/ compression_method=//';)
+    if [ ${filename_comp} != "no"  ]; then
+      if [[ "${filename_comp}" = "quicklz" && "${file_comp}" -ne "9" ]] || [[ "${filename_comp}" = "zlib" && "${file_comp}" -ne "11" ]] || [[ "${filename_comp}" = "lzma" && "${file_comp}" -ne "10" ]] || [[ "${filename_comp}" = "snappy" && "${file_comp}" -ne "7" ]] || [[ "${filename_comp}" = "default" && "${file_comp}" -ne "9" ]]; then
+        echo "TokuDB file ${file} has compression algorithm ${file_comp} and it should be ${filename_comp} which seems incorrect!"
+        exit 1
+      fi
     fi
-  fi
-done
+  done
+else 
+  echo "Tokudb is deprecated in PS8.0"
+fi  
 
 md5sum ${secure_file_priv}/*.txt > /tmp/comp_test_md5.sum
 
@@ -194,11 +203,18 @@ sed -i '/^rocksdb/d' ${MYCNF}
 nr1=$(grep -c "e7821682046d961fb2b5ff5d11894491" /tmp/comp_test_md5.sum)
 nr2=$(grep -c "3284a0c3a1f439892f6e07f75408b2c2" /tmp/comp_test_md5.sum)
 nr3=$(grep -c "72f7e51a16c2f0af31e39586b571b902" /tmp/comp_test_md5.sum)
-
-if [ ${nr1} -ne 24 -o ${nr2} -ne 24 -o ${nr3} -ne 24 ]; then
+if [ $1 != "ps80" ]; then
+  if [ ${nr1} -ne 24 -o ${nr2} -ne 24 -o ${nr3} -ne 24 ]; then
+    echo "md5sums of test files do not match. check files in ${secure_file_priv}"
+    exit 1
+  else
+    echo "md5sums of test files match"
+    exit 0
+  fi
+elif [ ${nr1} -ne 11 -o ${nr2} -ne 11 -o ${nr3} -ne 11 ]; then 
   echo "md5sums of test files do not match. check files in ${secure_file_priv}"
   exit 1
 else
   echo "md5sums of test files match"
-  exit 0
+  exit 0	
 fi
