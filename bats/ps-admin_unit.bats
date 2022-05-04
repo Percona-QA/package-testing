@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+MYSQL_VERSION=$(mysqld --version|grep -o "[0-9]\.[0-9]")
+
 PS_ADMIN_BIN=${PS_ADMIN_BIN:-/usr/bin/ps-admin}
 
 @test "run ps-admin without any arguments" {
@@ -8,8 +10,13 @@ PS_ADMIN_BIN=${PS_ADMIN_BIN:-/usr/bin/ps-admin}
 }
 
 @test "display ps-admin help screen" {
+if [ ${MYSQL_VERSION} = "8.0" ]; then
+  run ${PS_ADMIN_BIN} --help
+  [ "${lines[1]}" = "Valid options are:" ]
+else
   run ${PS_ADMIN_BIN} --help
   [ "${lines[3]}" = "Valid options are:" ]
+fi
 }
 
 @test "run ps-admin with wrong option" {
@@ -65,11 +72,15 @@ PS_ADMIN_BIN=${PS_ADMIN_BIN:-/usr/bin/ps-admin}
 }
 
 @test "test message for installing TokuDB if user is not root" {
-  if [ $(id -u) -ne 0 ]; then
-    run ${PS_ADMIN_BIN} --enable-tokudb
-    [ "${lines[0]}" = "ERROR: For TokuDB install/uninstall this script must be run as root!" ]
-  else
-    skip "This test requires that the current user is not root!"
-  fi
+ if [ ${MYSQL_VERSION} != "8.0" ]; then
+   if [ $(id -u) -ne 0 ]; then
+     run ${PS_ADMIN_BIN} --enable-tokudb
+     [ "${lines[0]}" = "ERROR: For TokuDB install/uninstall this script must be run as root!" ]
+   else
+     skip "This test requires that the current user is not root!"
+   fi
+ else
+   skip "This test requires PS 8.0 below"
+ fi
 }
 
