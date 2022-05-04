@@ -182,9 +182,6 @@
       remote_src: yes
     when: mycnf.stat.exists and ansible_os_family == "RedHat"
 
-  - name: Disable tokudb and tokubackup
-    command: /usr/bin/ps_tokudb_admin --disable --disable-backup
-
   - name: remove PS 5.7 packages
     include_tasks: ../tasks/remove_ps57.yml
 
@@ -226,10 +223,18 @@
     include: ../tasks/enable_ps8_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
+  - name: copy the Tokudb config file on Debian/Ubuntu
+    template: src=../templates/tokudb.j2 dest=/etc/mysql/conf.d/tokudb.cnf
+    when: ansible_os_family == "Debian"
+
   - name: append include for RedHat
     lineinfile:
         path: /etc/my.cnf
         line: '!includedir /etc/my.cnf.d'
+    when: ansible_os_family == "RedHat"
+
+  - name: copy the Tokudb config file on RHEL/CentOS/Amazon
+    template: src=../templates/tokudb.j2 dest=/etc/my.cnf.d/tokudb.cnf
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Server 8.0 packages
