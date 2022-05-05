@@ -47,7 +47,6 @@
       - percona-server-test
       - percona-server-source
       - percona-server-client
-      - percona-server-tokudb
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
 
@@ -61,7 +60,6 @@
       - percona-server-client
       - percona-server-test
       - percona-server-devel
-      - percona-server-tokudb
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
 
