@@ -32,6 +32,10 @@
     command: percona-release enable pxb-24 release
     when: lookup('env', 'pxc57repo') == "pxc57" or lookup('env', 'pxc57repo') == ""
 
+# for pxc5.7.37 test only. PXB2.4.26 is not out yet so tools testing repo should be on. Remove after pxb 2.4.26 is out
+  - name: enable tools testing repo
+    command: percona-release enable tools testing
+
   - name: clean and update yum cache
     shell: |
       yum clean all
