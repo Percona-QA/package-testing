@@ -37,7 +37,7 @@ ps80_functions = (
   ('get_last_record_timestamp_by_binlog', 'binlog_utils_udf.so', 'STRING')
 )
 ps80_files = (
-  'lib/libcoredumper.a', 'lib/libHotBackup.so', 
+  'lib/libcoredumper.a', 
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
   'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.28' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/audit_log.so',
