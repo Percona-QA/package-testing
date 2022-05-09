@@ -69,6 +69,19 @@
         - systemd-sysv
       when: ansible_os_family == "Debian" and ansible_distribution_release != "trusty"
 
+    - name: install needed packages for running tests with yum
+      yum:
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+          - pv
+          - libselinux-python
+          - unzip
+          - wget
+          - rsync
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
+
     - name: install needed packages for running tests with yum on RHEL8
       yum:
         name: "{{ packages }}"
