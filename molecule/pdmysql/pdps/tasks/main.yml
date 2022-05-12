@@ -171,7 +171,6 @@
     become: yes
     when: ansible_os_family == "Debian"
 
-
   - name: Extract the Go tarball
     unarchive:
       src: "/tmp/go1.16.5.linux-amd64.tar.gz"
