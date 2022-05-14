@@ -112,6 +112,16 @@
   - name: start mysql service
     service: name=mysql state=started
 
+  - name: download package-testing repo with wget
+    command: "{{ item }}"
+    with_items:
+    - rm -rf /package-testing
+    - rm -f master.zip
+    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+    - unzip master.zip
+    - rm -f master.zip
+    - mv package-testing-master /package-testing
+
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
     when: ansible_os_family == "RedHat"
