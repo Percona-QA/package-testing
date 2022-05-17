@@ -111,9 +111,9 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Centos7
-        stage('Ubuntu JammyJellyfish') {
+        stage('Ubuntu Jammy') {
           agent {
-            label "min-JammyJellyfish-x64"
+            label "min-Jammy-x64"
           }
           steps {
             script {
