@@ -24,6 +24,8 @@ else
   else
     sudo apt install -y python3 python3-pip
   fi
+  sudo apt-get update -y
+  sudo apt-get install -y libldap-2.4-2
   sudo apt install -y libaio1 libnuma1
 fi
 pip3 install --user pytest-testinfra pytest
