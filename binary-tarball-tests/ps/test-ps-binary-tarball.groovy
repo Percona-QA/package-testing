@@ -113,7 +113,7 @@ pipeline {
         } //End stage Centos7
         stage('Ubuntu Jammy') {
           agent {
-            label "min-Jammy-x64"
+            label "min-jammy-x64"
           }
           steps {
             script {
