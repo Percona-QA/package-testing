@@ -26,6 +26,7 @@ else
   fi
   sudo apt-get update -y
   sudo apt-get install -y libldap-2.4-2
+  sudo yum install tar
   sudo apt install -y libaio1 libnuma1
 fi
 pip3 install --user pytest-testinfra pytest

@@ -125,7 +125,7 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage JammyJellyfish
-        stage('Ubuntu Oracle Linux 8') {
+        stage('Oracle Linux 8') {
           agent {
             label "min-ol-8-x64"
           }
