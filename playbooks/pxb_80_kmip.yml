@@ -135,5 +135,10 @@
   - name: run backup
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
 
-  - name: prepare backup
-    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
+  - name: prepare backup on Redhat/CentOS
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --component-keyring-config=/usr/lib64/mysql/plugin/component_keyring_kmip.cnf
+    when: ansible_os_family == "RedHat"
+
+  - name: prepare backup on Debian/Ubuntu
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --component-keyring-config=/usr/lib/mysql/plugin/component_keyring_kmip.cnf
+    when: ansible_os_family == "Debian"
