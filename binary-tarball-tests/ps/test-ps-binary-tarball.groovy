@@ -125,6 +125,20 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage JammyJellyfish
+        stage('Ubuntu Oracle Linux 8') {
+          agent {
+            label "min-ol-8-x64"
+          }
+          steps {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+              }
+            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+              run_test()
+            }
+            junit 'package-testing/binary-tarball-tests/ps/report.xml'
+          } //End steps
+        } //End stage Oracle Linux 8
       } //End parallel
     } //End stage Run tests
   } //End stages
