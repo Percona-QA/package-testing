@@ -4,7 +4,7 @@ export PATH=${HOME}/.local/bin:${PATH}
 echo "Installing dependencies..."
 if [ -f /etc/redhat-release ]; then
   sudo yum install -y libaio numactl openssl
-  sudo yum install tar
+  sudo yum install -y tar
   # below needed for 5.6 mysql_install_db
   sudo yum install -y perl-Data-Dumper
   if [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
