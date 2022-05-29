@@ -45,8 +45,31 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
+### install PS5.7 without TokuDB as PS8.0 do not support TokuDB
   - name: install Percona Server 5.7 packages
     include_tasks: ../tasks/install_ps57.yml
+    vars:
+      packages:
+      - percona-server-server-5.7
+      - percona-server-test-5.7
+      - percona-server-5.7-dbg
+      - percona-server-source-5.7
+      - percona-server-rocksdb-5.7
+    when: ansible_os_family == "Debian"
+
+### install PS5.7 without TokuDB as PS8.0 do not support TokuDB
+  - name: install Percona Server 5.7 packages
+    include_tasks: ../tasks/install_ps57.yml
+    vars:
+      packages:
+      - Percona-Server-server-57
+      - Percona-Server-test-57
+      - Percona-Server-57-debuginfo
+      - Percona-Server-devel-57
+      - Percona-Server-rocksdb-57
+      - Percona-Server-shared-57
+      - Percona-Server-client-57
+    when: ansible_os_family == "RedHat"
 
   - name: install Percona Toolkit new deb packages
     include_tasks: ../tasks/install_pt.yml
@@ -74,36 +97,20 @@
               mode=0640 owner=root group=root
     when: ansible_os_family == "RedHat"
 
-  - name: run PAM test
-    include_tasks: ../tasks/pam_test.yml
-
-  - name: disable selinux on centos7 for TokuDB to work
+  - name: disable selinux on centos7
     shell: setenforce 0 || true
     when: ansible_os_family == "RedHat"
 
-  - name: install tokudb and restart server
-    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
-
   - name: restart mysql service
     service: name=mysql state=restarted
-
-  - name: re-run ps_tokudb_admin to finish tokudb install
-    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
-
-  - name: install plugins, import world database, test tokudb
-    command: /package-testing/plugins_test_57.sh ps
-
-  - name: keyring plugins test
-    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps57
-
-  - name: re-run ps_admin to install rocksdb
-    command: /usr/bin/ps-admin --enable-rocksdb
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps57
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps57
+    environment:
+      ps57_tokudb: "no"
 
 # - name: check that Percona Toolkit version is correct
 #   command: /package-testing/version_check.sh pt
@@ -121,24 +128,6 @@
     command: /package-testing/package_check.sh pxb24
     when: lookup('env', 'install_repo') != "experimental"
 
-  - name: run some MyRocks tests
-    command: /package-testing/scripts/ps_myrocks_test.sh
-
-  - name: run mysql compression tests script
-    command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps57
-
-  - name: run bats unit tests for ps_tokudb_admin scripts
-    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_unit.bats
-
-  - name: run bats integration tests for ps_tokudb_admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_integration.bats
-
-# - name: run bats unit tests for ps-admin script
-#   command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
-
-# - name: run bats integration tests for ps-admin script
-#   command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
-
   - name: install 3rd party packages with apt
     apt:
       name: "{{ packages }}"
@@ -155,14 +144,8 @@
       - rsyslog-mysql
     when: ansible_os_family == "RedHat"
 
-  - name: run bats tests for mysql init scripts
-    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
-
   - name: start mysql service
     service: name=mysql state=started
-
-  - name: upgrade partitioning
-    command: /package-testing/scripts/ps_upgrade_partitioning.sh
 
 # temporary commented out until BLD-906 is fixed
 # - name: check that mysqladmin shutdown works correctly
@@ -223,18 +206,10 @@
     include: ../tasks/enable_ps8_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
-  - name: copy the Tokudb config file on Debian/Ubuntu
-    template: src=../templates/tokudb.j2 dest=/etc/mysql/conf.d/tokudb.cnf
-    when: ansible_os_family == "Debian"
-
   - name: append include for RedHat
     lineinfile:
         path: /etc/my.cnf
         line: '!includedir /etc/my.cnf.d'
-    when: ansible_os_family == "RedHat"
-
-  - name: copy the Tokudb config file on RHEL/CentOS/Amazon
-    template: src=../templates/tokudb.j2 dest=/etc/my.cnf.d/tokudb.cnf
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Server 8.0 packages
