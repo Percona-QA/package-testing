@@ -15,7 +15,7 @@ def host():
     if ps_version_major in ['5.7','5.6']:
         subprocess.check_call(['docker','exec','--user','root',container_name,'microdnf','install','net-tools'])
     else:
-        subprocess.check_call(['docker','exec','--user','root',container_name,'microdnf','install','net-tools'])
+        subprocess.check_call(['docker','exec','--user','root',container_name,'yum','-y','install','net-tools'])
     time.sleep(20)
     yield testinfra.get_host("docker://root@" + docker_id)
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
