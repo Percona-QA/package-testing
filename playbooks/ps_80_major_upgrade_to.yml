@@ -237,9 +237,6 @@
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps80
  
-  - name: run some MyRocks tests
-    command: /package-testing/scripts/ps_myrocks_test.sh
-
 #  - name: run bats tests for PAM
 #    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
 
