@@ -417,6 +417,15 @@
   - name: checking existence of all artifacts from pmm2-client
     command: bash -xe /package-testing/scripts/check_artifacts.sh
 
+  - name: include Exporters Port in output checks for 2.29.0+
+    include_tasks: ../tasks/exporter-port-output-checks.yml
+    when: lookup('env', 'pmm_version') >= 2.29.0
+    with_items:
+      - vmagent
+      - postgres_exporter
+      - mongodb_exporter
+      - mysql_exporter
+
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
     with_items:

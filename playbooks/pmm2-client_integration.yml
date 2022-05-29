@@ -372,8 +372,14 @@
 
 ## end PG
 
-  - name: run pmm-admin list
-    command: pmm-admin list
+  - name: include Exporters Port in output checks for 2.29.0+
+    include_tasks: ../tasks/exporter-port-output-checks.yml
+    when: lookup('env', 'pmm_version') >= 2.29.0
+    with_items:
+      - vmagent
+      - postgres_exporter
+      - mongodb_exporter
+      - mysql_exporter
 
   - name: check if pmm_agent is connected
     shell: pmm-admin list | grep pmm_agent | awk -F" " '{print $2}'
