@@ -6,6 +6,10 @@
 - hosts: all
   become: true
   become_method: sudo
+  vars:
+      key_id: "{{ lookup('env', 'KMS_KEY_ID') }}"
+      access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+      secret_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
 
   tasks:
   - name: include tasks for test env setup
@@ -50,18 +54,19 @@
         dest: /usr/sbin/
         remote_src: yes
 
-  - name: create the global configuration file for mysql
-    blockinfile:
-        path: /usr/lib64/mysql/plugin/
-        mode: '0644'
-        create: true
-        block: |
+  - name: create the global configuration file for mysql on Debian/Ubuntu
+    copy:
+        dest: "/usr/lib/mysql/plugin/component_keyring_kms.cnf"
+        content: |
             { "path": "/var/lib/mysql/keyring_kms", "region": "us-east-1", "kms_key": "{{ key_id }}", "auth_key": "{{ access_key }}", "secret_access_key": "{{ secret_key }}", "read_only": false }
-        vars:
-            key_id: "{{ lookup('env', 'KMS_KEY_ID') }}"
-            access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
-            secret_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
     when: ansible_os_family == "Debian"
+
+  - name: create the global configuration file for mysql on Redhat/CentOS
+    copy:
+        dest: "/usr/lib64/mysql/plugin/component_keyring_kms.cnf"
+        content: |
+            { "path": "/var/lib/mysql/keyring_kms", "region": "us-east-1", "kms_key": "{{ key_id }}", "auth_key": "{{ access_key }}", "secret_access_key": "{{ secret_key }}", "read_only": false }
+    when: ansible_os_family == "RedHat"
 
   - name: copy the encryption config file on Debian/Ubuntu
     copy:
