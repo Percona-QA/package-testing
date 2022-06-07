@@ -1,0 +1,90 @@
+# This task enables MysqL server 80 (upstream80) repository, installs and starts latest MySQL80 community server.
+
+# Enable MySQL repo and install MySQL package
+  - name: Install old MySQL apt repository package for Debian 9
+    apt:
+      deb: https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
+    when: ansible_os_family == "Debian" and ansible_distribution_major_version == "9"
+
+  - name: Install MySQL apt repository package
+    apt:
+      deb: https://dev.mysql.com/get/mysql-apt-config_0.8.22-1_all.deb
+    when: ansible_os_family == "Debian" and ansible_distribution_major_version |int >= 10
+
+  - name: Install MySQL RHEL 7 yum repository package
+    yum: name=https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: Import key for mysql-repo
+    rpm_key:
+      state: present
+      key: http://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: Install MySQL RHEL 8 yum repository package
+    yum: name=https://dev.mysql.com/get/mysql80-community-release-el8-3.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: setup epel 7 repo
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: setup epel 8 repo
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: /usr/bin/dnf module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: install MySQL Community deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - mysql-community-server
+    when: ansible_os_family == "Debian"
+
+  - name: install MySQL Community packages in centos6/7
+    yum:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - mysql-community-server
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+
+  - name: install MySQL Community packages in rhel/centos 8
+    yum:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - python3-libselinux
+      - mysql-community-server
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+# Start mysql service
+  - name: start mysql service on debian
+    service: 
+      name: mysql
+      state: started
+    when: ansible_os_family == "Debian"
+
+  - name: start mysqld service on CentOS
+    systemd: 
+      name: mysqld
+      state: started
+    when: ansible_os_family == "RedHat"
+
+# On Centos mysql is started with random root password. Change myssql root password and create cnf with new client password on centos.
+  - name: set root password on centos
+    command: ../setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"

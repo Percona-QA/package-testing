@@ -29,8 +29,8 @@ mysql -e "CREATE FUNCTION service_get_write_locks RETURNS INT SONAME 'locking_se
 mysql -e "CREATE FUNCTION service_release_locks RETURNS INT SONAME 'locking_service.so';"
 mysql -e "INSTALL PLUGIN validate_password SONAME 'validate_password.so';"
 mysql -e "INSTALL PLUGIN version_tokens SONAME 'version_token.so';"
-mysql -e "INSTALL PLUGIN rpl_semi_sync_source SONAME 'semisync_source.so';"
-mysql -e "INSTALL PLUGIN rpl_semi_sync_replica SONAME 'semisync_replica.so';"
+#mysql -e "INSTALL PLUGIN rpl_semi_sync_source SONAME 'semisync_source.so';"
+#mysql -e "INSTALL PLUGIN rpl_semi_sync_replica SONAME 'semisync_replica.so';"
 #mysql -e "INSTALL PLUGIN rpl_semi_sync_master SONAME 'semisync_master.so';"
 #mysql -e "INSTALL PLUGIN rpl_semi_sync_slave SONAME 'semisync_slave.so';"
 mysql -e "INSTALL PLUGIN connection_control SONAME 'connection_control.so';"
@@ -64,7 +64,6 @@ if [ ! -z "$1" ]; then
     mysql -e "CREATE DATABASE IF NOT EXISTS world3;"
     cat /package-testing/world.sql | mysql -D world2
     cat /package-testing/world.sql | mysql -D world3
-    mysql < /package-testing/tokudb_compression.sql
     mysql < /package-testing/rocksdb_test.sql
   fi
 fi

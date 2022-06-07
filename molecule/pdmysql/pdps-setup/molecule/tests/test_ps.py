@@ -8,15 +8,13 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 DEBPACKAGES = ['percona-server-server', 'percona-server-test',
                'percona-server-dbg', 'percona-server-source',
-               'percona-server-client', 'percona-server-tokudb',
-               'percona-server-rocksdb', 'percona-mysql-router',
-               'percona-mysql-shell']
+               'percona-server-client', 'percona-server-rocksdb',
+               'percona-mysql-router', 'percona-mysql-shell']
 
 RPMPACKAGES = ['percona-server-server', 'percona-server-client',
                'percona-server-test', 'percona-server-debuginfo',
-               'percona-server-devel', 'percona-server-tokudb',
-               'percona-server-rocksdb', 'percona-mysql-router',
-               'percona-mysql-shell']
+               'percona-server-devel', 'percona-server-rocksdb',
+               'percona-mysql-router', 'percona-mysql-shell']
 
 PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    " fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so';\"",

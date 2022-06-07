@@ -13,20 +13,6 @@ pipeline {
   stages {
     stage('Binary tarball test') {
       parallel {
-        stage('Ubuntu Xenial') {
-          agent {
-            label "min-xenial-x64"
-          }
-          steps {
-            script {
-              currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
-            }
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
-            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
-          } //End steps
-        } //End stage Ubuntu Xenial
         stage('Ubuntu Bionic') {
           agent {
             label "min-bionic-x64"

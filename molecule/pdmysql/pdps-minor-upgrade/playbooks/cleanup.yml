@@ -15,7 +15,6 @@
           - percona-server-dbg
           - percona-server-source
           - percona-server-client
-          - percona-server-tokudb
           - percona-server-rocksdb
           - percona-mysql-router
           - percona-mysql-shell
@@ -32,7 +31,6 @@
           - percona-server-test
           - percona-server-debuginfo
           - percona-server-devel
-          - percona-server-tokudb
           - percona-server-rocksdb
           - percona-mysql-router
           - percona-mysql-shell

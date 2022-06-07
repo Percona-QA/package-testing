@@ -23,6 +23,10 @@
      key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
+  - name: update mirrors for CentOS8
+    shell: sed -i 's/mirror\.centos\.org/vault\.centos\.org/g;s/\#baseurl=/baseurl=/g;s/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS*.repo
+    when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "8"
+
   - name: setup epel 8 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
@@ -131,7 +135,7 @@
       perms: yes
     when: lookup('env', 'USE_LOCAL_PKG_TEST') == "1"
 
-  - name: download package-testing repo with wget
+  - name: download package-testing repo branch with wget
     command: "{{ item }}"
     with_items:
     - rm -rf /package-testing

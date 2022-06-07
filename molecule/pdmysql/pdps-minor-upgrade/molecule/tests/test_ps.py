@@ -8,15 +8,13 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 DEBPACKAGES = ['percona-server-server', 'percona-server-test',
                'percona-server-dbg', 'percona-server-source',
-               'percona-server-client', 'percona-server-tokudb',
-               'percona-server-rocksdb', 'percona-mysql-router',
-               'percona-mysql-shell']
+               'percona-server-client', 'percona-server-rocksdb',
+               'percona-mysql-router', 'percona-mysql-shell']
 
 RPMPACKAGES = ['percona-server-server', 'percona-server-client',
                'percona-server-test', 'percona-server-debuginfo',
-               'percona-server-devel', 'percona-server-tokudb',
-               'percona-server-rocksdb', 'percona-mysql-router',
-               'percona-mysql-shell']
+               'percona-server-devel', 'percona-server-rocksdb',
+               'percona-mysql-router', 'percona-mysql-shell']
 
 PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    " fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so';\"",
@@ -70,7 +68,6 @@ VERSION = os.environ['VERSION']
 def is_running(host):
     cmd = 'ps auxww| grep -v grep  | grep -c "mysql"'
     result = host.run(cmd)
-    print(result.stdout)
     stdout = int(result.stdout)
     if stdout == 0:
         return True
@@ -101,7 +98,6 @@ def test_check_rpm_package(host, package):
 def test_binary_version(host, binary):
     cmd = "{} --version".format(binary)
     result = host.run(cmd)
-    print(result.stdout)
     assert result.rc == 0, result.stderr
     assert VERSION in result.stdout, result.stdout
 
@@ -111,7 +107,6 @@ def test_mysql_version(host, component):
     with host.sudo("root"):
         cmd = "mysql -e \"SELECT {}; \"| grep -c \"{}\"".format(component, VERSION)
         result = host.run(cmd)
-        print(result.stdout)
         assert result.rc == 0, result.stderr
         assert int(result.stdout) == 1, result.stdout
 
@@ -120,7 +115,6 @@ def test_mysql_version(host, component):
 def test_plugins(host, plugin_command):
     with host.sudo("root"):
         result = host.run(plugin_command)
-        print(result.stdout)
         assert result.rc == 0, result.stderr
 
 

@@ -83,19 +83,13 @@
     shell: setenforce 0 || true
     when: ansible_os_family == "RedHat"
 
-  - name: install tokudb and restart server
-    command: /usr/bin/ps-admin --enable-tokudb
-
   - name: restart mysql service
     service: name=mysql state=restarted
-
-  - name: re-run ps_tokudb_admin to finish tokudb install
-    command: /usr/bin/ps-admin --enable-tokudb
 
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
 
-  - name: install plugins, import world database, test tokudb
+  - name: install plugins, import world database
     command: /package-testing/plugins_test_80.sh ps
 
   - name: install percona-mysql-shell package
@@ -126,18 +120,6 @@
   - name: include tasks for enabling PS 8 testing repo
     include: ../tasks/enable_ps8_testing_repo.yml
 
-#
-# Add TokuDB options so it can run
-#
-
-  - name: copy the TokuDB config file on Debian/Ubuntu
-    template: src=../templates/tokudb.j2 dest=/etc/mysql/conf.d/tokudb.cnf
-    when: ansible_os_family == "Debian"
-
-  - name: copy the TokuDB config file on RHEL/CentOS/Amazon
-    template: src=../templates/tokudb.j2 dest=/etc/my.cnf.d/tokudb.cnf
-    when: ansible_os_family == "RedHat"
-#
 # Upgrade packages
 #
   - name: upgrade Percona Toolkit to new deb packages
@@ -162,7 +144,6 @@
       - percona-server-client
       - percona-server-dbg
       - percona-server-source
-      - percona-server-tokudb
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
 
@@ -194,6 +175,7 @@
     vars:
       packages:
       - percona-release
+    when: ansible_os_family == "RedHat"
 
   - name: upgrade Percona Server to new rpm packages on CentOS
     yum:
@@ -205,7 +187,6 @@
       - percona-server-test
       - percona-server-debuginfo
       - percona-server-devel
-      - percona-server-tokudb
       - percona-server-rocksdb
       - percona-server-shared
       - percona-server-shared-compat

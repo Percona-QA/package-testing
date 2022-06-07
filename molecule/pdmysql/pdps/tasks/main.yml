@@ -47,7 +47,6 @@
       - percona-server-dbg
       - percona-server-source
       - percona-server-client
-      - percona-server-tokudb
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
 
@@ -63,7 +62,6 @@
       - percona-server-test
       - percona-server-debuginfo
       - percona-server-devel
-      - percona-server-tokudb
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
 
@@ -136,15 +134,7 @@
   - name: restart mysql service
     service: name=mysql state=restarted
 
-  - name: install percona-mysql-shell package for CentOS
-    yum:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - percona-mysql-shell
-    when: ansible_os_family == "RedHat"
-
-  - name: install percona-mysql-shell package for Debian/Ubuntu
+  - name: install additional package for Debian/Ubuntu
     apt:
       update_cache: yes
       state: present
@@ -152,25 +142,17 @@
     vars:
       packages:
       - percona-mysql-shell
+      - percona-mysql-router
     when: ansible_os_family == "Debian"
 
-  - name: install percona-mysql-router package for CentOS
+  - name: install additional packages for CentOS
     yum:
       name: "{{ packages }}"
     vars:
       packages:
       - percona-mysql-router
+      - percona-mysql-shell
     when: ansible_os_family == "RedHat"
-
-  - name: install percona-mysql-router package for Debian/Ubuntu
-    apt:
-      update_cache: yes
-      state: present
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - percona-mysql-router
-    when: ansible_os_family == "Debian"
 
   - name: start mysql service
     service: name=mysql state=started enabled=yes
@@ -189,7 +171,6 @@
     become: yes
     when: ansible_os_family == "Debian"
 
-
   - name: Extract the Go tarball
     unarchive:
       src: "/tmp/go1.16.5.linux-amd64.tar.gz"
@@ -206,8 +187,8 @@
 
   - name: Clone orchestrator sources
     git:
-      repo: https://github.com/openark/orchestrator.git
-      version: v3.2.5
+      repo: https://github.com/percona/orchestrator.git
+      version: "{{ lookup('env', 'ORCHESTRATOR_TESTS_VERSION') }}"
       dest: /root/orchestrator
 
   - name: Copy test.sh for orchestrator Debian

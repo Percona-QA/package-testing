@@ -9,6 +9,8 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 DEBPACKAGES = ['percona-orchestrator-cli', 'percona-orchestrator-client', 'percona-orchestrator']
 
+VERSION = os.getenv("ORCHESTRATOR_VERSION")
+
 
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
@@ -17,7 +19,7 @@ def test_check_deb_package(host, package):
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert '3.1.4' in pkg.version, pkg.version
+    assert VERSION in pkg.version, pkg.version
 
 
 def test_check_rpm_package(host):
@@ -26,7 +28,7 @@ def test_check_rpm_package(host):
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package('percona-orchestrator')
     assert pkg.is_installed
-    assert '3.1.4' in pkg.version, pkg.version
+    assert VERSION in pkg.version, pkg.version
 
 
 def test_orchestrator_version(host):

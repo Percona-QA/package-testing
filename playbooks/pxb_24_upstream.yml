@@ -18,6 +18,12 @@
       deb: https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
     when: ansible_os_family == "Debian"
 
+  - name: Import key for mysql-repo
+    apt_key:
+      state: present
+      url: http://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+    when: ansible_os_family == "Debian"  
+
   - name: replace the default 8.0 repo with 5.7
     replace:
       path: /etc/apt/sources.list.d/mysql.list
@@ -31,7 +37,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
   - name: Install MySQL RHEL 7 yum repository package
-    yum: name=https://dev.mysql.com/get/mysql80-community-release-el7-2.noarch.rpm state=present
+    yum: name=https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
     # Note: Mysql 5.7 packages for RHEL8/CentOS8 do not exist in mysql80-community-release-el8-1.noarch.rpm, hence we can't run the upstream script for CentOS8 till the packages are available. Uncomment following section after MS5.7 packages are available for Centos8.
