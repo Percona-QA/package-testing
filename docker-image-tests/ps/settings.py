@@ -28,7 +28,7 @@ ps80_binaries = (
 ps80_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
-  ('group_replication','group_replication.so'),('clone','mysql_clone.so'),('data_masking','data_masking.so')
+  ('group_replication','group_replication.so'),('clone','mysql_clone.so'),('data_masking','data_masking.so'),('component_encryption_udf','component_encryption_udf.so'),('component_keyring_kmip','component_keyring_kmip.so'),('component_keyring_kms','component_keyring_kms.so')
 )
 ps80_functions = (
   ('fnv1a_64', 'libfnv1a_udf.so', 'INTEGER'),('fnv_64', 'libfnv_udf.so', 'INTEGER'),('murmur_hash', 'libmurmur_udf.so', 'INTEGER'),
