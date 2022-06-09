@@ -87,6 +87,7 @@ if ps_version_major == '8.0':
     ps_binaries = ps80_binaries
     ps_plugins = ps80_plugins
     ps_functions = ps80_functions
+    ps_component = ps80_component
 elif ps_version_major == '5.7':
     ps_packages = ps57_packages
     ps_binaries = ps57_binaries
