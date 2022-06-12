@@ -23,6 +23,8 @@ PTBINS = ['pt-align', 'pt-archiver', 'pt-config-diff', 'pt-deadlock-logger', 'pt
           'pt-table-checksum', 'pt-table-sync', 'pt-table-usage', 'pt-upgrade',
           'pt-variable-advisor', 'pt-visual-explain']
 
+VERSION = os.environ.get("PXB_VERSION")
+
 
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
@@ -31,7 +33,7 @@ def test_check_deb_package(host, package):
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert '8.0.14' in pkg.version, pkg.version
+    assert VERSION in pkg.version, pkg.version
 
 
 @pytest.mark.parametrize("package", RPMPACKAGES)
@@ -41,18 +43,18 @@ def test_check_rpm_package(host, package):
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert '8.0.14' in pkg.version, pkg.version
+    assert VERSION in pkg.version, pkg.version
 
 
 def test_binary_version(host):
     cmd = "xtrabackup --version"
     result = host.run(cmd)
     assert result.rc == 0, result.stderr
-    assert '8.0.14' in result.stderr, (result.stdout, result.stdout)
+    assert VERSION in result.stderr, (result.stdout, result.stdout)
 
 
 @pytest.mark.parametrize("pt_bin", PTBINS)
 def test_pt_binaries(host, pt_bin):
-    cmd = '{} --version'.format(pt_bin)
+    cmd = f"{pt_bin} --version"
     result = host.run(cmd)
-    assert '3.2.1' in result.stdout, result.stdout
+    assert os.environ.get("PT_VERSION") in result.stdout, result.stdout

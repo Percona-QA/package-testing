@@ -124,6 +124,16 @@
     vars:
       packages:
       - percona-release
+    when: ansible_os_family == "RedHat"
+
+  - name: upgrade Percona release to new apt packages
+    apt:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-release
+    when: ansible_os_family == "Debian"
 
   - name: install PS 5.7 packages from main repos
     include_tasks: ../tasks/install_ps57.yml
