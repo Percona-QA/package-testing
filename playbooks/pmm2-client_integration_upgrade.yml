@@ -417,11 +417,16 @@
   - name: checking existence of all artifacts from pmm2-client
     command: bash -xe /package-testing/scripts/check_artifacts.sh
 
+  - name: parse and set PMM minor version
+    shell: "pmm-admin --version | grep -oP '(?<=[.])\w+(?=[.])' | head -1"
+    register: pmm_agent_minor_version
+
   - name: include Exporters Port in output checks for 2.29.0+
     include_tasks: ../tasks/exporter-port-output-checks.yml
-    when: lookup('env', 'pmm_version') >= 2.29.0
+    when: pmm_agent_minor_version >= 29
     with_items:
       - vmagent
+      - node_exporter
       - postgres_exporter
       - mongodb_exporter
       - mysql_exporter
