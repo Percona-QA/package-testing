@@ -87,71 +87,8 @@
     become: yes
 
 ### start PS5.7
-  - name: install Percona Server 5.7 packages
-    include_tasks: ../tasks/install_ps57.yml
-
-  - name: start mysql service
-    service: name=mysql state=started
-
-  - name: start mysql service with service command
-    command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
-  - name: start mysql service with systemctl command
-    command: systemctl start mysql
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
-
-  - name: set root password on centos
-    command: /package-testing/setpass_57.sh
-    when: ansible_os_family == "RedHat"
-
-  - name: copy .my.cnf with credentials on centos
-    template: src=../templates/my_57.j2
-              dest=/root/.my.cnf
-              mode=0640 owner=root group=root
-    when: ansible_os_family == "RedHat"
-
-  - name: add mysql metrics and queries to monitoring
-    command: /package-testing/scripts/pmm2_add_instance.sh mysql {{ port_flag }}
-    when: ansible_os_family == "RedHat"
-
-  - name: add mysql instance for monitoring
-    command: pmm-admin add mysql {{ port_flag }} --query-source=perfschema --socket=/var/run/mysqld/mysqld.sock --service-name=mysql_{{ instance_ip }}
-    when: ansible_os_family != "RedHat"
-
-  - name: check if mysql monitoring running
-    command: "{{ cmd_admin_list }}"
-    register: list_output
-
-  - name: Assert if the pmm-admin list contains mysql
-    assert:
-      that:
-        - "'MySQL' in list_output.stdout"
-
-  - name: Wait for mysqld_exporter to have Running Status.
-    shell: "{{ cmd_admin_list }} | grep 'mysqld_exporter' | awk -F' ' '{print $2}'"
-    register: mysqld_exporter_status
-    until: mysqld_exporter_status.stdout.find('Running') != -1
-    delay: 5
-    retries: 5
-
-  - name: Assert if the pmm-admin list contains mysqld_exporter with Running state
-    assert:
-      that:
-        - "'Running' in mysqld_exporter_status.stdout"
-
-  - name: Wait for mysql_perfschema_agent to have Running Status.
-    shell: "{{ cmd_admin_list }} | grep 'mysql_perfschema_agent' | awk -F' ' '{print $2}'"
-    register: mysql_perfschema_agent_status
-    until: mysql_perfschema_agent_status.stdout.find('Running') != -1
-    delay: 5
-    retries: 5
-
-  - name: Assert if the pmm-admin list contains mysql_perfschema_agent with Running state
-    assert:
-      that:
-        - "'Running' in mysql_perfschema_agent_status.stdout"
-## end PS
+  - name: start Percona Server 5.7 packages
+    include_tasks: ../tasks/start_ps57.yml
 
 ### start PSMDB4.4
   - name: include tasks for enabling main repo
