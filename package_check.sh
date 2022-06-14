@@ -87,14 +87,22 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
       centos_maj_version=$(cat /etc/redhat-release | grep -oE '[0-9]+' | head -n 1)
     fi
     rpm_maj_version=$(echo ${product} | sed 's/^[a-z]*//') # 56
-    if [ ${product} = "ps57" ]; then
-      rpm_version="${version}" # 5.7.14-8
-    else
+    if [ ${product} = "ps56" ]; then
       rpm_version=$(echo ${version} | sed 's/-/-rel/') # 5.6.32-rel78.0
+    else
+      rpm_version="${version}" # 5.7.14-8
     fi
     if [ "${product}" = "ps56" ]; then
       rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-selinux-${rpm_maj_version}"
       rpm_num_pkgs="8"
+    elif [ "${product}" = "ps57" ] && [ "${ps57_tokudb}" = "no" ]; then
+      if [ "${centos_maj_version}" == "7" ]; then
+        rpm_num_pkgs="8"
+        rpm_opt_package="Percona-Server-rocksdb-${rpm_maj_version} Percona-Server-shared-compat-${rpm_maj_version}"
+      else
+        rpm_num_pkgs="7"
+        rpm_opt_package="Percona-Server-rocksdb-${rpm_maj_version}"
+      fi
     elif [ "${product}" = "ps57" ]; then
       if [ "${centos_maj_version}" == "7" ]; then
         rpm_num_pkgs="9"
@@ -109,13 +117,15 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
     fi
     if [ "${product}" = "ps80" ]; then
       ps_name="percona-server"
+      rpm_pkgs_list="${ps_name}-server ${ps_name}-test ${ps_name}-debuginfo ${ps_name}-devel ${ps_name}-shared ${ps_name}-client"
     else
       ps_name="Percona-Server"
+      rpm_pkgs_list="${ps_name}-server-${rpm_maj_version} ${ps_name}-test-${rpm_maj_version} ${ps_name}-${rpm_maj_version}-debuginfo ${ps_name}-devel-${rpm_maj_version} ${ps_name}-shared-${rpm_maj_version} ${ps_name}-client-${rpm_maj_version}"
     fi
     if [ "$(rpm -qa | grep "${ps_name}" | grep -c "${version}")" == "${rpm_num_pkgs}" ]; then
       echo "all packages are installed"
     else
-      for package in ${ps_name}-server-${rpm_maj_version} ${ps_name}-test-${rpm_maj_version} ${ps_name}-${rpm_maj_version}-debuginfo ${ps_name}-devel-${rpm_maj_version} ${ps_name}-shared-${rpm_maj_version} ${ps_name}-client-${rpm_maj_version} ${rpm_opt_package}; do
+      for package in ${rpm_pkgs_list} ${rpm_opt_package}; do
         if [ "$(rpm -qa | grep -c ${package}-${rpm_version})" -gt 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
         else
@@ -129,17 +139,25 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
     if [ ${product} = "ps56" ]; then
       deb_opt_package="percona-server-tokudb-${deb_maj_version}"
       deb_num_pkgs="7"
-    elif [ ${product} = "ps57" ]; then 
+    elif [ "${product}" = "ps57" ] && [ "${ps57_tokudb}" = "no" ]; then
+      deb_opt_package="percona-server-rocksdb-${deb_maj_version}"
+      deb_num_pkgs="7"
+    elif [ "${product}" = "ps57" ]; then
       deb_opt_package="percona-server-rocksdb-${deb_maj_version} percona-server-tokudb-${deb_maj_version}"
       deb_num_pkgs="8"
     else
       deb_opt_package="percona-server-rocksdb"
-      deb_num_pkgs="7"      
+      deb_num_pkgs="7"
+    fi
+    if [ "${product}" = "ps80" ]; then
+      deb_dbg_pkg="percona-server-dbg"
+    else
+      deb_dbg_pkg="percona-server-${deb_maj_version}-dbg"
     fi
     if [ "$(dpkg -l | grep percona-server | grep -c ${version})" == "${deb_num_pkgs}" ]; then
       echo "all packages are installed"
     else
-      for package in percona-server-server percona-server-client percona-server-test percona-server-dbg percona-server-source percona-server-common ${deb_opt_package}; do
+      for package in percona-server-server percona-server-client percona-server-test ${deb_dbg_pkg} percona-server-source percona-server-common ${deb_opt_package}; do
         if [ "$(dpkg -l | grep ${package} | grep -c ${version})" != 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed"
         else
