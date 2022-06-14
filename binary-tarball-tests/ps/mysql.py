@@ -27,8 +27,12 @@ class MySQL:
             os.environ['LD_PRELOAD'] = self.basedir+'/lib/mysql/libjemalloc.so.1 '+self.basedir+'/lib/libHotBackup.so'
             self.psadmin = base_dir+'/bin/ps_tokudb_admin'
             subprocess.check_call([self.mysql_install_db, '--no-defaults', '--basedir='+self.basedir,'--datadir='+self.datadir])
-        else:
+        elif self.major_version == "5.7":
             os.environ['LD_PRELOAD'] = self.basedir+'/lib/mysql/libjemalloc.so.1 '+self.basedir+'/lib/libHotBackup.so'
+            self.psadmin = base_dir+'/bin/ps-admin'
+            subprocess.check_call([self.mysqld, '--no-defaults', '--initialize-insecure','--basedir='+self.basedir,'--datadir='+self.datadir])
+        else:
+            os.environ['LD_PRELOAD'] = self.basedir+'/lib/mysql/libjemalloc.so.1'
             self.psadmin = base_dir+'/bin/ps-admin'
             subprocess.check_call([self.mysqld, '--no-defaults', '--initialize-insecure','--basedir='+self.basedir,'--datadir='+self.datadir])
 
