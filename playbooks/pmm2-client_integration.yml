@@ -373,7 +373,7 @@
 ## end PG
 
   - name: parse and set PMM minor version
-    shell: "pmm-admin --version | grep -oP '(?<=[.])\w+(?=[.])' | head -1"
+    shell: "pmm-admin --version | grep -oP '(?<=[.])\\w+(?=[.])' | head -1"
     register: pmm_agent_minor_version
 
   - name: include Exporters Port in output checks for 2.29.0+
