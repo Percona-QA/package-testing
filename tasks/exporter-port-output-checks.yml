@@ -15,32 +15,32 @@
 #      - mysql_exporter
 
 - name: "get {{ item }} port from ps"
-  command: "ps aux | grep {{ item }} | grep -oP 'address=:\K[\d.]+'"
-  register: "{{ item }}_port"
+  command: "ps aux | grep {{ item }} | grep -oP 'address=:\\K[\\d.]+'"
+  register: "port_from_ps"
 
 - name: "get {{ item }} port from pmm-admin list output"
   command: "pmm-admin list | awk '/{{ item }}/ {print $NF}'"
-  register: "{{ item }}_list_port_output"
+  register: "list_port_output"
 
 - name: "Assert {{ item }} port output is tha same in ps and pmm-admin list"
   assert:
     that:
-      - "{{ item }}_port = list_port_output"
+      - "port_from_ps = list_port_output"
 
 - name: "get {{ item }} port from pmm-admin status output"
   command: "pmm-admin status | awk '/{{ item }}/ {print $NF}'"
-  register: "{{ item }}_status_port_output"
+  register: "status_port_output"
 
 - name: "Assert {{ item }} port output is tha same in ps and pmm-admin status"
   assert:
     that:
-      - "{{ item }}_port = status_port_output"
+      - "port_from_ps = status_port_output"
 
 - name: "get {{ item }} port from pmm-admin inventory list agents output"
   command: "pmm-admin inventory list agents | awk '/{{ item }}/ {print $NF}'"
-  register: "{{ item }}_inventory_list_agents_port_output"
+  register: "inventory_list_agents_port_output"
 
 - name: "Assert {{ item }} port output is tha same in ps and pmm-admin inventory list agents"
   assert:
     that:
-      - "{{ item }}_port = inventory_list_agents_port_output"
+      - "port_from_ps = inventory_list_agents_port_output"
