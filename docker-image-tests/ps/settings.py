@@ -30,8 +30,8 @@ ps80_plugins = (
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
   ('group_replication','group_replication.so'),('clone','mysql_clone.so'),('data_masking','data_masking.so')
 )
-ps80_component = (
-('file://component_encryption_udf')
+ps80_components = (
+('component_encryption_udf')
 )
 ps80_functions = (
   ('fnv1a_64', 'libfnv1a_udf.so', 'INTEGER'),('fnv_64', 'libfnv_udf.so', 'INTEGER'),('murmur_hash', 'libmurmur_udf.so', 'INTEGER'),
@@ -89,7 +89,7 @@ if ps_version_major == '8.0':
     ps_binaries = ps80_binaries
     ps_plugins = ps80_plugins
     ps_functions = ps80_functions
-    ps_component = ps80_component
+    ps_components = ps80_components
 elif ps_version_major == '5.7':
     ps_packages = ps57_packages
     ps_binaries = ps57_binaries
