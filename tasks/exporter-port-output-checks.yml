@@ -15,8 +15,14 @@
 #      - mysql_exporter
 
 - name: "get {{ item }} port from ps"
-  command: "ps aux | grep {{ item }} | grep -oP 'address=:\\K[\\d.]+'"
+  command: "ps aux | grep -v grep | grep {{ item}} | awk -F '=:' '{ print $2; }' | awk -F' ' '{ print $1; }'"
   register: "port_from_ps"
+  when: {{ item }} != "vmagent"
+
+- name: "get {{ item }} port from ps"
+  command: "ps aux | grep -v grep | grep vmagent | awk -F'127.0.0.1:' '{ print $2; }' | awk -F' ' '{ print $1; }'"
+  register: "port_from_ps"
+  when: {{ item }} = "vmagent"
 
 - name: "get {{ item }} port from pmm-admin list output"
   command: "pmm-admin list | awk '/{{ item }}/ {print $NF}'"
