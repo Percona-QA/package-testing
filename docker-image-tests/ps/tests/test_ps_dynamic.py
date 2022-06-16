@@ -53,7 +53,7 @@ class TestDynamic:
         cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = \''+pname+'\';"')
         assert cmd.succeeded
         assert 'ACTIVE' in cmd.stdout
-    @pytest.mark.parametrize("component", ps_component)
+    @pytest.mark.parametrize("component", ps_components)
     def test_install_component(self, host, component):
         cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "INSTALL component \'file://'+component+'\';"')
         assert cmd.succeeded
