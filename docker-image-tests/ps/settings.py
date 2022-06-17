@@ -31,7 +31,7 @@ ps80_plugins = (
   ('group_replication','group_replication.so'),('clone','mysql_clone.so'),('data_masking','data_masking.so')
 )
 ps80_components = (
-  'file://component_encryption_udf'
+  ('file://component_encryption_udf'),('file://component_keyring_kmip.so')
 )
 ps80_functions = (
   ('fnv1a_64', 'libfnv1a_udf.so', 'INTEGER'),('fnv_64', 'libfnv_udf.so', 'INTEGER'),('murmur_hash', 'libmurmur_udf.so', 'INTEGER'),
