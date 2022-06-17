@@ -57,6 +57,6 @@ class TestDynamic:
     def test_install_component(self, host, cmpt):
         cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "INSTALL component \''+cmpt+'\';"')
         assert cmd.succeeded
-        cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "SELECT component_urn from mysql.component WHERE component_urn = \''+cmpt+'\';"')
+        cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "SELECT component_id from mysql.component WHERE component_urn = \''+cmpt+'\';"')
         assert cmd.succeeded
         assert 'ACTIVE' in cmd.stdout
