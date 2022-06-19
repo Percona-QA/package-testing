@@ -423,13 +423,13 @@
 
   - name: include Exporters Port in output checks for 2.29.0+
     include_tasks: ../tasks/exporter-port-output-checks.yml
-    when: pmm_agent_minor_version >= 29
+    when: pmm_agent_minor_version.stdout | int >= 29
     with_items:
       - vmagent
       - node_exporter
       - postgres_exporter
       - mongodb_exporter
-      - mysql_exporter
+      - mysqld_exporter
 
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
