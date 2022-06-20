@@ -59,4 +59,4 @@ class TestDynamic:
         assert cmd.succeeded
         cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "SELECT component_urn from mysql.component WHERE component_urn = \''+cmpt+'\';"')
         assert cmd.succeeded
-        assert '+cmpt+' in cmd.stdout
+        assert cmpt in cmd.stdout
