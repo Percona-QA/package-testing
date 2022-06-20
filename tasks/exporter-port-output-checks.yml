@@ -68,5 +68,5 @@
 - name: "Assert {{ item }} port output is tha same in ps and pmm-admin inventory list agents"
   assert:
     that:
-      - port_from_ps.stdout == inventory_list_agents_port_output.stdout
+      - port_from_ps.stdout in inventory_list_agents_port_output.stdout
   when: item != "vmagent"
