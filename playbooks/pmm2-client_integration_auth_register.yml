@@ -24,7 +24,7 @@
       instance_ip: "{{ instance_ip.stdout }}"
 
   - name: include tasks for test env setup
-    include_tasks: ../tasks/pmm_client_test_prepare.yml
+    include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
   - name: install PMM client new deb packages
     apt: name={{item}} update_cache=yes state=latest
@@ -64,6 +64,10 @@
   - name: restart pmm-agent
     command: "pkill -f pmm-agent"
     become: yes
+
+  - name: wait pmm-agent to restart
+    ansible.builtin.pause:
+      seconds: 10
 
 ### start PS 5.7
   - name: install and start Percona Server 5.7

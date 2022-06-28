@@ -25,7 +25,7 @@
       instance_ip: "{{ instance_ip.stdout }}"
 
   - name: include tasks for test env setup
-    include_tasks: ../tasks/pmm_client_test_prepare.yml
+    include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
   - name: install PMM client new deb packages
     apt: name={{item}} update_cache=yes state=latest
