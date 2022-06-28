@@ -13,33 +13,6 @@
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
 
   tasks:
-  - name: Install Needed Packages, update repo for redhat
-    shell: "{{item}}"
-    with_items:
-      - "yum install epel-release -y"
-      - "yum update -y"
-    when: ansible_os_family == "RedHat"
-    become: true
-
-  - name: Install JQ for exporter end point metric fetch
-    yum:
-      name: "{{ packages }}"
-      state: latest
-      update_cache: yes
-    vars:
-      packages:
-      - jq
-    when: ansible_os_family == "RedHat"
-  
-  - name: Install JQ for exporter end point metric fetch
-    apt:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - jq
-    when: ansible_os_family == "Debian"
-
   - name: Register Instance IP
     shell: echo $(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
     register: instance_ip
@@ -75,12 +48,6 @@
     apt: name={{item}} update_cache=yes state=latest
     with_items:
     - pmm2-client
-    when: ansible_os_family == "Debian"
-
-  - name: install acl package
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - acl
     when: ansible_os_family == "Debian"
 
   - name: install PMM client new rpm packages
