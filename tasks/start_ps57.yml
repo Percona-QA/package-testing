@@ -3,6 +3,10 @@
 # Important!  Playbook must contain variable: "cmd_admin_list"
 #             var "port_flag" is optional
 
+- name: set empty port_flag
+  set_fact:
+    port_flag: ""
+  when: port_flag is not defined
 
 - name: install Percona Server 5.7 packages
   include_tasks: ./install_ps57.yml
