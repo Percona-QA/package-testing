@@ -13,25 +13,6 @@
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
 
   tasks:
-  - name: Install JQ for exporter end point metric fetch
-    yum:
-      name: "{{ packages }}"
-      state: latest
-      update_cache: yes
-    vars:
-      packages:
-      - jq
-    when: ansible_os_family == "RedHat"
-  
-  - name: Install JQ for exporter end point metric fetch
-    apt:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - jq
-    when: ansible_os_family == "Debian"
-
   - name: Register Instance IP
     shell: echo $(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
     register: instance_ip
