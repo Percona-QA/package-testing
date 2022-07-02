@@ -1,12 +1,20 @@
 # This task installs and starts Percona Server 5.7 on CentOS and Debian/Ubuntu
 #
-# Important!  Playbook must contain variable: "cmd_admin_list"
-#             var "port_flag" is optional
+# Task adjustments are handled by parent playbook vars:
+#             var "port_flag"      :  to access agent with custom port
+#                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
+#             var "cmd_admin_list" :  to access agent with custom port
+#                                     ex: cmd_admin_list: "pmm-admin list {{ port_flag }}"
 
 - name: set empty port_flag
   set_fact:
     port_flag: ""
   when: port_flag is not defined
+
+- name: set cmd_admin_list without flags
+  set_fact:
+    cmd_admin_list: "pmm-admin list"
+  when: cmd_admin_list is not defined
 
 - name: install Percona Server 5.7 packages
   include_tasks: ./install_ps57.yml
