@@ -5,7 +5,7 @@
 ############################################################
 Help()
 {
-   echo "Custom PMM 2 Client instalation script."
+   echo "Custom PMM 2 Client installation script."
    echo
    echo "Syntax: scriptTemplate [-h|l|p]"
    echo "options:"

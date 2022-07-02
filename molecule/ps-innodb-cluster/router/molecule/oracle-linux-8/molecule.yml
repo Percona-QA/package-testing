@@ -1,6 +1,6 @@
 ---
 scenario:
-  name: centos-8
+  name: oracle-linux-8
 dependency:
   name: galaxy
 driver:
@@ -8,9 +8,9 @@ driver:
 lint:
   name: yamllint
 platforms:
-  - name: mysql-router-centos-8
+  - name: mysql-router-oracle-linux-8
     region: us-west-2
-    image: ami-0923359e80cfe4623
+    image: ami-036d2cdf95d86d256
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.micro
     ssh_user: centos

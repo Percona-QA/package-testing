@@ -13,33 +13,6 @@
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
 
   tasks:
-  - name: Install Needed Packages, update repo for redhat
-    shell: "{{item}}"
-    with_items:
-      - "yum install epel-release -y"
-      - "yum update -y"
-    when: ansible_os_family == "RedHat"
-    become: true
-
-  - name: Install JQ for exporter end point metric fetch
-    yum:
-      name: "{{ packages }}"
-      state: latest
-      update_cache: yes
-    vars:
-      packages:
-      - jq
-    when: ansible_os_family == "RedHat"
-  
-  - name: Install JQ for exporter end point metric fetch
-    apt:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - jq
-    when: ansible_os_family == "Debian"
-
   - name: Register Instance IP
     shell: echo $(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
     register: instance_ip
@@ -75,12 +48,6 @@
     apt: name={{item}} update_cache=yes state=latest
     with_items:
     - pmm2-client
-    when: ansible_os_family == "Debian"
-
-  - name: install acl package
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - acl
     when: ansible_os_family == "Debian"
 
   - name: install PMM client new rpm packages
@@ -235,6 +202,9 @@
     with_items:
       - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
 
+  - name: remove mongodb service from monitoring which was added via socket
+    command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
+
 ### end PSMDB
 
 ### start pgsql13
@@ -370,10 +340,23 @@
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
 
+  - name: remove postgresql instances added via socket
+    command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
 ## end PG
 
-  - name: run pmm-admin list
-    command: pmm-admin list
+  - name: parse and set PMM minor version
+    shell: "pmm-admin --version | grep -oP '(?<=[.])\\w+(?=[.])' | head -1"
+    register: pmm_agent_minor_version
+
+  - name: include Exporters Port in output checks for 2.29.0+
+    include_tasks: ../tasks/exporter-port-output-checks.yml
+    when: pmm_agent_minor_version.stdout | int >= 29
+    with_items:
+      - vmagent
+      - node_exporter
+      - postgres_exporter
+      - mongodb_exporter
+      - mysqld_exporter
 
   - name: check if pmm_agent is connected
     shell: pmm-admin list | grep pmm_agent | awk -F" " '{print $2}'
