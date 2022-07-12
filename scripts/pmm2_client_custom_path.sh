@@ -1,5 +1,15 @@
 #!/bin/bash
 
+while [ $# -gt 0 ]; do
+
+   if [[ $1 == *"--"* ]]; then
+        param="${1/--/}"
+        declare $param="$2"
+   fi
+
+  shift
+done
+
 ############################################################
 # Help                                                     #
 ############################################################
@@ -15,9 +25,12 @@ Help()
    echo
 }
 
+if [ -z "$version" ]; then
+    export version=${PMM_VERSION:-2.27.0}
+fi
+
 ### Variables
 custom_path=/pmm2-client-custom-path
-version=${PMM_VERSION:-2.26.0}
 
 ############################################################
 # Process the input options.                               #
@@ -29,7 +42,9 @@ while getopts ":hlp:" option; do
         exit 0
         ;;
       l) # listening custom port  starts from 2.27
-        version=${PMM_VERSION:-2.27.0}
+        if [ -z "$version" ]; then
+          export version=${PMM_VERSION:-2.27.0}
+        fi
         ;;
       p) # Enter a custom path
         path=$OPTARG
@@ -40,6 +55,7 @@ while getopts ":hlp:" option; do
          ;;
    esac
 done
+
 
 ### Main program
 wget https://downloads.percona.com/downloads/TESTING/pmm/pmm2-client-${version}.tar.gz
