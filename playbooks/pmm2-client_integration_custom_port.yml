@@ -43,7 +43,7 @@
     command: "{{item}}"
     with_items:
       - "chmod +x ../scripts/pmm2_client_custom_path.sh"
-      - "../scripts/pmm2_client_custom_path.sh -l"
+      - "../scripts/pmm2_client_custom_path.sh -l --version {{ pmm_version }}"
 
   - name: check that PMM client version is correct
     command: ../version_check.sh pmm2

@@ -58,7 +58,7 @@
     command: "{{item}}"
     with_items:
       - "chmod +x /package-testing/scripts/pmm2_client_custom_path.sh"
-      - "/package-testing/scripts/pmm2_client_custom_path.sh"
+      - "/package-testing/scripts/pmm2_client_custom_path.sh --version {{ pmm_version }}"
 
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2
