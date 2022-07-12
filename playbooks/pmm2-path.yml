@@ -58,7 +58,7 @@
 
 
   - name: setup pmm2-client artifacts for custom path
-    shell: pmm2_client_install_tarball.sh -p
+    shell: ../scripts/pmm2_client_install_tarball.sh -p
 
   - name: check that PMM client dev-latest version is correct
     command: ../version_check.sh pmm2

@@ -87,5 +87,7 @@ mkdir -p ${path}
 export PMM_DIR=${path}
 cd ./tmp/pmm2-client-${version}
 ./install_tarball
-echo "PATH=$PMM_DIR/bin:$PATH" >> /etc/environment
+#if [echo $PATH | grep $PMM_DIR] then
+echo $PATH | grep $PMM_DIR ||  echo "PATH=$PMM_DIR/bin:$PATH" >> /etc/environment
+#fi
 cd ../../
