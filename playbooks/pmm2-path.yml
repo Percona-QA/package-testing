@@ -9,6 +9,7 @@
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
+    pmm_repo: "{{ lookup('env', 'install_repo') }}"
 
   tasks:
   - name: Register Instance IP
@@ -19,10 +20,25 @@
     set_fact:
       instance_ip: "{{ instance_ip.stdout }}"
 
+  - name: Print pmm_server_address
+    ansible.builtin.debug:
+      msg: "{{ pmm_server_address }}"
+
+  - name: Print metrics_mode
+    ansible.builtin.debug:
+      msg: "{{ metrics_mode }}"
+
+  - name: Print pmm_version
+    ansible.builtin.debug:
+      msg: "{{ pmm_version }}"
+
+  - name: Print pmm_repo
+    ansible.builtin.debug:
+      msg: "{{ pmm_repo }}"
 
 
   - name: print env vars
-    shell: printenv
+    shell: env
     register: print_env
 
   - name: Print env
@@ -31,18 +47,14 @@
 
 
 
-
   - name: setup pmm2-client artifacts for custom path
-    command: "{{item}}"
-    with_items:
-      - "chmod +x ../scripts/pmm2_client_install_tarball.sh"
-      - "../scripts/pmm2_client_install_tarball.sh -p"
+    command: ../scripts/pmm2_client_install_tarball.sh -p
 
-  - name: check that PMM client version is correct
+  - name: check that PMM client dev-latest version is correct
     command: ../version_check.sh pmm2
     when: lookup('env', 'install_repo') == "experimental"
 
-  - name: check that PMM client version is correct
+  - name: check that PMM client RC version is correct
     command: ../version_check.sh pmm2-rc
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 

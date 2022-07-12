@@ -13,6 +13,7 @@ Help()
    echo "h     Print this Help."
    echo "l     listening custom port mode. Sets default version to 2.27.0"
    echo "p     Installation path. Default: /usr/local/percona/pmm2"
+   echo "v     Installing specified version 2.XX.X"
    echo
 }
 
@@ -27,12 +28,23 @@ min_ver=$(echo $version | awk -F'.' '{print $2}')
 ############################################################
 # Process the input options.                               #
 ############################################################
-while getopts ":hlp:" option; do
+while getopts ":hvlp:" option; do
    case $option in
       h) # display Help
         Help
         exit 0
         ;;
+        v) # Enter a version
+          if [ -n "$OPTARG" ]
+          then
+            version=$OPTARG
+            min_ver=$(echo $version | awk -F'.' '{print $2}')
+          fi
+          if [ $min_ver -le 26 ]
+          then
+            path=$default_path
+          fi
+          ;;
       l) # listening custom port starts from 2.27.0
         if [ $min_ver -le 27 ]
         then
@@ -67,15 +79,13 @@ if [ -z "${path}" ];
     path=$default_path
 fi
 echo "Downloading ${tarball_url}"
-wget ${tarball_url}
-tar -xvf pmm2-client-${version}.tar.gz
-echo "Installing traball to ${path}"
-pushd /
+mkdir -p ./tmp/
+wget ${tarball_url} -nv -P ./tmp/
+tar -xvf ./tmp/pmm2-client-${version}.tar.gz -C ./tmp/
+echo "Installing tarball to ${path}"
 mkdir -p ${path}
-pushd ${path}
-export PMM_DIR=$(pwd)
-popd
-popd
-mv pmm2-client-${version} pmm2-client
-cd pmm2-client
+export PMM_DIR=${path}
+cd ./tmp/pmm2-client-${version}
 ./install_tarball
+echo "PATH=$PMM_DIR/bin:$PATH" >> /etc/environment
+cd ../../
