@@ -45,10 +45,20 @@
     ansible.builtin.debug:
       msg: "{{ print_env.stdout }}"
 
+  - name: Debug all env vars
+    debug:
+      var: ansible_env
+
+
+
+  - name: make scripts accassible
+    shell: "chmod +x -R ../scripts/"
+
+
 
 
   - name: setup pmm2-client artifacts for custom path
-    shell: ../scripts/pmm2_client_install_tarball.sh -p
+    shell: pmm2_client_install_tarball.sh -p
 
   - name: check that PMM client dev-latest version is correct
     command: ../version_check.sh pmm2
