@@ -164,6 +164,7 @@ elif [ ${product} = "pmm" ]; then
 
 elif [ ${product} = "pmm2" -o ${product} = "pmm2-rc" ]; then
   version_check=$(pmm-admin --version 2>&1|grep -c ${version})
+  echo pmm-admin --version 2>&1|grep ^Version | awk -F ' ' '{print $2}'
   actual_version=$(pmm-admin --version 2>&1|grep ^Version | awk -F ' ' '{print $2}')
   if [ ${version_check} -eq 0 ]; then
     echo "${product} version ${actual_version} is not good! Expected: ${version}"

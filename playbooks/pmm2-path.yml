@@ -20,6 +20,10 @@
     set_fact:
       instance_ip: "{{ instance_ip.stdout }}"
 
+  - name: Basic usage
+    ansible.builtin.debug:
+      msg: "'{{ lookup('ansible.builtin.env', 'HOME') }}' is the HOME environment variable."
+
   - name: Print pmm_server_address
     ansible.builtin.debug:
       msg: "{{ pmm_server_address }}"
@@ -58,14 +62,14 @@
 
 
   - name: setup pmm2-client artifacts for custom path
-    shell: ../scripts/pmm2_client_install_tarball.sh -p
+    shell: ../scripts/pmm2_client_install_tarball.sh -p -v {{ pmm_version }}
 
   - name: check that PMM client dev-latest version is correct
-    command: ../version_check.sh pmm2
+    shell: ../version_check.sh pmm2
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: check that PMM client RC version is correct
-    command: ../version_check.sh pmm2-rc
+    shell: ../version_check.sh pmm2-rc
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
 
