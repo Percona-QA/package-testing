@@ -65,11 +65,11 @@
     shell: ../scripts/pmm2_client_install_tarball.sh -p -v {{ pmm_version }}
 
   - name: check that PMM client dev-latest version is correct
-    shell: ../version_check.sh pmm2
+    command: ../version_check.sh pmm2
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: check that PMM client RC version is correct
-    shell: ../version_check.sh pmm2-rc
+    command: ../version_check.sh pmm2-rc
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
 
