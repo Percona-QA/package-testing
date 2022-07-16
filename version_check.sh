@@ -164,6 +164,7 @@ elif [ ${product} = "pmm" ]; then
 
 elif [ ${product} = "pmm2" -o ${product} = "pmm2-rc" ]; then
   ### to override sudoers "secure_path"
+  pmm-admin --version
   version_check=$(env PATH=$PATH pmm-admin --version 2>&1|grep -c "${version}")
   actual_version=$(env PATH=$PATH pmm-admin --version 2>&1|grep ^Version | awk -F ' ' '{print $2}')
   if [ ${version_check} -eq 0 ]; then
