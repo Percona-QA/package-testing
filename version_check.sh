@@ -163,14 +163,14 @@ elif [ ${product} = "pmm" ]; then
   fi
 
 elif [ ${product} = "pmm2" -o ${product} = "pmm2-rc" ]; then
-  version_check=$(pmm-admin --version 2>&1|grep -c ${version})
-  echo pmm-admin --version 2>&1|grep ^Version | awk -F ' ' '{print $2}'
-  actual_version=$(pmm-admin --version 2>&1|grep ^Version | awk -F ' ' '{print $2}')
+  ### to override sudoers "secure_path"
+  version_check=$(env PATH=$PATH pmm-admin --version 2>&1|grep -c "${version}")
+  actual_version=$(env PATH=$PATH pmm-admin --version 2>&1|grep ^Version | awk -F ' ' '{print $2}')
   if [ ${version_check} -eq 0 ]; then
-    echo "${product} version ${actual_version} is not good! Expected: ${version}"
+    echo "${product} version ${actual_version} is not good! Expected: ${version}" >&2;
     exit 1
   else
-    echo "${product} version is correct and ${version}" >> "${log}"
+    echo "${product} version is correct and ${version}"
   fi
   bash -xe ./check_pmm2_client_upgrade.sh ${version}
 

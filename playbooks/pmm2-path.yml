@@ -53,34 +53,36 @@
     debug:
       var: ansible_env
 
+#  - name: make scripts accessible
+#    shell: "chmod +x -R ../scripts/"
 
-
-  - name: make scripts accassible
-    shell: "chmod +x -R ../scripts/"
-
-
-
+  - name: make scripts accessible
+    ansible.builtin.file:
+      path: ../scripts/
+      state: directory
+      recurse: yes
+      mode: +x
 
   - name: setup pmm2-client artifacts for custom path
-    shell: ../scripts/pmm2_client_install_tarball.sh -p -v {{ pmm_version }}
+    shell: ../scripts/pmm2_client_install_tarball.sh -v {{ pmm_version }}
 
   - name: check that PMM client dev-latest version is correct
-    command: ../version_check.sh pmm2
-    when: lookup('env', 'install_repo') == "experimental"
+    shell: ../version_check.sh pmm2
+    when: pmm_repo == "experimental"
 
   - name: check that PMM client RC version is correct
     command: ../version_check.sh pmm2-rc
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when: pmm_repo == "testing" or pmm_repo == ""
 
 
 
   - name: configure pmm client to connect to server in push/auto Mode
     shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --paths-base=/wrong_folder  --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
-    when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
+    when: metrics_mode == "push" or metrics_mode == ""
 
   - name: configure pmm client to connect to server in pull Mode
     shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --paths-base=/wrong_folder  --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
-    when: lookup('env', 'metrics_mode') == "pull"
+    when: metrics_mode == "pull"
 
   - name: Print PMM2-Client Status
     command: pmm-admin status
