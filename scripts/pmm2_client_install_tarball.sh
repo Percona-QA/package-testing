@@ -82,7 +82,6 @@ if [ -z "${path}" ]; then
   path=$default_path
 fi
 tarball_url=https://downloads.percona.com/downloads/TESTING/pmm/pmm2-client-${version}.tar.gz
-#
 
 ### Main program
 echo "Downloading ${tarball_url}"
@@ -94,7 +93,14 @@ echo "Installing tarball to ${path}"
 mkdir -p ${path}
 export PMM_DIR=${path}
 echo $PMM_DIR
-cd ./tmp/pmm2-client-${version}
-./install_tarball
+### uncomment when PMM-10247 will be merged
+#if [[ $min_ver -lt 30 ]]; then
+  cd ./tmp/pmm2-client-${version}
+  ./install_tarball
+  cd ../../
+#else
+#  ./tmp/pmm2-client-${version}/install_tarball
+#fi
 echo $PATH | grep ${path} ||  echo "PATH=${path}/bin:$PATH" >> /etc/environment
-cd ../../
+source /etc/environment
+echo 'Done!'
