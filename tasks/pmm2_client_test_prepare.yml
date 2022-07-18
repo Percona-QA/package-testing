@@ -1,6 +1,17 @@
 # This task conains common actions for the PMM Client all tests at preparation stage
 
 
+- name: install needed packages for running tests with yum on RHEL9
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+    - unzip
+    - wget
+    - jq # for exporter end point metric fetch
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 9
+
 - name: include tasks for test env setup
   include_tasks: ../tasks/test_prep.yml
 
