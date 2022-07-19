@@ -13,42 +13,10 @@
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
+    pmm_repo: "{{ lookup('env', 'install_repo') }}"
+    custom_path: "/pmm2-client-custom-path"
 
   tasks:
-  - name: Install Needed Packages, update repo for redhat
-    shell: "{{item}}"
-    with_items:
-      - "yum install epel-release -y"
-      - "yum update -y"
-    when: ansible_os_family == "RedHat"
-    become: true
-
-  - name: Install Needed Packages, update repo for debian
-    shell: "{{item}}"
-    with_items:
-      - "apt-get update"
-    when: ansible_os_family == "Debian"
-    become: true
-
-  - name: Install JQ for exporter end point metric fetch
-    yum:
-      name: "{{ packages }}"
-      state: latest
-      update_cache: yes
-    vars:
-      packages:
-      - jq
-    when: ansible_os_family == "RedHat"
-  
-  - name: Install JQ for exporter end point metric fetch
-    apt:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - jq
-    when: ansible_os_family == "Debian"
-
   - name: Register Instance IP
     shell: echo $(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
     register: instance_ip
@@ -58,34 +26,10 @@
       instance_ip: "{{ instance_ip.stdout }}"
 
   - name: include tasks for test env setup
-    include_tasks: ../tasks/test_prep.yml
+    include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
-  - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_main_repo.yml
-
-  - name: install PMM client old deb packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - pmm2-client
-    when: ansible_os_family == "Debian"
-
-  - name: install acl packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - acl
-    when: ansible_os_family == "Debian"
-
-  - name: install PMM client old rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - pmm2-client
-    when: ansible_os_family == "RedHat"
-
-  - name: setup pmm2-client artifacts for custom path
-    command: "{{item}}"
-    with_items:
-      - "chmod +x /package-testing/scripts/pmm2_client_custom_path.sh"
-      - "/package-testing/scripts/pmm2_client_custom_path.sh"
+  - name: install old pmm2-client tarball to custom path
+    command: "../scripts/pmm2_client_install_tarball.sh -v 2.26.0 -p {{ custom_path }}"
 
   - name: configure pmm client to connect to server in push/auto Mode
     shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --paths-base=/pmm2-client-custom-path/ --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
@@ -259,6 +203,9 @@
     with_items:
       - "bash -xe /package-testing/scripts/pmm2_get_exporter_binaries.sh"
 
+  - name: install old pmm2-client tarball to custom path
+    command: "../scripts/pmm2_client_install_tarball.sh -v {{ pmm_version }} -p {{ custom_path }}"
+
   - name: check that PMM client version is correct
     command: /package-testing/version_check.sh pmm2
     when: lookup('env', 'install_repo') == "experimental" or lookup('env', 'install_repo') == ""
@@ -361,15 +308,3 @@
      that:
       - "'{{ pmm_version }}' in pmm_admin_version.stdout"
     when: lookup('env', 'install_repo') == "testing"
-
-  - name: remove PMM client deb packages
-    apt: name={{item}} state=absent
-    with_items:
-    - pmm2-client
-    when: ansible_os_family == "Debian"
-
-  - name: remove PMM client rpm packages
-    yum: name={{item}} state=absent
-    with_items:
-    - pmm2-client
-    when: ansible_os_family == "RedHat"

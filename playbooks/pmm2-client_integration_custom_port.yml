@@ -27,23 +27,8 @@
   - name: include tasks for test env setup
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
-  - name: install PMM client new deb packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - pmm2-client
-    when: ansible_os_family == "Debian"
-
-  - name: install PMM client new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - pmm2-client
-    when: ansible_os_family == "RedHat"
-
   - name: setup pmm2-client artifacts for custom path
-    command: "{{item}}"
-    with_items:
-      - "chmod +x ../scripts/pmm2_client_custom_path.sh"
-      - "../scripts/pmm2_client_custom_path.sh -l --version {{ pmm_version }}"
+    command: "../scripts/pmm2_client_install_tarball.sh -l -v {{ pmm_version }}"
 
   - name: check that PMM client version is correct
     command: ../version_check.sh pmm2
@@ -307,15 +292,3 @@
      that:
       - "'{{ pmm_version }}' in pmm_admin_version.stdout"
     when: lookup('env', 'install_repo') == "testing"
-
-  - name: remove PMM client deb packages
-    apt: name={{item}} state=absent
-    with_items:
-    - pmm2-client
-    when: ansible_os_family == "Debian"
-
-  - name: remove PMM client rpm packages
-    yum: name={{item}} state=absent
-    with_items:
-    - pmm2-client
-    when: ansible_os_family == "RedHat"
