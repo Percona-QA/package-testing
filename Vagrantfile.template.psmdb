@@ -7,6 +7,7 @@ servers=[
   { :hostname => "d-bullseye-64-@@hostname@@", :box => "bento/debian-11" },
   { :hostname => "centos-7-64-@@hostname@@", :box => "bento/centos-7" },
   { :hostname => "centos-8-64-@@hostname@@", :box => "bento/centos-8" },
+  { :hostname => "u-xenial-64-@@hostname@@", :box => "bento/ubuntu-16.04" },
   { :hostname => "u-bionic-64-@@hostname@@", :box => "bento/ubuntu-18.04" },
   { :hostname => "u-focal-64-@@hostname@@", :box => "bento/ubuntu-20.04" },
   { :hostname => "u-jammy-64-@@hostname@@", :box => "bento/ubuntu-22.04" }
