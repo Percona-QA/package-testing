@@ -53,8 +53,8 @@
   - name: setup pmm2-client artifacts for custom path
     command: "{{item}}"
     with_items:
-      - "chmod +x ../scripts/pmm2_client_custom_path.sh"
-      - "../scripts/pmm2_client_custom_path.sh"
+      - "chmod +x ../scripts/pmm2_client_install_tarball.sh"
+      - "../scripts/pmm2_client_install_tarball.sh -l"
 
   - name: Use pmm-agent setup to configure on another port
     shell: pmm-agent setup --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml --force --server-address={{ pmm_server_address }} --server-insecure-tls --listen-port={{ custom_port }} --metrics-mode=auto --server-username=admin --server-password=admin --paths-base=/pmm2-client-custom-path/ {{ instance_ip }} generic node2_{{ instance_ip }}

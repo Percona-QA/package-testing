@@ -101,6 +101,14 @@ echo $PMM_DIR
 #else
 #  ./tmp/pmm2-client-${version}/install_tarball
 #fi
-echo $PATH | grep ${path} ||  echo "PATH=${path}/bin:$PATH" >> /etc/environment
-source /etc/environment
+#echo $PATH | grep ${path} ||  echo "PATH=${path}/bin:$PATH" >> /etc/environment
+#source /etc/environment
+
+ln -sf ${path}/bin/pmm-admin /usr/bin/pmm-admin
+ln -sf ${path}/bin/pmm-agent /usr/bin/pmm-agent
+
+#for file in node_exporter mysqld_exporter postgres_exporter mongodb_exporter proxysql_exporter
+#do
+#  %{__ln_s} -f /usr/local/percona/$file /usr/bin/$file
+#done
 echo 'Done!'
