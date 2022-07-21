@@ -184,7 +184,7 @@
 ## end PG
 
   - name: install new pmm2-client tarball to custom path
-    command: "../scripts/pmm2_client_install_tarball.sh -v {{ pmm_version }} -p {{ custom_path }}"
+    command: "../scripts/pmm2_client_install_tarball.sh -v {{ pmm_version }} -p {{ custom_path }} -u"
 
   - name: check that PMM client dev-latest version is correct
     shell: ../version_check.sh pmm2

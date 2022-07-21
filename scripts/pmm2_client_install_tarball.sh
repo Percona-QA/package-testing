@@ -15,6 +15,8 @@ Help()
    echo "p     Installation path. Default: /usr/local/percona/pmm2."
    echo "      Sets default version to 2.27.0 if no version specified"
    echo "l     listening custom port mode. Sets default version to 2.27.0 if no version specified"
+   echo "u     PMM-Agent can be updated from tarball: run ./install_tarball script with the “-u” flag."
+   echo "      The configuration file will not be overwritten with “-u” flag while the pmm-agent is updated."
 }
 
 ### Defaults
@@ -24,11 +26,12 @@ default_path=/usr/local/percona/pmm2
 default_version=2.26.0
 min_port_listening_version=2.27.0
 port_listening=0
+update_flag=""
 
 ############################################################
 # Process the input options.                               #
 ############################################################
-while getopts "v:p:hl" option; do
+while getopts "v:p:hlu" option; do
    case $option in
       h) # display Help
         Help
@@ -49,6 +52,9 @@ while getopts "v:p:hl" option; do
       l) # listening custom port starts from 2.27.0
         port_listening=1
         ;;
+      u) # update mode
+              update_flag="-u"
+              ;;
      \?) # Invalid option
          echo "Error: Invalid option"
          exit 1
@@ -96,10 +102,10 @@ echo $PMM_DIR
 ### uncomment when PMM-10247 will be merged
 #if [[ $min_ver -lt 30 ]]; then
   cd ./tmp/pmm2-client-${version}
-  ./install_tarball
+  ./install_tarball ${update_flag}
   cd ../../
 #else
-#  ./tmp/pmm2-client-${version}/install_tarball
+#  ./tmp/pmm2-client-${version}/install_tarball ${update_flag}
 #fi
 ln -sf ${path}/bin/pmm-admin /usr/bin/pmm-admin
 ln -sf ${path}/bin/pmm-agent /usr/bin/pmm-agent
