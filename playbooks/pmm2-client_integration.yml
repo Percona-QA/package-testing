@@ -326,6 +326,8 @@
 
   - name: check if Metric End point with Auth works for Postgres Exporter
     shell: "{{item}}"
+    retries: 3
+    delay: 10
     with_items:
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
@@ -334,6 +336,8 @@
 
   - name: check if Metric End point with Auth works for Postgres Exporter when service added via socket
     shell: "{{item}}"
+    retries: 3
+    delay: 10
     with_items:
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
@@ -380,6 +384,8 @@
 
   - name: check if Metric End point with Auth works for Node Exporter
     shell: "{{item}}"
+    retries: 3
+    delay: 10
     with_items:
       - "bash -x /package-testing/scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0"
 
