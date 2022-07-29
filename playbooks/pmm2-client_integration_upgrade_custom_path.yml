@@ -32,11 +32,8 @@
     shell: "wget -q https://registry.hub.docker.com/v1/repositories/percona/pmm-server/tags -O -  | sed -e 's/[][]//g' -e 's/\"//g' -e 's/ //g' | tr '}' '\n'  | awk -F: '{print $3}' | sort -V | tail -2 | head -1"
     register: pmm_release_version
 
-#  - name: "install old({{ pmm_release_version }}) pmm2-client tarball to custom path"
-#    command: "../scripts/pmm2_client_install_tarball.sh -v {{ pmm_release_version.stdout }} -p {{ custom_path }}"
-
-  - name: "install old(2.28.0) pmm2-client tarball to custom path"
-    command: "../scripts/pmm2_client_install_tarball.sh -v 2.28.0 -p {{ custom_path }}"
+  - name: "install old({{ pmm_release_version }}) pmm2-client tarball to custom path"
+    command: "../scripts/pmm2_client_install_tarball.sh -v {{ pmm_release_version.stdout }} -p {{ custom_path }}"
 
   - name: Start agent
     shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
