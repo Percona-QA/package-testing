@@ -14,6 +14,8 @@
     when: lookup('env', 'install_with') == "psmdb50"
 
   - name: include tasks for installing psmdb packages
+    vars:
+      packages: percona-server-mongodb
     include_tasks: ../tasks/install_psmdb.yml
 
 # Start psmdb service
