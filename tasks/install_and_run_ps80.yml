@@ -5,6 +5,8 @@
     include_tasks: ../tasks/enable_ps8_main_repo.yml
 
   - name: include tasks for installing ps80 packages
+    vars:
+      packages: percona-server-server
     include_tasks: ../tasks/install_ps80.yml
 
 # Start mysql service
