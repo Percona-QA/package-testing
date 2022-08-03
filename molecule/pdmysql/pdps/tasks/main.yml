@@ -110,8 +110,13 @@
 
   - name: install orchestrator rpm packages
     yum:
-      name: percona-orchestrator
+      name: "{{ packages }}"
       state: latest
+    vars:
+      packages:
+        - percona-orchestrator-cli
+        - percona-orchestrator-client
+        - percona-orchestrator
     when: ansible_os_family == "RedHat"
 
   - name: start mysql service
