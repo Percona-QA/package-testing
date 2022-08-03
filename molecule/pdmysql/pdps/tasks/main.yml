@@ -113,6 +113,7 @@
       name: "{{ packages }}"
       state: latest
     vars:
+      packages:
         - percona-orchestrator-cli
         - percona-orchestrator-client
         - percona-orchestrator
