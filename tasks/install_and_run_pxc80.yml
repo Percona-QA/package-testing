@@ -31,7 +31,7 @@
     with_items: "{{ ansible_all_ipv4_addresses }}"
     when: "item.startswith('10.')"
   
-  - name: output IP used to bootstrap pxc node
+  - name: output IP used to bootstrap pxc node by deb packages
     debug: 
       var: man_ip
 
