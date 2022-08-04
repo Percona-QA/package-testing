@@ -180,6 +180,7 @@
   apt:
     name: "{{ packages }}"
     update_cache: yes
+    state: latest
   vars:
     packages:
     - percona-xtradb-cluster-full
@@ -226,6 +227,7 @@
   apt:
     name: "{{ packages }}"
     update_cache: yes
+    state: latest
   vars:
     packages:
     - percona-haproxy
