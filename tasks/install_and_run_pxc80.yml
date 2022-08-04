@@ -22,7 +22,7 @@
       - percona-xtradb-cluster-full
     when: ansible_os_family == "RedHat"
 
-# Define node IP for PXC config  
+# Define node IP for PXC config (Used by Debian distros)
   - debug: 
       var: ansible_all_ipv4_addresses
 
@@ -31,7 +31,7 @@
     with_items: "{{ ansible_all_ipv4_addresses }}"
     when: "item.startswith('10.')"
   
-  - name: output IP used to bootstrap pxc node
+  - name: output IP used to bootstrap pxc node by deb packages
     debug: 
       var: man_ip
 
