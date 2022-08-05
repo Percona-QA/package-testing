@@ -6,7 +6,7 @@ driver:
 platforms:
   - name: rhel8-${BUILD_NUMBER}-${JOB_NAME}
     region: us-west-2
-    image: ami-0923359e80cfe4623
+    image:  ami-0157b1e4eefd91fd7
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.micro
     ssh_user: centos
