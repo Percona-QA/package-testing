@@ -13,7 +13,7 @@ Help()
    echo "h     Print this Help."
    echo "v     Installing specified version 2.XX.X"
    echo "p     Installation path. Default: /usr/local/percona/pmm2."
-   echo "      Sets default version to 2.27.0 if no version specified"
+   echo "      Sets default version to 2.26.0 if no version specified"
    echo "l     listening custom port mode. Sets default version to 2.27.0 if no version specified"
    echo "u     PMM-Agent can be updated from tarball: run ./install_tarball script with the “-u” flag."
    echo "      The configuration file will not be overwritten with “-u” flag while the pmm-agent is updated."
@@ -53,12 +53,12 @@ while getopts "v:p:hlu" option; do
         port_listening=1
         ;;
       u) # update mode
-              update_flag="-u"
-              ;;
+        update_flag="-u"
+        ;;
      \?) # Invalid option
-         echo "Error: Invalid option"
-         exit 1
-         ;;
+        echo "Error: Invalid option"
+        exit 1
+        ;;
    esac
 done
 
@@ -88,7 +88,6 @@ if [ -z "${path}" ]; then
   path=$default_path
 fi
 tarball_url=https://downloads.percona.com/downloads/TESTING/pmm/pmm2-client-${version}.tar.gz
-
 ### Main program
 echo "Downloading ${tarball_url}"
 mkdir -p ./tmp/
