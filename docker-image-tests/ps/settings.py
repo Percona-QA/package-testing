@@ -95,6 +95,7 @@ elif ps_version_major == '5.7':
     ps_binaries = ps57_binaries
     ps_plugins = ps57_plugins
     ps_functions = ps57_functions
+    ps_components = ps80_components
 elif ps_version_major == '5.6':
     ps_packages = ps56_packages
     ps_binaries = ps56_binaries
