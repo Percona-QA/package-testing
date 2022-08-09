@@ -55,7 +55,6 @@ class TestDynamic:
         assert 'ACTIVE' in cmd.stdout
 
 if ps_version_major in ['8.0']:
-#    pytestmark = pytest.mark.skipif(ps_version_major=['5.7'] ,reason="Components are supported from 8.0 onwards") 
     @pytest.mark.parametrize("cmpt", ps_components)
     def test_install_component(self, host, cmpt):
         cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "INSTALL component \''+cmpt+'\';"')
@@ -63,5 +62,3 @@ if ps_version_major in ['8.0']:
         cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "SELECT component_urn from mysql.component WHERE component_urn = \''+cmpt+'\';"')
         assert cmd.succeeded
         assert cmpt in cmd.stdout
-else:
-        pytest.mark.skip('Components are supported from 8.0 onwards')
