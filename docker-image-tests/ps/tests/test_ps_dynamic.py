@@ -54,8 +54,6 @@ class TestDynamic:
         assert cmd.succeeded
         assert 'ACTIVE' in cmd.stdout
 
-    if ps_version_major in ['5.7']:
-        pytestmark = pytest.mark.skip('skipping entire module')
     @pytest.mark.parametrize("cmpt", ps_components)
     def test_install_component(self, host, cmpt):
         cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "INSTALL component \''+cmpt+'\';"')
