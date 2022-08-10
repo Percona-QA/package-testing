@@ -38,16 +38,10 @@ while getopts "v:p:hlu" option; do
         exit 0
         ;;
       v) # Enter a version
-        if [ -n "$OPTARG" ]
-        then
-          version=$OPTARG
-        fi
+        version=$OPTARG
         ;;
       p) # Enter a custom path
-        if [ -n "$OPTARG" ]
-        then
-          path=$OPTARG
-        fi
+        path=$OPTARG
         ;;
       l) # listening custom port starts from 2.27.0
         port_listening=1
@@ -91,21 +85,18 @@ tarball_url=https://downloads.percona.com/downloads/TESTING/pmm/pmm2-client-${ve
 ### Main program
 echo "Downloading ${tarball_url}"
 mkdir -p ./tmp/
-#wget ${tarball_url} -nv -P ./tmp/
 wget ${tarball_url} -P ./tmp/
 tar -xvf ./tmp/pmm2-client-${version}.tar.gz -C ./tmp/
 echo "Installing tarball to ${path}"
 mkdir -p ${path}
 export PMM_DIR=${path}
-echo $PMM_DIR
-### uncomment when PMM-10247 will be merged
-#if [[ $min_ver -lt 30 ]]; then
+if [[ $min_ver -lt 30 ]]; then
   cd ./tmp/pmm2-client-${version}
   ./install_tarball ${update_flag}
   cd ../../
-#else
-#  ./tmp/pmm2-client-${version}/install_tarball ${update_flag}
-#fi
+else
+  ./tmp/pmm2-client-${version}/install_tarball ${update_flag}
+fi
 ln -sf ${path}/bin/pmm-admin /usr/bin/pmm-admin
 ln -sf ${path}/bin/pmm-agent /usr/bin/pmm-agent
 echo 'Done!'
