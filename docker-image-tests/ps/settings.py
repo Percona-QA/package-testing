@@ -64,6 +64,7 @@ ps57_functions = (
   ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'),
   ('service_release_locks', 'locking_service.so', 'INT')
 )
+ps57_components = ()
 
 # 5.6
 ps56_packages = (
@@ -95,6 +96,7 @@ elif ps_version_major == '5.7':
     ps_binaries = ps57_binaries
     ps_plugins = ps57_plugins
     ps_functions = ps57_functions
+    ps_components = ps57_components
 elif ps_version_major == '5.6':
     ps_packages = ps56_packages
     ps_binaries = ps56_binaries
