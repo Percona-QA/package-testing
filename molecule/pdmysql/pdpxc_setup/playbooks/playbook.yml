@@ -4,4 +4,4 @@
   become: true
   become_method: sudo
   roles:
-    - role: pdpxc-setup
+    - role: pdpxc_setup
