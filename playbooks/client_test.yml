@@ -45,8 +45,8 @@
       packages:
       - pv
     when: ansible_os_family == "RedHat"
-
-	- name: install PS/PXC client and run the check
+  
+  - name: install PS/PXC client and run the check
     shell: /package-testing/client_check.sh {{ client }} &> client-check.log
 
   - name: Log check for warnings in the previos stage
