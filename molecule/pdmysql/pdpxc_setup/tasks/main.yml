@@ -8,7 +8,7 @@
   include: ../../tasks/install_percona_release.yml
 
 - name: enable the PDMYSQL repo
-  command: percona-release setup pdpxc-{{ version }}
+  command: percona-release setup -y pdpxc-{{ version }}
   vars:
     version: "{{ lookup('env', 'VERSION') }}"
 
