@@ -21,7 +21,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
   - name: Setup the PDMYSQL repo
-    command: percona-release setup pdps-{{ version }}
+    command: percona-release setup -y pdps-{{ version }}
     vars:
       version: "{{ lookup('env', 'VERSION') }}"
 
