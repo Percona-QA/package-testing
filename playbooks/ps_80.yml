@@ -104,12 +104,9 @@
   - name: check that Percona Server version is correct
     shell: /package-testing/version_check.sh ps80 &> version-check.log
 
-  - name: Log check for warnings in the previos stage
+  - name: Log check for warnings in the previous stage
     command: /package-testing/scripts/log-warning-check.sh version-check.log
     when: (lookup('env', 'check_warnings') == "yes")
-
-  - name: check that Percona Server version is correct
-    command: /package-testing/version_check.sh ps80
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps80
