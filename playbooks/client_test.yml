@@ -7,7 +7,9 @@
   become_method: sudo
   vars:
     client: "{{ lookup('env', 'client_to_test') }}"
-
+    install_mysql_shell: "{{ lookup('env', 'install_mysql_shell') }}"
+  environment:
+    install_mysql_shell: '{{ install_mysql_shell }}'
   tasks:
   - name: include tasks for test env setup
     import_tasks: ../tasks/test_prep.yml
