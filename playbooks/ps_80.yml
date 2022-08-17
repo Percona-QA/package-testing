@@ -115,10 +115,14 @@
         when: (lookup('env', 'check_warnings') == "yes")
 
     rescue:
-      - name: Print the output of the version_check.sh logfile on the script failure
+      - name: Fetch the output of the version_check.sh logfile on the script failure
         command: cat "version-check.log"
         register: versioncheckoutput
-        
+
+      - name: Display the fetched output of the version_check.log logfile
+        debug:
+          msg: "Version check output: {{ versioncheckoutput.stdout }}"
+
       - name:   
         ansible.builtin.fail:
           msg: Failing the further tasks due to issues in the previous task.
