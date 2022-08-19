@@ -114,7 +114,7 @@ if glibc_version == "2.12":
     ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.1e'),
     ('lib/libssl.so','lib/private/libssl.so.1.0.1e'),
     ('lib/libtinfo.so','lib/private/libtinfo.so.5.7'),
-    ('lib/libsasl2.so','lib/private/libsasl2.so.2.0.26'),
+    ('lib/libsasl2.so','lib/private/libsasl2.so.2.0.23'),
     ('lib/libreadline.so','lib/private/libreadline.so.6.0'),
   )
 else:
