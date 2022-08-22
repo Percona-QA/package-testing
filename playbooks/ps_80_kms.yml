@@ -76,10 +76,11 @@
     when: ansible_os_family == "RedHat"
 
   - name: create keyring_kms file and change its permission on Redhat/CentOS
-    command: "{{ item }}"
-    with_items:
-        - touch /tmp/keyring_kms
-        - chown mysql:mysql /tmp/keyring_kms
+    ansible.builtin.file:
+        path: /tmp/keyring_kms
+        owner: mysql
+        group: mysql
+        state: touch
     when: ansible_os_family == "RedHat"
 
   - name: copy the encryption config file on Debian/Ubuntu
