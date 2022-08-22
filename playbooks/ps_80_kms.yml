@@ -72,8 +72,15 @@
     copy:
         dest: "/usr/lib64/mysql/plugin/component_keyring_kms.cnf"
         content: |
-            { "path": "/var/lib/mysql/keyring_kms", "region": "us-east-1", "kms_key": "{{ key_id }}", "auth_key": "{{ access_key }}", "secret_access_key": "{{ secret_key }}", "read_only": false }
+            { "path": "/tmp/keyring_kms", "region": "us-east-1", "kms_key": "{{ key_id }}", "auth_key": "{{ access_key }}", "secret_access_key": "{{ secret_key }}", "read_only": false }
     when: ansible_os_family == "RedHat"
+
+  - name: create keyring_kms file and change its permission on Redhat/CentOS
+  command: "{{ item }}"
+  with_items:
+      - touch /tmp/keyring_kms
+      - chown mysql:mysql /tmp/keyring_kms
+  when: ansible_os_family == "RedHat"
 
   - name: copy the encryption config file on Debian/Ubuntu
     copy:
