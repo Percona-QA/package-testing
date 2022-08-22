@@ -47,10 +47,22 @@
       packages:
       - pv
     when: ansible_os_family == "RedHat"
-  
-  - name: install PS/PXC client and run the check
-    shell: /package-testing/client_check.sh {{ client }} &> client-check.log
 
-  - name: Log check for warnings in the previos stage
-    command: /package-testing/scripts/log-warning-check.sh client-check.log
-    when: (lookup('env', 'check_warnings') == "yes")
+  - name: Handle installation and checks for percona client using client_check.sh
+    block:
+      - name: install PS/PXC client and run the check
+        shell: /package-testing/client_check.sh {{ client }} > client-check.log 2>&1
+
+      - name: Log check for warnings in the previous stage
+        command: /package-testing/scripts/log-warning-check.sh client-check.log
+        when: (lookup('env', 'check_warnings') == "yes")
+
+    rescue:
+      - name: Fetch the output of the client_check.sh logfile on the script failure
+        command: cat "client-check.log"
+        register: clientcheckoutput
+
+      - name: Display the fetched output of the client-check.log logfile
+        debug:
+          msg: "Version check output: {{ clientcheckoutput.stdout }}"
+

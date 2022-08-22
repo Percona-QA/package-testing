@@ -220,7 +220,8 @@
 
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
-
+    when: (lookup('env', 'install_mysql_shell') == "yes")
+    
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb80
     when: lookup('env', 'install_repo') != "experimental"

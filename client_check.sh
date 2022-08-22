@@ -37,6 +37,7 @@ else
 fi
 
 product=$1
+
 log="/tmp/${product}_client_check.log"
 echo -n > "${log}"
 
@@ -56,10 +57,12 @@ if [ -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
     exit 1
   fi
 else
- if [ "${product}" = "ps56" ] || [ "${product}" = "ps57" ]; then
+  if [ "${product}" = "ps56" ] || [ "${product}" = "ps57" ]; then
     apt-get update; apt-get install -y percona-server-client${deb_version}
-  elif [ "${product}" = "ps80" ]; then
+  elif ([ -z ${install_mysql_shell} ] && [ "${product}" = "ps80" ]) || [ "${product}" = "ps80" -a "${install_mysql_shell}" = "yes" ]; then
     apt-get update; apt-get install -y percona-server-client percona-mysql-router percona-mysql-shell
+  elif [ "${product}" = "ps80" ] && [ "${install_mysql_shell}" = "no" ]; then
+    apt-get update; apt-get install -y percona-server-client percona-mysql-router
   elif [ "${product}" = "pxc56" ] || [ "${product}" = "pxc57" ]; then
     apt-get install -y percona-xtradb-cluster-client${deb_version}
   elif [ "${product}" = "pxc80" ]; then
@@ -71,27 +74,34 @@ else
 fi
 
 if [ "${product}" = "ps80" ]; then
- echo "checking client version"
- if [ "$(mysql --version | grep -c "$version")" == 1 ]; then
-     echo "mysql client version is correct"
-   else
-     echo "ERROR: mysql-client version is incorrect "
-     exit 1
- fi
- echo "checking shell version"
- if [ "$(mysqlsh --version | grep -c "$version")" == 1 ]; then
-     echo "mysql shell version is correct"
-   else
-     echo "ERROR: mysql-shell version is incorrect "
-     exit 1
- fi
- echo "checking router version"
- if [ "$(mysqlrouter --version | grep -c "$version")" == 1 ]; then
-     echo "mysql router version is correct"
-   else
-     echo "ERROR: mysqlrouter version is incorrect "
-     exit 1
- fi
+  echo "checking client version"
+  if [ "$(mysql --version | grep -c "$version")" == 1 ]; then
+    echo "mysql client version is correct"
+  else
+    echo "ERROR: mysql-client version is incorrect "
+    exit 1
+  fi
+  if [ -z ${install_mysql_shell} ] || [ ${install_mysql_shell} = "yes" ] ; then
+    echo "checking shell version"
+    if [ "$(mysqlsh --version | grep -c "$version")" == 1 ]; then
+      echo "mysql shell version is correct"
+    else
+      echo "ERROR: mysql-shell version is incorrect "
+      exit 1
+    fi
+  elif [ ${install_mysql_shell} = "no" ]; then
+    echo "MYSQL Shell check is disabled.." >> "${log}"
+  else
+    echo "Invalid input in ${install_mysql_shell} variable"
+  fi
+
+  echo "checking router version"
+  if [ "$(mysqlrouter --version | grep -c "$version")" == 1 ]; then
+    echo "mysql router version is correct"
+  else
+    echo "ERROR: mysqlrouter version is incorrect "
+    exit 1
+  fi
 fi
 
 mysql --help

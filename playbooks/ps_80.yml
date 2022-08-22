@@ -108,7 +108,7 @@
   - name: Handle check that Percona Server version is correct
     block: 
       - name: Run the version_check.sh script
-        shell: /package-testing/version_check.sh ps80 &> version-check.log
+        shell: /package-testing/version_check.sh ps80 > version-check.log 2>&1
 
       - name: Log check for warnings in the previous stage
         command: /package-testing/scripts/log-warning-check.sh version-check.log
