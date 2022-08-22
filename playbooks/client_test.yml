@@ -66,3 +66,7 @@
         debug:
           msg: "Version check output: {{ clientcheckoutput.stdout }}"
 
+      - name:
+        ansible.builtin.fail:
+          msg: Failing the further tasks due to issues in the previous task.
+
