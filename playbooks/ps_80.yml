@@ -123,8 +123,8 @@
         debug:
           msg: "Version check output: {{ versioncheckoutput.stdout }}"
 
-      - name:   
-        ansible.builtin.fail:
+      - name: Fail the task due to previous issues
+        fail:
           msg: Failing the further tasks due to issues in the previous task.
 
   - name: check that Percona Server package versions are correct
