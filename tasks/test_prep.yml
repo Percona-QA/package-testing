@@ -3,12 +3,12 @@
 #   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm state=present
 #   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
-  - name: make scripts accessible
-    ansible.builtin.file:
-      path: ../scripts/
-      state: directory
-      recurse: yes
-      mode: +x
+#  - name: make scripts accessible
+#    ansible.builtin.file:
+#      path: ../scripts/
+#      state: directory
+#      recurse: yes
+#      mode: +x
 
   - name: setup epel 7 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
