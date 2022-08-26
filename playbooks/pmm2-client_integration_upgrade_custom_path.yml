@@ -32,7 +32,11 @@
     shell: "wget -q https://registry.hub.docker.com/v1/repositories/percona/pmm-server/tags -O -  | sed -e 's/[][]//g' -e 's/\"//g' -e 's/ //g' | tr '}' '\n'  | awk -F: '{print $3}' | sort -V | tail -2 | head -1"
     register: pmm_release_version
 
-  - name: "install old({{ pmm_release_version }}) pmm2-client tarball to custom path"
+  - name: Print detected PMM Release Version
+    ansible.builtin.debug:
+      msg: pmm2 release version is {{ pmm_release_version.stdout }}
+
+  - name: "install old({{ pmm_release_version.stdout }}) pmm2-client tarball to custom path"
     command: "../scripts/pmm2_client_install_tarball.sh -v {{ pmm_release_version.stdout }} -p {{ custom_path }}"
 
   - name: Start agent
