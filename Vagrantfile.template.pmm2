@@ -13,6 +13,7 @@ Vagrant.configure(2) do |config|
   config.ssh.insert_key = false
   config.vm.define :FOCAL_PACKAGE_TEST do |t|
   end
+  ## Set your local path to project and vagrant path
   config.vm.synced_folder "/media/sf_work/PMM/package-testing/", "/pmm/package-testing/"
   config.vm.provision "shell", privileged: true, inline: <<-SHELL
 
