@@ -20,10 +20,20 @@
     command: yum module disable mariadb -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
-  - name: Setup the PDMYSQL repo
-    command: percona-release setup pdps-{{ version }}
+  - set_fact:
+      major_repo: "{{ lookup('env', 'MAJOR_REPO') }}"
+
+  - name: Setup the PDMYSQL repo pdps-{{ version }}
+    command: percona-release setup -y pdps-{{ version }}
     vars:
       version: "{{ lookup('env', 'VERSION') }}"
+    when: not major_repo
+
+  - name: Setup the PDMYSQL repo pdps-{{ version }}
+    command: percona-release setup -y pdps-{{ version }}
+    vars:
+      version: "{{ lookup('env', 'VERSION').split('.')[0] + '.' + lookup('env', 'VERSION').split('.')[1] }}"
+    when: major_repo
 
   - name: install Percona Toolkit new deb packages
     include_tasks: ../../../tasks/install_pt.yml
@@ -110,8 +120,13 @@
 
   - name: install orchestrator rpm packages
     yum:
-      name: percona-orchestrator
+      name: "{{ packages }}"
       state: latest
+    vars:
+      packages:
+        - percona-orchestrator-cli
+        - percona-orchestrator-client
+        - percona-orchestrator
     when: ansible_os_family == "RedHat"
 
   - name: start mysql service
@@ -122,10 +137,12 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+    - wget --no-check-certificate -O master.zip "https://github.com/Percona-QA/package-testing/archive/{{ branch }}.zip"
     - unzip master.zip
     - rm -f master.zip
-    - mv package-testing-master /package-testing
+    - mv "package-testing-{{ branch }}" /package-testing
+    vars:
+      branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh

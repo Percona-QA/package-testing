@@ -22,7 +22,10 @@
     - name: install GPG key for Percona repos
       rpm_key:
         state: present
-        key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
+        key: "{{ item }}"
+      with_items:
+        - https://repo.percona.com/yum/RPM-GPG-KEY-Percona
+        - https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
     - name: setup epel 8 repo
@@ -88,6 +91,7 @@
           - unzip
           - wget
           - rsync
+          - git
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
 
     - name: install needed packages for running tests with yum on RHEL8
@@ -100,3 +104,27 @@
         - git
         - wget
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
+
+    - name: Setup SSH keys RHEL
+      authorized_key:
+        user: centos
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: (ansible_os_family == "RedHat") and (lookup('env', 'DESTROY_ENV') == "no")
+
+    - name: Setup SSH keys Debian
+      authorized_key:
+        user: admin
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: (ansible_distribution == "Debian") and (lookup('env', 'DESTROY_ENV') == "no")
+
+    - name: Setup SSH keys Ubuntu
+      authorized_key:
+        user: ubuntu
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: (ansible_distribution == "Ubuntu") and (lookup('env', 'DESTROY_ENV') == "no")

@@ -21,12 +21,17 @@ ps80_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/ps-admin', '/usr/bin/mysqladmin', '/usr/bin/mysqlbinlog',
   '/usr/sbin/mysqld-debug', '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow', '/usr/bin/mysqlimport', '/usr/bin/mysqlpump',
   '/usr/bin/mysqlshow', '/usr/bin/mysqlslap', '/usr/bin/mysqlcheck', '/usr/bin/mysql_config_editor', '/usr/bin/mysql_config',
-  '/usr/bin/mysql_config-64', '/usr/bin/mysql_ldb', '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade', '/usr/bin/mysql_tzinfo_to_sql'
+  '/usr/bin/mysql_config-64', '/usr/bin/mysql_ldb', '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade',
+  '/usr/bin/hostname', '/usr/bin/gunzip', '/usr/bin/my_print_defaults', '/usr/bin/cat', '/usr/bin/mysql_tzinfo_to_sql',
+  '/usr/bin/grep', '/usr/bin/cut', '/usr/bin/tail', '/usr/bin/sed', '/usr/bin/find', '/usr/bin/kill', '/usr/bin/gawk'
 )
 ps80_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
   ('group_replication','group_replication.so'),('clone','mysql_clone.so'),('data_masking','data_masking.so')
+)
+ps80_components = (
+  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms')
 )
 ps80_functions = (
   ('fnv1a_64', 'libfnv1a_udf.so', 'INTEGER'),('fnv_64', 'libfnv_udf.so', 'INTEGER'),('murmur_hash', 'libmurmur_udf.so', 'INTEGER'),
@@ -59,6 +64,7 @@ ps57_functions = (
   ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'),
   ('service_release_locks', 'locking_service.so', 'INT')
 )
+ps57_components = ()
 
 # 5.6
 ps56_packages = (
@@ -84,11 +90,13 @@ if ps_version_major == '8.0':
     ps_binaries = ps80_binaries
     ps_plugins = ps80_plugins
     ps_functions = ps80_functions
+    ps_components = ps80_components
 elif ps_version_major == '5.7':
     ps_packages = ps57_packages
     ps_binaries = ps57_binaries
     ps_plugins = ps57_plugins
     ps_functions = ps57_functions
+    ps_components = ps57_components
 elif ps_version_major == '5.6':
     ps_packages = ps56_packages
     ps_binaries = ps56_binaries

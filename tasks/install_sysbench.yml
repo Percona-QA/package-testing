@@ -8,8 +8,8 @@
     vars:
       packages:
       - sysbench
-      - sysbench-tpcc
-    when: ansible_os_family == "Debian" and ansible_distribution_release != "bullseye"
+#     - sysbench-tpcc
+    when: ansible_os_family == "Debian"
 
   - name: install sysbench new rpm packages
     yum:

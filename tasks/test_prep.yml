@@ -16,6 +16,12 @@
      state: present
      key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+  
+  - name: install GPG key for Percona repos
+    rpm_key:
+      state: present
+      key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: install GPG key for Percona repos
     rpm_key:
@@ -56,6 +62,8 @@
       - wget
       - gnupg
       - rsync
+      - jq # for exporter end point metric fetch
+      - acl
     retries: 60
     delay: 10
     register: result
@@ -73,6 +81,7 @@
       - unzip
       - wget
       - rsync
+      - jq # for exporter end point metric fetch
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
 
   - name: install needed packages for running tests with yum on RHEL8
@@ -83,6 +92,7 @@
       packages:
       - unzip
       - wget
+      - jq # for exporter end point metric fetch
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
 
   - name: register SLES for updates with suse_register
