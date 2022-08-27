@@ -99,4 +99,5 @@ else
 fi
 ln -sf ${path}/bin/pmm-admin /usr/bin/pmm-admin
 ln -sf ${path}/bin/pmm-agent /usr/bin/pmm-agent
+rm -rf ./tmp/
 echo 'Done!'
