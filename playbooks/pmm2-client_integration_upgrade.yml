@@ -417,12 +417,12 @@
     assert:
      that:
       - "'Running' in postgresql_pgstatements_agent.stdout"
-
-  - name: Remove Socket services, to verify Port output in pmm-admin list commands
-    command: "{{item}}"
-    with_items:
-      - pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
-      - pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
+  ## FIXME: Uncomment when bug PMM-10628 will be fixed
+#  - name: Remove Socket services, to verify Port output in pmm-admin list commands
+#    command: "{{item}}"
+#    with_items:
+#      - pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
+#      - pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
 
   - name: checking existence of all artifacts from pmm2-client
     command: bash -xe /package-testing/scripts/check_artifacts.sh
