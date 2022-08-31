@@ -298,8 +298,9 @@
   - name: add postgresql metrics to monitoring
     command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }}
 
-  - name: add postgresql metrics to monitoring via socket
-    command: pmm-admin add postgresql --socket /var/run/postgresql/ --username=postgres --service-name=pgsql_socket_{{ instance_ip }}
+  ## FIXME: Uncomment when bug PMM-10628 will be fixed
+#  - name: add postgresql metrics to monitoring via socket
+#    command: pmm-admin add postgresql --socket /var/run/postgresql/ --username=postgres --service-name=pgsql_socket_{{ instance_ip }}
 
   - name: check if postgresql monitoring is running
     command: pmm-admin list
