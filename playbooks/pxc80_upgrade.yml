@@ -64,9 +64,8 @@
 # - name: restart the service
 #   command: service mysql restart
 
-#   Comment out plugin test because of PS-8367 once it is fixed , we will enable tests again 
-# - name: install plugins
-#   command: /package-testing/plugins_test_80.sh pxc
+  - name: install plugins
+    command: /package-testing/plugins_test_80.sh pxc
 
   - name: check that PXC version is correct
     command: /package-testing/version_check.sh pxc80

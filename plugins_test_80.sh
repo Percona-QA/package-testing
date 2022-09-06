@@ -3,11 +3,7 @@ set -e
 WARNINGS_BEFORE=0
 WARNINGS_AFTER=0
 ERROR_LOG=""
-ERROR_LOG=$(mysql -N -s -e "show variables like 'log_error';" | grep -v "Warning:" | grep -o "\/.*$") || true
-if [ -z ${ERROR_LOG} ]; then
-  echo "ERROR_LOG variable is empty!"
-  exit 1
-fi
+ERROR_LOG=$(mysql -N -s -e "show variables like 'log_error';" | grep -v "Warning:" | grep -o "\/.*$")
 if [ ! -f ${ERROR_LOG} ]; then
   echo "Error log file was not found!"
   exit 1
