@@ -96,6 +96,16 @@
   - name: start mysql service
     service: name=mysql state=started
 
+  - name: check status
+    shell: sudo systemctl status mysql.service
+    register: output
+    ignore_errors: yes
+
+  - name: check status
+    debug:
+      var: output
+    ignore_errors: yes
+
   - name: register PXC version
     shell: mysqld --version
     register: pxc_version
