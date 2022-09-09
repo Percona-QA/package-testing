@@ -11,9 +11,7 @@
   become: true
   become_method: sudo
   vars:
-    install_mysql_shell: "{{ lookup('env', 'install_mysql_shell') }}"
-  environment:
-    install_mysql_shell: '{{ install_mysql_shell }}'
+    install_mysql_shell: "{{ lookup('env', 'install_mysql_shell', default='') }}"
   tasks:
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
@@ -103,7 +101,7 @@
 
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
-    when: (lookup('env', 'install_mysql_shell') == "yes") 
+    when: install_mysql_shell == "yes" or install_mysql_shell == ""
 
   - name: Handle check that Percona Server version is correct
     block: 
