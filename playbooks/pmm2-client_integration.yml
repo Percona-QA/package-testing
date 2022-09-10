@@ -168,9 +168,8 @@
   - name: add mongodb metrics to monitoring
     command: pmm-admin add mongodb --service-name=mongodb_{{ instance_ip }}
 
-  ## FIXME: Uncomment when bug PMM-10628 will be fixed
-#  - name: add mongodb metrics to monitoring using socket
-#    command: pmm-admin add mongodb --socket=/tmp/mongodb-27017.sock --service-name=mongodb_socket_{{ instance_ip }}
+  - name: add mongodb metrics to monitoring using socket
+    command: pmm-admin add mongodb --socket=/tmp/mongodb-27017.sock --service-name=mongodb_socket_{{ instance_ip }}
 
   - name: check if mongodb monitoring is running
     command: pmm-admin list
@@ -198,14 +197,13 @@
     with_items:
       - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
 
-  ## FIXME: Uncomment when bug PMM-10628 will be fixed
-#  - name: check if Metric End point with Auth works for MongoDB Exporter for service with socket
-#    shell: "{{item}}"
-#    with_items:
-#      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
-#
-#  - name: remove mongodb service from monitoring which was added via socket
-#    command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
+  - name: check if Metric End point with Auth works for MongoDB Exporter for service with socket
+    shell: "{{item}}"
+    with_items:
+      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
+
+  - name: remove mongodb service from monitoring which was added via socket
+    command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
 
 ### end PSMDB
 
@@ -298,9 +296,8 @@
   - name: add postgresql metrics to monitoring
     command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }}
 
-  ## FIXME: Uncomment when bug PMM-10628 will be fixed
-#  - name: add postgresql metrics to monitoring via socket
-#    command: pmm-admin add postgresql --socket /var/run/postgresql/ --username=postgres --service-name=pgsql_socket_{{ instance_ip }}
+  - name: add postgresql metrics to monitoring via socket
+    command: pmm-admin add postgresql --socket /var/run/postgresql/ --username=postgres --service-name=pgsql_socket_{{ instance_ip }}
 
   - name: check if postgresql monitoring is running
     command: pmm-admin list
@@ -337,20 +334,19 @@
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
 
-  ## FIXME: Uncomment when bug PMM-10628 will be fixed
-#  - name: check if Metric End point with Auth works for Postgres Exporter when service added via socket
-#    shell: "{{item}}"
-#    retries: 3
-#    delay: 10
-#    with_items:
-#      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-#      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-#      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-#      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-#
-#  - name: remove postgresql instances added via socket
-#    command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
-## end PG
+  - name: check if Metric End point with Auth works for Postgres Exporter when service added via socket
+    shell: "{{item}}"
+    retries: 3
+    delay: 10
+    with_items:
+      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+
+  - name: remove postgresql instances added via socket
+    command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
+### end PG
 
   - name: parse and set PMM minor version
     shell: "pmm-admin --version | grep -oP '(?<=[.])\\w+(?=[.])' | head -1"
