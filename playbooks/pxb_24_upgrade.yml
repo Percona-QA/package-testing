@@ -67,7 +67,7 @@
       name: "{{ packages }}"
     vars:
       packages:
-      - jemalloc
+      - jemalloc*
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: install tokudb and restart server
