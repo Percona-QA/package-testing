@@ -62,12 +62,9 @@
     command: setenforce 0
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: install jemalloc on Oracle Linux 8
-    yum:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - jemalloc*
+  - name: configure jemalloc on Oracle Centos 8
+    raw: |
+        ln --symbolic /usr/lib64/libjemalloc.so.2 /usr/lib64/libjemalloc.so.1
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: install tokudb and restart server
