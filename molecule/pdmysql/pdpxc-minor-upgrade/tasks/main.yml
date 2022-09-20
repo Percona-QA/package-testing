@@ -165,7 +165,7 @@
   service: name=mysql state=started
   when: ansible_os_family == "Debian"
 
-- name: disable old repository
+- name: disable initial repository
   command: percona-release disable pdpxc-{{ pdmysql_version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'FROM_REPO') }}"
@@ -182,61 +182,59 @@
   apt:
     name: "{{ packages }}"
     update_cache: yes
-    state: latest
     allow_downgrade: true
   vars:
     packages:
-    - percona-xtradb-cluster-full
-    - percona-xtradb-cluster-client
-    - percona-xtradb-cluster-common
-    - percona-xtradb-cluster-dbg
-    - percona-xtradb-cluster-garbd-debug
-    - percona-xtradb-cluster-garbd
-    - percona-xtradb-cluster-server
-    - percona-xtradb-cluster-server-debug
-    - percona-xtradb-cluster-test
-    - percona-xtradb-cluster
+    - "percona-xtradb-cluster-full-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-client-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-common-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-dbg-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-garbd-debug-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-garbd-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-server-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-server-debug-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-test-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-{{ lookup('env', 'VERSION') }}*"
   when: ansible_os_family == "Debian"
 
 - name: install PXC 8 rpm packages
   yum:
     name: "{{ packages }}"
-    state: latest
     allow_downgrade: true
   vars:
     packages:
-    - percona-xtradb-cluster-full
-    - percona-xtradb-cluster
-    - percona-xtradb-cluster-client
-    - percona-xtradb-cluster-debuginfo
-    - percona-xtradb-cluster-devel
-    - percona-xtradb-cluster-garbd
-    - percona-xtradb-cluster-server
-    - percona-xtradb-cluster-shared
-    - percona-xtradb-cluster-shared-compat
-    - percona-xtradb-cluster-test
+    - "percona-xtradb-cluster-full-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-client-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-debuginfo-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-devel-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-garbd-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-server-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-shared-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-shared-compat-{{ lookup('env', 'VERSION') }}*"
+    - "percona-xtradb-cluster-test-{{ lookup('env', 'VERSION') }}*"
   when: ansible_os_family == "RedHat"
 
 - name: install HA Proxy RHEL Packages
   yum:
     name: "{{ packages }}"
-    state: latest
+    allow_downgrade: true
   vars:
     packages:
-    - percona-haproxy
-    - percona-haproxy-debuginfo
+    - "percona-haproxy-{{ lookup('env', 'HAPROXY_VERSION') }}*"
+    - "percona-haproxy-debuginfo-{{ lookup('env', 'HAPROXY_VERSION') }}*"
   when: ansible_os_family == "RedHat"
 
 - name: install HA Proxy 8 deb packages
   apt:
     name: "{{ packages }}"
     update_cache: yes
-    state: latest
+    allow_downgrade: true
   vars:
     packages:
-    - percona-haproxy
-    - percona-haproxy-doc
-    - percona-vim-haproxy
+    - "percona-haproxy-{{ lookup('env', 'HAPROXY_VERSION') }}*"
+    - "percona-haproxy-doc-{{ lookup('env', 'HAPROXY_VERSION') }}*"
+    - "percona-vim-haproxy-{{ lookup('env', 'HAPROXY_VERSION') }}*"
   when: ansible_os_family == "Debian"
 
 - name: clean dnf cache
@@ -244,27 +242,65 @@
     dnf clean all
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
-- name: install Percona XtraBackup 8.0 packages
-  include_tasks: ../../../tasks/install_pxb80.yml
+  - name: install Percona XtraBackup new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      allow_downgrade: yes
+    vars:
+      packages:
+      - "percona-xtrabackup-80-{{ lookup('env', 'PXB_VERSION') }}*"
+      - "percona-xtrabackup-test-80-{{ lookup('env', 'PXB_VERSION') }}*"
+      - "percona-xtrabackup-dbg-80-{{ lookup('env', 'PXB_VERSION') }}*"
+    when: ansible_os_family == "Debian"
+
+ - name: install Percona XtraBackup new rpm packages
+    yum:
+      name: "{{ packages }}"
+      update_cache: yes
+      allow_downgrade: yes
+    vars:
+      packages:
+      - "percona-xtrabackup-80-{{ lookup('env', 'PXB_VERSION') }}*"
+      - "percona-xtrabackup-test-80-{{ lookup('env', 'PXB_VERSION') }}*"
+      - "percona-xtrabackup-80-debuginfo-{{ lookup('env', 'PXB_VERSION') }}*"
+    when: ansible_os_family == "RedHat"
 
 - name: install Percona Toolkit new deb packages
-  include_tasks: ../../../tasks/install_pt.yml
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+    allow_downgrade: true
+  vars:
+    packages:
+    - "percona-toolkit-{{ lookup('env', 'PT_VERSION') }}*"
+  when: ansible_os_family == "Debian"
+
+- name: install Percona Toolkit new rpm packages
+  yum:
+    name: "{{ packages }}"
+    update_cache: yes
+    allow_downgrade: yes
+  vars:
+    packages:
+    - "percona-toolkit-{{ lookup('env', 'PT_VERSION') }}*"
+  when: ansible_os_family == "RedHat"
 
 - name: install proxysql new deb packages
   apt:
     name: "{{ packages }}"
     update_cache: yes
-    state: latest
+    allow_downgrade: true
   vars:
     packages:
-      - proxysql2
+      - "proxysql2-{{ lookup('env', 'PROXYSQL_VERSION') }}*"
   when: ansible_os_family == "Debian"
 
 - name: install proxysql new rpm packages
   yum:
     name: "{{ packages }}"
-    state: latest
+    allow_downgrade: true
   vars:
     packages:
-      - proxysql2
+      - "proxysql2-{{ lookup('env', 'PROXYSQL_VERSION') }}*"
   when: ansible_os_family == "RedHat"
