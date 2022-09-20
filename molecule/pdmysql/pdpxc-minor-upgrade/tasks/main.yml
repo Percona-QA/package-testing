@@ -7,7 +7,7 @@
 - name: Install percona release
   include: ../../tasks/install_percona_release.yml
 
-- name: enable the old repository pdppxc-{{ pdmysql_version }} {{ repo }}
+- name: enable the initial repository pdppxc-{{ pdmysql_version }} {{ repo }}
   command: percona-release enable-only pdpxc-{{ pdmysql_version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'FROM_REPO') }}"
@@ -183,6 +183,7 @@
     name: "{{ packages }}"
     update_cache: yes
     state: latest
+    allow_downgrade: true
   vars:
     packages:
     - percona-xtradb-cluster-full
@@ -201,6 +202,7 @@
   yum:
     name: "{{ packages }}"
     state: latest
+    allow_downgrade: true
   vars:
     packages:
     - percona-xtradb-cluster-full
