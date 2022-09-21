@@ -29,7 +29,7 @@
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
   - name: detect and save release version
-    shell: "wget -q https://registry.hub.docker.com/v1/repositories/percona/pmm-server/tags -O -  | sed -e 's/[][]//g' -e 's/\"//g' -e 's/ //g' | tr '}' '\n'  | awk -F: '{print $3}' | sort -V | tail -2 | head -1"
+    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O -  | jq -r  .results[].name  | grep -v latest | sort -V | tail -n1"
     register: pmm_release_version
 
   - name: Print detected PMM Release Version
