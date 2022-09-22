@@ -110,6 +110,31 @@
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
 
+  - name: install qpress package on Redhat/CentOS
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - qpress
+    when: ansible_os_family == "RedHat"
+
+  - name: install qpress package on Ubuntu/Debian
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - qpress
+    when: ansible_os_family == "Debian"
+
+  - name: run backup with quicklz compression
+    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_q/ --compress=quicklz --compress-threads=10
+
+  - name: decompress backup
+    command: /usr/bin/xtrabackup --decompress --user=root --target-dir=/tmp/backup_q/
+
+  - name: prepare backup
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_q/
+
   - name: remove Percona Server 5.7 deb packages
     apt:
       name: "{{ packages }}"

@@ -7,10 +7,20 @@
 - name: Install percona release
   include: ../../tasks/install_percona_release.yml
 
-- name: enable the PDMYSQL repo
-  command: percona-release setup pdpxc-{{ version }}
+- set_fact:
+    major_repo: "{{ lookup('env', 'MAJOR_REPO') }}"
+
+- name: enable the PDMYSQL repo pdpxc-{{ version }}
+  command: percona-release setup -y pdpxc-{{ version }}
   vars:
     version: "{{ lookup('env', 'VERSION') }}"
+  when: not major_repo
+
+- name: enable the PDMYSQL repo pdpxc-{{ version }}
+  command: percona-release setup -y pdpxc-{{ version }}
+  vars:
+    version: "{{ lookup('env', 'VERSION').split('.')[0] + '.' + lookup('env', 'VERSION').split('.')[1] }}"
+  when: major_repo
 
 - name: clean and update yum cache
   shell: |
@@ -130,10 +140,12 @@
   with_items:
   - rm -rf /package-testing
   - rm -f master.zip
-  - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+  - wget --no-check-certificate -O master.zip "https://github.com/Percona-QA/package-testing/archive/{{ branch }}.zip"
   - unzip master.zip
   - rm -f master.zip
-  - mv package-testing-master /package-testing
+  - mv "package-testing-{{ branch }}" /package-testing
+  vars:
+    branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
 
 - name: install latest bats from github
   command: "{{ item }}"

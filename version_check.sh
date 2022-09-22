@@ -109,11 +109,17 @@ if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" ]; 
   fi
 
   if [ ${product} = "ps80" ]; then
-    if [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
-      echo "mysql-shell version is correct" >> "${log}"
+    if [ -z ${install_mysql_shell} ] || [ ${install_mysql_shell} = "yes" ] ; then
+      if [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
+        echo "mysql-shell version is correct" >> "${log}"
+      else
+        echo "ERROR: mysql-shell version is incorrect"
+        exit 1
+      fi
+    elif [ ${install_mysql_shell} = "no" ]; then
+      echo "MYSQL Shell check is disabled.." >> "${log}"
     else
-      echo "ERROR: mysql-shell version is incorrect"
-      exit 1
+      echo "Invalid input in ${install_mysql_shell} variable"
     fi
   fi
 
