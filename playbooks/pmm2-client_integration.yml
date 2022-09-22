@@ -346,7 +346,7 @@
 
   - name: remove postgresql instances added via socket
     command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
-## end PG
+### end PG
 
   - name: parse and set PMM minor version
     shell: "pmm-admin --version | grep -oP '(?<=[.])\\w+(?=[.])' | head -1"

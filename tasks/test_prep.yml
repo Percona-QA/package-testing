@@ -13,21 +13,15 @@
 
   - name: install GPG key for epel 8
     rpm_key:
-     state: present
-     key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+      state: present
+      key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
   
   - name: install GPG key for Percona repos
     rpm_key:
       state: present
       key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
-
-  - name: install GPG key for Percona repos
-    rpm_key:
-     state: present
-     key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
   - name: update mirrors for CentOS8
     shell: sed -i 's/mirror\.centos\.org/vault\.centos\.org/g;s/\#baseurl=/baseurl=/g;s/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS*.repo
@@ -84,7 +78,7 @@
       - jq # for exporter end point metric fetch
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
 
-  - name: install needed packages for running tests with yum on RHEL8
+  - name: install needed packages for running tests with yum on RHEL 8+
     yum:
       name: "{{ packages }}"
       state: latest
@@ -93,7 +87,7 @@
       - unzip
       - wget
       - jq # for exporter end point metric fetch
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
 
   - name: register SLES for updates with suse_register
     command: suse_register -a email="@@SLES_REG_EMAIL@@" -a regcode-sles=@@SLES_REG_CODE@@
@@ -179,12 +173,12 @@
       var: selinux_status
     when: ansible_os_family == "RedHat"
 
-  - name: get list of enabled dnf modules on centos 8
+  - name: get list of enabled dnf modules on rhel 8
     command: dnf module list --enabled
     register: enabled_dnf_modules
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: list enabled dnf modules on centos 8
+  - name: list enabled dnf modules on rhel 8
     debug:
       var: enabled_dnf_modules
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
