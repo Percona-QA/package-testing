@@ -94,7 +94,8 @@
 
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
-
+    when: install_mysql_shell == "yes" or install_mysql_shell == ""
+    
   - name: install 3rd party packages with apt
     apt:
       name: "{{ packages }}"
@@ -206,6 +207,7 @@
 
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
+    when: install_mysql_shell == "yes" or install_mysql_shell == ""
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml

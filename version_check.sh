@@ -109,11 +109,17 @@ if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" ]; 
   fi
 
   if [ ${product} = "ps80" ]; then
-    if [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
-      echo "mysql-shell version is correct" >> "${log}"
+    if [ -z ${install_mysql_shell} ] || [ ${install_mysql_shell} = "yes" ] ; then
+      if [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
+        echo "mysql-shell version is correct" >> "${log}"
+      else
+        echo "ERROR: mysql-shell version is incorrect"
+        exit 1
+      fi
+    elif [ ${install_mysql_shell} = "no" ]; then
+      echo "MYSQL Shell check is disabled.." >> "${log}"
     else
-      echo "ERROR: mysql-shell version is incorrect"
-      exit 1
+      echo "Invalid input in ${install_mysql_shell} variable"
     fi
   fi
 
@@ -163,10 +169,9 @@ elif [ ${product} = "pmm" ]; then
   fi
 
 elif [ ${product} = "pmm2" -o ${product} = "pmm2-rc" ]; then
-  ### to override sudoers "secure_path"
   pmm-admin --version
-  version_check=$(env PATH=$PATH pmm-admin --version 2>&1|grep -c "${version}")
-  actual_version=$(env PATH=$PATH pmm-admin --version 2>&1|grep ^Version | awk -F ' ' '{print $2}')
+  version_check=$(pmm-admin --version 2>&1|grep -c "${version}")
+  actual_version=$(pmm-admin --version 2>&1|grep ^Version | awk -F ' ' '{print $2}')
   if [ ${version_check} -eq 0 ]; then
     echo "${product} version ${actual_version} is not good! Expected: ${version}" >&2;
     exit 1

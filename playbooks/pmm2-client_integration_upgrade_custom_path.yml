@@ -11,44 +11,12 @@
   become_method: sudo
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
-    metrics_mode: "{{ lookup('env', 'METRICS_MODE') }}"
+    metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
+    pmm_repo: "{{ lookup('env', 'install_repo') }}"
+    custom_path: "/pmm2-client-custom-path"
 
   tasks:
-  - name: Install Needed Packages, update repo for redhat
-    shell: "{{item}}"
-    with_items:
-      - "yum install epel-release -y"
-      - "yum update -y"
-    when: ansible_os_family == "RedHat"
-    become: true
-
-  - name: Install Needed Packages, update repo for debian
-    shell: "{{item}}"
-    with_items:
-      - "apt-get update"
-    when: ansible_os_family == "Debian"
-    become: true
-
-  - name: Install JQ for exporter end point metric fetch
-    yum:
-      name: "{{ packages }}"
-      state: latest
-      update_cache: yes
-    vars:
-      packages:
-      - jq
-    when: ansible_os_family == "RedHat"
-  
-  - name: Install JQ for exporter end point metric fetch
-    apt:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - jq
-    when: ansible_os_family == "Debian"
-
   - name: Register Instance IP
     shell: echo $(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
     register: instance_ip
@@ -58,45 +26,31 @@
       instance_ip: "{{ instance_ip.stdout }}"
 
   - name: include tasks for test env setup
-    include_tasks: ../tasks/test_prep.yml
+    include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
-  - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_main_repo.yml
+  - name: detect and save release version
+    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O -  | jq -r  .results[].name  | grep -v latest | sort -V | tail -n1"
+    register: pmm_release_version
 
-  - name: install PMM client old deb packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - pmm2-client
-    when: ansible_os_family == "Debian"
+  - name: Print detected PMM Release Version
+    ansible.builtin.debug:
+      msg: pmm2 release version is {{ pmm_release_version.stdout }}
 
-  - name: install acl packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - acl
-    when: ansible_os_family == "Debian"
+  - name: "install old({{ pmm_release_version.stdout }}) pmm2-client tarball to custom path"
+    command: "../scripts/pmm2_client_install_tarball.sh -v {{ pmm_release_version.stdout }} -p {{ custom_path }}"
 
-  - name: install PMM client old rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - pmm2-client
-    when: ansible_os_family == "RedHat"
+  - name: Start agent
+    shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
 
-  - name: setup pmm2-client artifacts for custom path
-    command: "{{item}}"
-    with_items:
-      - "chmod +x ../scripts/pmm2_client_install_tarball.sh"
-      - "../scripts/pmm2_client_install_tarball.sh -p"
+  - name: define "--metrics-mode=push|pull|auto" argument
+    set_fact:
+      metrics_mode_arg: "--metrics-mode={{ metrics_mode }}"
 
-  - name: configure pmm client to connect to server in push/auto Mode
-    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --paths-base=/pmm2-client-custom-path/ --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
-    when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
-
-  - name: configure pmm client to connect to server in pull Mode
-    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --paths-base=/pmm2-client-custom-path/ --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
-    when: lookup('env', 'metrics_mode') == "pull"
+  - name: Use pmm-agent setup to configure pmm client to connect to server
+    shell: pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-address={{ pmm_server_address }} --server-insecure-tls {{ metrics_mode_arg }} --server-username=admin --server-password=admin --paths-base={{ custom_path }}/ {{ instance_ip }} generic node2_{{ instance_ip }}
 
   - name: Check if the configuration generated with paths-base is using the custom path
-    shell: cat /usr/local/percona/pmm2/config/pmm-agent.yaml | grep -o -c "/pmm2-client-custom-path" | grep "14"
+    shell: cat {{custom_path}}/config/pmm-agent.yaml | grep -o -c "{{custom_path}}" | grep "14"
     become: yes
 
 ### start PS 5.7
@@ -109,7 +63,7 @@
 #    shell: "{{item}}"
 #    with_items:
 #      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
-## end PS
+## end PS 5.7
 
 ### start PSMDB 4.4
   - name: install and start Percona Server MongoDB 4.4
@@ -156,41 +110,35 @@
 #    command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
 ## end PG
 
-  - name: include tasks for enabling testing repo
-    include: ../tasks/enable_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+  - name: "install new({{ pmm_version }}) pmm2-client tarball to custom path"
+    command: "../scripts/pmm2_client_install_tarball.sh -v {{ pmm_version }} -p {{ custom_path }} -u"
 
-  - name: include tasks for enabling experimental repo
-    include_tasks: ../tasks/enable_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+  - name: check that PMM client dev-latest version is correct
+    shell: ../version_check.sh pmm2
+    when: pmm_repo == "experimental"
 
-  - name: upgrade PMM client to the latest deb packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - pmm2-client
-    when: ansible_os_family == "Debian"
+  - name: check that PMM client RC version is correct
+    shell: ../version_check.sh pmm2-rc
+    ### "testing" "main" "tools-main" "pmm2-client-main"
+    when: pmm_repo != "experimental"
 
-  - name: upgrade PMM client to the latest rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - pmm2-client
-    when: ansible_os_family == "RedHat"
+  #TODO: investigate purpose and possible moving it inside ../version_check.sh
+  - name: Fetch PMM-Admin version via pmm-admin status output
+    shell: pmm-admin status | grep pmm-admin | awk -F' ' '{print $3}'
+    register: pmm_admin_version
 
-  - name: Get Exporter Binaries for the new version
-    shell: "{{item}}"
-    with_items:
-      - "bash -xe /package-testing/scripts/pmm2_get_exporter_binaries.sh"
+  - name: Print the PMM-Admin Version on Status command
+    ansible.builtin.debug:
+      msg: pmm-admin version is {{ pmm_admin_version.stdout }}
 
-  - name: check that PMM client version is correct
-    command: /package-testing/version_check.sh pmm2
-    when: lookup('env', 'install_repo') == "experimental" or lookup('env', 'install_repo') == ""
-
-  - name: check that PMM client version is correct
-    command: /package-testing/version_check.sh pmm2-rc
-    when: lookup('env', 'install_repo') == "testing"
+  - name: Assert if the version output value is strict matched with expected version
+    assert:
+      that:
+        - "'{{ pmm_version }}' in pmm_admin_version.stdout"
+    when: pmm_repo == "testing"
 
   - name: Check if the configuration generated with paths-base is using the custom path after upgrade client
-    shell: cat /usr/local/percona/pmm2/config/pmm-agent.yaml | grep -o -c /pmm2-client-custom-path | grep "14"
+    shell: cat {{ custom_path }}/config/pmm-agent.yaml | grep -o -c {{ custom_path }} | grep "14"
     become: yes
 
   - name: check if mongodb is still being monitored
@@ -262,36 +210,22 @@
      that:
       - "'Running' in vmagent_status.stdout"
 
-  - name: Fetch PMM-Admin version via pmm-admin status output
-    shell: pmm-admin status | grep pmm-admin | awk -F' ' '{print $3}'
-    register: pmm_admin_version
-
-  - name: Print the PMM-Admin Version on Status command
-    ansible.builtin.debug:
-      msg: pmm-admin version is {{ pmm_admin_version.stdout }}
-
   - name: check if Metric End point with Auth works for Node Exporter, MysqlD Exporter, MongoDB Exporter, Postgres Exporter
     shell: "{{item}}"
     with_items:
-      - "bash -xe /package-testing/scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0"
-      - "bash -xe /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1"
-      - "bash -xe /package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
-      - "bash -xe /package-testing/scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
+      - bash -x ../scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
 
-  - name: Assert if the version output value is strict matched with expected version
-    assert:
-     that:
-      - "'{{ pmm_version }}' in pmm_admin_version.stdout"
-    when: lookup('env', 'install_repo') == "testing"
-
-  - name: remove PMM client deb packages
-    apt: name={{item}} state=absent
+  - name: check if Metric End point with Auth works after upgrade for Postgres exporter when service was added via socket before upgrade
+    shell: "{{item}}"
     with_items:
-    - pmm2-client
-    when: ansible_os_family == "Debian"
-
-  - name: remove PMM client rpm packages
-    yum: name={{item}} state=absent
-    with_items:
-    - pmm2-client
-    when: ansible_os_family == "RedHat"
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1

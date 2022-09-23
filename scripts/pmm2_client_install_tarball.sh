@@ -13,8 +13,10 @@ Help()
    echo "h     Print this Help."
    echo "v     Installing specified version 2.XX.X"
    echo "p     Installation path. Default: /usr/local/percona/pmm2."
-   echo "      Sets default version to 2.27.0 if no version specified"
+   echo "      Sets default version to 2.26.0 if no version specified"
    echo "l     listening custom port mode. Sets default version to 2.27.0 if no version specified"
+   echo "u     PMM-Agent can be updated from tarball: run ./install_tarball script with the “-u” flag."
+   echo "      The configuration file will not be overwritten with “-u” flag while the pmm-agent is updated."
 }
 
 ### Defaults
@@ -24,35 +26,33 @@ default_path=/usr/local/percona/pmm2
 default_version=2.26.0
 min_port_listening_version=2.27.0
 port_listening=0
+update_flag=""
 
 ############################################################
 # Process the input options.                               #
 ############################################################
-while getopts "v:p:hl" option; do
+while getopts "v:p:hlu" option; do
    case $option in
       h) # display Help
         Help
         exit 0
         ;;
       v) # Enter a version
-        if [ -n "$OPTARG" ]
-        then
-          version=$OPTARG
-        fi
+        version=$OPTARG
         ;;
       p) # Enter a custom path
-        if [ -n "$OPTARG" ]
-        then
-          path=$OPTARG
-        fi
+        path=$OPTARG
         ;;
       l) # listening custom port starts from 2.27.0
         port_listening=1
         ;;
+      u) # update mode
+        update_flag="-u"
+        ;;
      \?) # Invalid option
-         echo "Error: Invalid option"
-         exit 1
-         ;;
+        echo "Error: Invalid option"
+        exit 1
+        ;;
    esac
 done
 
@@ -82,33 +82,22 @@ if [ -z "${path}" ]; then
   path=$default_path
 fi
 tarball_url=https://downloads.percona.com/downloads/TESTING/pmm/pmm2-client-${version}.tar.gz
-
 ### Main program
 echo "Downloading ${tarball_url}"
 mkdir -p ./tmp/
-#wget ${tarball_url} -nv -P ./tmp/
 wget ${tarball_url} -P ./tmp/
 tar -xvf ./tmp/pmm2-client-${version}.tar.gz -C ./tmp/
 echo "Installing tarball to ${path}"
 mkdir -p ${path}
 export PMM_DIR=${path}
-echo $PMM_DIR
-### uncomment when PMM-10247 will be merged
-#if [[ $min_ver -lt 30 ]]; then
+if [[ $min_ver -lt 30 ]]; then
   cd ./tmp/pmm2-client-${version}
-  ./install_tarball
+  ./install_tarball ${update_flag}
   cd ../../
-#else
-#  ./tmp/pmm2-client-${version}/install_tarball
-#fi
-#echo $PATH | grep ${path} ||  echo "PATH=${path}/bin:$PATH" >> /etc/environment
-#source /etc/environment
-
+else
+  ./tmp/pmm2-client-${version}/install_tarball ${update_flag}
+fi
 ln -sf ${path}/bin/pmm-admin /usr/bin/pmm-admin
 ln -sf ${path}/bin/pmm-agent /usr/bin/pmm-agent
-
-#for file in node_exporter mysqld_exporter postgres_exporter mongodb_exporter proxysql_exporter
-#do
-#  %{__ln_s} -f /usr/local/percona/$file /usr/bin/$file
-#done
+rm -rf ./tmp/
 echo 'Done!'

@@ -75,7 +75,7 @@
 ### end PSMDB
 
 ### start pgsql 13
-  - name: install and start Percona Server MongoDB 4.4
+  - name: install and start Percona Distribution for PostgreSQL 13
     include_tasks: ../tasks/start_psql13.yml
 
   - name: check if Metric End point with Auth works for Postgres Exporter

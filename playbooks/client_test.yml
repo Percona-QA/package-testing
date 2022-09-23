@@ -7,7 +7,9 @@
   become_method: sudo
   vars:
     client: "{{ lookup('env', 'client_to_test') }}"
-
+    install_mysql_shell: "{{ lookup('env', 'install_mysql_shell') }}"
+  environment:
+    install_mysql_shell: '{{ install_mysql_shell }}'
   tasks:
   - name: include tasks for test env setup
     import_tasks: ../tasks/test_prep.yml
@@ -46,5 +48,25 @@
       - pv
     when: ansible_os_family == "RedHat"
 
-  - name: install PS/PXC client and run the check
-    command: /package-testing/client_check.sh {{ client }}
+  - name: Handle installation and checks for percona client using client_check.sh
+    block:
+      - name: install PS/PXC client and run the check
+        shell: /package-testing/client_check.sh {{ client }} > client-check.log 2>&1
+
+      - name: Log check for warnings in the previous stage
+        command: /package-testing/scripts/log-warning-check.sh client-check.log
+        when: (lookup('env', 'check_warnings') == "yes")
+
+    rescue:
+      - name: Fetch the output of the client_check.sh logfile on the script failure
+        command: cat "client-check.log"
+        register: clientcheckoutput
+
+      - name: Display the fetched output of the client-check.log logfile
+        debug:
+          msg: "Version check output: {{ clientcheckoutput.stdout }}"
+
+      - name: Fail the task due to previous issues
+        fail:
+          msg: Failing the further tasks due to issues in the previous task.
+
