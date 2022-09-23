@@ -105,13 +105,21 @@
         - wget
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
 
-    - name: Setup SSH keys RHEL
+    - name: Setup SSH keys CentOS
       authorized_key:
         user: centos
         key: "{{ lookup('file', 'public_keys') }}"
         state: present
         exclusive: False
-      when: (ansible_os_family == "RedHat") and (lookup('env', 'DESTROY_ENV') == "no")
+      when: (ansible_distribution == "CentOS") and (lookup('env', 'DESTROY_ENV') == "no")
+
+    - name: Setup SSH keys Oracle Linux
+      authorized_key:
+        user: ec2-user
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: (ansible_distribution == "OracleLinux") and (lookup('env', 'DESTROY_ENV') == "no")
 
     - name: Setup SSH keys Debian
       authorized_key:
