@@ -3,13 +3,6 @@
 #   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm state=present
 #   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
-  - name: make scripts accessible
-    ansible.builtin.file:
-      path: ../scripts/
-      state: directory
-      recurse: yes
-      mode: +x
-
   - name: setup epel 7 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
@@ -146,12 +139,15 @@
       perms: yes
     when: lookup('env', 'USE_LOCAL_PKG_TEST') == "1"
 
-  - name: download package-testing repo branch with git
-    ansible.builtin.git:
-      repo: https://github.com/Percona-QA/package-testing.git
-      dest: /package-testing
-#      single_branch: yes
-      version: master
+  - name: download package-testing repo branch with wget
+    command: "{{ item }}"
+    with_items:
+    - rm -rf /package-testing
+    - rm -f master.zip
+    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+    - unzip master.zip
+    - rm -f master.zip
+    - mv package-testing-master /package-testing
     when: lookup('env', 'USE_LOCAL_PKG_TEST') == "" or lookup('env', 'USE_LOCAL_PKG_TEST') == "0"
 
   - name: install latest bats from github
