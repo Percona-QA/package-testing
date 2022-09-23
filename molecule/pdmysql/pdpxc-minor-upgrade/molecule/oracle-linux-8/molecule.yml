@@ -4,12 +4,12 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: rhel8-${BUILD_NUMBER}-${JOB_NAME}
+  - name: ol8-${BUILD_NUMBER}-${JOB_NAME}
     region: eu-central-1
-    image: ami-0a2dc38dc30ba417e
+    image: ami-059d20a9c4cb68026
     vpc_subnet_id: subnet-085deaca8c1c59a4f
-    instance_type: t2.micro
-    ssh_user: centos
+    instance_type: t2.small
+    ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
@@ -30,7 +30,7 @@ verifier:
     s: true
     junitxml: report.xml
 scenario:
-  name: rhel8
+  name: oracle-8
   destroy_sequence:
     - destroy
   clenup_sequence:
