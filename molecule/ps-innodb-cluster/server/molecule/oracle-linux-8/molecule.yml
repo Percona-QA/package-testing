@@ -12,7 +12,7 @@ platforms:
     region: us-west-2
     image: ami-0c32e4ead7507bc6f
     vpc_subnet_id: subnet-0430e63d7cdbcd237
-    instance_type: t2.micro
+    instance_type: t2.small
     ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
@@ -21,7 +21,7 @@ platforms:
     region: us-west-2
     image: ami-0c32e4ead7507bc6f
     vpc_subnet_id: subnet-0430e63d7cdbcd237
-    instance_type: t2.micro
+    instance_type: t2.small
     ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
@@ -30,7 +30,7 @@ platforms:
     region: us-west-2
     image: ami-0c32e4ead7507bc6f
     vpc_subnet_id: subnet-0430e63d7cdbcd237
-    instance_type: t2.micro
+    instance_type: t2.small
     ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
