@@ -1,7 +1,13 @@
 ---
+  - name: Check IP MAIN
+    shell: ifconfig
+    register: check_main
+
+  - debug: var=check_main
+
   - set_fact:
       man_ip: "{{ lookup('env', ip_env) }}"
-  
+ 
   - debug: var=man_ip
 
   - name: include tasks for test env setup
@@ -113,3 +119,9 @@
   - name: check PXC 8.0 version
     command: /package-testing/version_check.sh pxc80
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+      
+  - name: Sleep 60 seconds
+    command: sleep 60
+
+    
+

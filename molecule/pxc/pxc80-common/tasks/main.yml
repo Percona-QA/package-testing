@@ -1,7 +1,6 @@
 ---
   - set_fact:
-      man_ip: "{{ lookup('env', ip_env) }}"
-  
+      man_ip={{ lookup('env', ip_env) }}
   - debug: var=man_ip
 
   - name: include tasks for test env setup
@@ -80,7 +79,8 @@
 
   - name: start mysql service
     service: name=mysql state=started
-
+    throttle: 1
+    
   - name: register PXC version
     shell: mysqld --version
     register: pxc_version
@@ -101,8 +101,13 @@
 # - name: install plugins
 #   command: /package-testing/plugins_test_80.sh pxc
 
+#  - name: Run tests and incase of failure save logs
+#    block:
+
   - name: run bats tests for mysql init scripts
     shell: sleep {{ sleep_before_tests | default('0') }}; /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
+    throttle: 1
 
   - name: start mysql service
     service: name=mysql state=started
+    throttle: 1

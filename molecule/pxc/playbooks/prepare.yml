@@ -5,15 +5,6 @@
   become_method: sudo
   gather_facts: true
   tasks:
-    - name: add the Vault and epel CentOS 6 repos
-      shell: |
-        curl https://www.getpagespeed.com/files/centos6-eol.repo --output /etc/yum.repos.d/CentOS-Base.repo
-        curl https://www.getpagespeed.com/files/centos6-epel-eol.repo --output /etc/yum.repos.d/epel.repo
-        yum -y install centos-release-scl
-        curl https://www.getpagespeed.com/files/centos6-scl-eol.repo --output /etc/yum.repos.d/CentOS-SCLo-scl.repo
-        curl https://www.getpagespeed.com/files/centos6-scl-rh-eol.repo --output /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
-        yum -y install epel-release.noarch
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
     - name: install GPG key for epel 8
       rpm_key:
@@ -45,11 +36,14 @@
         state: present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
+    - name: upgrade deb packages apt
+      apt: update_cache=yes upgrade=safe
+      when: ansible_os_family == "Debian"
+
 
     - name: install needed packages for running tests with apt
       apt:
         name: "{{ packages }}"
-        update_cache: yes
         state: latest
       vars:
         packages:
@@ -59,6 +53,7 @@
           - gnupg2
           - rsync
           - acl
+          - net-tools
       retries: 60
       delay: 10
       register: result
@@ -96,4 +91,12 @@
         packages:
         - unzip
         - wget
+        - net-tools
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
+
+    - name: disable firewalld for OL8
+      service:
+        name: firewalld
+        state: stopped
+      when: ansible_distribution == "OracleLinux" and ansible_distribution_major_version == "8"
+

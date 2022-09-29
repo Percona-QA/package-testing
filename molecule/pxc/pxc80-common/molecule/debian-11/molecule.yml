@@ -10,20 +10,20 @@ lint:
 platforms:
   - name: pxc2-80-common-debian-11
     region: us-west-2
-    image: ami-0362922178e02e9f3
+    image: ami-0d0f7602aa5c2425d
     vpc_subnet_id: subnet-0430e63d7cdbcd237
-    instance_type: t2.micro
-    ssh_user: centos
-    root_device_name: /dev/sda1
+    instance_type: t2.small
+    ssh_user: admin
+    root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
   - name: pxc3-80-common-debian-11
     region: us-west-2
-    image: ami-0362922178e02e9f3
+    image: ami-0d0f7602aa5c2425d
     vpc_subnet_id: subnet-0430e63d7cdbcd237
-    instance_type: t2.micro
-    ssh_user: centos
-    root_device_name: /dev/sda1
+    instance_type: t2.small
+    ssh_user: admin
+    root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
 provisioner:

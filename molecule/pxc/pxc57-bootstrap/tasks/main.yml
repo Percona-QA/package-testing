@@ -107,9 +107,6 @@
     when: ansible_os_family == "Debian"
 
   # bootstrap the cluster
-  - name: bootstrap cluster on RHEL6
-    command: /etc/init.d/mysql bootstrap-pxc
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
   - name: bootstrap cluster on RHEL7
     command: systemctl start mysql@bootstrap.service
@@ -131,9 +128,6 @@
     when: ansible_os_family == "RedHat"
 
   # add sstuser
-  - name: create backup user on centos 6
-    mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
   - name: create backup user on centos 7
     command: /package-testing/pxc_backup_user.sh
