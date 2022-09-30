@@ -16,7 +16,7 @@ platforms:
     ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
-      iit-billing-tag: jenkins-ps-worker
+      iit-billing-tag: jenkins-ps80-worker
   - name: ps-node2-oracle-linux-8
     region: us-west-2
     image: ami-0c32e4ead7507bc6f
@@ -25,7 +25,7 @@ platforms:
     ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
-      iit-billing-tag: jenkins-ps-worker
+      iit-billing-tag: jenkins-ps80-worker
   - name: ps-node3-oracle-linux-8
     region: us-west-2
     image: ami-0c32e4ead7507bc6f
@@ -34,7 +34,7 @@ platforms:
     ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
-      iit-billing-tag: jenkins-ps-worker
+      iit-billing-tag: jenkins-ps80-worker
 provisioner:
   name: ansible
   lint:
