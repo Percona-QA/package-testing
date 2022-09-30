@@ -1,6 +1,6 @@
 ---
 scenario:
-  name: oracle-linux-8
+  name: oracle-8
 dependency:
   name: galaxy
 driver:
@@ -8,7 +8,25 @@ driver:
 lint:
   name: yamllint
 platforms:
-  - name: mysql-router-oracle-linux-8
+  - name: ps-node1-oracle-8
+    region: us-west-2
+    image: ami-0c32e4ead7507bc6f
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t2.small
+    ssh_user: ec2-user
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+  - name: ps-node2-oracle-8
+    region: us-west-2
+    image: ami-0c32e4ead7507bc6f
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t2.small
+    ssh_user: ec2-user
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+  - name: ps-node3-oracle-8
     region: us-west-2
     image: ami-0c32e4ead7507bc6f
     vpc_subnet_id: subnet-0430e63d7cdbcd237
