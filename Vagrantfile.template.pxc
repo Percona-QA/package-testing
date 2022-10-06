@@ -2,16 +2,14 @@
 # vi: set ft=ruby :
 
 servers=[
-  { :hostname => "d-stretch-64-@@hostname@@", :box => "bento/debian-9" },
   { :hostname => "d-buster-64-@@hostname@@", :box => "bento/debian-10" },
   { :hostname => "d-bullseye-64-@@hostname@@", :box => "bento/debian-11" },
-  { :hostname => "centos-6-64-@@hostname@@", :box => "bento/centos-6" },
   { :hostname => "centos-7-64-@@hostname@@", :box => "bento/centos-7" },
-  { :hostname => "centos-8-64-@@hostname@@", :box => "bento/centos-8" },
-  { :hostname => "u-xenial-64-@@hostname@@", :box => "bento/ubuntu-16.04" },
+  { :hostname => "min-ol-8-x64-@@hostname@@", :box => "bento/oracle-8" },
+  { :hostname => "min-ol-9-x64-@@hostname@@", :box => "generic/oracle9" },
   { :hostname => "u-bionic-64-@@hostname@@", :box => "bento/ubuntu-18.04" },
   { :hostname => "u-focal-64-@@hostname@@", :box => "bento/ubuntu-20.04" },
-  { :hostname => "sles-12-64-@@hostname@@", :box => "wvera/sles12sp2" }
+  { :hostname => "minimal-ubuntu-jammy-x64-@@hostname@@", :box => "ubuntu/jammy64" }
 ]
 
 Vagrant.configure("2") do |config|
