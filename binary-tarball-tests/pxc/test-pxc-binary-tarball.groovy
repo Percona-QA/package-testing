@@ -35,9 +35,9 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage Ubuntu Focal
-        stage('Debian Stretch') {
+        stage('Ubuntu Jammy') {
           agent {
-            label "min-stretch-x64"
+            label "min-jammy-x64"
           }
           steps {
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
@@ -45,7 +45,7 @@ pipeline {
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
-        } //End stage Debian Stretch
+        } //End stage Ubuntu Jammy
         stage('Debian Buster') {
           agent {
             label "min-buster-x64"
@@ -57,6 +57,17 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage Debian Buster
+        stage('Debian Bullseye') {
+          agent {
+            label "min-bullseye-x64"
+          }
+          steps {
+            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+              run_test()
+            }
+            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+          } //End steps
+        } //End stage Debian Bullseye
         stage('Centos7') {
           agent {
             label "min-centos-7-x64"
@@ -68,9 +79,9 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage CentOS7
-        stage('Centos8') {
+        stage('Oracle Linux 8') {
           agent {
-            label "min-centos-8-x64"
+            label "min-ol-8-x64"
           }
           steps {
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
@@ -78,7 +89,18 @@ pipeline {
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
-        } //End stage CentOS8
+        } //End stage Oracle Linux 8
+        stage('Oracle Linux 9') {
+          agent {
+            label "min-ol-9-x64"
+          }
+          steps {
+            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+              run_test()
+            }
+            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+          } //End steps
+        } //End stage Oracle Linux 9
        } //End parallel
     } //End stage Run tests
   } //End stages
@@ -105,7 +127,7 @@ void run_test() {
     fi
     rm -rf package-testing
     if [ -f /usr/bin/yum ]; then
-      sudo yum install -y git wget
+      sudo yum install -y git wget tar
     else
       sudo apt install -y git wget
     fi
