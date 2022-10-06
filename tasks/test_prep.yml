@@ -97,7 +97,6 @@
       - unzip
       - wget
       - jq # for exporter end point metric fetch
-      - tar  
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
 
   - name: register SLES for updates with suse_register
