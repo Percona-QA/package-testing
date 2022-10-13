@@ -12,6 +12,8 @@ Help()
    echo "options:"
    echo "h     Print this Help."
    echo "v     Installing specified version 2.XX.X"
+   echo "r     Installing specified feature build, ex: PR-2734-6fe2553"
+   echo "      Please note that version is mandatory for this option"
    echo "p     Installation path. Default: /usr/local/percona/pmm2."
    echo "      Sets default version to 2.26.0 if no version specified"
    echo "l     listening custom port mode. Sets default version to 2.27.0 if no version specified"
@@ -31,7 +33,7 @@ update_flag=""
 ############################################################
 # Process the input options.                               #
 ############################################################
-while getopts "v:p:hlu" option; do
+while getopts "v:r:p:hlu" option; do
    case $option in
       h) # display Help
         Help
@@ -39,6 +41,9 @@ while getopts "v:p:hlu" option; do
         ;;
       v) # Enter a version
         version=$OPTARG
+        ;;
+      r) # Enter a PR ex: PR-2734-6fe2553
+        fb=$OPTARG
         ;;
       p) # Enter a custom path
         path=$OPTARG
@@ -81,12 +86,17 @@ fi
 if [ -z "${path}" ]; then
   path=$default_path
 fi
-tarball_url=https://downloads.percona.com/downloads/TESTING/pmm/pmm2-client-${version}.tar.gz
+client_tar=pmm2-client-${version}.tar.gz
+tarball_url=https://downloads.percona.com/downloads/TESTING/pmm/${client_tar}
+if [ -n "${fb}" ]; then
+  client_tar=pmm2-client-${fb}.tar.gz
+  tarball_url=https://s3.us-east-2.amazonaws.com/pmm-build-cache/PR-BUILDS/pmm2-client/${client_tar}
+fi
 ### Main program
 echo "Downloading ${tarball_url}"
 mkdir -p ./tmp/
 wget ${tarball_url} -P ./tmp/
-tar -xvf ./tmp/pmm2-client-${version}.tar.gz -C ./tmp/
+tar -xvf "./tmp/${client_tar}" -C ./tmp/
 echo "Installing tarball to ${path}"
 mkdir -p ${path}
 export PMM_DIR=${path}
