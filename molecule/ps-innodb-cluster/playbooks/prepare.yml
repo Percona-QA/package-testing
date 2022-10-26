@@ -106,3 +106,9 @@
       iptables:
         flush: yes
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+    - name: disable firewalld for OL8
+      service:
+        name: firewalld
+        state: stopped
+      when: ansible_distribution == "OracleLinux" and ansible_distribution_major_version == "8"
