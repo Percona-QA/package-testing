@@ -21,6 +21,8 @@ Vagrant.configure("2") do |config|
     config.vm.define "pxc1-#{machine[:hostname]}" do |node1|
       node1.vm.box = machine[:box]
       node1.vm.hostname = machine[:hostname]
+      node1.ssh.username = "vagrant"
+      node1.ssh.password = "vagrant"
       node1.vm.provider "virtualbox" do |vb|
           vb.customize ["modifyvm", :id, "--cpus", 2]
           vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on"]
@@ -42,6 +44,8 @@ Vagrant.configure("2") do |config|
     config.vm.define "pxc2-#{machine[:hostname]}" do |node2|
       node2.vm.box = machine[:box]
       node2.vm.hostname = machine[:hostname]
+      node2.ssh.username = "vagrant"
+      node2.ssh.password = "vagrant"
       node2.vm.provider "virtualbox" do |vb|
           vb.customize ["modifyvm", :id, "--cpus", 2]
           vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on"]
@@ -63,6 +67,8 @@ Vagrant.configure("2") do |config|
     config.vm.define "pxc3-#{machine[:hostname]}" do |node3|
       node3.vm.box = machine[:box]
       node3.vm.hostname = machine[:hostname]
+      node3.ssh.username = "vagrant"
+      node3.ssh.password = "vagrant"
       node3.vm.provider "virtualbox" do |vb|
           vb.customize ["modifyvm", :id, "--cpus", 2]
           vb.customize ["modifyvm", :id, "--memory", "2048", "--ioapic", "on"]
