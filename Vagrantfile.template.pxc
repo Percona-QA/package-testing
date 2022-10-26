@@ -9,7 +9,7 @@ servers=[
   { :hostname => "min-ol-9-x64-@@hostname@@", :box => "generic/oracle9" },
   { :hostname => "u-bionic-64-@@hostname@@", :box => "bento/ubuntu-18.04" },
   { :hostname => "u-focal-64-@@hostname@@", :box => "bento/ubuntu-20.04" },
-  { :hostname => "minimal-ubuntu-jammy-x64-@@hostname@@", :box => "ubuntu/jammy64" }
+  { :hostname => "minimal-ubuntu-jammy-x64-@@hostname@@", :box => "bento/ubuntu-22.04" }
 ]
 
 Vagrant.configure("2") do |config|
