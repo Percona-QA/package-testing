@@ -1,4 +1,4 @@
-#!/usr/bin/env rash
+#!/usr/bin/env bash
 export PATH=${HOME}/.local/bin:${PATH}
 
 PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
