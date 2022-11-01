@@ -115,7 +115,7 @@ void run_test() {
       MINIMAL="-minimal"
     fi
     if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
-      TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.17${MINIMAL}.tar.gz"
+      TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.27${MINIMAL}.tar.gz"
       TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
     elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
       export GLIBC_VERSION="2.17"
@@ -131,7 +131,7 @@ void run_test() {
     else
       sudo apt install -y git wget
     fi
-    git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+    git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-pxc-tarball --depth 1
     cd package-testing/binary-tarball-tests/pxc
     wget -q ${TARBALL_LINK}${TARBALL_NAME}
     ./run.sh || true
