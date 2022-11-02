@@ -21,7 +21,7 @@ def test_check_deb_package(host, package):
 def test_orchestrator_version(host):
     cmd = 'orchestrator --version'
     dist = host.system_info.distribution
-    if dist.lower() in ["redhat", "centos", "rhel", "oracleserver","ol"]:
+    if dist.lower() in ["redhat", "centos", "rhel", "oracleserver", "ol", "amazonlinux", "amzn"]:
         cmd = "/usr/local/orchestrator/orchestrator --version"
     result = host.run(cmd)
     assert result.rc == 0, result.stderr
