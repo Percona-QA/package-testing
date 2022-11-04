@@ -6,7 +6,7 @@ driver:
 platforms:
   - name: ujammy-${BUILD_NUMBER}-${JOB_NAME}
     region: us-west-2
-    image: ami-0a7db3037c9dfce2f
+    image: ami-00b0c1efb144c2176
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.micro
     ssh_user: ubuntu
