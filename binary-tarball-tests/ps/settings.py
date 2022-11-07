@@ -25,7 +25,7 @@ ps80_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
   ('group_replication','group_replication.so'),('clone','mysql_clone.so'),('data_masking','data_masking.so'),
-  ('authentication_ldap_simple','authentication_ldap_simple.so'),('procfs', 'procfs.so')
+  ('authentication_ldap_simple','authentication_ldap_simple.so'),('procfs', 'procfs.so'),
   ('authentication_ldap_sasl','authentication_ldap_sasl.so'),('authentication_fido','authentication_fido.so')
 )
 ps80_functions = (
