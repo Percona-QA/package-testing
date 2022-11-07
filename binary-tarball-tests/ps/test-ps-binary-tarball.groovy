@@ -138,7 +138,10 @@ void run_test() {
     if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
       MINIMAL="-minimal"
     fi
-    export GLIBC_VERSION="2.17"
+    if [[ $(lsb_release -sc) == 'jammy' ]]; then
+      export GLIBC_VERSION="2.27"
+    else
+      export GLIBC_VERSION="2.17"
     TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
     TARBALL_LINK="https://www.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
     rm -rf package-testing
