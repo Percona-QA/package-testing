@@ -168,24 +168,18 @@ elif [ ${product} = "pmm" ]; then
     echo "${product} version is correct and ${version}" >> "${log}"
   fi
 
-elif [ ${product} = "pmm2" ]; then
-  version_check=$(pmm-admin --version 2>&1|grep -c ${version})
+elif [ ${product} = "pmm2" -o ${product} = "pmm2-rc" ]; then
+  pmm-admin --version
+  version_check=$(pmm-admin --version 2>&1|grep -c "${version}")
+  actual_version=$(pmm-admin --version 2>&1|grep ^Version | awk -F ' ' '{print $2}')
   if [ ${version_check} -eq 0 ]; then
-    echo "${product} version is not good!"
+    echo "${product} version ${actual_version} is not good! Expected: ${version}" >&2;
     exit 1
   else
-    echo "${product} version is correct and ${version}" >> "${log}"
+    echo "${product} version is correct and ${version}"
   fi
   bash -xe ./check_pmm2_client_upgrade.sh ${version}
-elif [ ${product} = "pmm2-rc" ]; then
-  version_check=$(pmm-admin --version 2>&1|grep -c ${version})
-  if [ ${version_check} -eq 0 ]; then
-    echo "${product} version is not good!"
-    exit 1
-  else
-    echo "${product} version is correct and ${version}" >> "${log}"
-  fi
-  bash -xe ./check_pmm2_client_upgrade.sh ${version}
+
 elif [ "${product}" = "pxb24" -o "${product}" = "pxb80" ]; then
     for binary in xtrabackup xbstream xbcloud xbcrypt; do
         version_check=$($binary --version 2>&1| grep -c "${version}")
@@ -197,6 +191,7 @@ elif [ "${product}" = "pxb24" -o "${product}" = "pxb80" ]; then
             echo "${binary} version is correctly displayed as: ${version}" >> "${log}"
         fi
     done
+
 elif [ ${product} = "proxysql" -o ${product} = "proxysql2" ]; then
   version_check=$(proxysql --version 2>&1|grep -c ${version})
   installed_version=$(proxysql --version)

@@ -413,7 +413,6 @@
     assert:
      that:
       - "'Running' in postgresql_pgstatements_agent.stdout"
-
   - name: Remove Socket services, to verify Port output in pmm-admin list commands
     command: "{{item}}"
     with_items:

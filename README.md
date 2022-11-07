@@ -7,3 +7,15 @@ Created by: Hrvoje Matijakovic, Percona
 Expanded by: Tomislav Plavcic, Percona
 
 Current Ownership: Tomislav Plavcic
+
+## Execute tests
+Tests can be launched locally via vagrant. Please see corresponding Vagrant.template    
+* PMM2: [Vagrantfile.template.pmm2](Vagrantfile.template.pmm2)
+
+## Developer notes
+### Important!
+Windows users make sure to ignore file mode in repo due to open defect.
+Use: `git config core.fileMode false`
+
+Make sure any script(.sh) has +x byte committed to repo.  
+Use `git update-index --chmod=+x myScript.sh` then commit and push.
