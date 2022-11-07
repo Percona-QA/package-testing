@@ -7,7 +7,7 @@
 - name: Install percona release
   include: ../../tasks/install_percona_release.yml
 
-- name: enable the PDMYSQL-80 repo
+- name: enable the old repository pdppxc-{{ pdmysql_version }} {{ repo }}
   command: percona-release enable-only pdpxc-{{ pdmysql_version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'FROM_REPO') }}"
@@ -21,11 +21,11 @@
 
 - name: disable the mysql module on RHEL/CentOS 8
   command: yum module disable mysql -y
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
 - name: disable the mariadb module on RHEL/CentOS 8
   command: yum module disable mariadb -y
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
 - name: install PXC 8 deb packages
   apt:
@@ -131,10 +131,12 @@
   with_items:
   - rm -rf /package-testing
   - rm -f master.zip
-  - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+  - wget --no-check-certificate -O master.zip "https://github.com/Percona-QA/package-testing/archive/{{ branch }}.zip"
   - unzip master.zip
   - rm -f master.zip
-  - mv package-testing-master /package-testing
+  - mv "package-testing-{{ branch }}" /package-testing
+  vars:
+    branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
 
 - name: install latest bats from github
   command: "{{ item }}"
@@ -163,13 +165,13 @@
   service: name=mysql state=started
   when: ansible_os_family == "Debian"
 
-- name: Disable old repository
+- name: disable old repository
   command: percona-release disable pdpxc-{{ pdmysql_version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'FROM_REPO') }}"
     pdmysql_version: "{{ lookup('env', 'FROM_VERSION') }}"
 
-- name: Setup new repository
+- name: enable new repository pdppxc-{{ pdmysql_version }} {{ repo }}
   command: percona-release enable pdpxc-{{ pdmysql_version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'TO_REPO') }}"
