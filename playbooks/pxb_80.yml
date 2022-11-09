@@ -73,13 +73,14 @@
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
 
-  - name: install qpress and lz4 packages on Redhat/CentOS
+  - name: install qpress, lz4 and zstd packages on Redhat/CentOS
     yum:
       name: "{{ packages }}"
     vars:
       packages:
       - qpress
       - lz4
+      - zstd
     when: ansible_os_family == "RedHat"
 
   - name: install qpress, lz4 and zstd packages on Ubuntu/Debian
