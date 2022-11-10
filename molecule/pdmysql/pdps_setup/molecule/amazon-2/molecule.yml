@@ -31,7 +31,6 @@ verifier:
     - ../../../tests/test_proxysql2.py
     - ../../../tests/test_pxb.py
 scenario:
-  name: amazon-2
   destroy_sequence:
     - destroy
   clenup_sequence:
