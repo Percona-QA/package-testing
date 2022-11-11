@@ -76,7 +76,7 @@ def is_running(host):
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
     dist = host.system_info.distribution
-    if dist.lower() in ["redhat", "centos", "rhel", "oracleserver","ol"]:
+    if dist.lower() in ["redhat", "centos", "rhel", "oracleserver", "ol", "amzn"]:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
@@ -159,7 +159,7 @@ def test_disable_validate_password_plugin(host):
         plugin = host.run(cmd)
         assert plugin.rc == 0, plugin.stdout
         dist = host.system_info.distribution
-        if dist.lower() in ["redhat", "centos", "rhel", "oracleserver","ol"]:
+        if dist.lower() in ["redhat", "centos", "rhel", "oracleserver", "ol", "amzn"]:
             cmd = 'service mysql restart'
             restart = host.run(cmd)
             assert restart.rc == 0, (restart.stdout, restart.stderr)
