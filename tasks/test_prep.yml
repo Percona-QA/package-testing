@@ -51,6 +51,11 @@
       yum -y install epel-release.noarch
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
+  - name: add locale in ubuntu jammy
+    shell: |
+      export LC_ALL="en_US.UTF-8"
+    when: ansible_os_family == "Debian" and ansible_distribution_release == "jammy"
+
   - name: allow release-info to change for apt repositories
     command: apt-get update -y --allow-releaseinfo-change
     when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
@@ -154,10 +159,10 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+    - wget --no-check-certificate -O master.zip https://github.com/kaushikpuneet07/package-testing/archive/PS-8481.zip
     - unzip master.zip
     - rm -f master.zip
-    - mv package-testing-master /package-testing
+    - mv package-testing-PS-8481 /package-testing
     when: lookup('env', 'USE_LOCAL_PKG_TEST') == "" or lookup('env', 'USE_LOCAL_PKG_TEST') == "0"
 
   - name: install latest bats from github
