@@ -14,6 +14,9 @@
   become_method: sudo
   vars:
     major_upgrade: true
+    install_mysql_shell: "{{ lookup('env', 'install_mysql_shell', default='') }}"
+  environment:
+    install_mysql_shell: '{{ install_mysql_shell }}'
 
   tasks:
 ### start of PS 5.7 install
