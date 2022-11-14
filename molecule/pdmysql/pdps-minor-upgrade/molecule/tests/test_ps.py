@@ -55,6 +55,10 @@ PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    "mysql -e \"INSTALL PLUGIN"
                    " connection_control SONAME 'connection_control.so';\"",
                    "mysql -e \"INSTALL PLUGIN"
+                   " authentication_ldap_sasl SONAME 'authentication_ldap_sasl.so';\"",
+                   "mysql -e \"INSTALL PLUGIN"
+                   " authentication_fido SONAME 'authentication_fido.so';\"",
+                   "mysql -e \"INSTALL PLUGIN"
                    " connection_control_failed_login_attempts SONAME 'connection_control.so';\""]
 
 
