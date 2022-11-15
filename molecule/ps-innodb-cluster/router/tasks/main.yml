@@ -69,7 +69,7 @@
       packages:
       - percona-mysql-router
       - percona-mysql-shell
-      - sysbench   
+      - sysbench
       - jq
     when: ansible_os_family == "RedHat"
 
