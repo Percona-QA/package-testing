@@ -42,5 +42,3 @@ provisioner:
       pxc3-80-common-debian-10:
         ip_env: PXC3_IP
         sleep_before_tests: 40
-
-

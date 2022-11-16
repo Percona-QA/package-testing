@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+# This bash script is used to manually run on the local setup using vagrant
+
 set -e
 
 function fail {
