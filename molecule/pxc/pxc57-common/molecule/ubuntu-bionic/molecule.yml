@@ -10,19 +10,19 @@ lint:
 platforms:
   - name: pxc2-57-common-ubuntu-bionic
     region: us-west-2
-    image: ami-0362922178e02e9f3
+    image: ami-074251216af698218
     vpc_subnet_id: subnet-0430e63d7cdbcd237
-    instance_type: t2.micro
-    ssh_user: centos
+    instance_type: t2.small
+    ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
   - name: pxc3-57-common-ubuntu-bionic
     region: us-west-2
-    image: ami-0362922178e02e9f3
+    image: ami-074251216af698218
     vpc_subnet_id: subnet-0430e63d7cdbcd237
-    instance_type: t2.micro
-    ssh_user: centos
+    instance_type: t2.small
+    ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
