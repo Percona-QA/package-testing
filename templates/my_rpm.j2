@@ -12,7 +12,7 @@ innodb_log_file_size=20M
 wsrep_provider=/usr/lib64/libgalera_smm.so
 
 # Cluster connection URL contains the IPs of node#1, node#2 and node#3
-wsrep_cluster_address=gcomm://192.168.70.61,192.168.70.62,192.168.70.63
+wsrep_cluster_address=gcomm://{{ lookup('env', "PXC1_IP") | default("192.168.70.61") }},{{ lookup('env', "PXC2_IP") | default("192.168.70.62") }},{{ lookup('env', "PXC3_IP") | default("192.168.70.63") }}
 
 # In order for Galera to work correctly binlog format should be ROW
 binlog_format=ROW

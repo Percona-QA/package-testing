@@ -1,0 +1,29 @@
+---
+- name: LogsBackup Bootstrap
+  hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: true
+  tasks:
+
+    - set_fact:
+        man_ip={{ip_env}}
+    - debug: var=man_ip
+
+    - set_fact:
+        jenkinsworkspace={{ lookup('ansible.builtin.env', 'JENWORKSPACE') }}
+      delegate_to: localhost
+
+    - name: Zip the logs
+      community.general.archive:
+        path: /var/log
+        dest: /var/log/{{man_ip}}_logs.tar.gz
+
+    - name: Fetch the log zip to the main node
+      become: true
+      ansible.builtin.fetch:
+        src: /var/log/{{man_ip}}_logs.tar.gz
+        dest: "{{jenkinsworkspace}}/PXC/{{man_ip}}/"
+
+
+
