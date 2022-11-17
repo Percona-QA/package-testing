@@ -1,0 +1,48 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: ufocal-${BUILD_NUMBER}-${JOB_NAME}
+    region: us-west-2
+    image: ami-09dd2e08d601bff67
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: t2.micro
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-ps80-worker
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    create: ../../../../playbooks/create.yml
+    destroy: ../../../../playbooks/destroy.yml
+    prepare: ../../../../playbooks/prepare.yml
+    cleanup: ../../playbooks/cleanup.yml
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../tests/
+  options:
+    verbose: true
+    s: true
+    junitxml: report.xml
+  additional_files_or_dirs:
+    - ../../../tests/test_proxysql2.py
+    - ../../../tests/test_pxb.py
+scenario:
+  name: ubuntu-focal
+  destroy_sequence:
+    - destroy
+  clenup_sequence:
+    - cleanup
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+    - destroy

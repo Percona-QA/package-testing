@@ -1,0 +1,360 @@
+---
+# This playbook does following:
+#   enables Percona main repository
+#   installs previous version of PMM client
+#   enables Percona testing repository
+#   upgrades PMM client
+#   does some tests
+
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
+    metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
+    pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
+    pmm_repo: "{{ lookup('env', 'install_repo') }}"
+    custom_path: "/pmm2-client-custom-path"
+
+  tasks:
+  - name: Register Instance IP
+    shell: echo $(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
+    register: instance_ip
+
+  - name: Register Instance IP as a variable
+    set_fact:
+      instance_ip: "{{ instance_ip.stdout }}"
+
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/pmm2_client_test_prepare.yml
+
+  - name: detect and save release version
+    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O -  | jq -r  .results[].name  | grep -v latest | sort -V | tail -n1"
+    register: pmm_release_version
+
+  - name: Print detected PMM Release Version
+    ansible.builtin.debug:
+      msg: pmm2 release version is {{ pmm_release_version.stdout }}
+
+  - name: "install old({{ pmm_release_version.stdout }}) pmm2-client tarball to custom path"
+    command: "../scripts/pmm2_client_install_tarball.sh -v {{ pmm_release_version.stdout }} -p {{ custom_path }}"
+
+  - name: Start agent
+    shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
+
+  - name: define "--metrics-mode=push|pull|auto" argument
+    set_fact:
+      metrics_mode_arg: "--metrics-mode={{ metrics_mode }}"
+
+  - name: Use pmm-agent setup to configure pmm client to connect to server
+    shell: pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-address={{ pmm_server_address }} --server-insecure-tls {{ metrics_mode_arg }} --server-username=admin --server-password=admin --paths-base={{ custom_path }}/ {{ instance_ip }} generic node2_{{ instance_ip }}
+
+  - name: Check if the configuration generated with paths-base is using the custom path
+    shell: cat {{custom_path}}/config/pmm-agent.yaml | grep -o -c "{{custom_path}}" | grep "14"
+    become: yes
+
+### start PS 5.7
+  - name: install Percona Server 5.7 packages
+    include_tasks: ../tasks/install_ps57.yml
+
+  - name: start mysql service
+    service: name=mysql state=started
+
+  - name: start mysql service with service command
+    command: service mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+
+  - name: set root password on centos
+    command: ../setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+      dest=/root/.my.cnf
+      mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
+
+  - name: add mysql metrics and queries to monitoring
+    command: ../scripts/pmm2_add_instance.sh mysql
+    when: ansible_os_family == "RedHat"
+
+  - name: add mysql instance for monitoring using socket
+    command: pmm-admin add mysql --query-source=perfschema --socket=/var/run/mysqld/mysqld.sock --service-name=mysql_{{ instance_ip }}
+    when: ansible_os_family != "RedHat"
+
+  - name: check if mysql monitoring running
+    command: pmm-admin list
+    register: list_output
+
+  - name: Assert if the pmm-admin list contains mysql
+    assert:
+      that:
+        - "'MySQL' in list_output.stdout"
+## end PS 5.7
+
+### start PSMDB 4.4
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_psmdb_repo.yml
+    vars:
+      psmdb_repo: "psmdb-44"
+
+  - name: install PSMDB packages
+    include_tasks: ../tasks/install_psmdb.yml
+
+  - name: start mongod with service
+    command: service mongod start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mongod with systemctl
+    command: systemctl start mongod
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 6
+
+  - name: add mongodb metrics to monitoring
+    command: pmm-admin add mongodb --service-name=mongodb_{{ instance_ip }}
+
+  - name: add mongodb metrics to monitoring using socket
+    command: pmm-admin add mongodb --socket=/tmp/mongodb-27017.sock --service-name=mongodb_socket_{{ instance_ip }}
+
+  - name: check if mongodb monitoring is running
+    command: pmm-admin list
+    register: list_output
+
+  - name: Assert if the pmm-admin list contains mongodb instance
+    assert:
+      that:
+        - "'MongoDB' in list_output.stdout"
+### end PSMDB 4.4
+
+### start PG 13
+  - name: Enable postgresql repository
+    command: percona-release setup -y ppg-13
+    when: ansible_distribution_release != 'xenial'
+
+  - name: include tasks for setting up pg13
+    include_tasks: ../ppg-testing/tasks/install_ppg13.yml
+    when: ansible_distribution_release != 'xenial'
+
+  - name: Initialize Postgres RHEL
+    command: /usr/pgsql-13/bin/postgresql-13-setup initdb
+    environment:
+      PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    when: ansible_os_family == "RedHat"
+
+  - name: Start Postgres RHEL
+    service:
+      name: postgresql-13
+      state: started
+      enabled: true
+    when: ansible_os_family == "RedHat"
+
+  - name: Start postgresql service for Debian based
+    service:
+      name: postgresql
+      state: started
+      enabled: true
+    when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
+
+  - name: create lowercase 8 character password for pgsql
+    set_fact:
+      random_pgsql_password: "psql-{{ lookup('password', '/tmp/pgsqlpassword chars=ascii_lowercase,digits length=8') }}"
+
+  - name: Change Postgresql Password
+    command: psql -c "ALTER USER postgres PASSWORD '{{ random_pgsql_password }}';"
+    become: yes
+    become_user: postgres
+    when: ansible_distribution_release != 'xenial'
+
+  - name: setup postgresql pg_stat_statements for Debian based Systems
+    shell: "{{item}}"
+    with_items:
+      - chmod a+w /etc/postgresql/13/main/postgresql.conf
+      - echo "shared_preload_libraries = 'pg_stat_statements'" >> /etc/postgresql/13/main/postgresql.conf
+      - cat /etc/postgresql/13/main/postgresql.conf | grep "pg_stat_statements"
+    become: yes
+    when: ansible_os_family == "Debian"
+
+  - name: setup postgresql pg_stat_statements for redhat based systems
+    shell: "{{item}}"
+    with_items:
+      - chmod a+w /var/lib/pgsql/13/data/postgresql.conf
+      - echo "shared_preload_libraries = 'pg_stat_statements'" >> /var/lib/pgsql/13/data/postgresql.conf
+      - cat /var/lib/pgsql/13/data/postgresql.conf | grep "pg_stat_statements"
+    become: yes
+    when: ansible_os_family == "RedHat"
+
+  - name: Enable Socket Based Connection for pgsql via pgsql configuration for debian based systems
+    command: sed -i 's/local   all             postgres                                peer/local   all             postgres                                trust/' /etc/postgresql/13/main/pg_hba.conf
+    become: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Enable Socket Based Connection for pgsql via pgsql configuration for redhat based systems
+    command: sed -i 's/local   all             all                                     peer/local   all             all                                     trust/' /var/lib/pgsql/13/data/pg_hba.conf
+    become: yes
+    when: ansible_os_family == "RedHat"
+
+  - name: Start Postgres RHEL
+    service:
+      name: postgresql-13
+      state: restarted
+      enabled: true
+    when: ansible_os_family == "RedHat"
+
+  - name: Start postgresql service for Debian based
+    service:
+      name: postgresql
+      state: restarted
+      enabled: true
+    when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
+
+  - name: Create Extension pg_stat_statements
+    command: psql -c "create extension pg_stat_statements;"
+    become: yes
+    become_user: postgres
+
+  - name: add postgresql metrics to monitoring
+    command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }}
+    when: ansible_distribution_release != 'xenial'
+
+  - name: add postgresql metrics to monitoring via socket
+    command: pmm-admin add postgresql --socket /var/run/postgresql/ --username=postgres --service-name=pgsql_socket_{{ instance_ip }}
+
+  - name: check if postgresql monitoring is running
+    command: pmm-admin list
+    register: list_output
+    when: ansible_distribution_release != 'xenial'
+
+  - name: Print the pmm-admin list value
+    ansible.builtin.debug:
+      msg: System {{ list_output.stdout }}
+    when: ansible_distribution_release != 'xenial'
+
+  - name: Assert if the pmm-admin list contains postgreSQL instance
+    assert:
+      that:
+        - "'PostgreSQL' in list_output.stdout"
+    when: ansible_distribution_release != 'xenial'
+## end PG 13
+
+  - name: "install new({{ pmm_version }}) pmm2-client tarball to custom path"
+    command: "../scripts/pmm2_client_install_tarball.sh -v {{ pmm_version }} -p {{ custom_path }} -u"
+
+  - name: check that PMM client dev-latest version is correct
+    shell: ../version_check.sh pmm2
+    when: pmm_repo == "experimental"
+
+  - name: check that PMM client RC version is correct
+    shell: ../version_check.sh pmm2-rc
+    ### "testing" "main" "tools-main" "pmm2-client-main"
+    when: pmm_repo != "experimental"
+
+  #TODO: investigate purpose and possible moving it inside ../version_check.sh
+  - name: Fetch PMM-Admin version via pmm-admin status output
+    shell: pmm-admin status | grep pmm-admin | awk -F' ' '{print $3}'
+    register: pmm_admin_version
+
+  - name: Print the PMM-Admin Version on Status command
+    ansible.builtin.debug:
+      msg: pmm-admin version is {{ pmm_admin_version.stdout }}
+
+  - name: Assert if the version output value is strict matched with expected version
+    assert:
+      that:
+        - "'{{ pmm_version }}' in pmm_admin_version.stdout"
+    when: pmm_repo == "testing"
+
+  - name: Check if the configuration generated with paths-base is using the custom path after upgrade client
+    shell: cat {{ custom_path }}/config/pmm-agent.yaml | grep -o -c {{ custom_path }} | grep "14"
+    become: yes
+
+  - name: check if mongodb is still being monitored
+    command: pmm-admin list
+    register: list_output
+
+  - name: Assert if the pmm-admin list contains mongodb instance
+    assert:
+      that:
+        - "'MongoDB' in list_output.stdout"
+
+  - name: Assert if the pmm-admin list contains mysql
+    assert:
+      that:
+        - "'MySQL' in list_output.stdout"
+
+  - name: Assert if the pmm-admin list contains postgreSQL instance
+    assert:
+      that:
+        - "'PostgreSQL' in list_output.stdout"
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+
+  - name: check if pmm_agent is connected
+    shell: pmm-admin list | grep pmm_agent | awk -F" " '{print $2}'
+    register: pmm_agent_status
+
+  - name: Assert if the pmm-admin list contains pmm_agent type and Connected
+    assert:
+     that:
+      - "'Connected' in pmm_agent_status.stdout"
+
+  - name: Wait for node_exporter to be Running Status After Upgrade
+    shell: pmm-admin list | grep node_exporter | awk -F" " '{print $2}'
+    register: ne_status
+    until: ne_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
+
+  - name: check if node_exporter is Running
+    shell: pmm-admin list | grep node_exporter | awk -F" " '{print $2}'
+    register: node_exporter_status
+
+  - name: Print the node_exporter_status
+    ansible.builtin.debug:
+      msg: Node Exporter Status is {{ node_exporter_status.stdout }}
+
+  - name: Assert if the pmm-admin list contains node_exporter and Running state
+    assert:
+     that:
+      - "'Running' in node_exporter_status.stdout"
+
+  - name: Wait for vmagent to be Running Status After Upgrade
+    shell: pmm-admin list | grep vmagent | awk -F" " '{print $2}'
+    register: vm_status
+    until: vm_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
+
+  - name: check if vmagent is Running
+    shell: pmm-admin list | grep vmagent | awk -F" " '{print $2}'
+    register: vmagent_status
+
+  - name: Print the vmagent Status
+    ansible.builtin.debug:
+      msg: vmagent status is {{ vmagent_status.stdout }}
+
+  - name: Assert if the pmm-admin list contains vmagent and Running State
+    assert:
+     that:
+      - "'Running' in vmagent_status.stdout"
+
+  - name: check if Metric End point with Auth works for Node Exporter, MysqlD Exporter, MongoDB Exporter, Postgres Exporter
+    shell: "{{item}}"
+    with_items:
+      - bash -x ../scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+
+  - name: check if Metric End point with Auth works after upgrade for Postgres exporter when service was added via socket before upgrade
+    shell: "{{item}}"
+    with_items:
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1

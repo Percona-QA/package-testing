@@ -3,9 +3,13 @@ set -e
 WARNINGS_BEFORE=0
 WARNINGS_AFTER=0
 ERROR_LOG=""
-ERROR_LOG=$(mysql -N -s -e "show variables like 'log_error';" | grep -v "Warning:" | grep -o "\/.*$")
+ERROR_LOG=$(mysql -N -s -e "show variables like 'log_error';" | grep -v "Warning:" | grep -o "\/.*$") || true
+if [ -z ${ERROR_LOG} ]; then
+  echo "ERROR_LOG variable is empty!"
+  exit 1
+fi
 if [ ! -f ${ERROR_LOG} ]; then
-  echo "Error log was not found!"
+  echo "Error log file was not found!"
   exit 1
 fi
 
@@ -29,8 +33,10 @@ mysql -e "CREATE FUNCTION service_get_write_locks RETURNS INT SONAME 'locking_se
 mysql -e "CREATE FUNCTION service_release_locks RETURNS INT SONAME 'locking_service.so';"
 mysql -e "INSTALL PLUGIN validate_password SONAME 'validate_password.so';"
 mysql -e "INSTALL PLUGIN version_tokens SONAME 'version_token.so';"
-mysql -e "INSTALL PLUGIN rpl_semi_sync_master SONAME 'semisync_master.so';"
-mysql -e "INSTALL PLUGIN rpl_semi_sync_slave SONAME 'semisync_slave.so';"
+#mysql -e "INSTALL PLUGIN rpl_semi_sync_source SONAME 'semisync_source.so';"
+#mysql -e "INSTALL PLUGIN rpl_semi_sync_replica SONAME 'semisync_replica.so';"
+#mysql -e "INSTALL PLUGIN rpl_semi_sync_master SONAME 'semisync_master.so';"
+#mysql -e "INSTALL PLUGIN rpl_semi_sync_slave SONAME 'semisync_slave.so';"
 mysql -e "INSTALL PLUGIN connection_control SONAME 'connection_control.so';"
 mysql -e "INSTALL PLUGIN connection_control_failed_login_attempts SONAME 'connection_control.so';"
 mysql -e "INSTALL PLUGIN authentication_ldap_simple SONAME 'authentication_ldap_simple.so';"
@@ -41,6 +47,8 @@ mysql -e "CREATE FUNCTION get_gtid_set_by_binlog RETURNS STRING SONAME 'binlog_u
 mysql -e "CREATE FUNCTION get_binlog_by_gtid_set RETURNS STRING SONAME 'binlog_utils_udf.so';"
 mysql -e "CREATE FUNCTION get_first_record_timestamp_by_binlog RETURNS STRING SONAME 'binlog_utils_udf.so';"
 mysql -e "CREATE FUNCTION get_last_record_timestamp_by_binlog RETURNS STRING SONAME 'binlog_utils_udf.so';"
+mysql -e "INSTALL PLUGIN authentication_ldap_sasl SONAME 'authentication_ldap_sasl.so';"
+mysql -e "INSTALL PLUGIN authentication_fido SONAME 'authentication_fido.so';"
 
 for component in component_validate_password component_log_sink_syseventlog component_log_sink_json component_log_filter_dragnet component_audit_api_message_emit; do
   if [ $(mysql -Ns -e "select count(*) from mysql.component where component_urn=\"file://${component}\";") -eq 0 ]; then
@@ -62,7 +70,6 @@ if [ ! -z "$1" ]; then
     mysql -e "CREATE DATABASE IF NOT EXISTS world3;"
     cat /package-testing/world.sql | mysql -D world2
     cat /package-testing/world.sql | mysql -D world3
-    mysql < /package-testing/tokudb_compression.sql
     mysql < /package-testing/rocksdb_test.sql
   fi
 fi

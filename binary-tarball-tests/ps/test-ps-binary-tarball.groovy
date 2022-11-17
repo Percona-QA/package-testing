@@ -3,8 +3,8 @@ pipeline {
     label 'docker'
   }
   parameters {
-    string(name: 'PS_VERSION', defaultValue: '8.0.22-13', description: 'PS full version')
-    string(name: 'PS_REVISION', defaultValue: '0cc556b', description: 'PS revision')
+    string(name: 'PS_VERSION', defaultValue: '8.0.26-16', description: 'PS full version')
+    string(name: 'PS_REVISION', defaultValue: '3d64165', description: 'PS revision')
     booleanParam( 
       defaultValue: false,
       name: 'BUILD_TYPE_MINIMAL'
@@ -41,20 +41,6 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Ubuntu Bionic
-        stage('Ubuntu Xenial') {
-          agent {
-            label "min-xenial-x64"
-          }
-          steps {
-            script {
-                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-              }
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
-            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-          } //End steps
-        } //End stage Ubuntu Xenial
         stage('Debian Bullseye') {
           agent {
             label "min-bullseye-x64"
@@ -83,34 +69,6 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Debian Buster
-        stage('Debian Stretch') {
-          agent {
-            label "min-stretch-x64"
-          }
-          steps {
-            script {
-                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-              }
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
-            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-          } //End steps
-        } //End stage Debian Stretch
-        stage('Centos8') {
-          agent {
-            label "min-centos-8-x64"
-          }
-          steps {
-            script {
-                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-              }
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
-            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-          } //End steps
-        } //End stage Centos8
         stage('Centos7') {
           agent {
             label "min-centos-7-x64"
@@ -125,9 +83,9 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Centos7
-        stage('Centos6') {
+        stage('Oracle Linux 8') {
           agent {
-            label "min-centos-6-x64"
+            label "min-ol-8-x64"
           }
           steps {
             script {
@@ -138,7 +96,7 @@ pipeline {
             }
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
-        } //End stage Centos6
+        } //End stage Oracle Linux 8
       } //End parallel
     } //End stage Run tests
   } //End stages
@@ -152,17 +110,9 @@ void run_test() {
     if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
       MINIMAL="-minimal"
     fi
-    if [ "${PS_MAJOR_VERSION}" = "8.0" ]; then
-      export GLIBC_VERSION="2.17"
-      if [ -f /etc/redhat-release ] && [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
-        export GLIBC_VERSION="2.12"
-      fi
-      TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
-      TARBALL_LINK="https://www.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
-    elif [ "${PS_MAJOR_VERSION}" = "5.7" ]; then
-      TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.12${MINIMAL}.tar.gz"
-      TARBALL_LINK="https://www.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
-    fi
+    export GLIBC_VERSION="2.17"
+    TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
+    TARBALL_LINK="https://www.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
     rm -rf package-testing
     if [ -f /usr/bin/yum ]; then
       sudo yum install -y git wget

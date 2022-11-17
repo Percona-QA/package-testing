@@ -8,15 +8,13 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 DEBPACKAGES = ['percona-server-server', 'percona-server-test',
                'percona-server-dbg', 'percona-server-source',
-               'percona-server-client', 'percona-server-tokudb',
-               'percona-server-rocksdb', 'percona-mysql-router',
-               'percona-mysql-shell']
+               'percona-server-client', 'percona-server-rocksdb',
+               'percona-mysql-router', 'percona-mysql-shell']
 
 RPMPACKAGES = ['percona-server-server', 'percona-server-client',
                'percona-server-test', 'percona-server-debuginfo',
-               'percona-server-devel', 'percona-server-tokudb',
-               'percona-server-rocksdb', 'percona-mysql-router',
-               'percona-mysql-shell']
+               'percona-server-devel', 'percona-server-rocksdb',
+               'percona-mysql-router', 'percona-mysql-shell']
 
 PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    " fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so';\"",
@@ -57,6 +55,10 @@ PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    "mysql -e \"INSTALL PLUGIN"
                    " connection_control SONAME 'connection_control.so';\"",
                    "mysql -e \"INSTALL PLUGIN"
+                   " authentication_ldap_sasl SONAME 'authentication_ldap_sasl.so';\"",
+                   "mysql -e \"INSTALL PLUGIN"
+                   " authentication_fido SONAME 'authentication_fido.so';\"",
+                   "mysql -e \"INSTALL PLUGIN"
                    " connection_control_failed_login_attempts SONAME 'connection_control.so';\""]
 
 COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
@@ -78,7 +80,7 @@ def is_running(host):
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
     dist = host.system_info.distribution
-    if dist.lower() in ["redhat", "centos", 'rhel']:
+    if dist.lower() in ["redhat", "centos", "rhel", "oracleserver", "ol", "amzn"]:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
@@ -161,7 +163,7 @@ def test_disable_validate_password_plugin(host):
         plugin = host.run(cmd)
         assert plugin.rc == 0, plugin.stdout
         dist = host.system_info.distribution
-        if dist.lower() in ["redhat", "centos", 'rhel']:
+        if dist.lower() in ["redhat", "centos", "rhel", "oracleserver", "ol", "amzn"]:
             cmd = 'service mysql restart'
             restart = host.run(cmd)
             assert restart.rc == 0, (restart.stdout, restart.stderr)

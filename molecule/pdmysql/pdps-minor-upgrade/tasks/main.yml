@@ -14,13 +14,13 @@
 
   - name: disable the mysql module on RHEL/CentOS 8
     command: yum module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: disable the mariadb module on RHEL/CentOS 8
     command: yum module disable mariadb -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: Setup initial (old) repository
+  - name: Setup initial (old) repository pdps-{{ pdmysql_version }} {{ repo }}
     command: percona-release enable-only pdps-{{ pdmysql_version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'FROM_REPO') }}"
@@ -41,7 +41,6 @@
       - percona-server-dbg
       - percona-server-source
       - percona-server-client
-      - percona-server-tokudb
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
 
@@ -58,7 +57,6 @@
       - percona-server-test
       - percona-server-debuginfo
       - percona-server-devel
-      - percona-server-tokudb
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
 
@@ -107,12 +105,27 @@
 
   - name: install orchestrator rpm packages
     yum:
-      name: percona-orchestrator
+      name: "{{ packages }}"
       state: latest
+    vars:
+      packages:
+        - percona-orchestrator
     when: ansible_os_family == "RedHat"
 
   - name: start mysql service
     service: name=mysql state=started
+
+  - name: download package-testing repo with wget
+    command: "{{ item }}"
+    with_items:
+    - rm -rf /package-testing
+    - rm -f master.zip
+    - wget --no-check-certificate -O master.zip "https://github.com/Percona-QA/package-testing/archive/{{ branch }}.zip"
+    - unzip master.zip
+    - rm -f master.zip
+    - mv "package-testing-{{ branch }}" /package-testing
+    vars:
+      branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
@@ -160,13 +173,13 @@
   - name: start mysql service
     service: name=mysql state=started enabled=yes
 
-  - name: Disable old repository
+  - name: Disable old repository pdps-{{ pdmysql_version }} {{ repo }}
     command: percona-release disable pdps-{{ pdmysql_version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'FROM_REPO') }}"
       pdmysql_version: "{{ lookup('env', 'FROM_VERSION') }}"
 
-  - name: Setup new repository
+  - name: Setup new repository pdps-{{ pdmysql_version }} {{ repo }}
     command: percona-release enable pdps-{{ pdmysql_version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'TO_REPO') }}"
@@ -187,7 +200,6 @@
       - percona-server-dbg
       - percona-server-source
       - percona-server-client
-      - percona-server-tokudb
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
 
@@ -195,7 +207,6 @@
     yum:
       name: "{{ packages }}"
       state: latest
-#      disablerepo: "epel"
       update_cache: yes
     vars:
       packages:
@@ -204,7 +215,6 @@
       - percona-server-test
       - percona-server-debuginfo
       - percona-server-devel
-      - percona-server-tokudb
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
 
@@ -253,8 +263,13 @@
 
   - name: install orchestrator rpm packages
     yum:
-      name: percona-orchestrator
+      name: "{{ packages }}"
       state: latest
+    vars:
+      packages:
+        - percona-orchestrator-cli
+        - percona-orchestrator-client
+        - percona-orchestrator
     when: ansible_os_family == "RedHat"
 
   - name: start mysql service
@@ -266,6 +281,7 @@
   - name: install percona-mysql-shell package for CentOS
     yum:
       name: "{{ packages }}"
+      state: latest
     vars:
       packages:
       - percona-mysql-shell
@@ -274,7 +290,7 @@
   - name: install percona-mysql-shell package for Debian/Ubuntu
     apt:
       update_cache: yes
-      state: present
+      state: latest
       name: "{{ packages }}"
     vars:
       packages:
@@ -284,6 +300,7 @@
   - name: install percona-mysql-router package for CentOS
     yum:
       name: "{{ packages }}"
+      state: latest
     vars:
       packages:
       - percona-mysql-router
@@ -292,7 +309,7 @@
   - name: install percona-mysql-router package for Debian/Ubuntu
     apt:
       update_cache: yes
-      state: present
+      state: latest
       name: "{{ packages }}"
     vars:
       packages:

@@ -1,7 +1,0 @@
----
-- name: Converge
-  hosts: all
-  become: true
-  become_method: sudo
-  roles:
-    - role: pdps-setup

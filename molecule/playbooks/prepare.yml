@@ -5,25 +5,53 @@
   become_method: sudo
   gather_facts: true
   tasks:
+    - name: Edit mirrorlist for Centos8 repos
+      shell: "sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-Linux-*"
+      when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "8"
+
+    - name: Edit baseurl for Centos8 repos
+      shell: "sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-*"
+      when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "8"
+
+    - name: install GPG key for epel 7
+      rpm_key:
+        state: present
+        key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
+      when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2"
+
     - name: install GPG key for epel 8
       rpm_key:
         state: present
         key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
+    - name: install GPG key for epel 9
+      rpm_key:
+        state: present
+        key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+      register: epel_9_output
+
     - name: install GPG key for Percona repos
       rpm_key:
         state: present
-        key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
+        key: "{{ item }}"
+      with_items:
+        - https://repo.percona.com/yum/RPM-GPG-KEY-Percona
+        - https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+    - name: setup epel 7 repo for Amazon Linux 2
+      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
+      when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2"
 
     - name: setup epel 8 repo
       yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-#    - name: setup epel 6 repo
-#      yum: name=http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm state=present
-#      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+    - name: setup epel 9 repo
+      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
     - name: setup ca-certificates release
       yum:
@@ -96,4 +124,37 @@
         - unzip
         - git
         - wget
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
+
+    - name: Setup SSH keys CentOS
+      authorized_key:
+        user: centos
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: (ansible_distribution == "CentOS") and (lookup('env', 'DESTROY_ENV') == "no")
+
+    - name: Setup SSH keys for Oracle Linux or Amazon
+      authorized_key:
+        user: ec2-user
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: (ansible_distribution == "OracleLinux" and lookup('env', 'DESTROY_ENV') == "no") or
+            (ansible_distribution == "Amazon" and lookup('env', 'DESTROY_ENV') == "no")
+
+    - name: Setup SSH keys Debian
+      authorized_key:
+        user: admin
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: (ansible_distribution == "Debian") and (lookup('env', 'DESTROY_ENV') == "no")
+
+    - name: Setup SSH keys Ubuntu
+      authorized_key:
+        user: ubuntu
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: (ansible_distribution == "Ubuntu") and (lookup('env', 'DESTROY_ENV') == "no")

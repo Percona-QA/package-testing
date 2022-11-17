@@ -85,7 +85,7 @@ log="/tmp/${product}_version_check.log"
 echo -n > "${log}"
 
 if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" ]; then
-  for i in @@INNODB_VERSION @@VERSION @@TOKUDB_VERSION; do
+  for i in @@INNODB_VERSION @@VERSION; do
     if [ "$(mysql -e "SELECT ${i}; "| grep -c "${version}")" = 1 ]; then
       echo "${i} is correct" >> "${log}"
     else
@@ -93,6 +93,13 @@ if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" ]; 
       exit 1
     fi
  done
+ if [ "${product}" = "ps56" -o "${product}" = "ps57" ]; then
+    if [ "$(mysql -e "SELECT @@TOKUDB_VERSION; "| grep -c "${version}")" = 1 ]; then
+      echo "@@TOKUDB_VERSION is correct" >> "${log}"
+    else
+      echo "@@TOKUDB_VERSION is incorrect it shows $(mysql -e "SELECT @@TOKUDB_VERSION;")"
+    fi
+  fi
 
   if [ "$(mysql -e "SELECT @@VERSION_COMMENT;" | grep ${revision} | grep -c ${release})" = 1 ]; then
     echo "@@VERSION COMMENT is correct" >> "${log}"
@@ -102,11 +109,17 @@ if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" ]; 
   fi
 
   if [ ${product} = "ps80" ]; then
-    if [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
-      echo "mysql-shell version is correct" >> "${log}"
+    if [ -z ${install_mysql_shell} ] || [ ${install_mysql_shell} = "yes" ] ; then
+      if [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
+        echo "mysql-shell version is correct" >> "${log}"
+      else
+        echo "ERROR: mysql-shell version is incorrect"
+        exit 1
+      fi
+    elif [ ${install_mysql_shell} = "no" ]; then
+      echo "MYSQL Shell check is disabled.." >> "${log}"
     else
-      echo "ERROR: mysql-shell version is incorrect"
-      exit 1
+      echo "Invalid input in ${install_mysql_shell} variable"
     fi
   fi
 
@@ -155,24 +168,18 @@ elif [ ${product} = "pmm" ]; then
     echo "${product} version is correct and ${version}" >> "${log}"
   fi
 
-elif [ ${product} = "pmm2" ]; then
-  version_check=$(pmm-admin --version 2>&1|grep -c ${version})
+elif [ ${product} = "pmm2" -o ${product} = "pmm2-rc" ]; then
+  pmm-admin --version
+  version_check=$(pmm-admin --version 2>&1|grep -c "${version}")
+  actual_version=$(pmm-admin --version 2>&1|grep ^Version | awk -F ' ' '{print $2}')
   if [ ${version_check} -eq 0 ]; then
-    echo "${product} version is not good!"
+    echo "${product} version ${actual_version} is not good! Expected: ${version}" >&2;
     exit 1
   else
-    echo "${product} version is correct and ${version}" >> "${log}"
+    echo "${product} version is correct and ${version}"
   fi
   bash -xe ./check_pmm2_client_upgrade.sh ${version}
-elif [ ${product} = "pmm2-rc" ]; then
-  version_check=$(pmm-admin --version 2>&1|grep -c ${version})
-  if [ ${version_check} -eq 0 ]; then
-    echo "${product} version is not good!"
-    exit 1
-  else
-    echo "${product} version is correct and ${version}" >> "${log}"
-  fi
-  bash -xe ./check_pmm2_client_upgrade.sh ${version}
+
 elif [ "${product}" = "pxb24" -o "${product}" = "pxb80" ]; then
     for binary in xtrabackup xbstream xbcloud xbcrypt; do
         version_check=$($binary --version 2>&1| grep -c "${version}")
@@ -184,6 +191,7 @@ elif [ "${product}" = "pxb24" -o "${product}" = "pxb80" ]; then
             echo "${binary} version is correctly displayed as: ${version}" >> "${log}"
         fi
     done
+
 elif [ ${product} = "proxysql" -o ${product} = "proxysql2" ]; then
   version_check=$(proxysql --version 2>&1|grep -c ${version})
   installed_version=$(proxysql --version)

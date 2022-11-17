@@ -31,6 +31,16 @@
       yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
+    - name: install GPG key for epel 9
+      rpm_key:
+        state: present
+        key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+
+    - name: setup epel 9 repo
+      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+
     - name: setup ca-certificates release
       yum:
         name: ca-certificates
@@ -45,6 +55,10 @@
         state: present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
+    - name: buster workaround
+      shell: |
+        apt -y update --allow-releaseinfo-change || true 
+      when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
 
     - name: install needed packages for running tests with apt
       apt:
@@ -102,3 +116,9 @@
       iptables:
         flush: yes
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+    - name: disable firewalld for OL8 and OL9
+      service:
+        name: firewalld
+        state: stopped
+      when: ansible_distribution == "OracleLinux" and (ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9") 

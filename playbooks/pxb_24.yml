@@ -27,14 +27,14 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
+  - name: install Percona Server 5.7 packages
+    include_tasks: ../tasks/install_ps57.yml
+
   - name: install Percona Toolkit new deb packages
     include_tasks: ../tasks/install_pt.yml
 
   - name: install sysbench new packages
     include_tasks: ../tasks/install_sysbench.yml
-
-  - name: install Percona Server 5.7 packages
-    include_tasks: ../tasks/install_ps57.yml
 
   - name: install Percona XtraBackup 2.4 packages
     include_tasks: ../tasks/install_pxb24.yml
@@ -90,21 +90,50 @@
 
   - name: run sysbench prepare script
     command: sysbench --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
+    when: ansible_distribution_release != "bullseye"
 
   - name: run sysbench benchmark
     command: sysbench --mysql-user=sbt --mysql-db=sb --mysql-password=s3cret!Pass --time=30 --threads=64 --tables=3 oltp_read_write run
+    when: ansible_distribution_release != "bullseye"
 
   - name: run sysbench tpcc prepare script
     command: /usr/share/sysbench/tpcc.lua --mysql-user=sbt --mysql-password=s3cret!Pass  --mysql-db=sbt --time=30 --threads=64 --report-interval=1 --tables=3 --scale=5 --db-driver=mysql prepare
+    when: ansible_distribution_release != "bullseye"
 
   - name: run sysbench tpcc benchmark
     command: /usr/share/sysbench/tpcc.lua --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sbt --time=30 --threads=64 --report-interval=1 --tables=3 --scale=5 --db-driver=mysql run
+    when: ansible_distribution_release != "bullseye"
 
   - name: run backup
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
 
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
+
+  - name: install qpress package on Redhat/CentOS
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - qpress
+    when: ansible_os_family == "RedHat"
+
+  - name: install qpress package on Ubuntu/Debian
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - qpress
+    when: ansible_os_family == "Debian"
+
+  - name: run backup with quicklz compression
+    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_q/ --compress=quicklz --compress-threads=10
+
+  - name: decompress backup
+    command: /usr/bin/xtrabackup --decompress --user=root --target-dir=/tmp/backup_q/
+
+  - name: prepare backup
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_q/
 
   - name: remove Percona Server 5.7 deb packages
     apt:

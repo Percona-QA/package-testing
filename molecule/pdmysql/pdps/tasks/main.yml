@@ -14,18 +14,28 @@
 
   - name: disable the mysql module on RHEL/CentOS 8
     command: yum module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: disable the mariadb module on RHEL/CentOS 8
     command: yum module disable mariadb -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: enable the PDMYSQL-80 repo
+  - set_fact:
+      major_repo: "{{ lookup('env', 'MAJOR_REPO') }}"
+
+  - name: enable the pdps-{{ version }} repo
     command: percona-release enable-only pdps-{{ version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
       version: "{{ lookup('env', 'VERSION') }}"
+    when: not major_repo
 
+  - name: enable the major pdps-{{ version }} repo
+    command: percona-release enable-only pdps-{{ version }} {{ repo }}
+    vars:
+      repo: "{{ lookup('env', 'REPO') }}"
+      version: "{{ lookup('env', 'VERSION').split('.')[0] + '.' + lookup('env', 'VERSION').split('.')[1] }}"
+    when: major_repo
 
   - name: install Percona Toolkit
     include_tasks: ../../../tasks/install_pt.yml
@@ -48,7 +58,6 @@
       - percona-server-dbg
       - percona-server-source
       - percona-server-client
-      - percona-server-tokudb
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
 
@@ -56,7 +65,6 @@
     yum:
       name: "{{ packages }}"
       state: latest
-#      disablerepo: "epel"
       update_cache: yes
     vars:
       packages:
@@ -65,7 +73,6 @@
       - percona-server-test
       - percona-server-debuginfo
       - percona-server-devel
-      - percona-server-tokudb
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
 
@@ -114,8 +121,13 @@
 
   - name: install orchestrator rpm packages
     yum:
-      name: percona-orchestrator
+      name: "{{ packages }}"
       state: latest
+    vars:
+      packages:
+        - percona-orchestrator-cli
+        - percona-orchestrator-client
+        - percona-orchestrator
     when: ansible_os_family == "RedHat"
 
   - name: start mysql service
@@ -126,10 +138,12 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+    - wget --no-check-certificate -O master.zip "https://github.com/Percona-QA/package-testing/archive/{{ branch }}.zip"
     - unzip master.zip
     - rm -f master.zip
-    - mv package-testing-master /package-testing
+    - mv "package-testing-{{ branch }}" /package-testing
+    vars:
+      branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
@@ -138,15 +152,7 @@
   - name: restart mysql service
     service: name=mysql state=restarted
 
-  - name: install percona-mysql-shell package for CentOS
-    yum:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - percona-mysql-shell
-    when: ansible_os_family == "RedHat"
-
-  - name: install percona-mysql-shell package for Debian/Ubuntu
+  - name: install additional package for Debian/Ubuntu
     apt:
       update_cache: yes
       state: present
@@ -154,25 +160,17 @@
     vars:
       packages:
       - percona-mysql-shell
+      - percona-mysql-router
     when: ansible_os_family == "Debian"
 
-  - name: install percona-mysql-router package for CentOS
+  - name: install additional packages for CentOS
     yum:
       name: "{{ packages }}"
     vars:
       packages:
       - percona-mysql-router
+      - percona-mysql-shell
     when: ansible_os_family == "RedHat"
-
-  - name: install percona-mysql-router package for Debian/Ubuntu
-    apt:
-      update_cache: yes
-      state: present
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - percona-mysql-router
-    when: ansible_os_family == "Debian"
 
   - name: start mysql service
     service: name=mysql state=started enabled=yes
@@ -191,7 +189,6 @@
     become: yes
     when: ansible_os_family == "Debian"
 
-
   - name: Extract the Go tarball
     unarchive:
       src: "/tmp/go1.16.5.linux-amd64.tar.gz"
@@ -208,8 +205,8 @@
 
   - name: Clone orchestrator sources
     git:
-      repo: https://github.com/openark/orchestrator.git
-      version: v3.2.4
+      repo: https://github.com/percona/orchestrator.git
+      version: "{{ lookup('env', 'ORCHESTRATOR_TESTS_VERSION') }}"
       dest: /root/orchestrator
 
   - name: Copy test.sh for orchestrator Debian

@@ -27,6 +27,10 @@
     include: ../tasks/enable_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
+  - name: include tasks for enabling laboratory and main repos
+    include: ../tasks/enable_laboratory_with_main_repo.yml
+    when: lookup('env', 'install_repo') == "laboratory"
+
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
@@ -144,9 +148,9 @@
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps56
 
-  - name: check that Percona Toolkit version is correct
-    command: /package-testing/version_check.sh pt
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "6"
+# - name: check that Percona Toolkit version is correct
+#   command: /package-testing/version_check.sh pt
+#   when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "6"
 
   - name: check that sysbench version is correct
     command: /package-testing/version_check.sh sysbench

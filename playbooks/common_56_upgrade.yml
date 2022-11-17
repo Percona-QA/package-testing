@@ -142,9 +142,13 @@
 # End PAM test
 
 #
-# Enable testing repository
+# Enable testing repository or laboratory repository
 #
   - include: ../tasks/enable_testing_repo.yml
+    when:  lookup('env', 'install_repo') != "laboratory"
+
+  - include: ../tasks/enable_laboratory_with_main_repo.yml
+    when:  lookup('env', 'install_repo') == "laboratory"
 
 #
 # Upgrade packages
@@ -171,9 +175,9 @@
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps56
 
-  - name: check that Percona Toolkit version is correct
-    command: /package-testing/version_check.sh pt
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "6"
+# - name: check that Percona Toolkit version is correct
+#   command: /package-testing/version_check.sh pt
+#   when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "6"
 
   - name: run bats tests for PAM
     command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
