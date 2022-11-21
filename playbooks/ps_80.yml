@@ -131,6 +131,7 @@
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps80
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
@@ -180,6 +181,7 @@
 
   - name: run bats tests for mysql init scripts
     command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
 
   - name: start mysql service
     service: name=mysql state=started
