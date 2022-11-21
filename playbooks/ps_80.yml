@@ -184,8 +184,8 @@
   - name: start mysql service
     service: name=mysql state=started
 
-  - name: check that mysqladmin shutdown works correctly
-    command: /package-testing/madmin_check.sh
+    #  - name: check that mysqladmin shutdown works correctly
+    #    command: /package-testing/madmin_check.sh
 
   - name: disable all percona repos
     command: percona-release disable all
