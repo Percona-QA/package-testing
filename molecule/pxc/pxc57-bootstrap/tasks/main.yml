@@ -50,7 +50,7 @@
     vars:
       packages:
       - python-mysqldb
-    when: (ansible_os_family == "Debian" and ansible_distribution_release != "focal") and (ansible_os_family == "Debian" and ansible_distribution_release != "bionic") and (ansible_os_family == "Debian" and ansible_distribution_release != "bullseye")
+    when: (ansible_os_family == "Debian") and (ansible_distribution_release != "focal" and ansible_distribution_release != "bionic" and ansible_distribution_release != "bullseye")
 
   - name: install python mysql deb packages for focal and bionic
     apt:
@@ -59,7 +59,7 @@
     vars:
       packages:
       - python3-mysqldb
-    when: (ansible_os_family == "Debian" and ansible_distribution_release == "focal") or (ansible_os_family == "Debian" and ansible_distribution_release == "bionic") or (ansible_os_family == "Debian" and ansible_distribution_release == "bullseye")
+    when: (ansible_os_family == "Debian") and (ansible_distribution_release == "focal" or ansible_distribution_release == "bionic" or ansible_distribution_release == "bullseye")
 
   - name: install PXC 5.7 previous rpm packages
     yum:
