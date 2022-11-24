@@ -67,10 +67,9 @@
   - name: install Percona Server 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
 
-    # Disabling sysbench packages as many idstributions don't have it in main repo
-    #  - name: install sysbench new deb packages
-    #    include_tasks: ../tasks/install_sysbench.yml
-    #    when: lookup('env', 'install_repo') != "experimental"
+  - name: install sysbench new deb packages
+    include_tasks: ../tasks/install_sysbench.yml
+    when: lookup('env', 'install_repo') != "experimental"
 
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
@@ -132,7 +131,6 @@
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps80
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80

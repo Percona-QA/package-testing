@@ -30,7 +30,7 @@ opt_enc="ENCRYPTION='Y'"
 #fi
 
 echo "Adding the config vars" | tee -a ${LOG}
-service mysql stop
+systemctl stop mysql
 sleep 10
 if [ $(grep -c "\[mysqld\]" ${MYCNF}) -eq 0 ]; then
   echo -e "\n[mysqld]" >> ${MYCNF}
@@ -39,7 +39,7 @@ sed -i '/\[mysqld\]/a early_plugin_load=keyring_file.so' ${MYCNF}
 #sed -i "/\[mysqld\]/a ${binlog_enc}" ${MYCNF}
 sed -i '/\[mysqld\]/a master_verify_checksum=ON' ${MYCNF}
 sed -i '/\[mysqld\]/a binlog_checksum=CRC32' ${MYCNF}
-service mysql start
+systemctl start mysql
 sleep 10
 
 echo "install keyring udf functions" | tee -a ${LOG}
@@ -70,12 +70,12 @@ mysql -e "UNINSTALL PLUGIN keyring_file;"
 
 echo "service restart so that plugins don't mess with each other" | tee -a ${LOG}
 # service restart so that plugins don't mess with eachother
-service mysql stop
+systemctl stop mysql
 sleep 10
 sed -i '/early_plugin_load=/d' ${MYCNF}
 sed -i '/\[mysqld\]/a early_plugin_load=keyring_vault.so' ${MYCNF}
 sed -i '/\[mysqld\]/a keyring_vault_config="/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf"' ${MYCNF}
-service mysql start
+systemctl start mysql
 sleep 10
 
 echo "keyring_vault plugin test" | tee -a ${LOG}
@@ -112,5 +112,5 @@ sed -i '/keyring_vault_config=/d' ${MYCNF}
 sed -i '/encrypt_binlog=/d' ${MYCNF}
 sed -i '/master_verify_checksum=/d' ${MYCNF}
 sed -i '/binlog_checksum=/d' ${MYCNF}
-service mysql restart
+systemctl restart mysql
 sleep 10
