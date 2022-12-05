@@ -1,7 +1,7 @@
 import os
 import pytest
-
 import testinfra.utils.ansible_runner
+from settings import *
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
@@ -21,7 +21,7 @@ def test_check_deb_package(host, package):
 def test_orchestrator_version(host):
     cmd = 'orchestrator --version'
     dist = host.system_info.distribution
-    if dist.lower() in ["redhat", "centos", "rhel", "oracleserver", "ol", "amzn" ]:
+    if dist.lower() in RHEL_DISTS:
         cmd = "/usr/local/orchestrator/orchestrator --version"
     result = host.run(cmd)
     assert result.rc == 0, result.stderr

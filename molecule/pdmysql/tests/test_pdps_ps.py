@@ -1,7 +1,7 @@
 import os
 import pytest
-
 import testinfra.utils.ansible_runner
+from settings import *
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
@@ -80,7 +80,7 @@ def is_running(host):
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
     dist = host.system_info.distribution
-    if dist.lower() in ["redhat", "centos", "rhel", "oracleserver", "ol", "amzn"]:
+    if dist.lower() in RHEL_DISTS:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
@@ -90,7 +90,7 @@ def test_check_deb_package(host, package):
 @pytest.mark.parametrize("package", RPMPACKAGES)
 def test_check_rpm_package(host, package):
     dist = host.system_info.distribution
-    if dist.lower() in ["debian", "ubuntu"]:
+    if dist.lower() in DEB_DISTS:
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
@@ -156,14 +156,14 @@ def test_madmin(host):
         mysql = host.service("mysql")
         assert mysql.is_running
 
-
+@pytest.mark.install
 def test_disable_validate_password_plugin(host):
     with host.sudo():
         cmd = "mysql -e \"UNINSTALL PLUGIN validate_password;\""
         plugin = host.run(cmd)
         assert plugin.rc == 0, plugin.stdout
         dist = host.system_info.distribution
-        if dist.lower() in ["redhat", "centos", "rhel", "oracleserver", "ol", "amzn"]:
+        if dist.lower() in RHEL_DISTS:
             cmd = 'service mysql restart'
             restart = host.run(cmd)
             assert restart.rc == 0, (restart.stdout, restart.stderr)
