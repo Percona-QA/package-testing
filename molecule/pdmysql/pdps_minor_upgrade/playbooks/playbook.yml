@@ -4,4 +4,4 @@
   become: true
   become_method: sudo
   roles:
-    - role: pdps-minor-upgrade
+    - role: pdps_minor_upgrade
