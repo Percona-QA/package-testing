@@ -1,5 +1,5 @@
 import pytest
-from settings import *
+from .settings import *
 
 @pytest.mark.install
 def test_integration(host):
