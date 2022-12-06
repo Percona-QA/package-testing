@@ -90,7 +90,7 @@ ps57_symlinks = (
 ps56_binaries = [
   'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog', 'bin/mysqldump',
   'bin/mysqlimport', 'bin/mysqlshow', 'bin/mysqlslap', 'bin/mysqlcheck',
-  'bin/mysql_config_editor', 'bin/mysql_secure_installation', 'bin/mysql_upgrade', 'bin/mysql_tzinfo_to_sql'
+  'bin/mysql_config_editor', 'bin/mysql_upgrade', 'bin/mysql_tzinfo_to_sql'
 ]
 ps56_executables = ps56_binaries + [
   'bin/mysqldumpslow',
