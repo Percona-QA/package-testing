@@ -52,9 +52,9 @@
     vars:
       packages:
       - percona-server-server
-      - percona-server-test
-      - percona-server-dbg
-      - percona-server-source
+      # - percona-server-test
+      # - percona-server-dbg
+      # - percona-server-source
       - percona-server-client
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
