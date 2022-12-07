@@ -112,8 +112,13 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
         rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-rocksdb-${rpm_maj_version}"
       fi
     elif [ "${product}" = "ps80" ]; then
+      if [ "${centos_maj_version}" == "9" ]; then
+        rpm_num_pkgs="7"
+        rpm_opt_package="percona-server-rocksdb"
+      else
         rpm_num_pkgs="8"
         rpm_opt_package="percona-server-rocksdb percona-server-shared-compat"
+      fi
     fi
     if [ "${product}" = "ps80" ]; then
       ps_name="percona-server"

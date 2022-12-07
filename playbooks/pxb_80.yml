@@ -36,8 +36,9 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: install Percona Toolkit new deb packages
-    include_tasks: ../tasks/install_pt.yml
+#  Disable Percona Toolkit installation till its supported in OL9 and Jammy
+#  - name: install Percona Toolkit new deb packages
+#    include_tasks: ../tasks/install_pt.yml
 
   - name: install Percona Server 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
@@ -72,31 +73,34 @@
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
 
-  - name: install qpress and lz4 packages on Redhat/CentOS
+  - name: install qpress, lz4 and zstd packages on Redhat/CentOS
     yum:
       name: "{{ packages }}"
     vars:
       packages:
       - qpress
       - lz4
+      - zstd
     when: ansible_os_family == "RedHat"
 
-  - name: install qpress and lz4 packages on Ubuntu/Debian
+  - name: install qpress, lz4 and zstd packages on Ubuntu/Debian
     apt:
       name: "{{ packages }}"
     vars:
       packages:
       - qpress
       - lz4
+      - zstd
     when: ansible_os_family == "Debian" and ansible_distribution_release != "bionic"
 
-  - name: install qpress and lz4 packages on Bionic 
+  - name: install qpress, lz4 and zstd packages on Bionic 
     apt:
       name: "{{ packages }}"
     vars: 
       packages:
       - qpress
       - liblz4-tool
+      - zstd
     when: ansible_os_family == "Debian" and ansible_distribution_release == "bionic"
 
   - name: run backup with quicklz compression
@@ -117,6 +121,15 @@
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_l/
 
+  - name: run backup with zstd compression
+    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_z/ --compress=zstd --compress-threads=10
+
+  - name: decompress backup
+    command: /usr/bin/xtrabackup --decompress --user=root --target-dir=/tmp/backup_z/
+
+  - name: prepare backup
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_z/
+    
   - name: remove Percona Server deb packages
     apt:
       name: "{{ packages }}"

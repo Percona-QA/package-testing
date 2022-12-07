@@ -55,6 +55,10 @@ PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    "mysql -e \"INSTALL PLUGIN"
                    " connection_control SONAME 'connection_control.so';\"",
                    "mysql -e \"INSTALL PLUGIN"
+                   " authentication_ldap_sasl SONAME 'authentication_ldap_sasl.so';\"",
+                   "mysql -e \"INSTALL PLUGIN"
+                   " authentication_fido SONAME 'authentication_fido.so';\"",
+                   "mysql -e \"INSTALL PLUGIN"
                    " connection_control_failed_login_attempts SONAME 'connection_control.so';\""]
 
 
@@ -77,7 +81,7 @@ def is_running(host):
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
     dist = host.system_info.distribution
-    if dist.lower() in ["redhat", "centos", "rhel", "oracleserver","ol"]:
+    if dist.lower() in ["redhat", "centos", "rhel", "oracleserver", "ol", "amzn"]:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
@@ -136,7 +140,12 @@ def test_components(component, host):
 def test_madmin(host):
     with host.sudo("root"):
         mysql = host.service("mysql")
-        assert mysql.is_running
+        if not mysql.is_running:
+            cmd = 'service mysql start'
+            start = host.run(cmd)
+            assert start.rc == 0, start.stdout
+            mysql = host.service("mysql")
+            assert mysql.is_running
         cmd = 'mysqladmin shutdown'
         shutdown = host.run(cmd)
         assert shutdown.rc == 0, shutdown.stdout

@@ -21,12 +21,12 @@ fi
 
 # if the server supports RocksDB options for column families need to be specified before running mysql
 if [ $1 != "ps56" ]; then
-  service mysql stop
+  systemctl stop mysql
   sleep 10
   echo -e "\n[mysqld]" >> ${MYCNF}
 #  echo "rocksdb_default_cf_options=compression_per_level=kNoCompression" >> ${MYCNF}
   echo "rocksdb_override_cf_options=cf1={compression=kZlibCompression;bottommost_compression=kZlibCompression};cf2={compression=kLZ4Compression;bottommost_compression=kLZ4Compression};cf3={compression=kZSTDNotFinalCompression;bottommost_compression=kZSTDNotFinalCompression};cf4={compression=kNoCompression;bottommost_compression=kNoCompression}" >> ${MYCNF}
-  service mysql start
+  systemctl start mysql
   sleep 10
 fi
 
