@@ -28,7 +28,7 @@ verifier:
   options:
     verbose: true
     s: true
-    k: "test_pdpxc_ or test_pxb_pt"
+    k: "test_pdpxc_ or test_common_"
     junitxml: report.xml
 scenario:
   name: ubuntu-focal
