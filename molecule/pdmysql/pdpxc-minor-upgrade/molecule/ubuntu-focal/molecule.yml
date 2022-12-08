@@ -24,10 +24,11 @@ provisioner:
     converge: ../../playbooks/playbook.yml
 verifier:
   name: testinfra
-  directory: ../tests/
+  directory: ../../../tests/
   options:
     verbose: true
     s: true
+    k: "test_pdpxc_ or test_pxb_pt_"
     junitxml: report.xml
 scenario:
   name: ubuntu-focal
