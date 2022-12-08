@@ -13,7 +13,7 @@ VERSION = os.getenv("ORCHESTRATOR_VERSION")
 
 
 @pytest.mark.parametrize("package", PACKAGES)
-def test_check_deb_package(host, package):
+def test_check_package(host, package):
     pkg = host.package(package)
     assert pkg.is_installed
     assert VERSION in pkg.version, pkg.version
