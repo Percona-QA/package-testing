@@ -1,7 +1,7 @@
 import os
 import pytest
-
 import testinfra.utils.ansible_runner
+from .settings import *
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
@@ -71,7 +71,7 @@ VERSION = os.environ['VERSION']
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
     dist = host.system_info.distribution
-    if dist.lower() in ["redhat", "centos", "rhel", "oracleserver","ol"]:
+    if dist.lower() in RHEL_DISTS:
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
@@ -81,7 +81,7 @@ def test_check_deb_package(host, package):
 @pytest.mark.parametrize("package", RPMPACKAGES)
 def test_check_rpm_package(host, package):
     dist = host.system_info.distribution
-    if dist.lower() in ["debian", "ubuntu"]:
+    if dist.lower() in DEB_DISTS:
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
