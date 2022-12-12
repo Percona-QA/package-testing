@@ -45,12 +45,12 @@
     - percona-xtradb-cluster-full
     - percona-xtradb-cluster-client
     - percona-xtradb-cluster-common
-    # - percona-xtradb-cluster-dbg
-    # - percona-xtradb-cluster-garbd-debug
+    - percona-xtradb-cluster-dbg
+    - percona-xtradb-cluster-garbd-debug
     - percona-xtradb-cluster-garbd
     - percona-xtradb-cluster-server
-    # - percona-xtradb-cluster-server-debug
-    # - percona-xtradb-cluster-test
+    - percona-xtradb-cluster-server-debug
+    - percona-xtradb-cluster-test
     - percona-xtradb-cluster
   when: ansible_os_family == "Debian"
 
@@ -63,13 +63,13 @@
     - percona-xtradb-cluster-full
     - percona-xtradb-cluster
     - percona-xtradb-cluster-client
-    # - percona-xtradb-cluster-debuginfo
-    # - percona-xtradb-cluster-devel
+    - percona-xtradb-cluster-debuginfo
+    - percona-xtradb-cluster-devel
     - percona-xtradb-cluster-garbd
     - percona-xtradb-cluster-server
     - percona-xtradb-cluster-shared
     - percona-xtradb-cluster-shared-compat
-    # - percona-xtradb-cluster-test
+    - percona-xtradb-cluster-test
   when: ansible_os_family == "RedHat"
 
 - name: install HA Proxy RHEL Packages
@@ -140,7 +140,7 @@
   with_items:
   - rm -rf /package-testing
   - rm -f master.zip
-  - wget --no-check-certificate -O master.zip "https://github.com/eleo007/package-testing/archive/{{ branch }}.zip"
+  - wget --no-check-certificate -O master.zip "https://github.com/Percona-QA/package-testing/archive/{{ branch }}.zip"
   - unzip master.zip
   - rm -f master.zip
   - mv "package-testing-{{ branch }}" /package-testing
