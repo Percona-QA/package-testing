@@ -24,13 +24,12 @@ provisioner:
     converge: ../../playbooks/playbook.yml
 verifier:
   name: testinfra
-  directory: ../tests/
+  directory: ../../../tests/
   options:
     verbose: true
     s: true
+    k: "test_pdpxc_ or test_common_"
     junitxml: report.xml
-  additional_files_or_dirs:
-    - ../../../tests/test_pxb.py
 scenario:
   name: debian-10
   destroy_sequence:
