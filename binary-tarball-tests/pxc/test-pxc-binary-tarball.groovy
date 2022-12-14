@@ -1,8 +1,8 @@
 pipeline {
   agent any 
   parameters {
-    string(name: 'PXC_VERSION', defaultValue: '8.0.22-13.1', description: 'PXC full version')
-    string(name: 'PXC_REVISION', defaultValue: '428f061', description: 'PXC revision')
+    string(name: 'PXC_VERSION', defaultValue: '8.0.30-22.1', description: 'PXC full version')
+    string(name: 'PXC_REVISION', defaultValue: 'e3bbf59', description: 'PXC revision')
     string(name: 'WSREP_VERSION', defaultValue: '26.4.3', description: 'WSREP version')
     string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.33-rel36-49.1', description: 'PXC-5.7 package version')
     booleanParam( 
