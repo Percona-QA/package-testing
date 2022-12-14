@@ -100,7 +100,7 @@ pipeline {
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
-        } //End stage Oracle Linux 9
+        } //End stage OracleLinux 9
        } //End parallel
     } //End stage Run tests
   } //End stages
@@ -127,7 +127,7 @@ void run_test() {
     fi
     rm -rf package-testing
     if [ -f /usr/bin/yum ]; then
-      sudo yum install -y git wget
+      sudo yum install -y git wget tar
     else
       sudo apt install -y git wget tar
     fi
