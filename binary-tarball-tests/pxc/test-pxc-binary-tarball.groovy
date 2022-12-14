@@ -90,17 +90,6 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage CentOS8
-        stage('Centos8') {
-          agent {
-            label "min-centos-8-x64"
-          }
-          steps {
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
-            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
-          } //End steps
-        } //End stage CentOS8
         stage('Oracle Linux 9') {
           agent {
             label "min-ol-9-x64"
