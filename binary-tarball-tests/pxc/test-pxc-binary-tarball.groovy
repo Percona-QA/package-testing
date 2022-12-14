@@ -46,17 +46,6 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage Ubuntu Jammy
-        stage('Debian Stretch') {
-          agent {
-            label "min-stretch-x64"
-          }
-          steps {
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
-            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
-          } //End steps
-        } //End stage Debian Stretch
         stage('Debian Buster') {
           agent {
             label "min-buster-x64"
