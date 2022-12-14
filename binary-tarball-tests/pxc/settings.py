@@ -53,7 +53,7 @@ pxc80_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 pxc80_files = (
-  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.29' ,
+  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.30' ,
   'lib/libmysqlservices.a' , 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini', 'lib/plugin/keyring_file.so',
@@ -63,7 +63,7 @@ pxc80_symlinks = (
   ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'), ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
   ('lib/libgcrypt.so','lib/private/libgcrypt.so.11.8.2'), ('lib/libnspr4.so','lib/private/libnspr4.so'),
   ('lib/libnss3.so','lib/private/libnss3.so'),  ('lib/libnssutil3.so','lib/private/libnssutil3.so'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.29'), ('lib/libplc4.so','lib/private/libplc4.so'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.30'), ('lib/libplc4.so','lib/private/libplc4.so'),
   ('lib/libplds4.so','lib/private/libplds4.so'), ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
   ('lib/libsmime3.so','lib/private/libsmime3.so'), ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
   ('lib/libssl3.so','lib/private/libssl3.so'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
