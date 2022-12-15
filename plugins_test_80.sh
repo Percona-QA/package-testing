@@ -47,7 +47,7 @@ mysql -e "CREATE FUNCTION get_gtid_set_by_binlog RETURNS STRING SONAME 'binlog_u
 mysql -e "CREATE FUNCTION get_binlog_by_gtid_set RETURNS STRING SONAME 'binlog_utils_udf.so';"
 mysql -e "CREATE FUNCTION get_first_record_timestamp_by_binlog RETURNS STRING SONAME 'binlog_utils_udf.so';"
 mysql -e "CREATE FUNCTION get_last_record_timestamp_by_binlog RETURNS STRING SONAME 'binlog_utils_udf.so';"
-mysql -e "INSTALL PLUGIN authentication_ldap_sasl SONAME 'authentication_ldap_sasl.so';"
+#mysql -e "INSTALL PLUGIN authentication_ldap_sasl SONAME 'authentication_ldap_sasl.so';"
 mysql -e "INSTALL PLUGIN authentication_fido SONAME 'authentication_fido.so';"
 
 for component in component_validate_password component_log_sink_syseventlog component_log_sink_json component_log_filter_dragnet component_audit_api_message_emit; do
