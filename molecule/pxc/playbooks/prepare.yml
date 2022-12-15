@@ -36,6 +36,10 @@
         state: present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
+    - name: setup epel release for amazon linux 2
+      shell: amazon-linux-extras install epel -y
+      when: ansible_distribution == "Amazon"
+
     - name: upgrade deb packages apt
       apt: update_cache=yes upgrade=safe
       when: ansible_os_family == "Debian"
