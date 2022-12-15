@@ -11,7 +11,7 @@
     when: ansible_os_family == "Debian"
 
   - name: add the Percona yum repos for CentOS
-    yum: name=https://repo.percona.com/percona/yum/testing/8/RPMS/noarch/percona-release-1.0-28.noarch.rpm
+    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
 
   - name: change the default repo to testing
