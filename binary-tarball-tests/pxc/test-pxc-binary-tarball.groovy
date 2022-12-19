@@ -4,7 +4,7 @@ pipeline {
     }
   parameters {
     string(name: 'PXC_VERSION', defaultValue: '8.0.30-22.1', description: 'PXC full version')
-    string(name: 'PXC_REVISION', defaultValue: 'e3bbf59', description: 'PXC revision')
+    string(name: 'PXC_REVISION', defaultValue: '167c5ac', description: 'PXC revision')
     string(name: 'WSREP_VERSION', defaultValue: '26.4.3', description: 'WSREP version')
     string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.33-rel36-49.1', description: 'PXC-5.7 package version')
     booleanParam( 
@@ -109,7 +109,7 @@ void run_test() {
       export GLIBC_VERSION="2.17"
       if [ -f /usr/bin/apt-get ]; then
         DEBIAN_VERSION=$(lsb_release -sc)
-        if [[ ${DEBIAN_VERSION} = jammy ]]; then
+        if [ ${DEBIAN_VERSION} = "jammy" ]; then
           export GLIBC_VERSION="2.35"
         fi
       fi
