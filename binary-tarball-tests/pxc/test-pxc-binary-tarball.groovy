@@ -129,10 +129,9 @@ void run_test() {
     else
       sudo apt install -y git wget tar
     fi
-    git clone https://github.com/eleo007/package-testing.git --branch tarball_jammy --depth 1
+    git clone https://github.com/Percona-QA/package-testing.git --branch tarball_jammy --depth 1
     cd package-testing/binary-tarball-tests/pxc
     wget -q ${TARBALL_LINK}${TARBALL_NAME}
-    echo "glibc_version before run.sh is $GLIBC_VERSION"
     ./run.sh || true
   '''
 }
