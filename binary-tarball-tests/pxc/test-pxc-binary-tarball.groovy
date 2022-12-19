@@ -15,28 +15,28 @@ pipeline {
   stages {
     stage('Binary tarball test') {
       parallel {
-        // stage('Ubuntu Bionic') {
-        //   agent {
-        //     label "min-bionic-x64"
-        //   }
-        //   steps {
-        //     withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-        //       run_test()
-        //     }
-        //     junit 'package-testing/binary-tarball-tests/pxc/report.xml'
-        //   } //End steps
-        // } //End stage Ubuntu Bionic
-        // stage('Ubuntu Focal') {
-        //   agent {
-        //     label "min-focal-x64"
-        //   }
-        //   steps {
-        //     withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-        //       run_test()
-        //     }
-        //     junit 'package-testing/binary-tarball-tests/pxc/report.xml'
-        //   } //End steps
-        // } //End stage Ubuntu Focal
+        stage('Ubuntu Bionic') {
+          agent {
+            label "min-bionic-x64"
+          }
+          steps {
+            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+              run_test()
+            }
+            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+          } //End steps
+        } //End stage Ubuntu Bionic
+        stage('Ubuntu Focal') {
+          agent {
+            label "min-focal-x64"
+          }
+          steps {
+            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+              run_test()
+            }
+            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+          } //End steps
+        } //End stage Ubuntu Focal
         stage('Ubuntu Jammy') {
           agent {
             label "min-jammy-x64"
@@ -48,50 +48,50 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage Ubuntu Jammy
-        // stage('Debian Buster') {
-        //   agent {
-        //     label "min-buster-x64"
-        //   }
-        //   steps {
-        //     withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-        //       run_test()
-        //     }
-        //     junit 'package-testing/binary-tarball-tests/pxc/report.xml'
-        //   } //End steps
-        // } //End stage Debian Buster
-        // stage('Centos7') {
-        //   agent {
-        //     label "min-centos-7-x64"
-        //   }
-        //   steps {
-        //     withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-        //       run_test()
-        //     }
-        //     junit 'package-testing/binary-tarball-tests/pxc/report.xml'
-        //   } //End steps
-        // } //End stage CentOS7
-        // stage('Centos8') {
-        //   agent {
-        //     label "min-centos-8-x64"
-        //   }
-        //   steps {
-        //     withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-        //       run_test()
-        //     }
-        //     junit 'package-testing/binary-tarball-tests/pxc/report.xml'
-        //   } //End steps
-        // } //End stage CentOS8
-        // stage('Oracle Linux 9') {
-        //   agent {
-        //     label "min-ol-9-x64"
-        //   }
-        //   steps {
-        //     withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-        //       run_test()
-        //     }
-        //     junit 'package-testing/binary-tarball-tests/pxc/report.xml'
-        //   } //End steps
-        // } //End stage OracleLinux 9
+        stage('Debian Buster') {
+          agent {
+            label "min-buster-x64"
+          }
+          steps {
+            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+              run_test()
+            }
+            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+          } //End steps
+        } //End stage Debian Buster
+        stage('Centos7') {
+          agent {
+            label "min-centos-7-x64"
+          }
+          steps {
+            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+              run_test()
+            }
+            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+          } //End steps
+        } //End stage CentOS7
+        stage('Centos8') {
+          agent {
+            label "min-centos-8-x64"
+          }
+          steps {
+            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+              run_test()
+            }
+            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+          } //End steps
+        } //End stage CentOS8
+        stage('Oracle Linux 9') {
+          agent {
+            label "min-ol-9-x64"
+          }
+          steps {
+            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+              run_test()
+            }
+            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+          } //End steps
+        } //End stage OracleLinux 9
        } //End parallel
     } //End stage Run tests
   } //End stages
