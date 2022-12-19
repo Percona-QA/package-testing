@@ -1,5 +1,7 @@
 pipeline {
-  agent any 
+  agent {
+    label "micro-amazon"
+    }
   parameters {
     string(name: 'PXC_VERSION', defaultValue: '8.0.30-22.1', description: 'PXC full version')
     string(name: 'PXC_REVISION', defaultValue: 'e3bbf59', description: 'PXC revision')
