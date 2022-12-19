@@ -153,4 +153,3 @@
   - name: check PXC 5.7 version
     command: /package-testing/version_check.sh pxc57
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
-

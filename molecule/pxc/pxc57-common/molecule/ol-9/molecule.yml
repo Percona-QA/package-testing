@@ -35,6 +35,7 @@ provisioner:
     destroy: ../../../../playbooks/destroy.yml
     prepare: ../../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
+    side_effect: ../../../../../playbooks/pxc57_upgrade_common.yml
   inventory:
     host_vars:
       pxc2-57-common-ol-9:

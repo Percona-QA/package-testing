@@ -26,6 +26,7 @@ provisioner:
     destroy: ../../../../playbooks/destroy.yml
     prepare: ../../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
+    side_effect: ../../../../../playbooks/pxc80_upgrade_bootstrap.yml
   inventory:
     host_vars:
       pxc1-80-bootstrap-min-amazon-2:
