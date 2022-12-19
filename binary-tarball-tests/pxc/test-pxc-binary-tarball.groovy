@@ -132,6 +132,7 @@ void run_test() {
     git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
     cd package-testing/binary-tarball-tests/pxc
     wget -q ${TARBALL_LINK}${TARBALL_NAME}
+    echo "glibc_version before run.sh is $GLIBC_VERSION"
     ./run.sh || true
   '''
 }

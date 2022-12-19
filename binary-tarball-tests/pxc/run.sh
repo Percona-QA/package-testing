@@ -70,4 +70,5 @@ cp conf/*cnf $BASE_DIR/
 
 echo "Running tests..."
 echo "${PXC_DIR_NAME}"
+echo "glibc_version during run.sh is $GLIBC_VERSION"
 python3 -m pytest --ignore="${PXC_DIR_NAME}"/percona-xtradb-cluster-tests -v --junit-xml report.xml $@
