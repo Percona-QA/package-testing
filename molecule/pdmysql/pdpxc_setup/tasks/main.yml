@@ -52,6 +52,7 @@
     - percona-xtradb-cluster-server-debug
     - percona-xtradb-cluster-test
     - percona-xtradb-cluster
+    - percona-replication-manager
   when: ansible_os_family == "Debian"
 
 - name: install PXC rpm packages before OL9
@@ -70,6 +71,7 @@
     - percona-xtradb-cluster-shared
     - percona-xtradb-cluster-shared-compat
     - percona-xtradb-cluster-test
+    - percona-replication-manager
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "8"
 
 - name: install PXC rpm packages on OL9
@@ -87,6 +89,7 @@
     - percona-xtradb-cluster-server
     - percona-xtradb-cluster-shared
     - percona-xtradb-cluster-test
+    - percona-replication-manager
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
 - name: install HA Proxy RHEL Packages
