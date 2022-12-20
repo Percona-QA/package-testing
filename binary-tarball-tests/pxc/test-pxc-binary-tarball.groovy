@@ -1,8 +1,10 @@
 pipeline {
-  agent any 
+  agent {
+    label "micro-amazon"
+    }
   parameters {
     string(name: 'PXC_VERSION', defaultValue: '8.0.30-22.1', description: 'PXC full version')
-    string(name: 'PXC_REVISION', defaultValue: 'e3bbf59', description: 'PXC revision')
+    string(name: 'PXC_REVISION', defaultValue: '167c5ac', description: 'PXC revision')
     string(name: 'WSREP_VERSION', defaultValue: '26.4.3', description: 'WSREP version')
     string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.33-rel36-49.1', description: 'PXC-5.7 package version')
     booleanParam( 
@@ -104,7 +106,14 @@ void run_test() {
       MINIMAL="-minimal"
     fi
     if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
-      TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.17${MINIMAL}.tar.gz"
+      export GLIBC_VERSION="2.17"
+      if [ -f /usr/bin/apt-get ]; then
+        DEBIAN_VERSION=$(lsb_release -sc)
+        if [ ${DEBIAN_VERSION} = "jammy" ]; then
+          export GLIBC_VERSION="2.35"
+        fi
+      fi
+      TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
       TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
     elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
       export GLIBC_VERSION="2.17"
