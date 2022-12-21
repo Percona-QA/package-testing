@@ -136,6 +136,15 @@
       - proxysql2
   when: ansible_os_family == "Debian"
 
+- name: install initscripts-service rpm packages
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+      - initscripts-service
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+
 - name: install proxysql new rpm packages
   yum:
     name: "{{ packages }}"
