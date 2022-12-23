@@ -95,7 +95,7 @@ def test_check_shared_package(host, package):
     release = host.system_info.release
     if dist.lower() in DEB_DISTS:
         pytest.skip("This test only for RHEL based platforms")
-    if dist.lower() in RHEL_DISTS and release == '9':
+    if dist.lower() in RHEL_DISTS and release == '9.0':
         pytest.skip("This test is for RHEL based platforms except RHEL 9")
     pkg = host.package(package)
     assert pkg.is_installed
