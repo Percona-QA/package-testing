@@ -62,17 +62,8 @@
       update_cache: yes
     vars:
       packages:
-      - python-mysqldb
-    when: ansible_os_family == "Debian" and (ansible_distribution_release != "focal" and ansible_distribution_release != "bullseye")
-
-  - name: install python mysql deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-    vars:
-      packages:
       - python3-mysqldb
-    when: ansible_os_family == "Debian" and (ansible_distribution_release == "focal" and ansible_distribution_release == "bullseye")
+    when: ansible_os_family == "Debian"
 
   - name: install PXC 5.7 previous rpm packages
     yum:
