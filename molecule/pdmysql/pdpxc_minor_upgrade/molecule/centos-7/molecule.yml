@@ -8,7 +8,7 @@ platforms:
     region: eu-central-1
     image: ami-04cf43aca3e6f3de3
     vpc_subnet_id: subnet-085deaca8c1c59a4f
-    instance_type: t2.micro
+    instance_type: t2.small
     ssh_user: centos
     root_device_name: /dev/sda1
     instance_tags:

@@ -16,7 +16,9 @@ RPMPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster',
                'percona-xtradb-cluster-client', 'percona-xtradb-cluster-debuginfo',
                'percona-xtradb-cluster-devel', 'percona-xtradb-cluster-garbd',
                'percona-xtradb-cluster-server', 'percona-xtradb-cluster-shared',
-               'percona-xtradb-cluster-shared-compat', 'percona-xtradb-cluster-test']
+               'percona-xtradb-cluster-test']
+
+EXTRA_RPMPACKAGE = ['percona-xtradb-cluster-shared-compat']
 
 PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    " fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so';\"",
@@ -86,6 +88,18 @@ def test_check_rpm_package(host, package):
     pkg = host.package(package)
     assert pkg.is_installed
     assert VERSION in pkg.version, pkg.version
+
+@pytest.mark.parametrize("package", EXTRA_RPMPACKAGE)
+def test_check_shared_package(host, package):
+    dist = host.system_info.distribution
+    release = host.system_info.release
+    if dist.lower() in DEB_DISTS:
+        pytest.skip("This test only for RHEL based platforms")
+    if dist.lower() in RHEL_DISTS and release == '9.0':
+        pytest.skip("This test is for RHEL based platforms except RHEL 9")
+    pkg = host.package(package)
+    assert pkg.is_installed
+    assert VERSION in pkg.version, (pkg.version, release)
 
 
 def test_binary_version(host):
