@@ -53,21 +53,32 @@ pxc80_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 pxc80_files = (
-  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.29' ,
+  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.30' ,
   'lib/libmysqlservices.a' , 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini', 'lib/plugin/keyring_file.so',
   'lib/plugin/keyring_udf.so', 'lib/plugin/keyring_vault.so'
 )
-pxc80_symlinks = (
-  ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'), ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
-  ('lib/libgcrypt.so','lib/private/libgcrypt.so.11.8.2'), ('lib/libnspr4.so','lib/private/libnspr4.so'),
-  ('lib/libnss3.so','lib/private/libnss3.so'),  ('lib/libnssutil3.so','lib/private/libnssutil3.so'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.29'), ('lib/libplc4.so','lib/private/libplc4.so'),
-  ('lib/libplds4.so','lib/private/libplds4.so'), ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
-  ('lib/libsmime3.so','lib/private/libsmime3.so'), ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
-  ('lib/libssl3.so','lib/private/libssl3.so'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
-)
+if glibc_version == '2.35':
+  pxc80_symlinks = (
+    ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),('lib/libgcrypt.so', 'lib/private/libgcrypt.so.20.3.4',),
+    ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.30'),('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
+    ('lib/libssl.so', 'lib/private/libssl.so.3'),('lib/libtinfo.so', 'lib/private/libtinfo.so.6.3'),
+    ('lib/libaio.so','lib/private/libaio.so.1.0.1'),('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
+    ('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'), ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
+    ('lib/librtmp.so', 'lib/private/librtmp.so.1'),('lib/libtirpc.so', 'lib/private/libtirpc.so.3.0.0')
+  )
+else:
+  pxc80_symlinks = (
+    ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'), ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
+
+    ('lib/libgcrypt.so','lib/private/libgcrypt.so.11.8.2'), ('lib/libnspr4.so','lib/private/libnspr4.so'),
+    ('lib/libnss3.so','lib/private/libnss3.so'), ('lib/libnssutil3.so','lib/private/libnssutil3.so'),
+    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.30'), ('lib/libplc4.so','lib/private/libplc4.so'),
+    ('lib/libplds4.so','lib/private/libplds4.so'), ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
+    ('lib/libsmime3.so','lib/private/libsmime3.so'), ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
+    ('lib/libssl3.so','lib/private/libssl3.so'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
+  )
 
 # 5.7
 pxc57_binaries = [
@@ -101,7 +112,7 @@ pxc57_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 pxc57_files = (
-  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.20.3.26' ,
+  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.20.3.27' ,
   'lib/libmysqlservices.a' , 'lib/libcoredumper.a', 'lib/mysql/plugin/audit_log.so',
   'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so',
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
@@ -109,8 +120,8 @@ pxc57_files = (
 
 if glibc_version == "2.12":
   pxc57_symlinks = (
-    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.26'),
-    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.26'),
+    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.27'),
+    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.27'),
     ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.1e'),
     ('lib/libssl.so','lib/private/libssl.so.1.0.1e'),
     ('lib/libtinfo.so','lib/private/libtinfo.so.5.7'),
@@ -119,8 +130,8 @@ if glibc_version == "2.12":
   )
 else:
   pxc57_symlinks = (
-    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.26'),
-    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.26'),
+    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.27'),
+    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.27'),
     ('lib/libncurses.so','lib/private/libncurses.so.5.9'),
     ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'),
     ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
