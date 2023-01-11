@@ -59,12 +59,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: check that PMM client version is correct
-    command: /package-testing/version_check.sh pmm2
-    when: lookup('env', 'install_repo') == "experimental" or lookup('env', 'install_repo') == ""
-
-  - name: check that PMM client version is correct
-    command: /package-testing/version_check.sh pmm2-rc
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == "tools-main" or lookup('env', 'install_repo') == "pmm2-client-main" or lookup('env', 'install_repo') == "main"
+    command: "../scripts/pmm2_client_version_checker.sh {{ pmm_version }}"
 
   - name: Print PMM2-Client Status
     command: pmm-admin status
@@ -95,7 +90,7 @@
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == "tools-main" or lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == "pmm2-client-main"
 
   - name: checking existence of all artifacts from pmm2-client
-    command: bash -xe /package-testing/scripts/check_artifacts.sh
+    command: bash -xe ../scripts/check_artifacts.sh
 
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent
