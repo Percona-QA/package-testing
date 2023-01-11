@@ -16,7 +16,7 @@
       state: present
       key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-  
+
   - name: install GPG key for Percona repos
     rpm_key:
       state: present
@@ -30,7 +30,7 @@
   - name: setup epel 8 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-  
+
   - name: install GPG key for epel 9
     rpm_key:
       state: present
@@ -39,7 +39,7 @@
 
   - name: setup epel 9 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"   
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: add the Vault and epel CentOS 6 repos
     shell: |
@@ -149,26 +149,26 @@
       perms: yes
     when: lookup('env', 'USE_LOCAL_PKG_TEST') == "1"
 
-  - name: download package-testing repo branch with wget
-    command: "{{ item }}"
-    with_items:
-    - rm -rf /package-testing
-    - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
-    - unzip master.zip
-    - rm -f master.zip
-    - mv package-testing-master /package-testing
-    when: lookup('env', 'USE_LOCAL_PKG_TEST') == "" or lookup('env', 'USE_LOCAL_PKG_TEST') == "0"
+#  - name: download package-testing repo branch with wget
+#    command: "{{ item }}"
+#    with_items:
+#    - rm -rf /package-testing
+#    - rm -f master.zip
+#    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+#    - unzip master.zip
+#    - rm -f master.zip
+#    - mv package-testing-master /package-testing
+#    when: lookup('env', 'USE_LOCAL_PKG_TEST') == "" or lookup('env', 'USE_LOCAL_PKG_TEST') == "0"
 
-  - name: install latest bats from github
-    command: "{{ item }}"
-    with_items:
-    - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/sstephenson/bats/archive/master.zip
-    - unzip master.zip
-    - rm -f master.zip
-    - bats-master/install.sh /usr/local
-    - rm -rf bats-master
+#  - name: install latest bats from github
+#    command: "{{ item }}"
+#    with_items:
+#    - rm -f master.zip
+#    - wget --no-check-certificate -O master.zip https://github.com/sstephenson/bats/archive/master.zip
+#    - unzip master.zip
+#    - rm -f master.zip
+#    - bats-master/install.sh /usr/local
+#    - rm -rf bats-master
 
   - name: include tasks for listing already installed packages
     include_tasks: list_installed_packages.yml
