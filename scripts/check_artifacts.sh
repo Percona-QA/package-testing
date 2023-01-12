@@ -10,6 +10,7 @@ ls -la /usr/local/percona/pmm2/exporters | grep -q postgres_exporter
 ls -la /usr/local/percona/pmm2/exporters | grep -q proxysql_exporter
 ls -la /usr/local/percona/pmm2/exporters | grep -q rds_exporter
 ls -la /usr/local/percona/pmm2/exporters | grep -q vmagent
+ls -la /usr/local/percona/pmm2/exporters | grep -q its_not_a_real_check
 
 ## check tools binary
 

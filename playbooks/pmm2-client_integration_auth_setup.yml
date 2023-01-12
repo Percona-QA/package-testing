@@ -31,14 +31,8 @@
   - name: install pmm2-client via tarball
     shell: ../scripts/pmm2_client_install_tarball.sh -v {{ pmm_version }} -p {{ custom_path }}
 
-  - name: check that PMM client dev-latest version is correct
-    shell: ../version_check.sh pmm2
-    when: pmm_repo == "experimental"
-
-  - name: check that PMM client RC version is correct
-    shell: ../version_check.sh pmm2-rc
-    ### "testing" "main" "tools-main" "pmm2-client-main"
-    when: pmm_repo != "experimental"
+  - name: check that PMM client version is correct
+    command: "../scripts/pmm2_client_version_checker.sh {{ pmm_version }}"
 
   - name: Start agent
     shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &

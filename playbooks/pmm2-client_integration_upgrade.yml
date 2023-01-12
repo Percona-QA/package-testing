@@ -32,7 +32,7 @@
       packages:
       - jq
     when: ansible_os_family == "RedHat"
-  
+
   - name: Install JQ for exporter end point metric fetch
     apt:
       name: "{{ packages }}"
@@ -291,12 +291,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: check that PMM client version is correct
-    command: /package-testing/version_check.sh pmm2
-    when: lookup('env', 'install_repo') == "experimental" or lookup('env', 'install_repo') == ""
-
-  - name: check that PMM client version is correct
-    command: /package-testing/version_check.sh pmm2-rc
-    when: lookup('env', 'install_repo') == "testing"
+    command: "../scripts/pmm2_client_version_checker.sh {{ pmm_version }}"
 
   - name: check if mongodb is still being monitored
     command: pmm-admin list
@@ -366,7 +361,7 @@
     assert:
      that:
       - "'Running' in vmagent_status.stdout"
-  
+
   - name: check if Metric End point with Auth works for Node Exporter, MysqlD Exporter, MongoDB Exporter, Postgres Exporter
     shell: "{{item}}"
     with_items:
@@ -400,7 +395,7 @@
      that:
       - "'{{ pmm_version }}' in pmm_admin_version.stdout"
     when: lookup('env', 'install_repo') == "testing"
-  
+
   - name: check if postgresql_pgstatements_agent is Running
     shell: pmm-admin list | grep postgresql_pgstatements_agent | awk -F" " '{print $2}'
     register: postgresql_pgstatements_agent

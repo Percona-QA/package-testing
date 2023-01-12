@@ -56,11 +56,11 @@
   - name: Use pmm-agent setup to configure on another port
     shell: pmm-agent setup --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml --force --server-address={{ pmm_server_address }} --server-insecure-tls --listen-port={{ custom_port }} --metrics-mode=auto --server-username=admin --server-password=admin --paths-base=/pmm2-client-custom-path/ {{ instance_ip }} generic node2_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
-    
+
   - name: Use pmm-agent setup to configure on another port in pull mode
     shell: pmm-agent setup --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml --force --server-address={{ pmm_server_address }} --server-insecure-tls --listen-port={{ custom_port }} --metrics-mode=pull --server-username=admin --server-password=admin --paths-base=/pmm2-client-custom-path/ {{ instance_ip }} generic node2_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "pull"
-    
+
   - name: Start agent on custom port non-default port
     shell: pmm-agent --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
     when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
@@ -230,12 +230,7 @@
       - "bash -xe /package-testing/scripts/pmm2_get_exporter_binaries.sh"
 
   - name: check that PMM client version is correct
-    command: /package-testing/version_check.sh pmm2
-    when: lookup('env', 'install_repo') == "experimental" or lookup('env', 'install_repo') == ""
-
-  - name: check that PMM client version is correct
-    command: /package-testing/version_check.sh pmm2-rc
-    when: lookup('env', 'install_repo') == "testing"
+    command: "../scripts/pmm2_client_version_checker.sh {{ pmm_version }}"
 
   - name: Check if the configuration generated with paths-base is using the custom path after upgrade client
     shell: cat /usr/local/percona/pmm2/config/pmm-agent.yaml | grep -o -c /pmm2-client-custom-path | grep "14"

@@ -39,16 +39,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: check that PMM client version is correct
-    command: /package-testing/version_check.sh pmm2
-    when: lookup('env', 'install_repo') == "experimental" or lookup('env', 'install_repo') == ""
-
-  - name: check that PMM client version is correct
-    command: /package-testing/version_check.sh pmm2-rc
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == "tools-main" or lookup('env', 'install_repo') == "pmm2-client-main"
-
-  - name: check that PMM client version is correct
-    command: /package-testing/version_check.sh pmm2-rc
-    when: lookup('env', 'install_repo') == "main"
+    command: "../scripts/pmm2_client_version_checker.sh {{ pmm_version }}"
 
   - name: configure pmm client to connect to server in push/auto Mode
     shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }} --agent-password={{ pmm_auth_password }}
