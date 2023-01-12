@@ -18,12 +18,9 @@ actual_version=$(pmm-admin --version ${FLAG} 2>&1|grep ^Version | awk -F ' ' '{p
 if [ ${version_match} -eq 0 ]; then
   echo "PMM Client version ${actual_version} is not good! Expected: ${EXPECTED}" >&2;
   exit 1
-else
-  echo "PMM Client version is correct and ${EXPECTED}"
 fi
 
 #check for packages after upgrade
-
 pmm-admin status | grep -q Running
 pmm-admin status | grep node_exporter | grep -qv Waiting
 pmm-admin status | grep vmagent | grep -qv Waiting
@@ -31,26 +28,21 @@ pmm-admin status | grep mysqld_exporter | grep -qv Waiting
 pmm-admin status | grep mysql_perfschema_agent | grep -qv Waiting
 pmm-admin status | grep mysql_perfschema_agent | grep -qv its_not_a_real_check
 
-server_version=$(pmm-admin status | grep Version | awk -F' ' '{print $2}')
-if [ "$server_version" != "$1" ]; then
-    echo "PMM Server Version is not equal to expected $1";
+admin_version=$(pmm-admin status ${FLAG} | grep pmm-admin | awk -F' ' '{print $3}')
+agent_version=$(pmm-admin status ${FLAG} | grep pmm-agent | awk -F' ' '{print $3}')
+if [ "$admin_version" != "${EXPECTED}" ]; then
+    echo "PMM Admin Version ${admin_version}is not equal to expected ${EXPECTED}";
     exit 1;
 fi
-admin_version=$(pmm-admin status | grep pmm-admin | awk -F' ' '{print $3}')
-if [ "$admin_version" != "$1" ]; then
-    echo "PMM Admin Version is not equal to expected $1";
-    exit 1;
-fi
-agent_version=$(pmm-admin status | grep pmm-agent | awk -F' ' '{print $3}')
-if [ "$agent_version" != "$1" ]; then
-    echo "PMM Agent Version is not equal to expected $1";
+if [ "$agent_version" != "${EXPECTED}" ]; then
+    echo "PMM Agent Version ${agent_version} is not equal to expected ${EXPECTED}";
     exit 1;
 fi
 if [ "$agent_version" != "$admin_version" ]; then
-    echo "PMM-Agent Version Does not Match PMM-Admin Version";
+    echo "PMM-Agent Version(${agent_version}) does not Match PMM-Admin Version (${admin_version})";
     exit 1;
 fi
-echo "PMM Client versions are OK"
+echo "PMM Client version is correct and ${EXPECTED}"
 
 ls -la /usr/local/percona/pmm2/exporters | grep -q azure_exporter
 ls -la /usr/local/percona/pmm2/exporters | grep -q mongodb_exporter
