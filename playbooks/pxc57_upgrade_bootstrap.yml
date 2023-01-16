@@ -110,11 +110,22 @@
     when: (ansible_os_family == "RedHat" and ansible_distribution_major_version == "7") or (ansible_distribution == "Amazon")
     throttle: 1
 
+  - name: register PXC version
+    shell: mysqld --version
+    register: pxc_version
+    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
+
+  - name: print PXC version
+    debug: var=pxc_version
+    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
+
   - name: check that PXC version is correct
     command: /package-testing/version_check.sh pxc57
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: check that PXC package versions are correct
     command: /package-testing/package_check.sh pxc57
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: run bats tests for mysql init scripts
     command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats

@@ -153,11 +153,11 @@
     command: "{{ item }}"
     with_items:
     - rm -rf /package-testing
-    - rm -f wip-pxc-package-testing-upgrade-test.zip
-    - wget --no-check-certificate -O wip-pxc-package-testing-upgrade-test.zip https://github.com/panchal-yash/package-testing/archive/wip-pxc-package-testing-upgrade-test.zip
-    - unzip wip-pxc-package-testing-upgrade-test.zip
-    - rm -f wip-pxc-package-testing-upgrade-test.zip
-    - mv package-testing-wip-pxc-package-testing-upgrade-test /package-testing
+    - rm -f master.zip
+    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+    - unzip master.zip
+    - rm -f master.zip
+    - mv package-testing-master /package-testing
     when: lookup('env', 'USE_LOCAL_PKG_TEST') == "" or lookup('env', 'USE_LOCAL_PKG_TEST') == "0"
 
   - name: install latest bats from github

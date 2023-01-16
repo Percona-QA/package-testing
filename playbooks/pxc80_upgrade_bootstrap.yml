@@ -70,14 +70,25 @@
   - name: install plugins
     command: /package-testing/plugins_test_80.sh pxc
 
-  - name: check that PXC version is correct
-    command: /package-testing/version_check.sh pxc80
+  - name: register PXC version Side Effect
+    shell: mysqld --version
+    register: pxc_version
 
-  - name: check that PXC package versions are correct
+  - name: print PXC version Side Effect
+    debug: var=pxc_version
+
+  - name: check that PXC version is correct Side Effect
+    command: /package-testing/version_check.sh pxc80
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
+  - name: check that PXC package versions are correct Side Effect
     command: /package-testing/package_check.sh pxc80
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
 
 # - name: run bats tests for mysql init scripts
 #   command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
 
 # - name: start mysql service
 #   service: name=mysql state=started
+
