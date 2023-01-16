@@ -1,0 +1,14 @@
+# This task performs PMM Client version verification from "pmm-admin --version" and
+# "pmm-admin status" commands output
+#
+# Task adjustments are handled by parent playbook vars:
+#             var "port_flag"      :  to access agent with custom port
+#                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
+
+- name: set empty port_flag
+  set_fact:
+    port_flag: ""
+  when: port_flag is not defined
+
+- name: run PMM client version check script
+  command: "bash -xe ../scripts/check_pmm2_client_upgrade.sh {{ port_flag }}"

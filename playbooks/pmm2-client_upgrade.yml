@@ -75,7 +75,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: check that PMM client version is correct
-    command: "../scripts/pmm2_client_version_checker.sh {{ pmm_version }}"
+    include_tasks: ../tasks/verify_pmm_client_version.yml
 
   - name: Print PMM2-Client Version After upgrade
     command: pmm-admin --version
