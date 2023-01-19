@@ -10,8 +10,19 @@
     port_flag: ""
   when: port_flag is not defined
 
+- name: Grep pmm-admin status output
+  shell: "pmm-admin status {{ port_flag }}"
+  register: pmm_admin_status
+- debug: var=pmm_admin_status.stdout
+
+- name: Assert pmm-agent is connected to server
+  assert:
+    that:
+      - "'Failed to get PMM Agent status from local pmm-agent' not in pmm_admin_status.stdout"
+
 - name: Grep PMM Server version from pmm-admin status output
-  shell: "pmm-admin status {{ port_flag }} | grep Version | awk -F' ' '{print $3}'"
+  shell: "pmm-admin status {{ port_flag }} | grep Version | awk -F':' '{print $2}' | awk -F' ' '{print $1}'"
+
   register: pmm_server_version
 
 - name: Print the PMM Server Version on Status command
