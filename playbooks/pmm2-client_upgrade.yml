@@ -51,7 +51,9 @@
   - name: debug yum
     shell: "yum list pmm2-client --showduplicates"
     register: yum_list
-    debug: var=yum_list.stdout
+    when: test_repo == "main" and ansible_os_family == "RedHat"
+
+  - debug: var=yum_list.stdout
     when: test_repo == "main" and ansible_os_family == "RedHat"
 
   - name: grep previous release PMM Client version from yum list
