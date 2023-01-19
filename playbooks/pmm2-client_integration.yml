@@ -9,6 +9,7 @@
   become_method: sudo
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
+    test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') | regex_search('\\S(.*\\S)?') }}"
 
@@ -26,34 +27,30 @@
 
   - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when: test_repo == "testing" or test_repo == ""
 
   - name: include tasks for enabling experimental repo
     include_tasks: ../tasks/enable_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+    when: test_repo == "experimental"
 
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+    when: test_repo == "main"
 
   - name: include tasks for enabling tools main repo
     include_tasks: ../tasks/enable_tools_main_repo.yml
-    when: lookup('env', 'install_repo') == "tools-main"
+    when: test_repo == "tools-main"
 
   - name: include tasks for enabling experimental repo
     include_tasks: ../tasks/enable_pmm2client_main_repo.yml
-    when: lookup('env', 'install_repo') == "pmm2-client-main"
+    when: test_repo == "pmm2-client-main"
 
   - name: install PMM client new deb packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - pmm2-client
+    apt: name=pmm2-client update_cache=yes state=latest
     when: ansible_os_family == "Debian"
 
   - name: install PMM client new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - pmm2-client
+    yum: name=pmm2-client state=latest
     when: ansible_os_family == "RedHat"
 
   - name: check that PMM Client version is correct
@@ -83,7 +80,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
   - name: set root password on centos
-    command: /package-testing/setpass_57.sh
+    command: ../setpass_57.sh
     when: ansible_os_family == "RedHat"
 
   - name: copy .my.cnf with credentials on centos
@@ -93,7 +90,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: add mysql metrics and queries to monitoring
-    command: /package-testing/scripts/pmm2_add_instance.sh mysql
+    command: ../scripts/pmm2_add_instance.sh mysql
     when: ansible_os_family == "RedHat"
 
   - name: add mysql instance for monitoring
@@ -119,7 +116,7 @@
   - name: check if Metric End point with Auth works for Mysqld Exporter
     shell: "{{item}}"
     with_items:
-      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
+      - "bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
 
   - name: Assert if the pmm-admin list contains mysqld_exporter with Running state
     assert:
@@ -186,12 +183,12 @@
   - name: check if Metric End point with Auth works for MongoDB Exporter
     shell: "{{item}}"
     with_items:
-      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
+      - "bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
 
   - name: check if Metric End point with Auth works for MongoDB Exporter for service with socket
     shell: "{{item}}"
     with_items:
-      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
+      - "bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
 
   - name: remove mongodb service from monitoring which was added via socket
     command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
@@ -320,20 +317,20 @@
     retries: 3
     delay: 10
     with_items:
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
 
   - name: check if Metric End point with Auth works for Postgres Exporter when service added via socket
     shell: "{{item}}"
     retries: 3
     delay: 10
     with_items:
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
 
   - name: remove postgresql instances added via socket
     command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
@@ -378,7 +375,7 @@
     retries: 3
     delay: 10
     with_items:
-      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0"
+      - "bash -x ../scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0"
 
   - name: Print the node_exporter_status
     ansible.builtin.debug:

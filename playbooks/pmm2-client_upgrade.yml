@@ -48,9 +48,35 @@
     register: pmm_release_minor_version
     when: test_repo == "main"
 
+### debug rhel
+  - name: debug yum list
+    shell: "yum list pmm2-client --showduplicates"
+    register: list
+    when: test_repo == "main" and ansible_os_family == "RedHat"
+  - debug: var=list.stdout
+    when: test_repo == "main" and ansible_os_family == "RedHat"
+
+  - name: debug yum list grep
+    shell: "yum list pmm2-client --showduplicates | grep 2.{{ pmm_release_minor_version.stdout | int -1 }}"
+    register: grep_list
+    when: test_repo == "main" and ansible_os_family == "RedHat"
+  - debug: var=grep_list.stdout
+    when: test_repo == "main" and ansible_os_family == "RedHat"
+
+  - name: debug yum list version
+    shell: "yum list pmm2-client --showduplicates | grep 2.{{ pmm_release_minor_version.stdout | int -1 }} | awk '{print $2}'"
+    register: old_ver
+    when: test_repo == "main" and ansible_os_family == "RedHat"
+  - debug: var=old_ver.stdout
+    when: test_repo == "main" and ansible_os_family == "RedHat"
+### debug end
+
   - name: grep previous release PMM Client version from yum list
     shell: "yum list pmm2-client --showduplicates | grep 2.{{ pmm_release_minor_version.stdout | int -1 }} | awk '{print $2}'"
     register: pmm_old_version
+    when: test_repo == "main" and ansible_os_family == "RedHat"
+
+  - debug: var=pmm_old_version.stdout
     when: test_repo == "main" and ansible_os_family == "RedHat"
 
   - name: grep previous release PMM Client version from apt list
