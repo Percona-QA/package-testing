@@ -57,7 +57,7 @@
     when: test_repo == "main"
 
   - name: grep previous release PMM Client version from yum list
-    shell: "yum list pmm2-client --showduplicates | grep 2.{{ pmm_release_minor_version.stdout | int -1 }}"
+    shell: "yum list pmm2-client --showduplicates | grep 2.{{ pmm_release_minor_version.stdout | int -1 | tail -n1}}"
     register: pmm_old_version
     when: test_repo == "main" and ansible_os_family == "RedHat"
 
