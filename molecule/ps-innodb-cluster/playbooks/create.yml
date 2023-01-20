@@ -82,6 +82,8 @@
             }
         }}"
         wait: true
+        spot_price: "0.0100"
+        spot_type: "one-time"
         assign_public_ip: true
         exact_count: 1
         count_tag:
@@ -92,6 +94,7 @@
             volume_type: gp2
             volume_size: 30
             delete_on_termination: true
+        instance_initiated_shutdown_behavior: "terminate"
       register: server
       loop: "{{ molecule_yml.platforms }}"
       loop_control:
