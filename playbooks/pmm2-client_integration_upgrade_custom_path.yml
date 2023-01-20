@@ -133,7 +133,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 6
 
   - name: add mongodb metrics to monitoring
-    command: pmm-admin add mongodb --service-name=mongodb_{{ instance_ip }}
+    command: pmm-admin add mongodb --service-name=mongodb_{{ rnd }}_{{ instance_ip }}
 
   - name: add mongodb metrics to monitoring using socket
     command: pmm-admin add mongodb --socket=/tmp/mongodb-27017.sock --service-name=mongodb_socket_{{ instance_ip }}
@@ -235,7 +235,7 @@
     become_user: postgres
 
   - name: add postgresql metrics to monitoring
-    command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }}
+    command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name=pgsql_{{ rnd }}_{{ instance_ip }}
     when: ansible_distribution_release != 'xenial'
 
   - name: add postgresql metrics to monitoring via socket
