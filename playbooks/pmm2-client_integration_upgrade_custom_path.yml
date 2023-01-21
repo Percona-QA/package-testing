@@ -49,9 +49,6 @@
   - name: "install old({{ pmm_old_version.stdout }}) pmm2-client tarball to custom path"
     command: "../scripts/pmm2_client_install_tarball.sh -v {{ pmm_old_version.stdout }} -p {{ custom_path }}"
 
-  - name: Start agent
-    shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
-
   - name: define "--metrics-mode=push|pull|auto" argument
     set_fact:
       metrics_mode_arg: "--metrics-mode={{ metrics_mode }}"
@@ -62,6 +59,9 @@
   - name: Check if the configuration generated with paths-base is using the custom path
     shell: cat {{custom_path}}/config/pmm-agent.yaml | grep -o -c "{{custom_path}}" | grep "14"
     become: yes
+
+  - name: Start agent
+    shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
 
   - name: check if pmm_agent is connected
     shell: pmm-admin list | grep pmm_agent | awk -F" " '{print $2}'
