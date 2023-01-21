@@ -12,7 +12,7 @@
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
     test_repo: "{{ lookup('env', 'install_repo') }}"
-    metrics_mode: "{{ lookup('env', 'METRICS_MODE') }}"
+    metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
 
   tasks:
@@ -32,12 +32,17 @@
     set_fact:
       instance_ip: "{{ instance_ip.stdout }}"
 
+  - set_fact:
+      rnd: "{{ 1000 | random }}"
+    run_once: yes
+
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_main_repo.yml
 
+### enable pmm2-client release and install old version to update
   - name: enable pmm2-client release repo
     command: percona-release enable pmm2-client release
     when: test_repo == "main"
@@ -89,6 +94,7 @@
     yum: name={{ pmm_client_old }} state=present
     when: ansible_os_family == "RedHat"
 
+### Setup PMM Client
   - name: configure pmm client to connect to server in push/auto Mode
     shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
@@ -96,6 +102,18 @@
   - name: configure pmm client to connect to server in pull Mode
     shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "pull"
+
+  - name: Grep pmm-admin status output
+    shell: "pmm-admin status"
+    register: pmm_admin_status
+  - debug: var=pmm_admin_status.stdout
+
+  - name: Assert pmm-agent is connected to server
+    assert:
+      that:
+        - "'Failed to get PMM Agent status from local pmm-agent' not in pmm_admin_status.stdout"
+      fail_msg: "pmm-agent is not connected to server!"
+      success_msg: "pmm-agent is connected to server"
 
 ### start PS5.7
   - name: install Percona Server 5.7 packages
@@ -285,6 +303,7 @@
 
 ## end PG
 
+### Upgrade PMM Client
   - name: include tasks for enabling testing repo
     include: ../tasks/enable_testing_repo.yml
     when: test_repo == "testing" or test_repo == ""
@@ -317,6 +336,16 @@
   - name: check that PMM client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
 
+### Checks after upgrade
+  - name: check if pmm_agent is connected
+    shell: pmm-admin list | grep pmm_agent | awk -F" " '{print $2}'
+    register: pmm_agent_status
+
+  - name: Assert if the pmm-admin list contains pmm_agent type and Connected
+    assert:
+      that:
+        - "'Connected' in pmm_agent_status.stdout"
+
   - name: check if mongodb is still being monitored
     command: pmm-admin list
     register: list_output
@@ -336,15 +365,6 @@
       that:
         - "'PostgreSQL' in list_output.stdout"
     when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
-
-  - name: check if pmm_agent is connected
-    shell: pmm-admin list | grep pmm_agent | awk -F" " '{print $2}'
-    register: pmm_agent_status
-
-  - name: Assert if the pmm-admin list contains pmm_agent type and Connected
-    assert:
-     that:
-      - "'Connected' in pmm_agent_status.stdout"
 
   - name: Wait for node_exporter to be Running Status After Upgrade
     shell: pmm-admin list | grep node_exporter | awk -F" " '{print $2}'
@@ -421,6 +441,7 @@
     assert:
      that:
       - "'Running' in postgresql_pgstatements_agent.stdout"
+
   - name: Remove Socket services, to verify Port output in pmm-admin list commands
     command: "{{item}}"
     with_items:
@@ -447,14 +468,11 @@
   - name: check that PMM client version is correct
     include_tasks: ../tasks/verify_pmm_status_versions.yml
 
+### Clean up
   - name: remove PMM client deb packages
-    apt: name={{item}} state=absent
-    with_items:
-    - pmm2-client
+    apt: name=pmm2-client state=absent
     when: ansible_os_family == "Debian"
 
   - name: remove PMM client rpm packages
-    yum: name={{item}} state=absent
-    with_items:
-    - pmm2-client
+    yum: name=pmm2-client state=absent
     when: ansible_os_family == "RedHat"

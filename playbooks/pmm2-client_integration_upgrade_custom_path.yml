@@ -32,23 +32,25 @@
   - name: include tasks for test env setup
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
+### detect and install(tarball) old version to update
   - name: detect and save release version
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | tail -n1"
-    register: pmm_old_version
+    register: old_version
     when: test_repo != "main"
 
-  - name: detect and save release version
+  - name: detect and save previous release version
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | grep -E '[[:digit:]]\\.[[:digit:]]+\\.[[:digit:]]' | tail -n2 | head -n1"
-    register: pmm_old_version
+    register: old_version
     when: test_repo == "main"
 
   - name: Print detected old PMM version to install
     ansible.builtin.debug:
-      msg: pmm2 release version is {{ pmm_old_version.stdout }}
+      msg: pmm2 release version is {{ old_version.stdout }}
 
-  - name: "install old({{ pmm_old_version.stdout }}) pmm2-client tarball to custom path"
-    command: "../scripts/pmm2_client_install_tarball.sh -v {{ pmm_old_version.stdout }} -p {{ custom_path }}"
+  - name: "install old({{ old_version.stdout }}) pmm2-client tarball to custom path"
+    command: "../scripts/pmm2_client_install_tarball.sh -v {{ old_version.stdout }} -p {{ custom_path }}"
 
+### Setup PMM Client
   - name: define "--metrics-mode=push|pull|auto" argument
     set_fact:
       metrics_mode_arg: "--metrics-mode={{ metrics_mode }}"
@@ -258,9 +260,14 @@
     when: ansible_distribution_release != 'xenial'
 ## end PG 13
 
+### Upgrade PMM Client
   - name: "install new({{ pmm_version }}) pmm2-client tarball to custom path"
     command: "../scripts/pmm2_client_install_tarball.sh -v {{ pmm_version }} -p {{ custom_path }} -u"
 
+  - name: Start upgraded agent
+    shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
+
+### Checks after upgrade
   - name: check that PMM client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
 

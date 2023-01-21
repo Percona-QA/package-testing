@@ -19,6 +19,9 @@
   assert:
     that:
       - "'Failed to get PMM Agent status from local pmm-agent' not in pmm_admin_status.stdout"
+#      - another message to check may be added here
+    fail_msg: "pmm-agent is not connected to server!"
+    success_msg: "pmm-agent is connected to server"
 
 - name: Grep PMM Server version from pmm-admin status output
   shell: "pmm-admin status {{ port_flag }} | grep Version | awk -F':' '{print $2}' | awk -F' ' '{print $1}'"

@@ -49,7 +49,7 @@
     command: pmm-admin status
     register: status
     ignore_errors: yes
-  - debug: var=status.stderr_lines
+  - debug: var=status.stdout
 
   - name: Start agent
     shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
