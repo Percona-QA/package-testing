@@ -29,6 +29,18 @@
       rnd: "{{ 1000 | random }}"
     run_once: yes
 
+
+
+  - name: debug env vars
+    shell: "printenv"
+    register: all_env_vars
+  - debug: var=all_env_vars.stdout
+
+  - debug: var=pmm_server_address
+  - debug: var=test_repo
+  - debug: var=metrics_mode
+  - debug: var=pmm_version
+
   - name: include tasks for test env setup
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
