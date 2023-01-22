@@ -77,6 +77,10 @@
         - "'Connected' in pmm_agent_status.stdout"
 
 ### start PS 5.7
+  - name: define mysql service name
+    set_fact:
+      mysql_service_name: "mysql_{{ rnd }}_{{ instance_ip }}"
+
   - name: install Percona Server 5.7 packages
     include_tasks: ../tasks/install_ps57.yml
 
@@ -106,7 +110,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: add mysql instance for monitoring using socket
-    command: pmm-admin add mysql --query-source=perfschema --socket=/var/run/mysqld/mysqld.sock --service-name=mysql_{{ rnd }}_{{ instance_ip }}
+    command: pmm-admin add mysql --query-source=perfschema --socket=/var/run/mysqld/mysqld.sock --service-name={{ mysql_service_name }}
     when: ansible_os_family != "RedHat"
 
   - name: check if mysql monitoring running
@@ -120,6 +124,10 @@
 ## end PS 5.7
 
 ### start PSMDB 4.4
+  - name: define mongodb service name
+    set_fact:
+      mongo_service_name: "mongodb_{{ rnd }}_{{ instance_ip }}"
+
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_psmdb_repo.yml
     vars:
@@ -137,7 +145,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 6
 
   - name: add mongodb metrics to monitoring
-    command: pmm-admin add mongodb --service-name=mongodb_{{ rnd }}_{{ instance_ip }}
+    command: pmm-admin add mongodb --service-name={{ mongo_service_name }}
 
   - name: add mongodb metrics to monitoring using socket
     command: pmm-admin add mongodb --socket=/tmp/mongodb-27017.sock --service-name=mongodb_socket_{{ instance_ip }}
@@ -153,6 +161,10 @@
 ### end PSMDB 4.4
 
 ### start PG 13
+  - name: define pgsql service name
+    set_fact:
+      pgsql_service_name: "pgsql_{{ rnd }}_{{ instance_ip }}"
+
   - name: Enable postgresql repository
     command: percona-release setup -y ppg-13
     when: ansible_distribution_release != 'xenial'
@@ -239,7 +251,7 @@
     become_user: postgres
 
   - name: add postgresql metrics to monitoring
-    command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name=pgsql_{{ rnd }}_{{ instance_ip }}
+    command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name={{ pgsql_service_name }}
     when: ansible_distribution_release != 'xenial'
 
   - name: add postgresql metrics to monitoring via socket
@@ -357,13 +369,13 @@
     shell: "{{item}}"
     with_items:
       - bash -x ../scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name {{ mongo_service_name }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name {{ mysql_service_name }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name {{ pgsql_service_name }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name {{ pgsql_service_name }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name {{ pgsql_service_name }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+      - bash -x ../scripts/pmm2_check_metric.sh --service_name {{ pgsql_service_name }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
 
   - name: check if Metric End point with Auth works after upgrade for Postgres exporter when service was added via socket before upgrade
     shell: "{{item}}"
