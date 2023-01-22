@@ -35,8 +35,8 @@
 - name: add mongodb metrics to monitoring
   command: pmm-admin add mongodb {{ port_flag }} --service-name=mongodb_{{ instance_ip }}
 
-#- name: add mongodb metrics to monitoring using socket
-#  command: pmm-admin add mongodb {{ port_flag }} --socket=/tmp/mongodb-27017.sock --service-name=mongodb_socket_{{ instance_ip }}
+- name: add mongodb metrics to monitoring using socket
+  command: pmm-admin add mongodb {{ port_flag }} --socket=/tmp/mongodb-27017.sock --service-name=mongodb_socket_{{ instance_ip }}
 
 - name: check if mongodb monitoring is running
   command: "{{ cmd_admin_list }}"
