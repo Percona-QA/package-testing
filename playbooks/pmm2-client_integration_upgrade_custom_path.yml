@@ -43,6 +43,8 @@
     register: old_version
     when: test_repo == "main"
 
+  - debug: var=old_version
+
   - name: Print detected old PMM version to install
     ansible.builtin.debug:
       msg: pmm2 release version is {{ old_version.stdout }}
@@ -263,6 +265,10 @@
 ### Upgrade PMM Client
   - name: "install new({{ pmm_version }}) pmm2-client tarball to custom path"
     command: "../scripts/pmm2_client_install_tarball.sh -v {{ pmm_version }} -p {{ custom_path }} -u"
+
+  - name: stop pmm-agent process
+    command: "pkill -f pmm-agent"
+    become: yes
 
   - name: Start upgraded agent
     shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
