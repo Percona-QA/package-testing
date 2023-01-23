@@ -29,18 +29,6 @@
       rnd: "{{ 1000 | random }}"
     run_once: yes
 
-
-
-  - name: debug env vars
-    shell: "printenv"
-    register: all_env_vars
-  - debug: var=all_env_vars.stdout
-
-  - debug: var=pmm_server_address
-  - debug: var=test_repo
-  - debug: var=metrics_mode
-  - debug: var=pmm_version
-
   - name: include tasks for test env setup
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
@@ -56,6 +44,49 @@
     when: test_repo == "main"
 
   - debug: var=old_version
+
+  - name: detect 1
+    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | tail -n1"
+    register: ver1
+  - debug: var=ver1
+
+  - name: detect 2
+    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | grep -E '[[:digit:]]\\.[[:digit:]]+\\.[[:digit:]]' | tail -n2 | head -n1"
+    register: ver2
+  - debug: var=ver2
+
+  - name: detect 3
+    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | grep -E '[[:digit:]]\\.[[:digit:]]+\\.[[:digit:]]' | tail -n2"
+    register: ver3
+  - debug: var=ver3
+
+  - name: detect 4
+    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | grep -E '[[:digit:]]\\.[[:digit:]]+\\.[[:digit:]]'"
+    register: ver4
+  - debug: var=ver4
+
+  - name: detect 5
+    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V"
+    register: ver5
+  - debug: var=ver5
+
+  - name: detect 6
+    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest"
+    register: ver6
+  - debug: var=ver6
+
+  - name: detect 7
+    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name"
+    register: ver7
+  - debug: var=ver7
+
+  - name: detect 8
+    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - "
+    register: ver8
+  - debug: var=ver8
+
+
+
 
   - name: Print detected old PMM version to install
     ansible.builtin.debug:
