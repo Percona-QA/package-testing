@@ -33,37 +33,23 @@
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
 ### detect and install(tarball) old version to update
-  - name: detect 1
-    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | tail -n1"
-    register: ver1
-  - debug: var=ver1
-
-  - name: detect 2
-    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | grep -E '[[:digit:]]\\.[[:digit:]]+\\.[[:digit:]]' | tail -n2 | head -n1"
-    register: ver2
-  - debug: var=ver2
-
   - name: detect and save release version
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | tail -n1"
-    register: old_version
-    when: test_repo != "main"
+    register: latest_release
 
   - name: detect and save previous release version
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | grep -E '[[:digit:]]\\.[[:digit:]]+\\.[[:digit:]]' | tail -n2 | head -n1"
-    register: old_version
-    when: test_repo == "main"
+    register: old_release
 
-  - debug: var=old_version
-
-
-
+  - set_fact:
+      old_version: "{{ old_release.stdout if (test_repo == 'main') else latest_release.stdout }}"
 
   - name: Print detected old PMM version to install
     ansible.builtin.debug:
-      msg: pmm2 release version is {{ old_version.stdout }}
+      msg: pmm2 release version is {{ old_version }}
 
-  - name: "install old({{ old_version.stdout }}) pmm2-client tarball to custom path"
-    command: "../scripts/pmm2_client_install_tarball.sh -v {{ old_version.stdout }} -p {{ custom_path }}"
+  - name: "install old({{ old_version }}) pmm2-client tarball to custom path"
+    command: "../scripts/pmm2_client_install_tarball.sh -v {{ old_version }} -p {{ custom_path }}"
 
 ### Setup PMM Client
   - name: define "--metrics-mode=push|pull|auto" argument
