@@ -33,17 +33,29 @@
   - name: check that PMM client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
 
-  - name: Use pmm-agent setup to configure on another port
-    shell: pmm-agent setup --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml --force --server-address={{ pmm_server_address }} --server-insecure-tls --listen-port={{ custom_port }} --metrics-mode=auto --server-username=admin --server-password=admin --paths-base=/pmm2-client-custom-path/ {{ instance_ip }} generic node2_{{ instance_ip }}
-    when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
+    ### Setup PMM Client
+  - name: define "--metrics-mode=push|pull|auto" argument
+    set_fact:
+      metrics_mode_arg: "--metrics-mode={{ metrics_mode }}"
 
-  - name: Start agent on custom port non-default port
-    shell: pmm-agent --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
-    when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
+  - name: Use pmm-agent setup to configure pmm client to connect to server
+    shell: pmm-agent setup --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml --force --server-address={{ pmm_server_address }} --server-insecure-tls --listen-port={{ custom_port }} {{ metrics_mode_arg }} --server-username=admin --server-password=admin {{ instance_ip }} generic node2_{{ instance_ip }}
 
   - name: Check if the configuration generated with pmm-agent-listen-port is using the custom port
     shell: "cat /usr/local/percona/pmm2/config/pmm-agent.yaml | grep -o -c '{{ custom_port }}' | grep '1'"
     become: yes
+
+  - name: Start agent on custom port non-default port
+    shell: pmm-agent --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
+
+  - name: check if pmm_agent is connected
+    shell: pmm-admin list | grep pmm_agent | awk -F" " '{print $2}'
+    register: pmm_agent_status
+
+  - name: Assert if the pmm-admin list contains pmm_agent type and Connected
+    assert:
+      that:
+        - "'Connected' in pmm_agent_status.stdout"
 
 ### start PS5.7
   - name: install Percona Server 5.7 packages
@@ -92,7 +104,7 @@
     register: mysqld_exporter_status
     until: mysqld_exporter_status.stdout.find('Running') != -1
     delay: 5
-    retries: 5
+    retries: 10
 
   - name: Assert if the pmm-admin list contains mysqld_exporter with Running state
     assert:
@@ -239,7 +251,7 @@
     register: ne_status
     until: ne_status.stdout.find('Running') != -1
     delay: 5
-    retries: 10
+    retries: 5
 
   - name: check if node_exporter is Running
     shell: "{{ cmd_admin_list }}| grep node_exporter | awk -F' ' '{print $2}'"
