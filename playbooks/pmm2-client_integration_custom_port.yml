@@ -239,7 +239,7 @@
     register: ne_status
     until: ne_status.stdout.find('Running') != -1
     delay: 5
-    retries: 5
+    retries: 10
 
   - name: check if node_exporter is Running
     shell: "{{ cmd_admin_list }}| grep node_exporter | awk -F' ' '{print $2}'"
