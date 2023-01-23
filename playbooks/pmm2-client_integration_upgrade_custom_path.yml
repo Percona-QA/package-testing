@@ -36,11 +36,13 @@
   - name: detect and save release version
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | tail -n1"
     register: old_version
+    warn: false
     when: test_repo != "main"
 
   - name: detect and save previous release version
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | grep -E '[[:digit:]]\\.[[:digit:]]+\\.[[:digit:]]' | tail -n2 | head -n1"
     register: old_version
+    warn: false
     when: test_repo == "main"
 
   - debug: var=old_version
@@ -48,41 +50,49 @@
   - name: detect 1
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | tail -n1"
     register: ver1
+    warn: false
   - debug: var=ver1
 
   - name: detect 2
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | grep -E '[[:digit:]]\\.[[:digit:]]+\\.[[:digit:]]' | tail -n2 | head -n1"
     register: ver2
+    warn: false
   - debug: var=ver2
 
   - name: detect 3
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | grep -E '[[:digit:]]\\.[[:digit:]]+\\.[[:digit:]]' | tail -n2"
     register: ver3
+    warn: false
   - debug: var=ver3
 
   - name: detect 4
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V | grep -E '[[:digit:]]\\.[[:digit:]]+\\.[[:digit:]]'"
     register: ver4
+    warn: false
   - debug: var=ver4
 
   - name: detect 5
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest | sort -V"
     register: ver5
+    warn: false
   - debug: var=ver5
 
   - name: detect 6
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name | grep -v latest"
     register: ver6
+    warn: false
   - debug: var=ver6
 
   - name: detect 7
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name"
     register: ver7
+    warn: false
   - debug: var=ver7
 
   - name: detect 8
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - "
     register: ver8
+    warn: false
   - debug: var=ver8
 
 
