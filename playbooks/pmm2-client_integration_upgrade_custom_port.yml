@@ -100,7 +100,7 @@
     become: yes
 
   - name: check if pmm_agent is connected
-    shell: pmm-admin list | grep pmm_agent | awk -F" " '{print $2}'
+    shell: "{{ cmd_admin_list }} | grep pmm_agent | awk -F' ' '{print $2}'"
     register: pmm_agent_status
 
   - name: Assert if the pmm-admin list contains pmm_agent type and Connected

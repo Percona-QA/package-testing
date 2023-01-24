@@ -49,7 +49,7 @@
     shell: pmm-agent --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
 
   - name: check if pmm_agent is connected
-    shell: "cmd_admin_list | grep pmm_agent | awk -F' ' '{print $2}'"
+    shell: "{{ cmd_admin_list }} | grep pmm_agent | awk -F' ' '{print $2}'"
     register: pmm_agent_status
 
   - name: Assert if the pmm-admin list contains pmm_agent type and Connected
