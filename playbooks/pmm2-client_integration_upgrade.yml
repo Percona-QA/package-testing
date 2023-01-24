@@ -340,7 +340,7 @@
     shell: pmm-admin list | grep pmm_agent | awk -F" " '{print $2}'
     register: pmm_agent_status
 
-  - name: verify pmm-admin list contains pmm_agent with "Connected" status
+  - name: verify pmm-admin list contains pmm_agent with Connected status
     assert:
       that:
         - "'Connected' in pmm_agent_status.stdout"
