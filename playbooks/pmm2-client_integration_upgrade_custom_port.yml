@@ -11,7 +11,8 @@
   become_method: sudo
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
-    metrics_mode: "{{ lookup('env', 'METRICS_MODE') }}"
+    test_repo: "{{ lookup('env', 'install_repo') }}"
+    metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
     custom_port: 17788
     port_flag: "--pmm-agent-listen-port={{ custom_port }}"
