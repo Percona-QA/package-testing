@@ -78,7 +78,8 @@
 ### start PS 5.7
   - name: define mysql service name
     set_fact:
-      mysql_service_name: "mysql_{{ rnd }}_{{ instance_ip }}"
+      mysql_service_name: "mysql_{{ instance_ip }}"
+#      mysql_service_name: "mysql_{{ rnd }}_{{ instance_ip }}"
 
   - name: install Percona Server 5.7 packages
     include_tasks: ../tasks/install_ps57.yml
@@ -125,7 +126,8 @@
 ### start PSMDB 4.4
   - name: define mongodb service name
     set_fact:
-      mongo_service_name: "mongodb_{{ rnd }}_{{ instance_ip }}"
+      mongo_service_name: "mongodb_{{ instance_ip }}"
+#      mongo_service_name: "mongodb_{{ rnd }}_{{ instance_ip }}"
 
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_psmdb_repo.yml
@@ -363,6 +365,11 @@
     assert:
      that:
       - "'Running' in vmagent_status.stdout"
+
+  - name: List debug
+    shell: pmm-admin list
+    register: list_1
+  - debug: var=list_1
 
   - name: check if Metric End point with Auth works for Node Exporter, MysqlD Exporter, MongoDB Exporter, Postgres Exporter
     shell: "{{item}}"
