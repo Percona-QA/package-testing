@@ -104,8 +104,8 @@
     assert:
       that:
         - "'Connected' in pmm_agent_status.stdout"
-    fail_msg: "pmm-agent is not connected to server!"
-    success_msg: "pmm-agent is connected to server"
+      fail_msg: "pmm-agent is not connected to server!"
+      success_msg: "pmm-agent is connected to server"
 
   - name: Wait for node_exporter to be Running Status.
     shell: pmm-admin list | grep node_exporter | awk -F" " '{print $2}'
