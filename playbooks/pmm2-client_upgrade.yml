@@ -73,10 +73,9 @@
       pmm_client_old: "pmm2-client"
     when: test_repo != "main"
 
-  - name: Print the pmm-admin list value
+  - name: print old version
     ansible.builtin.debug:
       msg: "Installing old version: '{{ pmm_client_old }}'"
-    when: test_repo == "main"
 
   - name: install PMM client old deb packages
     apt: name={{ pmm_client_old }} update_cache=yes state=present

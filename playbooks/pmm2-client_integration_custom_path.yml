@@ -96,14 +96,16 @@
     command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
 ## end PG
 
-  - name: check if pmm_agent is connected
+  - name: grep pmm_agent status from pmm-admin list
     shell: pmm-admin list | grep pmm_agent | awk -F" " '{print $2}'
     register: pmm_agent_status
 
-  - name: Assert if the pmm-admin list contains pmm_agent type and Connected
+  - name: verify pmm-admin list contains pmm_agent with "Connected" status
     assert:
-     that:
-      - "'Connected' in pmm_agent_status.stdout"
+      that:
+        - "'Connected' in pmm_agent_status.stdout"
+    fail_msg: "pmm-agent is not connected to server!"
+    success_msg: "pmm-agent is connected to server"
 
   - name: Wait for node_exporter to be Running Status.
     shell: pmm-admin list | grep node_exporter | awk -F" " '{print $2}'

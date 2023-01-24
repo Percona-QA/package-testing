@@ -81,10 +81,9 @@
       pmm_client_old: "pmm2-client"
     when: test_repo != "main"
 
-  - name: Print the pmm-admin list value
+  - name: print old version
     ansible.builtin.debug:
       msg: "Installing old version: '{{ pmm_client_old }}'"
-    when: test_repo == "main"
 
   - name: install PMM client old deb packages
     apt: name={{ pmm_client_old }} update_cache=yes state=present
@@ -337,14 +336,16 @@
     include_tasks: ../tasks/verify_pmm_client_version.yml
 
 ### Checks after upgrade
-  - name: check if pmm_agent is connected
+  - name: grep pmm_agent status from pmm-admin list
     shell: pmm-admin list | grep pmm_agent | awk -F" " '{print $2}'
     register: pmm_agent_status
 
-  - name: Assert if the pmm-admin list contains pmm_agent type and Connected
+  - name: verify pmm-admin list contains pmm_agent with "Connected" status
     assert:
       that:
         - "'Connected' in pmm_agent_status.stdout"
+    fail_msg: "pmm-agent is not connected to server!"
+    success_msg: "pmm-agent is connected to server"
 
   - name: check if mongodb is still being monitored
     command: pmm-admin list

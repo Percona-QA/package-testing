@@ -75,10 +75,9 @@
       pmm_client_old: "pmm2-client"
     when: test_repo != "main"
 
-  - name: Print the pmm-admin list value
+  - name: print old version
     ansible.builtin.debug:
       msg: "Installing old version: '{{ pmm_client_old }}'"
-    when: test_repo == "main"
 
   - name: install PMM client old deb packages
     apt: name={{ pmm_client_old }} update_cache=yes state=present
@@ -89,25 +88,27 @@
     when: ansible_os_family == "RedHat"
 
   - name: configure pmm client on another port to connect to server in push/auto Mode
-    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --listen-port={{ custom_port }} --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --pmm-agent-listen-port={{ custom_port }} --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
 
   - name: configure pmm client on another port to connect to server in pull Mode
-    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --listen-port={{ custom_port }} --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --pmm-agent-listen-port={{ custom_port }} --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "pull"
 
   - name: Check if the configuration generated with pmm-agent-listen-port is using the custom port
     shell: "cat /usr/local/percona/pmm2/config/pmm-agent.yaml | grep -o -c '{{ custom_port }}' | grep '1'"
     become: yes
 
-  - name: check if pmm_agent is connected
+  - name: grep pmm_agent status from pmm-admin list
     shell: "{{ cmd_admin_list }} | grep pmm_agent | awk -F' ' '{print $2}'"
     register: pmm_agent_status
 
-  - name: Assert if the pmm-admin list contains pmm_agent type and Connected
+  - name: verify pmm-admin list contains pmm_agent with "Connected" status
     assert:
       that:
         - "'Connected' in pmm_agent_status.stdout"
+    fail_msg: "pmm-agent is not connected to server!"
+    success_msg: "pmm-agent is connected to server"
 
 ### start PS5.7
   - name: install Percona Server 5.7 packages
@@ -304,14 +305,16 @@
         - "'PostgreSQL' in list_output.stdout"
     when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
 
-  - name: check if pmm_agent is connected
+  - name: grep pmm_agent status from pmm-admin list
     shell: "{{ cmd_admin_list }} | grep pmm_agent | awk -F' ' '{print $2}'"
     register: pmm_agent_status
 
-  - name: Assert if the pmm-admin list contains pmm_agent type and Connected
+  - name: verify pmm-admin list contains pmm_agent with "Connected" status
     assert:
-     that:
-      - "'Connected' in pmm_agent_status.stdout"
+      that:
+        - "'Connected' in pmm_agent_status.stdout"
+    fail_msg: "pmm-agent is not connected to server!"
+    success_msg: "pmm-agent is connected to server"
 
   - name: Wait for node_exporter to be Running Status After Upgrade
     shell: "{{ cmd_admin_list }} | grep node_exporter | awk -F' ' '{print $2}'"

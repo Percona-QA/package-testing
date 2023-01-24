@@ -49,14 +49,16 @@
   - name: Start agent on custom port non-default port
     shell: pmm-agent --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
 
-  - name: check if pmm_agent is connected
+  - name: grep pmm_agent status from pmm-admin list
     shell: "{{ cmd_admin_list }} | grep pmm_agent | awk -F' ' '{print $2}'"
     register: pmm_agent_status
 
-  - name: Assert if the pmm-admin list contains pmm_agent type and Connected
+  - name: verify pmm-admin list contains pmm_agent with "Connected" status
     assert:
       that:
         - "'Connected' in pmm_agent_status.stdout"
+    fail_msg: "pmm-agent is not connected to server!"
+    success_msg: "pmm-agent is connected to server"
 
 ### start PS5.7
   - name: install Percona Server 5.7 packages
@@ -238,14 +240,16 @@
   - name: run pmm-admin list
     command: "{{ cmd_admin_list }}"
 
-  - name: check if pmm_agent is connected
+  - name: grep pmm_agent status from pmm-admin list
     shell: "{{ cmd_admin_list }} | grep pmm_agent | awk -F' ' '{print $2}'"
     register: pmm_agent_status
 
-  - name: Assert if the pmm-admin list contains pmm_agent type and Connected
+  - name: verify pmm-admin list contains pmm_agent with "Connected" status
     assert:
-     that:
-      - "'Connected' in pmm_agent_status.stdout"
+      that:
+        - "'Connected' in pmm_agent_status.stdout"
+    fail_msg: "pmm-agent is not connected to server!"
+    success_msg: "pmm-agent is connected to server"
 
   - name: Wait for node_exporter to be Running Status.
     shell: "{{ cmd_admin_list }}| grep node_exporter | awk -F' ' '{print $2}'"
