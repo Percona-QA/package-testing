@@ -156,9 +156,15 @@ void run_test() {
     if [ -f /usr/bin/yum ]; then
       sudo yum install -y git wget
     else
-      sudo apt install -y git wget
+      sudo apt install -y git wget lsb_release
     fi
     export GLIBC_VERSION="2.17"
+    if [ -f /usr/bin/apt-get ]; then
+      DEBIAN_VERSION=$(lsb_release -sc)
+      if [ ${DEBIAN_VERSION} = "jammy" ]; then
+        export GLIBC_VERSION="2.35"
+      fi
+    fi
     TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
     TARBALL_LINK="https://www.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
     rm -rf package-testing
