@@ -141,7 +141,7 @@ void run_test() {
     if [ -f /usr/bin/yum ]; then
       sudo yum install -y git wget
     else
-      sudo apt install -y git wget lsb_release
+      sudo apt install -y git wget
     fi
     export GLIBC_VERSION="2.17"
     if [ -f /usr/bin/apt-get ]; then
