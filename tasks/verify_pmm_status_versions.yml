@@ -69,6 +69,3 @@
   assert:
     that:
       - "'{{ pmm_admin_version.stdout }}' in pmm_agent_version.stdout"
-
-
-

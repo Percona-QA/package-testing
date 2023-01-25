@@ -42,7 +42,7 @@
     set_fact:
       metrics_mode_arg: "--metrics-mode={{ metrics_mode }}"
 
-  - name: Use pmm-agent setup to configure pmm client  with wrong path-base
+  - name: Use pmm-agent setup to configure pmm client with wrong path-base
     shell: pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-insecure-tls --server-address={{ pmm_server_address }}  {{ metrics_mode_arg }} --server-username=admin --server-password=admin --paths-base=/wrong_folder/ {{ instance_ip }} generic node2_{{ instance_ip }}
 
   - name: Print PMM2-Client Status
@@ -66,9 +66,6 @@
 
   - name: use "pmm-admin config" to set correct  path base
     shell: pmm-admin config --force --server-insecure-tls {{ metrics_mode_arg }} --paths-base={{ custom_path }}/  --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
-
-#  - name: Use pmm-agent setup to configure pmm client to connect to server
-#    shell: pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-address={{ pmm_server_address }} --server-insecure-tls {{ metrics_mode_arg }} --server-username=admin --server-password=admin --paths-base={{ custom_path }}/ {{ instance_ip }} generic node2_{{ instance_ip }}
 
   - name: Check if the configuration generated with paths-base is using the custom path
     shell: cat {{custom_path}}/config/pmm-agent.yaml | grep -o -c "{{custom_path}}" | grep "14"
