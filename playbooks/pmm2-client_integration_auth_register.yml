@@ -73,9 +73,12 @@
     command: "pkill -f pmm-agent"
     become: yes
 
-  - name: wait pmm-agent to restart
-    ansible.builtin.pause:
-      seconds: 10
+  - name: wait for pmm_agent status from pmm-admin list
+    shell: pmm-admin list | grep pmm_agent | awk -F' ' '{print $2}'
+    register: pmm_agent_status
+    until: pmm_agent_status.stdout.find('Connected') != -1
+    delay: 1
+    retries: 5
 
 ### start PS 5.7
   - name: install and start Percona Server 5.7
