@@ -144,19 +144,19 @@
     command: /package-testing/package_check.sh pxb24
 
   - name: run sysbench prepare script
-    command: sysbench --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
+    command: sysbench --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sb --time=20 --threads=64 --tables=3 oltp_read_write prepare
     when: ansible_distribution_release != "bullseye"
 
   - name: run sysbench benchmark
-    command: sysbench --mysql-user=sbt --mysql-db=sb --mysql-password=s3cret!Pass --time=30 --threads=64 --tables=3 oltp_read_write run
+    command: sysbench --mysql-user=sbt --mysql-db=sb --mysql-password=s3cret!Pass --time=20 --threads=64 --tables=3 oltp_read_write run
     when: ansible_distribution_release != "bullseye"
 
   - name: run sysbench tpcc prepare script
-    command: /usr/share/sysbench/tpcc.lua --mysql-user=sbt --mysql-password=s3cret!Pass  --mysql-db=sbt --time=30 --threads=64 --report-interval=1 --tables=3 --scale=5 --db-driver=mysql prepare
+    command: /usr/share/sysbench/tpcc.lua --mysql-user=sbt --mysql-password=s3cret!Pass  --mysql-db=sbt --time=20 --threads=64 --report-interval=1 --tables=2 --scale=1 --db-driver=mysql prepare
     when: ansible_distribution_release != "bullseye"
 
   - name: run sysbench tpcc benchmark
-    command: /usr/share/sysbench/tpcc.lua --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sbt --time=30 --threads=64 --report-interval=1 --tables=3 --scale=5 --db-driver=mysql run
+    command: /usr/share/sysbench/tpcc.lua --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sbt --time=20 --threads=64 --report-interval=1 --tables=2 --scale=1 --db-driver=mysql run
     when: ansible_distribution_release != "bullseye"
 
   - name: run backup

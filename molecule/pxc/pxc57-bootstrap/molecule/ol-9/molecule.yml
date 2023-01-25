@@ -1,0 +1,32 @@
+---
+scenario:
+  name: ol-9
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+lint:
+  name: yamllint
+platforms:
+  - name: pxc1-57-bootstrap-ol-9
+    region: us-west-2
+    image: ami-00a5d5bcea31bb02c
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t2.small
+    ssh_user: ec2-user
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  playbooks:
+    create: ../../../playbooks/create.yml
+    destroy: ../../../../playbooks/destroy.yml
+    prepare: ../../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+  inventory:
+    host_vars:
+      pxc1-57-bootstrap-ol-9:
+        ip_env: PXC1_IP

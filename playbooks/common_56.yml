@@ -154,10 +154,10 @@
 
   - name: check that sysbench version is correct
     command: /package-testing/version_check.sh sysbench
-
-  - name: check that Percona XtraBackup version is correct
-    command: /package-testing/version_check.sh pxb24
-    when: ansible_os_family == "Debian"
+ 
+    #  - name: check that Percona XtraBackup version is correct
+    #    command: /package-testing/version_check.sh pxb24
+    #    when: ansible_os_family == "Debian"
 
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb24

@@ -1,0 +1,105 @@
+---
+- name: Prepare node for running tests
+  hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: true
+  tasks:
+
+    - name: install GPG key for epel 8
+      rpm_key:
+        state: present
+        key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+    - name: install GPG key for Percona repos
+      rpm_key:
+        state: present
+        key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+    - name: setup epel 8 repo
+      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+    - name: setup ca-certificates release
+      yum:
+        name: ca-certificates
+        update_cache: yes
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: setup epel release centos 7
+      yum:
+        name: epel-release
+        update_cache: yes
+        state: present
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    - name: setup epel release for amazon linux 2
+      shell: amazon-linux-extras install epel -y
+      when: ansible_distribution == "Amazon"
+
+    - name: upgrade deb packages apt
+      apt: update_cache=yes upgrade=safe
+      when: ansible_os_family == "Debian"
+
+
+    - name: install needed packages for running tests with apt
+      apt:
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+          - unzip
+          - wget
+          - gnupg
+          - gnupg2
+          - rsync
+          - acl
+          - net-tools
+      retries: 60
+      delay: 10
+      register: result
+      until: result is not failed
+      when: ansible_os_family == "Debian"
+
+    - name: update systemd-sysv integration on debian/ubuntu
+      apt:
+        name: "{{ packages }}"
+        update_cache: yes
+        state: latest
+      vars:
+        packages:
+        - systemd-sysv
+      when: ansible_os_family == "Debian" and ansible_distribution_release != "trusty"
+
+    - name: install needed packages for running tests with yum
+      yum:
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+          - pv
+          - libselinux-python
+          - unzip
+          - wget
+          - rsync
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
+
+    - name: install needed packages for running tests with yum on RHEL8
+      yum:
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+        - unzip
+        - wget
+        - net-tools
+      when: (ansible_os_family == "RedHat") and (ansible_distribution_major_version|int == 8 or ansible_distribution_major_version|int == 9)
+
+    - name: disable firewalld for OL8
+      service:
+        name: firewalld
+        state: stopped
+      when: ansible_distribution == "OracleLinux" and ansible_distribution_major_version >= "8"
