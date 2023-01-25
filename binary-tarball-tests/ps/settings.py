@@ -39,15 +39,15 @@ ps80_functions = (
 ps80_files = (
   'lib/libcoredumper.a', 
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.30' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.31' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini','lib/plugin/keyring_file.so',
   'lib/plugin/keyring_udf.so', 'lib/plugin/keyring_vault.so', 'lib/plugin/binlog_utils_udf.so'
 )
 ps80_symlinks = (
-  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.30'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.30'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.31'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.31'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 
 # 5.7
