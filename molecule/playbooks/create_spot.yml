@@ -116,6 +116,7 @@
             volume_size: 30
             delete_on_termination: true
         instance_initiated_shutdown_behavior: "terminate"
+        wait_timeout: '1200'
       register: server
       loop: "{{ molecule_yml.platforms }}"
       loop_control:
