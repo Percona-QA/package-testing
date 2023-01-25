@@ -116,7 +116,6 @@
             volume_size: 30
             delete_on_termination: true
         instance_initiated_shutdown_behavior: "terminate"
-        wait_timeout: '1200'
       register: server
       loop: "{{ molecule_yml.platforms }}"
       loop_control:
@@ -131,6 +130,11 @@
       until: ec2_jobs.finished
       retries: 300
       with_items: "{{ server.results }}"
+      ignore_errors: True
+
+    - name: Fail after the 'Wait for instance(s) creation to complete' step
+      fail:
+        msg: Failing after the 'Wait for instance(s) creation to complete' step
 
     # Mandatory configuration for Molecule to function.
 
