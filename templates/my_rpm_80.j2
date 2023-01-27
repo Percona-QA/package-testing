@@ -24,7 +24,7 @@ wsrep_provider=/usr/lib64/galera4/libgalera_smm.so
 # Cluster connection URL contains IPs of nodes
 #If no IP is found, this implies that a new cluster needs to be created,
 #in order to do that you need to bootstrap this node
-wsrep_cluster_address=gcomm://192.168.70.61,192.168.70.62,192.168.70.63
+wsrep_cluster_address=gcomm://{{ lookup('env', "PXC1_IP") | default("192.168.70.61") }},{{ lookup('env', "PXC2_IP") | default("192.168.70.62") }},{{ lookup('env', "PXC3_IP") | default("192.168.70.63") }}
 
 # In order for Galera to work correctly binlog format should be ROW
 binlog_format=ROW
@@ -38,13 +38,8 @@ wsrep_log_conflicts
 innodb_autoinc_lock_mode=2
 
 # Node IP address
-{% if ansible_eth1.ipv4.address is defined %}
-wsrep_node_address={{ansible_eth1.ipv4.address}}
-{% elif ansible_eth0.ipv4.address is defined %}
-wsrep_node_address={{ansible_eth0.ipv4.address}}
-{% elif ansible_default_ipv4.address is defined %}
-wsrep_node_address={{ ansible_default_ipv4.address }}
-{% endif %}
+wsrep_node_address={{ man_ip }}
+
 
 # Cluster name
 wsrep_cluster_name=pxc-cluster

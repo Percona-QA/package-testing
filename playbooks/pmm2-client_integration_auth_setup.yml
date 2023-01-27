@@ -9,9 +9,9 @@
   become_method: sudo
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
+    test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
-    pmm_repo: "{{ lookup('env', 'install_repo') }}"
     cmd_admin_list: "pmm-admin list"
     pmm_auth_password: "pmm-pass"
     custom_path: "/pmm2-client-custom-path"
@@ -28,21 +28,14 @@
   - name: include tasks for test env setup
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
+### install PMM Client from tarball
   - name: install pmm2-client via tarball
     shell: ../scripts/pmm2_client_install_tarball.sh -v {{ pmm_version }} -p {{ custom_path }}
 
-  - name: check that PMM client dev-latest version is correct
-    shell: ../version_check.sh pmm2
-    when: pmm_repo == "experimental"
+  - name: check that PMM client version is correct
+    include_tasks: ../tasks/verify_pmm_client_version.yml
 
-  - name: check that PMM client RC version is correct
-    shell: ../version_check.sh pmm2-rc
-    ### "testing" "main" "tools-main" "pmm2-client-main"
-    when: pmm_repo != "experimental"
-
-  - name: Start agent
-    shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
-
+### Setup PMM Client
   - name: define "--metrics-mode=push|pull|auto" argument
     set_fact:
       metrics_mode_arg: "--metrics-mode={{ metrics_mode }}"
@@ -50,19 +43,11 @@
   - name: Use pmm-agent setup to configure pmm client to connect to server
     shell: pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-address={{ pmm_server_address }} --server-insecure-tls {{ metrics_mode_arg }}  --agent-password={{ pmm_auth_password }} --server-username=admin --server-password=admin --paths-base={{ custom_path }}/ {{ instance_ip }} generic node2_{{ instance_ip }}
 
-  - name: Fetch PMM-Admin version via pmm-admin status output
-    shell: pmm-admin status | grep pmm-admin | awk -F' ' '{print $3}'
-    register: pmm_admin_version
+  - name: Start agent
+    shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
 
-  - name: Print the PMM-Admin Version on Status command
-    ansible.builtin.debug:
-      msg: pmm-admin version is {{ pmm_admin_version.stdout }}
-
-  - name: Assert if the version output value is strict matched with expected version
-    assert:
-      that:
-        - "'{{ pmm_version }}' in pmm_admin_version.stdout"
-    when: pmm_repo == "testing"
+  - name: check that PMM client version is correct
+    include_tasks: ../tasks/verify_pmm_status_versions.yml
 
 ### start node_exporter
   - name: Wait for node_exporter to be Running Status.
@@ -136,4 +121,3 @@
   - name: remove postgresql instances added via socket
     command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
 ## end PG
-

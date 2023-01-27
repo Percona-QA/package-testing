@@ -6,7 +6,7 @@ driver:
 platforms:
   - name: ujammy-${BUILD_NUMBER}-${JOB_NAME}
     region: us-west-2
-    image: ami-0a7db3037c9dfce2f
+    image: ami-0ee8244746ec5d6d4
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.micro
     ssh_user: ubuntu
@@ -17,23 +17,19 @@ provisioner:
   name: ansible
   log: True
   playbooks:
-    create: ../../../../playbooks/create.yml
+    create: ../../../../playbooks/create_spot.yml
     destroy: ../../../../playbooks/destroy.yml
     prepare: ../../../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../playbooks/playbook.yml
 verifier:
   name: testinfra
-  directory: ../tests/
+  directory: ../../../tests/
   options:
     verbose: true
     s: true
+    k: "test_pdps_ or test_common_"
     junitxml: report.xml
-  additional_files_or_dirs:
-    - ../../../tests/test_proxysql2.py
-    - ../../../tests/test_pxb.py
-    - ../../../tests/test_sources.py
-
 scenario:
   name: ubuntu-jammy
   destroy_sequence:

@@ -14,11 +14,11 @@
 
   - name: disable the mysql module on RHEL/CentOS 8
     command: yum module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: disable the mariadb module on RHEL/CentOS 8
     command: yum module disable mariadb -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - set_fact:
       major_repo: "{{ lookup('env', 'MAJOR_REPO') }}"
@@ -98,13 +98,13 @@
     when: ansible_os_family == "RedHat"
 
   - name: start proxysql service
-    service: name=proxysql state=started
+    command: service proxysql start
 
   - name: stop proxysql service
-    service: name=proxysql state=stopped
+    command: service proxysql stop
 
   - name: start proxysql service
-    service: name=proxysql state=started
+    command: service proxysql start
 
   - name: install orchestrator new deb packages
     apt:

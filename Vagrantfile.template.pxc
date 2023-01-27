@@ -30,15 +30,15 @@ Vagrant.configure("2") do |config|
 #         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
 #         vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
       end
-      config.vm.provision "ansible" do |ansible|
+      node1.vm.provision "ansible" do |ansible|
         ansible.playbook = "@@pxc1-playbook_full@@"
         ansible.become = "true"
         # ansible.verbose = "vvvv"
         ansible.host_key_checking = "false"
       end
-      config.vm.synced_folder '.', '/vagrant', :disabled => true
-      config.vm.synced_folder '.', '/home/vagrant/sync', :disabled => true
-      config.vm.network :private_network, ip: "192.168.70.61"
+      node1.vm.synced_folder '.', '/vagrant', :disabled => true
+      node1.vm.synced_folder '.', '/home/vagrant/sync', :disabled => true
+      node1.vm.network :private_network, ip: "192.168.70.61"
     end
 
     config.vm.define "pxc2-#{machine[:hostname]}" do |node2|
@@ -51,15 +51,15 @@ Vagrant.configure("2") do |config|
 #         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
 #         vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
       end
-      config.vm.provision "ansible" do |ansible|
+      node2.vm.provision "ansible" do |ansible|
         ansible.playbook = "@@pxc2-playbook_full@@"
-        ansible.sudo = "true"
+        ansible.become = "true"
         # ansible.verbose = "vvvv"
         ansible.host_key_checking = "false"
       end
-      config.vm.synced_folder '.', '/vagrant', :disabled => true
-      config.vm.synced_folder '.', '/home/vagrant/sync', :disabled => true
-      config.vm.network :private_network, ip: "192.168.70.62"
+      node2.vm.synced_folder '.', '/vagrant', :disabled => true
+      node2.vm.synced_folder '.', '/home/vagrant/sync', :disabled => true
+      node2.vm.network :private_network, ip: "192.168.70.62"
     end
 
     config.vm.define "pxc3-#{machine[:hostname]}" do |node3|
@@ -72,15 +72,15 @@ Vagrant.configure("2") do |config|
 #         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
 #         vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
       end
-      config.vm.provision "ansible" do |ansible|
+      node3.vm.provision "ansible" do |ansible|
         ansible.playbook = "@@pxc3-playbook_full@@"
-        ansible.sudo = "true"
+        ansible.become = "true"
         # ansible.verbose = "vvvv"
         ansible.host_key_checking = "false"
       end
-      config.vm.synced_folder '.', '/vagrant', :disabled => true
-      config.vm.synced_folder '.', '/home/vagrant/sync', :disabled => true
-      config.vm.network :private_network, ip: "192.168.70.63"
+      node3.vm.synced_folder '.', '/vagrant', :disabled => true
+      node3.vm.synced_folder '.', '/home/vagrant/sync', :disabled => true
+      node3.vm.network :private_network, ip: "192.168.70.63"
     end
 
   end

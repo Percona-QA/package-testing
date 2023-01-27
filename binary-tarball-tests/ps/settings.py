@@ -25,7 +25,8 @@ ps80_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
   ('group_replication','group_replication.so'),('clone','mysql_clone.so'),('data_masking','data_masking.so'),
-  ('authentication_ldap_simple','authentication_ldap_simple.so'),('procfs', 'procfs.so')
+  ('procfs', 'procfs.so'), ('authentication_ldap_sasl','authentication_ldap_sasl.so'),
+  ('authentication_fido','authentication_fido.so')
 )
 ps80_functions = (
   ('fnv1a_64', 'libfnv1a_udf.so', 'INTEGER'),('fnv_64', 'libfnv_udf.so', 'INTEGER'),('murmur_hash', 'libmurmur_udf.so', 'INTEGER'),
@@ -39,15 +40,15 @@ ps80_functions = (
 ps80_files = (
   'lib/libcoredumper.a', 
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.29' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.31' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini','lib/plugin/keyring_file.so',
   'lib/plugin/keyring_udf.so', 'lib/plugin/keyring_vault.so', 'lib/plugin/binlog_utils_udf.so'
 )
 ps80_symlinks = (
-  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.29'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.29'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.31'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.31'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 
 # 5.7
@@ -76,21 +77,21 @@ ps57_functions = (
 )
 ps57_files = (
   'lib/libHotBackup.so', 'lib/libmysqlservices.a', 'lib/libcoredumper.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.20.3.26' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.20.3.27' ,'lib/mysql/libjemalloc.so.1',
   'lib/mysql/plugin/ha_tokudb.so', 'lib/mysql/plugin/ha_rocksdb.so', 'lib/mysql/plugin/audit_log.so',
   'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so', 'lib/mysql/plugin/tokudb_backup.so',
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
 ps57_symlinks = (
-  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.26'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.26')
+  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.27'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.27')
 )
 
 # 5.6
 ps56_binaries = [
   'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog', 'bin/mysqldump',
   'bin/mysqlimport', 'bin/mysqlshow', 'bin/mysqlslap', 'bin/mysqlcheck',
-  'bin/mysql_config_editor', 'bin/mysql_secure_installation', 'bin/mysql_upgrade', 'bin/mysql_tzinfo_to_sql'
+  'bin/mysql_config_editor', 'bin/mysql_upgrade', 'bin/mysql_tzinfo_to_sql'
 ]
 ps56_executables = ps56_binaries + [
   'bin/mysqldumpslow',

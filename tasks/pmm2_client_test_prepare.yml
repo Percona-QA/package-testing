@@ -1,4 +1,4 @@
-# This task conains common actions for the PMM Client all tests at preparation stage
+# This task contains common actions for the PMM Client all tests at preparation stage
 
 - name: include tasks for test env setup
   include_tasks: ../tasks/test_prep.yml

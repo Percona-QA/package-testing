@@ -1,7 +1,6 @@
 #!/bin/sh
 
 ## check exporters
-
 ls -la /usr/local/percona/pmm2/exporters | grep -q azure_exporter
 ls -la /usr/local/percona/pmm2/exporters | grep -q mongodb_exporter
 ls -la /usr/local/percona/pmm2/exporters | grep -q mysqld_exporter

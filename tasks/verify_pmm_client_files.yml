@@ -1,0 +1,7 @@
+# This task performs verification that all PMM Client files exist in installation folder
+#
+# Task adjustments are handled by parent playbook vars:
+#             install folder should be added here for custom destination path
+
+- name: run script to verify existence of all PMM Client artifacts
+  command: bash -xe ../scripts/check_artifacts.sh

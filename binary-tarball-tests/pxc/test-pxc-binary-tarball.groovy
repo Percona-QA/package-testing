@@ -1,8 +1,10 @@
 pipeline {
-  agent any 
+  agent {
+    label "micro-amazon"
+    }
   parameters {
-    string(name: 'PXC_VERSION', defaultValue: '8.0.22-13.1', description: 'PXC full version')
-    string(name: 'PXC_REVISION', defaultValue: '428f061', description: 'PXC revision')
+    string(name: 'PXC_VERSION', defaultValue: '8.0.30-22.1', description: 'PXC full version')
+    string(name: 'PXC_REVISION', defaultValue: '167c5ac', description: 'PXC revision')
     string(name: 'WSREP_VERSION', defaultValue: '26.4.3', description: 'WSREP version')
     string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.33-rel36-49.1', description: 'PXC-5.7 package version')
     booleanParam( 
@@ -35,9 +37,9 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage Ubuntu Focal
-        stage('Debian Stretch') {
+        stage('Ubuntu Jammy') {
           agent {
-            label "min-stretch-x64"
+            label "min-jammy-x64"
           }
           steps {
             withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
@@ -45,7 +47,7 @@ pipeline {
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
-        } //End stage Debian Stretch
+        } //End stage Ubuntu Jammy
         stage('Debian Buster') {
           agent {
             label "min-buster-x64"
@@ -79,6 +81,17 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage CentOS8
+        stage('Oracle Linux 9') {
+          agent {
+            label "min-ol-9-x64"
+          }
+          steps {
+            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+              run_test()
+            }
+            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+          } //End steps
+        } //End stage OracleLinux 9
        } //End parallel
     } //End stage Run tests
   } //End stages
@@ -93,7 +106,14 @@ void run_test() {
       MINIMAL="-minimal"
     fi
     if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
-      TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.17${MINIMAL}.tar.gz"
+      export GLIBC_VERSION="2.17"
+      if [ -f /usr/bin/apt-get ]; then
+        DEBIAN_VERSION=$(lsb_release -sc)
+        if [ ${DEBIAN_VERSION} = "jammy" ]; then
+          export GLIBC_VERSION="2.35"
+        fi
+      fi
+      TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
       TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
     elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
       export GLIBC_VERSION="2.17"
@@ -105,9 +125,9 @@ void run_test() {
     fi
     rm -rf package-testing
     if [ -f /usr/bin/yum ]; then
-      sudo yum install -y git wget
+      sudo yum install -y git wget tar
     else
-      sudo apt install -y git wget
+      sudo apt install -y git wget tar
     fi
     git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
     cd package-testing/binary-tarball-tests/pxc

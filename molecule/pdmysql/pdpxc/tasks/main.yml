@@ -32,11 +32,11 @@
 
 - name: disable the mysql module on RHEL/CentOS 8
   command: yum module disable mysql -y
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
 - name: disable the mariadb module on RHEL/CentOS 8
   command: yum module disable mariadb -y
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
 - name: install PXC 8 deb packages
   apt:
@@ -56,7 +56,7 @@
     - percona-xtradb-cluster
   when: ansible_os_family == "Debian"
 
-- name: install PXC 8 rpm packages
+- name: install PXC rpm packages before OL9
   yum:
     name: "{{ packages }}"
     state: latest
@@ -72,7 +72,43 @@
     - percona-xtradb-cluster-shared
     - percona-xtradb-cluster-shared-compat
     - percona-xtradb-cluster-test
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "8"
+
+- name: install PXC rpm packages on OL9
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+    - percona-xtradb-cluster-full
+    - percona-xtradb-cluster
+    - percona-xtradb-cluster-client
+    - percona-xtradb-cluster-debuginfo
+    - percona-xtradb-cluster-devel
+    - percona-xtradb-cluster-garbd
+    - percona-xtradb-cluster-server
+    - percona-xtradb-cluster-shared
+    - percona-xtradb-cluster-test
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+
+- name: install percona-replication-manager RHEL Packages
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+    - percona-replication-manager
   when: ansible_os_family == "RedHat"
+
+- name: install percona-replication-manager deb packages
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+    state: latest
+  vars:
+    packages:
+    - percona-replication-manager
+  when: ansible_os_family == "Debian"
 
 - name: install HA Proxy RHEL Packages
   yum:
@@ -126,13 +162,13 @@
   when: ansible_os_family == "RedHat"
 
 - name: start proxysql service
-  service: name=proxysql state=started
+  command: service proxysql start
 
 - name: stop proxysql service
-  service: name=proxysql state=stopped
+  command: service proxysql stop
 
 - name: start proxysql service
-  service: name=proxysql state=started
+  command: service proxysql start
 # set root password on centos
 - name: start mysql service
   service: name=mysql state=started

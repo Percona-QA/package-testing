@@ -118,7 +118,7 @@ install_tokudb() {
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-tokudb"
   [ $status -eq 0 ]
 
-  service mysql restart >/dev/null 3>&-
+  systemctl restart mysql >/dev/null 3>&-
   [ $? -eq 0 ]
   sleep 5
 
@@ -151,7 +151,7 @@ install_tokubackup() {
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-tokubackup"
   [ $status -eq 0 ]
 
-  service mysql restart >/dev/null 3>&-
+  systemctl restart mysql >/dev/null 3>&-
   [ $? -eq 0 ]
   sleep 5
 
@@ -217,7 +217,7 @@ install_all() {
   # This first restart is needed only because of these bugs:
   # https://jira.percona.com/browse/MYR-204
   # https://jira.percona.com/browse/PS-3817
-  service mysql restart >/dev/null 3>&-
+  systemctl restart mysql >/dev/null 3>&-
   [ $? -eq 0 ]
   sleep 5
 
@@ -225,7 +225,7 @@ install_all() {
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-audit ${OPT}"
   [ $status -eq 0 ]
 
-  service mysql restart >/dev/null 3>&-
+  systemctl restart mysql >/dev/null 3>&-
   [ $? -eq 0 ]
   sleep 5
 
@@ -246,7 +246,7 @@ uninstall_all() {
   run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-audit ${OPT}"
   [ $status -eq 0 ]
 
-  service mysql restart >/dev/null 3>&-
+  systemctl restart mysql >/dev/null 3>&-
   [ $? -eq 0 ]
   sleep 5
 

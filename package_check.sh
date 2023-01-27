@@ -112,8 +112,13 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
         rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-rocksdb-${rpm_maj_version}"
       fi
     elif [ "${product}" = "ps80" ]; then
+      if [ "${centos_maj_version}" == "9" ]; then
+        rpm_num_pkgs="7"
+        rpm_opt_package="percona-server-rocksdb"
+      else
         rpm_num_pkgs="8"
         rpm_opt_package="percona-server-rocksdb percona-server-shared-compat"
+      fi
     fi
     if [ "${product}" = "ps80" ]; then
       ps_name="percona-server"
@@ -169,8 +174,14 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
   fi
 
 elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
-  if [ -f /etc/redhat-release ]; then
-    centos_maj_version=$(cat /etc/redhat-release | grep -oE '[0-9]+' | head -n 1)
+  if [ -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
+    if [ -f /etc/system-release -a $(grep -c Amazon /etc/system-release) -eq 1 ]; then
+      centos_maj_version="7"
+    else
+      centos_maj_version=$(cat /etc/redhat-release | grep -oE '[0-9]+' | head -n 1)
+    fi  
+      echo "the centos maj version is: $centos_maj_version"
+
     rpm_maj_version=$(echo ${product} | sed 's/^[a-z]*//') # 56
 
     if [ ${product} = "pxc56" ]; then
@@ -184,12 +195,15 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
       else
         rpm_num_pkgs="9"
         rpm_opt_package=""
-      fi
+      fi      
 	  garbd_maj_version=$(echo ${product} | sed 's/^[a-z]*//')
+    echo "RPM Num Packages: $rpm_num_pkgs and $rpm_opt_package"
     fi
+
     if [ "$(rpm -qa | grep Percona-XtraDB-Cluster | grep -c ${version})" == "${rpm_num_pkgs}" ]; then
       echo "all packages are installed"
     else
+      echo "RPM QA PART"
       for package in Percona-XtraDB-Cluster-server-${rpm_maj_version} Percona-XtraDB-Cluster-test-${rpm_maj_version} Percona-XtraDB-Cluster-${rpm_maj_version}-debuginfo Percona-XtraDB-Cluster-devel-${rpm_maj_version} Percona-XtraDB-Cluster-shared-${rpm_maj_version} Percona-XtraDB-Cluster-client-${rpm_maj_version} Percona-XtraDB-Cluster-full-${rpm_maj_version} ${rpm_opt_package}; do
         if [ "$(rpm -qa | grep -c ${package}-${version})" -gt 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
@@ -205,11 +219,13 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
         exit 1
       fi
     fi
+
   else
     deb_maj_version=$(echo ${product} | sed 's/^[a-z]*//' | sed 's/./&\./') # 5.6
     deb_maj_version_nodot=$(echo ${product} | sed 's/^[a-z]*//') # 56
     deb_opt_package=""
     deb_num_pkgs="10"
+    echo "IN DPKG PART"
     if [ "$(dpkg -l | grep percona-xtradb-cluster | grep -c ${version})" == "${deb_num_pkgs}" ]; then
       echo "all packages are installed"
     else

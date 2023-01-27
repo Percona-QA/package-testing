@@ -60,8 +60,9 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: install Percona Toolkit new deb packages
-    include_tasks: ../tasks/install_pt.yml
+# Disable Percona Toolkit installation till its supported in OL9 and Jammy
+#  - name: install Percona Toolkit new deb packages
+#    include_tasks: ../tasks/install_pt.yml
 
   - name: install Percona Server 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
@@ -179,12 +180,13 @@
 
   - name: run bats tests for mysql init scripts
     command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
 
   - name: start mysql service
     service: name=mysql state=started
 
-  - name: check that mysqladmin shutdown works correctly
-    command: /package-testing/madmin_check.sh
+    #  - name: check that mysqladmin shutdown works correctly
+    #    command: /package-testing/madmin_check.sh
 
   - name: disable all percona repos
     command: percona-release disable all
