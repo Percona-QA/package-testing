@@ -23,27 +23,7 @@
       instance_ip: "{{ instance_ip.stdout }}"
 
   - name: include tasks for test env setup
-    include_tasks: ../tasks/test_prep.yml
-
-  - name: include tasks for enabling test repo
-    include_tasks: ../tasks/enable_testing_repo.yml
-    when: test_repo == "testing" or test_repo == ""
-
-  - name: include tasks for enabling experimental repo
-    include_tasks: ../tasks/enable_experimental_repo.yml
-    when: test_repo == "experimental"
-
-  - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_main_repo.yml
-    when: test_repo == "main"
-
-  - name: include tasks for enabling tools main repo
-    include_tasks: ../tasks/enable_tools_main_repo.yml
-    when: test_repo == "tools-main"
-
-  - name: include tasks for enabling experimental repo
-    include_tasks: ../tasks/enable_pmm2client_main_repo.yml
-    when: test_repo == "pmm2-client-main"
+    include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
   - name: install PMM client new deb packages
     apt: name=pmm2-client update_cache=yes state=latest

@@ -37,10 +37,7 @@
     run_once: yes
 
   - name: include tasks for test env setup
-    include_tasks: ../tasks/test_prep.yml
-
-  - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_main_repo.yml
+    include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
 ### enable pmm2-client release and install old version to update
   - name: enable pmm2-client release repo
