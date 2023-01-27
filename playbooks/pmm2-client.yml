@@ -11,8 +11,9 @@
   become_method: sudo
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
+    test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') }}"
-    pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
+    pmm_version: "{{ lookup('env', 'PMM_VERSION') | regex_search('\\S(.*\\S)?') }}"
 
   tasks:
   - name: Register Instance IP
@@ -28,49 +29,34 @@
 
   - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when: test_repo == "testing" or test_repo == ""
 
   - name: include tasks for enabling experimental repo
     include_tasks: ../tasks/enable_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+    when: test_repo == "experimental"
 
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+    when: test_repo == "main"
 
   - name: include tasks for enabling tools main repo
     include_tasks: ../tasks/enable_tools_main_repo.yml
-    when: lookup('env', 'install_repo') == "tools-main"
+    when: test_repo == "tools-main"
 
   - name: include tasks for enabling pmm2-client main repo
     include_tasks: ../tasks/enable_pmm2client_main_repo.yml
-    when: lookup('env', 'install_repo') == "pmm2-client-main"
+    when: test_repo == "pmm2-client-main"
 
   - name: install PMM client new deb packages
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - pmm2-client
+    apt: name=pmm2-client update_cache=yes state=latest
     when: ansible_os_family == "Debian"
 
   - name: install PMM client new rpm packages
-    yum: name={{item}} state=latest
-    with_items:
-    - pmm2-client
+    yum: name=pmm2-client state=latest
     when: ansible_os_family == "RedHat"
 
-  - name: check that PMM client version is correct
-    command: /package-testing/version_check.sh pmm2
-    when: lookup('env', 'install_repo') == "experimental" or lookup('env', 'install_repo') == ""
-
-  - name: check that PMM client version is correct
-    command: /package-testing/version_check.sh pmm2-rc
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == "tools-main" or lookup('env', 'install_repo') == "pmm2-client-main" or lookup('env', 'install_repo') == "main"
-
-  - name: Print PMM2-Client Status
-    command: pmm-admin status
-    register: status
-    ignore_errors: yes
-  - debug: var=status.stderr_lines
+  - name: check that PMM Client version is correct
+    include_tasks: ../tasks/verify_pmm_client_version.yml
 
   - name: configure pmm client to connect to server in push/auto Mode
     shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
@@ -80,22 +66,11 @@
     shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "pull"
 
-  - name: Fetch PMM-Admin version via pmm-admin status output
-    shell: pmm-admin status | grep pmm-admin | awk -F' ' '{print $3}'
-    register: pmm_admin_version
+  - name: check that PMM client version is correct
+    include_tasks: ../tasks/verify_pmm_status_versions.yml
 
-  - name: Print the PMM-Admin Version on Status command
-    ansible.builtin.debug:
-      msg: pmm-admin version is {{ pmm_admin_version.stdout }}
-
-  - name: Assert if the version output value is strict matched with expected version
-    assert:
-     that:
-      - "'{{ pmm_version }}' in pmm_admin_version.stdout"
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == "tools-main" or lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == "pmm2-client-main"
-
-  - name: checking existence of all artifacts from pmm2-client
-    command: bash -xe /package-testing/scripts/check_artifacts.sh
+  - name: check pmm2-client files
+    include_tasks: ../tasks/verify_pmm_client_files.yml
 
   - name: remove PMM client deb packages
     apt: name={{item}} state=absent

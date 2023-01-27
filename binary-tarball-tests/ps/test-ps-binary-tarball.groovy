@@ -13,6 +13,20 @@ pipeline {
   stages {
     stage('Binary tarball test') {
       parallel {
+        stage('Ubuntu Jammy') {
+          agent {
+            label "min-jammy-x64"
+          }
+          steps {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+              }
+            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+              run_test()
+            }
+            junit 'package-testing/binary-tarball-tests/ps/report.xml'
+          } //End steps
+        } //End stage Ubuntu Jammy
         stage('Ubuntu Focal') {
           agent {
             label "min-focal-x64"
@@ -97,6 +111,20 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Oracle Linux 8
+        stage('Oracle Linux 9') {
+          agent {
+            label "min-ol-9-x64"
+          }
+          steps {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+              }
+            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+              run_test()
+            }
+            junit 'package-testing/binary-tarball-tests/ps/report.xml'
+          } //End steps
+        } //End stage Oracle Linux 9
       } //End parallel
     } //End stage Run tests
   } //End stages
@@ -110,15 +138,21 @@ void run_test() {
     if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
       MINIMAL="-minimal"
     fi
-    export GLIBC_VERSION="2.17"
-    TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
-    TARBALL_LINK="https://www.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
-    rm -rf package-testing
     if [ -f /usr/bin/yum ]; then
       sudo yum install -y git wget
     else
-      sudo apt install -y git wget lsb-release
+      sudo apt install -y git wget
     fi
+    export GLIBC_VERSION="2.17"
+    if [ -f /usr/bin/apt-get ]; then
+      DEBIAN_VERSION=$(lsb_release -sc)
+      if [ ${DEBIAN_VERSION} = "jammy" ]; then
+        export GLIBC_VERSION="2.35"
+      fi
+    fi
+    TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
+    TARBALL_LINK="https://www.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
+    rm -rf package-testing
     git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
     cd package-testing/binary-tarball-tests/ps
     wget -q ${TARBALL_LINK}${TARBALL_NAME}
