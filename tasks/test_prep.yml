@@ -149,26 +149,26 @@
       perms: yes
     when: lookup('env', 'USE_LOCAL_PKG_TEST') == "1"
 
-#  - name: download package-testing repo branch with wget
-#    command: "{{ item }}"
-#    with_items:
-#    - rm -rf /package-testing
-#    - rm -f master.zip
-#    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
-#    - unzip master.zip
-#    - rm -f master.zip
-#    - mv package-testing-master /package-testing
-#    when: lookup('env', 'USE_LOCAL_PKG_TEST') == "" or lookup('env', 'USE_LOCAL_PKG_TEST') == "0"
+  - name: download package-testing repo branch with wget
+    command: "{{ item }}"
+    with_items:
+    - rm -rf /package-testing
+    - rm -f master.zip
+    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+    - unzip master.zip
+    - rm -f master.zip
+    - mv package-testing-master /package-testing
+    when: lookup('env', 'USE_LOCAL_PKG_TEST') == "" or lookup('env', 'USE_LOCAL_PKG_TEST') == "0"
 
-#  - name: install latest bats from github
-#    command: "{{ item }}"
-#    with_items:
-#    - rm -f master.zip
-#    - wget --no-check-certificate -O master.zip https://github.com/sstephenson/bats/archive/master.zip
-#    - unzip master.zip
-#    - rm -f master.zip
-#    - bats-master/install.sh /usr/local
-#    - rm -rf bats-master
+  - name: install latest bats from github
+    command: "{{ item }}"
+    with_items:
+    - rm -f master.zip
+    - wget --no-check-certificate -O master.zip https://github.com/sstephenson/bats/archive/master.zip
+    - unzip master.zip
+    - rm -f master.zip
+    - bats-master/install.sh /usr/local
+    - rm -rf bats-master
 
   - name: include tasks for listing already installed packages
     include_tasks: list_installed_packages.yml
