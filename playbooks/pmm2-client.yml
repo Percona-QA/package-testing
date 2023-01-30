@@ -2,6 +2,7 @@
 # Basic test:
 #   prepare Percona Repository and software
 #   install PMM client deb/rpm
+#   perform correct setup
 #   verify versions
 
 - hosts: all
@@ -25,6 +26,7 @@
   - name: include tasks for test env setup
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
+### install pmm2-client
   - name: install PMM client new deb packages
     apt: name=pmm2-client update_cache=yes state=latest
     when: ansible_os_family == "Debian"
@@ -36,6 +38,7 @@
   - name: check that PMM Client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
 
+### Setup PMM Client
   - name: use "pmm-admin config" to connect pmm client to server
     shell: pmm-admin config --force --server-insecure-tls --metrics-mode={{ metrics_mode }} --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
 
