@@ -24,7 +24,7 @@ pipeline {
             export PATH=${PATH}:~/.local/bin
             sudo yum install -y python3 python3-pip
             rm -rf package-testing
-            git clone https://github.com/eleo007/package-testing.git -b docker_add_mysql-shell --depth 1
+            git clone https://github.com/Percona-QA/package-testing.git --depth 1
             cd package-testing/docker-image-tests/ps
             pip3 install --user -r requirements.txt
             ./run.sh
