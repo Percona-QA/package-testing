@@ -2,44 +2,8 @@
   - name: Fetch the vars from file
     ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
 
-  - name: Print some debug information 
-    vars: 
-      msg: |
-        Module Variables ("vars"):
-        --------------------------------
-        {{ vars | to_nice_json }} 
-        
-        Environment Variables ("environment"):
-        --------------------------------
-        {{ environment | to_nice_json }} 
-        
-        GROUP NAMES Variables ("group_names"):
-        --------------------------------
-        {{ group_names | to_nice_json }}
-        
-        GROUPS Variables ("groups"):
-        --------------------------------
-        {{ groups | to_nice_json }}
-        
-        HOST Variables ("hostvars"):
-        --------------------------------
-        {{ hostvars | to_nice_json }} 
-  
-    debug: 
-      msg: "{{ msg.split('\n') }}"       
-    tags: debug_info
-
-  - name: Check IP MAIN Bootstrap
-    shell: ifconfig
-    register: check_main
-
-  - debug: var=check_main
-
-
   - set_fact:
       man_ip: "{{ ip_env }}"
-
-  - debug: var=man_ip
 
   - name: include tasks for test env setup
     include: ../../../../tasks/test_prep.yml

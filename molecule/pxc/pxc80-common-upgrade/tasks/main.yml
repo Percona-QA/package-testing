@@ -2,9 +2,6 @@
   - name: Fetch the vars from file
     ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
 
-  - name: debgu
-    shell: echo "{{ inventory_hostname }}"
-
   - set_fact:
       man_ip: "{{ ip_env }}"
 

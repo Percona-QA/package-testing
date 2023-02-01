@@ -3,7 +3,7 @@
     ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
 
   - set_fact:
-      man_ip: "{{ lookup('env', ip_env) }}"
+      man_ip: "{{ ip_env }}"
   
   - debug: var=man_ip
 
