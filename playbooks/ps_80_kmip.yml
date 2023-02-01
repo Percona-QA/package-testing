@@ -72,6 +72,11 @@
 
   - name: start pykmip server
     shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
+    when: ansible_distribution != "Amazon"
+
+  - name: start pykmip server for Amazon-Linux
+    shell: nohup /usr/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
+    when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2"
 
   - name: copy the global manifest for mysql
     copy:
