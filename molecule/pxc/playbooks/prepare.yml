@@ -114,36 +114,3 @@
         name: firewalld
         state: stopped
       when: (ansible_os_family == "RedHat") and (ansible_distribution_major_version|int == 8 or ansible_distribution_major_version|int == 9)
-
-    - name: Setup SSH keys CentOS
-      authorized_key:
-        user: centos
-        key: "{{ lookup('file', 'public_keys') }}"
-        state: present
-        exclusive: False
-      when: (ansible_distribution == "CentOS") and (lookup('env', 'DESTROY_ENV') == "no")
-
-    - name: Setup SSH keys for Oracle Linux or Amazon
-      authorized_key:
-        user: ec2-user
-        key: "{{ lookup('file', 'public_keys') }}"
-        state: present
-        exclusive: False
-      when: (ansible_distribution == "OracleLinux" and lookup('env', 'DESTROY_ENV') == "no") or
-            (ansible_distribution == "Amazon" and lookup('env', 'DESTROY_ENV') == "no")
-
-    - name: Setup SSH keys Debian
-      authorized_key:
-        user: admin
-        key: "{{ lookup('file', 'public_keys') }}"
-        state: present
-        exclusive: False
-      when: (ansible_distribution == "Debian") and (lookup('env', 'DESTROY_ENV') == "no")
-
-    - name: Setup SSH keys Ubuntu
-      authorized_key:
-        user: ubuntu
-        key: "{{ lookup('file', 'public_keys') }}"
-        state: present
-        exclusive: False
-      when: (ansible_distribution == "Ubuntu") and (lookup('env', 'DESTROY_ENV') == "no")
