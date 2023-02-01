@@ -32,9 +32,6 @@
     keypair_path: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/ssh_key"
 
   tasks:
-#    - name: Fetch the vars from file
-#      ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
-
     - name: Check subnet
       ec2_vpc_subnet_info:
         region: "{{ item.region|default(default_region) }}"
@@ -164,8 +161,6 @@
           retries: 300
           with_items: "{{ server.results }}"
 
-
-
     - name: Populate instance private IP dict
       set_fact:
         instance_priv_ip_dict: {
@@ -191,22 +186,6 @@
     - name: Convert instance public IP dict to a list
       set_fact:
         instance_public_ip: "{{ instance_public_ip_dict.results | map(attribute='ansible_facts.instance_public_ip_dict') | list }}"
-
-
-    - name: debgu create
-      set_fact: 
-        instance_name: "{{ item.tagged_instances[0].tags.Name }}"
-      with_items: "{{ ec2_jobs.results }}"
-      register: creates1
-
-    - name: yekki
-      shell: echo "{{ instance_name }}"
-      register: creates
-
-    - name: debuging created
-      debug:
-        var: creates
-#------------------------------------- INSTALL
 
     - name: Dump instance private IPs install and bootstrap instance
       copy:
@@ -239,8 +218,6 @@
       when: 
         - "'install' in creates.stdout"
         - "'common' in creates.stdout"
-
-#----------------------------------------- UPGRADE
 
     - name: Dump instance private IPs upgrade and bootstrap instance
       copy:
