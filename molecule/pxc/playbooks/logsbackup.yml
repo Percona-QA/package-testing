@@ -5,9 +5,6 @@
   become_method: sudo
   gather_facts: true
   tasks:
-    - name: debgu
-      shell: echo "{{ inventory_hostname }}"
-
     - set_fact:
         jenkinsworkspace={{ lookup('ansible.builtin.env', 'JENWORKSPACE') }}
         test_phase={{ lookup('ansible.builtin.env', 'test_type') }}

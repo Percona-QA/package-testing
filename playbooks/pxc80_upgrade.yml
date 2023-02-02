@@ -61,9 +61,6 @@
        - percona-xtradb-cluster-shared-compat
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-# - name: restart the service
-#   command: service mysql restart
-
   - name: install plugins
     command: /package-testing/plugins_test_80.sh pxc
 
@@ -72,12 +69,6 @@
 
   - name: check that PXC package versions are correct
     command: /package-testing/package_check.sh pxc80
-
-# - name: run bats tests for mysql init scripts
-#   command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
-
-# - name: start mysql service
-#   service: name=mysql state=started
 
   - name: remove PXC deb packages
     apt:
