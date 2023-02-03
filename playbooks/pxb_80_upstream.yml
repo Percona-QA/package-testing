@@ -14,7 +14,7 @@
 
   - name: Install MySQL apt repository package
     apt:
-      deb: https://dev.mysql.com/get/mysql-apt-config_0.8.22-1_all.deb
+      deb: https://repo.mysql.com/mysql-apt-config_0.8.22-1_all.deb
     when: ansible_os_family == "Debian"
 
   - name: Install MySQL RHEL 6 yum repository package
