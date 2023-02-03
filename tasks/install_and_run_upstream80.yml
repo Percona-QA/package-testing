@@ -6,8 +6,8 @@
       deb: https://repo.mysql.com/mysql-apt-config_0.8.12-1_all.deb
     when: ansible_os_family == "Debian" and ansible_distribution_major_version == "9"
 
-  - name: Instal MySQL apt repository package
-    apt: 
+  - name: Install MySQL apt repository package
+    apt:
       deb: https://repo.mysql.com/mysql-apt-config_0.8.24-1_all.deb
     when: ansible_os_family == "Debian" and ansible_distribution_major_version |int >= 10
   
