@@ -82,7 +82,7 @@
   - name: stop mysql service with service command
     command: service mysql stop
 
-  - name: copy pxc config on centos
+  - name: copy pxc config on Redhat
     template: src=../templates/my_rpm_80.j2 dest=/etc/my.cnf
     when: ansible_os_family == "RedHat"
 
@@ -98,15 +98,15 @@
     when: ansible_os_family == "Debian"
 
   # bootstrap the cluster
-  - name: bootstrap cluster on CentOS
+  - name: bootstrap cluster
     command: systemctl start mysql@bootstrap.service
 
-  # set root password on centos
-  - name: set root password on centos
+  # set root password on Redhat
+  - name: set root password on Redhat
     command: /package-testing/setpass_57.sh
     when: ansible_os_family == "RedHat"
 
-  - name: copy .my.cnf with credentials on centos
+  - name: copy .my.cnf with credentials on Redhat
     template: src=../templates/my_57.j2
               dest=/root/.my.cnf
               mode=0640 owner=root group=root
@@ -116,15 +116,18 @@
 # - name: install plugins
 #   command: /package-testing/plugins_test_80.sh pxc
 
-  - name: register PXC version
+  - name: register PXC version Install
     shell: mysqld --version
     register: pxc_version
-    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
 
-  - name: print PXC version
+  - name: print PXC version Install
     debug: var=pxc_version
-    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
 
-  - name: check PXC 8.0 version
+  - name: check that PXC version is correct Install
     command: /package-testing/version_check.sh pxc80
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
+  - name: check that PXC package versions are correct Install
+    command: /package-testing/package_check.sh pxc80
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+

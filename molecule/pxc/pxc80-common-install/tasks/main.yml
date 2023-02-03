@@ -1,0 +1,113 @@
+---
+  - name: Fetch the vars from file
+    ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
+
+  - set_fact:
+      man_ip: "{{ ip_env }}"
+
+  - name: include tasks for test env setup
+    include: ../../../../tasks/test_prep.yml
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: include tasks for enabling test repo
+    include_tasks: ../../../../tasks/enable_pxc80_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../../../../tasks/enable_pxc80_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../../../../tasks/enable_pxc80_experimental_repo.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: allow all users to connect to mysql
+    shell: setsebool -P mysql_connect_any 1
+    when: ((ansible_os_family == "RedHat") and (ansible_distribution != "Amazon"))
+
+  - name: flush iptables
+    iptables:
+      flush: yes
+    when: ansible_os_family == "RedHat"
+
+  - name: install PXC 8 deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+      - percona-xtradb-cluster-source
+      - percona-toolkit
+      - percona-xtrabackup-80
+    when: ansible_os_family == "Debian"
+
+  - name: install PXC 8 rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+      - percona-toolkit
+      - percona-xtrabackup-80
+    when: ansible_os_family == "RedHat"
+
+  - name: copy PXC config on centos 7
+    template: src=../../../../templates/my_rpm_80.j2 
+              dest=/etc/my.cnf
+    when: ansible_os_family == "RedHat"
+
+  - name: copy PXC config on debian/ubuntu
+    template: src=../../../../templates/my_8.j2
+              dest=/etc/mysql/my.cnf
+              mode=0640 owner=mysql group=root
+    when: ansible_os_family == "Debian"
+
+  - name: copy .my.cnf with credentials
+    template: src=../../../../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
+
+  - name: copy pxc certs
+    copy:
+      src: ../../../../support-files/certs/
+      dest: /etc/mysql/certs/
+
+  - name: start mysql service
+    service: name=mysql state=started
+    throttle: 1
+    
+  - name: register PXC version Molecule
+    shell: mysqld --version
+    register: pxc_version
+
+  - name: print PXC version Molecule
+    debug: var=pxc_version
+
+  - name: check that PXC version is correct Molecule
+    command: /package-testing/version_check.sh pxc80
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
+  - name: check that PXC package versions are correct Molecule
+    command: /package-testing/package_check.sh pxc80
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
+# - name: install plugins
+#   command: /package-testing/plugins_test_80.sh pxc
+
+#  - name: Run tests and incase of failure save logs
+#    block:
+
+  - name: run bats tests for mysql init scripts
+    shell: sleep {{ sleep_before_tests | default('0') }}; /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
+    throttle: 1
+
+  - name: start mysql service
+    service: name=mysql state=started
+    throttle: 1

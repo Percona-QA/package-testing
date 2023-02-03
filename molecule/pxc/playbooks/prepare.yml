@@ -16,11 +16,22 @@
       rpm_key:
         state: present
         key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+      when: (ansible_os_family == "RedHat") and (ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9") 
 
     - name: setup epel 8 repo
       yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+    - name: install GPG key for epel 9
+      rpm_key:
+        state: present
+        key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+
+    - name: setup epel 9 repo
+      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+
 
     - name: setup ca-certificates release
       yum:
@@ -102,4 +113,4 @@
       service:
         name: firewalld
         state: stopped
-      when: ansible_distribution == "OracleLinux" and ansible_distribution_major_version >= "8"
+      when: (ansible_os_family == "RedHat") and (ansible_distribution_major_version|int == 8 or ansible_distribution_major_version|int == 9)

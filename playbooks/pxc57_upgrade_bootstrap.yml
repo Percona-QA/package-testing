@@ -1,0 +1,135 @@
+---
+# This playbook upgrades the PXC node to the latest available version in testing repo
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+
+  - name: include tasks for enabling test repo
+    include_tasks: ../tasks/enable_pxc57_testing_repo.yml
+    when: lookup('env', 'upgrade_repo') == "testing" or lookup('env', 'upgrade_repo') == ""
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_pxc57_main_repo.yml
+    when: lookup('env', 'upgrade_repo') == "main"
+
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../tasks/enable_pxc57_experimental_repo.yml
+    when: lookup('env', 'upgrade_repo') == "experimental"
+
+# restart the bootstrapped node before upgrading
+ 
+  - name: restart the service
+    command: service mysql restart
+    throttle: 1
+    when: ansible_os_family == "Debian"
+
+  - name: stop the service on CentOS 8
+    command: mysqladmin shutdown
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: upgrade PXC 5.7 to new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full-57
+      - percona-xtradb-cluster-test-5.7
+      - percona-xtradb-cluster-source-5.7
+      - percona-xtradb-cluster-server-debug-5.7
+      - percona-xtradb-cluster-server-5.7
+      - percona-xtradb-cluster-common-5.7
+      - percona-xtradb-cluster-5.7-dbg
+      - percona-xtradb-cluster-client-5.7
+      - percona-xtradb-cluster-57
+    when: ansible_os_family == "Debian"
+
+  - name: upgrade PXC 5.7 to new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - Percona-XtraDB-Cluster-full-57
+      - Percona-XtraDB-Cluster-test-57
+      - Percona-XtraDB-Cluster-shared-57
+      - Percona-XtraDB-Cluster-server-57
+      - Percona-XtraDB-Cluster-garbd-57
+      - Percona-XtraDB-Cluster-devel-57
+      - Percona-XtraDB-Cluster-client-57
+      - Percona-XtraDB-Cluster-57-debuginfo
+      - Percona-XtraDB-Cluster-57
+    when: ansible_os_family == "RedHat"
+
+  - name: install Percona Server new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+       - Percona-XtraDB-Cluster-shared-compat-57
+    when: (ansible_os_family == "RedHat" and ansible_distribution_major_version == "7") or (ansible_distribution == "Amazon")
+
+# PXC-2317 workaround
+  - name: start mysql service
+    service: name=mysql state=started
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+    throttle: 1
+# PXC-2317 workaround
+
+# PXC-3203 workaround
+  - name: restart the service
+    command: service mysql restart
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    throttle: 1
+# PXC-3203 workaround
+
+  - name: run mysql_upgrade
+    command: /usr/bin/mysql_upgrade
+    throttle: 1
+
+  - name: sleep for 90 seconds
+    command: sleep 90
+
+  - name: restart the service
+    service: name=mysql state=restarted
+    when: (ansible_os_family != "RedHat" and ansible_distribution_major_version != "7") and (ansible_distribution != "Amazon")
+    throttle: 1
+
+  - name: stopping mysql@bootstrap service for centos 7 and amazon linux 2
+    service: name=mysql@bootstrap state=stopped
+    when: (ansible_os_family == "RedHat" and ansible_distribution_major_version == "7") or (ansible_distribution == "Amazon")
+    throttle: 1
+
+  - name: start mysql service for centos 7 and amazon linux 2
+    service: name=mysql state=started
+    when: (ansible_os_family == "RedHat" and ansible_distribution_major_version == "7") or (ansible_distribution == "Amazon")
+    throttle: 1
+
+  - name: register PXC version
+    shell: mysqld --version
+    register: pxc_version
+    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
+
+  - name: print PXC version
+    debug: var=pxc_version
+    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
+
+  - name: check that PXC version is correct
+    command: /package-testing/version_check.sh pxc57
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
+  - name: check that PXC package versions are correct
+    command: /package-testing/package_check.sh pxc57
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
+  - name: run bats tests for mysql init scripts
+    command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
+
+  - name: start mysql service
+    service: name=mysql state=started
+    throttle: 1
