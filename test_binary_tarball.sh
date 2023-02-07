@@ -21,11 +21,11 @@ if [ "$1" = "pxb80" ]; then
     echo "Downloading ${1} latest version..." >> "${log}"
     if [ "$2" = "main" ]; then
         if [ "$3" = "normal" ]; then
-            wget https://www.percona.com/downloads/Percona-XtraBackup-LATEST/Percona-XtraBackup-${major_version}-${minor_version}/binary/tarball/percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17.tar.gz
+            wget https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-${major_version}-${minor_version}/binary/tarball/percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17.tar.gz
             tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17"
         else
             # Download minimal version
-            wget https://www.percona.com/downloads/Percona-XtraBackup-LATEST/Percona-XtraBackup-${major_version}-${minor_version}/binary/tarball/percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17-minimal.tar.gz
+            wget https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-${major_version}-${minor_version}/binary/tarball/percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17-minimal.tar.gz
             tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17-minimal"
         fi
 
@@ -55,11 +55,11 @@ elif [ "$1" = "pxb24" ]; then
     echo "Downloading ${1} latest version..." >> "${log}"
     if [ "$2" = "main" ]; then
         if [ "$3" = "normal" ]; then
-            wget https://www.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-${version}/binary/tarball/percona-xtrabackup-${version}-Linux-x86_64.glibc2.12.tar.gz
+            wget https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-${version}/binary/tarball/percona-xtrabackup-${version}-Linux-x86_64.glibc2.12.tar.gz
             tarball_dir="percona-xtrabackup-${version}-Linux-x86_64.glibc2.12"
         else
             # Download minimal version
-            wget https://www.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-${version}/binary/tarball/percona-xtrabackup-${version}-Linux-x86_64.glibc2.12-minimal.tar.gz
+            wget https://downloads.percona.com/downloads/Percona-XtraBackup-2.4/Percona-XtraBackup-${version}/binary/tarball/percona-xtrabackup-${version}-Linux-x86_64.glibc2.12-minimal.tar.gz
             tarball_dir="percona-xtrabackup-${version}-Linux-x86_64.glibc2.12-minimal"
         fi
 
