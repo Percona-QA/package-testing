@@ -18,11 +18,11 @@
     when: ansible_os_family == "Debian"
 
   - name: Install MySQL RHEL 6 yum repository package
-    yum: name=https://dev.mysql.com/get/mysql80-community-release-el6-1.noarch.rpm state=present
+    yum: name=https://repo.mysql.com/mysql80-community-release-el6-1.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
   - name: Install MySQL RHEL 7 yum repository package
-    yum: name=https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm state=present
+    yum: name=https://repo.mysql.com/mysql80-community-release-el7-5.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: Import key for mysql-repo
@@ -32,11 +32,11 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: Install MySQL RHEL 8 yum repository package
-    yum: name=https://dev.mysql.com/get/mysql80-community-release-el8-3.noarch.rpm state=present
+    yum: name=https://repo.mysql.com/mysql80-community-release-el8-3.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: Install MySQL RHEL 9 yum repository package
-    yum: name=https://dev.mysql.com/get/mysql80-community-release-el9-1.noarch.rpm state=present
+    yum: name=https://repo.mysql.com/mysql80-community-release-el9-1.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: epel 7 repo
