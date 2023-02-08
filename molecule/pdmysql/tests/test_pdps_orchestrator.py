@@ -16,7 +16,7 @@ VERSION = os.getenv("ORCHESTRATOR_VERSION")
 def test_check_package(host, package):
     pkg = host.package(package)
     assert pkg.is_installed
-    assert VERSION in pkg.version, pkg.version
+    assert VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
 
 def test_orchestrator_version(host):
     cmd = 'orchestrator --version'
