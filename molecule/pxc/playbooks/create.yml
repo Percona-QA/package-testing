@@ -10,24 +10,6 @@
     default_region: "{{ lookup('env', 'AWS_DEFAULT_REGION') | default('us-east-1', true) }}"
     security_group_name_prefix: molecule-pxc-package-testing
     security_group_description: Testing PXC package testing with Molecule
-    security_group_rules:
-      - proto: tcp
-        from_port: "{{ ssh_port }}"
-        to_port: "{{ ssh_port }}"
-        cidr_ip: '0.0.0.0/0'
-      - proto: icmp
-        from_port: 8
-        to_port: -1
-        cidr_ip: '0.0.0.0/0'
-      - proto: -1
-        from_port: -1
-        to_port: -1
-        group_name: "{{ security_group_name_prefix }}"
-    security_group_rules_egress:
-      - proto: -1
-        from_port: 0
-        to_port: 0
-        cidr_ip: '0.0.0.0/0'
     keypair_name: "molecule-pkg-tests"
     keypair_path: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/ssh_key"
 
@@ -49,8 +31,24 @@
       ec2_group:
         name: "{{ security_group_name_prefix }}-{{ subnet_dict[item.vpc_subnet_id] }}"
         description: "{{ security_group_description }}"
-        rules: "{{ security_group_rules }}"
-        rules_egress: "{{ security_group_rules_egress }}"
+        rules:
+        - proto: tcp
+          from_port: "{{ ssh_port }}"
+          to_port: "{{ ssh_port }}"
+          cidr_ip: '0.0.0.0/0'
+        - proto: icmp
+          from_port: 8
+          to_port: -1
+          cidr_ip: '0.0.0.0/0'
+        - proto: -1
+          from_port: -1
+          to_port: -1
+          group_name: "{{ security_group_name_prefix }}-{{ subnet_dict[item.vpc_subnet_id] }}"
+        rules_egress:
+        - proto: -1
+          from_port: 0
+          to_port: 0
+          cidr_ip: '0.0.0.0/0'
         vpc_id: "{{ subnet_dict[item.vpc_subnet_id] }}"
         region: "{{ item.region|default(default_region) }}"
       with_items: "{{ molecule_yml.platforms }}"

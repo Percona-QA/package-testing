@@ -2,8 +2,24 @@
   - name: Fetch the vars from file
     ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
 
+  - name: Ansible check inventory_hostname
+    debug:
+      var: inventory_hostname
+
   - set_fact:
-      man_ip: "{{ ip_env }}"
+      man_ip: "{{ PXC1_IP }}"
+    when: 
+    - "'pxc1' in inventory_hostname"
+
+  - set_fact:
+      man_ip: "{{ PXC2_IP }}"
+    when: 
+    - "'pxc2' in inventory_hostname"
+
+  - set_fact:
+      man_ip: "{{ PXC3_IP }}"
+    when: 
+    - "'pxc3' in inventory_hostname"
 
   - name: include tasks for test env setup
     include: ../../../../tasks/test_prep.yml
