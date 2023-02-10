@@ -15,8 +15,12 @@ VERSION = os.getenv("ORCHESTRATOR_VERSION")
 @pytest.mark.parametrize("package", PACKAGES)
 def test_check_package(host, package):
     pkg = host.package(package)
+    dist = host.system_info.distribution
     assert pkg.is_installed
-    assert VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
+    if dist.lower() in RHEL_DISTS:
+        assert VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
+    else:
+        assert VERSION in pkg.version, pkg.version
 
 def test_orchestrator_version(host):
     cmd = 'orchestrator --version'
