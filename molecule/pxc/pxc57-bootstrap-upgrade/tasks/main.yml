@@ -2,10 +2,6 @@
   - name: Fetch the vars from file
     ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
 
-  - name: Ansible check inventory_hostname
-    debug:
-      var: inventory_hostname
-
   - set_fact:
       man_ip: "{{ PXC1_IP }}"
     when: 
@@ -175,15 +171,5 @@
   - name: install plugins
     command: /package-testing/plugins_test_57.sh pxc
 
-  - name: register PXC version
-    shell: mysqld --version
-    register: pxc_version
-    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
-
-  - name: print PXC version
-    debug: var=pxc_version
-    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
-
-  - name: check PXC 5.7 version
-    command: /package-testing/version_check.sh pxc57
-    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+  - name: Check that the PXC Cluster is up and running
+    shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'

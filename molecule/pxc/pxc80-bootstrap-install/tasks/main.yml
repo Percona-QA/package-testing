@@ -2,10 +2,6 @@
   - name: Fetch the vars from file
     ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
 
-  - name: Ansible check inventory_hostname
-    debug:
-      var: inventory_hostname
-
   - set_fact:
       man_ip: "{{ PXC1_IP }}"
     when: 
