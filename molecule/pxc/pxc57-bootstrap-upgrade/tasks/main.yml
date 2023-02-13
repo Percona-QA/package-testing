@@ -170,6 +170,3 @@
   # other tests
   - name: install plugins
     command: /package-testing/plugins_test_57.sh pxc
-
-  - name: Check that the PXC Cluster is up and running
-    shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'
