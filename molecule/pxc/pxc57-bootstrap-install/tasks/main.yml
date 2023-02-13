@@ -3,8 +3,20 @@
     ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
 
   - set_fact:
-      man_ip: "{{ ip_env }}"
-  
+      man_ip: "{{ PXC1_IP }}"
+    when: 
+    - "'pxc1' in inventory_hostname"
+
+  - set_fact:
+      man_ip: "{{ PXC2_IP }}"
+    when: 
+    - "'pxc2' in inventory_hostname"
+
+  - set_fact:
+      man_ip: "{{ PXC3_IP }}"
+    when: 
+    - "'pxc3' in inventory_hostname"
+
   - debug: var=man_ip
     
   - name: include tasks for test env setup
@@ -53,7 +65,7 @@
     vars:
       packages:
       - python-mysqldb
-    when: (ansible_os_family == "Debian") and (ansible_distribution_release != "focal" and ansible_distribution_release != "bionic" and ansible_distribution_release != "bullseye")
+    when: (ansible_os_family == "Debian") and (ansible_distribution_release != "focal" and ansible_distribution_release != "bionic" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "buster")
 
   - name: install python mysql deb packages for focal and bionic
     apt:
@@ -63,6 +75,15 @@
       packages:
       - python3-mysqldb
     when: (ansible_os_family == "Debian") and (ansible_distribution_release == "focal" or ansible_distribution_release == "bionic" or ansible_distribution_release == "bullseye")
+
+  - name: Install python3 PyMySQL for Buster (Debian 10)
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - python3-pymysql
+    when: (ansible_os_family == "Debian") and (ansible_distribution_release == "buster")
 
   - name: install PXC 5.7 previous rpm packages
     yum:
@@ -137,7 +158,13 @@
     when: ((ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7") or (ansible_distribution == "Amazon"))
 
   - name: create backup user on debian/ubuntu
-    mysql_user: name=sstuser password=s3cretPass priv="*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" state=present
+    mysql_user:
+      login_unix_socket: /var/run/mysqld/mysqld.sock
+      name: sstuser 
+      password: s3cretPass 
+      priv: "*.*:RELOAD,PROCESS,LOCK TABLES,REPLICATION CLIENT" 
+      state: present
+    become: yes
     when: ansible_os_family == "Debian"
 
   # other tests

@@ -3,7 +3,19 @@
     ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
 
   - set_fact:
-      man_ip: "{{ ip_env }}"
+      man_ip: "{{ PXC1_IP }}"
+    when: 
+    - "'pxc1' in inventory_hostname"
+
+  - set_fact:
+      man_ip: "{{ PXC2_IP }}"
+    when: 
+    - "'pxc2' in inventory_hostname"
+
+  - set_fact:
+      man_ip: "{{ PXC3_IP }}"
+    when: 
+    - "'pxc3' in inventory_hostname"
 
   - name: include tasks for test env setup
     include: ../../../../tasks/test_prep.yml
@@ -111,3 +123,6 @@
   - name: start mysql service
     service: name=mysql state=started
     throttle: 1
+
+  - name: Check that the PXC Cluster is up and running
+    shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'
