@@ -83,50 +83,99 @@
 #      loop: "{{ molecule_yml.platforms }}"
 #      when: item.image is not defined
 #      register: ami_facts
+    - name: Create spot instance or on-demand if spot is not avalable
+      block:
+        - name: Create spot molecule instance(s)
+          ec2:
+            key_name: "{{ keypair_name }}"
+            image: "{{ item.image }}"
+            instance_type: "{{ item.instance_type }}"
+            vpc_subnet_id: "{{ item.vpc_subnet_id }}"
+            group: "{{ security_group_name_prefix }}-{{ subnet_dict[item.vpc_subnet_id] }}"
+            instance_tags: "{{
+                item.instance_tags | combine({
+                  'Name': item.name,
+                  'ssh_user': item.ssh_user|default(ssh_user)
+                })
+                if item.instance_tags is defined
+                else {
+                    'Name': item.name,
+                    'ssh_user': item.ssh_user|default(ssh_user)
+                }
+            }}"
+            wait: true
+            spot_price: "0.0100"
+            spot_type: "one-time"
+            assign_public_ip: true
+            exact_count: 1
+            count_tag:
+              Name: "{{ item.name }}"
+            region: "{{ item.region|default(default_region) }}"
+            volumes:
+              - device_name: "{{ item.root_device_name }}"
+                volume_type: gp2
+                volume_size: 30
+                delete_on_termination: true
+            instance_initiated_shutdown_behavior: "terminate"
+          register: server
+          loop: "{{ molecule_yml.platforms }}"
+          loop_control:
+            index_var: index
+          async: 7200
+          poll: 0
 
-    - name: Create molecule instance(s)
-      ec2:
-        key_name: "{{ keypair_name }}"
-        image: "{{ item.image }}"
-        instance_type: "{{ item.instance_type }}"
-        vpc_subnet_id: "{{ item.vpc_subnet_id }}"
-        group: "{{ security_group_name_prefix }}-{{ subnet_dict[item.vpc_subnet_id] }}"
-        instance_tags: "{{
-            item.instance_tags | combine({
-              'Name': item.name,
-              'ssh_user': item.ssh_user|default(ssh_user)
-            })
-            if item.instance_tags is defined
-            else {
-                'Name': item.name,
-                'ssh_user': item.ssh_user|default(ssh_user)
-            }
-        }}"
-        wait: true
-        assign_public_ip: true
-        exact_count: 1
-        count_tag:
-          Name: "{{ item.name }}"
-        region: "{{ item.region|default(default_region) }}"
-        volumes:
-          - device_name: "{{ item.root_device_name }}"
-            volume_type: gp2
-            volume_size: 30
-            delete_on_termination: true
-      register: server
-      loop: "{{ molecule_yml.platforms }}"
-      loop_control:
-        index_var: index
-      async: 7200
-      poll: 0
+        - name: Wait for spot instance(s) creation to complete
+          async_status:
+            jid: "{{ item.ansible_job_id }}"
+          register: ec2_jobs
+          until: ec2_jobs.finished
+          retries: 300
+          with_items: "{{ server.results }}"
 
-    - name: Wait for instance(s) creation to complete
-      async_status:
-        jid: "{{ item.ansible_job_id }}"
-      register: ec2_jobs
-      until: ec2_jobs.finished
-      retries: 300
-      with_items: "{{ server.results }}"
+      rescue:
+        - name: Create on-demand molecule instance(s) because spot is not available
+          ec2:
+            key_name: "{{ keypair_name }}"
+            image: "{{ item.image }}"
+            instance_type: "{{ item.instance_type }}"
+            vpc_subnet_id: "{{ item.vpc_subnet_id }}"
+            group: "{{ security_group_name_prefix }}-{{ subnet_dict[item.vpc_subnet_id] }}"
+            instance_tags: "{{
+                item.instance_tags | combine({
+                  'Name': item.name,
+                  'ssh_user': item.ssh_user|default(ssh_user)
+                })
+                if item.instance_tags is defined
+                else {
+                    'Name': item.name,
+                    'ssh_user': item.ssh_user|default(ssh_user)
+                }
+            }}"
+            wait: true
+            assign_public_ip: true
+            exact_count: 1
+            count_tag:
+              Name: "{{ item.name }}"
+            region: "{{ item.region|default(default_region) }}"
+            volumes:
+              - device_name: "{{ item.root_device_name }}"
+                volume_type: gp2
+                volume_size: 30
+                delete_on_termination: true
+          register: server
+          loop: "{{ molecule_yml.platforms }}"
+          loop_control:
+            index_var: index
+          async: 7200
+          poll: 0
+
+        - name: Wait for on-demand instance(s) creation to complete
+          async_status:
+            jid: "{{ item.ansible_job_id }}"
+          register: ec2_jobs
+          until: ec2_jobs.finished
+          retries: 300
+          with_items: "{{ server.results }}"
 
     # Mandatory configuration for Molecule to function.
 
