@@ -188,7 +188,7 @@ function teardown(){
   if [ ${SERVICE} -eq 1 ]; then
     service mysql restart 3>- &
     [ $? -eq 0 ]
-    sleep 20
+    sleep 40
     run is_running
     [ $status -eq 0 ]
   else
