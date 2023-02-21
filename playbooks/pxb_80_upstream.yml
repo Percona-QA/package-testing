@@ -29,7 +29,7 @@
     rpm_key:
       state: present
       key: http://repo.mysql.com/RPM-GPG-KEY-mysql-2022
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
   - name: Install MySQL RHEL 8 yum repository package
     yum: name=https://repo.mysql.com/mysql80-community-release-el8-3.noarch.rpm state=present
@@ -88,7 +88,7 @@
       - mysql-community-server
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
 
-  - name: install packages in rhel/centos 8
+  - name: install packages in rhel/centos 8, 9
     yum:
       name: "{{ packages }}"
       state: present
@@ -96,7 +96,7 @@
       packages:
       - python3-libselinux
       - mysql-community-server
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
   - name: Start the MySQL service
     service: name=mysql state=started
