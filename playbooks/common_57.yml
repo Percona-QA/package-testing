@@ -109,7 +109,7 @@
 
   - name: check that sysbench version is correct
     command: /package-testing/version_check.sh sysbench
-    when: lookup('env', 'install_repo') != "experimental"
+    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy"
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
