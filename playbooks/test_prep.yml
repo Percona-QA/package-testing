@@ -10,4 +10,4 @@
   tasks:
   - name: install python2
     raw: test -e /usr/bin/python || (which apt && apt -y update && apt install -y python-minimal)
-    when: ansible_os_family == "Debian" and ansible_distribution_major_version != "20"
+    when: ansible_os_family == "Debian" and ansible_distribution_major_version != "20" and ansible_distribution_release != "jammy"
