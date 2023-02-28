@@ -90,19 +90,19 @@
 
   - name: run sysbench prepare script
     command: sysbench --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sb --time=20 --threads=64 --tables=3 oltp_read_write prepare
-    when: ansible_distribution_release != "bullseye"
+    when: ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and (ansible_os_family == "RedHat" and ansible_distribution_major_version != "9")
 
   - name: run sysbench benchmark
     command: sysbench --mysql-user=sbt --mysql-db=sb --mysql-password=s3cret!Pass --time=20 --threads=64 --tables=3 oltp_read_write run
-    when: ansible_distribution_release != "bullseye"
+    when: ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and (ansible_os_family == "RedHat" and ansible_distribution_major_version != "9")
 
   - name: run sysbench tpcc prepare script
     command: /usr/share/sysbench/tpcc.lua --mysql-user=sbt --mysql-password=s3cret!Pass  --mysql-db=sbt --time=20 --threads=64 --report-interval=1 --tables=2 --scale=1 --db-driver=mysql prepare
-    when: ansible_distribution_release != "bullseye"
+    when: ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and (ansible_os_family == "RedHat" and ansible_distribution_major_version != "9")
 
   - name: run sysbench tpcc benchmark
     command: /usr/share/sysbench/tpcc.lua --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sbt --time=20 --threads=64 --report-interval=1 --tables=2 --scale=1 --db-driver=mysql run
-    when: ansible_distribution_release != "bullseye"
+    when: ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and (ansible_os_family == "RedHat" and ansible_distribution_major_version != "9")
 
   - name: run backup
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
