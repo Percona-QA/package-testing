@@ -96,7 +96,6 @@
       packages:
       - unzip
       - wget
-      - jemalloc
       - jq # for exporter end point metric fetch
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
 
