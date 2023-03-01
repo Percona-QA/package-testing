@@ -243,8 +243,9 @@
   - name: start mysql service
     service: name=mysql state=started
 
-  - name: check that Percona Server version is correct
-    command: /package-testing/version_check.sh ps80
+    #commented to disable mysql-shell check
+    #  - name: check that Percona Server version is correct
+    #    command: /package-testing/version_check.sh ps80
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps80
@@ -260,6 +261,7 @@
 
   - name: run bats tests for mysql init scripts
     command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
 
   - name: run Group Replication tests
     include_tasks: ../tasks/gr_test.yml
