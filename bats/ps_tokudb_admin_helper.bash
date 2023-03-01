@@ -10,7 +10,7 @@ install_tokudb() {
   run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable"
   [ $status -eq 0 ]
 
-  service mysql restart >/dev/null 3>&-
+  systemctl restart mysql >/dev/null 3>&-
   [ $? -eq 0 ]
   sleep 5
 
@@ -30,7 +30,7 @@ uninstall_tokudb() {
   run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --disable"
   [ $status -eq 0 ]
 
-  service mysql restart >/dev/null 3>&-
+  systemctl restart mysql >/dev/null 3>&-
   [ $? -eq 0 ]
   sleep 5
 }
@@ -47,7 +47,7 @@ install_tokubackup() {
   run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable-backup"
   [ $status -eq 0 ]
 
-  service mysql restart >/dev/null 3>&-
+  systemctl restart mysql >/dev/null 3>&-
   [ $? -eq 0 ]
   sleep 5
 
@@ -74,7 +74,7 @@ install_all() {
   run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --enable --enable-backup"
   [ $status -eq 0 ]
 
-  service mysql restart >/dev/null 3>&-
+  systemctl restart mysql >/dev/null 3>&-
   [ $? -eq 0 ]
   sleep 5
 
@@ -86,7 +86,7 @@ uninstall_all() {
   run bash -c "${PS_TOKUDB_ADMIN_BIN} ${CONNECTION} --disable --disable-backup"
   [ $status -eq 0 ]
 
-  service mysql restart >/dev/null 3>&-
+  systemctl restart mysql >/dev/null 3>&-
   [ $? -eq 0 ]
   sleep 5
 
