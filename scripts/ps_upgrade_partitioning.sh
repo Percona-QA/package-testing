@@ -8,14 +8,14 @@ else
 fi
 
 echo "Adding the config vars"
-service mysql stop
+systemctl stop mysql
 sleep 10
 if [ $(grep -c "\[mysqld\]" ${MYCNF}) -eq 0 ]; then
   echo -e "\n[mysqld]" >> ${MYCNF}
 fi
 sed -i '/\[mysqld\]/a rocksdb_enable_native_partition=ON' ${MYCNF}
 sed -i '/\[mysqld\]/a tokudb_enable_native_partition=ON' ${MYCNF}
-service mysql start
+systemctl start mysql
 sleep 10
 
 echo "upgrade tables"
@@ -34,5 +34,5 @@ mysql -e "ALTER TABLE comp_test.t1_TokuDB_zlib UPGRADE PARTITIONING;"
 echo "remove the config vars"
 sed -i '/rocksdb_enable_native_partition=/d' ${MYCNF}
 sed -i '/tokudb_enable_native_partition=/d' ${MYCNF}
-service mysql restart
+systemctl restart mysql
 sleep 10
