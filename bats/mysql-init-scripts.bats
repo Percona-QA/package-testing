@@ -199,6 +199,9 @@ function teardown(){
 @test "check if mysql service is enabled in systemd" {
   if [ ${SYSTEMCTL} -eq 1 ]; then
     result=$(systemctl is-enabled mysql)
+      if [ $result == 'alias' ]; then
+          result=$(systemctl is-enabled mysqld)
+      fi
     [ $result == "enabled" ]
   else
     skip "system doesn't have systemctl command"
