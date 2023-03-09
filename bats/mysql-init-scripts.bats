@@ -196,6 +196,7 @@ function teardown(){
   fi
 }
 
+#Added 'alias' check based on OL9 behavior. Check PS-8675 for details.
 @test "check if mysql service is enabled in systemd" {
   if [ ${SYSTEMCTL} -eq 1 ]; then
     result=$(systemctl is-enabled mysql)
