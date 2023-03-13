@@ -1,0 +1,29 @@
+---
+scenario:
+  name: ol-8
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: pxc1-57-bootstrap-ol-8-upgrade
+    region: us-west-2
+    image: ami-000b99c02c2b64925
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t2.small
+    ssh_user: ec2-user
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../../../playbooks/create.yml
+    destroy: ../../../../playbooks/destroy.yml
+    prepare: ../../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+    side_effect: ../../../../../playbooks/pxc57_upgrade_bootstrap.yml
+  inventory:
+    host_vars:
+      pxc1-57-bootstrap-ol-8-upgrade:
+        ip_env: "{{ ansible_host }}"

@@ -14,29 +14,29 @@
 
   - name: Install MySQL apt repository package
     apt:
-      deb: https://dev.mysql.com/get/mysql-apt-config_0.8.22-1_all.deb
+      deb: https://repo.mysql.com/mysql-apt-config_0.8.22-1_all.deb
     when: ansible_os_family == "Debian"
 
   - name: Install MySQL RHEL 6 yum repository package
-    yum: name=https://dev.mysql.com/get/mysql80-community-release-el6-1.noarch.rpm state=present
+    yum: name=https://repo.mysql.com/mysql80-community-release-el6-1.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
   - name: Install MySQL RHEL 7 yum repository package
-    yum: name=https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm state=present
+    yum: name=https://repo.mysql.com/mysql80-community-release-el7-5.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: Import key for mysql-repo
     rpm_key:
       state: present
       key: http://repo.mysql.com/RPM-GPG-KEY-mysql-2022
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
   - name: Install MySQL RHEL 8 yum repository package
-    yum: name=https://dev.mysql.com/get/mysql80-community-release-el8-3.noarch.rpm state=present
+    yum: name=https://repo.mysql.com/mysql80-community-release-el8-3.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: Install MySQL RHEL 9 yum repository package
-    yum: name=https://dev.mysql.com/get/mysql80-community-release-el9-1.noarch.rpm state=present
+    yum: name=https://repo.mysql.com/mysql80-community-release-el9-1.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: epel 7 repo
@@ -88,7 +88,7 @@
       - mysql-community-server
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
 
-  - name: install packages in rhel/centos 8
+  - name: install packages in rhel/centos 8, 9
     yum:
       name: "{{ packages }}"
       state: present
@@ -96,7 +96,7 @@
       packages:
       - python3-libselinux
       - mysql-community-server
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
   - name: Start the MySQL service
     service: name=mysql state=started

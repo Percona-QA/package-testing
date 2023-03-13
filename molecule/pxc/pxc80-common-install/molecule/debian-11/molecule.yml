@@ -1,0 +1,41 @@
+---
+scenario:
+  name: debian-11
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: pxc2-80-common-debian-11-install
+    region: us-west-2
+    image: ami-0d0f7602aa5c2425d
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t2.small
+    ssh_user: admin
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+  - name: pxc3-80-common-debian-11-install
+    region: us-west-2
+    image: ami-0d0f7602aa5c2425d
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t2.small
+    ssh_user: admin
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../../../playbooks/create.yml
+    destroy: ../../../../playbooks/destroy.yml
+    prepare: ../../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+    side_effect: ../../../../../playbooks/pxc80_upgrade_common.yml
+  inventory:
+    host_vars:
+      pxc2-80-common-debian-11-install:
+        ip_env: "{{ ansible_host }}"
+      pxc3-80-common-debian-11-install:
+        ip_env: "{{ ansible_host }}"
+        sleep_before_tests: 40

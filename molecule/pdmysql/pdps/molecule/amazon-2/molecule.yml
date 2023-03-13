@@ -15,7 +15,7 @@ provisioner:
   name: ansible
   log: True
   playbooks:
-    create: ../../../../playbooks/create_spot.yml
+    create: ../../../../playbooks/create.yml
     destroy: ../../../../playbooks/destroy.yml
     prepare: ../../../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml

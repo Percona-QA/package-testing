@@ -82,9 +82,6 @@
   - name: check that PXC package versions are correct
     command: /package-testing/package_check.sh pxc56
 
-# - name: run bats tests for mysql init scripts
-#   command: /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
-
   - name: start mysql service
     service: name=mysql state=started
 

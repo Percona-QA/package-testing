@@ -67,8 +67,16 @@
         - python3 -m pip install -U setuptools
         - python3 -m pip install -U pykmip
 
+  - name: downgrade SQLAlchemy as new version doesn't work with pykmip
+    command: pip3 install SQLAlchemy==1.4.46
+
   - name: start pykmip server
     shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
+    when: ansible_distribution != "Amazon"
+
+  - name: start pykmip server for Amazon-Linux
+    shell: nohup /usr/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
+    when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2"
 
   - name: copy the global manifest for mysql
     copy:
