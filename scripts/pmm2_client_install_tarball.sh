@@ -12,7 +12,7 @@ Help()
    echo "options:"
    echo "h     Print this Help."
    echo "v     Installing specified version 2.XX.X or feature build, ex: PR-2734-6fe2553"
-   echo "      Please note that version is mandatory for this option"
+   echo "      Also full s3 url to FB tarball is supported"
    echo "p     Installation path. Default: /usr/local/percona/pmm2."
    echo "      Sets default version to 2.26.0 if no version specified"
    echo "l     listening custom port mode. Sets default version to 2.27.0 if no version specified"
