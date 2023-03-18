@@ -1,7 +1,7 @@
 ---
 # This playbook does following:
 #   enables Percona testing repository
-#   installs the latest version of PMM2 client
+#   installs latest version of PMM2 client
 #   does some tests
 
 - hosts: all
@@ -23,7 +23,27 @@
       instance_ip: "{{ instance_ip.stdout }}"
 
   - name: include tasks for test env setup
-    include_tasks: ../tasks/pmm2_client_test_prepare.yml
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: include tasks for enabling test repo
+    include_tasks: ../tasks/enable_testing_repo.yml
+    when: test_repo == "testing" or test_repo == ""
+
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../tasks/enable_experimental_repo.yml
+    when: test_repo == "experimental"
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_main_repo.yml
+    when: test_repo == "main"
+
+  - name: include tasks for enabling tools main repo
+    include_tasks: ../tasks/enable_tools_main_repo.yml
+    when: test_repo == "tools-main"
+
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../tasks/enable_pmm2client_main_repo.yml
+    when: test_repo == "pmm2-client-main"
 
   - name: install PMM client new deb packages
     apt: name=pmm2-client update_cache=yes state=latest
@@ -44,19 +64,121 @@
     shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "pull"
 
-### start PS 5.7
-  - name: install and start Percona Server 5.7
-    include_tasks: ../tasks/start_ps57.yml
+### start PS5.7
+  - name: install Percona Server 5.7 packages
+    include_tasks: ../tasks/install_ps57.yml
+
+  - name: start mysql service
+    service: name=mysql state=started
+
+  - name: start mysql service with service command
+    command: service mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+
+  - name: set root password on centos
+    command: ../setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
+
+  - name: add mysql metrics and queries to monitoring
+    command: ../scripts/pmm2_add_instance.sh mysql
+    when: ansible_os_family == "RedHat"
+
+  - name: add mysql instance for monitoring
+    command: pmm-admin add mysql --query-source=perfschema --socket=/var/run/mysqld/mysqld.sock --service-name=mysql_{{ instance_ip }}
+    when: ansible_os_family != "RedHat"
+
+  - name: check if mysql monitoring running
+    command: pmm-admin list
+    register: list_output
+
+  - name: Assert if the pmm-admin list contains mysql
+    assert:
+      that:
+        - "'MySQL' in list_output.stdout"
+
+  - name: Wait for mysqld_exporter to have Running Status.
+    shell: pmm-admin list | grep 'mysqld_exporter' | awk -F" " '{print $2}'
+    register: mysqld_exporter_status
+    until: mysqld_exporter_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
 
   - name: check if Metric End point with Auth works for Mysqld Exporter
     shell: "{{item}}"
     with_items:
       - "bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
+
+  - name: Assert if the pmm-admin list contains mysqld_exporter with Running state
+    assert:
+      that:
+        - "'Running' in mysqld_exporter_status.stdout"
+
+  - name: Wait for mysql_perfschema_agent to have Running Status.
+    shell: pmm-admin list | grep 'mysql_perfschema_agent' | awk -F" " '{print $2}'
+    register: mysql_perfschema_agent_status
+    until: mysql_perfschema_agent_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
+
+  - name: Assert if the pmm-admin list contains mysql_perfschema_agent with Running state
+    assert:
+      that:
+        - "'Running' in mysql_perfschema_agent_status.stdout"
 ## end PS
 
-### start PSMDB 4.4
-  - name: install and start Percona Server MongoDB 4.4
-    include_tasks: ../tasks/start_psmdb44.yml
+### start PSMDB4.4
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_psmdb_repo.yml
+    vars:
+      psmdb_repo: "psmdb-44"
+
+  - name: install PSMDB packages
+    include_tasks: ../tasks/install_psmdb.yml
+
+  - name: start mongod with service
+    command: service mongod start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mongod with systemctl
+    command: systemctl start mongod
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 6
+
+  - name: add mongodb metrics to monitoring
+    command: pmm-admin add mongodb --service-name=mongodb_{{ instance_ip }}
+
+  - name: add mongodb metrics to monitoring using socket
+    command: pmm-admin add mongodb --socket=/tmp/mongodb-27017.sock --service-name=mongodb_socket_{{ instance_ip }}
+
+  - name: check if mongodb monitoring is running
+    command: pmm-admin list
+    register: list_output
+
+  - name: Assert if the pmm-admin list contains mongodb instance
+    assert:
+      that:
+        - "'MongoDB' in list_output.stdout"
+
+  - name: Wait for mongodb_exporter to have Running Status.
+    shell: pmm-admin list | grep 'mongodb_exporter' | awk -F" " '{print $2}'
+    register: mongodb_exporter_status
+    until: mongodb_exporter_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
+
+  - name: Assert if the pmm-admin list contains mongodb_exporter with Running state
+    assert:
+      that:
+        - "'Running' in mongodb_exporter_status.stdout"
 
   - name: check if Metric End point with Auth works for MongoDB Exporter
     shell: "{{item}}"
@@ -73,9 +195,122 @@
 
 ### end PSMDB
 
-### start pgsql 13
-  - name: install and start Percona Server MongoDB 4.4
-    include_tasks: ../tasks/start_psql13.yml
+### start pgsql13
+
+  - name: Enable postgresql repository
+    command: percona-release setup -y ppg-13
+    when: ansible_distribution_release != 'xenial'
+
+  - name: include tasks for setting up pg13
+    include_tasks: ../ppg-testing/tasks/install_ppg13.yml
+    when: ansible_distribution_release != 'xenial'
+
+  - name: Initialize Postgres RHEL
+    command: /usr/pgsql-13/bin/postgresql-13-setup initdb
+    environment:
+      PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    when: ansible_os_family == "RedHat"
+
+  - name: Start Postgres RHEL
+    service:
+      name: postgresql-13
+      state: started
+      enabled: true
+    when: ansible_os_family == "RedHat"
+
+  - name: Start postgresql service for Debian based
+    service:
+      name: postgresql
+      state: started
+      enabled: true
+    when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
+
+  - name: create lowercase 8 character password for pgsql
+    set_fact:
+      random_pgsql_password: "psql-{{ lookup('password', '/tmp/pgsqlpassword chars=ascii_lowercase,digits length=8') }}"
+
+  - name: Change Postgresql Password
+    command: psql -c "ALTER USER postgres PASSWORD '{{ random_pgsql_password }}';"
+    become: yes
+    become_user: postgres
+
+  - name: setup postgresql pg_stat_statements for Debian based Systems
+    shell: "{{item}}"
+    with_items:
+      - chmod a+w /etc/postgresql/13/main/postgresql.conf
+      - echo "shared_preload_libraries = 'pg_stat_statements'" >> /etc/postgresql/13/main/postgresql.conf
+      - cat /etc/postgresql/13/main/postgresql.conf | grep "pg_stat_statements"
+    become: yes
+    when: ansible_os_family == "Debian"
+
+  - name: setup postgresql pg_stat_statements for redhat based systems
+    shell: "{{item}}"
+    with_items:
+      - chmod a+w /var/lib/pgsql/13/data/postgresql.conf
+      - echo "shared_preload_libraries = 'pg_stat_statements'" >> /var/lib/pgsql/13/data/postgresql.conf
+      - cat /var/lib/pgsql/13/data/postgresql.conf | grep "pg_stat_statements"
+    become: yes
+    when: ansible_os_family == "RedHat"
+
+  - name: Enable Socket Based Connection for pgsql via pgsql configuration for debian based systems
+    command: sed -i 's/local   all             postgres                                peer/local   all             postgres                                trust/' /etc/postgresql/13/main/pg_hba.conf
+    become: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Enable Socket Based Connection for pgsql via pgsql configuration for redhat based systems
+    command: sed -i 's/local   all             all                                     peer/local   all             all                                     trust/' /var/lib/pgsql/13/data/pg_hba.conf
+    become: yes
+    when: ansible_os_family == "RedHat"
+
+  - name: Start Postgres RHEL
+    service:
+      name: postgresql-13
+      state: restarted
+      enabled: true
+    when: ansible_os_family == "RedHat"
+
+  - name: Start postgresql service for Debian based
+    service:
+      name: postgresql
+      state: restarted
+      enabled: true
+    when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
+
+  - name: Create Extension pg_stat_statements
+    command: psql -c "create extension pg_stat_statements;"
+    become: yes
+    become_user: postgres
+
+  - name: add postgresql metrics to monitoring
+    command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }} --query-source="pgstatements"
+
+  - name: add postgresql metrics to monitoring via socket
+    command: pmm-admin add postgresql --socket /var/run/postgresql/ --username=postgres --service-name=pgsql_socket_{{ instance_ip }} --query-source="pgstatements"
+
+  - name: check if postgresql monitoring is running
+    command: pmm-admin list
+    register: list_output
+
+  - name: Print the pmm-admin list value
+    ansible.builtin.debug:
+      msg: System {{ list_output.stdout }}
+
+  - name: Assert if the pmm-admin list contains postgreSQL instance
+    assert:
+      that:
+        - "'PostgreSQL' in list_output.stdout"
+
+  - name: Wait for postgres_exporter to have Running Status.
+    shell: pmm-admin list | grep 'postgres_exporter' | awk -F" " '{print $2}'
+    register: postgres_exporter_status
+    until: postgres_exporter_status.stdout.find('Running') != -1
+    delay: 5
+    retries: 5
+
+  - name: Assert if the pmm-admin list contains postgres_exporter with Running state
+    assert:
+      that:
+        - "'Running' in postgres_exporter_status.stdout"
 
   - name: check if Metric End point with Auth works for Postgres Exporter
     shell: "{{item}}"
@@ -205,3 +440,15 @@
     until: postgres_exporter_status.stdout.find('Running') != -1
     delay: 5
     retries: 5
+
+  - name: remove PMM client deb packages
+    apt: name={{item}} state=absent
+    with_items:
+    - pmm2-client
+    when: ansible_os_family == "Debian"
+
+  - name: remove PMM client rpm packages
+    yum: name={{item}} state=absent
+    with_items:
+    - pmm2-client
+    when: ansible_os_family == "RedHat"
