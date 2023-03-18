@@ -148,7 +148,7 @@
 
 ### start pgsql 13
   - name: install and start Percona Server MongoDB 4.4
-    include_tasks: ../tasks/start_psql13.yml
+    include_tasks: ../tasks/start_pgsql13.yml
 
     # there was no metric check and removing - add it?
 
