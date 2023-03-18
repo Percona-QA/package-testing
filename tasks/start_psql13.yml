@@ -101,10 +101,10 @@
   become_user: postgres
 
 - name: add postgresql metrics to monitoring
-  command: pmm-admin add postgresql {{ port_flag }} --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }}  --query-source="pgstatements"
+  command: pmm-admin add postgresql {{ port_flag }} --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }}
 
 - name: add postgresql metrics to monitoring via socket
-  command: pmm-admin add postgresql {{ port_flag }} --socket /var/run/postgresql/ --username=postgres --service-name=pgsql_socket_{{ instance_ip }} --query-source="pgstatements"
+  command: pmm-admin add postgresql {{ port_flag }} --socket /var/run/postgresql/ --username=postgres --service-name=pgsql_socket_{{ instance_ip }}
 
 - name: check if postgresql monitoring is running
   command: "{{ cmd_admin_list }}"
