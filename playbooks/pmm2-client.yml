@@ -27,11 +27,11 @@
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
 ### install pmm2-client
-  - name: install PMM client new deb packages
+  - name: install PMM client deb packages
     apt: name=pmm2-client update_cache=yes state=latest
     when: ansible_os_family == "Debian"
 
-  - name: install PMM client new rpm packages
+  - name: install PMM client rpm packages
     yum: name=pmm2-client state=latest
     when: ansible_os_family == "RedHat"
 
