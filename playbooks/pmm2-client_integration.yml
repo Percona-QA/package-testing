@@ -1,7 +1,7 @@
 ---
 # This playbook does following:
 #   enables Percona testing repository
-#   installs latest version of PMM2 client
+#   installs the latest version of PMM2 client
 #   does some tests
 
 - hosts: all
