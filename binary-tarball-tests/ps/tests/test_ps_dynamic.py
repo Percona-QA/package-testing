@@ -2,6 +2,7 @@
 import pytest
 import subprocess
 import testinfra
+import time
 import mysql
 
 from settings import *
@@ -10,6 +11,7 @@ from settings import *
 def mysql_server(request):
     mysql_server = mysql.MySQL(base_dir)
     mysql_server.start()
+    time.sleep(10)
     yield mysql_server
     mysql_server.purge()
 
