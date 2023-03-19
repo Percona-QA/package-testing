@@ -29,7 +29,7 @@
       rnd: "{{ 1000 | random }}"
     run_once: yes
 
-  - name: include tasks for test env setup
+  - name: Setup environment
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
 ### detect and install(tarball) old version to update
