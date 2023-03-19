@@ -100,7 +100,7 @@
 
 ### start pgsql 13
   - name: install and start Percona Server MongoDB 4.4
-    include_tasks: ../tasks/start_pgsql13.yml
+    include_tasks: ../tasks/start_psql13.yml
 
   - name: check if Metric End point with Auth works for Postgres Exporter
     shell: "{{item}}"

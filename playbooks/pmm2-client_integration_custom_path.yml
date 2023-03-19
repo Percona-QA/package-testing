@@ -24,7 +24,7 @@
     set_fact:
       instance_ip: "{{ instance_ip.stdout }}"
 
-  - name: Setup environment
+  - name: include tasks for test env setup
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
 ### install PMM Client from tarball
@@ -82,7 +82,7 @@
 
 ### start PG 13
   - name: install and start Percona Distribution for PostgreSQL 13
-    include_tasks: ../tasks/start_pgsql13.yml
+    include_tasks: ../tasks/start_psql13.yml
 
   - name: check if Metric End point with Auth works for Postgres Exporter
     shell: "{{item}}"
