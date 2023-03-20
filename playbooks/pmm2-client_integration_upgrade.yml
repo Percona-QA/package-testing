@@ -255,18 +255,18 @@
         ansible.builtin.debug:
           msg: node_exporter status is {{ node_exporter_status.stdout }}
 
-- name: Validate vmagent status
-  block:
-    - name: Wait for vmagent to be Running Status After Upgrade
-      shell: pmm-admin list | grep vmagent | awk -F" " '{print $2}'
-      register: vmagent_status
-      until: vmagent_status.stdout.find('Running') != -1
-      delay: 5
-      retries: 5
-  rescue:
-    - name: Print the vmagent Status
-      ansible.builtin.debug:
-        msg: vmagent status is {{ vmagent_status.stdout }}
+  - name: Validate vmagent status
+    block:
+      - name: Wait for vmagent to be Running Status After Upgrade
+        shell: pmm-admin list | grep vmagent | awk -F" " '{print $2}'
+        register: vmagent_status
+        until: vmagent_status.stdout.find('Running') != -1
+        delay: 5
+        retries: 5
+    rescue:
+      - name: Print the vmagent Status
+        ansible.builtin.debug:
+          msg: vmagent status is {{ vmagent_status.stdout }}
 
   - name: Check if Metric Endpoint with Auth works for Node Exporter, MysqlD Exporter, MongoDB Exporter, Postgres Exporter
     shell: "{{item}}"
