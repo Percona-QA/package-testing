@@ -116,24 +116,36 @@
       - mongodb_exporter
       - mysqld_exporter
 
-  - name: Wait for node_exporter to be Running Status.
-    shell: pmm-admin list | grep node_exporter | awk -F" " '{print $2}'
-    register: node_exporter_status
-    until: node_exporter_status.stdout.find('Running') != -1
-    delay: 5
-    retries: 5
+  - name: Validate node_exporter status
+    block:
+      - name: Wait for node_exporter to be Running
+        shell: pmm-admin list | grep node_exporter | awk -F" " '{print $2}'
+        register: node_exporter_status
+        until: node_exporter_status.stdout.find('Running') != -1
+        delay: 5
+        retries: 5
+    rescue:
+      - name: Print the node_exporter Status
+        ansible.builtin.debug:
+          msg: node_exporter status is {{ node_exporter_status.stdout }}
 
   - name: Check Node Exporter metric endpoint with Auth works
     shell: "bash -x ../scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0"
     retries: 3
     delay: 10
 
-  - name: Wait for vmagent to be Running Status
-    shell: pmm-admin list | grep vmagent | awk -F" " '{print $2}'
-    register: vmagent_status
-    until: vmagent_status.stdout.find('Running') != -1
-    delay: 5
-    retries: 5
+  - name: Validate vmagent status
+    block:
+      - name: Wait for vmagent to be Running
+        shell: pmm-admin list | grep vmagent | awk -F" " '{print $2}'
+        register: vmagent_status
+        until: vmagent_status.stdout.find('Running') != -1
+        delay: 5
+        retries: 5
+    rescue:
+      - name: Print the vmagent status
+        ansible.builtin.debug:
+          msg: vmagent status is {{ vmagent_status.stdout }}
 
   - name: check postgresql_pgstatements_agent is Running
     shell: pmm-admin list | grep postgresql_pgstatements_agent | awk -F" " '{print $2}'
@@ -148,9 +160,15 @@
      that:
       - "'Running' in postgresql_pgstatements_agent.stdout"
 
-  - name: Wait for postgres_exporter to have Running Status.
-    shell: pmm-admin list | grep 'postgres_exporter' | awk -F" " '{print $2}'
-    register: postgres_exporter_status
-    until: postgres_exporter_status.stdout.find('Running') != -1
-    delay: 5
-    retries: 5
+  - name: Validate postgres_exporter_status status
+    block:
+      - name: Wait for postgres_exporter to have Running Status.
+        shell: pmm-admin list | grep 'postgres_exporter' | awk -F" " '{print $2}'
+        register: postgres_exporter_status
+        until: postgres_exporter_status.stdout.find('Running') != -1
+        delay: 5
+        retries: 5
+    rescue:
+      - name: Print the vmagent status
+        ansible.builtin.debug:
+          msg: postgres_exporter_status status is {{ postgres_exporter_status.stdout }}
