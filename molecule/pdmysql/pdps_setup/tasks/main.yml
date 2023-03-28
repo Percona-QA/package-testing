@@ -26,7 +26,7 @@
   - name: Setup the PDMYSQL repo pdps-{{ version }}
     command: percona-release setup -y pdps-{{ version }}
     vars:
-      version: "{{ lookup('env', 'VERSION') }}"
+      version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
     when: not major_repo
 
   - name: Setup the PDMYSQL repo pdps-{{ version }}

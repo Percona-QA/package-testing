@@ -14,7 +14,7 @@
   command: percona-release enable-only pdpxc-{{ version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
-    version: "{{ lookup('env', 'VERSION') }}"
+    version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
   when: not major_repo
 
 - name: enable the PDMYSQL-80 repo pdpxc-{{ version }}
