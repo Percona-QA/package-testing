@@ -13,7 +13,7 @@
 - name: enable the PDMYSQL repo pdpxc-{{ version }}
   command: percona-release setup -y pdpxc-{{ version }}
   vars:
-    version: "{{ lookup('env', 'VERSION') }}"
+    version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
   when: not major_repo
 
 - name: enable the PDMYSQL repo pdpxc-{{ version }}

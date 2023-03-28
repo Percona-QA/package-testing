@@ -11,7 +11,7 @@
   command: percona-release enable-only pdpxc-{{ pdmysql_version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'FROM_REPO') }}"
-    pdmysql_version: "{{ lookup('env', 'FROM_VERSION') }}"
+    pdmysql_version: "{{ lookup('env', 'FROM_VERSION').split('-')[0] }}"
 
 - name: clean and update yum cache
   shell: |
@@ -205,13 +205,13 @@
   command: percona-release disable pdpxc-{{ pdmysql_version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'FROM_REPO') }}"
-    pdmysql_version: "{{ lookup('env', 'FROM_VERSION') }}"
+    pdmysql_version: "{{ lookup('env', 'FROM_VERSION').split('-')[0] }}"
 
 - name: enable new repository pdppxc-{{ pdmysql_version }} {{ repo }}
   command: percona-release enable pdpxc-{{ pdmysql_version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'TO_REPO') }}"
-    pdmysql_version: "{{ lookup('env', 'VERSION') }}"
+    pdmysql_version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
 
 
 - name: install PXC 8 deb packages

@@ -1,6 +1,7 @@
 import os
 import pytest
 import testinfra.utils.ansible_runner
+import re
 from .settings import *
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -84,7 +85,11 @@ def test_check_deb_package(host, package):
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert VERSION in pkg.version, pkg.version
+    if package == 'percona-mysql-shell':
+        shell_version = re.search(r'^(\d+\.\d+\.\d+)(?:-\d+)*$', VERSION)
+        assert shell_version[1] in pkg.version, (shell_version, pkg.version)
+    else:
+        assert VERSION in pkg.version, pkg.version
 
 
 @pytest.mark.parametrize("package", RPMPACKAGES)
@@ -94,7 +99,11 @@ def test_check_rpm_package(host, package):
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert VERSION in pkg.version, pkg.version
+    if package == 'percona-mysql-shell':
+        shell_version = re.search(r'^(\d+\.\d+\.\d+)(?:-\d+)*$', VERSION)
+        assert shell_version[1] in pkg.version, (shell_version, pkg.version)
+    else:
+        assert VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
 
 
 @pytest.mark.parametrize("binary", ['mysqlsh', 'mysql', 'mysqlrouter'])

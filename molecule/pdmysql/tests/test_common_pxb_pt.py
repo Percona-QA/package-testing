@@ -36,7 +36,6 @@ def test_check_deb_package(host, package):
     assert pkg.is_installed
     assert PXB_VERSION in pkg.version, pkg.version
 
-
 @pytest.mark.parametrize("package", RPMPACKAGES)
 def test_check_rpm_package(host, package):
     dist = host.system_info.distribution
@@ -44,8 +43,7 @@ def test_check_rpm_package(host, package):
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert PXB_VERSION in pkg.version, pkg.version
-
+    assert PXB_VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
 
 def test_binary_version(host):
     cmd = "xtrabackup --version"
