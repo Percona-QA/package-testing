@@ -28,8 +28,9 @@
     command: percona-release enable-only pxc-57 testing
     when: lookup('env', 'pxc57repo') == "pxc57" or lookup('env', 'pxc57repo') == ""
 
+    # Update release to testing
   - name: enable pxb24 repo
-    command: percona-release enable pxb-24 release
+    command: percona-release enable pxb-24 testing
     when: lookup('env', 'pxc57repo') == "pxc57" or lookup('env', 'pxc57repo') == ""
 
   - name: clean and update yum cache
