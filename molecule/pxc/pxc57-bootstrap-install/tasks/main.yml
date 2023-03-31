@@ -114,7 +114,7 @@
     when: ansible_os_family == "RedHat" and (ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9")
 
   - name: stop mysql service with service command
-    command: service mysql stop
+    command: systemctl stop mysql
 
   - name: copy pxc config on centos 6
     template: src=../../../../templates/my_rpm.j2 dest=/etc/my.cnf
