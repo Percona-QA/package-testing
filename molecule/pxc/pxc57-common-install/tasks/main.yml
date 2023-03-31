@@ -102,7 +102,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: start mysql service
-    cmd: systemctl start mysql
+    command: systemctl start mysql
     throttle: 1
 
   - name: register PXC version
@@ -127,7 +127,7 @@
     throttle: 1
 
   - name: start mysql service
-    service: name=mysql state=started
+    command: systemctl start mysql
     throttle: 1
 
   - name: Check that the PXC Cluster is up and running
