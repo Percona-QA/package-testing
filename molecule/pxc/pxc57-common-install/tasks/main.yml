@@ -82,8 +82,8 @@
       - Percona-XtraDB-Cluster-57
     when: ansible_os_family == "RedHat"
 
-  - name: stop mysql service with service command
-    command: service mysql stop
+  - name: stop mysql service
+    command: systemctl stop mysql
 
   - name: copy PXC config on centos 7
     template: src=../../../../templates/my_rpm_7.j2 dest=/etc/my.cnf
