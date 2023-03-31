@@ -8,7 +8,7 @@ driver:
 platforms:
   - name: pxc2-80-common-ubuntu-focal-install
     region: us-west-2
-    image: ami-0892d3c7ee96c0bf7
+    image: ami-00712dae9a53f8c15
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.small
     ssh_user: ubuntu
@@ -17,7 +17,7 @@ platforms:
       iit-billing-tag: jenkins-pxc-worker
   - name: pxc3-80-common-ubuntu-focal-install
     region: us-west-2
-    image: ami-0892d3c7ee96c0bf7
+    image: ami-00712dae9a53f8c15
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.small
     ssh_user: ubuntu
