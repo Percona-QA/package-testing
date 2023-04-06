@@ -11,6 +11,7 @@
   become_method: sudo
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
+    pmm_server_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default('admin', true) }}"
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
@@ -95,11 +96,11 @@
 
 ### Setup PMM Client
   - name: configure pmm client to connect to server in push/auto Mode
-    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
 
   - name: configure pmm client to connect to server in pull Mode
-    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "pull"
 
   - name: Grep pmm-admin status output
