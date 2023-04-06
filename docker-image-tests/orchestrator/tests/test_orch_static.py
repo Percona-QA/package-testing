@@ -10,7 +10,7 @@ container_name = 'orchestartor-docker-test-static'
 @pytest.fixture(scope='module')
 def host():
     docker_id = subprocess.check_output(
-        ['docker', 'run', '--name', container_name, '-d', docker_image ]).decode().strip()
+        ['docker', 'run', '--name', container_name, '-d', docker_image ], stderr=subprocess.STDOUT ).decode().strip()
     time.sleep(20)
     subprocess.check_call(['docker','exec','--user','root',container_name,'microdnf','install', '-y', 'net-tools'])
     time.sleep(20)

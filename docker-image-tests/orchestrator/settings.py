@@ -1,7 +1,7 @@
 import os
 
-orch_version = os.getenv('OCHESTARTOR_VERSION')
-docker_tag = os.getenv('OCHESTARTOR_VERSION')
+orch_version = os.getenv('ORCHESTRATOR_VERSION')
+docker_tag = os.getenv('ORCHESTRATOR_VERSION')
 docker_acc = os.getenv('DOCKER_ACC')
 
 docker_product = 'percona-orchestrator'
