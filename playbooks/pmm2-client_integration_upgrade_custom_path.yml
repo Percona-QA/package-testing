@@ -388,7 +388,7 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name {{ pgsql_service_name }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name {{ pgsql_service_name }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
     environment:
-      ADMIN_PASSWORD: {{ pmm_server_password }}
+      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: check if Metric End point with Auth works after upgrade for Postgres exporter when service was added via socket before upgrade
     shell: "{{item}}"
@@ -398,5 +398,5 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
     environment:
-      ADMIN_PASSWORD: {{ pmm_server_password }}
+      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 

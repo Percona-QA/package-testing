@@ -119,7 +119,7 @@
     with_items:
       - "bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
     environment:
-      ADMIN_PASSWORD: {{ pmm_server_password }}
+      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: Assert if the pmm-admin list contains mysqld_exporter with Running state
     assert:
@@ -188,14 +188,14 @@
     with_items:
       - "bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
     environment:
-      ADMIN_PASSWORD: {{ pmm_server_password }}
+      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: check if Metric End point with Auth works for MongoDB Exporter for service with socket
     shell: "{{item}}"
     with_items:
       - "bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
     environment:
-      ADMIN_PASSWORD: {{ pmm_server_password }}
+      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: remove mongodb service from monitoring which was added via socket
     command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
@@ -329,7 +329,7 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
     environment:
-      ADMIN_PASSWORD: {{ pmm_server_password }}
+      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: check if Metric End point with Auth works for Postgres Exporter when service added via socket
     shell: "{{item}}"
@@ -341,7 +341,7 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
     environment:
-      ADMIN_PASSWORD: {{ pmm_server_password }}
+      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: remove postgresql instances added via socket
     command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
@@ -388,7 +388,7 @@
     with_items:
       - "bash -x ../scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0"
     environment:
-      ADMIN_PASSWORD: {{ pmm_server_password }}
+      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: Print the node_exporter_status
     ansible.builtin.debug:
