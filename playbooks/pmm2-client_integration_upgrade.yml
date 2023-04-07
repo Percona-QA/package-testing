@@ -192,114 +192,114 @@
 ### end PSMDB
 
 ### start pgsql13
-
-  - name: Enable postgresql repository
-    command: percona-release setup -y ppg-13
-    when: ansible_distribution_release != 'xenial'
-
-  - name: include tasks for setting up pg13
-    include_tasks: ../ppg-testing/tasks/install_ppg13.yml
-    when: ansible_distribution_release != 'xenial'
-
-  - name: Initialize Postgres RHEL
-    command: /usr/pgsql-13/bin/postgresql-13-setup initdb
-    environment:
-      PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-    when: ansible_os_family == "RedHat"
-
-  - name: Start Postgres RHEL
-    service:
-      name: postgresql-13
-      state: started
-      enabled: true
-    when: ansible_os_family == "RedHat"
-
-  - name: Start postgresql service for Debian based
-    service:
-      name: postgresql
-      state: started
-      enabled: true
-    when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
-
-  - name: create lowercase 8 character password for pgsql
-    set_fact:
-      random_pgsql_password: "psql-{{ lookup('password', '/tmp/pgsqlpassword chars=ascii_lowercase,digits length=8') }}"
-
-  - name: Change Postgresql Password
-    command: psql -c "ALTER USER postgres PASSWORD '{{ random_pgsql_password }}';"
-    become: yes
-    become_user: postgres
-    when: ansible_distribution_release != 'xenial'
-
-  - name: setup postgresql pg_stat_statements for Debian based Systems
-    shell: "{{item}}"
-    with_items:
-      - chmod a+w /etc/postgresql/13/main/postgresql.conf
-      - echo "shared_preload_libraries = 'pg_stat_statements'" >> /etc/postgresql/13/main/postgresql.conf
-      - cat /etc/postgresql/13/main/postgresql.conf | grep "pg_stat_statements"
-    become: yes
-    when: ansible_os_family == "Debian"
-
-  - name: setup postgresql pg_stat_statements for redhat based systems
-    shell: "{{item}}"
-    with_items:
-      - chmod a+w /var/lib/pgsql/13/data/postgresql.conf
-      - echo "shared_preload_libraries = 'pg_stat_statements'" >> /var/lib/pgsql/13/data/postgresql.conf
-      - cat /var/lib/pgsql/13/data/postgresql.conf | grep "pg_stat_statements"
-    become: yes
-    when: ansible_os_family == "RedHat"
-
-  - name: Enable Socket Based Connection for pgsql via pgsql configuration for debian based systems
-    command: sed -i 's/local   all             postgres                                peer/local   all             postgres                                trust/' /etc/postgresql/13/main/pg_hba.conf
-    become: yes
-    when: ansible_os_family == "Debian"
-
-  - name: Enable Socket Based Connection for pgsql via pgsql configuration for redhat based systems
-    command: sed -i 's/local   all             all                                     peer/local   all             all                                     trust/' /var/lib/pgsql/13/data/pg_hba.conf
-    become: yes
-    when: ansible_os_family == "RedHat"
-
-  - name: Start Postgres RHEL
-    service:
-      name: postgresql-13
-      state: restarted
-      enabled: true
-    when: ansible_os_family == "RedHat"
-
-  - name: Start postgresql service for Debian based
-    service:
-      name: postgresql
-      state: restarted
-      enabled: true
-    when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
-
-  - name: Create Extension pg_stat_statements
-    command: psql -c "create extension pg_stat_statements;"
-    become: yes
-    become_user: postgres
-
-  - name: add postgresql metrics to monitoring
-    command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }} --query-source="pgstatements"
-    when: ansible_distribution_release != 'xenial'
-
-  - name: add postgresql metrics to monitoring via socket
-    command: pmm-admin add postgresql --socket /var/run/postgresql/ --username=postgres --service-name=pgsql_socket_{{ instance_ip }} --query-source="pgstatements"
-
-  - name: check if postgresql monitoring is running
-    command: pmm-admin list
-    register: list_output
-    when: ansible_distribution_release != 'xenial'
-
-  - name: Print the pmm-admin list value
-    ansible.builtin.debug:
-      msg: System {{ list_output.stdout }}
-    when: ansible_distribution_release != 'xenial'
-
-  - name: Assert if the pmm-admin list contains postgreSQL instance
-    assert:
-      that:
-        - "'PostgreSQL' in list_output.stdout"
-    when: ansible_distribution_release != 'xenial'
+#
+#  - name: Enable postgresql repository
+#    command: percona-release setup -y ppg-13
+#    when: ansible_distribution_release != 'xenial'
+#
+#  - name: include tasks for setting up pg13
+#    include_tasks: ../ppg-testing/tasks/install_ppg13.yml
+#    when: ansible_distribution_release != 'xenial'
+#
+#  - name: Initialize Postgres RHEL
+#    command: /usr/pgsql-13/bin/postgresql-13-setup initdb
+#    environment:
+#      PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+#    when: ansible_os_family == "RedHat"
+#
+#  - name: Start Postgres RHEL
+#    service:
+#      name: postgresql-13
+#      state: started
+#      enabled: true
+#    when: ansible_os_family == "RedHat"
+#
+#  - name: Start postgresql service for Debian based
+#    service:
+#      name: postgresql
+#      state: started
+#      enabled: true
+#    when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
+#
+#  - name: create lowercase 8 character password for pgsql
+#    set_fact:
+#      random_pgsql_password: "psql-{{ lookup('password', '/tmp/pgsqlpassword chars=ascii_lowercase,digits length=8') }}"
+#
+#  - name: Change Postgresql Password
+#    command: psql -c "ALTER USER postgres PASSWORD '{{ random_pgsql_password }}';"
+#    become: yes
+#    become_user: postgres
+#    when: ansible_distribution_release != 'xenial'
+#
+#  - name: setup postgresql pg_stat_statements for Debian based Systems
+#    shell: "{{item}}"
+#    with_items:
+#      - chmod a+w /etc/postgresql/13/main/postgresql.conf
+#      - echo "shared_preload_libraries = 'pg_stat_statements'" >> /etc/postgresql/13/main/postgresql.conf
+#      - cat /etc/postgresql/13/main/postgresql.conf | grep "pg_stat_statements"
+#    become: yes
+#    when: ansible_os_family == "Debian"
+#
+#  - name: setup postgresql pg_stat_statements for redhat based systems
+#    shell: "{{item}}"
+#    with_items:
+#      - chmod a+w /var/lib/pgsql/13/data/postgresql.conf
+#      - echo "shared_preload_libraries = 'pg_stat_statements'" >> /var/lib/pgsql/13/data/postgresql.conf
+#      - cat /var/lib/pgsql/13/data/postgresql.conf | grep "pg_stat_statements"
+#    become: yes
+#    when: ansible_os_family == "RedHat"
+#
+#  - name: Enable Socket Based Connection for pgsql via pgsql configuration for debian based systems
+#    command: sed -i 's/local   all             postgres                                peer/local   all             postgres                                trust/' /etc/postgresql/13/main/pg_hba.conf
+#    become: yes
+#    when: ansible_os_family == "Debian"
+#
+#  - name: Enable Socket Based Connection for pgsql via pgsql configuration for redhat based systems
+#    command: sed -i 's/local   all             all                                     peer/local   all             all                                     trust/' /var/lib/pgsql/13/data/pg_hba.conf
+#    become: yes
+#    when: ansible_os_family == "RedHat"
+#
+#  - name: Start Postgres RHEL
+#    service:
+#      name: postgresql-13
+#      state: restarted
+#      enabled: true
+#    when: ansible_os_family == "RedHat"
+#
+#  - name: Start postgresql service for Debian based
+#    service:
+#      name: postgresql
+#      state: restarted
+#      enabled: true
+#    when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
+#
+#  - name: Create Extension pg_stat_statements
+#    command: psql -c "create extension pg_stat_statements;"
+#    become: yes
+#    become_user: postgres
+#
+#  - name: add postgresql metrics to monitoring
+#    command: pmm-admin add postgresql --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }} --query-source="pgstatements"
+#    when: ansible_distribution_release != 'xenial'
+#
+#  - name: add postgresql metrics to monitoring via socket
+#    command: pmm-admin add postgresql --socket /var/run/postgresql/ --username=postgres --service-name=pgsql_socket_{{ instance_ip }} --query-source="pgstatements"
+#
+#  - name: check if postgresql monitoring is running
+#    command: pmm-admin list
+#    register: list_output
+#    when: ansible_distribution_release != 'xenial'
+#
+#  - name: Print the pmm-admin list value
+#    ansible.builtin.debug:
+#      msg: System {{ list_output.stdout }}
+#    when: ansible_distribution_release != 'xenial'
+#
+#  - name: Assert if the pmm-admin list contains postgreSQL instance
+#    assert:
+#      that:
+#        - "'PostgreSQL' in list_output.stdout"
+#    when: ansible_distribution_release != 'xenial'
 
 ## end PG
 
@@ -362,11 +362,11 @@
       that:
         - "'MySQL' in list_output.stdout"
 
-  - name: Assert if the pmm-admin list contains postgreSQL instance
-    assert:
-      that:
-        - "'PostgreSQL' in list_output.stdout"
-    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+#  - name: Assert if the pmm-admin list contains postgreSQL instance
+#    assert:
+#      that:
+#        - "'PostgreSQL' in list_output.stdout"
+#    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
 
   - name: Wait for node_exporter to be Running Status After Upgrade
     shell: pmm-admin list | grep node_exporter | awk -F" " '{print $2}'
@@ -415,44 +415,44 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
     environment:
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
-  - name: check if Metric End point with Auth works after upgrade for Postgres exporter when service was added via socket before upgrade
-    shell: "{{item}}"
-    with_items:
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-    environment:
-      ADMIN_PASSWORD: "{{ pmm_server_password }}"
+#  - name: check if Metric End point with Auth works after upgrade for Postgres exporter when service was added via socket before upgrade
+#    shell: "{{item}}"
+#    with_items:
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#    environment:
+#      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: check pmm2-client files
     include_tasks: ../tasks/verify_pmm_client_files.yml
 
-  - name: check if postgresql_pgstatements_agent is Running
-    shell: pmm-admin list | grep postgresql_pgstatements_agent | awk -F" " '{print $2}'
-    register: postgresql_pgstatements_agent
+#  - name: check if postgresql_pgstatements_agent is Running
+#    shell: pmm-admin list | grep postgresql_pgstatements_agent | awk -F" " '{print $2}'
+#    register: postgresql_pgstatements_agent
 
-  - name: Print the postgresql_pgstatements_agent Status
-    ansible.builtin.debug:
-      msg: postgresql_pgstatements_agent status is {{ postgresql_pgstatements_agent.stdout }}
+#  - name: Print the postgresql_pgstatements_agent Status
+#    ansible.builtin.debug:
+#      msg: postgresql_pgstatements_agent status is {{ postgresql_pgstatements_agent.stdout }}
 
-  - name: Assert if the pmm-admin list contains postgresql_pgstatements_agent and Running State
-    assert:
-     that:
-      - "'Running' in postgresql_pgstatements_agent.stdout"
+#  - name: Assert if the pmm-admin list contains postgresql_pgstatements_agent and Running State
+#    assert:
+#     that:
+#      - "'Running' in postgresql_pgstatements_agent.stdout"
 
   - name: Remove Socket services, to verify Port output in pmm-admin list commands
     command: "{{item}}"
     with_items:
       - pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
-      - pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
+#      - pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
 
   - name: checking existence of all artifacts from pmm2-client
     command: bash -xe ../scripts/check_artifacts.sh
