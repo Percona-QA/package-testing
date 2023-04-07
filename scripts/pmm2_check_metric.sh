@@ -24,9 +24,6 @@ if [ -z "$pmm_client_ip" ]; then
         export pmm_client_ip=127.0.0.1
 fi
 
-printenv
-set
-
 echo "pass is $ADMIN_PASSWORD"
 
 if [ -z "$ADMIN_PASSWORD" ]; then
