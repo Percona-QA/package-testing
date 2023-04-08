@@ -9,7 +9,6 @@
   become_method: sudo
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
-    pmm_server_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default('admin', true) }}"
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') | regex_search('\\S(.*\\S)?') }}"
@@ -58,11 +57,11 @@
     include_tasks: ../tasks/verify_pmm_client_version.yml
 
   - name: configure pmm client to connect to server in push/auto Mode
-    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
 
   - name: configure pmm client to connect to server in pull Mode
-    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --server-url=https://admin:admin@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "pull"
 
 ### start PS5.7
@@ -118,8 +117,6 @@
     shell: "{{item}}"
     with_items:
       - "bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
-    environment:
-      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: Assert if the pmm-admin list contains mysqld_exporter with Running state
     assert:
@@ -187,15 +184,11 @@
     shell: "{{item}}"
     with_items:
       - "bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
-    environment:
-      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: check if Metric End point with Auth works for MongoDB Exporter for service with socket
     shell: "{{item}}"
     with_items:
       - "bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
-    environment:
-      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: remove mongodb service from monitoring which was added via socket
     command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
@@ -328,8 +321,6 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-    environment:
-      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: check if Metric End point with Auth works for Postgres Exporter when service added via socket
     shell: "{{item}}"
@@ -340,8 +331,6 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-    environment:
-      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: remove postgresql instances added via socket
     command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
@@ -387,8 +376,6 @@
     delay: 10
     with_items:
       - "bash -x ../scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0"
-    environment:
-      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: Print the node_exporter_status
     ansible.builtin.debug:
