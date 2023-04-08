@@ -24,7 +24,7 @@
     command: percona-release enable-only pdps-{{ pdmysql_version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'FROM_REPO') }}"
-      pdmysql_version: "{{ lookup('env', 'FROM_VERSION') }}"
+      pdmysql_version: "{{ lookup('env', 'FROM_VERSION').split('-')[0] }}"
 
   - name: install Percona Toolkit new deb packages
     include_tasks: ../../../tasks/install_pt.yml
@@ -177,13 +177,13 @@
     command: percona-release disable pdps-{{ pdmysql_version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'FROM_REPO') }}"
-      pdmysql_version: "{{ lookup('env', 'FROM_VERSION') }}"
+      pdmysql_version: "{{ lookup('env', 'FROM_VERSION').split('-')[0] }}"
 
   - name: Setup new repository pdps-{{ pdmysql_version }} {{ repo }}
     command: percona-release enable pdps-{{ pdmysql_version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'TO_REPO') }}"
-      pdmysql_version: "{{ lookup('env', 'VERSION') }}"
+      pdmysql_version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
 
   - name: install Percona Toolkit new deb packages
     include_tasks: ../../../tasks/install_pt.yml
