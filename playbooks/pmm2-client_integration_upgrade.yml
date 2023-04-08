@@ -14,6 +14,7 @@
   become_method: sudo
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
+    pmm_server_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default('admin', true) }}"
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
@@ -115,6 +116,8 @@
 
   - name: Check if Metric Endpoint with Auth works for Mysqld Exporter
     shell: "bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
+    environment:
+      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 ## end PS
 
 ### start PSMDB 4.4
@@ -126,6 +129,8 @@
     with_items:
       - "bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
       - "bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
+    environment:
+      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: Remove mongodb service from monitoring which was added via socket
     command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
@@ -144,6 +149,8 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+    environment:
+      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: Check Postgres Exporter metric endpoint with Auth works(service added via socket)
     shell: "{{item}}"
@@ -154,6 +161,8 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+    environment:
+      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: Remove PostgreSQL instances added via socket
     command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
@@ -279,6 +288,8 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+    environment:
+      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: Check if Metric End point with Auth works after upgrade for Postgres exporter when service was added via socket before upgrade
     shell: "{{item}}"
@@ -287,6 +298,8 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+    environment:
+      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: Check if postgresql_pgstatements_agent is Running
     shell: pmm-admin list | grep postgresql_pgstatements_agent | awk -F" " '{print $2}'
