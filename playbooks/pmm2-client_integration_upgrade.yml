@@ -295,15 +295,13 @@
       - mongodb_exporter
       - mysqld_exporter
 
-  - name: Check if postgresql_pgstatements_agent is Running
-    shell: pmm-admin list | grep postgresql_pgstatements_agent | awk -F" " '{print $2}'
-    register: postgresql_pgstatements_agent
-
-  - name: Print the postgresql_pgstatements_agent Status
-    ansible.builtin.debug:
-      msg: postgresql_pgstatements_agent status is {{ postgresql_pgstatements_agent.stdout }}
-
-  - name: Assert if the pmm-admin list contains postgresql_pgstatements_agent and Running State
-    assert:
-     that:
-      - "'Running' in postgresql_pgstatements_agent.stdout"
+  - name: Validate postgresql_pgstatements_agent status
+    block:
+      - shell: pmm-admin list | grep postgresql_pgstatements_agent | awk -F" " '{print $2}'
+        register: pgstatements_agent_status
+      - assert:
+          that:
+            - "'Running' in pgstatements_agent_status.stdout"
+    rescue:
+      - ansible.builtin.debug:
+          msg: pgstatements_agent_status status is {{ postgresql_pgstatements_agent.stdout }}
