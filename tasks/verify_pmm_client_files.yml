@@ -5,3 +5,5 @@
 
 - name: run script to verify existence of all PMM Client artifacts
   command: bash -xe ../scripts/check_artifacts.sh
+  environment:
+    path_base: "{{ custom_path }}"
