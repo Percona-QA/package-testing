@@ -116,9 +116,6 @@
       - "bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
     environment:
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
-
-  - name: Remove mongodb service from monitoring which was added via socket
-    command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
 ### end PSMDB 4.4
 
 ### start PGSQL 13
@@ -147,9 +144,6 @@
       - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
     environment:
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
-
-  - name: Remove postgresql instances added via socket
-    command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
 ## end PG 13
 
 ### Upgrade PMM Client
