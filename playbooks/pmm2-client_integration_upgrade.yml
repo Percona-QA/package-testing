@@ -205,26 +205,6 @@
   - name: Checking existence of all artifacts from pmm2-client
     command: bash -xe ../scripts/check_artifacts.sh
 
-  - name: Parse and set PMM minor version
-    shell: "pmm-admin --version | grep ^Version | awk -F. '{print $2}'"
-    register: pmm_agent_minor_version
-
-  - name: Remove Socket services, to verify Port output in pmm-admin list commands
-    command: "{{item}}"
-    with_items:
-      - pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
-      - pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
-
-  - name: Include Exporters Port in output checks for 2.29.0+
-    include_tasks: ../tasks/exporter-port-output-checks.yml
-    when: pmm_agent_minor_version.stdout | int >= 29
-    with_items:
-      - vmagent
-      - node_exporter
-      - postgres_exporter
-      - mongodb_exporter
-      - mysqld_exporter
-
   - name: Get "pmm-admin list" output
     command: pmm-admin list
     register: list_output
@@ -294,6 +274,26 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
     environment:
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
+
+  - name: Parse and set PMM minor version
+    shell: "pmm-admin --version | grep ^Version | awk -F. '{print $2}'"
+    register: pmm_agent_minor_version
+
+  - name: Remove Socket services, to verify Port output in pmm-admin list commands
+    command: "{{item}}"
+    with_items:
+      - pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
+      - pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
+
+  - name: Include Exporters Port in output checks for 2.29.0+
+    include_tasks: ../tasks/exporter-port-output-checks.yml
+    when: pmm_agent_minor_version.stdout | int >= 29
+    with_items:
+      - vmagent
+      - node_exporter
+      - postgres_exporter
+      - mongodb_exporter
+      - mysqld_exporter
 
   - name: Check if postgresql_pgstatements_agent is Running
     shell: pmm-admin list | grep postgresql_pgstatements_agent | awk -F" " '{print $2}'
