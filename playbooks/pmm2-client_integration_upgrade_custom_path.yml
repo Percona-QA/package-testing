@@ -58,7 +58,7 @@
 
 ### Setup PMM Client
   - name: Use pmm-agent setup to configure pmm client to connect to server
-    shell: >
+    shell: >-
       pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force
       --server-address={{ pmm_server_address }}
       --server-insecure-tls {{ metrics_mode }}
