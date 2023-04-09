@@ -58,14 +58,15 @@
 
 ### Setup PMM Client
   - name: Use pmm-agent setup to configure pmm client to connect to server
-    shell: >-
-      pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force
-      --server-address={{ pmm_server_address }}
-      --server-insecure-tls {{ metrics_mode }}
-      --server-username=admin
-      --server-password={{ pmm_server_password }}
-      --paths-base={{ custom_path }}/
-      {{ instance_ip }} generic node2_{{ instance_ip }}
+    shell: pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-address={{ pmm_server_address }} --server-insecure-tls {{ metrics_mode }} --server-username=admin --server-password={{ pmm_server_password }} --paths-base={{ custom_path }}/ {{ instance_ip }} generic node2_{{ instance_ip }}
+#    shell: >-
+#      pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force
+#      --server-address={{ pmm_server_address }}
+#      --server-insecure-tls {{ metrics_mode }}
+#      --server-username=admin
+#      --server-password={{ pmm_server_password }}
+#      --paths-base={{ custom_path }}/
+#      {{ instance_ip }} generic node2_{{ instance_ip }}
 
   - name: Check if the configuration generated with paths-base is using the custom path
     shell: cat {{custom_path}}/config/pmm-agent.yaml | grep -o -c "{{custom_path}}" | grep "14"
