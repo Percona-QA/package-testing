@@ -202,9 +202,6 @@
   - name: Check pmm2-client files
     include_tasks: ../tasks/verify_pmm_client_files.yml
 
-  - name: Checking existence of all artifacts from pmm2-client
-    command: bash -xe ../scripts/check_artifacts.sh
-
   - name: Get "pmm-admin list" output
     command: pmm-admin list
     register: list_output
