@@ -31,7 +31,10 @@
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
 - name: set root password on centos
-  command: /package-testing/setpass_57.sh
+  shell: |
+    init_pass=$(grep "temporary password" /var/log/mysqld.log | awk '{print $NF}' | tail -1)
+    mysql --connect-expired-password -uroot --password="$init_pass" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'U?fY)9s7|3gxUm';"
+    cp ../templates/my_57.j2 /root/.my.cnf
   when: ansible_os_family == "RedHat"
 
 - name: copy .my.cnf with credentials on centos
