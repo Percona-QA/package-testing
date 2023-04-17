@@ -138,10 +138,10 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip "https://github.com/kaushikpuneet07/package-testing/archive/{{ source-test }}.zip"
+    - wget --no-check-certificate -O master.zip "https://github.com/kaushikpuneet07/package-testing/archive/{{ branch }}.zip"
     - unzip master.zip
     - rm -f master.zip
-    - mv "package-testing-{{ source-test }}" /package-testing
+    - mv "package-testing-{{ branch }}" /package-testing
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
 
