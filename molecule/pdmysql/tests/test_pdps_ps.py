@@ -176,11 +176,3 @@ def test_disable_validate_password_plugin(host):
             cmd = 'service mysql restart'
             restart = host.run(cmd)
             assert restart.rc == 0, (restart.stdout, restart.stderr)
-
-#@pytest.mark.parametrize("binary", ['percona-mysql-shell', 'proxysql2', 'percona-xtrabackup-80', 'percona-orchestrator', 'percona-server', 'percona-toolkit'])
-#def test_binary_version(host, binary):
-#    cmd = "apt-cache madison {} | grep Source | grep "$VERSION"".format(binary)
-#    result = host.run(cmd)
-#    print(result.stdout)
-#    assert result.rc == 0, (result.stderr, result.stdout)
-#    assert VERSION in result.stdout, result.stdout
