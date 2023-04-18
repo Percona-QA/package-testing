@@ -160,13 +160,13 @@
   when: ansible_os_family == "RedHat"
 
 - name: start proxysql service
-  command: service proxysql start
+  command: systemctl start proxysql 
 
 - name: stop proxysql service
-  command: service proxysql stop
+  command: systemctl stop proxysql
 
 - name: start proxysql service
-  command: service proxysql start
+  command: systemctl start proxysql
 # set root password on centos
 - name: start mysql service
   service: name=mysql state=started
