@@ -123,7 +123,7 @@
       pgsql_service_name: "pgsql_{{ instance_ip }}"
 
   - name: Install and start Percona Server MongoDB 4.4
-    include_tasks: ../tasks/start_psql13.yml
+    include_tasks: ../tasks/start_pgsql13.yml
 
   - name: Check if Metric End point with Auth works for Postgres Exporter
     shell: "{{item}}"
