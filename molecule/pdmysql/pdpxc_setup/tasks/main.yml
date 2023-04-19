@@ -159,14 +159,22 @@
       - proxysql2
   when: ansible_os_family == "RedHat"
 
+- name: install init scripts for OL9
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - initscripts-service
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+
 - name: start proxysql service
-  command: systemctl start proxysql
+  command: service proxysql start
 
 - name: stop proxysql service
-  command: systemctl stop proxysql
+  command: service proxysql stop
 
 - name: start proxysql service
-  command: systemctl start proxysql
+  command: service proxysql start
 
 # set root password on centos
 - name: start mysql service
