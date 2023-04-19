@@ -159,6 +159,7 @@
       - proxysql2
   when: ansible_os_family == "RedHat"
 
+#install initscripts-service manually on OL9 till DISTMYSQL-300 is fixed
 - name: install init scripts for OL9
   yum:
     name: "{{ packages }}"
@@ -185,7 +186,7 @@
   with_items:
   - rm -rf /package-testing
   - rm -f master.zip
-  - wget --no-check-certificate -O master.zip "https://github.com/eleo007/package-testing/archive/{{ branch }}.zip"
+  - wget --no-check-certificate -O master.zip "https://github.com/Percona-QA/package-testing/archive/{{ branch }}.zip"
   - unzip master.zip
   - rm -f master.zip
   - mv "package-testing-{{ branch }}" /package-testing
