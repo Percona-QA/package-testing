@@ -67,6 +67,7 @@ COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_audit_api_message_emit']
 
 VERSION = os.environ.get("VERSION")
+REPO = os.environ.get("REPO")
 
 
 def is_running(host):
@@ -177,9 +178,13 @@ def test_disable_validate_password_plugin(host):
             restart = host.run(cmd)
             assert restart.rc == 0, (restart.stdout, restart.stderr)
 
-@pytest.mark.parametrize("binary", ['percona-mysql-shell', 'proxysql2', 'percona-xtrabackup-80', 'percona-orchestrator', 'percona-server', 'percona-toolkit'])
-def test_binary_version(host, binary):
-    cmd = "apt-cache madison {} | grep Source" .format(binary)
+def test_sources_version(host):
+    if REPO == "testing":
+        pytest.skip("This test only for main repo")
+    dist = host.system_info.distribution    
+    if dist.lower() in RHEL_DISTS:
+        pytest.skip("This test only for DEB distributions")
+    cmd = "apt-cache madison percona-server | grep Source | grep \"{}\"".format(VERSION)
     result = host.run(cmd)
-    print(result.stdout)
     assert result.rc == 0, (result.stderr, result.stdout)
+    assert VERSION in result.stdout, result.stdout
