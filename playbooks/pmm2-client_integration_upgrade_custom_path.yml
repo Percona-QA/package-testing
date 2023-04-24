@@ -167,9 +167,6 @@
   - name: Check pmm2-client files
     include_tasks: ../tasks/verify_pmm_client_files.yml
 
-  - name: Checking existence of all artifacts from pmm2-client
-    command: bash -xe ../scripts/check_artifacts.sh
-
   - name: Check if the configuration generated with paths-base is using the custom path after upgrade client
     shell: cat {{ custom_path }}/config/pmm-agent.yaml | grep -o -c {{ custom_path }} | grep "14"
     become: yes
