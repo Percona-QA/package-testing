@@ -178,7 +178,7 @@ def test_disable_validate_password_plugin(host):
             restart = host.run(cmd)
             assert restart.rc == 0, (restart.stdout, restart.stderr)
 
-def test_sources_version(host):
+def test_sources_ps_version(host):
     if REPO == "testing":
         pytest.skip("This test only for main repo")
     dist = host.system_info.distribution    
@@ -188,3 +188,15 @@ def test_sources_version(host):
     result = host.run(cmd)
     assert result.rc == 0, (result.stderr, result.stdout)
     assert VERSION in result.stdout, result.stdout
+
+def test_sources_mysql_shell_version(host):
+    if REPO == "testing":
+        pytest.skip("This test only for main repo")
+    dist = host.system_info.distribution
+    if dist.lower() in RHEL_DISTS:
+        pytest.skip("This test only for DEB distributions")
+    shell_version = re.search(r'^(\d+\.\d+\.\d+)(?:-\d+)*$', VERSION)    
+    cmd = "apt-cache madison percona-mysql-shell | grep Source | grep \"{}\"".format(shell_version)
+    result = host.run(cmd)
+    assert result.rc == 0, (result.stderr, result.stdout)
+    assert shell_version[1] in result.stdout, result.stdout
