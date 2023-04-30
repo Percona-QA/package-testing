@@ -59,7 +59,7 @@ def test_pt_binaries(host, pt_bin):
     assert PT_VERSION in result.stdout, result.stdout
 
 def test_sources_pxb_version(host):
-    if REPO == "testing":
+    if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")
     dist = host.system_info.distribution
     if dist.lower() in RHEL_DISTS:
@@ -70,7 +70,7 @@ def test_sources_pxb_version(host):
     assert PXB_VERSION in result.stdout, result.stdout
 
 def test_sources_pt_version(host):
-    if REPO == "testing":
+    if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")
     dist = host.system_info.distribution
     if dist.lower() in RHEL_DISTS:

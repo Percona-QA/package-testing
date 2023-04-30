@@ -179,7 +179,7 @@ def test_disable_validate_password_plugin(host):
             assert restart.rc == 0, (restart.stdout, restart.stderr)
 
 def test_sources_ps_version(host):
-    if REPO == "testing":
+    if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")
     dist = host.system_info.distribution    
     if dist.lower() in RHEL_DISTS:
@@ -190,7 +190,7 @@ def test_sources_ps_version(host):
     assert VERSION in result.stdout, result.stdout
 
 def test_sources_mysql_shell_version(host):
-    if REPO == "testing":
+    if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")
     dist = host.system_info.distribution
     if dist.lower() in RHEL_DISTS:

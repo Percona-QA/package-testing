@@ -1,6 +1,7 @@
 import os
 import testinfra.utils.ansible_runner
 from .settings import *
+import pytest
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
@@ -20,7 +21,7 @@ def test_proxysql2_version(host):
     assert VERSION in result.stdout, result.stdout
 
 def test_sources_version(host):
-    if REPO == "testing":
+    if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")
     dist = host.system_info.distribution
     if dist.lower() in RHEL_DISTS:
