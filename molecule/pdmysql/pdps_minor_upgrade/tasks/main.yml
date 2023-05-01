@@ -315,3 +315,13 @@
       packages:
       - percona-mysql-router
     when: ansible_os_family == "Debian"
+
+  - name: show enabled repo
+    command: percona-release show
+    register: output
+    ignore_errors: yes
+
+  - name: check output
+    debug:
+      var: output
+    ignore_errors: yes
