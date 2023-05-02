@@ -67,7 +67,6 @@ COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_audit_api_message_emit']
 
 VERSION = os.environ.get("VERSION")
-REPO = os.environ.get("REPO")
 
 def is_running(host):
     cmd = 'ps auxww| grep -v grep  | grep -c "mysql"'

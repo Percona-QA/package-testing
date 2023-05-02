@@ -25,7 +25,6 @@ PTBINS = ['pt-align', 'pt-archiver', 'pt-config-diff', 'pt-deadlock-logger', 'pt
 
 PXB_VERSION = os.getenv("PXB_VERSION")
 PT_VERSION = os.getenv("PT_VERSION")
-REPO = os.environ.get("REPO")
 
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):

@@ -7,7 +7,6 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
 VERSION = os.getenv("PROXYSQL_VERSION")
-REPO = os.environ.get("REPO")
 
 def test_package_is_installed(host):
     pkg = host.package('proxysql2')
