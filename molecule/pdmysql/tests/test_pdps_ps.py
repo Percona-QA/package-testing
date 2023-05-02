@@ -68,7 +68,6 @@ COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
 
 VERSION = os.environ.get("VERSION")
 
-
 def is_running(host):
     cmd = 'ps auxww| grep -v grep  | grep -c "mysql"'
     result = host.run(cmd)
@@ -176,3 +175,28 @@ def test_disable_validate_password_plugin(host):
             cmd = 'service mysql restart'
             restart = host.run(cmd)
             assert restart.rc == 0, (restart.stdout, restart.stderr)
+
+@pytest.mark.install
+def test_sources_ps_version(host):
+    if REPO == "testing" or REPO == "experimental":
+        pytest.skip("This test only for main repo")
+    dist = host.system_info.distribution    
+    if dist.lower() in RHEL_DISTS:
+        pytest.skip("This test only for DEB distributions")
+    cmd = "apt-cache madison percona-server | grep Source | grep \"{}\"".format(VERSION)
+    result = host.run(cmd)
+    assert result.rc == 0, (result.stderr, result.stdout)
+    assert VERSION in result.stdout, result.stdout
+
+@pytest.mark.install
+def test_sources_mysql_shell_version(host):
+    if REPO == "testing" or REPO == "experimental":
+        pytest.skip("This test only for main repo")
+    dist = host.system_info.distribution
+    if dist.lower() in RHEL_DISTS:
+        pytest.skip("This test only for DEB distributions")
+    shell_version = re.search(r'^(\d+\.\d+\.\d+)(?:-\d+)*$', VERSION)    
+    cmd = "apt-cache madison percona-mysql-shell | grep Source | grep \"{}\"".format(shell_version[1])
+    result = host.run(cmd)
+    assert result.rc == 0, (result.stderr, result.stdout)
+    assert shell_version[1] in result.stdout, result.stdout
