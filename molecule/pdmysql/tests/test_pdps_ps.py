@@ -69,7 +69,6 @@ COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
 VERSION = os.environ.get("VERSION")
 REPO = os.environ.get("REPO")
 
-
 def is_running(host):
     cmd = 'ps auxww| grep -v grep  | grep -c "mysql"'
     result = host.run(cmd)
@@ -178,6 +177,7 @@ def test_disable_validate_password_plugin(host):
             restart = host.run(cmd)
             assert restart.rc == 0, (restart.stdout, restart.stderr)
 
+@pytest.mark.install
 def test_sources_ps_version(host):
     if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")
@@ -189,6 +189,7 @@ def test_sources_ps_version(host):
     assert result.rc == 0, (result.stderr, result.stdout)
     assert VERSION in result.stdout, result.stdout
 
+@pytest.mark.install
 def test_sources_mysql_shell_version(host):
     if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")

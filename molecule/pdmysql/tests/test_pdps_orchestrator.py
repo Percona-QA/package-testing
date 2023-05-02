@@ -36,8 +36,9 @@ def test_orchestrator_client(host):
     result = host.run(cmd)
     assert result.rc == 0, result.stderr
 
+@pytest.mark.install
 def test_sources_version(host):
-    if REPO == "testing" or REPO == "experimental":
+    if REPO == "testing" or REPO == "experimental" or TO_REPO == "testing":
         pytest.skip("This test only for main repo")
     dist = host.system_info.distribution
     if dist.lower() in RHEL_DISTS:

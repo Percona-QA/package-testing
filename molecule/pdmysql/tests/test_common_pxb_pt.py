@@ -58,6 +58,7 @@ def test_pt_binaries(host, pt_bin):
     result = host.run(cmd)
     assert PT_VERSION in result.stdout, result.stdout
 
+@pytest.mark.install
 def test_sources_pxb_version(host):
     if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")
@@ -69,6 +70,7 @@ def test_sources_pxb_version(host):
     assert result.rc == 0, (result.stderr, result.stdout)
     assert PXB_VERSION in result.stdout, result.stdout
 
+@pytest.mark.install
 def test_sources_pt_version(host):
     if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")
