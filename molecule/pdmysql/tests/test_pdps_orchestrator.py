@@ -11,7 +11,6 @@ PACKAGES = ['percona-orchestrator-cli', 'percona-orchestrator-client', 'percona-
 
 VERSION = os.getenv("ORCHESTRATOR_VERSION")
 
-
 @pytest.mark.parametrize("package", PACKAGES)
 def test_check_package(host, package):
     pkg = host.package(package)
@@ -35,3 +34,15 @@ def test_orchestrator_client(host):
     cmd = 'orchestrator-client --help h'
     result = host.run(cmd)
     assert result.rc == 0, result.stderr
+
+@pytest.mark.install
+def test_sources_version(host):
+    if REPO == "testing" or REPO == "experimental" or TO_REPO == "testing":
+        pytest.skip("This test only for main repo")
+    dist = host.system_info.distribution
+    if dist.lower() in RHEL_DISTS:
+        pytest.skip("This test only for DEB distributions")
+    cmd = "apt-cache madison percona-orchestrator | grep Source | grep \"{}\"".format(VERSION)
+    result = host.run(cmd)
+    assert result.rc == 0, (result.stderr, result.stdout)
+    assert VERSION in result.stdout, result.stdout

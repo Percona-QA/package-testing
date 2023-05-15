@@ -87,7 +87,7 @@ def test_check_rpm_package(host, package):
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert VERSION in pkg.version, pkg.version
+    assert VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
 
 @pytest.mark.parametrize("package", EXTRA_RPMPACKAGE)
 def test_check_shared_package(host, package):
@@ -99,7 +99,7 @@ def test_check_shared_package(host, package):
         pytest.skip("This test is for RHEL based platforms except RHEL 9")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert VERSION in pkg.version, (pkg.version, release)
+    assert VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
 
 
 def test_binary_version(host):

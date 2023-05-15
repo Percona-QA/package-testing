@@ -11,7 +11,7 @@
   command: percona-release enable-only pdpxc-{{ pdmysql_version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'FROM_REPO') }}"
-    pdmysql_version: "{{ lookup('env', 'FROM_VERSION') }}"
+    pdmysql_version: "{{ lookup('env', 'FROM_VERSION').split('-')[0] }}"
 
 - name: clean and update yum cache
   shell: |
@@ -150,6 +150,15 @@
       - proxysql2
   when: ansible_os_family == "RedHat"
 
+#install initscripts-service manually on OL9 till DISTMYSQL-300 is fixed
+- name: install init scripts for OL9
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - initscripts-service
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+
 - name: start proxysql service
   command: service proxysql start
 
@@ -205,13 +214,13 @@
   command: percona-release disable pdpxc-{{ pdmysql_version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'FROM_REPO') }}"
-    pdmysql_version: "{{ lookup('env', 'FROM_VERSION') }}"
+    pdmysql_version: "{{ lookup('env', 'FROM_VERSION').split('-')[0] }}"
 
 - name: enable new repository pdppxc-{{ pdmysql_version }} {{ repo }}
   command: percona-release enable pdpxc-{{ pdmysql_version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'TO_REPO') }}"
-    pdmysql_version: "{{ lookup('env', 'VERSION') }}"
+    pdmysql_version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
 
 
 - name: install PXC 8 deb packages
