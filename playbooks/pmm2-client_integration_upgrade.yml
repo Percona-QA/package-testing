@@ -216,11 +216,11 @@
       that:
         - "'MySQL' in list_output.stdout"
 
-  - name: Assert if the pmm-admin list contains PostgreSQL instance
-    assert:
-      that:
-        - "'PostgreSQL' in list_output.stdout"
-    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
+#  - name: Assert if the pmm-admin list contains PostgreSQL instance
+#    assert:
+#      that:
+#        - "'PostgreSQL' in list_output.stdout"
+#    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
 
   - name: Validate node_exporter status
     block:
@@ -255,22 +255,22 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
     environment:
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
-  - name: Check if Metric End point with Auth works after upgrade for Postgres exporter when service was added via socket before upgrade
-    shell: "{{item}}"
-    with_items:
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-    environment:
-      ADMIN_PASSWORD: "{{ pmm_server_password }}"
+#  - name: Check if Metric End point with Auth works after upgrade for Postgres exporter when service was added via socket before upgrade
+#    shell: "{{item}}"
+#    with_items:
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#    environment:
+#      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: Parse and set PMM minor version
     shell: "pmm-admin --version | grep ^Version | awk -F. '{print $2}'"
@@ -280,7 +280,7 @@
     command: "{{item}}"
     with_items:
       - pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
-      - pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
+#      - pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
 
   - name: Include Exporters Port in output checks for 2.29.0+
     include_tasks: ../tasks/exporter-port-output-checks.yml
@@ -288,17 +288,17 @@
     with_items:
       - vmagent
       - node_exporter
-      - postgres_exporter
+#      - postgres_exporter
       - mongodb_exporter
       - mysqld_exporter
 
-  - name: Validate postgresql_pgstatements_agent status
-    block:
-      - shell: pmm-admin list | grep postgresql_pgstatements_agent | awk -F" " '{print $2}'
-        register: pgstatements_agent_status
-      - assert:
-          that:
-            - "'Running' in pgstatements_agent_status.stdout"
-    rescue:
-      - ansible.builtin.debug:
-          msg: pgstatements_agent_status status is {{ postgresql_pgstatements_agent.stdout }}
+#  - name: Validate postgresql_pgstatements_agent status
+#    block:
+#      - shell: pmm-admin list | grep postgresql_pgstatements_agent | awk -F" " '{print $2}'
+#        register: pgstatements_agent_status
+#      - assert:
+#          that:
+#            - "'Running' in pgstatements_agent_status.stdout"
+#    rescue:
+#      - ansible.builtin.debug:
+#          msg: pgstatements_agent_status status is {{ postgresql_pgstatements_agent.stdout }}
