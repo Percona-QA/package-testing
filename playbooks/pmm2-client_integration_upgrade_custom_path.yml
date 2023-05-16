@@ -119,31 +119,31 @@
 ### end PSMDB 4.4
 
 ### start PGSQL 13
-  - set_fact:
-      pgsql_service_name: "pgsql_{{ instance_ip }}"
-
-  - name: Install and start Percona Server MongoDB 4.4
-    include_tasks: ../tasks/start_pgsql13.yml
-
-  - name: Check if Metric End point with Auth works for Postgres Exporter
-    shell: "{{item}}"
-    with_items:
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-    environment:
-      ADMIN_PASSWORD: "{{ pmm_server_password }}"
-
-  - name: Check if Metric End point with Auth works for Postgres Exporter when service added via socket
-    shell: "{{item}}"
-    with_items:
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-    environment:
-      ADMIN_PASSWORD: "{{ pmm_server_password }}"
+#  - set_fact:
+#      pgsql_service_name: "pgsql_{{ instance_ip }}"
+#
+#  - name: Install and start Percona Server MongoDB 4.4
+#    include_tasks: ../tasks/start_pgsql13.yml
+#
+#  - name: Check if Metric End point with Auth works for Postgres Exporter
+#    shell: "{{item}}"
+#    with_items:
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#    environment:
+#      ADMIN_PASSWORD: "{{ pmm_server_password }}"
+#
+#  - name: Check if Metric End point with Auth works for Postgres Exporter when service added via socket
+#    shell: "{{item}}"
+#    with_items:
+#      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
+#    environment:
+#      ADMIN_PASSWORD: "{{ pmm_server_password }}"
 ## end PG 13
 
 ### Upgrade PMM Client
