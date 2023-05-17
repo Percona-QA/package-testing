@@ -59,9 +59,9 @@
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
 ## end PS 5.7
 
-### start PSMDB 4.4
-  - name: Install and start Percona Server MongoDB 4.4
-    include_tasks: ../tasks/start_psmdb44.yml
+### start PSMDB 6.0
+  - name: Install and start Percona Server MongoDB 6.0
+    include_tasks: ../tasks/start_psmdb60.yml
 
   - name: Check MongoDB Exporter metric endpoint with Auth(including service with socket)
     shell: "{{item}}"
@@ -73,7 +73,7 @@
 
   - name: Remove mongodb service from monitoring which was added via socket
     command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
-### end PSMDB 4.4
+### end PSMDB 6.0
 
 ### start PGSQL 13
 #  - name: Install and start Percona Server MongoDB 4.4
