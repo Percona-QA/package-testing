@@ -9,6 +9,7 @@
   become_method: sudo
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
+    pmm_server_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default('admin', true) }}"
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
@@ -41,7 +42,7 @@
       metrics_mode_arg: "--metrics-mode={{ metrics_mode }}"
 
   - name: Use pmm-agent setup to configure pmm client to connect to server
-    shell: pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-address={{ pmm_server_address }} --server-insecure-tls {{ metrics_mode_arg }}  --agent-password={{ pmm_auth_password }} --server-username=admin --server-password=admin --paths-base={{ custom_path }}/ {{ instance_ip }} generic node2_{{ instance_ip }}
+    shell: pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-address={{ pmm_server_address }} --server-insecure-tls {{ metrics_mode_arg }}  --agent-password={{ pmm_auth_password }} --server-username=admin --server-password={{ pmm_server_password }} --paths-base={{ custom_path }}/ {{ instance_ip }} generic node2_{{ instance_ip }}
 
   - name: Start agent
     shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &

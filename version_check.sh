@@ -193,14 +193,30 @@ elif [ "${product}" = "pxb24" -o "${product}" = "pxb80" ]; then
     done
 
 elif [ ${product} = "proxysql" -o ${product} = "proxysql2" ]; then
-  version_check=$(proxysql --version 2>&1|grep -c ${version})
-  installed_version=$(proxysql --version)
-  if [ ${version_check} -eq 0 ]; then
-    echo "${product} version ${version} is not good!. Installed version: ${installed_version}"
-    exit 1
+  # Define binaries lists depending on product.
+  # proxysql 1.X.X packages contain 'proxysql' and 'proxysql-admin' binaries.
+  # proxysql 2.X.X packages contain 'proxysql', 'proxysql-admin', 'percona-scheduler-admin' and 'pxc_scheduler_handler' binaries.
+  if [ ${product} = "proxysql" ]; then
+    binaries_list='proxysql proxysql-admin'
   else
-    echo "${product} version is correct and ${version}" >> "${log}"
+    binaries_list='proxysql proxysql-admin percona-scheduler-admin pxc_scheduler_handler'
   fi
+    # Check version of each binary.
+  for binary in ${binaries_list}; do
+    # proxysql and proxysql-admin/pxc_scheduler_handler have different formats of version output.
+    # proxysql 2.X.X-percona-X.X, proxysql-admin/pxc_scheduler_handler 2.X.X
+    if [ "${binary}" != "proxysql" ]; then
+      version=$(echo "${version}" | awk -F '-' '{print $1}')
+    fi
+    version_check=$(${binary} --version 2>&1|grep -c ${version})
+    installed_version=$(${binary} --version)
+    if [ ${version_check} -eq 0 ]; then
+      echo "${binary} version ${version} is not good!. Installed version: ${installed_version}"
+      exit 1
+    else
+      echo "${binary} version is correct and ${version}" >> "${log}"
+    fi
+  done
 
 elif [ ${product} = "sysbench" ]; then
   version_check=$(sysbench --version 2>&1|grep -c ${version})
