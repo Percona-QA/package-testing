@@ -77,14 +77,14 @@ ps57_functions = (
 )
 ps57_files = (
   'lib/libHotBackup.so', 'lib/libmysqlservices.a', 'lib/libcoredumper.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.20.3.28' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.20.3.29' ,'lib/mysql/libjemalloc.so.1',
   'lib/mysql/plugin/ha_tokudb.so', 'lib/mysql/plugin/ha_rocksdb.so', 'lib/mysql/plugin/audit_log.so',
   'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so', 'lib/mysql/plugin/tokudb_backup.so',
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
 ps57_symlinks = (
-  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.28'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.28')
+  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.29'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.29')
 )
 
 # 5.6
