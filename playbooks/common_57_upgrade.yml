@@ -51,6 +51,10 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
+  - name: use Percona Server my.cnf
+    shell: update-alternatives --set my.cnf /etc/mysql/percona-server.cnf
+    when: ansible_os_family == "Debian" and ansible_distribution_release == "bullseye"
+
   - name: start mysql service with service command
     command: service mysql start
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
@@ -135,16 +139,16 @@
       - percona-release
     when: ansible_os_family == "Debian"
 
-  - name: install PS 5.7 packages from main repos
+  - name: install PS 5.7 packages from testing repos
     include_tasks: ../tasks/install_ps57.yml
 
-  - name: install Percona Toolkit packages from main repos
+  - name: install Percona Toolkit packages from testing repos
     include_tasks: ../tasks/install_pt.yml
 
-  - name: install sysbench packages from main repos
+  - name: install sysbench packages from testing repos
     include_tasks: ../tasks/install_sysbench.yml
 
-  - name: install Percona XtraBackup 2.4 packages from main repos
+  - name: install Percona XtraBackup 2.4 packages from testing repos
     include_tasks: ../tasks/install_pxb24.yml
 
   - name: list installed packages
