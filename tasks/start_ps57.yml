@@ -44,7 +44,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: add mysql metrics and queries to monitoring
-  command: /package-testing/scripts/pmm2_add_instance.sh mysql {{ port_flag }}
+  command: ../scripts/pmm2_add_instance.sh mysql {{ port_flag }}
   when: ansible_os_family == "RedHat"
 
 - name: add mysql instance for monitoring
