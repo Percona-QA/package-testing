@@ -16,13 +16,8 @@
     cmd_admin_list: "pmm-admin list"
   when: cmd_admin_list is not defined
 
-- name: include tasks for enabling main repo
-  include_tasks: ../tasks/enable_psmdb_repo.yml
-  vars:
-    psmdb_repo: "psmdb-60"
-
-- name: install PSMDB packages
-  include_tasks: ../tasks/install_psmdb.yml
+- name: install PSMDB 6.0 packages
+  include_tasks: ../tasks/install_psmdb_60.yml
 
 - name: start mongod with service
   command: service mongod start

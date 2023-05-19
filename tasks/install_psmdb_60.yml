@@ -1,0 +1,84 @@
+# install Percona Server for MongoDB 6.0
+#
+- name: include tasks for enabling main repo
+  include_tasks: ../tasks/enable_psmdb_repo.yml
+  vars:
+    psmdb_repo: "psmdb-60"
+
+- name: enable psmdb repo
+  command: percona-release enable psmdb-60 release
+
+- name: install psmdb deb packages
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+  vars:
+    packages:
+      - percona-server-mongodb=6.0*
+      - percona-server-mongodb-server=6.0*
+      - percona-server-mongodb-mongos=6.0*
+      - percona-server-mongodb-tools=6.0*
+      - percona-server-mongodb-dbg=6.0*
+  when: ansible_os_family == "Debian"
+
+- name: install psmdb rpm packages on RedHat 7(and lower)
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+      - percona-server-mongodb-6.0
+      - percona-server-mongodb-server-6.0
+      - percona-server-mongodb-mongos-6.0
+      - percona-server-mongodb-tools-6.0
+      - percona-server-mongodb-debuginfo-6.0
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+
+- name: install psmdb rpm packages on RedHat 8
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+      - percona-server-mongodb-6.0
+      - percona-server-mongodb-server-6.0
+      - percona-server-mongodb-mongos-6.0
+      - percona-server-mongodb-tools-6.0
+      - percona-server-mongodb-debugsource-6.0
+      - percona-server-mongodb-tools-debuginfo-6.0
+      - percona-server-mongodb-mongos-debuginfo-6.0
+      - percona-server-mongodb-server-debuginfo-6.0
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+- name: install psmdb rpm packages on RedHat 9
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+      - percona-server-mongodb-6.0
+      - percona-server-mongodb-server-6.0
+      - percona-server-mongodb-mongos-6.0
+      - percona-server-mongodb-tools-6.0
+      - percona-server-mongodb-tools-debuginfo-6.0
+      - percona-server-mongodb-mongos-debuginfo-6.0
+      - percona-server-mongodb-server-debuginfo-6.0
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+
+- name: install mongosh deb package
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+  vars:
+    packages:
+      - percona-mongodb-mongosh
+  when: ansible_os_family == "Debian"
+
+- name: install mongosh rpm package
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+      - percona-mongodb-mongosh
+  when: ansible_os_family == "RedHat"

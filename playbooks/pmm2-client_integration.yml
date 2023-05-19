@@ -61,7 +61,7 @@
 
 ### start PSMDB 6.0
   - name: Install and start Percona Server MongoDB 6.0
-    include_tasks: ../tasks/start_psmdb60.yml
+    include_tasks: ../tasks/start_psmdb_60.yml
 
   - name: Check MongoDB Exporter metric endpoint with Auth(including service with socket)
     shell: "{{item}}"

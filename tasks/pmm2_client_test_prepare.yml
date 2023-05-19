@@ -1,11 +1,17 @@
 # This task contains common actions for the PMM Client all tests at preparation stage
 
+- name: Removing Percona Release package
+  include_tasks: ./remove_percona_repository.yml
+
 - name: Install EPEL and GPG
   include_tasks: ./install_epel.yml
 
-- name: allow release-info to change for apt repositories
+- name: Allow release-info to change for apt repositories
   command: apt-get update -y --allow-releaseinfo-change
   when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
+
+- name: Install percona release package
+  include_tasks: ./install_percona_release.yml
 
 - name: install needed packages for running tests with apt
   apt:
@@ -51,22 +57,14 @@
       - jq # for exporter end point metric fetch
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
 
-- name: include tasks for enabling test repo
-  include_tasks: ./enable_testing_repo.yml
-  when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+- name: enable only pmm2-client testing repo
+  command: percona-release enable-only pmm2-client testing
+  when: lookup('env', 'install_repo') == "testing"
 
-- name: include tasks for enabling experimental repo
-  include_tasks: ./enable_experimental_repo.yml
+- name: enable only pmm2-client experimental repo
+  command: percona-release enable original experimental
   when: lookup('env', 'install_repo') == "experimental"
 
-- name: include tasks for enabling main repo
-  include_tasks: ./enable_main_repo.yml
-  when: lookup('env', 'install_repo') == "main"
-
-- name: include tasks for enabling tools main repo
-  include_tasks: ./enable_tools_main_repo.yml
-  when: lookup('env', 'install_repo') == "tools-main"
-
-- name: include tasks for enabling experimental repo
-  include_tasks: ./enable_pmm2client_main_repo.yml
-  when: lookup('env', 'install_repo') == "pmm2-client-main"
+- name: enable only pmm2-client release repo
+  command: percona-release enable-only original release
+  when: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == "pmm2-client-main"
