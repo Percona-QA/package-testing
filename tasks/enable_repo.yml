@@ -1,0 +1,28 @@
+# Encapsulates Percona Release enable(-only) specified repo for specified percona distribution
+# NOTE!!!!
+# Task does NOT install or uninstalls anything. "percona-release" have to be installed outside
+#
+# Task arguments are handled by parent playbook vars:
+#         var "only"       : boolean argument to perform "enable-only"
+#                            ex: only: true || yes || false || no
+#         var "package"    : to access agent with custom port
+#                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
+#         var "repository" :  to access agent with custom port
+#                                     ex: cmd_admin_list: "pmm-admin list {{ port_flag }}"
+#
+
+- set_fact:
+    suffix_only: "{{ (custom_path is defined and only) | ternary ('-only', '') }}"
+
+- name: percona-release enable{{ suffix_only }} {{ package }} {{ repository }}
+  command: percona-release enable{{ suffix_only }} {{ package }} {{ repository }}
+
+- name: Update apt-get repo and cache
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=600
+  when: ansible_os_family == "Debian"
+
+- name: clean and update yum cache
+  shell: |
+    yum clean all
+    yum makecache
+  when: ansible_os_family == "RedHat"

@@ -57,14 +57,25 @@
       - jq # for exporter end point metric fetch
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
 
-- name: enable only pmm2-client testing repo
-  command: percona-release enable-only pmm2-client testing
-  when: lookup('env', 'install_repo') == "testing"
+- name: "convert {{ test_repo }} into repository name"
+  set_fact:
+    repo_name: "{{ (test_repo is search('main')) | ternary ('release', test_repo) }}"
 
-- name: enable only pmm2-client experimental repo
-  command: percona-release enable original experimental
-  when: lookup('env', 'install_repo') == "experimental"
+- name: enable psmdb repo
+  include_tasks: ./enable_repo.yml
+  vars:
+    only: yes
+    package: "pmm2-client"
+    repository: "{{ repo_name }}"
 
-- name: enable only pmm2-client release repo
-  command: percona-release enable-only original release
-  when: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == "pmm2-client-main"
+#- name: enable only pmm2-client testing repo
+#  command: percona-release enable-only pmm2-client testing
+#  when: lookup('env', 'install_repo') == "testing"
+#
+#- name: enable only pmm2-client experimental repo
+#  command: percona-release enable original experimental
+#  when: lookup('env', 'install_repo') == "experimental"
+#
+#- name: enable only pmm2-client release repo
+#  command: percona-release enable-only original release
+#  when: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == "pmm2-client-main"
