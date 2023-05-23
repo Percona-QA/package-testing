@@ -108,13 +108,13 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: start proxysql service
-    command: systemctl start proxysql
+    command: service proxysql start
 
   - name: stop proxysql service
-    command: systemctl stop proxysql
+    command: service proxysql stop
 
   - name: start proxysql service
-    command: systemctl start proxysql
+    command: service proxysql start
 
   - name: install orchestrator new deb packages
     apt:
