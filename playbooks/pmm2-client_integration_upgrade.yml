@@ -8,7 +8,7 @@
 #   setup PGSQL 13
 #   install PMM the latest client deb/rpm
 #   verify versions, exporters still work, metrics, etc.
-
+#
 - hosts: all
   become: true
   become_method: sudo
@@ -131,7 +131,7 @@
       - "bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
     environment:
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
-### end PSMDB
+### end PSMDB 6.0
 
 ### start PGSQL 13
   - name: Install and start Percona Server MongoDB 4.4
