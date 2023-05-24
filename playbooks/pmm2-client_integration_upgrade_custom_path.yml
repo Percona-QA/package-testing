@@ -35,11 +35,11 @@
     vars:
       db_list:
         - "{{ (false) | ternary('ps-8.0','') }}"
-        - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '9')  | ternary('ps-5.7','') }}"
-        - "{{ (ansible_os_family == 'Debian' | ternary('ps-5.7','') }}"
+        - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '9') | ternary('ps-5.7','') }}"
+        - "{{ (ansible_os_family == 'Debian') | ternary('ps-5.7','') }}"
         - psmdb-6.0
-        - "{{ (ansible_os_family == 'Debian')  | ternary('pg-13','') }}"
-        - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '8')  | ternary('pg-13','') }}"
+        - "{{ (ansible_os_family == 'Debian') | ternary('pg-13','') }}"
+        - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '8') | ternary('pg-13','') }}"
 
   - set_fact:
       rnd: "{{ 1000 | random }}"
