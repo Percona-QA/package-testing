@@ -22,21 +22,10 @@
     dest: /tmp
     mode: 0777
 
-#- name: Run install_setup_psmdb.yml
-#  include_tasks: /tmp/install_setup_psmdb.yml
-#  vars:
-#    psmdb_to_test: "psmdb-60"
-
-- name: install PSMDB 6.0 packages
-  include_tasks: ../tasks/install_psmdb_60.yml
-
-- name: start mongod with service
-  command: service mongod start
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
-- name: start mongod with systemctl
-  command: systemctl start mongod
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 6
+- name: Run install_setup_psmdb.yml
+  include_tasks: /tmp/install_setup_psmdb.yml
+  vars:
+    psmdb_to_test: "psmdb-60"
 
 - name: add mongodb metrics to monitoring
   command: pmm-admin add mongodb {{ port_flag }} --service-name=mongodb_{{ instance_ip }}
