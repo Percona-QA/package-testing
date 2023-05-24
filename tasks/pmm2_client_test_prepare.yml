@@ -67,15 +67,3 @@
     only: yes
     package: "pmm2-client"
     repository: "{{ repo_name }}"
-
-#- name: enable only pmm2-client testing repo
-#  command: percona-release enable-only pmm2-client testing
-#  when: lookup('env', 'install_repo') == "testing"
-#
-#- name: enable only pmm2-client experimental repo
-#  command: percona-release enable original experimental
-#  when: lookup('env', 'install_repo') == "experimental"
-#
-#- name: enable only pmm2-client release repo
-#  command: percona-release enable-only original release
-#  when: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == "pmm2-client-main"

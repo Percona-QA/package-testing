@@ -4,16 +4,16 @@
 #   pmm-admin inventory list agents output shows exporters ports
 #   reassigned port is reflected in output
 #
-#   must be called with "include_tasks" and "with_items, ex:
+#   must be called with "include_tasks" and "with_items:" or "loop:", ex:
 #  - name: some name for the task
 #    include_tasks: ../tasks/exporter-port-output-checks.yml
-#    with_items:
+#    loop:
 #      - vmagent
 #      - node_exporter
 #      - postgres_exporter
 #      - mongodb_exporter
 #      - mysqld_exporter
-
+#
 - name: "get {{ item }} port from ps"
   shell: "ps aux | grep -v grep | grep {{ item }} | awk -F '=:' '{ print $2; }' | awk -F' ' '{ print $1; }'"
   register: node_port

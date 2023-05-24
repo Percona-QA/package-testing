@@ -16,6 +16,17 @@
     cmd_admin_list: "pmm-admin list"
   when: cmd_admin_list is not defined
 
+- name: Download install_setup_psmdb.yml
+  get_url:
+    url: https://raw.githubusercontent.com/Percona-QA/psmdb-testing/main/pbm/tasks/install_setup_psmdb.yml
+    dest: /tmp
+    mode: 0777
+
+#- name: Run install_setup_psmdb.yml
+#  include_tasks: /tmp/install_setup_psmdb.yml
+#  vars:
+#    psmdb_to_test: "psmdb-60"
+
 - name: install PSMDB 6.0 packages
   include_tasks: ../tasks/install_psmdb_60.yml
 

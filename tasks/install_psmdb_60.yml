@@ -30,7 +30,7 @@
       - percona-server-mongodb-server-6.0*
       - percona-server-mongodb-mongos-6.0*
       - percona-server-mongodb-tools-6.0*
-      - percona-server-mongodb-debuginfo-6.0*
+      - percona-mongodb-mongosh
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
 
 - name: install psmdb rpm packages on RedHat 8+
@@ -43,12 +43,5 @@
       - percona-server-mongodb-server-6.0*
       - percona-server-mongodb-mongos-6.0*
       - percona-server-mongodb-tools-6.0*
-      - percona-server-mongodb-tools-debuginfo-6.0*
-      - percona-server-mongodb-mongos-debuginfo-6.0*
-      - percona-server-mongodb-server-debuginfo-6.0*
       - percona-mongodb-mongosh
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
-
-- name: "install 'percona-server-mongodb-debugsource' on RedHat 8"
-  yum: name=percona-server-mongodb-debugsource-6.0* state=latest
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
