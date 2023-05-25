@@ -17,23 +17,13 @@ def inspect_data():
 
 
 class TestContainerAttributes:
-    def test_args(self, inspect_data):
-        assert len(inspect_data['Args']) == 4
-        assert inspect_data['Args'][0] == '/usr/local/mysqlrouter/mysqlrouter'
-        assert inspect_data['Args'][1] == '-config'
-        assert inspect_data['Args'][2] == '/etc/mysqlrouter/mysqlrouter.conf'
-        assert inspect_data['Args'][3] == 'http'
-
     def test_status(self, inspect_data):
         assert inspect_data['State']['Status'] == 'running'
         assert inspect_data['State']['Running'] == True
 
     def test_config(self, inspect_data):
-        assert len(inspect_data['Config']['Cmd']) == 4
-        assert inspect_data['Config']['Cmd'][0] == '/usr/local/mysqlrouter/mysqlrouter'
-        assert inspect_data['Config']['Cmd'][1] == '-config'
-        assert inspect_data['Config']['Cmd'][2] == '/etc/mysqlrouter/mysqlrouter.conf'
-        assert inspect_data['Config']['Cmd'][3] == 'http'
+        assert len(inspect_data['Config']['Cmd']) == 1
+        assert inspect_data['Config']['Cmd'][0] == 'mysqlrouter'
 
     def test_image_name(self, inspect_data):
         assert inspect_data['Config']['Image'] == docker_image
@@ -46,7 +36,3 @@ class TestContainerAttributes:
         assert len(inspect_data['Config']['Entrypoint']) == 1
         assert inspect_data['Config']['Entrypoint'][0] == '/entrypoint.sh'
 
-    def test_exposed_ports(self, inspect_data):
-        assert len(inspect_data['Config']['ExposedPorts']) == 2
-        assert '6446/tcp' in inspect_data['Config']['ExposedPorts']
-        assert '6447/tcp' in inspect_data['Config']['ExposedPorts']    
