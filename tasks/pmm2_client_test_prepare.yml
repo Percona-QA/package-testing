@@ -10,20 +10,18 @@
   command: apt-get update -y --allow-releaseinfo-change
   when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
 
-- name: Install percona release package
+- name: Install percona-release package
   include_tasks: ./install_percona_release.yml
 
-- name: install needed packages for running tests with apt
+- name: Install needed packages for Debian/Ubuntu
   apt:
     name: "{{ packages }}"
     update_cache: yes
     state: latest
   vars:
     packages:
-      - unzip
       - wget
       - gnupg
-      - rsync
       - jq # for exporter endpoint metric fetch
       - acl
   retries: 60
@@ -32,21 +30,18 @@
   until: result is not failed
   when: ansible_os_family == "Debian"
 
-- name: install needed packages for running tests with yum
+- name: Install needed packages for RHEL 7
   yum:
     name: "{{ packages }}"
     state: latest
   vars:
     packages:
-      - pv
       - libselinux-python
-      - unzip
       - wget
-      - rsync
       - jq # for exporter end point metric fetch
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
 
-- name: install needed packages for running tests with yum on RHEL 8+
+- name: Install needed packages for RHEL 8+
   yum:
     name: "{{ packages }}"
     state: latest

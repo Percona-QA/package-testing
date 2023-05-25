@@ -22,6 +22,12 @@
     dest: /tmp
     mode: 0777
 
+- name: enable psmdb repo
+  include_tasks: ./enable_repo.yml
+  vars:
+    package: "psmdb-60"
+    repository: "release"
+
 - name: Run install_setup_psmdb.yml
   include_tasks: /tmp/install_setup_psmdb.yml
   vars:
