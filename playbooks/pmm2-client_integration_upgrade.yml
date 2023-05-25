@@ -61,19 +61,24 @@
     when: test_repo == "main"
 
   - name: Grep previous release PMM Client version from yum list
-    shell: "yum list pmm2-client --showduplicates | grep 2.{{ pmm_release_minor_version.stdout | int -1 | tail -n1}}"
-    register: pmm_old_version
+    shell: "yum list pmm2-client --showduplicates | grep 2.{{ pmm_release_minor_version.stdout | int -1 }} | tail -n1 | awk '{print $2}'"
+    register: pmm_old_version_rpm
     when: test_repo == "main" and ansible_os_family == "RedHat"
 
   - name: Grep previous release PMM Client version from apt list
     shell: "apt-cache madison pmm2-client | grep 2.{{ pmm_release_minor_version.stdout | int -1 }} | awk '{print $3}'"
-    register: pmm_old_version
+    register: pmm_old_version_deb
     when: test_repo == "main" and ansible_os_family == "Debian"
 
-  - name: Set PMM Client package name with old version to install
+  - name: Set PMM Client package name with old version to install for apt
     set_fact:
-      pmm_client_old: "pmm2-client={{ pmm_old_version.stdout }}"
-    when: test_repo == "main"
+      pmm_client_old: "pmm2-client={{ pmm_old_version_deb.stdout }}"
+    when: test_repo == "main" and ansible_os_family == 'Debian'
+
+  - name: Set PMM Client package name with old version to install for yum
+    set_fact:
+      pmm_client_old: "pmm2-client-{{ pmm_old_version_rpm.stdout }}"
+    when: test_repo == "main" and ansible_os_family == "RedHat"
 
   - name: Set PMM Client package name to install
     set_fact:

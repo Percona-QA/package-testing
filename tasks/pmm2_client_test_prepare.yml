@@ -60,5 +60,7 @@
   include_tasks: ./enable_repo.yml
   vars:
     only: yes
-    package: "pmm2-client"
+    package: "original"
+### uncomment when ENG-1194 wil be fixed
+#    package: "pmm2-client"
     repository: "{{ repo_name }}"

@@ -12,7 +12,7 @@
 #
 
 - set_fact:
-    suffix_only: "{{ (custom_path is defined and only is true) | ternary ('-only', '') }}"
+    suffix_only: "{{ (only is defined and only|bool) | ternary ('-only', '') }}"
 
 - name: percona-release enable{{ suffix_only }} {{ package }} {{ repository }}
   command: percona-release enable{{ suffix_only }} {{ package }} {{ repository }}
