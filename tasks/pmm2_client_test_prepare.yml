@@ -56,7 +56,7 @@
   set_fact:
     repo_name: "{{ (test_repo is search('main')) | ternary ('release', test_repo) }}"
 
-- name: enable psmdb repo
+- name: enable pmm2-client {{ repo_name }} repo
   include_tasks: ./enable_repo.yml
   vars:
     only: yes
