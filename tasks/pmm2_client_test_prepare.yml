@@ -60,7 +60,7 @@
   include_tasks: ./enable_repo.yml
   vars:
     only: yes
-    package: "original"
+    package: "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version|int == 8) | ternary('pmm2-client', 'original') }}"
 ### uncomment when ENG-1194 wil be fixed
 #    package: "pmm2-client"
     repository: "{{ repo_name }}"
