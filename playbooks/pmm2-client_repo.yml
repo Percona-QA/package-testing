@@ -26,6 +26,7 @@
   - name: Install percona-release package
     include_tasks: ./install_percona_release.yml
 
+### release
   - name: enable pmm2-client release repo
     include_tasks: ./enable_repo.yml
     vars:
@@ -33,7 +34,7 @@
       package: "pmm2-client"
       repository: "release"
 
-  - name: Grep previous release PMM Client version from yum list
+  - name: Get pmm2-client versions from yum
     shell: yum list pmm2-client --showduplicates
     register: rel_rpm
     when: ansible_os_family == "RedHat"
@@ -42,7 +43,7 @@
       msg: "rel_rpm.stdout"
     when: ansible_os_family == "RedHat"
 
-  - name: Grep previous release PMM Client version from apt list
+  - name: Get pmm2-client versions from yum apt
     shell: apt-cache madison pmm2-client
     register: rel_deb
     when: ansible_os_family == "Debian"
@@ -51,29 +52,30 @@
       msg: "rel_deb.stdout"
     when: ansible_os_family == "Debian"
 
-  - name: enable pmm2-client release repo
+### testing
+  - name: enable pmm2-client testing repo
     include_tasks: ./enable_repo.yml
     vars:
       only: yes
       package: "pmm2-client"
-      repository: "release"
+      repository: "testing"
 
-  - name: Grep previous release PMM Client version from yum list
+  - name: Get pmm2-client versions from yum
     shell: yum list pmm2-client --showduplicates
-    register: rel_rpm
+    register: tes_rpm
     when: ansible_os_family == "RedHat"
 
   - debug:
-      msg: "rel_rpm.stdout"
+      msg: "tes_rpm.stdout"
     when: ansible_os_family == "RedHat"
 
-  - name: Grep previous release PMM Client version from apt list
+  - name: Get pmm2-client versions from yum apt
     shell: apt-cache madison pmm2-client
-    register: rel_deb
+    register: tes_deb
     when: ansible_os_family == "Debian"
 
   - debug:
-      msg: "rel_deb.stdout"
+      msg: "tes_deb.stdout"
     when: ansible_os_family == "Debian"
 
 ### experimental
@@ -84,7 +86,7 @@
       package: "pmm2-client"
       repository: "experimental"
 
-  - name: Grep previous release PMM Client version from yum list
+  - name: Get pmm2-client versions from yum
     shell: yum list pmm2-client --showduplicates
     register: exp_rpm
     when: ansible_os_family == "RedHat"
@@ -93,7 +95,7 @@
       msg: "exp_rpm.stdout"
     when: ansible_os_family == "RedHat"
 
-  - name: Grep previous release PMM Client version from apt list
+  - name: Get pmm2-client versions from yum apt
     shell: apt-cache madison pmm2-client
     register: exp_deb
     when: ansible_os_family == "Debian"
