@@ -1,0 +1,103 @@
+---
+# Temporary debug of pmm2-client package presence
+#
+- hosts: localhost
+  become: true
+  become_method: sudo
+  connection: local
+  vars:
+    pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
+    pmm_server_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default('admin', true) }}"
+    test_repo: "{{ lookup('env', 'install_repo') }}"
+    metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
+    pmm_version: "{{ lookup('env', 'PMM_VERSION') | regex_search('\\S(.*\\S)?') }}"
+
+  tasks:
+  - name: Removing Percona Release package
+    include_tasks: ./remove_percona_repository.yml
+
+  - name: Install EPEL and GPG
+    include_tasks: ./install_epel.yml
+
+  - name: Allow release-info to change for apt repositories
+    command: apt-get update -y --allow-releaseinfo-change
+    when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
+
+  - name: Install percona-release package
+    include_tasks: ./install_percona_release.yml
+
+  - name: enable pmm2-client release repo
+    include_tasks: ./enable_repo.yml
+    vars:
+      only: yes
+      package: "pmm2-client"
+      repository: "release"
+
+  - name: Grep previous release PMM Client version from yum list
+    shell: yum list pmm2-client --showduplicates
+    register: rel_rpm
+    when: ansible_os_family == "RedHat"
+
+  - debug:
+      msg: "rel_rpm.stdout"
+    when: ansible_os_family == "RedHat"
+
+  - name: Grep previous release PMM Client version from apt list
+    shell: apt-cache madison pmm2-client
+    register: rel_deb
+    when: ansible_os_family == "Debian"
+
+  - debug:
+      msg: "rel_deb.stdout"
+    when: ansible_os_family == "Debian"
+
+  - name: enable pmm2-client release repo
+    include_tasks: ./enable_repo.yml
+    vars:
+      only: yes
+      package: "pmm2-client"
+      repository: "release"
+
+  - name: Grep previous release PMM Client version from yum list
+    shell: yum list pmm2-client --showduplicates
+    register: rel_rpm
+    when: ansible_os_family == "RedHat"
+
+  - debug:
+      msg: "rel_rpm.stdout"
+    when: ansible_os_family == "RedHat"
+
+  - name: Grep previous release PMM Client version from apt list
+    shell: apt-cache madison pmm2-client
+    register: rel_deb
+    when: ansible_os_family == "Debian"
+
+  - debug:
+      msg: "rel_deb.stdout"
+    when: ansible_os_family == "Debian"
+
+### experimental
+  - name: enable pmm2-client experimental repo
+    include_tasks: ./enable_repo.yml
+    vars:
+      only: yes
+      package: "pmm2-client"
+      repository: "experimental"
+
+  - name: Grep previous release PMM Client version from yum list
+    shell: yum list pmm2-client --showduplicates
+    register: exp_rpm
+    when: ansible_os_family == "RedHat"
+
+  - debug:
+      msg: "exp_rpm.stdout"
+    when: ansible_os_family == "RedHat"
+
+  - name: Grep previous release PMM Client version from apt list
+    shell: apt-cache madison pmm2-client
+    register: exp_deb
+    when: ansible_os_family == "Debian"
+
+  - debug:
+      msg: "exp_deb.stdout"
+    when: ansible_os_family == "Debian"
