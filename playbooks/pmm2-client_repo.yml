@@ -40,7 +40,7 @@
     when: ansible_os_family == "RedHat"
 
   - debug:
-      msg: "rel_rpm.stdout"
+      msg: "{{rel_rpm.stdout}}"
     when: ansible_os_family == "RedHat"
 
   - name: Get pmm2-client versions from yum apt
@@ -49,7 +49,7 @@
     when: ansible_os_family == "Debian"
 
   - debug:
-      msg: "rel_deb.stdout"
+      msg: "{{rel_deb.stdout}}"
     when: ansible_os_family == "Debian"
 
 ### testing
@@ -66,7 +66,7 @@
     when: ansible_os_family == "RedHat"
 
   - debug:
-      msg: "tes_rpm.stdout"
+      msg: "{{tes_rpm.stdout}}"
     when: ansible_os_family == "RedHat"
 
   - name: Get pmm2-client versions from yum apt
@@ -75,7 +75,7 @@
     when: ansible_os_family == "Debian"
 
   - debug:
-      msg: "tes_deb.stdout"
+      msg: "{{tes_deb.stdout}}"
     when: ansible_os_family == "Debian"
 
 ### experimental
@@ -92,7 +92,7 @@
     when: ansible_os_family == "RedHat"
 
   - debug:
-      msg: "exp_rpm.stdout"
+      msg: "{{exp_rpm.stdout}}"
     when: ansible_os_family == "RedHat"
 
   - name: Get pmm2-client versions from yum apt
@@ -101,5 +101,5 @@
     when: ansible_os_family == "Debian"
 
   - debug:
-      msg: "exp_deb.stdout"
+      msg: "{{exp_deb.stdout}}"
     when: ansible_os_family == "Debian"
