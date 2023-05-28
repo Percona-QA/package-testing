@@ -14,10 +14,10 @@
 
   tasks:
   - name: Removing Percona Release package
-    include_tasks: ./remove_percona_repository.yml
+    include_tasks: ../tasks/remove_percona_repository.yml
 
   - name: Install EPEL and GPG
-    include_tasks: ./install_epel.yml
+    include_tasks: ../tasks/install_epel.yml
 
   - name: Allow release-info to change for apt repositories
     command: apt-get update -y --allow-releaseinfo-change
