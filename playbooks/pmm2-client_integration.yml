@@ -7,11 +7,10 @@
 #   setup PSMDB 4.4
 #   setup PGSQL 13
 #   verify versions, metrics, exporters, etc.
-
+#
 - hosts: all
   become: true
   become_method: sudo
-  connection: local
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
     pmm_server_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default('admin', true) }}"
