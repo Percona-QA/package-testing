@@ -90,7 +90,7 @@
 ### end PSMDB 6.0
 
 ### start PGSQL 13
-  - name: Install and start Percona Server MongoDB 4.4
+  - name: Install and start Percona Server PostgreSQL 13
     include_tasks: ../tasks/start_pgsql13.yml
     when: '"pg-13" in enabled_db'
 

@@ -16,7 +16,6 @@
     cmd_admin_list: "pmm-admin list"
   when: cmd_admin_list is not defined
 
-    git clone https://github.com/Percona-QA/ppg-testing --branch PMM-7-ol-8-fix --single-branch
 - name: Download install_setup_psmdb.yml
   get_url:
 #    url: https://raw.githubusercontent.com/Percona-QA/ppg-testing/main/tasks/install_ppg13.yml
