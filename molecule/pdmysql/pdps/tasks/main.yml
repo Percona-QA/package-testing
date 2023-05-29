@@ -98,14 +98,14 @@
         - proxysql2
     when: ansible_os_family == "RedHat"
 
-#install initscripts-service manually on OL9 till DISTMYSQL-300 is fixed
-- name: install init scripts for OL9
-  yum:
-    name: "{{ packages }}"
-  vars:
-    packages:
-    - initscripts-service
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+  #install initscripts-service manually on OL9 till DISTMYSQL-300 is fixed
+  - name: install init scripts for OL9
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - initscripts-service
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: start proxysql service
     command: service proxysql start
