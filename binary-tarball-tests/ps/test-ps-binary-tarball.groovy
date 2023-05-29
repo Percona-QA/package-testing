@@ -3,8 +3,8 @@ pipeline {
     label 'docker'
   }
   parameters {
-    string(name: 'PS_VERSION', defaultValue: '8.0.26-16', description: 'PS full version')
-    string(name: 'PS_REVISION', defaultValue: '3d64165', description: 'PS revision')
+    string(name: 'PS_VERSION', defaultValue: '8.0.33-25', description: 'PS full version')
+    string(name: 'PS_REVISION', defaultValue: '9468fd1d', description: 'PS revision')
     booleanParam( 
       defaultValue: false,
       name: 'BUILD_TYPE_MINIMAL'
@@ -153,7 +153,7 @@ void run_test() {
     TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
     TARBALL_LINK="https://www.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
     rm -rf package-testing
-    git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+    git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-jobs --depth 1
     cd package-testing/binary-tarball-tests/ps
     wget -q ${TARBALL_LINK}${TARBALL_NAME}
     ./run.sh || true
