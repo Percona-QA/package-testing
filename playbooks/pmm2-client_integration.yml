@@ -133,9 +133,10 @@
     shell: "pmm-admin --version | grep -oP '(?<=[.])\\w+(?=[.])' | head -1"
     register: pmm_agent_minor_version
 
-  - name: Set Exporters to check
-    set_fact:
-      exporters_check: "{{ ex_list|select|list }}"
+  - name: Include Exporters Port in output checks for 2.29.0+
+    include_tasks: ../tasks/exporter-port-output-checks.yml
+    when: pmm_agent_minor_version.stdout | int >= 29
+    loop: "{{ ex_list|select|list }}"
     vars:
       ex_list:
         - vmagent
@@ -143,11 +144,6 @@
         - "{{ ('ps-' in enabled_db | join('')) | ternary('mysqld_exporter','') }}"
         - "{{ ('psmdb-' in enabled_db | join('')) | ternary('mongodb_exporter','') }}"
         - "{{ ('pg-' in enabled_db | join('')) | ternary('postgres_exporter','') }}"
-
-  - name: Include Exporters Port in output checks for 2.29.0+
-    include_tasks: ../tasks/exporter-port-output-checks.yml
-    when: pmm_agent_minor_version.stdout | int >= 29
-    loop: "{{ exporters_check }}"
 
   - name: Validate node_exporter status
     block:
