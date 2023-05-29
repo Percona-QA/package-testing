@@ -21,7 +21,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-              run_test()
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Ubuntu Jammy
@@ -33,7 +33,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-              run_test()
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Ubuntu Focal
@@ -45,7 +45,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-              run_test()
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Ubuntu Bionic
@@ -57,7 +57,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-              run_test()
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Debian Bullseye
@@ -69,7 +69,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-              run_test()
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Debian Buster
@@ -81,7 +81,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-              run_test()
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Centos7
@@ -93,7 +93,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-              run_test()
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Oracle Linux 8
@@ -105,7 +105,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-              run_test()
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Oracle Linux 9
