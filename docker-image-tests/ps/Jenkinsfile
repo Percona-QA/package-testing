@@ -4,8 +4,8 @@ pipeline {
   }
   parameters {
     choice(name: 'DOCKER_ACC', choices: ['percona','perconalab'], description: 'Docker repo to use: percona or perconalab')
-    string(name: 'PS_VERSION', defaultValue: '8.0.26-16', description: 'Full PS version')
-    string(name: 'PS_REVISION', defaultValue: '3d64165', description: 'Short git hash for release')
+    string(name: 'PS_VERSION', defaultValue: '8.0.33-25', description: 'Full PS version')
+    string(name: 'PS_REVISION', defaultValue: '9468fd1d', description: 'Short git hash for release')
   }
   stages {
     stage('Run test') {
@@ -24,7 +24,7 @@ pipeline {
             export PATH=${PATH}:~/.local/bin
             sudo yum install -y python3 python3-pip
             rm -rf package-testing
-            git clone https://github.com/Percona-QA/package-testing.git --depth 1
+            git clone -b fix-jobs https://github.com/kaushikpuneet07/package-testing.git --depth 1
             cd package-testing/docker-image-tests/ps
             pip3 install --user -r requirements.txt
             ./run.sh
