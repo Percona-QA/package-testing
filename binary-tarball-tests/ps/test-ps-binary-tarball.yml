@@ -6,7 +6,7 @@
     pipeline-scm:
       scm:
         - git:
-            url: https://github.com/Percona-QA/package-testing.git
+            url: https://github.com/kaushikpuneet07/package-testing.git
             branches:
             - 'fix-jobs'
             wipe-workspace: false
