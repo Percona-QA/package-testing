@@ -24,8 +24,9 @@ if [ -z "$pmm_client_ip" ]; then
         export pmm_client_ip=127.0.0.1
 fi
 
+export api_auth=$(printf '%s' admin:$ADMIN_PASSWORD | base64)
 export token=$(printf '%s' pmm:${agent_password} | base64)
-export listen_port=$(curl -s "https://${pmm_server_ip}/v1/inventory/Agents/List" -H 'Authorization: Basic YWRtaW46YWRtaW4=' --data '{"promise":{}}' --compressed --insecure | jq ".${agent_type}[] | select(.agent_id == "\"${agent_id}"\") | .listen_port")
+export listen_port=$(curl -s "https://${pmm_server_ip}/v1/inventory/Agents/List" -H "Authorization: Basic ${api_auth}" --data '{"promise":{}}' --compressed --insecure | jq ".${agent_type}[] | select(.agent_id == "\"${agent_id}"\") | .listen_port")
 if [ -z ${listen_port} ]; then
         echo "Failed to find port for '${service_name}' service"
         exit 1;
