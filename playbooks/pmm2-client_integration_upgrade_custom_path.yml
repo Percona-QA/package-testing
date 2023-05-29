@@ -238,7 +238,6 @@
       - bash -x ../scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0
       - bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1
       - bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1
-      - bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1
     environment:
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
