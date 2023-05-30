@@ -141,7 +141,7 @@ void run_test() {
       TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
     fi
     rm -rf package-testing
-    git clone https://github.com/kaushikpuneet07/package-testing.git --branch tar-up --depth 1
+    git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
     cd package-testing/binary-tarball-tests/ps
     wget -q ${TARBALL_LINK}${TARBALL_NAME}
     ./run.sh || true
