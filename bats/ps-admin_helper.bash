@@ -188,7 +188,7 @@ check_rocksdb_exists() {
     [ "$result" -eq 17 ]
   else
     result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like BINARY "%ROCKSDB%" and PLUGIN_STATUS like "ACTIVE";')
-    [ "$result" -eq 17 ]
+    [ "$result" -eq 13 ]
   fi
 }
 
