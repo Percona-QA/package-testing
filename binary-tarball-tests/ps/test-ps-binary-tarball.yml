@@ -6,9 +6,9 @@
     pipeline-scm:
       scm:
         - git:
-            url: https://github.com/Percona-QA/package-testing.git
+            url: https://github.com/kaushikpuneet07/package-testing.git
             branches:
-            - 'master'
+            - 'tar-up'
             wipe-workspace: false
       lightweight-checkout: true
       script-path: binary-tarball-tests/ps/test-ps-binary-tarball.groovy
