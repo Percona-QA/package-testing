@@ -281,6 +281,7 @@
 
   - name: Remove MongoDB Socket service, to verify Port output in pmm-admin list commands
     command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
+    when: '"psmdb-" in enabled_db | join("")'
 
   - name: Remove PostgreSQL Socket services to verify Port output in pmm-admin list commands
     command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
