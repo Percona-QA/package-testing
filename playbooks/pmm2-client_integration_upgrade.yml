@@ -225,34 +225,26 @@
         - "'MySQL' in list_output.stdout"
     when: '"ps-" in enabled_db | join("")'
 
-  - name: Validate node_exporter status
-    block:
-      - name: Wait for node_exporter to be Running
-        shell: pmm-admin list | grep node_exporter | awk -F" " '{print $2}'
-        register: node_exporter_status
-        until: node_exporter_status.stdout.find('Running') != -1
-        delay: 5
-        retries: 5
-    rescue:
-      - name: Print the node_exporter Status
-        ansible.builtin.debug:
-          msg: node_exporter status is {{ node_exporter_status.stdout }}
+  - name: "Wait for 'node_exporter' is Running"
+    include_tasks: ../tasks/wait_exporter_is_running.yml
+    vars:
+      process_name: "node_exporter"
 
-  - name: Validate vmagent status
-    block:
-      - name: Wait for vmagent to be Running Status After Upgrade
-        shell: pmm-admin list | grep vmagent | awk -F" " '{print $2}'
-        register: vmagent_status
-        until: vmagent_status.stdout.find('Running') != -1
-        delay: 5
-        retries: 5
-    rescue:
-      - name: Print the vmagent Status
-        ansible.builtin.debug:
-          msg: vmagent status is {{ vmagent_status.stdout }}
+  - name: "Wait for 'vmagent' is Running"
+    include_tasks: ../tasks/wait_exporter_is_running.yml
+    vars:
+      process_name: "vmagent"
 
-  - name: Check 'postgresql_pgstatements_agent' and 'postgres_exporter' are Running
-    include_tasks: ../tasks/verify_pg_exporter_and_agent.yml
+  - name: "Validate 'postgresql_pgstatements_agent' is Running"
+    include_tasks: ../tasks/verify_exporter_status.yml
+    vars:
+      process_name: "postgresql_pgstatements_agent"
+    when: '"pg-" in enabled_db | join("")'
+
+  - name: "Wait for 'postgres_exporter' is Running"
+    include_tasks: ../tasks/wait_exporter_is_running.yml
+    vars:
+      process_name: "postgres_exporter"
     when: '"pg-" in enabled_db | join("")'
 
   - name: Check if Metric Endpoint with Auth works for Node Exporter, MysqlD Exporter, MongoDB Exporter, Postgres Exporter

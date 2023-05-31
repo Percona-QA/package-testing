@@ -5,12 +5,9 @@
 # Task arguments are handled by parent playbook vars:
 #         var "only"       : boolean argument to perform "enable-only"
 #                            ex: only: true || yes || false || no
-#         var "package"    : to access agent with custom port
-#                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
-#         var "repository" :  to access agent with custom port
-#                                     ex: cmd_admin_list: "pmm-admin list {{ port_flag }}"
+#         var "package"    : any supported product, ex: psmdb-60, pmm2-client
+#         var "repository" :  release || testing || experimental
 #
-
 - set_fact:
     suffix_only: "{{ (only is defined and only|bool) | ternary ('-only', '') }}"
 
