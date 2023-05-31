@@ -279,11 +279,10 @@
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
     when: '"pg-" in enabled_db | join("")'
 
-  - name: Remove Socket services, to verify Port output in pmm-admin list commands
+  - name: Remove MongoDB Socket service, to verify Port output in pmm-admin list commands
     command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
-    when: '"ps-" in enabled_db | join("")'
 
-  - name: Remove PostgreSQL Socket services, to verify Port output in pmm-admin list commands
+  - name: Remove PostgreSQL Socket services to verify Port output in pmm-admin list commands
     command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
     when: '"pg-" in enabled_db | join("")'
 
