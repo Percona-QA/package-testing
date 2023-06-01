@@ -34,7 +34,7 @@ pipeline {
   } //end stages
   post {
     always {
-      junit 'package-testing/docker-image-tests/ps/report.xml'
+      junit 'package-testing/docker-image-tests/ps-arm/report.xml'
     }
   }
 } //end pipeline
