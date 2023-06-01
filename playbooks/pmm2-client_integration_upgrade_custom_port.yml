@@ -53,7 +53,7 @@
     become: true
 
   - name: detect and save release minor version
-    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name  | grep -v latest | sort -V | tail -n1 | awk -F. '{print $2}'"
+    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-client/tags -O - | jq -r .results[].name  | grep -v latest | sort -V | tail -n1 | awk -F. '{print $2}'"
     register: pmm_release_minor_version
     when: test_repo == "main"
 
