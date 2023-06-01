@@ -1,8 +1,9 @@
+Docker job for testing ARM DOcker images
 Before running set environment variables, eg.:
 ```
-export DOCKER_ACC="percona"
-export PS_VERSION="8.0.16-7"
-export PS_REVISION="613e312"
+export DOCKER_ACC="perconalab"
+export PS_VERSION="8.0.33-25.1-aarch64"
+export PS_REVISION="9468fd1d"
 ```
 
 This is based on:
