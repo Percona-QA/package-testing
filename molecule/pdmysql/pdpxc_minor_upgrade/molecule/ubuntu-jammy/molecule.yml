@@ -29,6 +29,7 @@ verifier:
     verbose: true
     s: true
     k: "test_pdpxc_ or test_common_"
+    m: "not install"
     junitxml: report.xml
 scenario:
   name: ubuntu-jammy

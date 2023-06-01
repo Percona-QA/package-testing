@@ -16,6 +16,13 @@
     cmd_admin_list: "pmm-admin list"
   when: cmd_admin_list is not defined
 
+- name: enable ps-57 release repo
+  include_tasks: ./enable_repo.yml
+  vars:
+    only: yes
+    package: "ps-57"
+    repository: "release"
+
 - name: install Percona Server 5.7 packages
   include_tasks: ./install_ps57.yml
 
@@ -31,7 +38,10 @@
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
 - name: set root password on centos
-  command: /package-testing/setpass_57.sh
+  shell: |
+    init_pass=$(grep "temporary password" /var/log/mysqld.log | awk '{print $NF}' | tail -1)
+    mysql --connect-expired-password -uroot --password="$init_pass" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'U?fY)9s7|3gxUm';"
+    cp ../templates/my_57.j2 /root/.my.cnf
   when: ansible_os_family == "RedHat"
 
 - name: copy .my.cnf with credentials on centos
@@ -41,7 +51,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: add mysql metrics and queries to monitoring
-  command: /package-testing/scripts/pmm2_add_instance.sh mysql {{ port_flag }}
+  command: ../scripts/pmm2_add_instance.sh mysql {{ port_flag }}
   when: ansible_os_family == "RedHat"
 
 - name: add mysql instance for monitoring

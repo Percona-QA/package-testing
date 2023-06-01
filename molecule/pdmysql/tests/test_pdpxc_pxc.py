@@ -1,6 +1,7 @@
 import os
 import pytest
 import testinfra.utils.ansible_runner
+import re
 from .settings import *
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
@@ -68,7 +69,12 @@ COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_audit_api_message_emit']
 
 VERSION = os.environ['VERSION']
-
+DEB_PERCONA_BUILD_VERSION = ''
+RPM_PERCONA_BUILD_VERSION = ''
+if re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', VERSION): # if full package VERSION 8.0.32-24.2 is passed we need to re-assign it for tests
+    DEB_PERCONA_BUILD_VERSION = re.sub(r'.(\d+)$',r'-\g<1>', VERSION) # convert to format passed by host.package.version for deb 8.0.32-24-2
+    RPM_PERCONA_BUILD_VERSION = VERSION # re-assign for RPM tests and use 8.0.32-24.2
+    VERSION = '.'.join(VERSION.split('.')[:-1]) # use VERSION 8.0.32-24 without package build number for non-package tests
 
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
@@ -77,8 +83,10 @@ def test_check_deb_package(host, package):
         pytest.skip("This test only for Debian based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert VERSION in pkg.version, pkg.version
-
+    if DEB_PERCONA_BUILD_VERSION:
+        assert DEB_PERCONA_BUILD_VERSION in pkg.version, pkg.version
+    else:
+        assert VERSION in pkg.version, pkg.version
 
 @pytest.mark.parametrize("package", RPMPACKAGES)
 def test_check_rpm_package(host, package):
@@ -87,7 +95,10 @@ def test_check_rpm_package(host, package):
         pytest.skip("This test only for RHEL based platforms")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert VERSION in pkg.version, pkg.version
+    if RPM_PERCONA_BUILD_VERSION:
+        assert RPM_PERCONA_BUILD_VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
+    else:
+        assert VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
 
 @pytest.mark.parametrize("package", EXTRA_RPMPACKAGE)
 def test_check_shared_package(host, package):
@@ -99,7 +110,10 @@ def test_check_shared_package(host, package):
         pytest.skip("This test is for RHEL based platforms except RHEL 9")
     pkg = host.package(package)
     assert pkg.is_installed
-    assert VERSION in pkg.version, (pkg.version, release)
+    if RPM_PERCONA_BUILD_VERSION:
+        assert RPM_PERCONA_BUILD_VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
+    else:
+        assert VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
 
 
 def test_binary_version(host):

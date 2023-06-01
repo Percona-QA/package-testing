@@ -11,6 +11,7 @@
   become_method: sudo
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
+    pmm_server_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default('admin', true) }}"
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
@@ -52,7 +53,7 @@
     become: true
 
   - name: detect and save release minor version
-    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name  | grep -v latest | sort -V | tail -n1 | awk -F. '{print $2}'"
+    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-client/tags -O - | jq -r .results[].name  | grep -v latest | sort -V | tail -n1 | awk -F. '{print $2}'"
     register: pmm_release_minor_version
     when: test_repo == "main"
 
@@ -94,7 +95,7 @@
       metrics_mode_arg: "--metrics-mode={{ metrics_mode }}"
 
   - name: Use pmm-agent setup to configure pmm client to connect to server
-    shell: pmm-agent setup --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml --force --server-address={{ pmm_server_address }} --server-insecure-tls --listen-port={{ custom_port }} {{ metrics_mode_arg }} --server-username=admin --server-password=admin {{ instance_ip }} generic node2_{{ instance_ip }}
+    shell: pmm-agent setup --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml --force --server-address={{ pmm_server_address }} --server-insecure-tls --listen-port={{ custom_port }} {{ metrics_mode_arg }} --server-username=admin --server-password={{ pmm_server_password }} {{ instance_ip }} generic node2_{{ instance_ip }}
 
   - name: Check if the configuration generated with pmm-agent-listen-port is using the custom port
     shell: "cat /usr/local/percona/pmm2/config/pmm-agent.yaml | grep -o -c '{{ custom_port }}' | grep '1'"
