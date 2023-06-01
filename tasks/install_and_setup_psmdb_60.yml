@@ -1,0 +1,61 @@
+# This task installs and starts Percona Server MongoDB 6.0 on Oracle Linux and Debian/Ubuntu
+#
+# Task adjustments are handled by parent playbook vars:
+#             var "port_flag"      :  to access agent with custom port
+#                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
+#             var "cmd_admin_list" :  to access agent with custom port
+#                                     ex: cmd_admin_list: "pmm-admin list {{ port_flag }}"
+
+- name: set empty port_flag
+  set_fact:
+    port_flag: ""
+  when: port_flag is not defined
+
+- name: set cmd_admin_list without flags
+  set_fact:
+    cmd_admin_list: "pmm-admin list"
+  when: cmd_admin_list is not defined
+
+- name: Download install_setup_psmdb.yml
+  get_url:
+    url: https://raw.githubusercontent.com/Percona-QA/psmdb-testing/main/pbm/tasks/install_setup_psmdb.yml
+    dest: /tmp
+    mode: 0777
+
+- name: enable psmdb repo
+  include_tasks: ./enable_repo.yml
+  vars:
+    package: "psmdb-60"
+    repository: "release"
+
+- name: Run install_setup_psmdb.yml
+  include_tasks: /tmp/install_setup_psmdb.yml
+  vars:
+    psmdb_to_test: "psmdb-60"
+
+- name: add mongodb metrics to monitoring
+  command: pmm-admin add mongodb {{ port_flag }} --service-name=mongodb_{{ instance_ip }}
+
+- name: add mongodb metrics to monitoring using socket
+  command: pmm-admin add mongodb {{ port_flag }} --socket=/tmp/mongodb-27017.sock --service-name=mongodb_socket_{{ instance_ip }}
+
+- name: check if mongodb monitoring is running
+  command: "{{ cmd_admin_list }}"
+  register: list_output
+
+- name: Assert if the pmm-admin list contains mongodb instance
+  assert:
+    that:
+      - "'MongoDB' in list_output.stdout"
+
+- name: Wait for mongodb_exporter to have Running Status.
+  shell: "{{ cmd_admin_list }} | grep 'mongodb_exporter' | awk -F' ' '{print $2}'"
+  register: mongodb_exporter_status
+  until: mongodb_exporter_status.stdout.find('Running') != -1
+  delay: 5
+  retries: 5
+
+- name: Assert if the pmm-admin list contains mongodb_exporter with Running state
+  assert:
+    that:
+      - "'Running' in mongodb_exporter_status.stdout"
