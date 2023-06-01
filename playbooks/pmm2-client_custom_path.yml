@@ -35,8 +35,7 @@
 
 ### Setup PMM Client
   - name: Use pmm-agent setup to configure pmm client with wrong path-base
-    shell: pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-insecure-tls --server-address={{ pmm_server_address }} --metrics-mode={{ metrics_mode }} --server-username=admin --server-password={{
- }} --paths-base=/wrong_folder/ {{ instance_ip }} generic node2_{{ instance_ip }}
+    shell: pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-insecure-tls --server-address={{ pmm_server_address }} --metrics-mode={{ metrics_mode }} --server-username=admin --server-password={{ pmm_server_password }} --paths-base=/wrong_folder/ {{ instance_ip }} generic node2_{{ instance_ip }}
 
   - name: Start agent
     shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
