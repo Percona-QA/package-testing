@@ -11,4 +11,4 @@
             - 'docker-aarch64'
             wipe-workspace: false
       lightweight-checkout: true
-      script-path: docker-image-tests/ps/Jenkinsfile-arm
+      script-path: docker-image-tests/ps-arm/Jenkinsfile-arm
