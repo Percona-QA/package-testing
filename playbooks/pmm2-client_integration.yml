@@ -44,12 +44,12 @@
 
 ### install pmm2-client
   - name: Install PMM client new deb packages
-    apt: name=pmm2-client update_cache=yes state=latest
     when: ansible_os_family == "Debian"
+    apt: name=pmm2-client update_cache=yes state=latest
 
   - name: Install PMM client new rpm packages
-    yum: name=pmm2-client state=latest
     when: ansible_os_family == "RedHat"
+    yum: name=pmm2-client state=latest
 
   - name: Check that PMM Client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
@@ -63,14 +63,14 @@
 
 ### start PS 5.7
   - name: Install and start Percona Server 5.7
-    include_tasks: ../tasks/start_ps57.yml
     when: '"ps-5.7" in enabled_db'
+    include_tasks: ../tasks/start_ps57.yml
 
   - name: Check if Metric Endpoint with Auth works for Mysqld Exporter
+    when: '"ps-5.7" in enabled_db'
     shell: "bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
     environment:
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
-    when: '"ps-5.7" in enabled_db'
 ## end PS 5.7
 
 ### start PSMDB 6.0
@@ -91,10 +91,11 @@
 
 ### start PGSQL 13
   - name: Install and start Percona Server PostgreSQL 13
-    include_tasks: ../tasks/start_pgsql13.yml
     when: '"pg-13" in enabled_db'
+    include_tasks: ../tasks/start_pgsql13.yml
 
   - name: Check Postgres Exporter metric endpoint with Auth works
+    when: '"pg-13" in enabled_db'
     shell: "{{item}}"
     retries: 3
     delay: 10
@@ -105,9 +106,9 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
     environment:
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
-    when: '"pg-13" in enabled_db'
 
   - name: Check Postgres Exporter metric endpoint with Auth works(service added via socket)
+    when: '"pg-13" in enabled_db'
     shell: "{{item}}"
     retries: 3
     delay: 10
@@ -118,7 +119,6 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
     environment:
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
-    when: '"pg-13" in enabled_db'
 
   - name: Remove PostgreSQL instances added via socket
     command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
@@ -134,8 +134,8 @@
     register: pmm_agent_minor_version
 
   - name: Validate Exporters Port in output  for 2.29.0+
-    include_tasks: ../tasks/exporter-port-output-checks.yml
     when: pmm_agent_minor_version.stdout | int >= 29
+    include_tasks: ../tasks/exporter-port-output-checks.yml
     loop: "{{ ex_list|select|list }}"
     vars:
       ex_list:
@@ -163,13 +163,14 @@
       process_name: "vmagent"
 
   - name: "Validate 'postgresql_pgstatements_agent' is Running"
+    when: '"pg-" in enabled_db | join("")'
     include_tasks: ../tasks/verify_exporter_status.yml
     vars:
       process_name: "postgresql_pgstatements_agent"
-    when: '"pg-" in enabled_db | join("")'
+
 
   - name: "Wait for 'postgres_exporter' is Running"
+    when: '"pg-" in enabled_db | join("")'
     include_tasks: ../tasks/wait_exporter_is_running.yml
     vars:
       process_name: "postgres_exporter"
-    when: '"pg-" in enabled_db | join("")'

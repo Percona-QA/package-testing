@@ -56,19 +56,19 @@
       repository: "release"
 
   - name: Detect and save release minor version
+    when: test_repo == "main"
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-client/tags -O - | jq -r .results[].name  | grep -v latest | sort -V | tail -n1 | awk -F. '{print $2}'"
     register: pmm_release_minor_version
-    when: test_repo == "main"
 
   - name: Grep previous release PMM Client version from yum list
+    when: test_repo == "main" and ansible_os_family == "RedHat"
     shell: "yum list pmm2-client --showduplicates | grep 2.{{ pmm_release_minor_version.stdout | int -1 }} | tail -n1 | awk '{print $2}'"
     register: pmm_old_version_rpm
-    when: test_repo == "main" and ansible_os_family == "RedHat"
 
   - name: Grep previous release PMM Client version from apt list
+    when: test_repo == "main" and ansible_os_family == "Debian"
     shell: "apt-cache madison pmm2-client | grep 2.{{ pmm_release_minor_version.stdout | int -1 }} | awk '{print $3}'"
     register: pmm_old_version_deb
-    when: test_repo == "main" and ansible_os_family == "Debian"
 
   - name: Set PMM Client package name with old version to install for apt
     set_fact:
@@ -76,26 +76,26 @@
     when: test_repo == "main" and ansible_os_family == 'Debian'
 
   - name: Set PMM Client package name with old version to install for yum
+    when: test_repo == "main" and ansible_os_family == "RedHat"
     set_fact:
       pmm_client_old: "pmm2-client-{{ pmm_old_version_rpm.stdout }}"
-    when: test_repo == "main" and ansible_os_family == "RedHat"
 
   - name: Set PMM Client package name to install
+    when: test_repo != "main"
     set_fact:
       pmm_client_old: "pmm2-client"
-    when: test_repo != "main"
 
   - name: Print old version
     ansible.builtin.debug:
       msg: "Installing old version: '{{ pmm_client_old }}'"
 
   - name: Install PMM client old deb packages
-    apt: name={{ pmm_client_old }} update_cache=yes state=present
     when: ansible_os_family == "Debian"
+    apt: name={{ pmm_client_old }} update_cache=yes state=present
 
   - name: Install PMM client old rpm packages
-    yum: name={{ pmm_client_old }} state=present
     when: ansible_os_family == "RedHat"
+    yum: name={{ pmm_client_old }} state=present
 
 ### Setup PMM Client
   - name: Use "pmm-admin config" to connect pmm client to server
@@ -115,14 +115,14 @@
 
 ### start PS 5.7
   - name: Install and start Percona Server 5.7
-    include_tasks: ../tasks/start_ps57.yml
     when: '"ps-5.7" in enabled_db'
+    include_tasks: ../tasks/start_ps57.yml
 
   - name: Check if Metric Endpoint with Auth works for Mysqld Exporter
+    when: '"ps-5.7" in enabled_db'
     shell: "bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
     environment:
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
-    when: '"ps-5.7" in enabled_db'
 ## end PS
 
 ### start PSMDB 6.0
@@ -140,10 +140,11 @@
 
 ### start PGSQL 13
   - name: Install and start Percona Server MongoDB 4.4
-    include_tasks: ../tasks/start_pgsql13.yml
     when: '"pg-13" in enabled_db'
+    include_tasks: ../tasks/start_pgsql13.yml
 
   - name: Check Postgres Exporter metric endpoint with Auth works
+    when: '"pg-13" in enabled_db'
     shell: "{{item}}"
     retries: 3
     delay: 10
@@ -154,9 +155,9 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
     environment:
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
-    when: '"pg-13" in enabled_db'
 
   - name: Check Postgres Exporter metric endpoint with Auth works(service added via socket)
+    when: '"pg-13" in enabled_db'
     shell: "{{item}}"
     retries: 3
     delay: 10
@@ -167,38 +168,37 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
     environment:
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
-    when: '"pg-13" in enabled_db'
 ### end PG
 
 ### Upgrade PMM Client
   - name: Include tasks for enabling testing repo
-    include: ../tasks/enable_testing_repo.yml
     when: test_repo == "testing" or test_repo == ""
+    include: ../tasks/enable_testing_repo.yml
 
   - name: Include tasks for enabling experimental repo
-    include_tasks: ../tasks/enable_experimental_repo.yml
     when: test_repo == "experimental"
+    include_tasks: ../tasks/enable_experimental_repo.yml
 
   - name: Enable pmm2-client release repo
-    command: percona-release enable pmm2-client release
     when: test_repo == "main"
+    command: percona-release enable pmm2-client release
 
   - name: Update apt repositories
-    command: apt-get update -y
     when: test_repo == "main" and ansible_os_family == "Debian"
+    command: apt-get update -y
 
   - name: Update repo for redhat
-    shell: yum update -y
     when: test_repo == "main" and ansible_os_family == "RedHat"
+    shell: yum update -y
     become: true
 
   - name: Upgrade PMM client to the latest deb packages
-    apt: name=pmm2-client update_cache=yes state=latest
     when: ansible_os_family == "Debian"
+    apt: name=pmm2-client update_cache=yes state=latest
 
   - name: Upgrade PMM client to the latest rpm packages
-    yum: name=pmm2-client state=latest
     when: ansible_os_family == "RedHat"
+    yum: name=pmm2-client state=latest
 
 ### Checks after upgrade
   - name: Check that PMM client version is correct
@@ -220,10 +220,10 @@
         - "'MongoDB' in list_output.stdout"
 
   - name: Assert if the pmm-admin list contains MySQL
+    when: '"ps-" in enabled_db | join("")'
     assert:
       that:
         - "'MySQL' in list_output.stdout"
-    when: '"ps-" in enabled_db | join("")'
 
   - name: "Wait for 'node_exporter' is Running"
     include_tasks: ../tasks/wait_exporter_is_running.yml
@@ -236,16 +236,16 @@
       process_name: "vmagent"
 
   - name: "Validate 'postgresql_pgstatements_agent' is Running"
+    when: '"pg-" in enabled_db | join("")'
     include_tasks: ../tasks/verify_exporter_status.yml
     vars:
       process_name: "postgresql_pgstatements_agent"
-    when: '"pg-" in enabled_db | join("")'
 
   - name: "Wait for 'postgres_exporter' is Running"
+    when: '"pg-" in enabled_db | join("")'
     include_tasks: ../tasks/wait_exporter_is_running.yml
     vars:
       process_name: "postgres_exporter"
-    when: '"pg-" in enabled_db | join("")'
 
   - name: Check if Metric Endpoint with Auth works for Node Exporter, MysqlD Exporter, MongoDB Exporter, Postgres Exporter
     shell: "{{item}}"
@@ -257,14 +257,15 @@
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
 
   - name: Check if Metric Endpoint with Auth works for Node Exporter, MysqlD Exporter, MongoDB Exporter, Postgres Exporter
+    when: '"ps-" in enabled_db | join("")'
     shell: "{{item}}"
     with_items:
       - bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1
     environment:
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
-    when: '"ps-" in enabled_db | join("")'
 
   - name: Check if Metric End point with Auth works after upgrade for Postgres exporter when service was added via socket before upgrade
+    when: '"pg-" in enabled_db | join("")'
     shell: "{{item}}"
     with_items:
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
@@ -277,23 +278,22 @@
       - bash -x ../scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
     environment:
       ADMIN_PASSWORD: "{{ pmm_server_password }}"
-    when: '"pg-" in enabled_db | join("")'
 
   - name: Remove MongoDB Socket service, to verify Port output in pmm-admin list commands
-    command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
     when: '"psmdb-" in enabled_db | join("")'
+    command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
 
   - name: Remove PostgreSQL Socket services to verify Port output in pmm-admin list commands
-    command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
     when: '"pg-" in enabled_db | join("")'
+    command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
 
   - name: Parse and set PMM minor version
     shell: "pmm-admin --version | grep ^Version | awk -F. '{print $2}'"
     register: pmm_agent_minor_version
 
   - name: Include Exporters Port in output checks for 2.29.0+
-    include_tasks: ../tasks/exporter-port-output-checks.yml
     when: pmm_agent_minor_version.stdout | int >= 29
+    include_tasks: ../tasks/exporter-port-output-checks.yml
     loop: "{{ ex_list|select|list }}"
     vars:
       ex_list:
