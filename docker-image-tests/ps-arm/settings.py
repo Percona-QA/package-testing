@@ -6,8 +6,11 @@ ps_version = os.getenv('PS_VERSION')
 ps_revision = os.getenv('PS_REVISION')
 
 ps_version_upstream = ps_version.split('-')[0]
-ps_version_percona_1 = ps_version.split('-')[1]
-ps_version_percona = ps_version_percona_1.split('.')[0]
+
+ps_version_percona = ps_version.split('-')[1]
+
+#ps_version_percona = ps_version_percona_1.split('.')[0]
+
 ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
 
 docker_product = 'percona-server'
