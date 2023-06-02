@@ -45,6 +45,11 @@
 # Stop mysql service and bootstrap pxc node
   - name: stop mysql service with service command
     command: service mysql stop
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
+
+  - name: stop mysql service with systemctl command
+    command: systemctl stop mysql
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: copy pxc config on centos
     template: src=../templates/my_rpm_7.j2 
