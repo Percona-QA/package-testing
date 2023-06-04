@@ -7,14 +7,14 @@
 #                                     ex: cmd_admin_list: "pmm-admin list {{ port_flag }}"
 
 - name: set empty port_flag
+  when: port_flag is not defined
   set_fact:
     port_flag: ""
-  when: port_flag is not defined
 
 - name: set cmd_admin_list without flags
+  when: cmd_admin_list is not defined
   set_fact:
     cmd_admin_list: "pmm-admin list"
-  when: cmd_admin_list is not defined
 
 - name: Download install_setup_psmdb.yml
   get_url:

@@ -3,7 +3,7 @@
 #   enables Percona testing repository
 #   installs the latest version of PMM2 client
 #   does some tests of custom port listening
-
+#
 - hosts: all
   become: true
   become_method: sudo

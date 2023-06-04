@@ -2,14 +2,9 @@
 #
 # Task adjustments are handled by parent playbook vars:
 #             var "custom_path"      :  user defined installation folder
-
+#
 - set_fact:
-    path_base: "/usr/local/percona/pmm2/"
-  when: custom_path is not defined
-
-- set_fact:
-    path_base: "{{ custom_path }}"
-  when: custom_path is defined
+    path_base: "{{ (custom_path is defined) | ternary(custom_path, '/usr/local/percona/pmm2/' }}"
 
 - name: Verify existence of all PMM Client artifacts
   shell: |

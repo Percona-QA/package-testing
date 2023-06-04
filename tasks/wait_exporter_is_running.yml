@@ -6,19 +6,19 @@
 #                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
 #           TODO: add arguments doc and make task loop compatible
 - name: set empty port_flag
+  when: port_flag is not defined
   set_fact:
     port_flag: ""
-  when: port_flag is not defined
 
 - name: set default delay
+  when: delay is not defined
   set_fact:
     delay: 5
-  when: delay is not defined
 
 - name: set default retries
+  when: retries is not defined
   set_fact:
     retries: 5
-  when: retries is not defined
 
 - name: Validate {{ process_name }} status
   block:

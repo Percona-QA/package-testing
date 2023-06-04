@@ -5,7 +5,7 @@
 #   enables Percona testing repository
 #   upgrades PMM client and PT to the latest version
 #   does some tests
-
+#
 - hosts: all
   become: true
   become_method: sudo
@@ -30,58 +30,58 @@
 
 ### enable pmm2-client release and install old version to update
   - name: Enable pmm2-client release repo
-    command: percona-release enable pmm2-client release
     when: test_repo == "main"
+    command: percona-release enable pmm2-client release
 
   - name: Update apt repositories
-    command: apt-get update -y
     when: test_repo == "main" and ansible_os_family == "Debian"
+    command: apt-get update -y
     become: true
 
   - name: Update repo for redhat
-    shell: yum update -y
     when: test_repo == "main" and ansible_os_family == "RedHat"
+    shell: yum update -y
     become: true
 
   - name: Detect and save release minor version
+    when: test_repo == "main"
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-server/tags -O - | jq -r .results[].name  | grep -v latest | sort -V | tail -n1 | awk -F. '{print $2}'"
     register: pmm_release_minor_version
-    when: test_repo == "main"
 
   - name: Grep previous release PMM Client version from yum list
+    when: test_repo == "main" and ansible_os_family == "RedHat"
     shell: "yum list pmm2-client --showduplicates | grep 2.{{ pmm_release_minor_version.stdout | int -1 }} | awk '{print $2}' | tail -n1"
     register: pmm_old_version
-    when: test_repo == "main" and ansible_os_family == "RedHat"
 
   - debug: var=pmm_old_version.stdout
     when: test_repo == "main" and ansible_os_family == "RedHat"
 
   - name: Grep previous release PMM Client version from apt list
+    when: test_repo == "main" and ansible_os_family == "Debian"
     shell: "apt-cache madison pmm2-client | grep 2.{{ pmm_release_minor_version.stdout | int -1 }} | awk '{print $3}'"
     register: pmm_old_version
-    when: test_repo == "main" and ansible_os_family == "Debian"
 
   - name: Set PMM Client package name with old version to install
+    when: test_repo == "main"
     set_fact:
       pmm_client_old: "pmm2-client={{ pmm_old_version.stdout }}"
-    when: test_repo == "main"
 
   - name: Set PMM Client package name to install
+    when: test_repo != "main"
     set_fact:
       pmm_client_old: "pmm2-client"
-    when: test_repo != "main"
 
   - name: Print old version
     ansible.builtin.debug:
       msg: "Installing old version: '{{ pmm_client_old }}'"
 
   - name: Install PMM client old deb packages
-    apt: name={{ pmm_client_old }} update_cache=yes state=present
     when: ansible_os_family == "Debian"
+    apt: name={{ pmm_client_old }} update_cache=yes state=present
 
   - name: Install PMM client old rpm packages
-    yum: name={{ pmm_client_old }} state=present
     when: ansible_os_family == "RedHat"
+    yum: name={{ pmm_client_old }} state=present
 
   - name: Print PMM2-Client Version before upgrade
     command: pmm-admin --version
@@ -90,12 +90,12 @@
 
 ### Setup PMM Client
   - name: Configure pmm client to connect to server in push/auto Mode
-    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
 
   - name: Configure pmm client to connect to server in pull Mode
-    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
     when: lookup('env', 'metrics_mode') == "pull"
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
 
   - name: Grep pmm-admin status output
     shell: "pmm-admin status"
@@ -111,20 +111,20 @@
 
 ### Upgrade PMM Client
   - name: Include tasks for enabling test repo
-    include_tasks: ../tasks/enable_testing_repo.yml
     when: test_repo == "testing" or test_repo == ""
+    include_tasks: ../tasks/enable_testing_repo.yml
 
   - name: Include tasks for enabling experimental repo
-    include_tasks: ../tasks/enable_experimental_repo.yml
     when: test_repo == "experimental"
+    include_tasks: ../tasks/enable_experimental_repo.yml
 
   - name: Upgrade PMM client to the latest deb packages
-    apt: name=pmm2-client update_cache=yes state=latest
     when: ansible_os_family == "Debian"
+    apt: name=pmm2-client update_cache=yes state=latest
 
   - name: Upgrade PMM client to the latest rpm packages
-    yum: name=pmm2-client state=latest
     when: ansible_os_family == "RedHat"
+    yum: name=pmm2-client state=latest
 
 ### Checks after upgrade
   - name: Check that PMM client version is correct

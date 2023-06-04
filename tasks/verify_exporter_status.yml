@@ -7,9 +7,9 @@
 #           TODO: add arguments doc and make task loop compatible
 #
 - name: set empty port_flag
+  when: port_flag is not defined
   set_fact:
     port_flag: ""
-  when: port_flag is not defined
 
 - name: Grep {{ process_name }} status
   shell: "pmm-admin list {{ port_flag }} | grep '{{ process_name }}' | awk -F' ' '{print $2}'"

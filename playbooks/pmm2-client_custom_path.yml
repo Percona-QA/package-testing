@@ -5,7 +5,7 @@
 #   perform wrong setup
 #   perform correct setup
 #   verify versions etc.
-
+#
 - hosts: all
   become: true
   become_method: sudo

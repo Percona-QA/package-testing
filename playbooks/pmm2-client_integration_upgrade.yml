@@ -116,7 +116,7 @@
 ### start PS 5.7
   - name: Install and start Percona Server 5.7
     when: '"ps-5.7" in enabled_db'
-    include_tasks: ../tasks/start_ps57.yml
+    include_tasks: ../tasks/install_and_add_to_pmm_ps_57.yml
 
   - name: Check if Metric Endpoint with Auth works for Mysqld Exporter
     when: '"ps-5.7" in enabled_db'
@@ -127,7 +127,7 @@
 
 ### start PSMDB 6.0
   - name: Install and start Percona Server MongoDB 6.0
-    include_tasks: ../tasks/install_and_setup_psmdb_60.yml
+    include_tasks: ../tasks/install_and_add_to_pmm_psmdb_60.yml
 
   - name: Check MongoDB Exporter metric endpoint with Auth(including service with socket)
     shell: "{{item}}"
@@ -141,7 +141,7 @@
 ### start PGSQL 13
   - name: Install and start Percona Server MongoDB 4.4
     when: '"pg-13" in enabled_db'
-    include_tasks: ../tasks/start_pgsql13.yml
+    include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql_13.yml
 
   - name: Check Postgres Exporter metric endpoint with Auth works
     when: '"pg-13" in enabled_db'
@@ -293,7 +293,7 @@
 
   - name: Include Exporters Port in output checks for 2.29.0+
     when: pmm_agent_minor_version.stdout | int >= 29
-    include_tasks: ../tasks/exporter-port-output-checks.yml
+    include_tasks: ../tasks/verify_exporter_port_output.yml
     loop: "{{ ex_list|select|list }}"
     vars:
       ex_list:
