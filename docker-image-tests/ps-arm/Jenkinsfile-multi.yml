@@ -1,0 +1,14 @@
+- job:
+    name: test-ps-docker-image-multi
+    project-type: pipeline
+    description: |
+        Do not edit this job through the web!
+    pipeline-scm:
+      scm:
+        - git:
+            url: https://github.com/kaushikpuneet07/package-testing.git
+            branches:
+            - 'docker-aarch64'
+            wipe-workspace: false
+      lightweight-checkout: true
+      script-path: docker-image-tests/ps-arm/Jenkinsfile-multi
