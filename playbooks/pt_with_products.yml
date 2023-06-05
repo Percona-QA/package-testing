@@ -46,6 +46,10 @@
     include_tasks: ../tasks/install_and_run_psmdb.yml
     when: lookup('env', 'install_with') == "psmdb50"
 
+  - name: include tasks for installing and setup psmdb 60
+    include_tasks: ../tasks/install_and_run_psmdb.yml
+    when: lookup('env', 'install_with') == "psmdb60"
+
 # Enable only tools repo to install pt
   - name: include tasks for enabling tools testing repo
     include_tasks: ../tasks/enable_only_repo_for_pt.yml
