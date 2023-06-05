@@ -77,17 +77,12 @@
     include_tasks: ../tasks/install_pt.yml
 
 #   will fail till the PT-1959 is fixed
-  # - name: check that pt version is correct
-  #   command: ../version_check.sh pt
+  - name: check that pt version is correct
+    command: ../version_check.sh pt
 
   - name: run pt-mongodb-summary
     command: pt-mongodb-summary
     when: lookup('env', 'install_with') is match('psmdb')
-    register: pt_mongo_output
-  
-  - name: debug mongo output
-    debug:
-      var: pt_mongo_output
 
   - name: run pt-mysql-summary
     command: pt-mysql-summary
