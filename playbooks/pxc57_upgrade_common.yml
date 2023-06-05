@@ -98,7 +98,7 @@
     throttle: 1
     
   - name: restart the service
-    command: service mysql restart
+    command: systemctl restart mysql
     throttle: 1
 
   - name: register PXC version
