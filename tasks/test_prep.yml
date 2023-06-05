@@ -154,7 +154,7 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/eleo007/package-testing/archive/master.zip -b pt_ol9
+    - wget --no-check-certificate -b pt_ol9 -O master.zip https://github.com/eleo007/package-testing/archive/master.zip
     - unzip master.zip
     - rm -f master.zip
     - mv package-testing-pt_ol9 /package-testing
