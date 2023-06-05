@@ -154,10 +154,10 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+    - wget --no-check-certificate -O master.zip https://github.com/eleo007/package-testing/archive/master.zip -b pt_ol9
     - unzip master.zip
     - rm -f master.zip
-    - mv package-testing-master /package-testing
+    - mv package-testing-pt_ol9 /package-testing
     when: lookup('env', 'USE_LOCAL_PKG_TEST') == "" or lookup('env', 'USE_LOCAL_PKG_TEST') == "0"
 
   - name: install latest bats from github
