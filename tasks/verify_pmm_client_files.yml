@@ -4,7 +4,7 @@
 #             var "custom_path"      :  user defined installation folder
 #
 - set_fact:
-    path_base: "{{ (custom_path is defined) | ternary(custom_path, '/usr/local/percona/pmm2/' }}"
+    path_base: "{{ (custom_path is defined) | ternary(custom_path, '/usr/local/percona/pmm2/') }}"
 
 - name: Verify existence of all PMM Client artifacts
   shell: |
