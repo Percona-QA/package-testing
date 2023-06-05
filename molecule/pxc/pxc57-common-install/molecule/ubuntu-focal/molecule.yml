@@ -15,6 +15,7 @@ platforms:
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
+      job-name: pxc-package-testing-job-pxc57
   - name: pxc3-57-common-ubuntu-focal-install
     region: us-west-2
     image: ami-0892d3c7ee96c0bf7
@@ -24,6 +25,7 @@ platforms:
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
+      job-name: pxc-package-testing-job-pxc57
 provisioner:
   name: ansible
   playbooks:

@@ -15,6 +15,7 @@ platforms:
     root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
+      job-name: pxc-package-testing-job-pxc80
   - name: pxc3-80-common-min-amazon-2-install
     region: us-west-2
     image: ami-0f9f005c313373218
@@ -24,6 +25,7 @@ platforms:
     root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
+      job-name: pxc-package-testing-job-pxc80
 provisioner:
   name: ansible
   playbooks:
