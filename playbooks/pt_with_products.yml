@@ -83,6 +83,11 @@
   - name: run pt-mongodb-summary
     command: pt-mongodb-summary
     when: lookup('env', 'install_with') is match('psmdb')
+    register: pt_mongo_output
+  
+  - name: debug mongo output
+    debug:
+      var: pt_mongo_output
 
   - name: run pt-mysql-summary
     command: pt-mysql-summary
