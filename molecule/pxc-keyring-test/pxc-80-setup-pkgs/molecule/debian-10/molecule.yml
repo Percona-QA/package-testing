@@ -1,0 +1,54 @@
+---
+scenario:
+  name: debian-10
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: pxc1-80-debian-10-install-keyring-test
+    region: us-west-2
+    image: ami-01efaf0d45d8730a6
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t2.small
+    ssh_user: admin
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: pxc-keyring-test-job
+  - name: pxc2-80-debian-10-install-keyring-test
+    region: us-west-2
+    image: ami-01efaf0d45d8730a6
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t2.small
+    ssh_user: admin
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: pxc-keyring-test-job
+  - name: pxc3-80-debian-10-install-keyring-test
+    region: us-west-2
+    image: ami-01efaf0d45d8730a6
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t2.small
+    ssh_user: admin
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: pxc-keyring-test-job
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../../../playbooks/create.yml
+    destroy: ../../../../playbooks/destroy.yml
+    prepare: ../../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+  inventory:
+    host_vars:
+      pxc1-80-debian-10-install-keyring-test:
+        ip_env: "{{ ansible_host }}"
+      pxc2-80-debian-10-install-keyring-test:
+        ip_env: "{{ ansible_host }}"
+      pxc3-80-debian-10-install-keyring-test:
+        ip_env: "{{ ansible_host }}"
+        sleep_before_tests: 40
