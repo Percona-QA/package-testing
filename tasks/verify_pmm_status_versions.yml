@@ -6,9 +6,9 @@
 #                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
 
 - name: set empty port_flag
+  when: port_flag is not defined
   set_fact:
     port_flag: ""
-  when: port_flag is not defined
 
 - name: Grep pmm-admin status output
   shell: "pmm-admin status {{ port_flag }}"
@@ -33,10 +33,10 @@
     msg: PMM Server version is {{ pmm_server_version.stdout }}
 
 - name: Assert PMM Server version from "status" output ({{ pmm_server_version.stdout }}) equals expected "{{ pmm_version }}"
+  when: lookup('env', 'install_repo') == "testing"
   assert:
     that:
       - "'{{ pmm_version }}' in pmm_server_version.stdout"
-  when: lookup('env', 'install_repo') == "testing"
 
 - name: Grep PMM Admin version from pmm-admin status output
   shell: "pmm-admin status {{ port_flag }} | grep pmm-admin | awk -F' ' '{print $3}'"
@@ -47,10 +47,10 @@
     msg: pmm-agent version is {{ pmm_admin_version.stdout }}
 
 - name: Assert PMM Admin version from "status" output ({{ pmm_admin_version.stdout }}) equals expected "{{ pmm_version }}"
+#  when: lookup('env', 'install_repo') == "testing"
   assert:
     that:
       - "'{{ pmm_version }}' in pmm_admin_version.stdout"
-#  when: lookup('env', 'install_repo') == "testing"
 
 - name: Grep PMM Agent version from pmm-admin status output
   shell: "pmm-admin status {{ port_flag }} | grep pmm-agent | awk -F' ' '{print $3}'"

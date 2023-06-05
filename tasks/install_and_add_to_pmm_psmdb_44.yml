@@ -5,32 +5,33 @@
 #                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
 #             var "cmd_admin_list" :  to access agent with custom port
 #                                     ex: cmd_admin_list: "pmm-admin list {{ port_flag }}"
-
+#
 - name: set empty port_flag
+  when: port_flag is not defined
   set_fact:
     port_flag: ""
-  when: port_flag is not defined
 
 - name: set cmd_admin_list without flags
+  when: cmd_admin_list is not defined
   set_fact:
     cmd_admin_list: "pmm-admin list"
-  when: cmd_admin_list is not defined
 
-- name: include tasks for enabling main repo
-  include_tasks: ../tasks/enable_psmdb_repo.yml
+- name: enable psmdb repo
+  include_tasks: ./enable_repo.yml
   vars:
-    psmdb_repo: "psmdb-44"
+    only: yes
+    package: "psmdb-44"
 
 - name: install PSMDB packages
   include_tasks: ../tasks/install_psmdb.yml
 
 - name: start mongod with service
-  command: service mongod start
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+  command: service mongod start
 
 - name: start mongod with systemctl
-  command: systemctl start mongod
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 6
+  command: systemctl start mongod
 
 - name: add mongodb metrics to monitoring
   command: pmm-admin add mongodb {{ port_flag }} --service-name=mongodb_{{ instance_ip }}

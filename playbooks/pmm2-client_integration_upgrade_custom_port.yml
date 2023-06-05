@@ -5,7 +5,7 @@
 #   enables Percona testing repository
 #   upgrades PMM client
 #   does some tests of custom port listening
-
+#
 - hosts: all
   become: true
   become_method: sudo
@@ -40,54 +40,54 @@
 
 ### enable pmm2-client release and install old version to update
   - name: enable pmm2-client release repo
-    command: percona-release enable pmm2-client release
     when: test_repo == "main"
+    command: percona-release enable pmm2-client release
 
   - name: update apt repositories
-    command: apt-get update -y
     when: test_repo == "main" and ansible_os_family == "Debian"
+    command: apt-get update -y
 
   - name: update repo for redhat
-    shell: yum update -y
     when: test_repo == "main" and ansible_os_family == "RedHat"
+    shell: yum update -y
     become: true
 
   - name: detect and save release minor version
+    when: test_repo == "main"
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-client/tags -O - | jq -r .results[].name  | grep -v latest | sort -V | tail -n1 | awk -F. '{print $2}'"
     register: pmm_release_minor_version
-    when: test_repo == "main"
 
   - name: grep previous release PMM Client version from yum list
+    when: test_repo == "main" and ansible_os_family == "RedHat"
     shell: "yum list pmm2-client --showduplicates | grep 2.{{ pmm_release_minor_version.stdout | int -1 | tail -n1}}"
     register: pmm_old_version
-    when: test_repo == "main" and ansible_os_family == "RedHat"
 
   - name: grep previous release PMM Client version from apt list
+    when: test_repo == "main" and ansible_os_family == "Debian"
     shell: "apt-cache madison pmm2-client | grep 2.{{ pmm_release_minor_version.stdout | int -1 }} | awk '{print $3}'"
     register: pmm_old_version
-    when: test_repo == "main" and ansible_os_family == "Debian"
 
   - name: set PMM Client package name with old version to install
+    when: test_repo == "main"
     set_fact:
       pmm_client_old: "pmm2-client={{ pmm_old_version.stdout }}"
-    when: test_repo == "main"
 
   - name: set PMM Client package name to install
+    when: test_repo != "main"
     set_fact:
       pmm_client_old: "pmm2-client"
-    when: test_repo != "main"
 
   - name: print old version
     ansible.builtin.debug:
       msg: "Installing old version: '{{ pmm_client_old }}'"
 
   - name: install PMM client old deb packages
-    apt: name={{ pmm_client_old }} update_cache=yes state=present
     when: ansible_os_family == "Debian"
+    apt: name={{ pmm_client_old }} update_cache=yes state=present
 
   - name: install PMM client old rpm packages
-    yum: name={{ pmm_client_old }} state=present
     when: ansible_os_family == "RedHat"
+    yum: name={{ pmm_client_old }} state=present
 
 ### Setup PMM Client
   - name: define "--metrics-mode=push|pull|auto" argument
@@ -255,37 +255,37 @@
 ## end PG
 
   - name: include tasks for enabling testing repo
-    include: ../tasks/enable_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    include: ../tasks/enable_testing_repo.yml
 
   - name: include tasks for enabling experimental repo
-    include_tasks: ../tasks/enable_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
+    include_tasks: ../tasks/enable_experimental_repo.yml
 
   - name: enable pmm2-client release repo
     command: percona-release enable pmm2-client release
     when: test_repo == "main"
 
   - name: update apt repositories
-    command: apt-get update -y
     when: test_repo == "main" and ansible_os_family == "Debian"
+    command: apt-get update -y
 
   - name: update repo for redhat
-    shell: yum update -y
     when: test_repo == "main" and ansible_os_family == "RedHat"
+    shell: yum update -y
     become: true
 
   - name: upgrade PMM client to the latest deb packages
+    when: ansible_os_family == "Debian"
     apt: name={{item}} update_cache=yes state=latest
     with_items:
     - pmm2-client
-    when: ansible_os_family == "Debian"
 
   - name: upgrade PMM client to the latest rpm packages
+    when: ansible_os_family == "RedHat"
     yum: name={{item}} state=latest
     with_items:
     - pmm2-client
-    when: ansible_os_family == "RedHat"
 
 ### Checks after upgrade
   - name: check that PMM client version is correct
@@ -313,10 +313,10 @@
         - "'MySQL' in list_output.stdout"
 
   - name: Assert if the pmm-admin list contains postgreSQL instance
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
     assert:
       that:
         - "'PostgreSQL' in list_output.stdout"
-    when: ansible_distribution == 'Ubuntu' and ansible_distribution_release != 'xenial'
 
   - name: grep pmm_agent status from pmm-admin list
     shell: "{{ cmd_admin_list }} | grep pmm_agent | awk -F' ' '{print $2}'"
