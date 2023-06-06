@@ -1,6 +1,6 @@
 ---
 # This playbook does following:
-#   
+#
 #   installs latest version of Percona-Server-57 (ps57), Percona-Server-80 (ps80), Percona-XtraDB-Cluster-57 (pxc57), Percona-XtraDB-Cluster-80 (pxc80), MysqL server 57 (upstream57), MySQL server 80 (upstream80), Percona Server for MongoDB 44 (psmdb44), Percona Server for MongoDB 50 (psmdb50).
 #   enables Percona tools repository
 #   installs latest version of Percona-Toolkit (pt) and runs one of the tools (pt-mysql-summary or pt-psmdb-summary)
@@ -49,6 +49,26 @@
   - name: include tasks for installing and setup psmdb 60
     include_tasks: ../tasks/install_and_run_psmdb.yml
     when: lookup('env', 'install_with') == "psmdb60"
+
+  - name: enable psmdb repo
+    when: "'psmdb' in lookup('env', 'install_with')"
+    include_tasks: ./enable_repo.yml
+    vars:
+      package: "psmdb-{{ lookup('env', 'install_with')  | regex_replace('[^0-9]', '') | int }}"
+      repository: "release"
+
+  - name: Download install_setup_psmdb.yml
+    when: "'psmdb' in lookup('env', 'install_with')"
+    get_url:
+      url: https://raw.githubusercontent.com/Percona-QA/psmdb-testing/main/pbm/tasks/install_setup_psmdb.yml
+      dest: /tmp
+      mode: 0777
+
+  - name: Run install_setup_psmdb.yml
+    when: "psmdb" in lookup('env', 'install_with')
+    include_tasks: /tmp/install_setup_psmdb.yml
+    vars:
+      psmdb_to_test: "psmdb-{{ lookup('env', 'install_with')  | regex_replace('[^0-9]', '') | int }}"
 
 # Enable only tools repo to install pt
   - name: include tasks for enabling tools testing repo
