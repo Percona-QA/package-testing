@@ -13,6 +13,7 @@ platforms:
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pg-worker
+      job-name: pdps-orchestrator
 provisioner:
   name: ansible
   log: True
