@@ -38,25 +38,17 @@
     include_tasks: ../tasks/install_and_run_upstream80.yml
     when: lookup('env', 'install_with') == "upstream80"
 
-  - name: enable psmdb repo
-    when: "'psmdb' in lookup('env', 'install_with')"
-    include_tasks: ./enable_repo.yml
-    vars:
-      package: "psmdb-{{ lookup('env', 'install_with')  | regex_replace('[^0-9]', '') | int }}"
-      repository: "release"
+  - name: include tasks for installing and setup psmdb 44
+    include_tasks: ../tasks/install_and_run_psmdb.yml
+    when: lookup('env', 'install_with') == "psmdb44"
 
-  - name: Download install_setup_psmdb.yml
-    when: "'psmdb' in lookup('env', 'install_with')"
-    get_url:
-      url: https://raw.githubusercontent.com/Percona-QA/psmdb-testing/main/pbm/tasks/install_setup_psmdb.yml
-      dest: /tmp
-      mode: 0777
+  - name: include tasks for installing and setup psmdb 50
+    include_tasks: ../tasks/install_and_run_psmdb.yml
+    when: lookup('env', 'install_with') == "psmdb50"
 
-  - name: Run install_setup_psmdb.yml
-    when: "psmdb" in lookup('env', 'install_with')
-    include_tasks: /tmp/install_setup_psmdb.yml
-    vars:
-      psmdb_to_test: "psmdb-{{ lookup('env', 'install_with')  | regex_replace('[^0-9]', '') | int }}"
+  - name: include tasks for installing and setup psmdb 60
+    include_tasks: ../tasks/install_and_run_psmdb.yml
+    when: lookup('env', 'install_with') == "psmdb60"
 
 # Enable only tools repo to install pt
   - name: include tasks for enabling tools testing repo
