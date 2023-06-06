@@ -11,6 +11,7 @@ platforms:
     root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: jenkins-ps80-worker
+      job-name: pdps
 provisioner:
   name: ansible
   log: True
