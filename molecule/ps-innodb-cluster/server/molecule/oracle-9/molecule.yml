@@ -17,6 +17,7 @@ platforms:
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
+      job-name: test-ps-innodb-cluster
   - name: ps-node2-oracle-9
     region: us-west-2
     image: ami-00a5d5bcea31bb02c
@@ -26,6 +27,7 @@ platforms:
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
+      job-name: test-ps-innodb-cluster
   - name: ps-node3-oracle-9
     region: us-west-2
     image: ami-00a5d5bcea31bb02c
@@ -35,6 +37,7 @@ platforms:
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
+      job-name: test-ps-innodb-cluster
 provisioner:
   name: ansible
   lint:
