@@ -143,23 +143,23 @@
   - name: restart mysql service
     service: name=mysql state=restarted
 
-  - name: install percona-mysql-shell package for CentOS
-    yum:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - percona-mysql-shell
-    when: ansible_os_family == "RedHat"
+#   - name: install percona-mysql-shell package for CentOS
+#     yum:
+#       name: "{{ packages }}"
+#     vars:
+#       packages:
+#       - percona-mysql-shell
+#     when: ansible_os_family == "RedHat"
 
-  - name: install percona-mysql-shell package for Debian/Ubuntu
-    apt:
-      update_cache: yes
-      state: present
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - percona-mysql-shell
-    when: ansible_os_family == "Debian"
+#   - name: install percona-mysql-shell package for Debian/Ubuntu
+#     apt:
+#       update_cache: yes
+#       state: present
+#       name: "{{ packages }}"
+#     vars:
+#       packages:
+#       - percona-mysql-shell
+#     when: ansible_os_family == "Debian"
 
   - name: install percona-mysql-router package for CentOS
     yum:
@@ -287,24 +287,24 @@
   - name: restart mysql service
     service: name=mysql state=restarted
 
-  - name: install percona-mysql-shell package for CentOS
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-mysql-shell
-    when: ansible_os_family == "RedHat"
+#   - name: install percona-mysql-shell package for CentOS
+#     yum:
+#       name: "{{ packages }}"
+#       state: latest
+#     vars:
+#       packages:
+#       - percona-mysql-shell
+#     when: ansible_os_family == "RedHat"
 
-  - name: install percona-mysql-shell package for Debian/Ubuntu
-    apt:
-      update_cache: yes
-      state: latest
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - percona-mysql-shell
-    when: ansible_os_family == "Debian"
+#   - name: install percona-mysql-shell package for Debian/Ubuntu
+#     apt:
+#       update_cache: yes
+#       state: latest
+#       name: "{{ packages }}"
+#     vars:
+#       packages:
+#       - percona-mysql-shell
+#     when: ansible_os_family == "Debian"
 
   - name: install percona-mysql-router package for CentOS
     yum:
