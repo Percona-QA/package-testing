@@ -10,12 +10,12 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 DEBPACKAGES = ['percona-server-server', 'percona-server-test',
                'percona-server-dbg', 'percona-server-source',
                'percona-server-client', 'percona-server-rocksdb',
-               'percona-mysql-router', 'percona-mysql-shell']
+               'percona-mysql-router']
 
 RPMPACKAGES = ['percona-server-server', 'percona-server-client',
                'percona-server-test', 'percona-server-debuginfo',
                'percona-server-devel', 'percona-server-rocksdb',
-               'percona-mysql-router', 'percona-mysql-shell']
+               'percona-mysql-router']
 
 PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    " fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so';\"",
@@ -117,7 +117,7 @@ def test_check_rpm_package(host, package):
             assert VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
 
 
-@pytest.mark.parametrize("binary", ['mysqlsh', 'mysql', 'mysqlrouter'])
+@pytest.mark.parametrize("binary", ['mysql', 'mysqlrouter'])
 def test_binary_version(host, binary):
     cmd = "{} --version".format(binary)
     result = host.run(cmd)
