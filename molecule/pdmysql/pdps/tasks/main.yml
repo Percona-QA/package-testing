@@ -168,7 +168,7 @@
       name: "{{ packages }}"
     vars:
       packages:
-      - percona-mysql-shell
+#       - percona-mysql-shell
       - percona-mysql-router
     when: ansible_os_family == "Debian"
 
@@ -178,7 +178,7 @@
     vars:
       packages:
       - percona-mysql-router
-      - percona-mysql-shell
+#       - percona-mysql-shell
     when: ansible_os_family == "RedHat"
 
   - name: start mysql service
