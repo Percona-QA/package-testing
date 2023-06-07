@@ -15,6 +15,7 @@ platforms:
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
+      job-name: pxc-package-testing-job-pxc57
   - name: pxc3-57-common-ubuntu-jammy-install
     region: us-west-2
     image: ami-0ee8244746ec5d6d4
@@ -24,6 +25,7 @@ platforms:
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
+      job-name: pxc-package-testing-job-pxc57
 provisioner:
   name: ansible
   playbooks:

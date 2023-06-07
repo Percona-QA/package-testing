@@ -15,6 +15,7 @@ platforms:
     root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
+      job-name: pxc-package-testing-job-pxc80
   - name: pxc3-80-common-debian-10-upgrade
     region: us-west-2
     image: ami-013e2c587714af230
@@ -24,6 +25,7 @@ platforms:
     root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
+      job-name: pxc-package-testing-job-pxc80
 provisioner:
   name: ansible
   playbooks:
