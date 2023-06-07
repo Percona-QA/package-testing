@@ -250,13 +250,13 @@
     when: ansible_os_family == "RedHat"
 
   - name: start proxysql service
-    service: name=proxysql state=started
+    systemd: name=proxysql state=started
 
   - name: stop proxysql service
-    service: name=proxysql state=stopped
+    systemd: name=proxysql state=stopped
 
   - name: start proxysql service
-    service: name=proxysql state=started
+    systemd: name=proxysql state=started
 
   - name: install orchestrator new deb packages
     apt:
