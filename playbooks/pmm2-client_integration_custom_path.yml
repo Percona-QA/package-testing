@@ -3,7 +3,7 @@
 #   enables Percona testing repository
 #   installs latest version of PMM2 client
 #   does some tests
-
+#
 - hosts: all
   become: true
   become_method: sudo
@@ -55,7 +55,7 @@
 
 ### start PS 5.7
   - name: install and start Percona Server 5.7
-    include_tasks: ../tasks/start_ps57.yml
+    include_tasks: ../tasks/install_and_add_to_pmm_ps_57.yml
 
   - name: check if Metric End point with Auth works for Mysqld Exporter
     shell: "{{item}}"
@@ -65,7 +65,7 @@
 
 ### start PSMDB 4.4
   - name: install and start Percona Server MongoDB 4.4
-    include_tasks: ../tasks/start_psmdb44.yml
+    include_tasks: ../tasks/install_and_add_to_pmm_psmdb_44.yml
 
   - name: check if Metric End point with Auth works for MongoDB Exporter
     shell: "{{item}}"

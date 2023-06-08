@@ -6,7 +6,7 @@
 #
 #   must be called with "include_tasks" and "with_items:" or "loop:", ex:
 #  - name: some name for the task
-#    include_tasks: ../tasks/exporter-port-output-checks.yml
+#    include_tasks: ../tasks/verify_exporter_port_output.yml
 #    loop:
 #      - vmagent
 #      - node_exporter

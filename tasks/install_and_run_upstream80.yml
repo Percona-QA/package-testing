@@ -19,11 +19,15 @@
     rpm_key:
       state: present
       key: http://repo.mysql.com/RPM-GPG-KEY-mysql-2022
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
 
   - name: Install MySQL RHEL 8 yum repository package
     yum: name=https://repo.mysql.com/mysql80-community-release-el8-3.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: Install MySQL RHEL 9 yum repository package
+    yum: name=https://repo.mysql.com/mysql80-community-release-el9-1.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: setup epel 7 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
@@ -63,7 +67,7 @@
       packages:
       - python3-libselinux
       - mysql-community-server
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
 
 # Start mysql service
   - name: start mysql service on debian
