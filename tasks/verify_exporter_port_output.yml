@@ -48,7 +48,7 @@
   assert:
     that:
       - port_from_ps.stdout == status_port_output.stdout
-    fail_msg: "{{ port_from_ps.stdout }} != {{ status_port_output.stdout }}"
+    fail_msg: 'ps-port: "{{ port_from_ps.stdout }}" != status-port: "{{ status_port_output.stdout }}"'
     success_msg: "Success: {{ port_from_ps.stdout }} == {{ status_port_output.stdout }}"
 
 - name: "{{ item }}: get port from pmm-admin inventory list agents output"

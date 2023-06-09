@@ -30,6 +30,7 @@ export token=$(printf '%s' pmm:${agent_password} | base64)
 export listen_port=$(pmm-admin list | grep ${agent_id} | awk -F' ' '{print $NF}')
 if [ -z ${listen_port} ]; then
         echo "Failed to find port for '${service_name}' service"
+        pmm-admin list
         exit 1;
 fi
 if curl -s "http://${pmm_client_ip}:${listen_port}/metrics" | grep -q "${metric_name} ${metric_value}"; then
