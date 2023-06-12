@@ -7,9 +7,9 @@ driver:
   name: ec2
 platforms:
   - name: pxc2-57-common-ubuntu-jammy-install
-    region: us-west-2
-    image: ami-0ee8244746ec5d6d4
-    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    region: us-west-1
+    image: ami-0dc5e9ff792ec08e3
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: t2.small
     ssh_user: ubuntu
     root_device_name: /dev/sda1
@@ -17,9 +17,9 @@ platforms:
       iit-billing-tag: jenkins-pxc-worker
       job-name: pxc-package-testing-job-pxc57
   - name: pxc3-57-common-ubuntu-jammy-install
-    region: us-west-2
-    image: ami-0ee8244746ec5d6d4
-    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    region: us-west-1
+    image: ami-0dc5e9ff792ec08e3
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: t2.small
     ssh_user: ubuntu
     root_device_name: /dev/sda1
