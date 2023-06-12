@@ -37,8 +37,8 @@ class TestMysqlEnvironment:
             assert host.check_output('mysql --version') == 'mysql  Ver 14.14 Distrib '+ps_version+', for Linux (x86_64) using  7.0'
             assert host.check_output('mysqld --version') == 'mysqld  Ver '+ps_version+' for Linux on x86_64 (Percona Server (GPL), Release '+ps_version_percona+', Revision '+ps_revision+')'
         else:
-            assert host.check_output('mysql --version') == 'mysql  Ver '+ ps_version +' for Linux on x86_64 (Percona Server (GPL), Release '+ ps_version_percona +', Revision '+ ps_revision +')'
-            assert host.check_output('mysqld --version') == '/usr/sbin/mysqld  Ver '+ ps_version +' for Linux on x86_64 (Percona Server (GPL), Release '+ ps_version_percona +', Revision '+ ps_revision +')'
+            assert host.check_output('mysql --version') == 'mysql  Ver '+ ps_version_upstream + '-' + ps_version_percona +' for Linux on x86_64 (Percona Server (GPL), Release '+ ps_version_percona +', Revision '+ ps_revision +')'
+            assert host.check_output('mysqld --version') == '/usr/sbin/mysqld  Ver '+ ps_version_upstream + '-' + ps_version_percona +' for Linux on x86_64 (Percona Server (GPL), Release '+ ps_version_percona +', Revision '+ ps_revision +')'
 
     def test_process_running(self, host):
         assert host.process.get(user="mysql", comm="mysqld")
