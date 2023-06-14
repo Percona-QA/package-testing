@@ -18,15 +18,15 @@ docker_image = docker_acc + "/" + docker_product + ":" + docker_tag
 # 8.0
 ps80_packages = (
   'percona-server-client', 'percona-server-rocksdb', 'percona-server-server',
-  'percona-server-shared', 'percona-mysql-shell'
+  'percona-server-shared'
 )
 ps80_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/ps-admin', '/usr/bin/mysqladmin', '/usr/bin/mysqlbinlog',
   '/usr/sbin/mysqld-debug', '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow', '/usr/bin/mysqlimport', '/usr/bin/mysqlpump',
   '/usr/bin/mysqlshow', '/usr/bin/mysqlslap', '/usr/bin/mysqlcheck', '/usr/bin/mysql_config_editor', '/usr/bin/mysql_config',
-  '/usr/bin/mysql_config-64', '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade',
+  '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade',
   '/usr/bin/hostname', '/usr/bin/gunzip', '/usr/bin/my_print_defaults', '/usr/bin/cat', '/usr/bin/mysql_tzinfo_to_sql',
-  '/usr/bin/grep', '/usr/bin/cut', '/usr/bin/tail', '/usr/bin/sed', '/usr/bin/find', '/usr/bin/kill', '/usr/bin/gawk', '/usr/bin/mysqlsh'
+  '/usr/bin/grep', '/usr/bin/cut', '/usr/bin/tail', '/usr/bin/sed', '/usr/bin/find', '/usr/bin/kill', '/usr/bin/gawk'
 )
 ps80_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
