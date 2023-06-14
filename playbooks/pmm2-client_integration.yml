@@ -113,10 +113,10 @@
       retries: 3
       delay: 10
     loop:
-      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector=\"\custom_query.hr\"\} 1' }
-      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector=\"\custom_query.lr\"\} 1' }
-      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector=\"\custom_query.mr\"\} 1' }
-      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector=\"\exporter\"\} 1' }
+      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.hr"} 1' }
+      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.lr"} 1' }
+      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
+      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
 
   - name: Verify Postgres Exporter metric endpoint with Auth works(service added via socket)
     when: '"pg-" in enabled_db | join("")'
@@ -125,10 +125,10 @@
       retries: 3
       delay: 10
     loop:
-      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector=\"\custom_query.hr\"\} 1' }
-      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector=\"\custom_query.lr\"\} 1' }
-      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector=\"\custom_query.mr\"\} 1' }
-      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector=\"\exporter\"\} 1' }
+      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.hr"} 1' }
+      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.lr"} 1' }
+      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
+      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
 
   - name: Remove PostgreSQL instances added via socket
     when: '"pg-13" in enabled_db'
