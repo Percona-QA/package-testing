@@ -35,3 +35,4 @@
     - name: Waiting failed
       debug:
         msg: "{{ process_name }} status is '{{ last_status.stdout }}'!"
+      failed_when: true
