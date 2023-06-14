@@ -33,7 +33,7 @@
 
     - name: "{{ item.service_name }}: grep Agent ID"
       when: service_id.changed
-      shell: "echo '{{ list_output.stdout }}' | grep '{{ service_id.output }}' | awk '/_exporter/ {print $4}'"
+      shell: "echo '{{ list_output.stdout }}' | grep '{{ service_id.stdout }}' | awk '/_exporter/ {print $4}'"
       register: service_agent_id
 
     - set_fact:
