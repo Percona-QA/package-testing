@@ -6,9 +6,9 @@
     pipeline-scm:
       scm:
         - git:
-            url: https://github.com/kaushikpuneet07/package-testing.git
+            url: https://github.com/Percona-QA/package-testing.git
             branches:
-            - 'docker-aarch64'
+            - 'master'
             wipe-workspace: false
       lightweight-checkout: true
       script-path: docker-image-tests/ps-arm/Jenkinsfile-multi
