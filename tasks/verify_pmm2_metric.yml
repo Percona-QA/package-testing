@@ -43,10 +43,6 @@
         agent_password: "{{ agent_id.stdout }}"
       when: agent_password is not defined
 
-    - name: Generate HTTP AUTH token
-      shell: printf '%s' pmm:{{ agent_password }} | base64
-      register: auth_token
-
     - name: "{{ item.service_name }}:: grep exporter port"
       shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id.stdout }}' | awk '/_exporter/ {print $NF}'"
       register: exporter_port
@@ -65,7 +61,7 @@
 
     - block:
         - name: "{{ item.service_name }}: curl metric with auth token"
-          shell: "curl -s -H 'Authorization: Basic {{ auth_token.stdout }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
+          shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_password) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
           register: metric_with_auth
           until: metric_with_auth.stdout == item.metric
           delay: "{{ delay | default(0, true) }}"
