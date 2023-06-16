@@ -16,14 +16,14 @@
 #
 - block:
     - name: "{{ item }}: grep port from ps aux"
-      shell: "ps aux | grep -v grep | grep {{ item }} | awk -F'{{ (item == 'vmagent') | ternary(''127.0.0.1:'', '=:') }}' '{ print $2; }' | awk -F' ' '{ print $1; }'"
+      shell: "ps aux | grep -v grep | grep {{ item }} | awk -F'{{ (item == 'vmagent') | ternary('127.0.0.1:', '=:') }}' '{ print $2; }' | awk -F' ' '{ print $1; }'"
       register: port_from_ps
       until: port_from_ps.stdout | length > 3
       delay: 2
       retries: 5
-    - name: "{{ item }}: port <port_from_ps.stdout> found!"
+    - name: "{{ item }}: port found!"
       debug:
-        msg: "{{ process_name }} is 'Running'"
+        msg: "{{ item }} port is <{{port_from_ps.stdout}}>"
   rescue:
     - shell: "ps aux | grep -v grep | grep {{ item }} "
       register: ps_aux
