@@ -6,7 +6,7 @@
 #
 #   must be called with "include_tasks" and "with_items, ex:
 #  - name: some name for the task
-#    include_tasks: ../tasks/exporter-port-output-checks.yml
+#    include_tasks: ../tasks/verify_exporter_port_output.yml
 #    with_items:
 #      - vmagent
 #      - node_exporter
@@ -15,14 +15,14 @@
 #      - mysqld_exporter
 
 - name: "get {{ item }} port from ps"
+  when: item != "vmagent"
   shell: "ps aux | grep -v grep | grep {{ item }} | awk -F '=:' '{ print $2; }' | awk -F' ' '{ print $1; }'"
   register: node_port
-  when: item != "vmagent"
 
 - name: "get vmagent port from ps"
+  when: item == "vmagent"
   shell: "ps aux | grep -v grep | grep vmagent | awk -F'127.0.0.1:' '{ print $2; }' | awk -F' ' '{ print $1; }'"
   register: vmagent_port
-  when: item == "vmagent"
 
 # unfortunately the only way to set the same variable in different conditions is to store values for all conditions
 - name: "set {{ item }} port from ps"
@@ -56,17 +56,17 @@
       - port_from_ps.stdout == status_port_output.stdout
 
 - name: "get {{ item }} port from pmm-admin inventory list agents output"
+  when: item != "vmagent"
   shell: "pmm-admin inventory list agents | awk '/{{ item }}/ {print $NF}'"
   register: inventory_list_agents_port_output
-  when: item != "vmagent"
 
 - name: Print values before assert
+  when: item != "vmagent"
   ansible.builtin.debug:
     msg: "Assert: {{ port_from_ps.stdout }} == {{ inventory_list_agents_port_output.stdout }}"
-  when: item != "vmagent"
 
 - name: "Assert {{ item }} port output is tha same in ps and pmm-admin inventory list agents"
+  when: item != "vmagent"
   assert:
     that:
       - port_from_ps.stdout in inventory_list_agents_port_output.stdout
-  when: item != "vmagent"

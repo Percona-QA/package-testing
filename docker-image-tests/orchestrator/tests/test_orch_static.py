@@ -5,6 +5,7 @@ import testinfra
 import time
 from settings import *
 
+orch_revision = os.getenv('ORCHESTRATOR_REVISION')
 container_name = 'orchestartor-docker-test-static'
 
 @pytest.fixture(scope='module')
@@ -34,7 +35,10 @@ class TestOrchEnvironment:
         assert oct(host.file(orch_binary).mode) == '0o755'
 
     def test_binaries_version(self, host):
-        assert orch_version in host.check_output("/usr/local/orchestrator/orchestrator --version")
+        version_output=host.check_output("/usr/local/orchestrator/orchestrator --version")
+        assert orch_version in version_output
+        if orch_revision:
+            assert orch_revision in version_output
 
     def test_process_running(self, host):
         assert host.process.get(user="mysql", comm="orchestrator")
@@ -63,9 +67,9 @@ class TestOrchEnvironment:
     def test_orch_conf_permissions(self, host):
         assert host.file('/etc/orchestrator/orchestrator.conf.json').user == 'mysql'
         assert host.file('/etc/orchestrator/orchestrator.conf.json').group == 'mysql'
-        assert oct(host.file('/etc/orchestrator').mode) == '0o775'
+        assert oct(host.file('/etc/orchestrator/orchestrator.conf.json').mode) == '0o644'
 
     def test_orch_topology_permissions(self, host):
         assert host.file('/etc/orchestrator/orc-topology.cnf').user == 'mysql'
         assert host.file('/etc/orchestrator/orc-topology.cnf').group == 'mysql'
-        assert oct(host.file('/etc/orchestrator').mode) == '0o775'
+        assert oct(host.file('/etc/orchestrator/orc-topology.cnf').mode) == '0o644'

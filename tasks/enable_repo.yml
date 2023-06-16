@@ -1,0 +1,38 @@
+# Encapsulates Percona Release enable(-only) specified repo for specified percona distribution
+# NOTE!!!!
+# Task does NOT install or uninstalls anything. "percona-release" have to be installed outside
+#
+# Task arguments are handled by parent playbook vars:
+#         var "only"         : boolean argument to perform "enable-only"
+#                               ex: only: true || yes || false || no
+#         var "package"      : any supported product, ex: psmdb-60, pmm2-client
+#         var "repository"   : release || testing || experimental
+#         var "clear_cache"  : boolean argument to run cache update
+#                               ex: only: true || yes || false || no
+#
+- set_fact:
+    suffix_only: "{{ (only is defined and only|bool) | ternary ('-only', '') }}"
+    repository: "{{ (repository is defined) | ternary (repository, '') }}"
+    clear_cache: "{{ (clear_cache is defined) | ternary (clear_cache, 'false') }}"
+
+- name: percona-release enable{{ suffix_only }} {{ package }} {{ repository }}
+  command: percona-release enable{{ suffix_only }} {{ package }} {{ repository }}
+  become: true
+
+- name: clean and update yum cache
+  shell: |
+    yum clean all
+    yum makecache
+  when: clear_cache and ansible_os_family == "RedHat"
+
+- name: Update apt repo
+  when: ansible_os_family == "Debian"
+  shell: apt-get update -y
+
+- name: Update yum repo Centos 7
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 7
+  shell: yum update -y --skip-broken
+
+- name: Update yum repo (not 7)
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int != 7
+  shell: yum update -y

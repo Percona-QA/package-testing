@@ -7,23 +7,25 @@ driver:
   name: ec2
 platforms:
   - name: pxc2-57-common-ol-8-upgrade
-    region: us-west-2
-    image: ami-000b99c02c2b64925
-    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    region: us-west-1
+    image: ami-06339041e422fab06
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: t2.small
     ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
+      job-name: pxc-package-testing-job-pxc57
   - name: pxc3-57-common-ol-8-upgrade
-    region: us-west-2
-    image: ami-000b99c02c2b64925
-    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    region: us-west-1
+    image: ami-06339041e422fab06
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: t2.small
     ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
+      job-name: pxc-package-testing-job-pxc57
 provisioner:
   name: ansible
   playbooks:

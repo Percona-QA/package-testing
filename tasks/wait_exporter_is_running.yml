@@ -1,0 +1,37 @@
+# This task verifies that specified exporter or agent is present in the
+# "pmm-admin list" command's output and have "Running" status using retry loop
+#
+# Task adjustments are handled by parent playbook vars:
+#             var "port_flag"      :  to access agent with custom port
+#                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
+#           TODO: add arguments doc and make task loop compatible
+- name: set empty port_flag
+  when: port_flag is not defined
+  set_fact:
+    port_flag: ""
+
+- name: set default delay
+  when: delay is not defined
+  set_fact:
+    delay: 5
+
+- name: set default retries
+  when: retries is not defined
+  set_fact:
+    retries: 5
+
+- name: Validate {{ process_name }} status
+  block:
+    - name: Wait for {{ process_name }} to have Running Status.
+      shell: "pmm-admin list {{ port_flag }} | grep '{{ process_name }}' | awk -F' ' '{print $2}'"
+      register: last_status
+      until: last_status.stdout.find('Running') != -1
+      delay: "{{ delay }}"
+      retries: "{{ retries }}"
+    - name: Waiting successful
+      debug:
+        msg: "{{ process_name }} is 'Running'"
+  rescue:
+    - name: Waiting failed
+      debug:
+        msg: "{{ process_name }} status is '{{ last_status.stdout }}'!"
