@@ -12,6 +12,7 @@ pipeline {
         parallel {
 
       stage ('Run trivy analyzer') {
+        agent { label 'min-bionic-x64' }
         steps {
             sh """
               sudo apt-get install -y curl wget git
