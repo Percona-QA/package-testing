@@ -1,7 +1,12 @@
+- name: set empty port_flag
+  when: port_flag is not defined
+  set_fact:
+    port_flag: ""
+
 - block:
     - shell: "sleep 1"
     - name: run pmm-admin list
-      shell: "pmm-admin list xzc"
+      shell: "pmm-admin list {{ port_flag }}"
       register: last_list
   rescue:
     - name: pmm-admin list result in error
