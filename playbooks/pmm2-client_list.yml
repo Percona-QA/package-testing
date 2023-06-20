@@ -95,15 +95,15 @@
   - name: Check pmm2-client files
     include_tasks: ../tasks/verify_pmm_client_files.yml
 
-- name: Validate pmm-admin list Stability
-  block:
-    - name: Wait for pmm-admin list to return error
-      shell: "pmm-admin list "
-      register: last_list
-      until: "'not found.' in last_status.stdout"
-      delay: 1
-      retries: 100
-  rescue:
-    - name: Waiting result in error
-      debug: var=last_list
-      failed_when: true
+  - name: Validate pmm-admin list Stability
+    block:
+      - name: Wait for pmm-admin list to return error
+        shell: "pmm-admin list "
+        register: last_list
+        until: "'not found.' in last_status.stdout"
+        delay: 1
+        retries: 100
+    rescue:
+      - name: Waiting result in error
+        debug: var=last_list
+        failed_when: true
