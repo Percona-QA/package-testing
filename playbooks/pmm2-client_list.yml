@@ -100,7 +100,7 @@
       - name: Wait for pmm-admin list to return error
         shell: "pmm-admin list "
         register: last_list
-        until: "'not found.' in last_status.stdout"
+        until: "'not found.' in last_list.stdout"
         delay: 1
         retries: 100
       - name: "pmm-admin list executed 100 without any errors!"
