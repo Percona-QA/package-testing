@@ -103,6 +103,9 @@
         until: "'not found.' in last_status.stdout"
         delay: 1
         retries: 100
+      - name: "pmm-admin list executed 100 without any errors!"
+        debug:
+          msg: "100 runs succeeded! Last output: <{{last_list.stdout}}>"
     rescue:
       - name: Waiting result in error
         debug: var=last_list
