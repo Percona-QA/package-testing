@@ -1,0 +1,9 @@
+- block:
+    - name: run pmm-admin list
+      shell: "pmm-admin list "
+      register: last_list
+  rescue:
+    - name: pmm-admin list result in error
+      debug: var=last_list
+      failed_when: true
+

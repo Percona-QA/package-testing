@@ -96,17 +96,5 @@
     include_tasks: ../tasks/verify_pmm_client_files.yml
 
   - name: Validate pmm-admin list Stability
-    block:
-      - name: Wait for pmm-admin list to return error
-        shell: "pmm-admin list "
-        register: last_list
-        until: "'not found.' in last_list.stdout"
-        delay: 1
-        retries: 100
-      - name: "pmm-admin list executed 100 without any errors!"
-        debug:
-          msg: "100 runs succeeded! Last output: <{{last_list.stdout}}>"
-    rescue:
-      - name: Waiting result in error
-        debug: var=last_list
-        failed_when: true
+    include_tasks: ../tasks/verify_list.yml
+    with_sequence: count=1000
