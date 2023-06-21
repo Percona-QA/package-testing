@@ -12,15 +12,14 @@ BASEDIR=/usr/
 FILE_PLUGIN=0
 VAULT_PLUGIN=0
 
-PXC_START_TIMEOUT=600
+PXC_START_TIMEOUT=120
 
 
 SSH_EOF=$(ssh root@DB1_PUB """cat /etc/os-release""")
-echo $SSH_EOF
+#echo $SSH_EOF
 
 
-if [ $(echo $SSH_EOF  | grep debian | wc -l) -eq 1 ]
-then
+if [[ "$SSH_EOF" =~ "debian" ]]; then
 
 echo "Debian"
 MYSQL_LIB_PATH=/usr/lib/mysql
@@ -28,16 +27,16 @@ MYSQL_GALERA_LIBPATH=/usr/lib/galera4
 CHAR_SETS_DIR=/usr/share/mysql
 LC_MSG_DIR=/usr/share/mysql
 
-elif [ $(echo $SSH_EOF  | grep rhel | wc -l) -eq 1 ]
-then
+elif [[ "$SSH_EOF" =~ "rhel" ]]; then
+
 echo "RHEL"
 MYSQL_LIB_PATH=/usr/lib64/mysql
 MYSQL_GALERA_LIBPATH=/usr/lib64/galera4
 CHAR_SETS_DIR=/usr/share/percona-xtradb-cluster
 LC_MSG_DIR=/usr/share/percona-xtradb-cluster
 
-elif [ $(echo $SSH_EOF  | grep fedora | wc -l) -eq 1 ]
-then
+elif [[ "$SSH_EOF" =~ "fedora" ]]; then
+
 echo "FEDOROA"
 MYSQL_LIB_PATH=/usr/lib64/mysql
 MYSQL_GALERA_LIBPATH=/usr/lib64/galera4
@@ -135,11 +134,10 @@ cleanup() {
         set -xe
         rm -rf /usr/sbin/mysqld.my || true
         rm -rf /var/lib/mysql
-        if [ $(cat /etc/os-release  | grep -o rhel | uniq | wc -l) -eq 1 ]; 
-        then 
+        SSH_EOF=$(cat /etc/os-release)
+        if [[ "$SSH_EOF" =~ "rhel" ]]; then 
           echo "Removing the my.cnf in redhat" ; rm -rf /etc/my.cnf* ; 
-        elif [ $(cat /etc/os-release  | grep -o fedora | uniq | wc -l) -eq 1 ]; 
-        then 
+        elif [[ "$SSH_EOF" =~ "fedora" ]]; then 
           echo "Removing the my.cnf in fedora" ; rm -rf /etc/my.cnf* ; 
         else 
           echo "None of RHEL or FEDORA" ; 
@@ -149,13 +147,14 @@ DB1
     elif [ $i -eq 2 ]; then
       ssh root@DB2_PUB <<'DB2'
         set -xe
+        SSH_EOF=$(cat /etc/os-release)
         rm -rf /usr/sbin/mysqld.my || true
         rm -rf /var/lib/mysql
-        if [ $(cat /etc/os-release  | grep -o rhel | uniq | wc -l) -eq 1 ]; 
-        then 
+        if [[ "$SSH_EOF" =~ "rhel" ]]; then 
+
           echo "Removing the my.cnf in redhat" ; rm -rf /etc/my.cnf* ; 
-        elif [ $(cat /etc/os-release  | grep -o fedora | uniq | wc -l) -eq 1 ]; 
-        then 
+        elif [[ "$SSH_EOF" =~ "fedora" ]]; then 
+         
           echo "Removing the my.cnf in fedora" ; rm -rf /etc/my.cnf* ; 
         else 
           echo "None of RHEL or FEDORA" ; 
@@ -167,11 +166,12 @@ DB2
         set -xe
         rm -rf /usr/sbin/mysqld.my || true
         rm -rf /var/lib/mysql
-        if [ $(cat /etc/os-release  | grep -o rhel | uniq | wc -l) -eq 1 ]; 
-        then 
+        SSH_EOF=$(cat /etc/os-release)
+        if [[ "$SSH_EOF" =~ "rhel" ]]; then 
+         
           echo "Removing the my.cnf in redhat" ; rm -rf /etc/my.cnf* ; 
-        elif [ $(cat /etc/os-release  | grep -o fedora | uniq | wc -l) -eq 1 ]; 
-        then 
+        elif [[ "$SSH_EOF" =~ "fedora" ]]; then 
+         
           echo "Removing the my.cnf in fedora" ; rm -rf /etc/my.cnf* ; 
         else 
           echo "None of RHEL or FEDORA" ; 
