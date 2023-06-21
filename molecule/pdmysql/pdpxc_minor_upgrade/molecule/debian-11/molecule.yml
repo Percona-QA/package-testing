@@ -13,7 +13,7 @@ platforms:
     root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
-      job-name: pdpxc-upgrade
+      job-name: ${JOB_NAME}
 provisioner:
   name: ansible
   log: True
