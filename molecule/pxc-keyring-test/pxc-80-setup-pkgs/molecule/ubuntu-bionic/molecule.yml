@@ -1,0 +1,54 @@
+---
+scenario:
+  name: ubuntu-bionic
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: pxc1-80-ubuntu-bionic-install-keyring-test
+    region: us-west-1
+    image: ami-009726b835c24a3aa
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    instance_type: t2.small
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: ${JOB_NAME}
+  - name: pxc2-80-ubuntu-bionic-install-keyring-test
+    region: us-west-1
+    image: ami-009726b835c24a3aa
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    instance_type: t2.small
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: ${JOB_NAME}
+  - name: pxc3-80-ubuntu-bionic-install-keyring-test
+    region: us-west-1
+    image: ami-009726b835c24a3aa
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    instance_type: t2.small
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: ${JOB_NAME}
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../../../playbooks/create.yml
+    destroy: ../../../../playbooks/destroy.yml
+    prepare: ../../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+  inventory:
+    host_vars:
+      pxc1-80-ubuntu-bionic-install-keyring-test:
+        ip_env: "{{ ansible_host }}"
+      pxc2-80-ubuntu-bionic-install-keyring-test:
+        ip_env: "{{ ansible_host }}"
+      pxc3-80-ubuntu-bionic-install-keyring-test:
+        ip_env: "{{ ansible_host }}"
+        sleep_before_tests: 40
