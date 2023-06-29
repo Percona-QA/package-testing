@@ -23,7 +23,7 @@ PTBINS = ['pt-align', 'pt-archiver', 'pt-config-diff', 'pt-deadlock-logger', 'pt
           'pt-slave-delay', 'pt-slave-find', 'pt-slave-restart', 'pt-stalk', 'pt-summary',
           'pt-table-checksum', 'pt-table-sync', 'pt-table-usage', 'pt-upgrade',
           'pt-variable-advisor', 'pt-visual-explain', 'pt-k8s-debug-collector',
-          'pt-pg-summary', 'pt-mongodb-index-check', 'pt-secure-collect']
+          'pt-pg-summary', 'pt-secure-collect']
 
 PXB_VERSION = os.getenv("PXB_VERSION")
 DEB_PERCONA_BUILD_PXB_VERSION = ''
