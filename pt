@@ -32,6 +32,4 @@ pt-table-usage
 pt-upgrade
 pt-variable-advisor
 pt-visual-explain
-pt-pg-summary
-pt-secure-collect
 pt-k8s-debug-collector
