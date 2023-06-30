@@ -1,7 +1,7 @@
 import pytest
 from .settings import *
 
-@pytest.mark.install
+@pytest.mark.orch_source
 def test_integration(host):
     with host.sudo():
         dist = host.system_info.distribution
