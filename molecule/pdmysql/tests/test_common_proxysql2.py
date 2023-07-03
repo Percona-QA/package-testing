@@ -19,7 +19,7 @@ def test_proxysql2_version(host):
     assert result.rc == 0, result.stderr
     assert VERSION in result.stdout, result.stdout
 
-@pytest.mark.install
+@pytest.mark.pkg_source
 def test_sources_version(host):
     if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")
