@@ -1,6 +1,6 @@
 pipeline {
   agent {
-      label "docker"
+      label "min-bionic-x64"
   }
   parameters {
     choice(name: 'DOCKER_ACC', choices: ['percona','perconalab'], description: 'Docker repo to use: percona or perconalab')
@@ -13,12 +13,38 @@ pipeline {
     string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.33-rel36-49.1', description: 'PXC package version (only for PXC 5.7)')
   }
   stages {
-    stage('Run test') {
+    stage('Prepare') {
       steps {
           script {
             currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
             currentBuild.description = "${DOCKER_ACC}"
           }
+         }
+        }
+    stage("Run parallel") {
+        parallel {
+      stage ('Run trivy analyzer') {
+        steps {
+            sh """
+              sudo apt-get install -y curl wget git
+              TRIVY_VERSION=\$(curl --silent 'https://api.github.com/repos/aquasecurity/trivy/releases/latest' | grep '"tag_name":' | tr -d '"' | sed -E 's/.*v(.+),.*/\\1/')
+              wget https://github.com/aquasecurity/trivy/releases/download/v\${TRIVY_VERSION}/trivy_\${TRIVY_VERSION}_Linux-64bit.tar.gz
+              sudo tar zxvf trivy_\${TRIVY_VERSION}_Linux-64bit.tar.gz -C /usr/local/bin/
+              wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/junit.tpl
+              /usr/local/bin/trivy -q image --format template --template @junit.tpl  -o trivy-hight-junit.xml \
+              --timeout 10m0s --ignore-unfixed --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_ACC}/percona-xtradb-cluster:${PXC_VERSION}
+            """
+         } //end steps
+         post {
+           always {
+                    junit testResults: "*-junit.xml", keepLongStdio: true, allowEmptyResults: true, skipPublishingChecks: true
+                }
+        }
+      } //end Run trivy analyzer
+
+      stage('Run tests') {
+        agent { label 'docker-32gb' }
+        steps {
           sh '''
             export PATH=${PATH}:~/.local/bin
             sudo yum install -y python3 python3-pip
@@ -29,11 +55,13 @@ pipeline {
             ./run.sh
           '''
       } //end steps
-    } //end Run test stage
-  } //end stages
-  post {
-    always {
-      junit 'package-testing/docker-image-tests/pxc/report.xml'
+      post {
+        always {
+        junit 'package-testing/docker-image-tests/pxc/report.xml'
+      }
+     }
     }
+   }
   }
-} //end pipeline
+ }
+}
