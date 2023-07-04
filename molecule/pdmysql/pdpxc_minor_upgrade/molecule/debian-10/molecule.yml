@@ -6,14 +6,14 @@ driver:
 platforms:
   - name: debian10-${BUILD_NUMBER}-${JOB_NAME}
     region: eu-central-1
-    image: ami-0be88f8d647409e61
+    image: ami-0b0feb0b7d24e609b
     vpc_subnet_id: subnet-085deaca8c1c59a4f
     instance_type: t2.micro
     ssh_user: admin
-    root_device_name: xvda
+    root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
-      job-name: pdpxc-upgrade
+      job-name: ${JOB_NAME}
 provisioner:
   name: ansible
   log: True
@@ -30,7 +30,7 @@ verifier:
     verbose: true
     s: true
     k: "test_pdpxc_ or test_common_"
-    m: "not install"
+    m: "not pkg_source"
     junitxml: report.xml
 scenario:
   name: debian-10

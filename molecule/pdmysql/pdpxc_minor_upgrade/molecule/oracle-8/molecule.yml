@@ -13,7 +13,7 @@ platforms:
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
-      job-name: pdpxc-upgrade
+      job-name: ${JOB_NAME}
 provisioner:
   name: ansible
   log: True
@@ -30,6 +30,7 @@ verifier:
     verbose: true
     s: true
     k: "test_pdpxc_ or test_common_"
+    m: "not pkg_source"
     junitxml: report.xml
 scenario:
   name: oracle-8

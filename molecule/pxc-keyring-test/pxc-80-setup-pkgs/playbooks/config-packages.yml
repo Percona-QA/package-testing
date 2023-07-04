@@ -1,0 +1,85 @@
+---
+- name: Create User and configure stuff
+  hosts: all
+  become: true
+  become_method: sudo
+  vars:
+      KEY: "{{ lookup('env', 'KEY') }}"
+      extra_path: /usr/sbin
+  tasks:
+  - name: Create mysql user
+    ansible.builtin.user:
+      name: mysql
+      comment: Mysql User added to root group
+      group: root
+  
+  - name: Create a 2048-bit SSH key for user mysql in ~jsmith/.ssh/id_rsa
+    ansible.builtin.user:
+      name: mysql
+      generate_ssh_key: yes
+      ssh_key_bits: 2048
+      ssh_key_file: .ssh/id_rsa
+
+  - name: Create a 2048-bit SSH key for user mysql in ~jsmith/.ssh/id_rsa
+    ansible.builtin.user:
+      name: root
+      generate_ssh_key: yes
+      ssh_key_bits: 2048
+      ssh_key_file: .ssh/id_rsa
+
+  - name: deploy keys on all servers mysql server
+    authorized_key:
+      user: mysql
+      key: "{{ KEY }}"
+      state: present
+
+  - name: deploy keys on all servers root server
+    authorized_key:
+      user: root
+      key: "{{ KEY }}"
+      state: present
+
+  - name: Keep no Password 
+    shell: "echo \"mysql ALL=(ALL) NOPASSWD: ALL\" >> /etc/sudoers"
+    tags: nopass
+
+  - name: Add mysql user to sudoers group
+    shell: usermod -aG root mysql
+    tags: suoder
+
+  - name: Fetch the vars from file
+    shell: echo "No further things are needed..."
+
+  - name: add the value to path
+    lineinfile: >
+     dest=/etc/environment
+     state=present
+     backrefs=yes
+     regexp='PATH=(["]*)((?!.*?{{extra_path}}).*?)(["]*)$'
+     line="PATH=\1\2:{{extra_path}}\3"
+
+  - name: Create mysql log directory centos
+    ansible.builtin.file:
+      path: /var/log/mysql
+      state: directory
+      owner: mysql
+      group: root
+    when: ansible_os_family == "RedHat"
+
+  - name: Create mysql general log file for centos
+    copy:
+      content: ""
+      dest: /var/log/mysql/general.log
+      force: false
+      group: root
+      owner: mysql
+    when: ansible_os_family == "RedHat"
+
+  - name: Create mysql error log file for centos
+    copy:
+      content: ""
+      dest: /var/log/mysql/error.log
+      force: false
+      group: root
+      owner: mysql
+    when: ansible_os_family == "RedHat"

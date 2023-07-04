@@ -14,20 +14,23 @@
 #      - mongodb_exporter
 #      - mysqld_exporter
 #
-- name: "{{ item }}: grep port from ps"
-  shell: "ps aux | grep -v grep | grep {{ item }} | awk -F '=:' '{ print $2; }' | awk -F' ' '{ print $1; }'"
-  register: node_port
-  when: item != "vmagent"
-
-- name: "vmagent: grep port from ps"
-  shell: "ps aux | grep -v grep | grep vmagent | awk -F'127.0.0.1:' '{ print $2; }' | awk -F' ' '{ print $1; }'"
-  register: vmagent_port
-  when: item == "vmagent"
-
-# unfortunately the only way to set the same variable in different conditions is to store values for all conditions
-- name: "{{ item }}: set variable with port from ps"
-  set_fact:
-    port_from_ps: "{{ (item == 'vmagent') | ternary( vmagent_port, node_port ) }}"
+- block:
+    - name: "{{ item }}: grep port from ps aux"
+      shell: "ps aux | grep -v grep | grep {{ item }} | awk -F'{{ (item == 'vmagent') | ternary('127.0.0.1:', '=:') }}' '{ print $2; }' | awk -F' ' '{ print $1; }'"
+      register: port_from_ps
+      until: port_from_ps.stdout | length > 3
+      delay: 2
+      retries: 5
+    - name: "{{ item }}: port found!"
+      debug:
+        msg: "{{ item }} port is <{{port_from_ps.stdout}}>"
+  rescue:
+    - shell: "ps aux | grep -v grep | grep {{ item }} "
+      register: ps_aux
+    - name: "{{ item }}: Failed to get port from ps aux!"
+      debug:
+        msg: "{{ ps_aux.stdout }}"
+      failed_when: true
 
 - name: "{{ item }}: get port from pmm-admin list output"
   shell: "pmm-admin list | awk '/{{ item }}/ {print $NF}'"
@@ -48,7 +51,7 @@
   assert:
     that:
       - port_from_ps.stdout == status_port_output.stdout
-    fail_msg: "{{ port_from_ps.stdout }} != {{ status_port_output.stdout }}"
+    fail_msg: 'ps-port: "{{ port_from_ps.stdout }}" != status-port: "{{ status_port_output.stdout }}"'
     success_msg: "Success: {{ port_from_ps.stdout }} == {{ status_port_output.stdout }}"
 
 - name: "{{ item }}: get port from pmm-admin inventory list agents output"
