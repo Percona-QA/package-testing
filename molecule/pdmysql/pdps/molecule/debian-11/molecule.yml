@@ -32,7 +32,7 @@ verifier:
     k: "test_pdps_ or test_common_"
     junitxml: report.xml
 scenario:
-  name: debian-11
+  name: debian-12
   destroy_sequence:
     - destroy
   clenup_sequence:
