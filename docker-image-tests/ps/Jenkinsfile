@@ -1,5 +1,5 @@
 pipeline {
-  agent { label 'min-bionic-x64' }
+  agent { label 'docker' }
   parameters {
     choice(name: 'DOCKER_ACC', choices: ['percona','perconalab'], description: 'Docker repo to use: percona or perconalab')
     string(name: 'PS_VERSION', defaultValue: '8.0.33-25', description: 'Full PS version')
@@ -19,13 +19,13 @@ pipeline {
       stage ('Run trivy analyzer') {
         steps {
             sh """
-              sudo apt-get install -y curl wget git
+              sudo yum install -y curl wget git
               TRIVY_VERSION=\$(curl --silent 'https://api.github.com/repos/aquasecurity/trivy/releases/latest' | grep '"tag_name":' | tr -d '"' | sed -E 's/.*v(.+),.*/\\1/')
               wget https://github.com/aquasecurity/trivy/releases/download/v\${TRIVY_VERSION}/trivy_\${TRIVY_VERSION}_Linux-64bit.tar.gz
               sudo tar zxvf trivy_\${TRIVY_VERSION}_Linux-64bit.tar.gz -C /usr/local/bin/
               wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/junit.tpl
               /usr/local/bin/trivy -q image --format template --template @junit.tpl  -o trivy-hight-junit.xml \
-              --timeout 10m0s --ignore-unfixed --exit-code 1 --severity CRITICAL ${DOCKER_ACC}/percona-server:${PS_VERSION}
+              --timeout 10m0s --ignore-unfixed --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_ACC}/percona-server:${PS_VERSION}
             """
          } //end steps
          post {
@@ -36,7 +36,6 @@ pipeline {
       } //end Run trivy analyzer
      
       stage('Run tests') {
-        agent { label 'docker-32gb' }  
         steps {
             sh '''
               # disable THP on the host for TokuDB
