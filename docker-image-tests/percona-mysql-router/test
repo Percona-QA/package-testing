@@ -67,4 +67,4 @@ class TestRouterEnvironment:
 
     def test_mysqlsh_version(self, host):
         cmd = host.run("mysqlsh --version")
-        assert router_version in cmd.stdout
+        assert PS_VERSION in cmd.stdout
