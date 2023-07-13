@@ -4,13 +4,20 @@ import subprocess
 import testinfra
 import time
 from settings import *
+import json
+import os
+import requests
+import docker
 
-container_name = 'router-docker-test-static'
+container_name = 'mysql-router-test'
+network_name = 'innodbnet1'
 
 @pytest.fixture(scope='module')
 def host():
+    docker_client = docker.from_env()
+    docker_client.networks.create(network_name)
     docker_id = subprocess.check_output(
-        ['docker', 'run', '--name', container_name, '-d', docker_image ], stderr=subprocess.STDOUT ).decode().strip()
+        ['docker', 'run', '--name', container_name, '--net', network_name, '--MYSQL_HOST', mysql1, '--MYSQL_PORT', '3306', '--MYSQL_PASSWORD', inno, '--MYSQL_INNODB_CLUSTER_MEMBERS', '4', '-d', docker_image ], stderr=subprocess.STDOUT ).decode().strip()
     time.sleep(20)
     subprocess.check_call(['docker','exec','--user','root',container_name,'microdnf','install', '-y', 'net-tools'])
     time.sleep(20)
@@ -67,7 +74,7 @@ class TestRouterEnvironment:
         assert host.group('mysql').exists
         assert host.group('mysql').gid == 1001
 
-    def test_orch_permissions(self, host):
+    def test_router_permissions(self, host):
         assert host.file('/var/lib/mysqlrouter').user == 'mysql'
         assert host.file('/var/lib/mysqlrouter').group == 'mysql'
         assert oct(host.file('/var/lib/mysqlrouter').mode) == '0o755'
