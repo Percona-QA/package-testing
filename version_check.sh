@@ -104,7 +104,7 @@ if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" ]; 
   if [ "$(mysql -e "SELECT @@VERSION_COMMENT;" | grep ${revision} | grep -c ${release})" = 1 ]; then
     echo "@@VERSION COMMENT is correct" >> "${log}"
   else
-    echo "@@VERSION_COMMENT is incorrect. It is: "$(mysql -e "SELECT @@VERSION_COMMENT;") . Revision is ${revision}. Release is ${release}"
+    echo "@@VERSION_COMMENT is incorrect. It is: $(mysql -e "SELECT @@VERSION_COMMENT;") . Revision is ${revision}. Release is ${release}"
     exit 1
   fi
 
