@@ -69,12 +69,14 @@ COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_audit_api_message_emit']
 
 VERSION = os.environ['VERSION']
+REVISION = os.environ['PXC_REVISION']
 DEB_PERCONA_BUILD_VERSION = ''
 RPM_PERCONA_BUILD_VERSION = ''
 if re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', VERSION): # if full package VERSION 8.0.32-24.2 is passed we need to re-assign it for tests
     DEB_PERCONA_BUILD_VERSION = re.sub(r'.(\d+)$',r'-\g<1>', VERSION) # convert to format passed by host.package.version for deb 8.0.32-24-2
     RPM_PERCONA_BUILD_VERSION = VERSION # re-assign for RPM tests and use 8.0.32-24.2
     VERSION = '.'.join(VERSION.split('.')[:-1]) # use VERSION 8.0.32-24 without package build number for non-package tests
+
 
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
@@ -123,6 +125,13 @@ def test_binary_version(host):
         assert result.rc == 0, result.stderr
         assert VERSION in result.stdout, result.stdout
 
+def test_pxc_revision(host):
+    if not REVISION:
+        pytest.skip("PXC_REVISION parameter was not provided. Skipping this check.")
+    cmd = "{} --version".format('mysql')
+    result = host.run(cmd)
+    assert result.rc == 0, (result.stderr, result.stdout)
+    assert REVISION in result.stdout, result.stdout
 
 @pytest.mark.parametrize('component', ['@@INNODB_VERSION', '@@VERSION'])
 def test_mysql_version(host, component):
