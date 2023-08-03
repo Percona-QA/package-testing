@@ -1,5 +1,16 @@
 ---
-# tasks file for pdpxc
+# Test haproxy config with clustercheck and mysqlchk from https://docs.percona.com/percona-xtradb-cluster/8.0/howtos/haproxy.html
+# Short description:
+# * clustercheck is a script that is installed with cluster. It checks mysql availability with http. Location: /usr/bin/clustercheck.
+#   User should be created in DB. Defaults are: 'clustercheckuser' and 'clustercheckpassword!'
+#   Examples of output: https://docs.percona.com/percona-xtradb-cluster/8.0/faq.html#how-can-i-check-the-galera-node-health
+# * mysqlchk - used to to daemonize the clustercheck script using xinetd. Its config: /etc/xinetd.d/mysqlchk .
+# Setup:
+#   Clustercheck is set up to listen on port 9200 using mysqlchk (xinetd). haproxy is set up to send http check requests to 9200.
+#   So haproxy monitors pxc nodes via Clustercheck script.
+#   haproxy listens on 9201 port and re-sends received requests to node(s) (db01 localhost:3306)
+#
+# /usr/bin/clustercheck
 
 - name: include playbook for removing Percona repo
   include: ../../../tasks/remove_percona_repository.yml
@@ -56,17 +67,39 @@
     - percona-vim-haproxy
   when: ansible_os_family == "Debian"
 
-- name: start mysql service
-  service: name=mysql state=started
+- name: install xinetd deb packages
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+  vars:
+    packages:
+    - xinetd
   when: ansible_os_family == "Debian"
 
-- name: Copy haproxy.cfg
+- name: bootstrap pxc node
+  service: name=mysql@bootstrap.service state=started
+  when: ansible_os_family == "Debian"
+
+- name: Update haproxy config
+  blockinfile:
+    path: /etc/haproxy/haproxy.cfg
+    block: |
+      listen mysql-cluster
+          bind :9201
+          mode tcp
+          balance roundrobin
+          option  httpchk
+          server db01 localhost:3306 check port 9200 inter 12000 rise 3 fall 3
+
+- name: Create mysqlchk cnf
   copy:
-    src: haproxy.cfg
-    dest: /etc/haproxy/haproxy.cfg
+    src: mysqlchk
+    dest: /etc/xinetd.d/mysqlchk
     owner: root
     group: root
     mode: 0644
 
-- name: Start haproxy
-  shell: haproxy -f  /etc/haproxy/haproxy.cfg -D
+- name: add mysqlchk to services with 9200 port
+  lineinfile:
+    path: /etc/services
+    line: mysqlchk        9200/tcp                # mysqlchk
