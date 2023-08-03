@@ -120,14 +120,13 @@
       pkg_testing_path: "{{ pkg_testing_path_output.stdout }}"
     when: lookup('env', 'USE_LOCAL_PKG_TEST') == "1"
 
-# Disabled test as jobs are failing on this step for OL8 due to synchronize module not present in OL8 ansible-core modulei and this test is always skipped as we don't use 'USE_LOCAL_PKG_TEST'
-    #  - name: copy package-testing directory to remote
-    #    synchronize:
-    #      src: "{{ pkg_testing_path }}"
-    #      dest: /
-    #      recursive: yes
-    #      perms: yes
-    #    when: lookup('env', 'USE_LOCAL_PKG_TEST') == "1"
+  - name: copy package-testing directory to remote
+    synchronize:
+      src: "{{ pkg_testing_path }}"
+      dest: /
+      recursive: yes
+      perms: yes
+    when: lookup('env', 'USE_LOCAL_PKG_TEST') == "1"
 
   - name: download package-testing repo branch with wget
     command: "{{ item }}"
