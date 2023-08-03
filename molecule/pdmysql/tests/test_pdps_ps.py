@@ -69,6 +69,9 @@ COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
 VERSION = os.environ.get("VERSION")
 DEB_PERCONA_BUILD_VERSION = ''
 RPM_PERCONA_BUILD_VERSION = ''
+
+REVISION = os.environ.get('PS_REVISION')
+
 if re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', VERSION): # if full package VERSION 8.0.32-24.2 is passed we need to re-assign it for tests
     DEB_PERCONA_BUILD_VERSION = re.sub(r'.(\d+)$',r'-\g<1>', VERSION) # convert to format passed by host.package.version for deb 8.0.32-24-2
     RPM_PERCONA_BUILD_VERSION = VERSION # re-assign for RPM tests and use 8.0.32-24.2
@@ -123,6 +126,14 @@ def test_binary_version(host, binary):
     result = host.run(cmd)
     assert result.rc == 0, (result.stderr, result.stdout)
     assert VERSION in result.stdout, result.stdout
+
+def test_ps_revision(host):
+    if not REVISION:
+        pytest.skip("REVISION parameter was not provided. Skipping this check.")
+    cmd = "{} --version".format('mysql')
+    result = host.run(cmd)
+    assert result.rc == 0, (result.stderr, result.stdout)
+    assert REVISION in result.stdout, result.stdout
 
 
 @pytest.mark.parametrize('component', ['@@INNODB_VERSION', '@@VERSION'])
