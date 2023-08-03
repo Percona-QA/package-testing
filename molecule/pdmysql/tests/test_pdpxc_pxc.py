@@ -69,7 +69,7 @@ COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_audit_api_message_emit']
 
 VERSION = os.environ['VERSION']
-REVISION = os.environ['PXC_REVISION']
+REVISION = os.environ['REVISION']
 DEB_PERCONA_BUILD_VERSION = ''
 RPM_PERCONA_BUILD_VERSION = ''
 if re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', VERSION): # if full package VERSION 8.0.32-24.2 is passed we need to re-assign it for tests
@@ -127,7 +127,7 @@ def test_binary_version(host):
 
 def test_pxc_revision(host):
     if not REVISION:
-        pytest.skip("PXC_REVISION parameter was not provided. Skipping this check.")
+        pytest.skip("REVISION parameter was not provided. Skipping this check.")
     cmd = "{} --version".format('mysql')
     result = host.run(cmd)
     assert result.rc == 0, (result.stderr, result.stdout)
