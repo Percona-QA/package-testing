@@ -21,6 +21,7 @@ if pxc_version_major == '5.7':
   pxc57_server_version_norel = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1][3:] + '-' + pxc_version_major.replace('.', '')
 
 docker_image = docker_acc + "/" + docker_product + ":" + docker_tag
+docker_image_major = docker_acc + "/" + docker_product + ":" + pxc_version_major
 docker_network = 'pxc-network'
 
 base_node_name = 'pxc-docker-test-cluster-node'
