@@ -14,6 +14,9 @@ ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream
 docker_product = 'percona-server'
 docker_tag = ps_version
 docker_image = docker_acc + "/" + docker_product + ":" + docker_tag
+docker_image_latest = docker_acc + "/" + docker_product + ":" + "latest"
+docker_image_upstream = docker_acc + "/" + docker_product + ":" + ps_version_upstream
+docker_image_major = docker_acc + "/" + docker_product + ":" + ps_version_major
 
 # 8.0
 ps80_packages = (
