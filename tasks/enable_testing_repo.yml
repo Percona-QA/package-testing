@@ -17,7 +17,8 @@
     when: ansible_os_family == "RedHat"
 
   - name: enable only testing repo
-    command: percona-release enable-only original testing
+    command: percona-release enable-only ps-57 testing
+    #    command: percona-release enable-only original testing running tests from ps-57 repo
 
   - name: clean and update yum cache
     shell: |
