@@ -62,7 +62,7 @@
 
   - name: use Percona Server my.cnf
     shell: update-alternatives --set my.cnf /etc/mysql/percona-server.cnf
-    when: ansible_os_family == "Debian" and ansible_distribution_release == "bullseye"
+    when: ansible_os_family == "Debian" and (ansible_distribution_release == "bullseye" or ansible_distribution_release == "bookworm")
 
   - name: start mysql service
     service: name=mysql state=started
@@ -110,15 +110,15 @@
 
   - name: check that sysbench version is correct
     command: /package-testing/version_check.sh sysbench
-    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and ansible_distribution_major_version != "9"
+    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and ansible_distribution_major_version != "9" and ansible_distribution_release != "bookworm"
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
-    when: lookup('env', 'install_repo') != "experimental"
+    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bookworm"
 
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb24
-    when: lookup('env', 'install_repo') != "experimental"
+    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bookworm"
 
     # pt-mongodb-query-digest version is not good that's why disabling this test
     #  - name: check that Percona Toolkit version is correct
