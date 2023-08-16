@@ -10,7 +10,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 PACKAGES = ['percona-orchestrator-cli', 'percona-orchestrator-client', 'percona-orchestrator']
 
 VERSION = os.getenv("ORCHESTRATOR_VERSION")
-REVISION = os.getenv('ORCHESTRATOR_REVISION')
+REVISION = os.getenv("ORCHESTRATOR_REVISION")
 
 @pytest.mark.parametrize("package", PACKAGES)
 def test_check_package(host, package):
