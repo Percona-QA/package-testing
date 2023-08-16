@@ -73,32 +73,29 @@
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
 
-  - name: install qpress, lz4 and zstd packages on Redhat/CentOS
+  - name: install lz4 and zstd packages on Redhat/CentOS
     yum:
       name: "{{ packages }}"
     vars:
       packages:
-      - qpress
       - lz4
       - zstd
     when: ansible_os_family == "RedHat"
 
-  - name: install qpress, lz4 and zstd packages on Ubuntu/Debian
+  - name: install lz4 and zstd packages on Ubuntu/Debian
     apt:
       name: "{{ packages }}"
     vars:
       packages:
-      - qpress
       - lz4
       - zstd
     when: ansible_os_family == "Debian" and ansible_distribution_release != "bionic"
 
-  - name: install qpress, lz4 and zstd packages on Bionic 
+  - name: install lz4 and zstd packages on Bionic 
     apt:
       name: "{{ packages }}"
     vars: 
       packages:
-      - qpress
       - liblz4-tool
       - zstd
     when: ansible_os_family == "Debian" and ansible_distribution_release == "bionic"
