@@ -19,13 +19,14 @@ def host():
     yield testinfra.get_host("docker://root@" + docker_id)
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
 
+@pytest.mark.skipif(ps_version_major == "5.7", reason="Skipping tests for 5.7")
 @pytest.mark.skipif(docker_acc == "perconalab", reason="Skipping tests in 'testing' repo")
 class TestMysqlEnvironment:
     @pytest.mark.parametrize("pkg_name", ps_packages)
     def test_packages(self, host, pkg_name):
         assert host.package(pkg_name).is_installed
         assert host.package(pkg_name).version == ps_version_upstream
-    
+    @pytest.mark.skipif(ps_version_major == "5.7", reason="Skipping tests for 5.7")
     @pytest.mark.skipif(docker_acc == "perconalab", reason="Skipping tests in 'testing' repo")
     def test_binaries_version(self, host):
         if ps_version_major in ['5.7','5.6']:
