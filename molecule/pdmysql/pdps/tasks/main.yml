@@ -98,14 +98,14 @@
         - proxysql2
     when: ansible_os_family == "RedHat"
 
-#install initscripts-service manually on OL9 till DISTMYSQL-300 is fixed
-- name: install init scripts for OL9
-  yum:
-    name: "{{ packages }}"
-  vars:
-    packages:
-    - initscripts-service
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+  #install initscripts-service manually on OL9 till DISTMYSQL-300 is fixed
+  - name: install init scripts for OL9
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - initscripts-service
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: start proxysql service
     command: service proxysql start
@@ -147,12 +147,13 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip "https://github.com/Percona-QA/package-testing/archive/{{ branch }}.zip"
+    - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
     - unzip master.zip
     - rm -f master.zip
     - mv "package-testing-{{ branch }}" /package-testing
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
+      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh

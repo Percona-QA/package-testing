@@ -16,13 +16,18 @@
     cmd_admin_list: "pmm-admin list"
   when: cmd_admin_list is not defined
 
+- name: Download install_setup_psmdb.yml
+  get_url:
+    url: https://raw.githubusercontent.com/Percona-QA/ppg-testing/main/tasks/install_ppg13.yml
+#    url: https://raw.githubusercontent.com/Percona-QA/ppg-testing/PMM-7-ol-8-fix/tasks/install_ppg13.yml
+    dest: /tmp
+    mode: 0777
+
 - name: Enable postgresql repository
   command: percona-release setup -y ppg-13
-  when: ansible_distribution_release != 'xenial'
 
-- name: include tasks for setting up pg13
-  include_tasks: ../ppg-testing/tasks/install_ppg13.yml
-  when: ansible_distribution_release != 'xenial'
+- name: Run install_ppg13.yml
+  include_tasks: /tmp/install_ppg13.yml
 
 - name: Initialize Postgres RHEL
   command: /usr/pgsql-13/bin/postgresql-13-setup initdb

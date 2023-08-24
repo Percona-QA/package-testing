@@ -3,7 +3,7 @@
 #   enables Percona testing repository
 #   installs latest version of PMM2 client
 #   does PMM-T1268 test
-
+#
 - hosts: all
   become: true
   become_method: sudo
@@ -77,7 +77,7 @@
 
 ### start PS 5.7
   - name: install and start Percona Server 5.7
-    include_tasks: ../tasks/start_ps57.yml
+    include_tasks: ../tasks/install_and_add_to_pmm_ps_57.yml
 
   - name: check if Metric End point with Auth works for Mysqld Exporter
     shell: "bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
@@ -85,7 +85,7 @@
 
 ### start PSMDB 4.4
   - name: install and start Percona Server MongoDB 4.4
-    include_tasks: ../tasks/start_psmdb44.yml
+    include_tasks: ../tasks/install_and_add_to_pmm_psmdb_44.yml
 
   - name: check if Metric End point with Auth works for MongoDB Exporter
     shell: "bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"

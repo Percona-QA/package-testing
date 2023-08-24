@@ -16,6 +16,13 @@
     cmd_admin_list: "pmm-admin list"
   when: cmd_admin_list is not defined
 
+- name: enable ps-57 release repo
+  include_tasks: ./enable_repo.yml
+  vars:
+    only: yes
+    package: "ps-57"
+    repository: "release"
+
 - name: install Percona Server 5.7 packages
   include_tasks: ./install_ps57.yml
 
@@ -44,7 +51,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: add mysql metrics and queries to monitoring
-  command: /package-testing/scripts/pmm2_add_instance.sh mysql {{ port_flag }}
+  command: ../scripts/pmm2_add_instance.sh mysql {{ port_flag }}
   when: ansible_os_family == "RedHat"
 
 - name: add mysql instance for monitoring

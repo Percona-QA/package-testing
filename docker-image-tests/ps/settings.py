@@ -5,12 +5,18 @@ docker_acc = os.getenv('DOCKER_ACC')
 ps_version = os.getenv('PS_VERSION')
 ps_revision = os.getenv('PS_REVISION')
 
-ps_version_upstream, ps_version_percona = ps_version.split('-')
+#ps_version_upstream, ps_version_percona = ps_version.split('-')
+ps_version_upstream = ps_version.split('-')[0]
+ps_version_percona1 = ps_version.split('-')[1]
+ps_version_percona = ps_version_percona1.split('.')[0]
 ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
 
 docker_product = 'percona-server'
 docker_tag = ps_version
 docker_image = docker_acc + "/" + docker_product + ":" + docker_tag
+docker_image_latest = docker_acc + "/" + docker_product + ":" + "latest"
+docker_image_upstream = docker_acc + "/" + docker_product + ":" + ps_version_upstream
+docker_image_major = docker_acc + "/" + docker_product + ":" + ps_version_major
 
 # 8.0
 ps80_packages = (
@@ -21,7 +27,7 @@ ps80_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/ps-admin', '/usr/bin/mysqladmin', '/usr/bin/mysqlbinlog',
   '/usr/sbin/mysqld-debug', '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow', '/usr/bin/mysqlimport', '/usr/bin/mysqlpump',
   '/usr/bin/mysqlshow', '/usr/bin/mysqlslap', '/usr/bin/mysqlcheck', '/usr/bin/mysql_config_editor', '/usr/bin/mysql_config',
-  '/usr/bin/mysql_config-64', '/usr/bin/mysql_ldb', '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade',
+  '/usr/bin/mysql_config-64', '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade',
   '/usr/bin/hostname', '/usr/bin/gunzip', '/usr/bin/my_print_defaults', '/usr/bin/cat', '/usr/bin/mysql_tzinfo_to_sql',
   '/usr/bin/grep', '/usr/bin/cut', '/usr/bin/tail', '/usr/bin/sed', '/usr/bin/find', '/usr/bin/kill', '/usr/bin/gawk', '/usr/bin/mysqlsh'
 )

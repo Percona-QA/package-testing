@@ -3,8 +3,8 @@ pipeline {
     label 'docker'
   }
   parameters {
-    string(name: 'PS_VERSION', defaultValue: '8.0.26-16', description: 'PS full version')
-    string(name: 'PS_REVISION', defaultValue: '3d64165', description: 'PS revision')
+    string(name: 'PS_VERSION', defaultValue: '8.0.33-25', description: 'PS full version')
+    string(name: 'PS_REVISION', defaultValue: '9468fd1d', description: 'PS revision')
     booleanParam( 
       defaultValue: false,
       name: 'BUILD_TYPE_MINIMAL'
@@ -21,9 +21,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Ubuntu Jammy
@@ -35,9 +33,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Ubuntu Focal
@@ -49,9 +45,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Ubuntu Bionic
@@ -63,9 +57,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Debian Bullseye
@@ -77,9 +69,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Debian Buster
@@ -91,9 +81,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Centos7
@@ -105,9 +93,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Oracle Linux 8
@@ -119,9 +105,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
               }
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Oracle Linux 9
@@ -151,7 +135,11 @@ void run_test() {
       fi
     fi
     TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
-    TARBALL_LINK="https://www.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
+    if [ "${PS_MAJOR_VERSION}" = "8.0" ]; then
+      TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-release-${PS_VERSION}/"
+    else
+      TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
+    fi
     rm -rf package-testing
     git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
     cd package-testing/binary-tarball-tests/ps
