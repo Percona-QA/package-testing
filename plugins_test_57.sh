@@ -16,10 +16,9 @@ fi
 WARNINGS_BEFORE=$(grep -c "\[Warning\]" ${ERROR_LOG} || true)
 ERRORS_BEFORE=$(grep -c "\[ERROR\]" ${ERROR_LOG} || true)
 
-mysql -e "DROP FUNCTION IF EXISTS fnv1a_64"
-mysql -e "CREATE FUNCTION fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so'"
-mysql -e "CREATE FUNCTION fnv_64 RETURNS INTEGER SONAME 'libfnv_udf.so'"
-mysql -e "CREATE FUNCTION murmur_hash RETURNS INTEGER SONAME 'libmurmur_udf.so'"
+#mysql -e "CREATE FUNCTION fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so'"
+#mysql -e "CREATE FUNCTION fnv_64 RETURNS INTEGER SONAME 'libfnv_udf.so'"
+#mysql -e "CREATE FUNCTION murmur_hash RETURNS INTEGER SONAME 'libmurmur_udf.so'"
 mysql -e "INSTALL PLUGIN audit_log SONAME 'audit_log.so';"
 mysql -e "INSTALL PLUGIN scalability_metrics SONAME 'scalability_metrics.so';"
 mysql -e "INSTALL PLUGIN QUERY_RESPONSE_TIME_AUDIT SONAME 'query_response_time.so';"
