@@ -18,15 +18,17 @@
 
   - name: change the default repo to original testing
     command: percona-release enable-only original testing
-    when: lookup('env', 'pxc57repo') == "original"
+
+  - name: change the default repo to tools testing
+    command: percona-release enable tools testing
 
   - name: enable original release repo for qpress dependancy for RHEL
     command: percona-release enable original release
     when: (ansible_os_family == "RedHat") and (lookup('env', 'pxc57repo') == "original")
 
-  - name: change the default repo to pxc-57 testing
-    command: percona-release enable-only pxc-57 testing
-    when: lookup('env', 'pxc57repo') == "pxc57" or lookup('env', 'pxc57repo') == ""
+    #  - name: change the default repo to pxc-57 #testing
+    # command: percona-release enable-only pxc-57 testing
+    # when: lookup('env', 'pxc57repo') == "pxc57" or lookup('env', 'pxc57repo') == ""
 
     # Update release to testing
   - name: enable pxb24 repo
