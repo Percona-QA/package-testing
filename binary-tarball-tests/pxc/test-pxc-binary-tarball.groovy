@@ -23,8 +23,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
               }
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage Ubuntu Bionic
@@ -36,8 +35,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
               }
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage Ubuntu Focal
@@ -49,8 +47,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
               }
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage Ubuntu Jammy
@@ -62,8 +59,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
               }
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage Debian Buster
@@ -75,8 +71,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
               }
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage Debian Bullseye
@@ -88,8 +83,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
               }
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage Debian Bookworm
@@ -101,8 +95,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
               }
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage CentOS7
@@ -114,8 +107,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
               }
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage CentOS8
@@ -127,8 +119,7 @@ pipeline {
             script {
                 currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
               }
-              run_test()
-            }
+            run_test()
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage OracleLinux 9
