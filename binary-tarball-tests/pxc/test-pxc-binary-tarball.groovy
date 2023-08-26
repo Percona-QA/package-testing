@@ -59,6 +59,17 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage Debian Buster
+        stage('Debian Bullseye') {
+          agent {
+            label "min-bullseye-x64"
+          }
+          steps {
+            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+              run_test()
+            }
+            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+          } //End steps
+        } //End stage Debian Bullseye
         stage('Debian Bookworm') {
           agent {
             label "min-bookworm-x64"
