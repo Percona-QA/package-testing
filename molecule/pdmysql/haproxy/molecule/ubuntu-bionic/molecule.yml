@@ -13,7 +13,7 @@ platforms:
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pg-worker
-      job-name: pdps-haproxy
+      job-name: ${JOB_NAME}
 provisioner:
   name: ansible
   log: True

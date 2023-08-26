@@ -7,11 +7,11 @@ from .settings import *
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-DEBPACKAGES = ['percona-xtrabackup-80',
+PXB_DEBPACKAGES = ['percona-xtrabackup-80',
                'percona-xtrabackup-test-80',
                'percona-xtrabackup-dbg-80']
 
-RPMPACKAGES = ['percona-xtrabackup-80',
+PXB_RPMPACKAGES = ['percona-xtrabackup-80',
                'percona-xtrabackup-test-80',
                'percona-xtrabackup-80-debuginfo']
 
@@ -22,7 +22,7 @@ PTBINS = ['pt-align', 'pt-archiver', 'pt-config-diff', 'pt-deadlock-logger', 'pt
           'pt-online-schema-change', 'pt-pmp', 'pt-query-digest', 'pt-show-grants', 'pt-sift',
           'pt-slave-delay', 'pt-slave-find', 'pt-slave-restart', 'pt-stalk', 'pt-summary',
           'pt-table-checksum', 'pt-table-sync', 'pt-table-usage', 'pt-upgrade',
-          'pt-variable-advisor', 'pt-visual-explain']
+          'pt-variable-advisor', 'pt-visual-explain', 'pt-k8s-debug-collector',]
 
 PXB_VERSION = os.getenv("PXB_VERSION")
 DEB_PERCONA_BUILD_PXB_VERSION = ''
@@ -34,8 +34,8 @@ if re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', PXB_VERSION): # if full package PXB_VE
 
 PT_VERSION = os.getenv("PT_VERSION")
 
-@pytest.mark.parametrize("package", DEBPACKAGES)
-def test_check_deb_package(host, package):
+@pytest.mark.parametrize("package", PXB_DEBPACKAGES)
+def test_check_pxb_deb_package(host, package):
     dist = host.system_info.distribution
     if dist.lower() in RHEL_DISTS:
         pytest.skip("This test only for RHEL based platforms")
@@ -46,8 +46,8 @@ def test_check_deb_package(host, package):
     else:
         assert PXB_VERSION in pkg.version, pkg.version
 
-@pytest.mark.parametrize("package", RPMPACKAGES)
-def test_check_rpm_package(host, package):
+@pytest.mark.parametrize("package", PXB_RPMPACKAGES)
+def test_check_pxb_rpm_package(host, package):
     dist = host.system_info.distribution
     if dist.lower() in DEB_DISTS:
         pytest.skip("This test only for RHEL based platforms")
@@ -58,20 +58,13 @@ def test_check_rpm_package(host, package):
     else:
         assert PXB_VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
 
-def test_binary_version(host):
+def test_pxb_binary_version(host):
     cmd = "xtrabackup --version"
     result = host.run(cmd)
     assert result.rc == 0, result.stderr
     assert PXB_VERSION in result.stderr, (result.stdout, result.stdout)
 
-
-@pytest.mark.parametrize("pt_bin", PTBINS)
-def test_pt_binaries(host, pt_bin):
-    cmd = '{} --version'.format(pt_bin)
-    result = host.run(cmd)
-    assert PT_VERSION in result.stdout, result.stdout
-
-@pytest.mark.install
+@pytest.mark.pkg_source
 def test_sources_pxb_version(host):
     if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")
@@ -86,7 +79,29 @@ def test_sources_pxb_version(host):
     assert result.rc == 0, (result.stderr, result.stdout)
     assert PXB_VERSION in result.stdout, result.stdout
 
-@pytest.mark.install
+def test_check_pt_deb_package(host):
+    dist = host.system_info.distribution
+    if dist.lower() in RHEL_DISTS:
+        pytest.skip("This test only for RHEL based platforms")
+    pkg = host.package('percona-toolkit')
+    assert pkg.is_installed
+    assert PT_VERSION in pkg.version, pkg.version
+
+def test_check_pt_rpm_package(host):
+    dist = host.system_info.distribution
+    if dist.lower() in DEB_DISTS:
+        pytest.skip("This test only for RHEL based platforms")
+    pkg = host.package('percona-toolkit')
+    assert pkg.is_installed
+    assert PT_VERSION in pkg.version, pkg.version
+
+@pytest.mark.parametrize("pt_bin", PTBINS)
+def test_pt_binaries(host, pt_bin):
+    cmd = '{} --version'.format(pt_bin)
+    result = host.run(cmd)
+    assert PT_VERSION in result.stdout, result.stdout
+
+@pytest.mark.pkg_source
 def test_sources_pt_version(host):
     if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")

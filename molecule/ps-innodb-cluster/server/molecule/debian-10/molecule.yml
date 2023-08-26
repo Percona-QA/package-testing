@@ -17,7 +17,7 @@ platforms:
     root_device_name: xvda
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
-      job-name: test-ps-innodb-cluster
+      job-name: ${JOB_NAME}
   - name: ps-node2-debian-10
     region: us-west-2
     image: ami-0f5d8e2951e3f83a5
@@ -27,7 +27,7 @@ platforms:
     root_device_name: xvda
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
-      job-name: test-ps-innodb-cluster
+      job-name: ${JOB_NAME}
   - name: ps-node3-debian-10
     region: us-west-2
     image: ami-0f5d8e2951e3f83a5
@@ -37,7 +37,7 @@ platforms:
     root_device_name: xvda
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
-      job-name: test-ps-innodb-cluster
+      job-name: ${JOB_NAME}
 provisioner:
   name: ansible
   lint:

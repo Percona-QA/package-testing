@@ -15,7 +15,7 @@ platforms:
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
-      job-name: pxc-package-testing-job-pxc57
+      job-name: ${JOB_NAME}
   - name: pxc3-57-common-ol-9-upgrade
     region: us-west-1
     image: ami-0d1958c85fb6a7b3e
@@ -25,7 +25,7 @@ platforms:
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
-      job-name: pxc-package-testing-job-pxc57
+      job-name: ${JOB_NAME}
 provisioner:
   name: ansible
   playbooks:
