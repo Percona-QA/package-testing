@@ -36,12 +36,12 @@ else
   if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     wget -q https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb
     sudo dpkg -i percona-release_latest.$(lsb_release -sc)_all.deb
-    sudo percona-release enable pxb-24 testing
+    sudo percona-release enable original testing
     sudo apt update
     sudo apt-get install -y percona-xtrabackup-24
   fi
 fi
-pip3 install --user pytest-testinfra pytest
+pip3 install --user --break-system-packages pytest-testinfra pytest
 
 TARBALL_NAME=$(basename "$(find . -maxdepth 1 -name '*.tar.gz'|head -n1)")
 if [ -z "${TARBALL_NAME}" ]; then
