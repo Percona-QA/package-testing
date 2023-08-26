@@ -20,7 +20,9 @@ pipeline {
             label "min-bionic-x64"
           }
           steps {
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
+              }
               run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
@@ -31,7 +33,9 @@ pipeline {
             label "min-focal-x64"
           }
           steps {
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
+              }
               run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
@@ -42,7 +46,9 @@ pipeline {
             label "min-jammy-x64"
           }
           steps {
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
+              }
               run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
@@ -53,7 +59,9 @@ pipeline {
             label "min-buster-x64"
           }
           steps {
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
+              }
               run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
@@ -64,7 +72,9 @@ pipeline {
             label "min-bullseye-x64"
           }
           steps {
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
+              }
               run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
@@ -75,7 +85,9 @@ pipeline {
             label "min-bookworm-x64"
           }
           steps {
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
+              }
               run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
@@ -86,7 +98,9 @@ pipeline {
             label "min-centos-7-x64"
           }
           steps {
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
+              }
               run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
@@ -97,7 +111,9 @@ pipeline {
             label "min-centos-8-x64"
           }
           steps {
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
+              }
               run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
@@ -108,7 +124,9 @@ pipeline {
             label "min-ol-9-x64"
           }
           steps {
-            withCredentials([usernamePassword(credentialsId: 'JenkinsAPI', passwordVariable: 'JENKINS_API_PWD', usernameVariable: 'JENKINS_API_USER')]) {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
+              }
               run_test()
             }
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
@@ -151,7 +169,7 @@ void run_test() {
     else
       sudo apt install -y git wget tar
     fi
-    git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc-tar-5.7 --depth 1
+    git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
     cd package-testing/binary-tarball-tests/pxc
     wget -q ${TARBALL_LINK}${TARBALL_NAME}
     ./run.sh || true
