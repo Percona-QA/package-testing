@@ -36,12 +36,11 @@
   register: config_grep
   become: yes
 
-- name: Verify all expected params are present in "{{path_base}}/config/pmm-agent.yaml"
-  when: diff | length > 0
+- name: "Verify all expected params are present in \"{{path_base}}/config/pmm-agent.yaml\""
+  when: missing_in_config | length > 0 or extra_in_config > 0
   fail:
     msg: "Found {{ (missing_in_config | length > 0) | ternary('missing parameters: `' ~ missing_in_config | join(', ') ~ '`; ','') }}
     {{ (extra_in_config | length > 0) | ternary('unexpected params: `' ~ extra_in_config | join(', ') ~ '`','') }}"
   vars:
-    diff: "{{ expected_params | symmetric_difference(config_grep.stdout_lines | map('trim')) }}"
     missing_in_config: "{{ expected_params | difference(config_grep.stdout_lines | map('trim')) }}"
     extra_in_config: "{{ config_grep.stdout_lines | map('trim') | difference(expected_params) }}"

@@ -61,7 +61,7 @@
       old_version: "{{ old_release.stdout if (test_repo == 'main') else latest_release.stdout }}"
 
   - name: Print detected old PMM version to install
-    ansible.builtin.debug:
+    debug:
       msg: pmm2 release version is {{ old_version }}
 
   - name: "Install old({{ old_version }}) pmm2-client tarball to custom path"
