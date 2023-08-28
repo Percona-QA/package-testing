@@ -44,8 +44,7 @@
     shell: pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-address={{ pmm_server_address }} --server-insecure-tls {{ metrics_mode_arg }} --server-username=admin --server-password={{ pmm_server_password }} --paths-base={{ custom_path }}/ {{ instance_ip }} generic node2_{{ instance_ip }}
 
   - name: Check if the configuration generated with paths-base is using the custom path
-    shell: cat {{custom_path}}/config/pmm-agent.yaml | grep -o -c "{{custom_path}}" | grep "14"
-    become: yes
+    include_tasks: ../tasks/verify_pmm_client_config.yml
 
   - name: Start agent
     shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &

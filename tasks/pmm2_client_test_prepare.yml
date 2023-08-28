@@ -4,6 +4,7 @@
   include_tasks: ./remove_percona_repository.yml
 
 - name: Install EPEL and GPG
+  when: ansible_os_family == "RedHat"
   include_tasks: ./install_epel.yml
 
 - name: Allow release-info to change for apt repositories
