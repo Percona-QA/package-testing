@@ -58,7 +58,7 @@
       - percona-xtradb-cluster-57
     when: ansible_os_family == "Debian"
 
-  - name: install python mysql deb packages my repo
+  - name: install python mysql deb packages
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -67,7 +67,7 @@
       - python-mysqldb
     when: (ansible_os_family == "Debian") and (ansible_distribution_release != "focal" and ansible_distribution_release != "bionic" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "buster" and ansible_distribution_release != "jammy" and ansible_distribution_release != "bookworm")
 
-  - name: install python mysql deb packages for focal and bionic my repo
+  - name: install python mysql deb packages for focal and bionic
     apt:
       name: "{{ packages }}"
       update_cache: yes
