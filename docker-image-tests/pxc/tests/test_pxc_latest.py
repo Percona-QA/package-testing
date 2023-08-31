@@ -21,6 +21,7 @@ def host():
     yield testinfra.get_host("docker://root@" + docker_id)
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
 
+@pytest.mark.skipif(pxc_version_major == "5.7", reason="Skipping tests for 5.7")
 @pytest.mark.skipif(docker_acc == "perconalab", reason="Skipping tests in 'testing' repo")
 class TestMysqlEnvironment:
     @pytest.mark.parametrize("pkg_name,pkg_version", pxc_packages)

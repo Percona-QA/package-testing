@@ -21,7 +21,6 @@ def host():
     yield testinfra.get_host("docker://root@" + docker_id)
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
 
-@pytest.mark.skipif(docker_acc == "perconalab", reason="Skipping tests in 'testing' repo")
 class TestMysqlEnvironment:
     @pytest.mark.parametrize("pkg_name,pkg_version", pxc_packages)
     def test_packages(self, host, pkg_name, pkg_version):
@@ -38,6 +37,6 @@ class TestMysqlEnvironment:
     @pytest.mark.skipif(docker_acc == "perconalab", reason="Skipping tests in 'testing' repo")
     def test_mysqld_version(self, host):
         if pxc_version_major in ['5.7','5.6']:
-            assert host.check_output('mysqld --version') == 'mysqld  Ver '+pxc57_server_version_norel+' for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release '+pxc57_server_release+', Revision '+pxc_revision+', WSREP version '+ pxc_wsrep_version +', wsrep_'+ pxc_wsrep_version +')'
+            assert host.check_output('mysqld --version') == '/usr/sbin/mysqld-ps  Ver '+pxc57_server_version_norel+' for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release '+pxc57_server_release+', Revision '+pxc_revision+', WSREP version '+ pxc_wsrep_version +', wsrep_'+ pxc_wsrep_version +')'
         else:
             assert host.check_output('mysqld --version') == '/usr/sbin/mysqld-ps  Ver '+ pxc_version +' for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release rel'+ pxc_rel +', Revision '+ pxc_revision +', WSREP version '+ pxc_wsrep_version +')'
