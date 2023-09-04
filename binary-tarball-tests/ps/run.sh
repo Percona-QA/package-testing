@@ -27,7 +27,12 @@ else
   sudo apt-get update -y
   sudo apt install -y libaio1 libnuma1 libldap-2.4-2
 fi
-pip3 install --user pytest-testinfra pytest
+
+if [[ $(lsb_release -sc) == 'bookworm' ]]; then
+  pip3 install --user --break-system-packages pytest-testinfra pytest
+else
+  pip3 install --user pytest-testinfra pytest
+fi
 
 TARBALL_NAME=$(basename "$(find . -maxdepth 1 -name '*.tar.gz'|head -n1)")
 if [ -z "${TARBALL_NAME}" ]; then
