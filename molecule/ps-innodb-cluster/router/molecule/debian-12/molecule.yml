@@ -10,7 +10,7 @@ lint:
 platforms:
   - name: mysql-router-debian-12
     region: us-west-2
-    image: ami-071175b60c818694f
+    image: ami-0b6edd8449255b799
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.micro
     ssh_user: admin
