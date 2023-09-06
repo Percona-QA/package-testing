@@ -36,7 +36,7 @@ mysql -uroot -S/tmp/mysql_24000.sock -NBe "GRANT MASKING_DICTIONARIES_ADMIN on *
 
 
 
-#Create lists of: static UDFs (we know expected result), reference list for static and random UDFs
+#Create lists of: static UDFs (we know expected result), reference list for static and list for random UDFs
 staticUDFs=("SELECT mask_canada_sin('046454286A');" "SELECT mask_canada_sin('046454286A', '#');" \
          "SELECT mask_iban('LC14BOSL12345678901234567890123422');" "SELECT mask_iban('LC14BOSL12345678901234567890123422', '#');" \
          "SELECT mask_inner('This is a string', 4, 1);" "SELECT mask_inner('This is a string', 1, 4);" \
