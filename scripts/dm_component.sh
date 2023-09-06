@@ -34,49 +34,63 @@ mysql -uroot -S/tmp/mysql_24000.sock -NBe "GRANT MASKING_DICTIONARIES_ADMIN on *
 
 
 #use the Data Masking functions
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_canada_sin('046454286A');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_canada_sin('046454286A', '#');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_iban('LC14BOSL12345678901234567890123422');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_iban('LC14BOSL12345678901234567890123422', '#');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_inner('This is a string', 5, 1);"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_inner('This is a string', 5, 1, '#');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_inner('This is a string', 1, 5);"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_outer('This is a string', 5, 1);"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_outer('This is a string', 5, 1, '#');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_outer('This is a string', 1, 5);"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_inner('This is a string', 5, 1, '*');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_outer('This is a string', 5, 1, '#');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_pan('01234567891234');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_pan('01234567891234', '#');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_pan_relaxed('01234567891234');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_pan_relaxed('01234567891234', '#');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_ssn('909-63-6922');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_ssn('909-63-6922', '#');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_uk_nin('QQ123456C');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_uk_nin('QQ123456C', '#');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_uuid('79546566-9997-0850-0038-757090134161');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT mask_uuid('79546566-9997-0850-0038-757090134161', '#');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT gen_range(1, 10);"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT gen_rnd_canada_sin();"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT gen_rnd_email();"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT gen_rnd_email(3,4,'mydomain.com');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT gen_rnd_iban();"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT gen_rnd_iban('UA',20);"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT gen_rnd_pan();" # in our implementation no params are accepted
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT gen_rnd_ssn();"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT gen_rnd_uk_nin();"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT gen_rnd_us_phone();"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT gen_rnd_uuid();"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT masking_dictionary_term_add('test_dict1','test_term1_1');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT masking_dictionary_term_add('test_dict1','test_term1_2');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT masking_dictionary_term_add('test_dict2','test_term2_1');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT masking_dictionary_term_add('test_dict2','test_term2_2');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT masking_dictionary_term_remove('test_dict2','test_term2_2');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT gen_blocklist('test_term1_1', 'test_dict1', 'test_dict2');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT gen_dictionary('test_dict1');"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT masking_dictionary_remove('test_dict1');"
+staticUDFs=("SELECT mask_canada_sin('046454286A');" "SELECT mask_canada_sin('046454286A', '#');" \
+         "SELECT mask_iban('LC14BOSL12345678901234567890123422');" "SELECT mask_iban('LC14BOSL12345678901234567890123422', '#');" \
+         "SELECT mask_inner('This is a string', 4, 1);" "SELECT mask_inner('This is a string', 1, 4);" \
+         "SELECT mask_inner('This is a string', 4, 1, '#');" "SELECT mask_outer('This is a string', 11, 1);" \
+         "SELECT mask_outer('This is a string', 1, 12);" "SELECT mask_outer('This is a string', 11, 1, '#');" \
+         "SELECT mask_pan('01234567891234');" "SELECT mask_pan('01234567891234', '#');" \
+         "SELECT mask_pan_relaxed('01234567891234');" "SELECT mask_pan_relaxed('01234567891234', '#');" \
+         "SELECT mask_ssn('909-63-6922');" "SELECT mask_ssn('909-63-6922', '#');" \
+         "SELECT mask_uk_nin('QQ123456C');" "SELECT mask_uk_nin('QQ123456C', '#');" \
+         "SELECT mask_uuid('79546566-9997-0850-0038-757090134161');" "SELECT mask_uuid('79546566-9997-0850-0038-757090134161', '#');" \
+         "SELECT masking_dictionary_term_add('test_dict1','test_term1_1');" "SELECT masking_dictionary_term_add('test_dict1','test_term1_2');" \
+         "SELECT masking_dictionary_term_add('test_dict2','test_term2_1');" "SELECT masking_dictionary_term_add('test_dict2','test_term2_2');" \
+         "SELECT masking_dictionary_term_remove('test_dict2','test_term2_2');" "SELECT gen_blocklist('test_term1_1', 'test_dict1', 'test_dict2');" \
+         "SELECT gen_dictionary('test_dict2');" "SELECT masking_dictionary_remove('test_dict1');")
+referenceList=("XXXXXXXXXX" "##########" \
+         "LC********************************" "LC################################" \
+         "ThisXXXXXXXXXXXg" "TXXXXXXXXXXXring" \
+         "This###########g" "XXXXXXXXXXXtrinX" \
+         "XhisXXXXXXXXXXXX" "###########trin#" \
+         "XXXXXXXXXX1234" "##########1234" \
+         "012345XXXX1234" "012345####1234" \
+         "***-**-6922" "###-##-6922" \
+         "QQ*******" "QQ#######" \
+         "********-****-****-****-************" "########-####-####-####-############" \
+         "1" "1" \
+         "1" "1" \
+         "1" "test_term2_1" \
+         "test_term2_1" "1" )
+# randomUDFs=("SELECT gen_range(1, 10);" "SELECT gen_rnd_canada_sin();" \
+#          "SELECT gen_rnd_email();" "SELECT gen_rnd_email(3,4,'mydomain.com');" \
+#          "SELECT gen_rnd_iban();" "SELECT gen_rnd_iban('UA',20);" \
+#          "SELECT gen_rnd_pan();" "SELECT gen_rnd_ssn();" \
+#          "SELECT gen_rnd_uk_nin();" "SELECT gen_rnd_us_phone();" \
+#          "SELECT gen_rnd_uuid();")
+for i in ${!staticUDFs[@]}; do 
+    result=$(mysql -uroot -S/tmp/mysql_24000.sock -NBe "${staticUDFs[$i]}")
+    if [ "${result}" == "${referenceList[$i]}" ]; then
+        echo 'Equal'
+    else
+        echo "${staticUDFs[$i]} result is incorrect. Current result is: ${result}. Expected result is: ${referenceList[$i]}"
+        fails='1'
+    fi
+done
+# for i in ${randomUDFs[@]}; do
 
-
+#     result=$(mysql -uroot -S/tmp/mysql_24000.sock -NBe "${i}")
+#     if [[ -z "${result}" ]]; then
+#         fails='2'
+#         echo "There is and error"
+#     fi
+#     echo ${i} has result ${result}
+# done
 # Disable Data Masking plugin
 mysql -uroot -S/tmp/mysql_24000.sock -NBe "UNINSTALL PLUGIN data_masking';
+
+if [[ "${fails}" == '1' ]]; then
+    echo "Exiting because there were failed UDFs!"
+    exit 1
+fi
 
