@@ -1,42 +1,42 @@
 #!/bin/bash
 
 #check that data masking plugin is disabled
-DM_PLUGIN=$(mysql -uroot -S/tmp/mysql_24000.sock -NBe "SELECT PLUGIN_NAME, PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS WHERE PLUGIN_NAME = 'data_masking';" | grep -c ACTIVE)
+DM_PLUGIN=$(mysql -NBe "SELECT PLUGIN_NAME, PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS WHERE PLUGIN_NAME = 'data_masking';" | grep -c ACTIVE)
 
 if [ ${DM_PLUGIN} == 1 ]; then
-   echo "DM plugin is installed and active"
+   echo "ERROR: DM plugin is installed and active"
    exit 1
 else
    echo "DM plugin isn't installed or active"
 fi
 
-#install the data masking 
-install=$(mysql -uroot -S/tmp/mysql_24000.sock -NBe "INSTALL COMPONENT 'file://component_masking_functions';")
+#install the data masking component
+install=$(mysql -NBe "INSTALL COMPONENT 'file://component_masking_functions';")
 install_result=$?
 if [[ "${install_result}" == '1' ]]; then
     echo "Exiting because there was failure during component install!"
     exit 1
 fi
 
-# make sure DM plugin is active
-DM_COMPONENT=$(mysql -uroot -S/tmp/mysql_24000.sock -NBe "select * from mysql.component;" | grep -c component_masking_functions)
+# make sure DM component is in place
+DM_COMPONENT=$(mysql -NBe "select * from mysql.component;" | grep -c component_masking_functions)
 
 if [ ${DM_COMPONENT} == 1 ]; then
-   echo "DM component is installed and active"
+   echo "DM component is installed"
 else
-   echo "ERROR: DM component isn't installed or active"
+   echo "ERROR: DM component isn't installed"
    exit 1
 fi
 
 # create data masking dictionary table and give permissions to user
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "CREATE TABLE IF NOT EXISTS mysql.masking_dictionaries (Dictionary VARCHAR(256) NOT NULL,\
+mysql -NBe "CREATE TABLE IF NOT EXISTS mysql.masking_dictionaries (Dictionary VARCHAR(256) NOT NULL,\
       Term VARCHAR(256) NOT NULL, UNIQUE INDEX dictionary_term_idx (Dictionary, Term), INDEX dictionary_idx (Dictionary))\
       ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;"
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "GRANT MASKING_DICTIONARIES_ADMIN on *.* to 'root'@'localhost';"
+mysql -NBe "GRANT MASKING_DICTIONARIES_ADMIN on *.* to 'root'@'localhost';"
 
 
 
-#Create lists of: static UDFs (we know expected result), reference list for static and list for random UDFs
+#Create lists of static UDFs (we know expected result), reference list for static UDFs and list for random UDFs
 staticUDFs=("SELECT mask_canada_sin('046454286A');" "SELECT mask_canada_sin('046454286A', '#');" \
          "SELECT mask_iban('LC14BOSL12345678901234567890123422');" "SELECT mask_iban('LC14BOSL12345678901234567890123422', '#');" \
          "SELECT mask_inner('This is a string', 4, 1);" "SELECT mask_inner('This is a string', 1, 4);" \
@@ -72,9 +72,9 @@ randomUDFs=("SELECT gen_range(1, 10);" "SELECT gen_rnd_canada_sin();" \
          "SELECT gen_rnd_uk_nin();" "SELECT gen_rnd_us_phone();" \
          "SELECT gen_rnd_uuid();")
 
-#Check UDFs results of which we know by comparing UDF result to reference value
+#Check static UDFs results (we know expected result in advance) by comparing UDF result to reference value
 for i in ${!staticUDFs[@]}; do 
-    result=$(mysql -uroot -S/tmp/mysql_24000.sock -NBe "${staticUDFs[$i]}")
+    result=$(mysql -NBe "${staticUDFs[$i]}")
     if [[ "${result}" != "${referenceList[$i]}" ]]; then
         echo "${staticUDFs[$i]} result is incorrect. Current result is: ${result}. Expected result is: ${referenceList[$i]}"
         fails='1'
@@ -83,7 +83,7 @@ done
 
 #Check UDFs that generate random result. MySQL ERRORs have empty result.
 for i in "${randomUDFs[@]}"; do
-    result=$(mysql -uroot -S/tmp/mysql_24000.sock -NBe "${i}")
+    result=$(mysql -NBe "${i}")
     if [[ -z "${result}" ]]; then
         fails='1'
         echo "${i} has empty result."
@@ -92,8 +92,8 @@ done
 
 # set -e
 # Disable Data Masking component
-mysql -uroot -S/tmp/mysql_24000.sock -NBe "DROP TABLE IF EXISTS mysql.masking_dictionaries;"
-uninstall=$(mysql -uroot -S/tmp/mysql_24000.sock -NBe "UNINSTALL COMPONENT 'file://component_masking_functions';")
+mysql -NBe "DROP TABLE IF EXISTS mysql.masking_dictionaries;"
+uninstall=$(mysql -NBe "UNINSTALL COMPONENT 'file://component_masking_functions';")
 uninstall_result=$?
 
 #Exit script with and error if any of the checks failed.
