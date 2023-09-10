@@ -12,6 +12,38 @@ import docker
 container_name = 'mysql-router-test'
 network_name = 'innodbnet1'
 
+def get_running_containers():
+    try:
+        # Run the docker ps command and capture the output
+        output = subprocess.check_output(['docker', 'ps'], universal_newlines=True)
+
+        # Split the output into lines
+        lines = output.strip().split('\n')
+
+        # Skip the header line (which contains column names)
+        containers = lines[1:]
+
+        # Extract container IDs and names
+        container_info = [line.split()[:2] for line in containers]
+
+        return container_info
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error: {e}")
+        return None
+
+# Get the list of running containers
+running_containers = get_running_containers()
+
+# Print the container IDs and names
+if running_containers:
+    print("Running Docker Containers:")
+    for container in running_containers:
+        print(f"ID: {container[0]}, Name: {container[1]}")
+else:
+    print("Failed to retrieve running containers.")
+
+
 @pytest.fixture(scope='module')
 def host():
     docker_client = docker.from_env()
@@ -23,6 +55,38 @@ def host():
     time.sleep(20)
     yield testinfra.get_host("docker://root@" + docker_id)
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
+
+
+def get_running_containers():
+    try:
+        # Run the docker ps command and capture the output
+        output = subprocess.check_output(['docker', 'ps'], universal_newlines=True)
+
+        # Split the output into lines
+        lines = output.strip().split('\n')
+
+        # Skip the header line (which contains column names)
+        containers = lines[1:]
+
+        # Extract container IDs and names
+        container_info = [line.split()[:2] for line in containers]
+
+        return container_info
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error: {e}")
+        return None
+
+# Get the list of running containers
+running_containers = get_running_containers()
+
+# Print the container IDs and names
+if running_containers:
+    print("Running Docker Containers:")
+    for container in running_containers:
+        print(f"ID: {container[0]}, Name: {container[1]}")
+else:
+    print("Failed to retrieve running containers.")
 
 
 class TestRouterEnvironment:
