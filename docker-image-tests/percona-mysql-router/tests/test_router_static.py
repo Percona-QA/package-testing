@@ -20,7 +20,7 @@ def host():
     docker_client = docker.from_env()
     docker_client.networks.create(network_name)
     docker_id = subprocess.check_output(
-        ['docker', 'run', '--name', container_name, '-e', '--net', network_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e', '--MYSQL_INNODB_CLUSTER_MEMBERS', '4', docker_image ], stderr=subprocess.STDOUT ).decode().strip()
+        ['docker', 'run', '--name', container_name, '--net', network_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e', '--MYSQL_INNODB_CLUSTER_MEMBERS', '4', docker_image ], stderr=subprocess.STDOUT ).decode().strip()
     time.sleep(20)
     subprocess.check_call(['docker','exec','--user','root',container_name,'microdnf','install', '-y', 'net-tools'])
     time.sleep(20)
