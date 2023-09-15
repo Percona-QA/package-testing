@@ -49,6 +49,18 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Ubuntu Bionic
+        stage('Debian Bookworm') {
+          agent {
+            label "min-bookworm-x64"
+          }
+          steps {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+              }
+            run_test()
+            junit 'package-testing/binary-tarball-tests/ps/report.xml'
+          } //End steps
+        } //End stage Debian Bookworm
         stage('Debian Bullseye') {
           agent {
             label "min-bullseye-x64"
