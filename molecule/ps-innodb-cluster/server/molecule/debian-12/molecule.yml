@@ -1,0 +1,58 @@
+---
+scenario:
+  name: debian-12
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+lint:
+  name: yamllint
+platforms:
+  - name: ps-node1-debian-12
+    region: us-west-2
+    image: ami-0b6edd8449255b799
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t2.micro
+    ssh_user: admin
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+      job-name: ${JOB_NAME}
+  - name: ps-node2-debian-12
+    region: us-west-2
+    image: ami-0b6edd8449255b799
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t2.micro
+    ssh_user: admin
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+      job-name: ${JOB_NAME}
+  - name: ps-node3-debian-12
+    region: us-west-2
+    image: ami-0b6edd8449255b799
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t2.micro
+    ssh_user: admin
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+      job-name: ${JOB_NAME}
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  playbooks:
+    create: ../../../playbooks/create.yml
+    destroy: ../../../../playbooks/destroy.yml
+    prepare: ../../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../tests/
+  options:
+    verbose: true
+    s: true
+    junitxml: report.xml
+  lint:
+    name: flake8
