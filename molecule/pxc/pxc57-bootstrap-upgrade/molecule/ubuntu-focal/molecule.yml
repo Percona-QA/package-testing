@@ -7,9 +7,9 @@ driver:
   name: ec2
 platforms:
   - name: pxc1-57-bootstrap-ubuntu-focal-upgrade
-    region: us-west-1
-    image: ami-0d221cb540e0015f4
-    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    region: eu-west-1b
+    image: ami-0cc4e06e6e710cd94
+    vpc_subnet_id: subnet-02e8446080b5a52ef
     instance_type: t2.small
     ssh_user: ubuntu
     root_device_name: /dev/sda1

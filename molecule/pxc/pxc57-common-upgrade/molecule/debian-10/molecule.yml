@@ -7,9 +7,9 @@ driver:
   name: ec2
 platforms:
   - name: pxc2-57-common-debian-10-upgrade
-    region: us-west-1
-    image: ami-024fe42989cf9e876
-    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    region: eu-west-1b
+    image: ami-07a44bb660e25b065
+    vpc_subnet_id: subnet-02e8446080b5a52ef
     instance_type: t2.small
     ssh_user: admin
     root_device_name: /dev/xvda
@@ -17,9 +17,9 @@ platforms:
       iit-billing-tag: jenkins-pxc-worker
       job-name: ${JOB_NAME}
   - name: pxc3-57-common-debian-10-upgrade
-    region: us-west-1
-    image: ami-024fe42989cf9e876
-    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    region: eu-west-1b
+    image: ami-07a44bb660e25b065
+    vpc_subnet_id: subnet-02e8446080b5a52ef
     instance_type: t2.small
     ssh_user: admin
     root_device_name: /dev/xvda
