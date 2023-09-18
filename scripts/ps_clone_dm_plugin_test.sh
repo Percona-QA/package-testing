@@ -49,4 +49,4 @@ mysql -e "SELECT gen_rnd_ssn();"
 mysql -e "SELECT gen_rnd_us_phone();"
 
 # Disable Data Masking plugin
-mysql -e "UNINSTALL PLUGIN data_masking';
+mysql -e "UNINSTALL PLUGIN data_masking;"
