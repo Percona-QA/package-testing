@@ -37,6 +37,10 @@ ps80_functions = (
   ('get_gtid_set_by_binlog', 'binlog_utils_udf.so', 'STRING'), ('get_binlog_by_gtid_set', 'binlog_utils_udf.so', 'STRING'), ('get_first_record_timestamp_by_binlog', 'binlog_utils_udf.so', 'STRING'),
   ('get_last_record_timestamp_by_binlog', 'binlog_utils_udf.so', 'STRING')
 )
+
+ps80_components = (
+  'component_masking_functions',
+)
 ps80_files = (
   'lib/libcoredumper.a', 
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
@@ -123,6 +127,7 @@ if ps_version_major == '8.0':
     ps_functions = ps80_functions
     ps_files = ps80_files
     ps_symlinks = ps80_symlinks
+    ps_components = ps80_components
 elif ps_version_major == '5.7':
     ps_binaries = ps57_binaries
     ps_executables = ps57_executables
