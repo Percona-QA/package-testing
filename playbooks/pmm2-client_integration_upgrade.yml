@@ -286,13 +286,17 @@
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
 
+  - name: Remove MySQL Socket service, to verify Port output in pmm-admin list commands
+    when: '"ps-" in enabled_db | join("")'
+    command: pmm-admin remove mysql {{ mysql_socket_service_name }}
+
   - name: Remove MongoDB Socket service, to verify Port output in pmm-admin list commands
     when: '"psmdb-" in enabled_db | join("")'
-    command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
+    command: pmm-admin remove mongodb {{ mongo_socket_service_name }}
 
   - name: Remove PostgreSQL Socket services to verify Port output in pmm-admin list commands
     when: '"pg-" in enabled_db | join("")'
-    command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
+    command: pmm-admin remove postgresql {{ pgsql_socket_service_name }}
 
   - name: Parse and set PMM minor version
     shell: "pmm-admin --version | grep ^Version | awk -F. '{print $2}'"
