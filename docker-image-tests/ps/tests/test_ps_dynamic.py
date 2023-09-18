@@ -64,3 +64,13 @@ class TestDynamic:
             assert cmpt in cmd.stdout
         else:
             pytest.mark.skip('Components are available from 8.0 onwards')
+
+    def test_install_audit_log_v2(self, host):
+        if ps_version_major in ['8.0']:
+            cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "source /usr/share/mysql/audit_log_filter_linux_install.sql;"')
+            assert cmd.succeeded
+            cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = \'audit_log_filter\';"')
+            assert cmd.succeeded
+            assert 'ACTIVE' in cmd.stdout
+        else:
+            pytest.mark.skip('Components are available from 8.0 onwards')
