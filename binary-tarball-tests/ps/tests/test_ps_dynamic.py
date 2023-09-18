@@ -35,7 +35,24 @@ def test_install_functions(mysql_server):
     for function in ps_functions:
         mysql_server.install_function(function[0], function[1], function[2])
 
+def test_install_component(mysql_server):
+    if ps_version_major in ['8.0']:
+        for component in ps_components:
+            mysql_server.install_component(component)
+    else:
+        pytest.skip('Component is checked from 8.0!')
+
 def test_install_plugin(mysql_server):
     for plugin in ps_plugins:
         mysql_server.install_plugin(plugin[0], plugin[1])
+
+def test_audit_log_v2(mysql_server):
+    if ps_version_major in ['8.0']:
+        query='source {}/share/audit_log_filter_linux_install.sql;'.format(base_dir)
+        mysql_server.run_query(query)
+        query = 'SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = "audit_log_filter";'
+        output = mysql_server.run_query(query)
+        assert 'ACTIVE' in output
+    else:
+        pytest.skip('audit_log_v2 is checked from 8.0!')
 
