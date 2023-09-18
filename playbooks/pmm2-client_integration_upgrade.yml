@@ -115,7 +115,8 @@
 
 ### start PS 5.7
   - set_fact:
-      mysql_service_name: "mysql_{{ instance_ip }}"
+      mysql_service_name: "mysql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+      mysql_socket_service_name: "mysql_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
 #      mysql_service_name: "mysql_{{ rnd }}_{{ instance_ip }}"
 
   - name: Install and start Percona Server 5.7
@@ -127,12 +128,13 @@
     include_tasks: ../tasks/verify_pmm2_metric.yml
     loop:
       - { service_name: '{{ mysql_service_name }}', metric: 'mysql_up 1' }
+      - { service_name: '{{ mysql_socket_service_name }}', metric: 'mysql_up 1' }
 ## end PS
 
 ### start PSMDB 6.0
   - set_fact:
-      mongo_service_name: "mongodb_{{ instance_ip }}"
-      mongo_socket_service_name: "mongodb_socket_{{ instance_ip }}"
+      mongo_service_name: "mongodb_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+      mongo_socket_service_name: "mongodb_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
 #      mongo_service_name: "mongodb_{{ rnd }}_{{ instance_ip }}"
 
   - name: Install and start Percona Server MongoDB 6.0
@@ -148,8 +150,8 @@
 
 ### start PGSQL 13
   - set_fact:
-      pgsql_service_name: "pgsql_{{ instance_ip }}"
-      pgsql_socket_service_name: "pgsql_{{ instance_ip }}"
+      pgsql_service_name: "pgsql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+      pgsql_socket_service_name: "pgsql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
 
   - name: Install and start Percona Server PostgreSQL 13
     when: '"pg-13" in enabled_db'
@@ -266,6 +268,7 @@
     include_tasks: ../tasks/verify_pmm2_metric.yml
     loop:
       - { service_name: '{{ mysql_service_name }}', metric: 'mysql_up 1' }
+      - { service_name: '{{ mysql_socket_service_name }}', metric: 'mysql_up 1' }
 
   - name: Verify Postgres Exporter metric endpoint with Auth works
     when: '"pg-" in enabled_db | join("")'

@@ -3,19 +3,7 @@
 # Task adjustments are handled by parent playbook vars:
 #             var "port_flag"      :  to access agent with custom port
 #                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
-#             var "cmd_admin_list" :  to access agent with custom port
-#                                     ex: cmd_admin_list: "pmm-admin list {{ port_flag }}"
-
-- name: set empty port_flag
-  set_fact:
-    port_flag: ""
-  when: port_flag is not defined
-
-- name: set cmd_admin_list without flags
-  set_fact:
-    cmd_admin_list: "pmm-admin list"
-  when: cmd_admin_list is not defined
-
+#
 - name: enable ps-57 release repo
   include_tasks: ./enable_repo.yml
   vars:
@@ -30,63 +18,43 @@
   service: name=mysql state=started
 
 - name: start mysql service with service command
-  command: service mysql start
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+  command: service mysql start
 
 - name: start mysql service with systemctl command
-  command: systemctl start mysql
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+  command: systemctl start mysql
 
 - name: set root password on centos
+  when: ansible_os_family == "RedHat"
   shell: |
     init_pass=$(grep "temporary password" /var/log/mysqld.log | awk '{print $NF}' | tail -1)
     mysql --connect-expired-password -uroot --password="$init_pass" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'U?fY)9s7|3gxUm';"
     cp ../templates/my_57.j2 /root/.my.cnf
-  when: ansible_os_family == "RedHat"
 
 - name: copy .my.cnf with credentials on centos
+  when: ansible_os_family == "RedHat"
   template: src=../templates/my_57.j2
     dest=/root/.my.cnf
     mode=0640 owner=root group=root
-  when: ansible_os_family == "RedHat"
-
-- name: add mysql metrics and queries to monitoring
-  command: ../scripts/pmm2_add_instance.sh mysql {{ port_flag }}
-  when: ansible_os_family == "RedHat"
 
 - name: add mysql instance for monitoring
-  command: pmm-admin add mysql {{ port_flag }} --query-source=perfschema --socket=/var/run/mysqld/mysqld.sock --service-name=mysql_{{ instance_ip }}
-  when: ansible_os_family != "RedHat"
+  command: pmm-admin add mysql {{ port_flag if port_flag is defined else '' }} --password='U?fY)9s7|3gxUm' --service-name={{ mysql_service_name }} --query-source=perfschema
 
-- name: check if mysql monitoring running
-  command: "{{ cmd_admin_list }}"
-  register: list_output
+- name: add mysql instance for monitoring via socket
+  command: pmm-admin add mysql {{ port_flag if port_flag is defined else '' }} --socket=/var/run/mysqld/mysqld.sock --service-name={{ mysql_socket_service_name }} --query-source=perfschema
 
-- name: Assert if the pmm-admin list contains mysql
-  assert:
-    that:
-      - "'MySQL' in list_output.stdout"
+- name: "Validate pmm-admin list output contains 'MySQL'"
+  include_tasks: ./verify_pmm-admin_list_contains.yml
+  vars:
+    expected: "MySQL"
 
-- name: Wait for mysqld_exporter to have Running Status.
-  shell: "{{ cmd_admin_list }} | grep 'mysqld_exporter' | awk -F' ' '{print $2}'"
-  register: mysqld_exporter_status
-  until: mysqld_exporter_status.stdout.find('Running') != -1
-  delay: 5
-  retries: 5
+- name: "Wait for 'mysqld_exporter' is Running"
+  include_tasks: ./wait_exporter_is_running.yml
+  vars:
+    process_name: "mysqld_exporter"
 
-- name: Assert if the pmm-admin list contains mysqld_exporter with Running state
-  assert:
-    that:
-      - "'Running' in mysqld_exporter_status.stdout"
-
-- name: Wait for mysql_perfschema_agent to have Running Status.
-  shell: "{{ cmd_admin_list }} | grep 'mysql_perfschema_agent' | awk -F' ' '{print $2}'"
-  register: mysql_perfschema_agent_status
-  until: mysql_perfschema_agent_status.stdout.find('Running') != -1
-  delay: 5
-  retries: 5
-
-- name: Assert if the pmm-admin list contains mysql_perfschema_agent with Running state
-  assert:
-    that:
-      - "'Running' in mysql_perfschema_agent_status.stdout"
+- name: "Wait for 'mysql_perfschema_agent' is Running"
+  include_tasks: ./wait_exporter_is_running.yml
+  vars:
+    process_name: "mysql_perfschema_agent"
