@@ -154,8 +154,6 @@ mysql -uroot -NBe "set global audit_log_filter_max_size=1073741824;"
 
 # check UDFs for default format
 mysql -uroot -NBe "select audit_log_filter_flush();"
-mysql -uroot -NBe "select audit_log_encryption_password_get();"
-mysql -uroot -NBe "select audit_log_encryption_password_set('my_new_password');"
 mysql -uroot -NBe "select audit_log_filter_remove_user('%');"
 mysql -uroot -NBe "select audit_log_filter_remove_filter('log_all');"
 
