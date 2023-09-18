@@ -74,9 +74,9 @@ class MySQL:
     def install_component(self, cname):
         query = 'INSTALL COMPONENT "file://{}";'.format(cname)
         self.run_query(query)
-        query = 'SELECT component_urn FROM mysql.component where component_urn like "%component_masking_functions%";'.format(cname)
+        query = 'SELECT component_urn FROM mysql.component where component_urn like "%{}%";'.format(cname)
         output = self.run_query(query)
-        assert output is None
+        assert cname in output
 
     def check_engine_active(self, engine):
         query = 'select SUPPORT from information_schema.ENGINES where ENGINE = "{}";'.format(engine)
