@@ -48,7 +48,8 @@ ps80_files = (
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini','lib/plugin/keyring_file.so',
-  'lib/plugin/keyring_udf.so', 'lib/plugin/keyring_vault.so', 'lib/plugin/binlog_utils_udf.so'
+  'lib/plugin/keyring_udf.so', 'lib/plugin/keyring_vault.so', 'lib/plugin/binlog_utils_udf.so',
+  'lib/plugin/audit_log_filter.so', 'lib/plugin/component_masking_functions.so'
 )
 ps80_symlinks = (
   ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.34'),
