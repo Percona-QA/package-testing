@@ -93,7 +93,7 @@
       - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up 1' }
       - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up 1' }
 
-  - name: Remove mongodb service from monitoring which was added via socket
+  - name: Remove MongoDB service from monitoring which was added via socket
     command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
 ### end PSMDB 6.0
 
@@ -122,7 +122,7 @@
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
 
-  - name: Remove PostgreSQL instances added via socket
+  - name: Remove PostgreSQL service added via socket
     when: '"pg-13" in enabled_db'
     command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
 ### end PG

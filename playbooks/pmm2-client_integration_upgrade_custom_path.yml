@@ -248,11 +248,11 @@
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
 
-  - name: Remove MongoDB Socket service, to verify Port output in pmm-admin list commands
+  - name: Remove MongoDB Socket service to verify Port output in pmm-admin list commands
     when: '"psmdb-" in enabled_db | join("")'
     command: pmm-admin remove mongodb {{ mongo_socket_service_name }}
 
-  - name: Remove PostgreSQL Socket services to verify Port output in pmm-admin list commands
+  - name: Remove PostgreSQL Socket service to verify Port output in pmm-admin list commands
     when: '"pg-" in enabled_db | join("")'
     command: pmm-admin remove postgresql {{ pgsql_socket_service_name }}
 
