@@ -3,15 +3,15 @@ set -e
 
 #install the audit log v2 plugin
 ALv2_PLUGIN=$(mysql -uroot -NBe "source /usr/share/mysql/audit_log_filter_linux_install.sql;")
-INSTALL_RESULT=$(mysql -uroot -NBe "SELECT PLUGIN_NAME, PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS WHERE PLUGIN_NAME LIKE 'audit_log_filter';"| grep -c ACTIVE)
+INSTALL_RESULT=$(mysql -uroot -NBe "SELECT PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS WHERE PLUGIN_NAME LIKE 'audit_log_filter';"| grep -c ACTIVE)
 if [ "${INSTALL_RESULT}" == 1 ]; then
    echo "Audit log v2 plugin is installed and active"
 else
-   echo "Audit log v2 plugin installed or active"
+   echo "Audit log v2 plugin is not installed or active"
    exit 1
 fi
 
-# Chech that all variables are present and have correct default values
+# Create dictionary of variables and their default values.
 declare -A variables=( ["audit_log_filter_buffer_size"]="1048576" ["audit_log_filter_compression"]="NONE" ["audit_log_filter_database"]="mysql" \
                 ["audit_log_filter_disable"]="0" ["audit_log_filter_encryption"]="NONE" ["audit_log_filter_file"]="audit_filter.log"\
                 ["audit_log_filter_filter_id"]="0" ["audit_log_filter_format"]="NEW" ["audit_log_filter_format_unix_timestamp"]="0" \
@@ -21,13 +21,14 @@ declare -A variables=( ["audit_log_filter_buffer_size"]="1048576" ["audit_log_fi
                 ["audit_log_filter_strategy"]="ASYNCHRONOUS" ["audit_log_filter_syslog_facility"]="LOG_USER" ["audit_log_filter_syslog_priority"]="LOG_INFO" \
                 ["audit_log_filter_syslog_tag"]="audit-filter")
 
+# Create dictionary of audit log v2 plugin functions
 functions_list=("audit_log_rotate" "audit_log_encryption_password_set" \
     "audit_log_encryption_password_get" "audit_log_filter_remove_user" \
     "audit_log_read_bookmark" "audit_log_filter_set_user" \
     "audit_log_filter_set_filter" "audit_log_filter_remove_filter" \
     "audit_log_filter_flush" "audit_log_read")
 
-# Chech that all variables are present and have correct default values
+# Check that all variables are present and have correct default values
 for al_variable in ${!variables[@]}; do
     result=$(mysql -uroot -NBe "SELECT @@${al_variable}")
     if [[ "${result}" != ${variables[${al_variable}]} ]]; then
@@ -36,7 +37,7 @@ for al_variable in ${!variables[@]}; do
     fi
 done
 
-# Chech that all UDFs are present
+# Check that all UDFs are present
 for al_function in ${functions_list[@]}; do
     result=$(mysql -uroot -NBe "SELECT * FROM performance_schema.user_defined_functions WHERE udf_name=\"${al_function}\";")
     if [[ -z ${result} ]]; then
@@ -108,8 +109,6 @@ else
     echo "audit_log_filter_rotate_on_size OK. Number of log files before SQL=${files_num_before}. Number of log files after SQL=${files_num_after}"
 fi
 
-#mysql -uroot -NBe "set global audit_log_filter_rotate_on_size=1073741824;"
-
 # audit_log_filter_max_size. When log files size => audit_log_filter_max_size, the extra files are pruned. Prunning is triggered during files rotation.
 # audit_log_filter_prune_seconds should be 0
 mysql -uroot -NBe "set global audit_log_filter_max_size=8192;"
@@ -128,7 +127,7 @@ if [[ ${files_num_after} -gt 2 ]]; then
 else
     echo "audit_log_filter_max_size OK. Number of log files after SQL=${files_num_after}"
 fi
-mysql -uroot -NBe "set global audit_log_filter_max_size=1073741824;"
+mysql -uroot -NBe "set global audit_log_filter_max_size=default;"
 
 # audit_log_filter_prune_seconds. When log files creation => audit_log_filter_prune_seconds, the extra files are pruned. Prunning is triggered during files rotation.
 # audit_log_filter_max_size should be 0
@@ -160,7 +159,7 @@ mysql -uroot -NBe "select audit_log_filter_remove_filter('log_all');"
 #remove plugin
 mysql -uroot -NBe "DROP TABLE IF EXISTS mysql.audit_log_user;DROP TABLE IF EXISTS mysql.audit_log_filter;UNINSTALL PLUGIN audit_log_filter;"
 
-#Exit script with and error if any of the checks failed.
+#Exit script with an error if any of the checks failed.
 if [[ "${fails}" == '1' ]]; then
     echo "Exiting because there were failed defaults/UDFs!"
     exit 1

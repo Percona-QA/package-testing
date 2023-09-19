@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #check that data masking plugin is disabled
-DM_PLUGIN=$(mysql -NBe "SELECT PLUGIN_NAME, PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS WHERE PLUGIN_NAME = 'data_masking';" | grep -c ACTIVE)
+DM_PLUGIN=$(mysql -NBe "SELECT PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS WHERE PLUGIN_NAME = 'data_masking';" | grep -c ACTIVE)
 
 if [ ${DM_PLUGIN} == 1 ]; then
    echo "ERROR: DM plugin is installed and active"
@@ -11,7 +11,7 @@ else
 fi
 
 #install the data masking component
-install=$(mysql -NBe "INSTALL COMPONENT 'file://component_masking_functions';")
+mysql -NBe "INSTALL COMPONENT 'file://component_masking_functions';"
 install_result=$?
 if [[ "${install_result}" == '1' ]]; then
     echo "Exiting because there was failure during component install!"
@@ -93,10 +93,10 @@ done
 # set -e
 # Disable Data Masking component
 mysql -NBe "DROP TABLE IF EXISTS mysql.masking_dictionaries;"
-uninstall=$(mysql -NBe "UNINSTALL COMPONENT 'file://component_masking_functions';")
+mysql -NBe "UNINSTALL COMPONENT 'file://component_masking_functions';"
 uninstall_result=$?
 
-#Exit script with and error if any of the checks failed.
+#Exit script with an error if any of the checks failed.
 if [[ "${fails}" == '1' ]]; then
     echo "Exiting because there were failed UDFs!"
     exit 1
