@@ -94,7 +94,7 @@
       - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up 1' }
 
   - name: Remove MongoDB service from monitoring which was added via socket
-    command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
+    command: pmm-admin remove mongodb {{ mongo_socket_service_name }}
 ### end PSMDB 6.0
 
 ### start PGSQL 13
@@ -124,7 +124,7 @@
 
   - name: Remove PostgreSQL service added via socket
     when: '"pg-13" in enabled_db'
-    command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
+    command: pmm-admin remove postgresql {{ pgsql_socket_service_name }}
 ### end PG
 
 ### verifications
