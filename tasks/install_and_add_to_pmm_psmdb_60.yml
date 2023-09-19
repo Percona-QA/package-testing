@@ -28,7 +28,7 @@
   command: pmm-admin add mongodb {{ port_flag if port_flag is defined else '' }} --socket=/tmp/mongodb-27017.sock --service-name={{ mongo_socket_service_name }}
 
 - name: "Validate pmm-admin list output contains 'MongoDB'"
-  include_tasks: ./verify_pmm-admin_list_contains.yml.yml
+  include_tasks: ./verify_pmm-admin_list_contains.yml
   vars:
     expected: "MongoDB"
 

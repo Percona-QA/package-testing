@@ -100,7 +100,7 @@
   command: pmm-admin add postgresql {{ port_flag if port_flag is defined else '' }} --socket /var/run/postgresql/ --username=postgres --service-name={{ pgsql_socket_service_name }} --query-source="pgstatements"
 
 - name: "Validate pmm-admin list output contains 'PostgreSQL'"
-  include_tasks: ./verify_pmm-admin_list_contains.yml.yml
+  include_tasks: ./verify_pmm-admin_list_contains.yml
   vars:
     expected: "PostgreSQL"
 
