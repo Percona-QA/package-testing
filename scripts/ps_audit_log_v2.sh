@@ -97,9 +97,9 @@ if [[ ${cur_value} != 4096 ]]; then
 fi
 files_num_before=$(ls -lht ${data_dir}|grep ${al_file_pattern}|wc -l)
 #run some sqls
-for i in {1..10}; do mysql -uroot -NBe "select '1'; select '2'; select '3';" > /dev/null; done
+for i in {1..100}; do mysql -uroot -NBe "select '1'; select '2'; select '3';" > /dev/null; done
 sleep 1
-for i in {1..10}; do mysql -uroot -NBe "select '1'; select '2'; select '3';" > /dev/null; done
+for i in {1..100}; do mysql -uroot -NBe "select '1'; select '2'; select '3';" > /dev/null; done
 sleep 1
 files_num_after=$(ls -lht ${data_dir}|grep ${al_file_pattern}|wc -l)
 if [[ ${files_num_before} -ge ${files_num_after} ]]; then
@@ -118,7 +118,7 @@ if [[ ${prune_sec_value} != 0 ]]; then
     exit 1
 fi
 sleep 1
-for i in {1..10}; do mysql -uroot -NBe "select '1';" > /dev/null; done
+for i in {1..200}; do mysql -uroot -NBe "select '1'; select '2'; select '3';" > /dev/null; done
 sleep 1
 files_num_after=$(ls -lht ${data_dir}|grep ${al_file_pattern}|wc -l)
 if [[ ${files_num_after} -gt 2 ]]; then
