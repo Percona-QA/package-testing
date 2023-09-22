@@ -143,7 +143,6 @@
 
   - name: start mysql service
     service: name=mysql state=started
-    ignore_errors: yes
 
   - name: check mysql service status
     command: /package-testing/check_running.sh mysql running
