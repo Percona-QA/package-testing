@@ -92,6 +92,15 @@
   - name: start pykmip server
     shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
 
+  - name: Check if kmip-server is running
+    shell: ps -ef | grep kmip-server | grep -v grep
+    register: kmip_server_running
+    failed_when: False
+
+  - name: Display result
+    debug:
+      msg: "KMIP Server is {{ 'running' if kmip_server_running.stdout else 'not running' }}"
+
   - name: copy the global manifest for mysql
     copy:
         src: /package-testing/kmip/mysqld.my
