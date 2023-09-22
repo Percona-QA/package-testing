@@ -69,18 +69,28 @@
     with_items:
         - python3 -m pip install -U pip
         - python3 -m pip install -U setuptools
+        - python3 -m pip install urllib3==1.26.6  
         - python3 -m pip install -U pykmip
+    when: ansible_distribution_release != "bookworm"
+
+  - name: install pykmip
+    command: "{{ item }}"
+    with_items:
+        - python3 -m pip install -U --break-system-packages pip
+        - python3 -m pip install -U --break-system-packages setuptools
+        - python3 -m pip install -U --break-system-packages pykmip
+    when: ansible_distribution_release == "bookworm"  
 
   - name: downgrade SQLAlchemy as new version doesn't work with pykmip
     command: pip3 install SQLAlchemy==1.4.46
+    when: ansible_distribution_release != "bookworm"
+
+  - name: downgrade SQLAlchemy as new version doesn't work with pykmip
+    command: pip3 install --break-system-packages SQLAlchemy==1.4.46
+    when: ansible_distribution_release == "bookworm"  
 
   - name: start pykmip server
     shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
-    when: ansible_distribution != "Amazon"
-
-  - name: start pykmip server for Amazon-Linux
-    shell: nohup /usr/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
-    when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2"
 
   - name: copy the global manifest for mysql
     copy:
@@ -124,6 +134,7 @@
 
   - name: start mysql service
     service: name=mysql state=started
+    ignore_errors: yes
 
   - name: check mysql service status
     command: /package-testing/check_running.sh mysql running
