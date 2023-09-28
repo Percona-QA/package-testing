@@ -45,7 +45,7 @@ def start_mysql_containers():
             f'--name=mysql{N}',
             f'--hostname=mysql{N}',
             '--net=innodbnet',
-            '-v', f'/home/puneet/my{N}.cnf:/etc/my.cnf',
+            '-v', f'my{N}.cnf:/etc/my.cnf',
             '-e', 'MYSQL_ROOT_PASSWORD=root', percona_docker_image
         ])
     time.sleep(60)
