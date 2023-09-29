@@ -10,6 +10,7 @@ import requests
 import docker
 
 container_name = 'mysql-router-test'
+container_name_mysql_router = 'mysql-router'
 network_name = 'innodbnet1'
 docker_tag = os.getenv('ROUTER_VERSION')
 docker_acc = os.getenv('DOCKER_ACC')
@@ -112,24 +113,16 @@ verify_new_user()
 docker_restart()
 create_cluster()
 add_slave()
-router_bootstrap()    
+router_bootstrap()
 
-# Get the Docker ID of the running container
-docker_id = subprocess.check_output(['sudo', 'docker', 'ps', '-q', '--filter', f'name={container_name}']).decode().strip()
-
-# Define the pytest fixture to provide the host identifier
-@pytest.fixture(scope='module')
-def host():
-    yield docker_id
-
-# Create an instance of the Host class
-class Host:
-    def check_output(self, command):
-        result = subprocess.run(['docker', 'exec', docker_id, 'bash', '-c', command], capture_output=True, text=True)
-        return result.stdout.strip()
-
-# Instantiate an instance of the Host class
-host = Host()
+def get_docker_id(container_name_mysql_router):
+    try:
+        command = f'docker ps --filter "name={container_name_mysql_router}" --format "{{.ID}}"'
+        docker_id = subprocess.check_output(command, shell=True).decode().strip()
+        return docker_id
+    except subprocess.CalledProcessError as e:
+        print(f"Error: {e}")
+        return None
 
 class TestRouterEnvironment:
     def test_mysqlrouter_version(self, host):
@@ -158,3 +151,15 @@ class TestRouterEnvironment:
         print(f"Username: {mysql_user.name}, UID: {mysql_user.uid}")
         assert mysql_user.exists
         assert mysql_user.uid == 1001
+
+    def test_mysqlrouter_ports(self, host):
+        host.socket("tcp://6446").is_listening
+        host.socket("tcp://6447").is_listening
+        host.socket("tcp://64460").is_listening
+        host.socket("tcp://64470").is_listening
+
+    def test_mysqlrouter_config(self, host):
+        assert host.file("/etc/mysqlrouter/mysqlrouter.conf").exists
+        assert host.file("/etc/mysqlrouter/mysqlrouter.conf").user == "root"
+        assert host.file("/etc/mysqlrouter/mysqlrouter.conf").group == "root"
+        assert oct(host.file("/etc/mysqlrouter/mysqlrouter.conf").mode) == "0o644"    
