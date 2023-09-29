@@ -104,6 +104,16 @@ def router_bootstrap():
         router_docker_image
     ])
 
+create_network()
+create_mysql_config()
+start_mysql_containers()
+create_new_user()
+verify_new_user()
+docker_restart()
+create_cluster()
+add_slave()
+router_bootstrap()    
+
 # Get the Docker ID of the running container
 docker_id = subprocess.check_output(['sudo', 'docker', 'ps', '-q', '--filter', f'name={container_name}']).decode().strip()
 
@@ -125,16 +135,16 @@ class TestRouterEnvironment:
     def test_mysqlrouter_version(self, host):
         command = "mysqlrouter --version"
         output = host.check_output(command)
-        assert "8.0.33" in output
+        assert ROUTER_VERSION in output
 
     def test_mysqlsh_version(self, host):
         command = "mysqlsh --version"
         output = host.check_output(command)
-        assert "8.0.33-25" in output
+        assert PS_VERSION in output
 
     def test_mysqlrouter_directory_permissions(self, host):
-        assert host.file('/var/lib/mysqlrouter').user == 'mysqlrouter'
-        assert host.file('/var/lib/mysqlrouter').group == 'mysqlrouter'
+        assert host.file('/var/lib/mysqlrouter').user == 'mysql'
+        assert host.file('/var/lib/mysqlrouter').group == 'mysql'
         assert oct(host.file('/var/lib/mysqlrouter').mode) == '0o755'
 
     def test_mysql_user(self, host):
