@@ -19,7 +19,7 @@ router_docker_image = docker_acc + "/" + "percona-mysql-router" + ":" + docker_t
 percona_docker_image = docker_acc + "/" + "percona-server" + ":" + ps_version
 
 def create_network():
-    subprocess.run(['sudo', 'docker', 'network', 'create', 'innodbnet'])
+    subprocess.run(['docker', 'network', 'create', 'innodbnet'])
 
 def create_mysql_config():
     for N in range(1, 5):
@@ -42,7 +42,7 @@ def create_mysql_config():
 def start_mysql_containers():
     for N in range(1, 5):
         subprocess.run([
-            'sudo', 'docker', 'run', '-d',
+            'docker', 'run', '-d',
             f'--name=mysql{N}',
             f'--hostname=mysql{N}',
             '--net=innodbnet',
@@ -54,7 +54,7 @@ def start_mysql_containers():
 def create_new_user():
     for N in range(1, 5):
         subprocess.run([
-            'sudo', 'docker', 'exec', f'mysql{N}',
+            'docker', 'exec', f'mysql{N}',
             'mysql', '-uroot', '-proot',
             '-e', "CREATE USER 'inno'@'%' IDENTIFIED BY 'inno'; GRANT ALL privileges ON *.* TO 'inno'@'%' with grant option; FLUSH PRIVILEGES;"
         ])
@@ -62,7 +62,7 @@ def create_new_user():
 def verify_new_user():
     for N in range(1, 5):
         subprocess.run([
-            'sudo', 'docker', 'exec', f'mysql{N}',
+            'docker', 'exec', f'mysql{N}',
             'mysql', '-uinno', '-pinno',
             '-e', "SHOW VARIABLES WHERE Variable_name = 'hostname';"
             '-e', "SELECT user FROM mysql.user where user = 'inno';"
@@ -70,31 +70,31 @@ def verify_new_user():
     time.sleep(30)
 
 def docker_restart():
-    subprocess.run(['sudo', 'docker', 'restart', 'mysql1', 'mysql2', 'mysql3', 'mysql4'])
+    subprocess.run(['docker', 'restart', 'mysql1', 'mysql2', 'mysql3', 'mysql4'])
     time.sleep(10)
 
 def create_cluster():
     subprocess.run([
-        'sudo', 'docker', 'exec', 'mysql1',
+        'docker', 'exec', 'mysql1',
         'mysqlsh', '-uinno', '-pinno', '--', 'dba', 'create-cluster', 'testCluster'
     ])
 
 def add_slave():
     subprocess.run([
-        'sudo', 'docker', 'exec', 'mysql1',
+        'docker', 'exec', 'mysql1',
         'mysqlsh', '-uinno', '-pinno', '--',
         'cluster', 'add-instance', '--uri=inno@mysql3', '--recoveryMethod=incremental'
     ])
     time.sleep(10)
     subprocess.run([
-        'sudo', 'docker', 'exec', 'mysql1',
+        'docker', 'exec', 'mysql1',
         'mysqlsh', '-uinno', '-pinno', '--',
         'cluster', 'add-instance', '--uri=inno@mysql4', '--recoveryMethod=incremental'
     ])
 
 def router_bootstrap():
     subprocess.run([
-        'sudo', 'docker', 'run', '-d',
+        'docker', 'run', '-d',
         '--name', 'mysql-router',
         '--net=innodbnet',
         '-e', 'MYSQL_HOST=mysql1',
