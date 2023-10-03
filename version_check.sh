@@ -153,6 +153,7 @@ elif [ ${product} = "pt" ]; then
     version_check=$(${i} --version|grep -c ${version})
     if [ ${version_check} -eq 0 ]; then
       echo "${i} version is not good!"
+      echo $(${i} --version)
       exit 1
     else
       echo "${i} version is correct and ${version}" >> "${log}"
