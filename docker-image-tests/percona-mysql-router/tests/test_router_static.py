@@ -92,8 +92,9 @@ def add_slave():
         'cluster', 'add-instance', '--uri=inno@mysql4', '--recoveryMethod=incremental'
     ])
 
-def router_bootstrap():
-    subprocess.run([
+@pytest.fixture(scope='module')
+def inspect_data():
+    dockerid = subprocess.check_output([
         'docker', 'run', '-d',
         '--name', 'mysql-router',
         '--net=innodbnet',
@@ -103,7 +104,11 @@ def router_bootstrap():
         '-e', 'MYSQL_PASSWORD=inno',
         '-e', 'MYSQL_INNODB_CLUSTER_MEMBERS=4',
         router_docker_image
-    ])
+    ]).decode().strip()
+    inspect_data = json.loads(subprocess.check_output(['docker','inspect','mysql-router']))
+    yield inspect_data[0]
+    subprocess.check_call(['docker', 'rm', '-f', docker_id])
+
 
 create_network()
 create_mysql_config()
@@ -113,16 +118,7 @@ verify_new_user()
 docker_restart()
 create_cluster()
 add_slave()
-router_bootstrap()
-
-def get_docker_id(container_name_mysql_router):
-    try:
-        command = f'docker ps --filter "name={container_name_mysql_router}" --format "{{.ID}}"'
-        docker_id = subprocess.check_output(command, shell=True).decode().strip()
-        return docker_id
-    except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
-        return None
+inspect_data()
 
 class TestRouterEnvironment:
     def test_mysqlrouter_version(self, host):
