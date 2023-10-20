@@ -141,14 +141,12 @@
 
   - name: Remove PXC packages
     include_tasks: ../../../../tasks/remove_pxc80.yml
-    when: "'pxc3' in inventory_hostname"
 
   - name: Block pmm.check-dev.percona.com IP
     iptables:
       chain: OUTPUT
       destination: check-dev.percona.com
       jump: DROP
-    when: "'pxc3' in inventory_hostname"
 
   - name: install PXC 8 deb packages with blocked Telemetry Server
     apt:
@@ -157,7 +155,7 @@
     vars:
       packages:
       - percona-xtradb-cluster
-    when: (ansible_os_family == "Debian") and ("'pxc3' in inventory_hostname")
+    when: ansible_os_family == "Debian"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
@@ -169,7 +167,7 @@
     vars:
       packages:
       - percona-xtradb-cluster
-    when: (ansible_os_family == "RedHat") and ("'pxc3' in inventory_hostname")
+    when: ansible_os_family == "RedHat"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
