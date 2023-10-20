@@ -65,6 +65,8 @@
       - percona-xtrabackup-80
       - percona-toolkit
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages
     yum:
@@ -76,6 +78,11 @@
       - percona-xtrabackup-80
       - percona-toolkit
     when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: check telemetry file presence
+    command: /package-testing/telemetry_check.sh pxc -e
 
   - name: stop mysql service with service command
     command: systemctl stop mysql

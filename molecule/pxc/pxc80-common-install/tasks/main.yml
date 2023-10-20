@@ -57,6 +57,10 @@
       - percona-toolkit
       - percona-xtrabackup-80
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
+
 
   - name: install PXC 8 rpm packages
     yum:
@@ -68,6 +72,12 @@
       - percona-toolkit
       - percona-xtrabackup-80
     when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: check telemetry file presence
+    command: /package-testing/telemetry_check.sh pxc -d
 
   - name: copy PXC config on centos 7
     template: src=../../../../templates/my_rpm_80.j2 
@@ -126,3 +136,46 @@
 
   - name: Check that the PXC Cluster is up and running
     shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'
+
+## Changes done for telemetry - remove old telemetry file - remove pxc package - add iptables rule for Telemetry Server - install only pxc package only pxc node 3
+
+  - name: Remove PXC packages
+    include_tasks: ../../../../tasks/remove_pxc80.yml
+    when: "'pxc3' in inventory_hostname"
+
+  - name: Remove telemetry file
+    command: rm /usr/local/percona/telemetry_uuid
+    when: "'pxc3' in inventory_hostname"
+
+  - name: Block pmm.check-dev.percona.com IP
+    iptables:
+      chain: OUTPUT
+      destination: check-dev.percona.com
+      jump: DROP
+    when: "'pxc3' in inventory_hostname"
+
+  - name: install PXC 8 deb packages with blocked Telemetry Server
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtradb-cluster
+    when: (ansible_os_family == "Debian") and ("'pxc3' in inventory_hostname")
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+
+  - name: install PXC 8 rpm packages with blocked Telemetry Server
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster
+    when: (ansible_os_family == "RedHat") and ("'pxc3' in inventory_hostname")
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: check telemetry file presence
+    command: /package-testing/telemetry_check.sh pxc -u
