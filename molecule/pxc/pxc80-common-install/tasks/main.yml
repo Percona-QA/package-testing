@@ -141,12 +141,14 @@
 
   - name: Remove PXC packages
     include_tasks: ../../../../tasks/remove_pxc80.yml
+    when: lookup('env', 'upgrade_repo') == ""
 
   - name: Block pmm.check-dev.percona.com IP
     iptables:
       chain: OUTPUT
       destination: check-dev.percona.com
       jump: DROP
+    when: lookup('env', 'upgrade_repo') == ""
 
   - name: install PXC 8 deb packages with blocked Telemetry Server
     apt:
@@ -155,9 +157,10 @@
     vars:
       packages:
       - percona-xtradb-cluster
-    when: ansible_os_family == "Debian"
+    when: ansible_os_family == "Debian" and lookup('env', 'upgrade_repo') == ""
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      
 
 
   - name: install PXC 8 rpm packages with blocked Telemetry Server
@@ -167,17 +170,20 @@
     vars:
       packages:
       - percona-xtradb-cluster
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and lookup('env', 'upgrade_repo') == ""
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: check telemetry file presence (unavailable)
     command: /package-testing/telemetry_check.sh pxc -u
+    when: lookup('env', 'upgrade_repo') == ""
 
   - name: verify instanceID
     command: cat /usr/local/percona/telemetry_uuid
     register: t_uuid_output
+    when: lookup('env', 'upgrade_repo') == ""
 
   - name: output t_uuid_output
     debug:
       var: t_uuid_output
+    when: lookup('env', 'upgrade_repo') == ""
