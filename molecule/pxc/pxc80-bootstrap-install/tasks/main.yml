@@ -81,8 +81,16 @@
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: check telemetry file presence
+  - name: check telemetry file presence (enabled)
     command: /package-testing/telemetry_check.sh pxc -e
+
+  - name: verify instanceID
+    command: cat /usr/local/percona/telemetry_uuid
+    register: t_uuid_output
+
+  - name: output t_uuid_output
+    debug:
+      var: t_uuid_output
 
   - name: stop mysql service with service command
     command: systemctl stop mysql
