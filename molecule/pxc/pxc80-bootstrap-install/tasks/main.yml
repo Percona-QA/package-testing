@@ -1,5 +1,5 @@
 ---
-  - name: Fetch the vars from file
+  - name: Fetch the vars from file for install
     ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
 
   - set_fact:
