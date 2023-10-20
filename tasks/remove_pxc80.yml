@@ -1,0 +1,19 @@
+  - name: remove Percona Server deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: absent
+    vars:
+      packages:
+      - percona-xtradb-cluster-server
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+      disablerepo: "epel"
+    vars:
+      packages:
+      - percona-xtradb-cluster-server
+    when: ansible_os_family == "RedHat"
