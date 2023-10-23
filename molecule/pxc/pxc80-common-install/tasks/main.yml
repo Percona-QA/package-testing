@@ -76,8 +76,8 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: check telemetry file presence (disabled)
-    command: /package-testing/telemetry_check.sh pxc -d
+  - name: check telemetry (disabled)
+    command: /package-testing/check_telemetry.sh pxc -d
 
   - name: copy PXC config on centos 7
     template: src=../../../../templates/my_rpm_80.j2 
@@ -137,7 +137,8 @@
   - name: Check that the PXC Cluster is up and running
     shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'
 
-## Changes done for telemetry - remove old telemetry file - remove pxc package - add iptables rule for Telemetry Server - install only pxc package only pxc node 3
+## Changes done for telemetry: remove pxc package - add iptables rule for Telemetry Server - install only pxc package.
+## Expected resuld - telemetry_uuid file has only instanceID
 
   - name: Remove PXC packages
     include_tasks: ../../../../tasks/remove_pxc80.yml
@@ -160,8 +161,6 @@
     when: ansible_os_family == "Debian" and lookup('env', 'upgrade_repo') == ""
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      
-
 
   - name: install PXC 8 rpm packages with blocked Telemetry Server
     yum:
@@ -175,15 +174,12 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: check telemetry file presence (unavailable)
-    command: /package-testing/telemetry_check.sh pxc -u
-    when: lookup('env', 'upgrade_repo') == ""
+    command: /package-testing/check_telemetry.sh pxc -u
 
-  - name: verify instanceID
+  - name: get telemetry_uuid content
     command: cat /usr/local/percona/telemetry_uuid
     register: t_uuid_output
-    when: lookup('env', 'upgrade_repo') == ""
 
-  - name: output t_uuid_output
+  - name: output telemetry_uuid content
     debug:
       var: t_uuid_output
-    when: lookup('env', 'upgrade_repo') == ""

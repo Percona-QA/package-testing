@@ -81,14 +81,14 @@
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: check telemetry file presence (enabled)
-    command: /package-testing/telemetry_check.sh pxc -e
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh pxc -e
 
-  - name: verify instanceID
+  - name: get telemetry_uuid content
     command: cat /usr/local/percona/telemetry_uuid
     register: t_uuid_output
 
-  - name: output t_uuid_output
+  - name: output telemetry_uuid content
     debug:
       var: t_uuid_output
 
