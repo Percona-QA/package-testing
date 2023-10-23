@@ -1,10 +1,11 @@
+#!/bin/bash
+
 # This script performs basic checks for telemetry script from Phase 0.
 # Based on parameters passed, it checks that:
 # * the telemetry file was created and has both valid instanceID and PRODUCT_FAMILY_XX (telemetry sending was enabled during run and was successful "-e" param)
 # * the telemetry file was not created (telemertry sending was disabled during run "-d" param)
 # * the telemetry file was created and has valid instanceID and no PRODUCT_FAMILY_XX (telemertry sending was enabled during run and was not successful "-u" param)
 
-#!/bin/bash
 
 set -e
 
