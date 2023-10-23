@@ -140,9 +140,26 @@
 ## Changes done for telemetry: remove pxc package - add iptables rule for Telemetry Server - install only pxc package.
 ## Expected resuld - telemetry_uuid file has only instanceID
 
-  - name: Remove PXC packages
-    include_tasks: ../../../../tasks/remove_pxc80.yml
-    when: lookup('env', 'upgrade_repo') == ""
+  - name: remove Percona Xtradb Cluster deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: absent
+    vars:
+      packages:
+      - percona-xtradb-cluster-server
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Xtradb Cluster rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+      disablerepo: "epel"
+    vars:
+      packages:
+      - percona-xtradb-cluster-server
+    when: ansible_os_family == "RedHat"
+
 
   - name: Block pmm.check-dev.percona.com IP
     iptables:
