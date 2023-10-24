@@ -48,7 +48,7 @@ pipeline {
             export PATH=${PATH}:~/.local/bin
             sudo yum install -y python3 python3-pip
             rm -rf package-testing
-            git clone https://github.com/eleo007/package-testing.git -b d_pxc_telemetry --depth 1
+            git clone https://github.com/Percona-QA/package-testing.git --depth 1
             cd package-testing/docker-image-tests/pxc
             pip3 install --user -r requirements.txt
             ./run.sh
