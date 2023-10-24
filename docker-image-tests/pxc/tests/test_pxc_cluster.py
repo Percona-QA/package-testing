@@ -14,7 +14,8 @@ class PxcNode:
         if bootstrap_node:
             self.docker_id = subprocess.check_output(
                 ['docker', 'run', '--name', node_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd, 
-                 '-e', 'CLUSTER_NAME='+cluster_name, '--net='+docker_network,'-d', docker_image]).decode().strip()
+                 '-e', 'CLUSTER_NAME='+cluster_name, '-e', 'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport',
+                 '--net='+docker_network, '-d', docker_image]).decode().strip()
             time.sleep(120)
             if pxc_version_major == "8.0":
                 subprocess.check_call(['mkdir', '-p', test_pwd+'/cert'])
@@ -29,6 +30,7 @@ class PxcNode:
                 self.docker_id = subprocess.check_output(
                 ['docker', 'run', '--name', node_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd,
                 '-e', 'CLUSTER_NAME='+cluster_name, '-e', 'CLUSTER_JOIN='+base_node_name+'1',
+                '-e', 'PERCONA_TELEMETRY_DISABLE=1',
                 '--net='+docker_network,'-v', test_pwd+'/config:/etc/percona-xtradb-cluster.conf.d',
                 '-v', test_pwd+'/cert:/cert', '-d', docker_image]).decode().strip()
             else:
@@ -47,7 +49,6 @@ class PxcNode:
         cmd = self.ti_host.run('mysql --user=root --password='+pxc_pwd+' -S/tmp/mysql.sock -s -N -e ' + shlex.quote(query))
         assert cmd.succeeded
         return cmd.stdout
-
 
 @pytest.fixture(scope='module')
 def cluster():
@@ -148,6 +149,14 @@ class TestCluster:
     def test_cluster_size(self, cluster):
         output = cluster[0].run_query('SHOW STATUS LIKE "wsrep_cluster_size";')
         assert output.split('\t')[1].strip() == "3"
+
+    def test_telemetry_enabled(self, cluster):
+        if pxc_version_major in ['5.7','5.6']:
+            pytest.skip('telemetry was added in 8.0')
+        else:
+            assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').exists
+            assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PXC')
+            assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
 
 class TestGardb:
     def test_cluster_size_at_startup(self, cluster, garbd):
