@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$#" -ne 3 ]; then
-  echo "This script requires the product parameter: pxb24/pxb80 main/testing normal/minimal!"
+  echo "This script requires the product parameter: pxb24/pxb80/pxb81 main/testing normal/minimal!"
   echo "Usage: $0 <product> <repo> <binary type>"
   exit 1
 fi
@@ -13,11 +13,45 @@ log="/tmp/binary_check.log"
 
 source "${SCRIPT_PWD}"/VERSIONS
 
-if [ "$1" = "pxb80" ]; then
+if [ "$1" = "pxb81" ]; then
+    product=pxb81
+    version=${PXB81_VER}
+    major_version="${PXB81_VER}"
+    minor_version="${PXB81_PKG_VER}"
+    echo "Downloading ${1} latest version..." >> "${log}"
+    if [ "$2" = "main" ]; then
+        if [ "$3" = "normal" ]; then
+            wget https://downloads.percona.com/downloads/Percona-XtraBackup-8.1/Percona-XtraBackup-${major_version}-${minor_version}/binary/tarball/percona-xtrabackup-${major_version}-$  {minor_version}-Linux-x86_64.glibc2.17.tar.gz
+            tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17"
+        else
+            # Download minimal version
+            wget https://downloads.percona.com/downloads/Percona-XtraBackup-8.1/Percona-XtraBackup-${major_version}-${minor_version}/binary/tarball/percona-xtrabackup-${major_version}-$  {minor_version}-Linux-x86_64.glibc2.17-minimal.tar.gz
+            tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17-minimal"
+        fi
+    else
+        # Use testing repo/link to download tarball
+        if [ "$3" = "normal" ]; then
+            wget https://downloads.percona.com/downloads/TESTING/pxb-${major_version}-${minor_version}/percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17.tar.gz
+            tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17"
+        else
+            # Download minimal version
+            wget https://downloads.percona.com/downloads/TESTING/pxb-${major_version}-${minor_version}/percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17-minima  l.tar.gz
+            tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17-minimal"
+        fi
+    fi
+
+    echo "Extracting binary" >> "${log}"
+    tar -xf ${tarball_dir}.tar.gz
+    mv ${tarball_dir} ${product}
+    tarball_dir=${product}
+
+    exec_files="xbcloud xbcrypt xbstream xtrabackup"
+
+elif [ "$1" = "pxb80" ]; then
     product=pxb80
     version=${PXB80_VER}
     major_version="${PXB80_VER}"
-    minor_version="${PXB80PKG_VER}"
+    minor_version="${PXB80_PKG_VER}"
     echo "Downloading ${1} latest version..." >> "${log}"
     if [ "$2" = "main" ]; then
         if [ "$3" = "normal" ]; then
