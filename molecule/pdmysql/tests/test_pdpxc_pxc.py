@@ -179,3 +179,13 @@ def test_components(component, host):
             component)
         check_result = host.run(check_cmd)
         assert check_result.rc == 1, (check_result.rc, check_result.stderr, check_result.stdout)
+
+@pytest.mark.telemetry_enabled
+def test_telemetry_enabled(host):
+    assert host.file('/usr/local/percona/telemetry_uuid').exists
+    assert host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PXC')
+    assert host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
+
+@pytest.mark.telemetry_disabled
+def test_telemetry_disabled(self, host):
+    assert not host.file('/usr/local/percona/telemetry_uuid').exists
