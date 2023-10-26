@@ -32,7 +32,7 @@ else
   exit 1
 fi
 
-if [ $2 = "-e" ]; then
+if [ "$2" = "-e" ]; then
   if [[ -s ${FILE_LOCATION} ]]; then
     if [[ $(grep -c ${PERCONA_PRODUCT_FAMILY}:1 ${FILE_LOCATION}) -ne 1 ]]; then
       echo "The telemetry is enabled and ${PERCONA_PRODUCT_FAMILY} is not present in ${FILE_LOCATION}! Please check!"
@@ -46,7 +46,7 @@ if [ $2 = "-e" ]; then
     echo "The telemetry is enabled and ${FILE_LOCATION} is not present! Check!"
     exit 1
   fi
-elif [ $2 = "-u" ]; then
+elif [ "$2" = "-u" ]; then
   if [[ -s ${FILE_LOCATION} ]]; then
     if [[ $(grep -c ${PERCONA_PRODUCT_FAMILY}:1 ${FILE_LOCATION}) -eq 1 ]]; then
       echo "The telemetry is not sent and ${PERCONA_PRODUCT_FAMILY} is present in ${FILE_LOCATION}! Please check!"
@@ -60,7 +60,7 @@ elif [ $2 = "-u" ]; then
     echo "The telemetry is enabled and ${FILE_LOCATION} is not present! Check!"
     exit 1
   fi
-elif [ $2 = "-d" ]; then
+elif [ "$2" = "-d" ]; then
   if [[ -s ${FILE_LOCATION} ]]; then
     echo "The telemetry is disabled and ${FILE_LOCATION} is present! Check!"
     exit 1
