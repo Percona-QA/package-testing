@@ -35,6 +35,9 @@
       - percona-xtradb-cluster-client
       - percona-xtradb-cluster
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: upgrade PXC 8.0 to new rpm packages
     yum:
@@ -51,6 +54,9 @@
       - percona-xtradb-cluster-full
       - percona-xtradb-cluster-client
     when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install Percona Server new rpm packages
     yum:
