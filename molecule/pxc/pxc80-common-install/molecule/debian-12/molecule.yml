@@ -40,4 +40,4 @@ provisioner:
         ip_env: "{{ ansible_host }}"
       pxc3-80-common-debian-12-install:
         ip_env: "{{ ansible_host }}"
-        sleep_before_tests: 40`
+        sleep_before_tests: 40
