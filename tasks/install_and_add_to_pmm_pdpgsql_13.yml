@@ -3,19 +3,7 @@
 # Task adjustments are handled by parent playbook vars:
 #             var "port_flag"      :  to access agent with custom port
 #                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
-#             var "cmd_admin_list" :  to access agent with custom port
-#                                     ex: cmd_admin_list: "pmm-admin list {{ port_flag }}"
-
-- name: set empty port_flag
-  set_fact:
-    port_flag: ""
-  when: port_flag is not defined
-
-- name: set cmd_admin_list without flags
-  set_fact:
-    cmd_admin_list: "pmm-admin list"
-  when: cmd_admin_list is not defined
-
+#
 - name: Download install_setup_psmdb.yml
   get_url:
     url: https://raw.githubusercontent.com/Percona-QA/ppg-testing/main/tasks/install_ppg13.yml
@@ -106,32 +94,17 @@
   become_user: postgres
 
 - name: add postgresql metrics to monitoring
-  command: pmm-admin add postgresql {{ port_flag }} --password={{ random_pgsql_password }} --service-name=pgsql_{{ instance_ip }} --query-source="pgstatements"
+  command: pmm-admin add postgresql {{ port_flag if port_flag is defined else '' }} --password={{ random_pgsql_password }} --service-name={{ pgsql_service_name }} --query-source="pgstatements"
 
 - name: add postgresql metrics to monitoring via socket
-  command: pmm-admin add postgresql {{ port_flag }} --socket /var/run/postgresql/ --username=postgres --service-name=pgsql_socket_{{ instance_ip }} --query-source="pgstatements"
+  command: pmm-admin add postgresql {{ port_flag if port_flag is defined else '' }} --socket /var/run/postgresql/ --username=postgres --service-name={{ pgsql_socket_service_name }} --query-source="pgstatements"
 
-- name: check if postgresql monitoring is running
-  command: "{{ cmd_admin_list }}"
-  register: list_output
+- name: "Validate pmm-admin list output contains 'PostgreSQL'"
+  include_tasks: ./verify_pmm-admin_list_contains.yml
+  vars:
+    expected: "PostgreSQL"
 
-- name: Print the pmm-admin list value
-  ansible.builtin.debug:
-    msg: System {{ list_output.stdout }}
-
-- name: Assert if the pmm-admin list contains postgreSQL instance
-  assert:
-    that:
-      - "'PostgreSQL' in list_output.stdout"
-
-- name: Wait for postgres_exporter to have Running Status.
-  shell: "{{ cmd_admin_list }} | grep 'postgres_exporter' | awk -F' ' '{print $2}'"
-  register: postgres_exporter_status
-  until: postgres_exporter_status.stdout.find('Running') != -1
-  delay: 5
-  retries: 5
-
-- name: Assert if the pmm-admin list contains postgres_exporter with Running state
-  assert:
-    that:
-      - "'Running' in postgres_exporter_status.stdout"
+- name: "Wait for 'postgres_exporter' is Running"
+  include_tasks: ./wait_exporter_is_running.yml
+  vars:
+    process_name: "postgres_exporter"

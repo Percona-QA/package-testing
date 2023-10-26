@@ -11,7 +11,7 @@ container_name = 'pxc-docker-test-static3'
 @pytest.fixture(scope='module')
 def host():
     docker_id = subprocess.check_output(
-        ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd, '-d', docker_image_debug]).decode().strip()
+        ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd, '-e', 'PERCONA_TELEMETRY_DISABLE=1', '-d', docker_image_debug]).decode().strip()
     if pxc_version_major in ['8.0','5.7','5.6']:
         exec_command = ['microdnf', 'install', 'net-tools']
     else:

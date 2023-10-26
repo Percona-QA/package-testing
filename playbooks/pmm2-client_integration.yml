@@ -63,7 +63,7 @@
 
 ### start PS 5.7
   - set_fact:
-      mysql_service_name: "mysql_{{ instance_ip }}"
+      mysql_service_name: "mysql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
 #      mysql_service_name: "mysql_{{ rnd }}_{{ instance_ip }}"
 
   - name: Install and start Percona Server 5.7
@@ -79,8 +79,8 @@
 
 ### start PSMDB 6.0
   - set_fact:
-      mongo_service_name: "mongodb_{{ instance_ip }}"
-      mongo_socket_service_name: "mongodb_socket_{{ instance_ip }}"
+      mongo_service_name: "mongodb_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+      mongo_socket_service_name: "mongodb_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
 #      mongo_service_name: "mongodb_{{ rnd }}_{{ instance_ip }}"
 
   - name: Install and start Percona Server MongoDB 6.0
@@ -93,14 +93,14 @@
       - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up 1' }
       - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up 1' }
 
-  - name: Remove mongodb service from monitoring which was added via socket
-    command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
+  - name: Remove MongoDB service from monitoring which was added via socket
+    command: pmm-admin remove mongodb {{ mongo_socket_service_name }}
 ### end PSMDB 6.0
 
 ### start PGSQL 13
   - set_fact:
-      pgsql_service_name: "pgsql_{{ instance_ip }}"
-      pgsql_socket_service_name: "pgsql_{{ instance_ip }}"
+      pgsql_service_name: "pgsql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+      pgsql_socket_service_name: "pgsql_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
 
   - name: Install and start Percona Server PostgreSQL 13
     when: '"pg-13" in enabled_db'
@@ -122,9 +122,9 @@
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
 
-  - name: Remove PostgreSQL instances added via socket
+  - name: Remove PostgreSQL service added via socket
     when: '"pg-13" in enabled_db'
-    command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
+    command: pmm-admin remove postgresql {{ pgsql_socket_service_name }}
 ### end PG
 
 ### verifications
