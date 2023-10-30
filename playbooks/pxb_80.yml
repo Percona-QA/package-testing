@@ -19,7 +19,7 @@
     include: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
-  - name: include tasks for enabling PS 8 test repo
+  - name: include tasks for enabling PS 8 main repo
     include: ../tasks/enable_ps8_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
