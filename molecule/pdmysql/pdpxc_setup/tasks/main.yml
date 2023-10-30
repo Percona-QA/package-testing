@@ -53,6 +53,8 @@
     - percona-xtradb-cluster-test
     - percona-xtradb-cluster
   when: ansible_os_family == "Debian"
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
 - name: install PXC rpm packages before OL9
   yum:
@@ -71,6 +73,8 @@
     - percona-xtradb-cluster-shared-compat
     - percona-xtradb-cluster-test
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "8"
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
 - name: install PXC rpm packages on OL9
   yum:
@@ -88,6 +92,8 @@
     - percona-xtradb-cluster-shared
     - percona-xtradb-cluster-test
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
 - name: install percona-replication-manager RHEL Packages
   yum:
