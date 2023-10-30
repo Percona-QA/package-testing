@@ -182,10 +182,10 @@ def test_components(component, host):
 
 @pytest.mark.telemetry_enabled
 def test_telemetry_enabled(host):
-    assert host.file('/usr/local/percona/telemetry_uuid').exists
-    assert host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PXC')
-    assert host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
+    assert host.file(TELEMETRY_PATH).exists
+    assert host.file(TELEMETRY_PATH).contains('PRODUCT_FAMILY_PXC')
+    assert host.file(TELEMETRY_PATH).contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
 
 @pytest.mark.telemetry_disabled
-def test_telemetry_disabled(self, host):
-    assert not host.file('/usr/local/percona/telemetry_uuid').exists
+def test_telemetry_disabled(host):
+    assert not host.file(TELEMETRY_PATH).exists
