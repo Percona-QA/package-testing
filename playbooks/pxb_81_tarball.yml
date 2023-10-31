@@ -38,7 +38,7 @@
     include: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
-  - name: include tasks for enabling PS 8.1 test repo
+  - name: include tasks for enabling PS 8.1 main repo
     include: ../tasks/enable_ps81_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 

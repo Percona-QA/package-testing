@@ -17,7 +17,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: enable the PS-81 main repo
-    command: percona-release setup ps-81 -y
+    command: percona-release enable ps-81 release
 
 # - name: enable the tools main repo
 #   command: percona-release enable tools release
