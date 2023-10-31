@@ -47,7 +47,7 @@
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling PS 8.1 experimental repo
-    include: ../tasks/enable_ps8_experimental_repo.yml
+    include: ../tasks/enable_ps81_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: download and extract world database
