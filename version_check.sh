@@ -48,6 +48,8 @@ elif [ "$1" = "pxb24" ]; then
   version=${PXB24_VER}
 elif [ "$1" = "pxb80" ]; then
   version=${PXB80_VER}
+elif [ "$1" = "pxb81" ]; then
+  version=${PXB81_VER}
 elif [ "$1" = "pmm" ]; then
   version=${PMM_VER}
 elif [ "$1" = "pmm2" ]; then
@@ -181,7 +183,7 @@ elif [ ${product} = "pmm2" -o ${product} = "pmm2-rc" ]; then
   fi
   bash -xe ./check_pmm2_client_upgrade.sh ${version}
 
-elif [ "${product}" = "pxb24" -o "${product}" = "pxb80" ]; then
+elif [ "${product}" = "pxb24" -o "${product}" = "pxb80" -o "${product}" = "pxb81" ]; then
     for binary in xtrabackup xbstream xbcloud xbcrypt; do
         version_check=$($binary --version 2>&1| grep -c "${version}")
         installed_version=$($binary --version 2>&1|tail -1|awk '{print $3}')
