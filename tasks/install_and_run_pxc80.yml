@@ -12,6 +12,8 @@
       packages:
       - percona-xtradb-cluster-full
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages
     yum:
@@ -21,6 +23,8 @@
       packages:
       - percona-xtradb-cluster-full
     when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
 # Define node IP for PXC config (Used by Debian distros)
   - debug: 
