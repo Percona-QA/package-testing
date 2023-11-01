@@ -12,7 +12,7 @@ load ps-admin_helper
   check_audit_notexists
 # check_pam_notexists
 # check_pam_compat_notexists
-  if [ ${MYSQL_VERSION} != "5.6" -a ${MYSQL_VERSION} != "8.0" ]; then
+  if [ ${MYSQL_VERSION} != "5.6" -a ${MYSQL_VERSION} != "8.0" -a ${MYSQL_VERSION} != "8.1" ]; then
     check_mysqlx_notexists
     check_rocksdb_notexists
   fi
@@ -27,7 +27,7 @@ load ps-admin_helper
 }
 
 @test "uninstall QRT plugin" {
-  if [ ${MYSQL_VERSION} = "8.0" -a ${MYSQL_VERSION} = "8.0"]; then
+  if [ ${MYSQL_VERSION} = "8.0" -a ${MYSQL_VERSION} = "8.1"]; then
     skip "PS 8 doesn't have QRT"
   fi
   uninstall_qrt
