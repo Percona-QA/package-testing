@@ -36,7 +36,7 @@ def test_install_functions(mysql_server):
         mysql_server.install_function(function[0], function[1], function[2])
 
 def test_install_component(mysql_server):
-    if ps_version_major in ['8.0']:
+    if ps_version_major in ['8.0', '8.1']:
         for component in ps_components:
             mysql_server.install_component(component)
     else:

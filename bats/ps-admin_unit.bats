@@ -10,7 +10,7 @@ PS_ADMIN_BIN=${PS_ADMIN_BIN:-/usr/bin/ps-admin}
 }
 
 @test "display ps-admin help screen" {
-if [ ${MYSQL_VERSION} = "8.0" ]; then
+if [ "${MYSQL_VERSION}" = "8.0" ] || [ "${MYSQL_VERSION}" = "8.1" ]; then
   run ${PS_ADMIN_BIN} --help
   [ "${lines[1]}" = "Valid options are:" ]
 else

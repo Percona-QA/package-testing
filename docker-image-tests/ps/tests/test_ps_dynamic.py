@@ -56,7 +56,7 @@ class TestDynamic:
 
     @pytest.mark.parametrize("cmpt", ps_components)
     def test_install_component(self, host, cmpt):
-        if ps_version_major in ['8.0']:
+        if ps_version_major in ['8.0', '8.1']:
             if cmpt == 'file://component_masking_functions':
                 host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "UNINSTALL PLUGIN data_masking;"')
             cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "INSTALL component \''+cmpt+'\';"')
