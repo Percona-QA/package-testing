@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-#install the clone plugin
-mysql -e "INSTALL PLUGIN clone SONAME 'mysql_clone.so';"
+##install the clone plugin
+#mysql -e "INSTALL PLUGIN clone SONAME 'mysql_clone.so';"
 
 
 # make sure clone plugin is active
