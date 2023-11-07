@@ -4,7 +4,7 @@ load ps-admin_helper
 
 @test "uninstall plugins for cleanup before testing" {
   uninstall_all
-  if [ ${MYSQL_VERSION} != "8.0" -a ${MYSQL_VERSION} != "8.1" ]; then
+  if [ ${MYSQL_VERSION} != "8.0" -o ${MYSQL_VERSION} != "8.1" ]; then
     check_qrt_notexists
     check_tokubackup_notexists
     check_tokudb_notexists
@@ -19,7 +19,7 @@ load ps-admin_helper
 }
 
 @test "install QRT plugin" {
-  if [ ${MYSQL_VERSION} = "8.0" -a ${MYSQL_VERSION} = "8.1"]; then
+  if [ ${MYSQL_VERSION} = "8.0" -o ${MYSQL_VERSION} = "8.1" ]; then
     skip "PS 8 doesn't have QRT"
   fi
   install_qrt
@@ -27,7 +27,7 @@ load ps-admin_helper
 }
 
 @test "uninstall QRT plugin" {
-  if [ ${MYSQL_VERSION} = "8.0" -a ${MYSQL_VERSION} = "8.1"]; then
+  if [ ${MYSQL_VERSION} = "8.0" -o ${MYSQL_VERSION} = "8.1" ]; then
     skip "PS 8 doesn't have QRT"
   fi
   uninstall_qrt
@@ -35,11 +35,17 @@ load ps-admin_helper
 }
 
 @test "install Audit Log plugin" {
+  if [ ${MYSQL_VERSION} = "8.1" ]; then
+    skip "PS 8.1 doesn't have Audit log plugin"
+  fi
   install_audit
   check_audit_exists
 }
 
 @test "uninstall Audit Log plugin" {
+  if [ ${MYSQL_VERSION} = "8.1" ]; then
+    skip "PS 8.1 doesn't have Audit log plugin"
+  fi
   uninstall_audit
   check_audit_notexists
 }
@@ -81,7 +87,7 @@ load ps-admin_helper
 }
 
 @test "install TokuDB plugin" {
-  if [ ${MYSQL_VERSION} = "8.0" -o ${MYSQL_VERSION} = "8.1"]; then
+  if [ ${MYSQL_VERSION} = "8.0" -o ${MYSQL_VERSION} = "8.1" ]; then
     skip "PS 8 doesn't have TokuDB"
   fi
   if [ $(id -u) -ne 0 ]; then
@@ -92,7 +98,7 @@ load ps-admin_helper
 }
 
 @test "uninstall TokuDB plugin" {
-  if [ ${MYSQL_VERSION} = "8.0" -o ${MYSQL_VERSION} = "8.1"]; then
+  if [ ${MYSQL_VERSION} = "8.0" -o ${MYSQL_VERSION} = "8.1" ]; then
     skip "PS 8 doesn't have TokuDB"
   fi
   uninstall_tokudb
@@ -103,7 +109,7 @@ load ps-admin_helper
   if [ $(id -u) -ne 0 ]; then
     skip "This test requires that the current user is root!"
   fi
-  if [ ${MYSQL_VERSION} = "8.0" -o ${MYSQL_VERSION} = "8.1"]; then
+  if [ ${MYSQL_VERSION} = "8.0" -o ${MYSQL_VERSION} = "8.1" ]; then
     skip "PS 8 doesn't have TokuDB"
   fi
   install_tokubackup
@@ -138,12 +144,14 @@ load ps-admin_helper
 
 @test "install ALL plugins at once" {
   install_all
-  if [ ${MYSQL_VERSION} != "8.0" -o ${MYSQL_VERSION} != "8.1"]; then
+  if [ ${MYSQL_VERSION} != "8.0" -a ${MYSQL_VERSION} != "8.1" ]; then
     check_qrt_exists
     check_tokudb_exists
     check_tokubackup_exists
   fi
-  check_audit_exists
+  if [ ${MYSQL_VERSION} != "8.1" ]; then
+    check_audit_exists
+  fi
 # check_pam_exists
 # check_pam_compat_exists
   if [ ${MYSQL_VERSION} != "5.6" ]; then
@@ -158,7 +166,7 @@ load ps-admin_helper
   check_audit_notexists
 # check_pam_notexists
 # check_pam_compat_notexists
-  if [ ${MYSQL_VERSION} != "8.0" -o ${MYSQL_VERSION} != "8.1" ]; then
+  if [ ${MYSQL_VERSION} != "8.0" -a ${MYSQL_VERSION} != "8.1" ]; then
     check_tokubackup_notexists
     check_tokudb_notexists
   fi
@@ -170,12 +178,14 @@ load ps-admin_helper
 
 @test "reinstall ALL plugins for upgrade test" {
   install_all
-  if [ ${MYSQL_VERSION} != "8.0" -o ${MYSQL_VERSION} != "8.1" ]; then
+  if [ ${MYSQL_VERSION} != "8.0" -a ${MYSQL_VERSION} != "8.1" ]; then
     check_qrt_exists
     check_tokudb_exists
     check_tokubackup_exists
   fi
-  check_audit_exists
+  if [ ${MYSQL_VERSION} != "8.1" ]; then
+    check_audit_exists
+  fi
 # check_pam_exists
 # check_pam_compat_exists
   if [ ${MYSQL_VERSION} != "5.6" ]; then
