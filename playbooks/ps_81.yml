@@ -142,10 +142,10 @@
     command: /package-testing/plugins_test_8.1.sh ps
 
   - name: check the clone and data masking plugins
-    command: /package-testing/scripts/ps_clone_dm_plugin_test.sh
+    command: /package-testing/scripts/ps_clone_plugin_test_81.sh
 
   - name: check the data masking component
-    command: /package-testing/scripts/ps_dm_component_8.1.sh
+    command: /package-testing/scripts/ps_dm_component.sh
 
   - name: check the audit log v2 plugin
     command: /package-testing/scripts/ps_audit_log_v2.sh
