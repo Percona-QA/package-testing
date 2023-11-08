@@ -63,7 +63,10 @@ sleep 10
 
 echo "keyring_vault component test" | tee -a ${LOG}
 
-systemctl restart mysql
+systemctl stop mysql
+sleep 10
+sed -i '/early_plugin_load=/d' ${MYCNF}
+systemctl start mysql
 sleep 10
 
 mysql -e "CREATE DATABASE IF NOT EXISTS test;"
