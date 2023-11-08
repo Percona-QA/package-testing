@@ -84,16 +84,3 @@ fi
 mysql --database=test -e "DROP TABLE keyring_vault_test;"
 mysql --database=test -e "DROP TABLESPACE ts1;"
 
-echo "drop keyring udf functions" | tee -a ${LOG}
-# drop keyring udf functions
-mysql -e "DROP FUNCTION keyring_key_fetch;"
-mysql -e "DROP FUNCTION keyring_key_type_fetch;"
-mysql -e "DROP FUNCTION keyring_key_length_fetch;"
-mysql -e "DROP FUNCTION keyring_key_remove;"
-mysql -e "DROP FUNCTION keyring_key_generate;"
-mysql -e "DROP FUNCTION keyring_key_store;"
-
-echo "remove the config vars" | tee -a ${LOG}
-
-# make sure KEYRING component is uninstalled
-mysql -NBe "UNINSTALL COMPONENT 'file://component_keyring_vault';"

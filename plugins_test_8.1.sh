@@ -36,7 +36,7 @@ mysql -e "INSTALL PLUGIN authentication_ldap_sasl SONAME 'authentication_ldap_sa
 mysql -e "INSTALL PLUGIN authentication_fido SONAME 'authentication_fido.so';"
 mysql -e "INSTALL PLUGIN clone SONAME 'mysql_clone.so';"
 
-for component in component_validate_password component_log_sink_syseventlog component_log_sink_json component_log_filter_dragnet component_audit_api_message_emit component_binlog_utils_udf component_percona_udf component_keyring_vault; do
+for component in component_validate_password component_log_sink_syseventlog component_log_sink_json component_log_filter_dragnet component_audit_api_message_emit component_binlog_utils_udf component_percona_udf component_keyring_vault component_audit_log_filter; do
   if [ $(mysql -Ns -e "select count(*) from mysql.component where component_urn=\"file://${component}\";") -eq 0 ]; then
     mysql -e "INSTALL COMPONENT \"file://${component}\";"
   fi
