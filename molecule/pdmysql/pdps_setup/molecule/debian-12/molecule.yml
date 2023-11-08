@@ -30,7 +30,7 @@ verifier:
     verbose: true
     s: true
     k: "test_pdps_ or test_common_"
-    m: "not orch_source"
+    m: "not orch_source and not telemetry_disabled"
     junitxml: report.xml
 scenario:
   name: debian-12

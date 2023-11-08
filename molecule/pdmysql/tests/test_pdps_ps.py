@@ -224,3 +224,13 @@ def test_sources_mysql_shell_version(host):
     result = host.run(cmd)
     assert result.rc == 0, (result.stderr, result.stdout)
     assert VERSION.split('-')[0] in result.stdout, result.stdout
+
+@pytest.mark.telemetry_enabled
+def test_telemetry_enabled(host):
+    assert host.file(TELEMETRY_PATH).exists
+    assert host.file(TELEMETRY_PATH).contains('PRODUCT_FAMILY_PS')
+    assert host.file(TELEMETRY_PATH).contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
+
+@pytest.mark.telemetry_disabled
+def test_telemetry_disabled(host):
+    assert not host.file(TELEMETRY_PATH).exists

@@ -18,7 +18,7 @@ def host():
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e', 'INIT_ROCKSDB=1', '-e', 'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport', '-d', docker_image]).decode().strip()
     time.sleep(20)
     yield testinfra.get_host("docker://root@" + docker_id)
-#    subprocess.check_call(['docker', 'rm', '-f', docker_id])
+    subprocess.check_call(['docker', 'rm', '-f', docker_id])
 
 
 class TestDynamic:
@@ -76,3 +76,11 @@ class TestDynamic:
             assert 'ACTIVE' in cmd.stdout
         else:
             pytest.mark.skip('Components are available from 8.0 onwards')
+
+    def test_telemetry_enabled(self, host):
+        if ps_version_major not in ['8.0']:
+            pytest.skip('telemetry was added in 8.0')
+        else:
+            assert host.file('/usr/local/percona/telemetry_uuid').exists
+            assert host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PS')
+            assert host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
