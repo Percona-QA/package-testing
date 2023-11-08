@@ -28,6 +28,7 @@ verifier:
     verbose: true
     s: true
     k: "test_pdps_ or test_common_"
+    m: "not telemetry_disabled"
     junitxml: report.xml
 scenario:
   destroy_sequence:

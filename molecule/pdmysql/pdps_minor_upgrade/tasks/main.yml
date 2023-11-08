@@ -43,6 +43,8 @@
       - percona-server-client
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install Percona Server rpm packages
     yum:
@@ -59,6 +61,8 @@
       - percona-server-devel
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../../../tasks/install_pxb80.yml
@@ -212,6 +216,8 @@
       - percona-server-client
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install Percona Server rpm packages
     yum:
@@ -227,6 +233,8 @@
       - percona-server-devel
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../../../tasks/install_pxb80.yml
