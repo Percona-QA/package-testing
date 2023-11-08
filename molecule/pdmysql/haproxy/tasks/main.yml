@@ -55,6 +55,8 @@
     - percona-xtradb-cluster-test
     - percona-xtradb-cluster
   when: ansible_os_family == "Debian"
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
 - name: install HA Proxy 8 deb packages
   apt:
