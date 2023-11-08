@@ -1,6 +1,0 @@
-{
-"vault_url": "https://127.0.0.1:8200",
-"secret_mount_point": "secret",
-"token": "hvs.edqXY81sCI0NUmP4kIrBknaE",
-"vault_ca": "/package-testing/scripts/vault-server/certificates/root.cer"
-}
