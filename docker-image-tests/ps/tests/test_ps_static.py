@@ -11,7 +11,9 @@ container_name = 'ps-docker-test-static'
 @pytest.fixture(scope='module')
 def host():
     docker_id = subprocess.check_output(
-        ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e', 'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport', '-d', docker_image]).decode().strip()
+        ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e',
+         'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport',
+         '-e', 'PERCONA_TELEMETRY_DISABLE=1', '-d', docker_image]).decode().strip()
     if ps_version_major in ['5.7','5.6']:
         subprocess.check_call(['docker','exec','--user','root',container_name,'microdnf','install','net-tools'])
     else:
@@ -88,3 +90,9 @@ class TestMysqlEnvironment:
             assert host.file('/var/lib/mysql-keyring').user == 'mysql'
             assert host.file('/var/lib/mysql-keyring').group == 'mysql'
             assert oct(host.file('/var/lib/mysql-keyring').mode) == '0o750'
+
+    def test_telemetry_disabled(self, host):
+        if ps_version_major in ['5.7','5.6']:
+            pytest.skip('telemetry was added in 8.0')
+        else:
+            assert not host.file('/usr/local/percona/telemetry_uuid').exists
