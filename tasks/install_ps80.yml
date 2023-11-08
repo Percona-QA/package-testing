@@ -16,6 +16,8 @@
       - percona-server-rocksdb
       - percona-mysql-router
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: get list of enabled dnf modules on centos 8
     command: dnf module list --enabled
@@ -51,3 +53,5 @@
       - percona-server-devel
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"

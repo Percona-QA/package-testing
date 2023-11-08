@@ -10,6 +10,8 @@
       key_id: "{{ lookup('env', 'KMS_KEY_ID') }}"
       access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
       secret_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
   - name: include tasks for test env setup
