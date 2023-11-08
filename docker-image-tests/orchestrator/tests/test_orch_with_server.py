@@ -47,9 +47,9 @@ def orchestrator_ip():
     docker_client.networks.create(network_name)
     docker_client.containers.run(docker_image, name=orch_container, network=network_name, detach=True)
     source_container = docker_client.containers.run(ps_docker_image, '--log-error-verbosity=3 --report_host='+source_ps_container+' --max-allowed-packet=134217728',
-                        name=source_ps_container, environment=["MYSQL_ROOT_PASSWORD="+ps_password], network=network_name, detach=True)
+                        name=source_ps_container, environment=["MYSQL_ROOT_PASSWORD="+ps_password, "PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport"], network=network_name, detach=True)
     replica_container = docker_client.containers.run(ps_docker_image, '--log-error-verbosity=3 --report_host='+replica_ps_container+' --max-allowed-packet=134217728 --server-id=2',
-                        name=replica_ps_container, environment=["MYSQL_ROOT_PASSWORD="+ps_password], network=network_name, detach=True)
+                        name=replica_ps_container, environment=["MYSQL_ROOT_PASSWORD="+ps_password, "PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport"], network=network_name, detach=True)
     #wait till replica mysql is up and listening on port
     time.sleep(15)
     #setup replication
