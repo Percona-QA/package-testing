@@ -24,7 +24,7 @@
 
   - name: setup config file for keyring vault
     template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test_v2.j2
-              dest=/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
+              dest=/package-testing/scripts/ps_keyring_plugins_test/component_keyring_vault.cnf
               mode=0664 owner=root group=root
 
   - name: enforce SELinux on CentOS
@@ -131,6 +131,27 @@
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps81
+  
+  - name: copy the global manifest for mysql
+    copy:
+        src: /package-testing/keyring-vault/mysqld.my
+        dest: /usr/sbin/
+        remote_src: yes
+
+  - name: copy the global configuration file for mysql in Redhat/CentOS
+    copy:
+        src: /package-testing/keyring-vault/component_keyring_vault.cnf
+        dest: /usr/lib64/mysql/plugin/
+        remote_src: yes
+    when: ansible_os_family == "RedHat"
+
+  - name: copy the global configuration file for mysql in Debian/Ubuntu
+    copy:
+        src: /package-testing/keyring-vault/component_keyring_vault.cnf
+        dest: /usr/lib/mysql/plugin/
+        remote_src: yes
+    when: ansible_os_family == "Debian"
+
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps81

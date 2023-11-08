@@ -1,8 +1,8 @@
 ---
 # This playbook does following:
 #   sets main Percona repo
-#   installs PS 8.1, PT and PXB 8.1
-#   changes repo to testing
+#   installs PS 8.0, PT and PXB 8.0
+#   changes repo to 8.1 testing
 #   upgrades packages to the new version
 #   does some tests
 
@@ -34,16 +34,16 @@
   - name: include tasks for enabling main repo
     include: ../tasks/enable_main_repo.yml
 
-  - name: include tasks for enabling PS 8.1 main repo
-    include: ../tasks/enable_ps81_main_repo.yml
+  - name: include tasks for enabling PS 8.0 main repo
+    include: ../tasks/enable_ps8_main_repo.yml
 
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: install Percona Server 8.1 packages
-    include_tasks: ../tasks/install_ps81.yml
+  - name: install Percona Server 8.0 packages
+    include_tasks: ../tasks/install_ps80.yml
 
 # Disable Percona Toolkit installation till its supported in OL9 and Jammy
 #  - name: install Percona Toolkit new deb packages
@@ -54,8 +54,8 @@
     #    include_tasks: ../tasks/install_sysbench.yml
     #    when: lookup('env', 'install_repo') != "experimental"
 
-  - name: install Percona XtraBackup 8.1 packages
-    include_tasks: ../tasks/install_pxb81.yml
+  - name: install Percona XtraBackup 8.0 packages
+    include_tasks: ../tasks/install_pxb80.yml
     when: lookup('env', 'install_repo') != "experimental"
 
   - name: list installed packages
@@ -96,7 +96,7 @@
     command: /usr/bin/ps-admin --enable-rocksdb
 
   - name: install plugins, import world database
-    command: /package-testing/plugins_test_81.sh ps
+    command: /package-testing/plugins_test_80.sh ps
 
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
@@ -161,9 +161,9 @@
       state: latest
     vars:
       packages:
-      - percona-xtrabackup-80
-      - percona-xtrabackup-test-80
-      - percona-xtrabackup-dbg-80
+      - percona-xtrabackup-81
+      - percona-xtrabackup-test-81
+      - percona-xtrabackup-dbg-81
     when: ansible_os_family == "Debian"
 
   - name: upgrade Percona Toolkit to new rpm packages

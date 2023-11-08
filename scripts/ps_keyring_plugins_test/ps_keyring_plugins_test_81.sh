@@ -61,30 +61,9 @@ mysql -e "UNINSTALL PLUGIN keyring_file;"
 
 sleep 10
 
-#install the KEYRING component
-mysql -NBe "INSTALL COMPONENT 'file://component_keyring_vault';"
-install_result=$?
-if [[ "${install_result}" == '1' ]]; then
-    echo "Exiting because there was failure during component install!"
-    exit 1
-fi
-
-# make sure KEYRING component is in place
-KEYRING_COMPONENT=$(mysql -NBe "select * from mysql.component;" | grep -c component_keyring_vault)
-
-if [ ${KEYRING_COMPONENT} == 1 ]; then
-   echo "KEYRING component is installed"
-else
-   echo "ERROR: KEYRING component isn't installed"
-   exit 1
-fi
-
 echo "keyring_vault component test" | tee -a ${LOG}
 
-systemctl stop mysql
-sleep 10
-sed -i '/\[mysqld\]/a keyring_vault_config="/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf"' ${MYCNF}
-systemctl start mysql
+systemctl restart mysql
 sleep 10
 
 mysql -e "CREATE DATABASE IF NOT EXISTS test;"
@@ -113,12 +92,3 @@ echo "remove the config vars" | tee -a ${LOG}
 
 # make sure KEYRING component is uninstalled
 mysql -NBe "UNINSTALL COMPONENT 'file://component_keyring_vault';"
-
-KEYRING_COMPONENT=$(mysql -NBe "select * from mysql.component;" | grep -c component_keyring_vault)
-
-if [ ${KEYRING_COMPONENT} == 0 ]; then
-   echo "KEYRING component is uninstalled"
-else
-   echo "ERROR: KEYRING component isn't uninstalled"
-   exit 1
-fi
