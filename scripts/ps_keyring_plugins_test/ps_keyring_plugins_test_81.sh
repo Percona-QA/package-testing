@@ -59,13 +59,15 @@ mysql --database=test -e "DROP TABLESPACE ts1;"
 mysql -e "DROP DATABASE test;"
 mysql -e "UNINSTALL PLUGIN keyring_file;"
 
-sleep 10
-
-echo "keyring_vault component test" | tee -a ${LOG}
-
+echo "service restart so that plugins don't mess with each other" | tee -a ${LOG}
 systemctl stop mysql
+
 sleep 10
+
 sed -i '/early_plugin_load=/d' ${MYCNF}
+
+sleep 5
+
 systemctl start mysql
 sleep 10
 
