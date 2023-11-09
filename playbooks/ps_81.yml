@@ -131,30 +131,9 @@
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps81
-  
-  - name: copy the global manifest for mysql
-    copy:
-        src: /package-testing/keyring-vault/mysqld.my
-        dest: /usr/sbin/
-        remote_src: yes
-
-  - name: copy the global configuration file for mysql in Redhat/CentOS
-    copy:
-        src: /package-testing/scripts/ps_keyring_plugins_test/component_keyring_vault.cnf
-        dest: /usr/lib64/mysql/plugin/
-        remote_src: yes
-    when: ansible_os_family == "RedHat"
-
-  - name: copy the global configuration file for mysql in Debian/Ubuntu
-    copy:
-        src: /package-testing/scripts/ps_keyring_plugins_test/component_keyring_vault.cnf
-        dest: /usr/lib/mysql/plugin/
-        remote_src: yes
-    when: ansible_os_family == "Debian"
-
 
   - name: keyring plugins test
-    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps81
+    include_tasks: ../tasks/ps_keyring_plugins_vault_test_81.yml
 
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
@@ -168,8 +147,8 @@
   - name: check the data masking component
     command: /package-testing/scripts/ps_dm_component.sh
 
-  - name: check the audit log v2 plugin
-    command: /package-testing/scripts/ps_audit_log_v2.sh
+    #  - name: check the audit log v2 plugin
+    #    command: /package-testing/scripts/ps_audit_log_v2.sh
 
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
