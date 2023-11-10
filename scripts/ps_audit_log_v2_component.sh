@@ -1,22 +1,8 @@
 #!/bin/bash
 set -e
 
-AUDIT_PLUGIN=$(mysql -NBe "SELECT PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS WHERE PLUGIN_NAME = 'audit_log_filter';" | grep -c ACTIVE)
-
-if [ ${AUDIT_PLUGIN} == 1 ]; then
-   echo "ERROR: AUDIT plugin is installed and active"
-   exit 1
-else
-   echo "AUDIT plugin isn't installed or active"
-fi
-
 #install the Audit log filter component
-mysql -NBe "INSTALL COMPONENT 'file://component_audit_log_filter';"
-install_result=$?
-if [[ "${install_result}" == '1' ]]; then
-    echo "Exiting because there was failure during component install!"
-    exit 1
-fi
+ALv2_component=$(mysql -uroot -NBe "source /usr/share/mysql/audit_log_filter_linux_install.sql;");
 
 # make sure AUDIT component is in place
 AUDIT_COMPONENT=$(mysql -NBe "select * from mysql.component;" | grep -c component_audit_log_filter)
@@ -29,14 +15,14 @@ else
 fi
 
 # Create dictionary of variables and their default values.
-declare -A variables=( ["audit_log_filter_buffer_size"]="1048576" ["audit_log_filter_compression"]="NONE" ["audit_log_filter_database"]="mysql" \
-                ["audit_log_filter_disable"]="0" ["audit_log_filter_encryption"]="NONE" ["audit_log_filter_file"]="audit_filter.log"\
-                ["audit_log_filter_filter_id"]="0" ["audit_log_filter_format"]="NEW" ["audit_log_filter_format_unix_timestamp"]="0" \
-                ["audit_log_filter_handler"]="FILE" ["audit_log_filter_key_derivation_iterations_count_mean"]="600000" \
-                ["audit_log_filter_max_size"]="1073741824" ["audit_log_filter_password_history_keep_days"]="0" \
-                ["audit_log_filter_prune_seconds"]="0" ["audit_log_filter_read_buffer_size"]="32768" ["audit_log_filter_rotate_on_size"]="1073741824" \
-                ["audit_log_filter_strategy"]="ASYNCHRONOUS" ["audit_log_filter_syslog_facility"]="LOG_USER" ["audit_log_filter_syslog_priority"]="LOG_INFO" \
-                ["audit_log_filter_syslog_tag"]="audit-filter")
+declare -A variables=( ["audit_log_filter.buffer_size"]="1048576" ["audit_log_filter.database"]="mysql" \
+                ["audit_log_filter.disable"]="0" ["audit_log_filter.file"]="audit_filter.log"\
+                ["audit_log_filter.format"]="NEW" ["audit_log_filter.format_unix_timestamp"]="0" \
+                ["audit_log_filter.handler"]="FILE" ["audit_log_filter.key_derivation_iterations_count_mean"]="600000" \
+                ["audit_log_filter.max_size"]="1073741824" ["audit_log_filter.password_history_keep_days"]="0" \
+                ["audit_log_filter.prune_seconds"]="0" ["audit_log_filter.read_buffer_size"]="32768" ["audit_log_filter.rotate_on_size"]="1073741824" \
+                ["audit_log_filter.strategy"]="ASYNCHRONOUS" ["audit_log_filter.syslog_facility"]="LOG_USER" ["audit_log_filter.syslog_priority"]="LOG_INFO" \
+                ["audit_log_filter.syslog_tag"]="audit-filter")
 
 # Create dictionary of audit log v2 plugin functions
 functions_list=("audit_log_rotate" "audit_log_encryption_password_set" \
@@ -67,7 +53,7 @@ done
 
 # get logfile location
 data_dir=$(mysql -uroot -NBe "SELECT @@datadir";)
-al_file_name=$(mysql -uroot -NBe "SELECT @@audit_log_filter_file;")
+al_file_name=$(mysql -uroot -NBe "SELECT @@audit_log_filter.file;")
 al_file_pattern=$(echo ${al_file_name}|awk -F'.' '{print $1}')
 al_file_location=${data_dir}${al_file_name}
 
@@ -88,7 +74,7 @@ fi
 # Check dynamic variables
 
 # audit_log_filter_disable
-mysql -uroot -NBe "set global audit_log_filter_disable='ON';"
+mysql -uroot -NBe "set global audit_log_filter.disable='ON';"
 sleep 1
 al_file_rows=$(wc -l ${al_file_location}|awk '{print $1}')
 mysql -uroot -NBe "SELECT 1;"
@@ -101,15 +87,15 @@ else
     echo "audit_log_filter_disable OK. Rows num before SQL=${al_file_rows}. Rows num after SQL=${al_file_rows_after}"
 fi
 # revert setting and enable audit log
-mysql -uroot -NBe "set global audit_log_filter_disable='OFF';"
+mysql -uroot -NBe "set global audit_log_filter.disable='OFF';"
 
 
 # audit_log_filter_rotate_on_size. 
-mysql -uroot -NBe "set global audit_log_filter_rotate_on_size=4096;"
+mysql -uroot -NBe "set global audit_log_filter.rotate_on_size=4096;"
 sleep 1
-cur_value=$(mysql -uroot -NBe "select @@audit_log_filter_rotate_on_size")
+cur_value=$(mysql -uroot -NBe "select @@audit_log_filter.rotate_on_size")
 if [[ ${cur_value} != 4096 ]]; then
-    echo "audit_log_filter_rotate_on_size value is incorrect!"
+    echo "audit_log_filter.rotate_on_size value is incorrect!"
     exit 1
 fi
 files_num_before=$(ls -lht ${data_dir}|grep ${al_file_pattern}|wc -l)
@@ -128,8 +114,8 @@ fi
 
 # audit_log_filter_max_size. When log files size => audit_log_filter_max_size, the extra files are pruned. Prunning is triggered during files rotation.
 # audit_log_filter_prune_seconds should be 0
-mysql -uroot -NBe "set global audit_log_filter_max_size=8192;"
-prune_sec_value=$(mysql -uroot -NBe "select @@audit_log_filter_prune_seconds")
+mysql -uroot -NBe "set global audit_log_filter.max_size=8192;"
+prune_sec_value=$(mysql -uroot -NBe "select @@audit_log_filter.prune_seconds")
 if [[ ${prune_sec_value} != 0 ]]; then
     echo "audit_log_filter_prune_seconds value is incorrect!"
     exit 1
@@ -144,12 +130,12 @@ if [[ ${files_num_after} -gt 2 ]]; then
 else
     echo "audit_log_filter_max_size OK. Number of log files after SQL=${files_num_after}"
 fi
-mysql -uroot -NBe "set global audit_log_filter_max_size=default;"
+mysql -uroot -NBe "set global audit_log_filter.max_size=default;"
 
 # audit_log_filter_prune_seconds. When log files creation => audit_log_filter_prune_seconds, the extra files are pruned. Prunning is triggered during files rotation.
 # audit_log_filter_max_size should be 0
-mysql -uroot -NBe "set global audit_log_filter_prune_seconds=10;"
-max_size_value=$(mysql -uroot -NBe "select @@audit_log_filter_max_size;")
+mysql -uroot -NBe "set global audit_log_filter.prune_seconds=10;"
+max_size_value=$(mysql -uroot -NBe "select @@audit_log_filter.max_size;")
 if [[ ${max_size_value} != 0 ]]; then
     echo "audit_log_filter_max_size value is incorrect!"
     exit 1
@@ -166,15 +152,15 @@ if [[ ${files_num_after} -ge ${files_num_before} ]]; then
 else
     echo "audit_log_filter_prune_seconds OK. Number of log files before = ${files_num_before}; after pruning = ${files_num_after}."
 fi
-mysql -uroot -NBe "set global audit_log_filter_max_size=1073741824;"
+mysql -uroot -NBe "set global audit_log_filter.max_size=1073741824;"
 
 # check UDFs for default format
 mysql -uroot -NBe "select audit_log_filter_flush();"
 mysql -uroot -NBe "select audit_log_filter_remove_user('%');"
 mysql -uroot -NBe "select audit_log_filter_remove_filter('log_all');"
 
-#remove plugin
-mysql -uroot -NBe "DROP TABLE IF EXISTS mysql.audit_log_user;DROP TABLE IF EXISTS mysql.audit_log_filter;UNINSTALL PLUGIN audit_log_filter;"
+#remove tables
+mysql -uroot -NBe "DROP TABLE IF EXISTS mysql.audit_log_user;DROP TABLE IF EXISTS mysql.audit_log_filter;"
 
 #Exit script with an error if any of the checks failed.
 if [[ "${fails}" == '1' ]]; then
