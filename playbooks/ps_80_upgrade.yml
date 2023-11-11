@@ -16,6 +16,7 @@
     install_mysql_shell: "{{ lookup('env', 'install_mysql_shell', default='') }}"
   environment:
     install_mysql_shell: '{{ install_mysql_shell }}'
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
   - name: include tasks for test env setup
@@ -44,6 +45,8 @@
 
   - name: install Percona Server 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
 # Disable Percona Toolkit installation till its supported in OL9 and Jammy
 #  - name: install Percona Toolkit new deb packages
@@ -153,6 +156,8 @@
       - percona-server-source
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: upgrade Percona XtraBackup to new deb packages
     apt:
@@ -199,6 +204,8 @@
       - percona-server-shared-compat
       - percona-server-client
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: upgrade Percona Server to new rpm packages on Oracle Linux 9
     yum:
@@ -214,6 +221,11 @@
       - percona-server-shared
       - percona-server-client
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: check telemetry (disabled)
+    command: /package-testing/check_telemetry.sh ps -d
 
   - name: upgrade Percona XtraBackup to new rpm packages
     yum:
@@ -309,3 +321,34 @@
     fail:
       msg: "Path exists and is a directory and is not empty"
     when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
+
+## Changes done for telemetry: add iptables rule for Telemetry Server - install only ps package.
+## Expected resuld - telemetry_uuid file has only instanceID
+  - name: Block pmm.check-dev.percona.com IP
+    iptables:
+      chain: OUTPUT
+      destination: check-dev.percona.com
+      jump: DROP
+
+  - name: install Percona Server deb package for telemetry
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: latest
+    vars:
+      packages:
+      - percona-server-server
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona Server rpm package for telemetry
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-server-server
+    when: ansible_os_family == "RedHat"
+
+  - name: check telemetry (disabled)
+    command: /package-testing/check_telemetry.sh ps -u
+

@@ -10,7 +10,7 @@ container_name = 'ps-docker-test-static1'
 @pytest.fixture(scope='module')
 def host():
     docker_id = subprocess.check_output(
-        ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-d', docker_image_major]).decode().strip()
+        ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e', 'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport', '-d', docker_image_major]).decode().strip()
     if ps_version_major in ['5.7','5.6']:
         subprocess.check_call(['docker','exec','--user','root',container_name,'microdnf','install','net-tools'])
     else:

@@ -30,7 +30,7 @@ verifier:
     verbose: true
     s: true
     k: "test_pdps_ or test_common_"
-    m: "not pkg_source and not orch_source"
+    m: "not pkg_source and not orch_source and not telemetry_enabled"
     junitxml: report.xml
 scenario:
   name: ubuntu-jammy

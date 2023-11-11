@@ -35,7 +35,7 @@ if [ "$1" = "pxb81" ]; then
             tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17"
         else
             # Download minimal version
-            wget https://downloads.percona.com/downloads/TESTING/pxb-${major_version}-${minor_version}/percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17-minima  l.tar.gz
+            wget https://downloads.percona.com/downloads/TESTING/pxb-${major_version}-${minor_version}/percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17-minimal.tar.gz
             tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17-minimal"
         fi
     fi
