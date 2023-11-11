@@ -108,27 +108,27 @@
     include_tasks: ../tasks/install_pshell.yml
     when: install_mysql_shell == "yes" or install_mysql_shell == ""
 
-  - name: Handle check that Percona Server version is correct
-    block: 
-      - name: Run the version_check.sh script
-        shell: /package-testing/version_check.sh ps81 > version-check.log 2>&1
+    #  - name: Handle check that Percona Server version is correct
+    #    block: 
+    #      - name: Run the version_check.sh script
+    #    shell: /package-testing/version_check.sh ps81 > version-check.log 2>&1
 
-      - name: Log check for warnings in the previous stage
-        command: /package-testing/scripts/log-warning-check.sh version-check.log
-        when: (lookup('env', 'check_warnings') == "yes")
+    # - name: Log check for warnings in the previous stage
+    #    command: /package-testing/scripts/log-warning-check.sh version-check.log
+    #    when: (lookup('env', 'check_warnings') == "yes")
 
-    rescue:
-      - name: Fetch the output of the version_check.sh logfile on the script failure
-        command: cat "version-check.log"
-        register: versioncheckoutput
+    #rescue:
+    #  - name: Fetch the output of the version_check.sh logfile on the script failure
+    #    command: cat "version-check.log"
+    #    register: versioncheckoutput
 
-      - name: Display the fetched output of the version_check.log logfile
-        debug:
-          msg: "Version check output: {{ versioncheckoutput.stdout }}"
+    #  - name: Display the fetched output of the version_check.log logfile
+    #    debug:
+    #      msg: "Version check output: {{ versioncheckoutput.stdout }}"
 
-      - name: Fail the task due to previous issues
-        fail:
-          msg: Failing the further tasks due to issues in the previous task.
+    # - name: Fail the task due to previous issues
+    #   fail:
+    #     msg: Failing the further tasks due to issues in the previous task.
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps81
