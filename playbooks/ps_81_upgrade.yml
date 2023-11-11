@@ -16,6 +16,7 @@
     install_mysql_shell: "{{ lookup('env', 'install_mysql_shell', default='') }}"
   environment:
     install_mysql_shell: '{{ install_mysql_shell }}'
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
   - name: include tasks for test env setup
@@ -26,7 +27,7 @@
 
   - name: setup config file for keyring vault
     template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test_v2.j2
-              dest=/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
+              dest=/package-testing/scripts/ps_keyring_plugins_test/component_keyring_vault.cnf
               mode=0664 owner=root group=root
 
 # Install from main repository
@@ -44,15 +45,6 @@
 
   - name: install Percona Server 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
-
-# Disable Percona Toolkit installation till its supported in OL9 and Jammy
-#  - name: install Percona Toolkit new deb packages
-#    include_tasks: ../tasks/install_pt.yml
-
-# Commenting sysbench installation because of jammy
-    #  - name: install sysbench new deb packages
-    #    include_tasks: ../tasks/install_sysbench.yml
-    #    when: lookup('env', 'install_repo') != "experimental"
 
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
@@ -233,20 +225,20 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e  
+
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps81
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps81
 
-  - name: check the clone and data masking plugins
-    command: /package-testing/scripts/ps_clone_dm_plugin_test.sh
-
   - name: check the data masking component
-    command: /package-testing/scripts/ps_dm_component_8.1.sh
+    command: /package-testing/scripts/ps_dm_component.sh
 
   - name: check the audit log v2 plugin
-    command: /package-testing/scripts/ps_audit_log_v2.sh
+    command: /package-testing/scripts/ps_audit_log_v2_component.sh
 
   - name: finish my.cnf change test
     command: /package-testing/check_mycnf_post.sh
@@ -254,11 +246,8 @@
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
 
-# - name: run bats tests for PAM
-#   command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
-
   - name: keyring plugins test
-    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps81
+    include_tasks: ../tasks/ps_keyring_plugins_vault_test_81.yml
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb81
