@@ -38,7 +38,7 @@ ps81_plugins = (
   ('authentication_ldap_sasl','authentication_ldap_sasl.so'),('authentication_fido','authentication_fido.so')
 )
 ps81_components = (
-  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://Component_audit_log_filter'),('file://Component_keyring_vault')
+  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault')
 )
 ps81_functions = (
   ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
