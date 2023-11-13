@@ -119,6 +119,10 @@
   - name: include tasks for enabling PS 8.1 testing repo
     include: ../tasks/enable_ps81_testing_repo.yml
 
+
+  - name: Remove PXB 8.0 packages
+    include_tasks: ../tasks/remove_pxb80.yml 
+    
 # Upgrade packages
 #
   - name: upgrade Percona Toolkit to new deb packages
