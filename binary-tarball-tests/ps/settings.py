@@ -155,13 +155,13 @@ ps81_files = (
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
   'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.22.0.0' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so',
-  'lib/plugin/keyring_file.so','lib/plugin/component_binlog_utils_udf.so'
+  'lib/plugin/keyring_file.so','lib/plugin/component_binlog_utils_udf.so',
   'lib/plugin/keyring_udf.so', 'lib/plugin/component_keyring_vault.so', 'lib/plugin/component_binlog_utils_udf.so',
   'lib/plugin/component_audit_log_filter.so', 'lib/plugin/component_masking_functions.so'
 )
 
 ps81_symlinks = (
-  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.22.0.0'),
+  ('lib/libperconaserverclient.so.22','lib/libperconaserverclient.so.22.0.0'),
   ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.22.0.0'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 
