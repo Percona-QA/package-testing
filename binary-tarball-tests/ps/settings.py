@@ -143,24 +143,26 @@ ps81_plugins = (
 ps81_functions = (
   ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
   ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_exclusive', 'version_token.so', 'INT'),
-  ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT)
+  ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
 )
 
 ps81_components = (
-  'component_masking_functions', 'component_binlog_utils_udf', 'component_percona_udf', 'COMPONENT_AUDIT_LOG_FILTER', 'component_keyring_vault'
+  'component_masking_functions', 'component_binlog_utils_udf', 'component_percona_udf', 'component_audit_log_filter', 'component_keyring_vault'
 )
+
 ps81_files = (
   'lib/libcoredumper.a', 
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.34' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.22.0.0' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so',
   'lib/plugin/keyring_file.so','lib/plugin/component_binlog_utils_udf.so'
   'lib/plugin/keyring_udf.so', 'lib/plugin/component_keyring_vault.so', 'lib/plugin/component_binlog_utils_udf.so',
   'lib/plugin/component_audit_log_filter.so', 'lib/plugin/component_masking_functions.so'
 )
+
 ps81_symlinks = (
-  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.34'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.34'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.22.0.0'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.22.0.0'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 
 #####
