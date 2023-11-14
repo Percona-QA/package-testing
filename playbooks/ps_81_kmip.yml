@@ -6,6 +6,8 @@
 - hosts: all
   become: true
   become_method: sudo
+  vars:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"      
 
   tasks:
   - name: include tasks for test env setup
