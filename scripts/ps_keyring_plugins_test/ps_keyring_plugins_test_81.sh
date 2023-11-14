@@ -35,12 +35,12 @@ sleep 10
 
 echo "install keyring udf functions" | tee -a ${LOG}
 # install keyring udf functions
-#mysql -e "CREATE FUNCTION keyring_key_fetch returns string SONAME 'keyring_udf.so';"
-#mysql -e "CREATE FUNCTION keyring_key_type_fetch returns string SONAME 'keyring_udf.so';"
-#mysql -e "CREATE FUNCTION keyring_key_length_fetch returns integer SONAME 'keyring_udf.so';"
-#mysql -e "CREATE FUNCTION keyring_key_remove returns integer SONAME 'keyring_udf.so';"
-#mysql -e "CREATE FUNCTION keyring_key_generate returns integer SONAME 'keyring_udf.so';"
-#mysql -e "CREATE FUNCTION keyring_key_store returns integer SONAME 'keyring_udf.so';"
+mysql -e "CREATE FUNCTION keyring_key_fetch returns string SONAME 'keyring_udf.so';"
+mysql -e "CREATE FUNCTION keyring_key_type_fetch returns string SONAME 'keyring_udf.so';"
+mysql -e "CREATE FUNCTION keyring_key_length_fetch returns integer SONAME 'keyring_udf.so';"
+mysql -e "CREATE FUNCTION keyring_key_remove returns integer SONAME 'keyring_udf.so';"
+mysql -e "CREATE FUNCTION keyring_key_generate returns integer SONAME 'keyring_udf.so';"
+mysql -e "CREATE FUNCTION keyring_key_store returns integer SONAME 'keyring_udf.so';"
 
 echo "keyring_file plugin test" | tee -a ${LOG}
 # keyring_file plugin test
@@ -58,6 +58,8 @@ mysql --database=test -e "DROP TABLE keyring_file_test;"
 mysql --database=test -e "DROP TABLESPACE ts1;"
 mysql -e "DROP DATABASE test;"
 mysql -e "UNINSTALL PLUGIN keyring_file;"
+
+# keyring vault component test
 
 echo "service restart so that plugins don't mess with each other" | tee -a ${LOG}
 systemctl stop mysql
