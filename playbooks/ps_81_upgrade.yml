@@ -42,6 +42,8 @@
 
   - name: install Percona Server 8.1 packages
     include_tasks: ../tasks/install_ps81.yml
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install Percona XtraBackup 8.1 packages
     include_tasks: ../tasks/install_pxb81.yml
@@ -136,6 +138,8 @@
       - percona-server-source
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: upgrade Percona XtraBackup to new deb packages
     apt:
@@ -148,6 +152,8 @@
       - percona-xtrabackup-test-81
       - percona-xtrabackup-dbg-81
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: upgrade Percona release to new rpm packages
     yum:
@@ -173,6 +179,8 @@
       - percona-server-shared-compat
       - percona-server-client
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: upgrade Percona Server to new rpm packages on Oracle Linux 9
     yum:
@@ -188,6 +196,8 @@
       - percona-server-shared
       - percona-server-client
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: upgrade Percona XtraBackup to new rpm packages
     yum:
@@ -207,8 +217,8 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: check telemetry (enabled)
-    command: /package-testing/check_telemetry.sh ps -e  
+  - name: check telemetry (disabled)
+    command: /package-testing/check_telemetry.sh ps -d
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps81
