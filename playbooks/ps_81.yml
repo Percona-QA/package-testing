@@ -24,7 +24,7 @@
     include_tasks: ../tasks/setup_local_vault.yml
 
   - name: setup config file for keyring vault
-    template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test_v2.j2
+    template: src=../scripts/ps_keyring_plugins_test/keyring_vault_component_test_v2.j2
               dest=/package-testing/scripts/ps_keyring_plugins_test/component_keyring_vault.cnf
               mode=0664 owner=root group=root
 
