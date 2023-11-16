@@ -250,8 +250,8 @@
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
 
-  - name: keyring plugins test
-    include_tasks: ../tasks/ps_keyring_plugins_vault_test_81.yml
+  - name: keyring Vault Component and plugins test
+    include_tasks: ../tasks/ps_keyring_vault_component_test.yml
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb81
