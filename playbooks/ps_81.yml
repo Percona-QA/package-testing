@@ -61,10 +61,6 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-# Disable Percona Toolkit installation till its supported in OL9 and Jammy
-#  - name: install Percona Toolkit new deb packages
-#    include_tasks: ../tasks/install_pt.yml
-
   - name: install Percona Server 8.1 packages
     include_tasks: ../tasks/install_ps81.yml
 
@@ -136,8 +132,8 @@
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps81
 
-  - name: keyring plugins test
-    include_tasks: ../tasks/ps_keyring_plugins_vault_test_81.yml
+  - name: keyring Vault Component and plugins test
+    include_tasks: ../tasks/ps_keyring_vault_component_test.yml
 
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb

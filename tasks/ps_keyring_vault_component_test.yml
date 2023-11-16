@@ -22,6 +22,9 @@
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test_81.sh ps81
 
+  - name: keyring Vault Component test
+    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_vault_component_test.sh
+
   - name: Remove mysqld.my from /usr/sbin/
     file:
       path: /usr/sbin/mysqld.my
