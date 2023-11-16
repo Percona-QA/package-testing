@@ -2,7 +2,7 @@
 set -e
 
 #check that Keyring Vault component is disabled
-KV_component=$(mysql -NBe "select STATUS_VALUE FROM performance_schema.keyring_component_status where STATUS_KEY='Component_status';" | grep -c ACTIVE)
+KV_component=$(mysql -NBe "select UPPER(STATUS_VALUE) FROM performance_schema.keyring_component_status where STATUS_KEY='Component_status';" | grep -c ACTIVE)
 
 if [ ${KV_component} == 1 ]; then
    echo "Keyring Vault Component is installed and active"
