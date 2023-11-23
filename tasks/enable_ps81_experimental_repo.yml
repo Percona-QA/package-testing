@@ -14,8 +14,8 @@
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
 
-  - name: enable the PS-81 Innovation experimental repo
-    command: percona-release enable-only innovation experimental
+  - name: enable the PS-8x Innovation experimental repo
+    command: percona-release enable-only ps-8x-innovation experimental
 
   - name: enable tools experimental repo
     command: percona-release enable tools experimental
