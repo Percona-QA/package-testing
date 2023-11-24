@@ -6,11 +6,11 @@
   - name: Install percona release
     include: ../../tasks/install_percona_release.yml
 
-  - name: enable the PDMYSQL-80 repo
+  - name: enable the PDMYSQL-{{ version }} {{ repo }}
     command: percona-release enable-only pdps-{{ version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
-      version: "{{ lookup('env', 'VERSION') }}"
+      version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
 
 #  - name: install Percona Toolkit
 #    include_tasks: ../../../tasks/install_pt.yml

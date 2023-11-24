@@ -4,15 +4,15 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: ubionic-${BUILD_NUMBER}-${JOB_NAME}
-    region: eu-central-1
-    image: ami-0a8561d8c5a4f098a
-    vpc_subnet_id: subnet-085deaca8c1c59a4f
-    instance_type: t2.micro
+  - name: ujammy-${BUILD_NUMBER}-${JOB_NAME}
+    region: us-west-2
+    image: ami-0ee8244746ec5d6d4
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: t2.small
     ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
-      iit-billing-tag: jenkins-pg-worker
+      iit-billing-tag: jenkins-ps80-worker
       job-name: ${JOB_NAME}
 provisioner:
   name: ansible
@@ -30,7 +30,7 @@ verifier:
     s: true
     junitxml: report.xml
 scenario:
-  name: ubuntu-bionic
+  name: ubuntu-jammy
   destroy_sequence:
     - destroy
   clenup_sequence:
