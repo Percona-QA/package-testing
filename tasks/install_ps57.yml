@@ -14,6 +14,8 @@
       - percona-server-tokudb-5.7
       - percona-server-rocksdb-5.7
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: get list of enabled dnf modules on centos 8
     command: dnf module list --enabled
@@ -50,6 +52,8 @@
       - Percona-Server-shared-57
       - Percona-Server-client-57
     when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install Percona-Server-shared-compat-57 rpm package
     yum:

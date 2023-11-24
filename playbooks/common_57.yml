@@ -10,6 +10,8 @@
 - hosts: all
   become: true
   become_method: sudo
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"      
 
   tasks:
   - name: include tasks for test env setup
@@ -45,6 +47,9 @@
 
   - name: install Percona Server 5.7 packages
     include_tasks: ../tasks/install_ps57.yml
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e  
 
   - name: install Percona Toolkit new deb packages
     include_tasks: ../tasks/install_pt.yml

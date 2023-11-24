@@ -14,6 +14,8 @@
   become_method: sudo
   vars:
     major_upgrade: true
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"      
 
   tasks:
 ### start of PS 5.7 install
@@ -70,6 +72,9 @@
       - Percona-Server-shared-57
       - Percona-Server-client-57
     when: ansible_os_family == "RedHat"
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e  
 
   - name: install Percona Toolkit new deb packages
     include_tasks: ../tasks/install_pt.yml
@@ -225,6 +230,9 @@
 
   - name: install Percona Server 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e  
 
   - name: install sysbench new deb packages
     include_tasks: ../tasks/install_sysbench.yml
