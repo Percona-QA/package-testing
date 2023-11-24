@@ -15,6 +15,35 @@ docker_product = 'percona-server'
 docker_tag = ps_version
 docker_image = docker_acc + "/" + docker_product + ":" + docker_tag
 
+# 8.1
+ps81_packages = (
+  'percona-server-client', 'percona-server-rocksdb', 'percona-server-server',
+  'percona-server-shared'
+)
+ps81_binaries = (
+  '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/ps-admin', '/usr/bin/mysqladmin', '/usr/bin/mysqlbinlog',
+  '/usr/sbin/mysqld-debug', '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow', '/usr/bin/mysqlimport', '/usr/bin/mysqlpump',
+  '/usr/bin/mysqlshow', '/usr/bin/mysqlslap', '/usr/bin/mysqlcheck', '/usr/bin/mysql_config_editor', '/usr/bin/mysql_config',
+  '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade',
+  '/usr/bin/hostname', '/usr/bin/gunzip', '/usr/bin/my_print_defaults', '/usr/bin/cat', '/usr/bin/mysql_tzinfo_to_sql',
+  '/usr/bin/grep', '/usr/bin/cut', '/usr/bin/tail', '/usr/bin/sed', '/usr/bin/find', '/usr/bin/kill', '/usr/bin/gawk'
+)
+ps81_plugins = (
+  ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
+  ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
+  ('group_replication','group_replication.so'),('clone','mysql_clone.so'),
+  ('authentication_ldap_sasl','authentication_ldap_sasl.so'),('authentication_fido','authentication_fido.so')
+)
+ps81_components = (
+  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault')
+)
+ps81_functions = (
+  ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
+  ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_exclusive', 'version_token.so', 'INT'),
+  ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
+)
+
+
 # 8.0
 ps80_packages = (
   'percona-server-client', 'percona-server-rocksdb', 'percona-server-server',
@@ -89,7 +118,13 @@ ps56_functions = (
 )
 #####
 
-if ps_version_major == '8.0':
+if  ps_version_major == '8.1':
+    ps_packages = ps81_packages
+    ps_binaries = ps81_binaries
+    ps_plugins = ps81_plugins
+    ps_functions = ps81_functions
+    ps_components = ps81_components
+elif ps_version_major == '8.0':
     ps_packages = ps80_packages
     ps_binaries = ps80_binaries
     ps_plugins = ps80_plugins

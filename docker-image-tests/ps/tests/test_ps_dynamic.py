@@ -10,7 +10,7 @@ container_name = 'ps-docker-test-dynamic'
 
 @pytest.fixture(scope='module')
 def host():
-    if ps_version_major not in ['8.0']:
+    if ps_version_major not in ['8.0', '8.1']:
         docker_id = subprocess.check_output(
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e', 'INIT_TOKUDB=1', '-e', 'INIT_ROCKSDB=1', '-e', 'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport','-d', docker_image]).decode().strip()
     else:
@@ -31,7 +31,7 @@ class TestDynamic:
             pytest.skip('RocksDB is available from 5.7!')
 
     def test_tokudb_installed(self, host):
-        if ps_version_major not in ['8.0']:
+        if ps_version_major not in ['8.0', '8.1']:
             cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "select SUPPORT from information_schema.ENGINES where ENGINE = \'TokuDB\';"')
             assert cmd.succeeded
             assert 'YES' in cmd.stdout
@@ -56,7 +56,7 @@ class TestDynamic:
 
     @pytest.mark.parametrize("cmpt", ps_components)
     def test_install_component(self, host, cmpt):
-        if ps_version_major in ['8.0']:
+        if ps_version_major in ['8.0', '8.1']:
             if cmpt == 'file://component_masking_functions':
                 host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "UNINSTALL PLUGIN data_masking;"')
             cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "INSTALL component \''+cmpt+'\';"')
@@ -78,7 +78,7 @@ class TestDynamic:
             pytest.mark.skip('Components are available from 8.0 onwards')
 
     def test_telemetry_enabled(self, host):
-        if ps_version_major not in ['8.0']:
+        if ps_version_major not in ['8.0', '8.1']:
             pytest.skip('telemetry was added in 8.0')
         else:
             assert host.file('/usr/local/percona/telemetry_uuid').exists

@@ -8,16 +8,14 @@
   - name: Install percona repository package
     apt:
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
-#     deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-21.generic_all.deb
     when: ansible_os_family == "Debian"
 
   - name: add the Percona testing yum repos for centos 6 and 7
-#   yum: name=https://repo.percona.com/yum/testing/7Server/RPMS/noarch/percona-release-1.0-21.noarch.rpm
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
 
-  - name: enable the PS-80 testing repo
-    command: percona-release enable-only ps-81 testing
+  - name: enable the PS-8x Innovation  testing repo
+    command: percona-release enable-only ps-8x-innovation testing
 
   - name: enable the tools testing repo
     command: percona-release enable tools testing
