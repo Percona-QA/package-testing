@@ -76,9 +76,9 @@ def test_sources_pxb_version(host):
     if dist.lower() in RHEL_DISTS:
         pytest.skip("This test only for DEB distributions")
     if DEB_PERCONA_BUILD_PXB_VERSION:
-        cmd = "apt-cache madison percona-xtrabackup-80 | grep Source | grep \"{}\"".format(DEB_PERCONA_BUILD_PXB_VERSION)
+        cmd = "apt-cache madison percona-xtrabackup-{} | grep Source | grep \"{}\"".format(PXB_MAJOR_VER, DEB_PERCONA_BUILD_PXB_VERSION)
     else:
-        cmd = "apt-cache madison percona-xtrabackup-80 | grep Source | grep \"{}\"".format(PXB_VERSION)
+        cmd = "apt-cache madison percona-xtrabackup-{} | grep Source | grep \"{}\"".format(PXB_MAJOR_VER, PXB_VERSION)
     result = host.run(cmd)
     assert result.rc == 0, (result.stderr, result.stdout)
     assert PXB_VERSION in result.stdout, result.stdout
