@@ -114,10 +114,15 @@
     command: /package-testing/check_mycnf_pre.sh
 
 #
-# Enable testing repository
+# Enable testing/main repository
 #
   - name: include tasks for enabling PS 8.1 testing repo
     include: ../tasks/enable_ps81_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling PS 8.1 test repo
+    include: ../tasks/enable_ps81_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
 
 
   - name: Remove PXB 8.0 packages
