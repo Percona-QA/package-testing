@@ -3,26 +3,10 @@ import pytest
 import testinfra.utils.ansible_runner
 import re
 from .settings import *
+from packaging import version
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
-
-PXB_DEBPACKAGES = ['percona-xtrabackup-80',
-               'percona-xtrabackup-test-80',
-               'percona-xtrabackup-dbg-80']
-
-PXB_RPMPACKAGES = ['percona-xtrabackup-80',
-               'percona-xtrabackup-test-80',
-               'percona-xtrabackup-80-debuginfo']
-
-PTBINS = ['pt-align', 'pt-archiver', 'pt-config-diff', 'pt-deadlock-logger', 'pt-diskstats',
-          'pt-duplicate-key-checker', 'pt-fifo-split', 'pt-find', 'pt-fingerprint',
-          'pt-fk-error-logger', 'pt-heartbeat', 'pt-index-usage', 'pt-ioprofile', 'pt-kill',
-          'pt-mext', 'pt-mongodb-query-digest', 'pt-mongodb-summary', 'pt-mysql-summary',
-          'pt-online-schema-change', 'pt-pmp', 'pt-query-digest', 'pt-show-grants', 'pt-sift',
-          'pt-slave-delay', 'pt-slave-find', 'pt-slave-restart', 'pt-stalk', 'pt-summary',
-          'pt-table-checksum', 'pt-table-sync', 'pt-table-usage', 'pt-upgrade',
-          'pt-variable-advisor', 'pt-visual-explain', 'pt-k8s-debug-collector',]
 
 PXB_VERSION = os.getenv("PXB_VERSION")
 DEB_PERCONA_BUILD_PXB_VERSION = ''
@@ -33,6 +17,26 @@ if re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', PXB_VERSION): # if full package PXB_VE
     PXB_VERSION = '.'.join(PXB_VERSION.split('.')[:-1]) # use VERSION 8.0.32-25 without package build number for non-package tests
 
 PT_VERSION = os.getenv("PT_VERSION")
+
+# Get 80/81/etc version number
+PXB_MAJOR_VER=''.join(PXB_VERSION.split('.')[:2])
+
+PXB_DEBPACKAGES = ['percona-xtrabackup-' + PXB_MAJOR_VER,
+            'percona-xtrabackup-test-' + PXB_MAJOR_VER,
+            'percona-xtrabackup-dbg-' + PXB_MAJOR_VER]
+
+PXB_RPMPACKAGES = ['percona-xtrabackup-' + PXB_MAJOR_VER,
+            'percona-xtrabackup-test-' + PXB_MAJOR_VER,
+            'percona-xtrabackup-' + PXB_MAJOR_VER + '-debuginfo']
+
+PTBINS = ['pt-align', 'pt-archiver', 'pt-config-diff', 'pt-deadlock-logger', 'pt-diskstats',
+          'pt-duplicate-key-checker', 'pt-fifo-split', 'pt-find', 'pt-fingerprint',
+          'pt-fk-error-logger', 'pt-heartbeat', 'pt-index-usage', 'pt-ioprofile', 'pt-kill',
+          'pt-mext', 'pt-mongodb-query-digest', 'pt-mongodb-summary', 'pt-mysql-summary',
+          'pt-online-schema-change', 'pt-pmp', 'pt-query-digest', 'pt-show-grants', 'pt-sift',
+          'pt-slave-delay', 'pt-slave-find', 'pt-slave-restart', 'pt-stalk', 'pt-summary',
+          'pt-table-checksum', 'pt-table-sync', 'pt-table-usage', 'pt-upgrade',
+          'pt-variable-advisor', 'pt-visual-explain', 'pt-k8s-debug-collector',]
 
 @pytest.mark.parametrize("package", PXB_DEBPACKAGES)
 def test_check_pxb_deb_package(host, package):

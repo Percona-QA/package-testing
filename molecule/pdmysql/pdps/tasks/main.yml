@@ -30,11 +30,11 @@
       version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
     when: not major_repo
 
-  - name: enable the major pdps-{{ version }} repo
+  - name: enable the major pdps-{{ version }} {{ repo }}
     command: percona-release enable-only pdps-{{ version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
-      version: "{{ lookup('env', 'VERSION').split('.')[0] + '.' + lookup('env', 'VERSION').split('.')[1] }}"
+      version: "{{ '8.0' if '8.0.' in lookup('env', 'VERSION') else '8x-innovation' }}"
     when: major_repo
 
   - name: install Percona Toolkit
@@ -76,8 +76,10 @@
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
 
-  - name: install Percona XtraBackup 8.0 packages
-    include_tasks: ../../../tasks/install_pxb80.yml
+  - name: install Percona XtraBackup {{ pxb_version }} packages
+    include_tasks: ../../../tasks/install_pxb{{ pxb_version }}.yml
+    vars:
+      pxb_version: "{{ lookup('env', 'VERSION').split('.')[:2]|join('') }}"
 
   - name: install proxysql new deb packages
     apt:
@@ -234,3 +236,4 @@
       mode: 0744
     when: ansible_os_family == "RedHat"
     become: yes
+
