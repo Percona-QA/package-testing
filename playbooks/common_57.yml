@@ -48,9 +48,6 @@
   - name: install Percona Server 5.7 packages
     include_tasks: ../tasks/install_ps57.yml
 
-  - name: check telemetry (enabled)
-    command: /package-testing/check_telemetry.sh ps -e  
-
   - name: install Percona Toolkit new deb packages
     include_tasks: ../tasks/install_pt.yml
 
@@ -128,6 +125,9 @@
     # pt-mongodb-query-digest version is not good that's why disabling this test
     #  - name: check that Percona Toolkit version is correct
     #    command: /package-testing/version_check.sh pt
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
 
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
