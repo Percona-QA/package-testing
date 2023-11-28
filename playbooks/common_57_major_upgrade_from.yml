@@ -15,7 +15,8 @@
   vars:
     major_upgrade: true
   environment:
-    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"      
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+    PERCONA_TELEMETRY_DISABLE: "1" 
 
   tasks:
 ### start of PS 5.7 install
@@ -73,10 +74,6 @@
       - Percona-Server-client-57
     when: ansible_os_family == "RedHat"
     
-  - name: Set percona_telemetry_disable variable
-      set_fact:
-        percona_telemetry_disable: "1"
-
   - name: install Percona Toolkit new deb packages
     include_tasks: ../tasks/install_pt.yml
 
