@@ -78,8 +78,8 @@ class TestDynamic:
             pytest.mark.skip('Components are available from 8.0 onwards')
 
     def test_telemetry_enabled(self, host):
-        if ps_version_major not in ['8.0', '8.1']:
-            pytest.skip('telemetry was added in 8.0')
+        if ps_version_major in ['5.6']:
+            pytest.skip('telemetry was added after 5.7')
         else:
             assert host.file('/usr/local/percona/telemetry_uuid').exists
             assert host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PS')

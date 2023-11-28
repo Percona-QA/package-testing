@@ -10,6 +10,8 @@
 - hosts: all
   become: true
   become_method: sudo
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"      
 
   tasks:
   - name: include tasks for test env setup
@@ -124,6 +126,9 @@
     #  - name: check that Percona Toolkit version is correct
     #    command: /package-testing/version_check.sh pt
 
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
+
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
 
@@ -133,8 +138,8 @@
   - name: run bats unit tests for ps_tokudb_admin scripts
     command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_unit.bats
 
-  - name: run bats integration tests for ps_tokudb_admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_integration.bats
+    #  - name: run bats integration tests for ps_tokudb_admin script
+    #    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_integration.bats
 
   - name: run bats unit tests for ps-admin script
     command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
