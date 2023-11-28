@@ -92,7 +92,7 @@ class TestMysqlEnvironment:
             assert oct(host.file('/var/lib/mysql-keyring').mode) == '0o750'
 
     def test_telemetry_disabled(self, host):
-        if ps_version_major in ['5.7','5.6']:
-            pytest.skip('telemetry was added in 8.0')
+        if ps_version_major in ['5.6']:
+            pytest.skip('telemetry was added in 5.7, 8.0 and 8.1')
         else:
             assert not host.file('/usr/local/percona/telemetry_uuid').exists
