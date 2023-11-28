@@ -133,10 +133,10 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/kaushikpuneet07/package-testing/archive/ps-5.7-test.zip
+    - wget --no-check-certificate -O master.zip https://github.com/kaushikpuneet07/package-testing/archive/PS-8.1-test.zip
     - unzip master.zip
     - rm -f master.zip
-    - mv package-testing-ps-5.7-test /package-testing
+    - mv package-testing-PS-8.1-test /package-testing
     when: lookup('env', 'USE_LOCAL_PKG_TEST') == "" or lookup('env', 'USE_LOCAL_PKG_TEST') == "0"
 
   - name: install latest bats from github

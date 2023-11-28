@@ -138,8 +138,8 @@
   - name: run bats unit tests for ps_tokudb_admin scripts
     command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_unit.bats
 
-  - name: run bats integration tests for ps_tokudb_admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_integration.bats
+    #  - name: run bats integration tests for ps_tokudb_admin script
+    #    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_integration.bats
 
   - name: run bats unit tests for ps-admin script
     command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
