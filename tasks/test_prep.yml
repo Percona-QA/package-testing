@@ -133,10 +133,10 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
-    - unzip master.zip
-    - rm -f master.zip
-    - mv package-testing-master /package-testing
+    - wget --no-check-certificate -O POC-INNOVATION-LTS.zip https://github.com/panchal-yash/package-testing/archive/refs/heads/POC-INNOVATION-LTS.zip
+    - unzip POC-INNOVATION-LTS.zip
+    - rm -f POC-INNOVATION-LTS.zip
+    - mv package-testing-POC-INNOVATION-LTS /package-testing
     when: lookup('env', 'USE_LOCAL_PKG_TEST') == "" or lookup('env', 'USE_LOCAL_PKG_TEST') == "0"
 
   - name: install latest bats from github

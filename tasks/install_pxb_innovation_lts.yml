@@ -1,0 +1,25 @@
+# This task install Percona XtraBackup {{ major_release_version }} on CentOS and Debian/Ubuntu
+#
+  - name: install Percona XtraBackup new deb packages for pxb-{{ major_release_version }}
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup-{{ major_release_version }}
+      - percona-xtrabackup-test-{{ major_release_version }}
+      - percona-xtrabackup-dbg-{{ major_release_version }}
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona XtraBackup new rpm packages for pxb-{{ major_release_version }}
+    yum:
+      name: "{{ packages }}"
+      state: latest
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtrabackup-{{ major_release_version }}
+      - percona-xtrabackup-test-{{ major_release_version }}
+      - percona-xtrabackup-{{ major_release_version }}-debuginfo
+    when: ansible_os_family == "RedHat"

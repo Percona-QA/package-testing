@@ -3,10 +3,10 @@
 set -e
 
 if [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps56, ps57 or ps80 !"
+  echo "This script requires product parameter: ps56, ps57 or ps8x !"
   echo "Usage: ./comp_test.sh <prod>"
   exit 1
-elif [ $1 != "ps56" -a $1 != "ps57" -a $1 != "ps80" -a $1 != "ps81" ]; then
+elif ! [[ "$1" =~ ^ps5[0-9]{1}$ || "$1" =~ ^ps8[0-9]{1}$i ]]; then
   echo "Product not recognized!"
   exit 1
 fi
@@ -56,7 +56,7 @@ for se in TokuDB RocksDB; do
     if [[ ${se} = "TokuDB" && " ${tokudb_comp_lib[@]} " =~ " ${comp_lib} " ]] || [[ ${se} = "RocksDB" && " ${rocksdb_comp_lib[@]} " =~ " ${comp_lib} " ]]; then
       if [ $1 = "ps56" -a ${se} = "RocksDB" ]; then
         echo "Skipping RocksDB since not supported in PS 5.6"
-      elif [ $1 = "ps80" -o $1 = "ps81" -a ${se} = "TokuDB" ]; then
+      elif [[ "$1" =~ ^ps8[0-9]{1}$ ]] && [[ ${se} = "TokuDB" ]]; then
         echo "Skipping TokuDB since not supported in PS 8.0 and PS 8.1"
       else
         if [ ${comp_lib} != "dummy" ]; then
@@ -106,7 +106,7 @@ for se in TokuDB RocksDB; do
             sed -i "s/ @@COMMENT_PARTITIONED@@/ ${new_comment_partitioned}/g" /tmp/create_table.sql
             sed -i "s/ @@COMMENT@@/ ${new_comment}/g" /tmp/create_table.sql
           fi
-          if [ $1 != "ps80" -o $1 != "ps81"]; then
+          if ! [[ "$1" =~ ^ps8[0-9]{1}$ ]]; then
             mysql -e "set global tokudb_row_format=${new_row_format};"
           else
 	    echo "Skipping TokuDB since not supported in PS 8.0 and PS 8.1"
@@ -179,7 +179,7 @@ for file in /var/lib/mysql/.rocksdb/*.sst; do
 done
 
 # check if TokuDB files contain proper compression libraries used
-if [ $1 != "ps80" -o $1 != "ps81"]; then
+if ! [[ "$1" =~ ^ps8[0-9]{1}$ ]]; then
   for file in /var/lib/mysql/comp_test/*TokuDB*_main_*.tokudb;
   do
     filename_comp=$(echo "${file}" | sed "s:/.*/::" | sed "s:.*TokuDB_::" | sed "s:_main_.*::" | sed "s:_P_.*::")
@@ -192,7 +192,7 @@ if [ $1 != "ps80" -o $1 != "ps81"]; then
     fi
   done
 else 
-  echo "Tokudb is deprecated in PS8.0 and PS 8.1"
+  echo "Tokudb is deprecated in PS8.0 and PS8.1"
 fi  
 
 md5sum ${secure_file_priv}/*.txt > /tmp/comp_test_md5.sum
@@ -203,7 +203,7 @@ sed -i '/^rocksdb/d' ${MYCNF}
 nr1=$(grep -c "e7821682046d961fb2b5ff5d11894491" /tmp/comp_test_md5.sum)
 nr2=$(grep -c "3284a0c3a1f439892f6e07f75408b2c2" /tmp/comp_test_md5.sum)
 nr3=$(grep -c "72f7e51a16c2f0af31e39586b571b902" /tmp/comp_test_md5.sum)
-if [ $1 != "ps80" -a $1 != "ps81" ]; then
+if ! [[ "$1" =~ ^ps8[0-9]{1}$ ]]; then
   if [ ${nr1} -ne 24 -o ${nr2} -ne 24 -o ${nr3} -ne 24 ]; then
     echo "md5sums of test files do not match. check files in ${secure_file_priv}"
     exit 1
