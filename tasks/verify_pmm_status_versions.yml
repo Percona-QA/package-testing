@@ -36,7 +36,7 @@
   when: lookup('env', 'install_repo') == "testing"
   assert:
     that:
-      - "'{{ pmm_version }}' in pmm_server_version.stdout"
+      - "pmm_version in pmm_server_version.stdout"
 
 - name: Grep PMM Admin version from pmm-admin status output
   shell: "pmm-admin status {{ port_flag }} | grep pmm-admin | awk -F' ' '{print $3}'"
@@ -50,7 +50,7 @@
 #  when: lookup('env', 'install_repo') == "testing"
   assert:
     that:
-      - "'{{ pmm_version }}' in pmm_admin_version.stdout"
+      - "pmm_version in pmm_admin_version.stdout"
 
 - name: Grep PMM Agent version from pmm-admin status output
   shell: "pmm-admin status {{ port_flag }} | grep pmm-agent | awk -F' ' '{print $3}'"
@@ -63,9 +63,9 @@
 - name: Assert PMM Agent version from "status" output ({{ pmm_agent_version.stdout }}) equals expected "{{ pmm_version }}"
   assert:
     that:
-      - "'{{ pmm_version }}' in pmm_agent_version.stdout"
+      - "pmm_version in pmm_agent_version.stdout"
 
 - name: Assert PMM Admin and Agent versions are equal
   assert:
     that:
-      - "'{{ pmm_admin_version.stdout }}' in pmm_agent_version.stdout"
+      - "pmm_admin_version.stdout in pmm_agent_version.stdout"
