@@ -22,7 +22,7 @@
     - name: "Validate pmm-admin list output contains '{{ expected }}'"
       assert:
         that:
-          - "'{{ expected }}' in list_output.stdout"
+          - expected in list_output.stdout
         fail_msg: "'{{ expected }}' not found in pmm-admin list output!"
         success_msg: "'{{ expected }}' found in pmm-admin list output"
   rescue:

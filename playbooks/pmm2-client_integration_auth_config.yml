@@ -141,7 +141,7 @@
     when: lookup('env', 'install_repo') == "testing"
     assert:
       that:
-        - "'{{ pmm_version }}' in pmm_admin_version.stdout"
+        - "pmm_version in pmm_admin_version.stdout"
 
   - name: remove PMM client deb packages
     when: ansible_os_family == "Debian"
