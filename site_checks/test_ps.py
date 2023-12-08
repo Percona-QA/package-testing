@@ -123,5 +123,5 @@ LIST_OF_PACKAGES = get_package_tuples()
 def test_packages_site(software_file,filename,link):
     print('\nTesting ' + software_file + ', file: ' + filename)
     print(link)
-    req = requests.head(link, allow_redirects=True)
+    req = requests.head(link)
     assert req.status_code == 200 and int(req.headers['content-length']) > 0, link
