@@ -57,6 +57,9 @@
       - percona-toolkit
       - percona-xtrabackup-80
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install PXC 8 rpm packages
     yum:
@@ -68,6 +71,9 @@
       - percona-toolkit
       - percona-xtrabackup-80
     when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: copy PXC config on centos 7
     template: src=../../../../templates/my_rpm_80.j2 

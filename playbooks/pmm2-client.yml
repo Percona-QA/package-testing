@@ -4,7 +4,7 @@
 #   install PMM client deb/rpm
 #   perform correct setup
 #   verify versions
-
+#
 - hosts: all
   become: true
   become_method: sudo
@@ -29,12 +29,12 @@
 
 ### install pmm2-client
   - name: Install PMM client deb packages
-    apt: name=pmm2-client update_cache=yes state=latest
     when: ansible_os_family == "Debian"
+    apt: name=pmm2-client update_cache=yes state=latest
 
   - name: Install PMM client rpm packages
-    yum: name=pmm2-client state=latest
     when: ansible_os_family == "RedHat"
+    yum: name=pmm2-client state=latest
 
   - name: Check that PMM Client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml

@@ -19,7 +19,7 @@
     include: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
-  - name: include tasks for enabling PS 8 test repo
+  - name: include tasks for enabling PS 8 main repo
     include: ../tasks/enable_ps8_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
@@ -73,44 +73,32 @@
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
 
-  - name: install qpress, lz4 and zstd packages on Redhat/CentOS
+  - name: install lz4 and zstd packages on Redhat/CentOS
     yum:
       name: "{{ packages }}"
     vars:
       packages:
-      - qpress
       - lz4
       - zstd
     when: ansible_os_family == "RedHat"
 
-  - name: install qpress, lz4 and zstd packages on Ubuntu/Debian
+  - name: install lz4 and zstd packages on Ubuntu/Debian
     apt:
       name: "{{ packages }}"
     vars:
       packages:
-      - qpress
       - lz4
       - zstd
     when: ansible_os_family == "Debian" and ansible_distribution_release != "bionic"
 
-  - name: install qpress, lz4 and zstd packages on Bionic 
+  - name: install lz4 and zstd packages on Bionic 
     apt:
       name: "{{ packages }}"
     vars: 
       packages:
-      - qpress
       - liblz4-tool
       - zstd
     when: ansible_os_family == "Debian" and ansible_distribution_release == "bionic"
-
-  - name: run backup with quicklz compression
-    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_q/ --compress=quicklz --compress-threads=10
-
-  - name: decompress backup
-    command: /usr/bin/xtrabackup --decompress --user=root --target-dir=/tmp/backup_q/
-
-  - name: prepare backup
-    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_q/
 
   - name: run backup with lz4 compression
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_l/ --compress=lz4 --compress-threads=10

@@ -11,6 +11,7 @@ Current Ownership: Tomislav Plavcic
 ## Execute tests
 Tests can be launched locally via vagrant. Please see corresponding Vagrant.template    
 * PMM2 deb: [Vagrantfile.template.pmm2-deb](Vagrantfile.template.pmm2-deb)
+* PMM2 ubuntu: [Vagrantfile.template.pmm2-ub](Vagrantfile.template.pmm2-ub)
 * PMM2 rpm: [Vagrantfile.template.pmm2-rpm](Vagrantfile.template.pmm2-rpm)
 
 ## Developer notes

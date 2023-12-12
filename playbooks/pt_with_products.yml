@@ -1,6 +1,6 @@
 ---
 # This playbook does following:
-#   
+#
 #   installs latest version of Percona-Server-57 (ps57), Percona-Server-80 (ps80), Percona-XtraDB-Cluster-57 (pxc57), Percona-XtraDB-Cluster-80 (pxc80), MysqL server 57 (upstream57), MySQL server 80 (upstream80), Percona Server for MongoDB 44 (psmdb44), Percona Server for MongoDB 50 (psmdb50).
 #   enables Percona tools repository
 #   installs latest version of Percona-Toolkit (pt) and runs one of the tools (pt-mysql-summary or pt-psmdb-summary)
@@ -8,6 +8,8 @@
 - hosts: all
   become: true
   become_method: sudo
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
   - name: include tasks for test env setup
@@ -45,6 +47,10 @@
   - name: include tasks for installing and setup psmdb 50
     include_tasks: ../tasks/install_and_run_psmdb.yml
     when: lookup('env', 'install_with') == "psmdb50"
+
+  - name: include tasks for installing and setup psmdb 60
+    include_tasks: ../tasks/install_and_run_psmdb.yml
+    when: lookup('env', 'install_with') == "psmdb60"
 
 # Enable only tools repo to install pt
   - name: include tasks for enabling tools testing repo

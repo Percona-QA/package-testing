@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps56, ps57 or ps80!"
+  echo "This script requires product parameter: ps56, ps57, ps80, ps81 !"
   echo "Usage: ./version_check.sh <prod>"
   exit 1
 fi
@@ -22,6 +22,10 @@ elif [ "$1" = "ps80" ]; then
   version=${PS80_VER}
   release=${PS80_VER#*-}
   revision=${PS80_REV}
+elif [ "$1" = "ps81" ]; then
+  version=${PS81_VER}
+  release=${PS81_VER#*-}
+  revision=${PS81_REV}  
 elif [ "$1" = "pxc56" ]; then
   version=${PXC56_VER%-*}
   release=${PXC56_VER#*-}
@@ -48,6 +52,8 @@ elif [ "$1" = "pxb24" ]; then
   version=${PXB24_VER}
 elif [ "$1" = "pxb80" ]; then
   version=${PXB80_VER}
+elif [ "$1" = "pxb81" ]; then
+  version=${PXB81_VER}
 elif [ "$1" = "pmm" ]; then
   version=${PMM_VER}
 elif [ "$1" = "pmm2" ]; then
@@ -84,7 +90,7 @@ product=$1
 log="/tmp/${product}_version_check.log"
 echo -n > "${log}"
 
-if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" ]; then
+if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" -o "${product}" = "ps81" ]; then
   for i in @@INNODB_VERSION @@VERSION; do
     if [ "$(mysql -e "SELECT ${i}; "| grep -c "${version}")" = 1 ]; then
       echo "${i} is correct" >> "${log}"
@@ -104,11 +110,11 @@ if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" ]; 
   if [ "$(mysql -e "SELECT @@VERSION_COMMENT;" | grep ${revision} | grep -c ${release})" = 1 ]; then
     echo "@@VERSION COMMENT is correct" >> "${log}"
   else
-    echo "@@VERSION_COMMENT is incorrect"
+    echo "@@VERSION_COMMENT is incorrect. It is: $(mysql -e "SELECT @@VERSION_COMMENT;") . Revision is ${revision}. Release is ${release}"
     exit 1
   fi
 
-  if [ ${product} = "ps80" ]; then
+  if [ ${product} = "ps80" -o ${product} = "ps81" ]; then
     if [ -z ${install_mysql_shell} ] || [ ${install_mysql_shell} = "yes" ] ; then
       if [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
         echo "mysql-shell version is correct" >> "${log}"
@@ -153,6 +159,7 @@ elif [ ${product} = "pt" ]; then
     version_check=$(${i} --version|grep -c ${version})
     if [ ${version_check} -eq 0 ]; then
       echo "${i} version is not good!"
+      echo $(${i} --version)
       exit 1
     else
       echo "${i} version is correct and ${version}" >> "${log}"
@@ -180,7 +187,7 @@ elif [ ${product} = "pmm2" -o ${product} = "pmm2-rc" ]; then
   fi
   bash -xe ./check_pmm2_client_upgrade.sh ${version}
 
-elif [ "${product}" = "pxb24" -o "${product}" = "pxb80" ]; then
+elif [ "${product}" = "pxb24" -o "${product}" = "pxb80" -o "${product}" = "pxb81" ]; then
     for binary in xtrabackup xbstream xbcloud xbcrypt; do
         version_check=$($binary --version 2>&1| grep -c "${version}")
         installed_version=$($binary --version 2>&1|tail -1|awk '{print $3}')

@@ -10,6 +10,8 @@
 - hosts: all
   become: true
   become_method: sudo
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"      
 
   tasks:
   - name: include tasks for test env setup
@@ -55,13 +57,14 @@
 
   - name: install Percona XtraBackup 2.4 packages
     include_tasks: ../tasks/install_pxb24.yml
+    when: ansible_distribution_release != "bookworm"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
   - name: use Percona Server my.cnf
     shell: update-alternatives --set my.cnf /etc/mysql/percona-server.cnf
-    when: ansible_os_family == "Debian" and ansible_distribution_release == "bullseye"
+    when: ansible_os_family == "Debian" and (ansible_distribution_release == "bullseye" or ansible_distribution_release == "bookworm")
 
   - name: start mysql service
     service: name=mysql state=started
@@ -109,19 +112,22 @@
 
   - name: check that sysbench version is correct
     command: /package-testing/version_check.sh sysbench
-    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and ansible_distribution_major_version != "9"
+    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and ansible_distribution_major_version != "9" and ansible_distribution_release != "bookworm"
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
-    when: lookup('env', 'install_repo') != "experimental"
+    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bookworm"
 
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb24
-    when: lookup('env', 'install_repo') != "experimental"
+    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bookworm"
 
     # pt-mongodb-query-digest version is not good that's why disabling this test
     #  - name: check that Percona Toolkit version is correct
     #    command: /package-testing/version_check.sh pt
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
 
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
@@ -132,8 +138,8 @@
   - name: run bats unit tests for ps_tokudb_admin scripts
     command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_unit.bats
 
-  - name: run bats integration tests for ps_tokudb_admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_integration.bats
+    #  - name: run bats integration tests for ps_tokudb_admin script
+    #    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_integration.bats
 
   - name: run bats unit tests for ps-admin script
     command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats

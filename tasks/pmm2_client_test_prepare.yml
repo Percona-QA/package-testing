@@ -4,16 +4,18 @@
   include_tasks: ./remove_percona_repository.yml
 
 - name: Install EPEL and GPG
+  when: ansible_os_family == "RedHat"
   include_tasks: ./install_epel.yml
 
 - name: Allow release-info to change for apt repositories
-  command: apt-get update -y --allow-releaseinfo-change
   when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
+  command: apt-get update -y --allow-releaseinfo-change
 
 - name: Install percona-release package
-  include_tasks: ./install_percona_release.yml
+  include_tasks: install_percona-release.yml
 
 - name: Install needed packages for Debian/Ubuntu
+  when: ansible_os_family == "Debian"
   apt:
     name: "{{ packages }}"
     update_cache: yes
@@ -28,9 +30,9 @@
   delay: 10
   register: result
   until: result is not failed
-  when: ansible_os_family == "Debian"
 
 - name: Install needed packages for RHEL 7
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
   yum:
     name: "{{ packages }}"
     state: latest
@@ -39,9 +41,9 @@
       - libselinux-python
       - wget
       - jq # for exporter end point metric fetch
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
 
 - name: Install needed packages for RHEL 8+
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
   yum:
     name: "{{ packages }}"
     state: latest
@@ -50,7 +52,6 @@
       - unzip
       - wget
       - jq # for exporter end point metric fetch
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
 
 - name: "convert {{ test_repo }} into repository name"
   set_fact:

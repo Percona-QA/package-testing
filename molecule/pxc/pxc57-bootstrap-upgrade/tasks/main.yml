@@ -65,7 +65,7 @@
     vars:
       packages:
       - python-mysqldb
-    when: (ansible_os_family == "Debian") and (ansible_distribution_release != "focal" and ansible_distribution_release != "bionic" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "buster")
+    when: (ansible_os_family == "Debian") and (ansible_distribution_release != "focal" and ansible_distribution_release != "bionic" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "buster" and ansible_distribution_release != "jammy")
 
   - name: install python mysql deb packages for focal and bionic
     apt:
@@ -74,7 +74,7 @@
     vars:
       packages:
       - python3-mysqldb
-    when: (ansible_os_family == "Debian") and (ansible_distribution_release == "focal" or ansible_distribution_release == "bionic" or ansible_distribution_release == "bullseye")
+    when: (ansible_os_family == "Debian") and (ansible_distribution_release == "focal" or ansible_distribution_release == "bionic" or ansible_distribution_release == "bullseye" or ansible_distribution_release == "jammy")
 
   - name: Install python3 PyMySQL for Buster (Debian 10)
     apt:
@@ -95,26 +95,26 @@
       - Percona-XtraDB-Cluster-57
     when: ansible_os_family == "RedHat" 
 
-  - name: install python mysql rpm packages for CentOS 6 and 7
+  - name: install python mysql rpm packages
     yum:
       name: "{{ packages }}"
       state: latest
     vars:
       packages:
       - MySQL-python
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "8"
+    when: ansible_os_family == "RedHat" and (ansible_distribution_major_version != "8" and ansible_distribution_major_version != "9")
 
-  - name: install python mysql rpm packages for CentOS 8
+  - name: install python mysql rpm packages for OL8 and OL9
     yum:
       name: "{{ packages }}"
       state: latest
     vars:
       packages:
       - python3-PyMySQL
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and (ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9")
 
-  - name: stop mysql service with service command
-    command: service mysql stop
+  - name: stop mysql service
+    command: systemctl stop mysql
 
   - name: copy pxc config on centos 6
     template: src=../../../../templates/my_rpm.j2 dest=/etc/my.cnf

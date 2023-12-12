@@ -43,6 +43,8 @@
       - percona-server-client
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install Percona Server rpm packages
     yum:
@@ -59,9 +61,16 @@
       - percona-server-devel
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: install Percona XtraBackup 8.0 packages
-    include_tasks: ../../../tasks/install_pxb80.yml
+# At this moment RHEL PXB packages do not support packages upgrade so we do not install them for major update on rhel. Re-check https://perconacorp.slack.com/archives/C047F39JKEW/p1700822258537029
+  - name: install Percona XtraBackup {{ pxb_version }} packages
+    include_tasks: ../../../tasks/install_pxb{{ pxb_version }}.yml
+    vars:
+      pxb_version: "{{ lookup('env', 'FROM_VERSION').split('.')[:2]|join('') }}"
+    when: ansible_os_family == "Debian" or (lookup('env', 'FROM_VERSION').split('.')[:2]|join('') == lookup('env', 'VERSION').split('.')[:2]|join('') and ansible_os_family == "RedHat")
+
 
   - name: install proxysql new deb packages
     apt:
@@ -129,12 +138,13 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip "https://github.com/Percona-QA/package-testing/archive/{{ branch }}.zip"
+    - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
     - unzip master.zip
     - rm -f master.zip
     - mv "package-testing-{{ branch }}" /package-testing
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
+      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
@@ -211,6 +221,8 @@
       - percona-server-client
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install Percona Server rpm packages
     yum:
@@ -226,9 +238,14 @@
       - percona-server-devel
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: install Percona XtraBackup 8.0 packages
-    include_tasks: ../../../tasks/install_pxb80.yml
+  - name: install Percona XtraBackup {{ pxb_version }} packages
+    include_tasks: ../../../tasks/install_pxb{{ pxb_version }}.yml
+    vars:
+      pxb_version: "{{ lookup('env', 'VERSION').split('.')[:2]|join('') }}"
+
 
   - name: install proxysql new deb packages
     apt:

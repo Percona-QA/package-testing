@@ -10,6 +10,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 PACKAGES = ['percona-orchestrator-cli', 'percona-orchestrator-client', 'percona-orchestrator']
 
 VERSION = os.getenv("ORCHESTRATOR_VERSION")
+REVISION = os.getenv("ORCHESTRATOR_REVISION")
 
 @pytest.mark.parametrize("package", PACKAGES)
 def test_check_package(host, package):
@@ -28,6 +29,9 @@ def test_orchestrator_version(host):
         cmd = "/usr/local/orchestrator/orchestrator --version"
     result = host.run(cmd)
     assert result.rc == 0, result.stderr
+    assert VERSION in result.stdout, result.stderr
+    if REVISION:
+        assert REVISION in result.stdout, result.stderr
 
 
 def test_orchestrator_client(host):
@@ -35,7 +39,7 @@ def test_orchestrator_client(host):
     result = host.run(cmd)
     assert result.rc == 0, result.stderr
 
-@pytest.mark.install
+@pytest.mark.pkg_source
 def test_sources_version(host):
     if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")

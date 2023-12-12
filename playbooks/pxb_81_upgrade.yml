@@ -1,0 +1,140 @@
+---
+# This playbook does following:
+#   sets main Percona repo
+#   installs PS 8.1, PT and PXB 8.1
+#   changes repo to testing
+#   upgrades packages to the new version
+#   does some tests
+#
+
+# Cosmic is still missing python
+# - import_playbook: test_prep.yml
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+  - name: include tasks for test env setup
+    include: ../tasks/test_prep.yml
+
+# Install from testing repository
+
+#  - name: include tasks for enabling main repo
+#    include: ../tasks/enable_main_repo.yml
+
+  - name: include tasks for enabling PS 8.1 main repo
+    include: ../tasks/enable_ps81_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling PS 8.1 test repo
+    include: ../tasks/enable_ps81_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling PS 8.1 experimental repo
+    include: ../tasks/enable_ps81_experimental_repo.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+# Disable Percona Toolkit installation till its supported in OL9 and Jammy
+#  - name: install Percona Toolkit new deb packages
+#    include_tasks: ../tasks/install_pt.yml
+
+  - name: install Percona Server 8.1 packages
+    include_tasks: ../tasks/install_ps81.yml
+
+  - name: install Percona XtraBackup 8.1 packages
+    include_tasks: ../tasks/install_pxb81.yml
+
+  - name: start mysql service with service command
+    command: service mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+
+  - name: install plugins, import world database
+    command: /package-testing/plugins_test.sh
+
+  - name: install 3rd party packages with apt
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "Debian"
+
+  - name: install 3rd party packages with yum
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "RedHat"
+
+#
+# Enable testing repository
+#
+  - name: include tasks for enabling PS 8.1 testing repo
+    include: ../tasks/enable_ps81_testing_repo.yml
+
+#
+# Upgrade packages
+#
+
+  - name: install Percona XtraBackup 8.1 packages
+    include_tasks: ../tasks/install_pxb81.yml
+
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb81
+
+  - name: check that Percona XtraBackup package versions are correct
+    command: /package-testing/package_check.sh pxb81
+
+  - name: run backup
+    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
+
+  - name: prepare backup
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
+
+  - name: remove Percona Server deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server-server
+      - percona-xtrabackup-81
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-server-server
+      - percona-xtrabackup-81
+    when: ansible_os_family == "RedHat"
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mysql stopped

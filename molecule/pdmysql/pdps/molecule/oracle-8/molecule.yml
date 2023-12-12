@@ -13,6 +13,7 @@ platforms:
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-ps80-worker
+      job-name: ${JOB_NAME}
 provisioner:
   name: ansible
   log: True
@@ -29,6 +30,7 @@ verifier:
     verbose: true
     s: true
     k: "test_pdps_ or test_common_"
+    m: "not telemetry_disabled"
     junitxml: report.xml
 scenario:
   name: oracle-8

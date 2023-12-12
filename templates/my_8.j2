@@ -22,7 +22,7 @@ wsrep_provider=/usr/lib/galera4/libgalera_smm.so
 # Cluster connection URL contains IPs of nodes
 #If no IP is found, this implies that a new cluster needs to be created,
 #in order to do that you need to bootstrap this node
-wsrep_cluster_address=gcomm://{{ lookup('env', "PXC1_IP") | default("192.168.70.61") }},{{ lookup('env', "PXC2_IP") | default("192.168.70.62") }},{{ lookup('env', "PXC3_IP") | default("192.168.70.63") }}
+wsrep_cluster_address=gcomm://{{ lookup('env', "PXC1_IP") | default("192.168.70.61", true) }},{{ lookup('env', "PXC2_IP") | default("192.168.70.62", true) }},{{ lookup('env', "PXC3_IP") | default("192.168.70.63", true) }}
 
 # Disable encryption
 # pxc_encrypt_cluster_traffic=OFF

@@ -18,6 +18,8 @@
       - percona-xtradb-cluster-57
       - percona-xtradb-cluster-source-5.7
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 5.7 new rpm packages
     yum:
@@ -28,6 +30,8 @@
       - Percona-XtraDB-Cluster-full-57
       - Percona-XtraDB-Cluster-57
     when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
 # Define node IP for PXC config
   - debug: 
@@ -43,8 +47,13 @@
       var: man_ip
 
 # Stop mysql service and bootstrap pxc node
-  - name: stop mysql service with service command
+  - name: stop mysql service with service command except OL9
     command: service mysql stop
+    when: (ansible_os_family == "Debian") or (ansible_os_family == "RedHat" and ansible_distribution_major_version != "9")
+
+  - name: stop mysql service with systemctl command
+    command: systemctl stop mysql
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: copy pxc config on centos
     template: src=../templates/my_rpm_7.j2 

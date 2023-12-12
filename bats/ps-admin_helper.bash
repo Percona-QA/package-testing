@@ -93,7 +93,7 @@ install_mysqlx() {
 
 check_mysqlx_exists() {
   result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "mysqlx%" and PLUGIN_STATUS like "ACTIVE";')
-  if [ ${MYSQL_VERSION} = "8.0" ]; then
+  if [ ${MYSQL_VERSION} = "8.0" -o ${MYSQL_VERSION} = "8.1" ]; then
     [ "$result" -eq 2 ]
   else
     [ "$result" -eq 1 ]
@@ -107,7 +107,7 @@ uninstall_mysqlx() {
 
 check_mysqlx_notexists() {
   result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "mysqlx%" and PLUGIN_STATUS like "ACTIVE";')
-  if [ ${MYSQL_VERSION} = "8.0" ]; then
+  if [ ${MYSQL_VERSION} = "8.0" -o ${MYSQL_VERSION} = "8.1" ]; then
     [ "$result" -eq 2 ]
   else
   [ "$result" -eq 0 ]
@@ -183,7 +183,7 @@ check_rocksdb_exists() {
   result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.ENGINES where ENGINE="ROCKSDB" and SUPPORT <> "NO";')
   [ "$result" -eq 1 ]
 
-  if [ ${MYSQL_VERSION} = "8.0" ]; then
+  if [ ${MYSQL_VERSION} = "8.0" -o ${MYSQL_VERSION} = "8.1" ]; then
     result=$(mysql ${CONNECTION} -N -s -e 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like BINARY "%ROCKSDB%" and PLUGIN_STATUS like "ACTIVE";')
     [ "$result" -eq 17 ]
   else
@@ -222,7 +222,11 @@ install_all() {
   sleep 5
 
   #run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam --enable-pam-compat ${OPT}"
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-audit ${OPT}"
+  if [ ${MYSQL_VERSION} == "8.1" ]; then
+    run bash -c "${PS_ADMIN_BIN} ${CONNECTION} ${OPT}"
+  else
+    run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-audit ${OPT}"
+  fi
   [ $status -eq 0 ]
 
   systemctl restart mysql >/dev/null 3>&-
@@ -230,7 +234,11 @@ install_all() {
   sleep 5
 
   #run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-qrt --enable-audit --enable-pam --enable-pam-compat ${OPT}"
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-audit ${OPT}"
+  if [ ${MYSQL_VERSION} == "8.1" ]; then
+    run bash -c "${PS_ADMIN_BIN} ${CONNECTION} ${OPT}"
+  else
+    run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --enable-audit ${OPT}"
+  fi
   [ $status -eq 0 ]
 }
 
@@ -243,7 +251,11 @@ uninstall_all() {
     OPT="--disable-rocksdb"
   fi
   #run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam --disable-pam-compat ${OPT}"
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-audit ${OPT}"
+  if [ ${MYSQL_VERSION} == "8.1" ]; then
+    run bash -c "${PS_ADMIN_BIN} ${CONNECTION} ${OPT}"
+  else
+    run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-audit ${OPT}"
+  fi
   [ $status -eq 0 ]
 
   systemctl restart mysql >/dev/null 3>&-
@@ -251,6 +263,10 @@ uninstall_all() {
   sleep 5
 
   #run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-qrt --disable-audit --disable-pam --disable-pam-compat ${OPT}"
-  run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-audit ${OPT}"
+  if [ ${MYSQL_VERSION} == "8.1" ]; then 
+    run bash -c "${PS_ADMIN_BIN} ${CONNECTION} ${OPT}"
+  else
+    run bash -c "${PS_ADMIN_BIN} ${CONNECTION} --disable-audit ${OPT}"
+  fi
   [ $status -eq 0 ]
 }

@@ -3,7 +3,7 @@
 set -e
 
 if [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps56, ps57 or ps80!"
+  echo "This script requires product parameter: ps56, ps57, ps80 or ps81 !"
   echo "Usage: ./package_check.sh <prod>"
   exit 1
 fi
@@ -24,6 +24,10 @@ elif [ $1 = "ps80" ]; then
   version=${PS80_VER}
   release=${PS80_VER#*-}
   revision=${PS80_REV}
+elif [ $1 = "ps81" ]; then
+  version=${PS81_VER}
+  release=${PS81_VER#*-}
+  revision=${PS81_REV}  
 elif [ $1 = "pxc56" ]; then
   version=${PXC56_VER}
   release=${PXC56_VER#*-}
@@ -47,6 +51,9 @@ elif [ $1 = "pxb24" ]; then
 elif [ $1 = "pxb80" ]; then
   version=${PXB80_VER}
   pkg_version=${PXB80_PKG_VER}
+elif [ $1 = "pxb81" ]; then
+  version=${PXB81_VER}
+  pkg_version=${PXB81_PKG_VER}
 elif [ $1 = "psmdb30" ]; then
   version=${PSMDB30_VER}
 elif [ $1 = "psmdb32" ]; then
@@ -79,7 +86,7 @@ product=$1
 log="/tmp/${product}_package_check.log"
 echo -n > $log
 
-if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
+if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" -o ${product} = "ps81" ]; then
   if [ -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
     if [ -f /etc/system-release -a $(grep -c Amazon /etc/system-release) -eq 1 ]; then
       centos_maj_version="7"
@@ -111,7 +118,7 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
         rpm_num_pkgs="8"
         rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-rocksdb-${rpm_maj_version}"
       fi
-    elif [ "${product}" = "ps80" ]; then
+    elif [ "${product}" = "ps80" -o "${product}" = "ps81" ]; then
       if [ "${centos_maj_version}" == "9" ]; then
         rpm_num_pkgs="7"
         rpm_opt_package="percona-server-rocksdb"
@@ -120,7 +127,7 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
         rpm_opt_package="percona-server-rocksdb percona-server-shared-compat"
       fi
     fi
-    if [ "${product}" = "ps80" ]; then
+    if [ "${product}" = "ps80" -o "${product}" = "ps81" ]; then
       ps_name="percona-server"
       rpm_pkgs_list="${ps_name}-server ${ps_name}-test ${ps_name}-debuginfo ${ps_name}-devel ${ps_name}-shared ${ps_name}-client"
     else
@@ -154,7 +161,7 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
       deb_opt_package="percona-server-rocksdb"
       deb_num_pkgs="7"
     fi
-    if [ "${product}" = "ps80" ]; then
+    if [ "${product}" = "ps80" -o "${product}" = "ps81" ]; then
       deb_dbg_pkg="percona-server-dbg"
     else
       deb_dbg_pkg="percona-server-${deb_maj_version}-dbg"

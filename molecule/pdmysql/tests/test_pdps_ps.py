@@ -3,6 +3,18 @@ import pytest
 import testinfra.utils.ansible_runner
 import re
 from .settings import *
+from packaging import version
+
+VERSION = os.environ.get("VERSION")
+DEB_PERCONA_BUILD_VERSION = ''
+RPM_PERCONA_BUILD_VERSION = ''
+
+REVISION = os.environ.get('PS_REVISION')
+
+if re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', VERSION): # if full package VERSION 8.0.32-24.2 is passed we need to re-assign it for tests
+    DEB_PERCONA_BUILD_VERSION = re.sub(r'.(\d+)$',r'-\g<1>', VERSION) # convert to format passed by host.package.version for deb 8.0.32-24-2
+    RPM_PERCONA_BUILD_VERSION = VERSION # re-assign for RPM tests and use 8.0.32-24.2
+    VERSION = '.'.join(VERSION.split('.')[:-1]) # use VERSION 8.0.32-24 without package build number for non-package tests
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
@@ -17,62 +29,102 @@ RPMPACKAGES = ['percona-server-server', 'percona-server-client',
                'percona-server-devel', 'percona-server-rocksdb',
                'percona-mysql-router', 'percona-mysql-shell']
 
-PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
-                   " fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " fnv_64 RETURNS INTEGER SONAME 'libfnv_udf.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " murmur_hash RETURNS INTEGER SONAME 'libmurmur_udf.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " version_tokens_set RETURNS STRING SONAME 'version_token.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " version_tokens_show RETURNS STRING SONAME 'version_token.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " version_tokens_edit RETURNS STRING SONAME 'version_token.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " version_tokens_delete RETURNS STRING SONAME 'version_token.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " version_tokens_lock_shared RETURNS INT SONAME 'version_token.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " version_tokens_lock_exclusive RETURNS INT SONAME 'version_token.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " version_tokens_unlock RETURNS INT SONAME 'version_token.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " mysql_no_login SONAME 'mysql_no_login.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " service_get_read_locks RETURNS INT SONAME 'locking_service.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " service_get_write_locks RETURNS INT SONAME 'locking_service.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " service_release_locks RETURNS INT SONAME 'locking_service.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " validate_password SONAME 'validate_password.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " version_tokens SONAME 'version_token.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " rpl_semi_sync_master SONAME 'semisync_master.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " rpl_semi_sync_slave SONAME 'semisync_slave.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " connection_control SONAME 'connection_control.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " authentication_ldap_sasl SONAME 'authentication_ldap_sasl.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " authentication_fido SONAME 'authentication_fido.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " connection_control_failed_login_attempts SONAME 'connection_control.so';\""]
-
-COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
+# Define plugins amd components lists for PS8.0.X releases:
+if version.parse(VERSION) > version.parse("8.0.0") and version.parse(VERSION) < version.parse("8.1.0"):
+    PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
+                    " fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " fnv_64 RETURNS INTEGER SONAME 'libfnv_udf.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " murmur_hash RETURNS INTEGER SONAME 'libmurmur_udf.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " version_tokens_set RETURNS STRING SONAME 'version_token.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " version_tokens_show RETURNS STRING SONAME 'version_token.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " version_tokens_edit RETURNS STRING SONAME 'version_token.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " version_tokens_delete RETURNS STRING SONAME 'version_token.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " version_tokens_lock_shared RETURNS INT SONAME 'version_token.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " version_tokens_lock_exclusive RETURNS INT SONAME 'version_token.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " version_tokens_unlock RETURNS INT SONAME 'version_token.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " mysql_no_login SONAME 'mysql_no_login.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " service_get_read_locks RETURNS INT SONAME 'locking_service.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " service_get_write_locks RETURNS INT SONAME 'locking_service.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " service_release_locks RETURNS INT SONAME 'locking_service.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " validate_password SONAME 'validate_password.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " version_tokens SONAME 'version_token.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " rpl_semi_sync_master SONAME 'semisync_master.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " rpl_semi_sync_slave SONAME 'semisync_slave.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " connection_control SONAME 'connection_control.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " authentication_ldap_sasl SONAME 'authentication_ldap_sasl.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " authentication_fido SONAME 'authentication_fido.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " connection_control_failed_login_attempts SONAME 'connection_control.so';\""]
+    COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_log_sink_json', 'component_log_filter_dragnet',
               'component_audit_api_message_emit']
-
-VERSION = os.environ.get("VERSION")
-DEB_PERCONA_BUILD_VERSION = ''
-RPM_PERCONA_BUILD_VERSION = ''
-if re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', VERSION): # if full package VERSION 8.0.32-24.2 is passed we need to re-assign it for tests
-    DEB_PERCONA_BUILD_VERSION = re.sub(r'.(\d+)$',r'-\g<1>', VERSION) # convert to format passed by host.package.version for deb 8.0.32-24-2
-    RPM_PERCONA_BUILD_VERSION = VERSION # re-assign for RPM tests and use 8.0.32-24.2
-    VERSION = '.'.join(VERSION.split('.')[:-1]) # use VERSION 8.0.32-24 without package build number for non-package tests
+# Define plugins amd components lists for PS8.0.1 releases:
+elif version.parse(VERSION) >= version.parse("8.1.0"):
+    PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
+                    " version_tokens_set RETURNS STRING SONAME 'version_token.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " version_tokens_show RETURNS STRING SONAME 'version_token.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " version_tokens_edit RETURNS STRING SONAME 'version_token.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " version_tokens_delete RETURNS STRING SONAME 'version_token.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " version_tokens_lock_shared RETURNS INT SONAME 'version_token.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " version_tokens_lock_exclusive RETURNS INT SONAME 'version_token.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " version_tokens_unlock RETURNS INT SONAME 'version_token.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " mysql_no_login SONAME 'mysql_no_login.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " service_get_read_locks RETURNS INT SONAME 'locking_service.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " service_get_write_locks RETURNS INT SONAME 'locking_service.so';\"",
+                    "mysql -e \"CREATE FUNCTION"
+                    " service_release_locks RETURNS INT SONAME 'locking_service.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " validate_password SONAME 'validate_password.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " version_tokens SONAME 'version_token.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " rpl_semi_sync_master SONAME 'semisync_master.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " rpl_semi_sync_slave SONAME 'semisync_slave.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " connection_control SONAME 'connection_control.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " authentication_ldap_sasl SONAME 'authentication_ldap_sasl.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " authentication_fido SONAME 'authentication_fido.so';\"",
+                    "mysql -e \"INSTALL PLUGIN"
+                    " connection_control_failed_login_attempts SONAME 'connection_control.so';\""]
+    COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
+              'component_log_sink_json', 'component_log_filter_dragnet',
+              'component_audit_api_message_emit', 'component_binlog_utils_udf',
+              'component_percona_udf', 'component_keyring_vault', 'component_audit_log_filter'
+              ]
+else:
+    assert "Incorrect version"
 
 def is_running(host):
     cmd = 'ps auxww| grep -v grep  | grep -c "mysql"'
@@ -123,6 +175,14 @@ def test_binary_version(host, binary):
     result = host.run(cmd)
     assert result.rc == 0, (result.stderr, result.stdout)
     assert VERSION in result.stdout, result.stdout
+
+def test_ps_revision(host):
+    if not REVISION:
+        pytest.skip("REVISION parameter was not provided. Skipping this check.")
+    cmd = "{} --version".format('mysql')
+    result = host.run(cmd)
+    assert result.rc == 0, (result.stderr, result.stdout)
+    assert REVISION in result.stdout, result.stdout
 
 
 @pytest.mark.parametrize('component', ['@@INNODB_VERSION', '@@VERSION'])
@@ -176,7 +236,6 @@ def test_madmin(host):
         mysql = host.service("mysql")
         assert mysql.is_running
 
-@pytest.mark.install
 def test_disable_validate_password_plugin(host):
     with host.sudo():
         cmd = "mysql -e \"UNINSTALL PLUGIN validate_password;\""
@@ -188,7 +247,7 @@ def test_disable_validate_password_plugin(host):
             restart = host.run(cmd)
             assert restart.rc == 0, (restart.stdout, restart.stderr)
 
-@pytest.mark.install
+@pytest.mark.pkg_source
 def test_sources_ps_version(host):
     if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")
@@ -203,7 +262,7 @@ def test_sources_ps_version(host):
     assert result.rc == 0, (result.stderr, result.stdout)
     assert VERSION in result.stdout, result.stdout
 
-@pytest.mark.install
+@pytest.mark.pkg_source
 def test_sources_mysql_shell_version(host):
     if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")
@@ -214,3 +273,13 @@ def test_sources_mysql_shell_version(host):
     result = host.run(cmd)
     assert result.rc == 0, (result.stderr, result.stdout)
     assert VERSION.split('-')[0] in result.stdout, result.stdout
+
+@pytest.mark.telemetry_enabled
+def test_telemetry_enabled(host):
+    assert host.file(TELEMETRY_PATH).exists
+    assert host.file(TELEMETRY_PATH).contains('PRODUCT_FAMILY_PS')
+    assert host.file(TELEMETRY_PATH).contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
+
+@pytest.mark.telemetry_disabled
+def test_telemetry_disabled(host):
+    assert not host.file(TELEMETRY_PATH).exists

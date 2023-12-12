@@ -49,6 +49,18 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Ubuntu Bionic
+        stage('Debian Bookworm') {
+          agent {
+            label "min-bookworm-x64"
+          }
+          steps {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+              }
+            run_test()
+            junit 'package-testing/binary-tarball-tests/ps/report.xml'
+          } //End steps
+        } //End stage Debian Bookworm
         stage('Debian Bullseye') {
           agent {
             label "min-bullseye-x64"
@@ -135,11 +147,7 @@ void run_test() {
       fi
     fi
     TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
-    if [ "${PS_MAJOR_VERSION}" = "8.0" ]; then
-      TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-release-${PS_VERSION}/"
-    else
-      TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
-    fi
+    TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
     rm -rf package-testing
     git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
     cd package-testing/binary-tarball-tests/ps

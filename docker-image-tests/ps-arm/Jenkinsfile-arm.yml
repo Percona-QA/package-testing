@@ -1,0 +1,14 @@
+- job:
+    name: test-ps-docker-image-arm
+    project-type: pipeline
+    description: |
+        Do not edit this job through the web!
+    pipeline-scm:
+      scm:
+        - git:
+            url: https://github.com/Percona-QA/package-testing.git
+            branches:
+            - 'master'
+            wipe-workspace: false
+      lightweight-checkout: true
+      script-path: docker-image-tests/ps-arm/Jenkinsfile-arm

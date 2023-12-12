@@ -3,7 +3,7 @@
 #   enables Percona testing repository
 #   installs the latest version of PMM2 client
 #   does PMM-T1267 test
-
+#
 - hosts: all
   become: true
   become_method: sudo
@@ -33,39 +33,39 @@
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
   - name: enable pmm2-client release repo
-    command: percona-release enable pmm2-client release
     when: test_repo == "main"
+    command: percona-release enable pmm2-client release
 
   - name: update apt repositories
-    command: apt-get update -y
     when: test_repo == "main" and ansible_os_family == "Debian"
+    command: apt-get update -y
     become: true
 
   - name: update repo for redhat
-    shell: yum update -y
     when: test_repo == "main" and ansible_os_family == "RedHat"
+    shell: yum update -y
     become: true
 
 ### install pmm2-client
   - name: install PMM client new deb packages
-    apt: name=pmm2-client update_cache=yes state=latest
     when: ansible_os_family == "Debian"
+    apt: name=pmm2-client update_cache=yes state=latest
 
   - name: install PMM client new rpm packages
-    yum: name=pmm2-client state=latest
     when: ansible_os_family == "RedHat"
+    yum: name=pmm2-client state=latest
 
   - name: check that PMM client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
 
 ### Setup pmm client
   - name: configure pmm client to connect to server in push/auto Mode
-    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }} --agent-password={{ pmm_auth_password }}
     when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }} --agent-password={{ pmm_auth_password }}
 
   - name: configure pmm client to connect to server in pull Mode
-    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }} --agent-password={{ pmm_auth_password }}
     when: lookup('env', 'metrics_mode') == "pull"
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }} --agent-password={{ pmm_auth_password }}
 
   - name: register pmm client exporter password
     shell: pmm-admin register --force --agent-password={{ pmm_auth_password }}
@@ -83,7 +83,7 @@
 
 ### start PS 5.7
   - name: install and start Percona Server 5.7
-    include_tasks: ../tasks/start_ps57.yml
+    include_tasks: ../tasks/install_and_add_to_pmm_ps_57.yml
 
   - name: check if Metric End point with Auth works for Mysqld Exporter
     shell: "{{item}}"
@@ -93,7 +93,7 @@
 
 ### start PSMDB 4.4
   - name: install and start Percona Server MongoDB 4.4
-    include_tasks: ../tasks/start_psmdb44.yml
+    include_tasks: ../tasks/install_and_add_to_pmm_psmdb_44.yml
 
   - name: check if Metric End point with Auth works for MongoDB Exporter
     shell: "{{item}}"
@@ -162,9 +162,10 @@
 
 ### Clean up
   - name: remove PMM client deb packages
-    apt: name=pmm2-client state=absent
     when: ansible_os_family == "Debian"
+    apt: name=pmm2-client state=absent
+
 
   - name: remove PMM client rpm packages
-    yum: name=pmm2-client state=absent
     when: ansible_os_family == "RedHat"
+    yum: name=pmm2-client state=absent

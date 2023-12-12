@@ -11,7 +11,9 @@ container_name = 'ps-docker-test-static'
 @pytest.fixture(scope='module')
 def host():
     docker_id = subprocess.check_output(
-        ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-d', docker_image]).decode().strip()
+        ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e',
+         'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport',
+         '-e', 'PERCONA_TELEMETRY_DISABLE=1', '-d', docker_image]).decode().strip()
     if ps_version_major in ['5.7','5.6']:
         subprocess.check_call(['docker','exec','--user','root',container_name,'microdnf','install','net-tools'])
     else:
@@ -37,8 +39,8 @@ class TestMysqlEnvironment:
             assert host.check_output('mysql --version') == 'mysql  Ver 14.14 Distrib '+ps_version+', for Linux (x86_64) using  7.0'
             assert host.check_output('mysqld --version') == 'mysqld  Ver '+ps_version+' for Linux on x86_64 (Percona Server (GPL), Release '+ps_version_percona+', Revision '+ps_revision+')'
         else:
-            assert host.check_output('mysql --version') == 'mysql  Ver '+ ps_version +' for Linux on x86_64 (Percona Server (GPL), Release '+ ps_version_percona +', Revision '+ ps_revision +')'
-            assert host.check_output('mysqld --version') == '/usr/sbin/mysqld  Ver '+ ps_version +' for Linux on x86_64 (Percona Server (GPL), Release '+ ps_version_percona +', Revision '+ ps_revision +')'
+            assert host.check_output('mysql --version') == 'mysql  Ver '+ ps_version_upstream + '-' + ps_version_percona +' for Linux on x86_64 (Percona Server (GPL), Release '+ ps_version_percona +', Revision '+ ps_revision +')'
+            assert host.check_output('mysqld --version') == '/usr/sbin/mysqld  Ver '+ ps_version_upstream + '-' + ps_version_percona +' for Linux on x86_64 (Percona Server (GPL), Release '+ ps_version_percona +', Revision '+ ps_revision +')'
 
     def test_process_running(self, host):
         assert host.process.get(user="mysql", comm="mysqld")
@@ -88,3 +90,9 @@ class TestMysqlEnvironment:
             assert host.file('/var/lib/mysql-keyring').user == 'mysql'
             assert host.file('/var/lib/mysql-keyring').group == 'mysql'
             assert oct(host.file('/var/lib/mysql-keyring').mode) == '0o750'
+
+    def test_telemetry_disabled(self, host):
+        if ps_version_major in ['5.6']:
+            pytest.skip('telemetry was added in 5.7, 8.0 and 8.1')
+        else:
+            assert not host.file('/usr/local/percona/telemetry_uuid').exists

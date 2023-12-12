@@ -5,29 +5,15 @@
 #             var "port_flag"      :  to access agent with custom port
 #                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
 #           TODO: add arguments doc and make task loop compatible
-- name: set empty port_flag
-  set_fact:
-    port_flag: ""
-  when: port_flag is not defined
-
-- name: set default delay
-  set_fact:
-    delay: 5
-  when: delay is not defined
-
-- name: set default retries
-  set_fact:
-    retries: 5
-  when: retries is not defined
-
+#
 - name: Validate {{ process_name }} status
   block:
     - name: Wait for {{ process_name }} to have Running Status.
-      shell: "pmm-admin list {{ port_flag }} | grep '{{ process_name }}' | awk -F' ' '{print $2}'"
+      shell: "pmm-admin list {{ port_flag if port_flag is defined else '' }} | grep '{{ process_name }}' | awk -F' ' '{print $2}'"
       register: last_status
       until: last_status.stdout.find('Running') != -1
-      delay: "{{ delay }}"
-      retries: "{{ retries }}"
+      delay: "{{ delay if delay is defined else 5 }}"
+      retries: "{{ retries if retries is defined else 5 }}"
     - name: Waiting successful
       debug:
         msg: "{{ process_name }} is 'Running'"
@@ -35,3 +21,4 @@
     - name: Waiting failed
       debug:
         msg: "{{ process_name }} status is '{{ last_status.stdout }}'!"
+      failed_when: true

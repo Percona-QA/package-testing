@@ -1,0 +1,61 @@
+# This task installs and starts Percona Server MongoDB 4.4 on CentOS and Debian/Ubuntu
+#
+# Task adjustments are handled by parent playbook vars:
+#             var "port_flag"      :  to access agent with custom port
+#                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
+#             var "cmd_admin_list" :  to access agent with custom port
+#                                     ex: cmd_admin_list: "pmm-admin list {{ port_flag }}"
+#
+- name: set empty port_flag
+  when: port_flag is not defined
+  set_fact:
+    port_flag: ""
+
+- name: set cmd_admin_list without flags
+  when: cmd_admin_list is not defined
+  set_fact:
+    cmd_admin_list: "pmm-admin list"
+
+- name: enable psmdb repo
+  include_tasks: ./enable_repo.yml
+  vars:
+    only: yes
+    package: "psmdb-44"
+
+- name: install PSMDB packages
+  include_tasks: ../tasks/install_psmdb.yml
+
+- name: start mongod with service
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+  command: service mongod start
+
+- name: start mongod with systemctl
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int > 6
+  command: systemctl start mongod
+
+- name: add mongodb metrics to monitoring
+  command: pmm-admin add mongodb {{ port_flag }} --service-name=mongodb_{{ instance_ip }}
+
+- name: add mongodb metrics to monitoring using socket
+  command: pmm-admin add mongodb {{ port_flag }} --socket=/tmp/mongodb-27017.sock --service-name=mongodb_socket_{{ instance_ip }}
+
+- name: check if mongodb monitoring is running
+  command: "{{ cmd_admin_list }}"
+  register: list_output
+
+- name: Assert if the pmm-admin list contains mongodb instance
+  assert:
+    that:
+      - "'MongoDB' in list_output.stdout"
+
+- name: Wait for mongodb_exporter to have Running Status.
+  shell: "{{ cmd_admin_list }} | grep 'mongodb_exporter' | awk -F' ' '{print $2}'"
+  register: mongodb_exporter_status
+  until: mongodb_exporter_status.stdout.find('Running') != -1
+  delay: 5
+  retries: 5
+
+- name: Assert if the pmm-admin list contains mongodb_exporter with Running state
+  assert:
+    that:
+      - "'Running' in mongodb_exporter_status.stdout"

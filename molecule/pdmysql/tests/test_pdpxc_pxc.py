@@ -76,6 +76,8 @@ if re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', VERSION): # if full package VERSION 8.
     RPM_PERCONA_BUILD_VERSION = VERSION # re-assign for RPM tests and use 8.0.32-24.2
     VERSION = '.'.join(VERSION.split('.')[:-1]) # use VERSION 8.0.32-24 without package build number for non-package tests
 
+REVISION = os.environ.get('PXC_REVISION')
+
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
     dist = host.system_info.distribution
@@ -123,6 +125,13 @@ def test_binary_version(host):
         assert result.rc == 0, result.stderr
         assert VERSION in result.stdout, result.stdout
 
+def test_pxc_revision(host):
+    if not REVISION:
+        pytest.skip("REVISION parameter was not provided. Skipping this check.")
+    cmd = "{} --version".format('mysql')
+    result = host.run(cmd)
+    assert result.rc == 0, (result.stderr, result.stdout)
+    assert REVISION in result.stdout, result.stdout
 
 @pytest.mark.parametrize('component', ['@@INNODB_VERSION', '@@VERSION'])
 def test_mysql_version(host, component):
@@ -170,3 +179,13 @@ def test_components(component, host):
             component)
         check_result = host.run(check_cmd)
         assert check_result.rc == 1, (check_result.rc, check_result.stderr, check_result.stdout)
+
+@pytest.mark.telemetry_enabled
+def test_telemetry_enabled(host):
+    assert host.file(TELEMETRY_PATH).exists
+    assert host.file(TELEMETRY_PATH).contains('PRODUCT_FAMILY_PXC')
+    assert host.file(TELEMETRY_PATH).contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
+
+@pytest.mark.telemetry_disabled
+def test_telemetry_disabled(host):
+    assert not host.file(TELEMETRY_PATH).exists

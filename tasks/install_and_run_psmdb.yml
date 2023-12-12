@@ -13,10 +13,18 @@
       psmdb_repo: "psmdb-50 release"
     when: lookup('env', 'install_with') == "psmdb50"
 
+  - name: include tasks for enabling psmdb 60 repo
+    include_tasks: ../tasks/enable_psmdb_repo.yml
+    vars:
+      psmdb_repo: "psmdb-60 release"
+    when: lookup('env', 'install_with') == "psmdb60"
+
   - name: include tasks for installing psmdb packages
     vars:
       packages: percona-server-mongodb
     include_tasks: ../tasks/install_psmdb.yml
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
 # Start psmdb service
   - name: start mongod service
