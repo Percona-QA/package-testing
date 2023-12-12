@@ -25,7 +25,7 @@ elif version.parse(PXB_VER_UPSTREAM) > version.parse("2.0.0") and version.parse(
 
 # Create list of supported software files
 if version.parse(PXB_VER) > version.parse("8.1.0"):
-    DEB_SOFTWARE_FILES=['buster', 'bullseye', 'bookworm', 'bionic', 'focal', 'jammy']
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy']
     RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
 elif version.parse(PXB_VER) > version.parse("8.0.0") and version.parse(PXB_VER) < version.parse("8.1.0"):
     DEB_SOFTWARE_FILES=['buster', 'bullseye', 'bookworm', 'focal', 'jammy']
