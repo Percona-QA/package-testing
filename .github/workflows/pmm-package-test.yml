@@ -1,205 +1,231 @@
 ---
-name: ui-tests-pipeline
+name: package-test-pipeline
 
 on:
-  workflow_call:
-    inputs:
-      pmm_ui_tests_branch:
-        description: 'Target branch for pmm-ui-tests repository'
-        type: string
-        default: 'main'
-        required: true
-      pmm_test_flag:
-        description: 'Flag to run only specific portion of the tests.'
-        type: string
-        required: false
-      pmm_server_version:
-        description: 'Version of the pmm server used for testing'
-        type: string
-        default: 'dev-latest'
-        required: true
-      pmm_client_version:
-        description: 'Version of the pmm client used for testing'
-        type: string
-        default: 'dev-latest'
-        required: true
-      pmm_clients:
-        description: 'Clients for pmm-server'
-        type: string
-        default: '--addclient=ps,1'
-        required: true
-      pmm_qa_branch:
-        description: 'Branch for the pmm-qa repository.'
-        type: string
-        default: 'main'
-        required: true
-
   workflow_dispatch:
     inputs:
-      pmm_ui_tests_branch:
-        description: 'Target branch for pmm-ui-tests repository'
+      package_testing_branch:
+        description: "Target branch for package-testing repository"
         type: string
-        default: 'main'
+        default: "master"
         required: true
-      pmm_test_flag:
-        description: 'Flag to run only specific portion of the tests.'
-        type: string
+      pmm_server_image:
+        description: "pmm-server docker image, default perconalab/pmm-server:dev-latest"
         required: false
-      pmm_server_version:
-        description: 'Version of the pmm server used for testing'
         type: string
-        default: 'dev-latest'
-        required: true
-      pmm_client_version:
-        description: 'Version of the pmm client used for testing'
+        default: "perconalab/pmm-server:dev-latest"
+      pmm_client_tarball:
+        description: "PMM Client tarball link or FB-code"
         type: string
-        default: 'dev-latest'
+#      package_repo: experimental | testing | main | pmm2-client-main
+      repository:
+        description: "Select Repo for Client Nodes:"
         required: true
-      pmm_clients:
-        description: 'Clients for pmm-server'
+        default: "dev-latest"
+        type: choice
+        options:
+          - release
+          - release candidate
+          - patch-release candidate
+          - dev-latest
+      metrics_mode:
+        description: "Select the Metrics Mode for PMM Client:"
+        required: true
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - push
+          - pull
+      test_name:
+        description: "Target branch for package-testing repository"
         type: string
-        default: '--addclient=ps,1'
+        default: "integration"
         required: true
-      pmm_qa_branch:
-        description: 'Branch for the pmm-qa repository.'
-        type: string
-        default: 'main'
+      os:
+        description: "Select OS to run test in:"
         required: true
+        default: "jammy-x64"
+        type: choice
+        options:
+          - bionic-x64
+          - bullseye-x64
+          - buster-x64
+          - focal-x64
+          - jammy-x64
+          - centos-7-x64
+          - ol-8-x64
+          - ol-9-x64
 
 jobs:
-  tests:
-    name: Tests
+  get_versions:
+    name: Get versions
+    uses: Percona-Lab/pmm-submodules/.github/workflows/pmm-version-getter.yml@PMM-2.0
+    with:
+      repository: ${{ inputs.repository || "dev-latest"}}
+
+  test:
+    name: ${{ inputs.test_name }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
-      SHA: ${{ inputs.sha || 'null' }}
-      PMM_BASE_URL: https://127.0.0.1
+      SHA: ${{ inputs.sha || "null" }}
+      PMM_SERVER_IP: 127.0.0.1
       ADMIN_PASSWORD: admin
 
-      UI_TESTS_BRANCH: ${{ inputs.pmm_ui_tests_branch }}
-      PMM_CLIENTS: ${{ inputs.pmm_clients }}
-      PMM_TEST_FLAG: ${{ inputs.pmm_test_flag }}
+      PACKAGE_TESTING_BRANCH: ${{ inputs.package_testing_branch || "master" }}
+      PMM_SERVER_IMAGE: ${{ inputs.pmm_server_image }}
+      TARBALL: ${{ inputs.pmm_server_image || "null" }}
+      EXPECTED_VERSION: ${{ inputs.pmm_version }}
 
-      PMM_SERVER_VERSION: ${{ inputs.pmm_server_version }}
-      PMM_CLIENT_VERSION: ${{ inputs.pmm_client_version }}
-      PMM_QA_BRANCH: ${{ inputs.pmm_qa_branch }}
-
-      OKTA_TOKEN: ${{ secrets.OKTA_TOKEN }}
-      OAUTH_ISSUER_URL: 'https://id-dev.percona.com/oauth2/aus15pi5rjdtfrcH51d7'
-      OAUTH_CLIENT_ID: ${{ secrets.OKTA_OAUTH_CLIENT_ID }}
-      OAUTH_CLIENT_SECRET: ${{ secrets.OKTA_OAUTH_CLIENT_SECRET }}
-      OAUTH_PMM_CLIENT_ID: ${{ secrets.OKTA_OAUTH_PMM_CLIENT_ID }}
-      OAUTH_PMM_CLIENT_SECRET: ${{ secrets.OKTA_OAUTH_PMM_CLIENT_SECRET }}
-      OAUTH_DEV_HOST: ${{ secrets.OAUTH_DEV_HOST }}
-      OAUTH_SCOPES: percona
-
-      # Variables for E2E tests
-      MAILOSAUR_API_KEY: ${{ secrets.MAILOSAUR_API_KEY }}
-      MAILOSAUR_UI_TESTS_SERVER_ID: ${{ secrets.MAILOSAUR_UI_TESTS_SERVER_ID }}
-      MAILOSAUR_API_TESTS_SERVER_ID: ${{ secrets.MAILOSAUR_API_TESTS_SERVER_ID }}
-
-      SERVICENOW_LOGIN: percona_platform
-      SERVICENOW_PASSWORD: ${{ secrets.SERVICENOW_PASSWORD }}
-      SERVICENOW_DEV_URL: 'https://perconadev.service-now.com/api/x_pellc_percona_pl/platform/settest'
+      REPO: ${{ inputs.repository || "dev-latest" }}
+      METRICS_MODE: ${{ inputs.metrics_mode || "auto" }}
+      PLAYBOOK: ${{ inputs.playbook }}
 
     steps:
-      - name: PMM server version ${{ inputs.pmm_server_version }} and UI tests for flag "${{ inputs.pmm_test_flag }}" and pmm-ui-tests branch ${{ inputs.pmm_ui_tests_branch }}
-        if: ${{ env.SHA != 'null' }}
+      - name: "Create status check"
+        if: ${{ env.SHA != "null" }}
         uses: percona/gh-action-github-status-action@v1
         continue-on-error: true
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
-          context: "${{ env.PMM_TEST_FLAG }} UI tests"
+          context: "${{ inputs.test_name }} Package test"
           description: "Test execution ${{ job.status }}"
           state: "pending"
           repository: ${{ github.repository }}
           target_url: "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           sha: ${{ env.SHA }}
 
-      - name: 'Checkout UI tests: "${{ inputs.pmm_ui_tests_branch }}"'
+      - name: 'Checkout package-testing: "${{ inputs.package_testing_branch }}"'
         uses: actions/checkout@v3
         with:
-          ref: ${{ inputs.pmm_ui_tests_branch }}
-          repository: percona/pmm-ui-tests
-          path: ./pmm-ui-tests
+          ref: ${{ inputs.package_testing_branch }}
+          path: ./package-testing
 
-      - name: 'Install playwright'
-        working-directory: ./pmm-ui-tests/playwright-tests
+      - name: 'Convert choices'
         run: |
-          npm ci
-          npx playwright install
+          sudo apt-get install -y jq
+          
+          ### pmm-server docker image ###
+          if [[ -z "${{ env.PMM_SERVER_IMAGE }}" ]]; then
+            if [[ "${{ inputs.repository }}" = "dev-latest" ]]; then
+              echo "PMM_SERVER_IMAGE=perconalab/pmm-server:dev-latest" >> $GITHUB_ENV
+            fi
+            if [[ "${{ inputs.repository }}" =~ "candidate" ]]; then
+              rc_latest=$(wget -q "https://registry.hub.docker.com/v2/repositories/perconalab/pmm-client/tags?page_size=25&name=rc" -O - | jq -r .results[].name  | grep 2.*.*-rc$ | sort -V | tail -n1)
+              echo "PMM_SERVER_IMAGE=perconalab/pmm-server:$rc_latest" >> $GITHUB_ENV
+            fi
+            if [[ "${{ inputs.repository }}" = "release" ]]; then
+              r_latest=$(wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-client/tags -O - | jq -r .results[].name  | grep -v latest | sort -V | tail -n1)
+              echo "PMM_SERVER_IMAGE=percona/pmm-server:$r_latest" >> $GITHUB_ENV
+            fi
+            echo "${{ env.PMM_SERVER_IMAGE }}"
+          fi
+          
+          ### pmm2-client repository ### 
+          if [[ "${{ inputs.repository }}" = "dev-latest" ]]; then
+            echo "REPO=experimental" >> $GITHUB_ENV
+          fi
+          if [[ "${{ inputs.repository }}" =~ "candidate" ]]; then
+            echo "REPO=testing" >> $GITHUB_ENV
+          fi
+          if [[ "${{ inputs.repository }}" = "release" ]]; then
+            echo "REPO=release" >> $GITHUB_ENV
+          fi
+          echo "${{ env.REPO }}"
+          
+          ### vagrant vm ###
+          if [[ "${{ inputs.os }}" =~ "buster" ]]; then
+            echo "VM_BOX=generic/debian10" >> $GITHUB_ENV
+          fi
+          if [[ "${{ inputs.os }}" =~ "bullseye" ]]; then
+          echo "VM_BOX=generic/debian11" >> $GITHUB_ENV
+          fi               
+          if [[ "${{ inputs.os }}" =~ "bionic" ]]; then
+          echo "VM_BOX=generic/ubuntu1804" >> $GITHUB_ENV
+          fi
+          if [[ "${{ inputs.os }}" =~ "focal" ]]; then
+          echo "VM_BOX=ubuntu/focal64" >> $GITHUB_ENV
+          fi
+          if [[ "${{ inputs.os }}" =~ "jammy" ]]; then
+          echo "VM_BOX=generic/ubuntu2204" >> $GITHUB_ENV
+          fi
+          if [[ "${{ inputs.os }}" =~ "centos-7" ]]; then
+            echo "VM_BOX=testing" >> $GITHUB_ENV
+          fi
+          if [[ "${{ inputs.os }}" =~ "ol-8" ]]; then
+            echo "VM_BOX=generic/oracle8" >> $GITHUB_ENV
+          fi
+          if [[ "${{ inputs.os }}" =~ "ol-9" ]]; then
+            echo "VM_BOX=generic/oracle9" >> $GITHUB_ENV
+          fi
 
-      - name: 'Checkout pmm-qa: "${{ inputs.pmm_qa_branch }}"'
-        uses: actions/checkout@v3
-        with:
-          # token: ${{ secrets.ROBOT_TOKEN }}
-          repository: percona/pmm-qa
-          ref: ${{ inputs.pmm_qa_branch }}
-          path: ./pmm-qa
-
-      - name: 'Setup <PMM Sever>: "${{ inputs.pmm_server_version }}"'
-        working-directory: pmm-qa/pmm-integration
+      - name: 'Setup <PMM Sever>: "${{ env.PMM_SERVER_IMAGE }}"'
         run: |
-          npm install
-          sudo npx ts-node ./integration-setup.ts --ci --setup-docker-pmm-server --rbac --pmm-server-docker-tag=${{ env.PMM_SERVER_VERSION }} --pmm-client-version=${{ env.PMM_CLIENT_VERSION }}
-          timeout 100 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost/ping)" != "200" ]]; do sleep 5; done' || false
+          docker create -v /srv --name pmm-server-data ${{ env.PMM_SERVER_IMAGE }}
+          docker run -d -p 80:80 -p 443:443 -p 9000:9000 \
+            -e PERCONA_TEST_PLATFORM_ADDRESS=https://check-dev.percona.com:443 \
+            -e PERCONA_TEST_PLATFORM_PUBLIC_KEY=RWTg+ZmCCjt7O8eWeAmTLAqW+1ozUbpRSKSwNTmO+exlS5KEIPYWuYdX \
+            --volumes-from pmm-server-data --name pmm-server --restart always ${{ env.PMM_SERVER_IMAGE }}
 
-      - name: 'Setup <PMM Client: ${{ inputs.pmm_client_version }}>'
+      - name: "Setup tools"
         run: |
-          sudo bash ./pmm-qa/pmm-tests/pmm2-client-setup.sh --pmm_server_ip 127.0.0.1 --client_version ${{ env.PMM_CLIENT_VERSION }} --admin_password admin --use_metrics_mode no
-        shell: bash
+          sudo apt-get update
+          sudo apt-get install -y apt-transport-https ca-certificates dirmngr ansible virtualbox vagrant
 
-      - name: Setup Databases for the PMM-Server
-        working-directory: pmm-qa/pmm-integration
+      - name: "Wait for PMM Server to be healthy"
         run: |
-          sudo npx ts-node ./integration-setup.ts --ci \
-          ${{ env.PMM_CLIENTS }}
-          sleep 30
-          sudo pmm-admin list
-        shell: bash
+          timeout 240 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://127.0.0.1/v1/readyz)" != "200" ]]; do sleep 2; done' || false
 
-      - name: Execute UI tests
-        if: ${{ inputs.pmm_test_flag == 'null' }}
-        id: ui-tests-all
-        working-directory: pmm-ui-tests/playwright-tests
+      - name: "Create vagrantfile"
+        working-directory: ~/
         run: |
-          npx playwright test --project="chromium" --quiet
-#        env:
-#          NODE_TLS_REJECT_UNAUTHORIZED: 0
+          mkdir -p ~/test-vm/
+          cat > ~/test-vm/Vagrantfile <<EOF
+          Vagrant.require_version ">= 1.7.0"
+          Vagrant.configure(2) do |config|
+            config.vm.box = "${{ env.VM_BOX}}"
+            config.ssh.insert_key = false
+            config.vm.define :CLIENT_TEST do |t|
+            end
 
-      - name: 'Run UI tests: ${{ env.PMM_TEST_FLAG }}'
-        if: ${{ inputs.pmm_test_flag != 'null' }}
-        id: ui-tests-flagged
-        working-directory: pmm-ui-tests/playwright-tests
-        run: |
-          project="${{ contains(env.PMM_TEST_FLAG, 'portal') && 'Portal' || 'Chromium' }}"
-          npx playwright test --project=$project --grep ${{ env.PMM_TEST_FLAG }} --pass-with-no-tests
-#        env:
-#          NODE_TLS_REJECT_UNAUTHORIZED: 0
+            config.vm.synced_folder "~/package-testing/", "/pmm/package-testing/"
+            config.vm.provision "shell", privileged: true, inline: <<-SHELL
+              ## Set environment variables...
+              export PMM_SERVER_IP=127.0.0.1:443
+              export METRICS_MODE=${{ env.METRICS_MODE }}
+              export PMM_VERSION="${{ env.EXPECTED_VERSION }}"
+              export install_repo=${{ env.REPO }}
+              export tarball_link=${{ env.TARBALL }}
+                
+              ### rpm                                                   
+              # sudo yum install -y epel-release
+              # sudo yum -y update
+              # sudo yum install -y ansible git wget
+          
+              sudo apt-get install -y dirmngr gnupg2
+              echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main" | sudo tee -a /etc/apt/sources.list > /dev/null
+              sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+              sudo apt update -y
+              sudo apt-get install -y ansible git wget
+              cd /pmm/package-testing/playbooks
+              ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 pmm2-client_integration.yml
+              SHELL
+          end
 
-      - name: 'Create report name'
-        if: failure()
-        run: |
-          # TODO: add job id for matrix call
-          job_tag=$(echo "${{ inputs.pmm_test_flag }}" | sed -e "s/-pre-upgrade//" -e "s/@//")
-          report_name="$job_tag"-report
-          echo $report_name
-          echo "REPORT_NAME=$report_name" >> $GITHUB_ENV
+          EOF
 
-      - name: Generate and Attach the report
-        if: failure()
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.REPORT_NAME }}
-          path: ./pmm-ui-tests/playwright-tests/playwright-report
+      - name: "Run ${{ inputs.test_name }} test on ${{ inputs.os }}"
+        working-directory: ~/vm-test
+        run: vagrant up
 
-      - name: Create status check
+      - name: "Create status check"
         uses: percona/gh-action-github-status-action@v1
-        if: ${{ env.SHA != 'null' && always() }}
+        if: ${{ env.SHA != "null" && always() }}
         continue-on-error: true
         with:
           authToken: ${{ secrets.GITHUB_TOKEN }}
-          context: "${{ env.PMM_TEST_FLAG }} UI tests"
+          context: "${{ inputs.test_name }} Package test"
           description: "Test execution ${{ job.status }}"
           state: ${{ job.status }}
           repository: ${{ github.repository }}
