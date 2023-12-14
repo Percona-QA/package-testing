@@ -18,6 +18,10 @@ on:
         description: "PMM Client tarball link or FB-code"
         type: string
 #      package_repo: experimental | testing | main | pmm2-client-main
+      pmm_version:
+        description: "expected version"
+        required: false
+        type: string
       repository:
         description: "Select Repo for Client Nodes:"
         required: true
