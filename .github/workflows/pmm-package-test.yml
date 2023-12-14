@@ -82,8 +82,8 @@ jobs:
       TARBALL: ${{ inputs.pmm_server_image || 'null' }}
       EXPECTED_VERSION: ${{ inputs.pmm_version }}
 
-      REPO: ${{ inputs.repository || "dev-latest" }}
-      METRICS_MODE: ${{ inputs.metrics_mode || "auto" }}
+      REPO: ${{ inputs.repository || 'dev-latest' }}
+      METRICS_MODE: ${{ inputs.metrics_mode || 'auto' }}
       PLAYBOOK: ${{ inputs.playbook }}
 
     steps:
