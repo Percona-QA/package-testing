@@ -104,7 +104,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ inputs.package_testing_branch }}
-          path: ./package-testing
 
       - name: 'Convert choices'
         run: |
@@ -182,7 +181,7 @@ jobs:
           timeout 240 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://127.0.0.1/v1/readyz)" != "200" ]]; do sleep 2; done' || false
 
       - name: "Create vagrantfile"
-        working-directory: ~/
+        working-directory: ./
         run: |
           mkdir -p ~/test-vm/
           cat > ~/test-vm/Vagrantfile <<EOF
@@ -220,7 +219,7 @@ jobs:
           EOF
 
       - name: "Run ${{ inputs.test_name }} test on ${{ inputs.os }}"
-        working-directory: ~/vm-test
+        working-directory: ./vm-test
         run: vagrant up
 
       - name: "Create status check"
