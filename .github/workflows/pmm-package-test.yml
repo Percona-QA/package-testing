@@ -62,11 +62,11 @@ on:
           - ol-9-x64
 
 jobs:
-  get_versions:
-    name: Get versions
-    uses: Percona-Lab/pmm-submodules/.github/workflows/pmm-version-getter.yml@PMM-2.0
-    with:
-      repository: ${{ inputs.repository || "dev-latest"}}
+#  get_versions:
+#    name: Get versions
+#    uses: Percona-Lab/pmm-submodules/.github/workflows/pmm-version-getter.yml@PMM-2.0
+#    with:
+#      repository: ${{ inputs.repository || "dev-latest"}}
 
   test:
     name: ${{ inputs.test_name }}
