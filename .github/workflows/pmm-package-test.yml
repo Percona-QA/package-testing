@@ -62,21 +62,12 @@ on:
           - ol-9-x64
 
 jobs:
-#  get_versions:
-#    name: Get versions
-#    uses: Percona-Lab/pmm-submodules/.github/workflows/pmm-version-getter.yml@PMM-2.0
-#    with:
-#      repository: ${{ inputs.repository || "dev-latest"}}
-
   test:
     name: ${{ inputs.test_name }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
       SHA: ${{ inputs.sha || 'null' }}
-      PMM_SERVER_IP: 127.0.0.1
-      ADMIN_PASSWORD: admin
-
       PACKAGE_TESTING_BRANCH: ${{ inputs.package_testing_branch || 'master' }}
       PMM_SERVER_IMAGE: ${{ inputs.pmm_server_image }}
       TARBALL: ${{ inputs.pmm_server_image || 'null' }}
@@ -107,8 +98,6 @@ jobs:
 
       - name: 'Convert choices'
         run: |
-          sudo apt-get install -y jq
-          
           ### pmm-server docker image ###
           if [[ -z "${{ env.PMM_SERVER_IMAGE }}" ]]; then
             if [[ "${{ inputs.repository }}" = "dev-latest" ]]; then
@@ -122,8 +111,8 @@ jobs:
               r_latest=$(wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-client/tags -O - | jq -r .results[].name  | grep -v latest | sort -V | tail -n1)
               echo "PMM_SERVER_IMAGE=percona/pmm-server:$r_latest" >> $GITHUB_ENV
             fi
-            echo "${{ env.PMM_SERVER_IMAGE }}"
           fi
+          echo "${{ env.PMM_SERVER_IMAGE }}"
           
           ### pmm2-client repository ### 
           if [[ "${{ inputs.repository }}" = "dev-latest" ]]; then
@@ -162,19 +151,36 @@ jobs:
           if [[ "${{ inputs.os }}" =~ "ol-9" ]]; then
             echo "VM_BOX=generic/oracle9" >> $GITHUB_ENV
           fi
+          echo "${{ env.VM_BOX }}"
+          
+          ### test name -> playbook map ###
+          # basic         -> pmm2-client.yml
+          # basic upgrade -> pmm2-client_upgrade.yml
+          # basic tarball -> pmm2-client_custom_path.yml
+          
+          # config              -> pmm2-client_integration_auth_config.yml
+          # register            -> pmm2-client_integration_auth_register.yml
+          # setup               -> pmm2-client_integration_auth_setup.yml
+          # integration tarball -> pmm2-client_integration_custom_path.yml
+          # integration         -> pmm2-client_integration_custom_port.yml
+          # integration upgrade -> pmm2-client_integration_upgrade_custom_port.yml
+          
+          ######### Matrix tests
+          #    integration         -> pmm2-client_integration.yml
+          #    integration upgrade -> pmm2-client_integration_upgrade.yml
+          #    tarball upgrade     -> pmm2-client_integration_upgrade_custom_path.yml
 
-      - name: 'Setup <PMM Sever>: "${{ env.PMM_SERVER_IMAGE }}"'
+
+      - name: 'Setup "${{ env.PMM_SERVER_IMAGE }}"'
         run: |
           docker create -v /srv --name pmm-server-data ${{ env.PMM_SERVER_IMAGE }}
           docker run -d -p 80:80 -p 443:443 -p 9000:9000 \
-            -e PERCONA_TEST_PLATFORM_ADDRESS=https://check-dev.percona.com:443 \
-            -e PERCONA_TEST_PLATFORM_PUBLIC_KEY=RWTg+ZmCCjt7O8eWeAmTLAqW+1ozUbpRSKSwNTmO+exlS5KEIPYWuYdX \
             --volumes-from pmm-server-data --name pmm-server --restart always ${{ env.PMM_SERVER_IMAGE }}
 
       - name: "Setup tools"
         run: |
           sudo apt-get update
-          sudo apt-get install -y apt-transport-https ca-certificates dirmngr ansible virtualbox vagrant
+          sudo apt-get install -y apt-transport-https ca-certificates ansible virtualbox vagrant
 
       - name: "Wait for PMM Server to be healthy"
         run: |
@@ -197,7 +203,7 @@ jobs:
             config.vm.synced_folder "/home/runner/work/package-testing/package-testing/", "/pmm/package-testing/"
             config.vm.provision "shell", privileged: true, inline: <<-SHELL
               ## Set environment variables...
-              export PMM_SERVER_IP=127.0.0.1:443
+              export PMM_SERVER_IP=10.0.2.2:443
               export METRICS_MODE=${{ env.METRICS_MODE }}
               export PMM_VERSION="${{ env.EXPECTED_VERSION }}"
               export install_repo=${{ env.REPO }}
