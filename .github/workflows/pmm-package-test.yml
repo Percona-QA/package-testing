@@ -192,7 +192,7 @@ jobs:
             config.vm.define :CLIENT_TEST do |t|
             end
 
-            config.vm.synced_folder "~/package-testing/", "/pmm/package-testing/"
+            config.vm.synced_folder "/home/runner/work/package-testing/package-testing/", "/pmm/package-testing/"
             config.vm.provision "shell", privileged: true, inline: <<-SHELL
               ## Set environment variables...
               export PMM_SERVER_IP=127.0.0.1:443
@@ -219,8 +219,7 @@ jobs:
           EOF
 
       - name: "Run ${{ inputs.test_name }} test on ${{ inputs.os }}"
-        working-directory: ./vm-test
-        run: vagrant up
+        run: cd ~/vm-test/ && vagrant up
 
       - name: "Create status check"
         uses: percona/gh-action-github-status-action@v1
