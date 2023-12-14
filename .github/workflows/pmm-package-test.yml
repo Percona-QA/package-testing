@@ -73,13 +73,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      SHA: ${{ inputs.sha || "null" }}
+      SHA: ${{ inputs.sha || 'null' }}
       PMM_SERVER_IP: 127.0.0.1
       ADMIN_PASSWORD: admin
 
-      PACKAGE_TESTING_BRANCH: ${{ inputs.package_testing_branch || "master" }}
+      PACKAGE_TESTING_BRANCH: ${{ inputs.package_testing_branch || 'master' }}
       PMM_SERVER_IMAGE: ${{ inputs.pmm_server_image }}
-      TARBALL: ${{ inputs.pmm_server_image || "null" }}
+      TARBALL: ${{ inputs.pmm_server_image || 'null' }}
       EXPECTED_VERSION: ${{ inputs.pmm_version }}
 
       REPO: ${{ inputs.repository || "dev-latest" }}
