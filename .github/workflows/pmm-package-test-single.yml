@@ -44,7 +44,7 @@ on:
 jobs:
   get_versions:
     name: Get versions
-    uses: Percona-Lab/pmm-submodules/.github/workflows/pmm-version-getter.yml
+    uses: percona/pmm-ui-tests/.github/workflows/pmm-version-getter.yml@main
     with:
       repository: ${{ inputs.repository || 'dev-latest'}}
 
