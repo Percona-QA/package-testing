@@ -65,7 +65,7 @@
     vars:
       packages:
       - python-mysqldb
-    when: (ansible_os_family == "Debian") and (ansible_distribution_release != "focal" and ansible_distribution_release != "bionic" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "buster" and ansible_distribution_release != "jammy")
+    when: (ansible_os_family == "Debian") and (ansible_distribution_release != "focal" and ansible_distribution_release != "bionic" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "buster" and ansible_distribution_release != "jammy" and ansible_distribution_release != "bookworm")
 
   - name: install python mysql deb packages for focal and bionic
     apt:
@@ -74,7 +74,7 @@
     vars:
       packages:
       - python3-mysqldb
-    when: (ansible_os_family == "Debian") and (ansible_distribution_release == "focal" or ansible_distribution_release == "bionic" or ansible_distribution_release == "bullseye" or ansible_distribution_release == "jammy")
+    when: (ansible_os_family == "Debian") and (ansible_distribution_release == "focal" or ansible_distribution_release == "bionic" or ansible_distribution_release == "bullseye" or ansible_distribution_release == "jammy" or ansible_distribution_release == "bookworm")
 
   - name: Install python3 PyMySQL for Buster (Debian 10)
     apt:
