@@ -41,9 +41,11 @@
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
   - name: install Percona Server 8.1 packages
-    include_tasks: ../tasks/install_ps81.yml
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
+    include_tasks: 
+      file: ../tasks/install_ps81.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install Percona XtraBackup 8.1 packages
     include_tasks: ../tasks/install_pxb81.yml
