@@ -18,7 +18,7 @@
   - name: Import key for mysql-repo
     rpm_key:
       state: present
-      key: http://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+      key: http://repo.mysql.com/RPM-GPG-KEY-mysql-2023
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
 
   - name: Install MySQL RHEL 8 yum repository package
