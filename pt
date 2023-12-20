@@ -8,6 +8,7 @@ pt-fifo-split
 pt-find
 pt-fingerprint
 pt-fk-error-logger
+pt-galera-log-explainer
 pt-heartbeat
 pt-index-usage
 pt-ioprofile
