@@ -23,7 +23,7 @@
   - set_fact:
       major_repo: "{{ lookup('env', 'MAJOR_REPO') }}"
 
-  - name: enable the pdps-{{ version }} repo
+  - name: enable the pdps-{{ version }} {{ repo }}
     command: percona-release enable-only pdps-{{ version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
@@ -237,3 +237,22 @@
     when: ansible_os_family == "RedHat"
     become: yes
 
+  - name: get list of installed packages on Debian/Ubuntu
+    shell: dpkg -l|grep -iE "percona|sysbench|mysql|mongo|proxysql|maria" || true
+    register: installed_packages
+    when: ansible_os_family == "Debian"
+
+  - name: list installed packages on Debian/Ubuntu
+    debug:
+      var: installed_packages
+    when: ansible_os_family == "Debian"
+
+  - name: get list of installed packages on Centos
+    shell: yum list installed|grep -iE "percona|sysbench|mysql|mongo|proxysql|maria" || true
+    register: installed_packages
+    when: ansible_os_family == "RedHat"
+
+  - name: list installed packages on Centos
+    debug:
+      var: installed_packages
+    when: ansible_os_family == "RedHat"
