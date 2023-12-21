@@ -53,6 +53,9 @@
       - percona-xtradb-cluster-57
       - percona-xtradb-cluster-source-5.7
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install python mysql deb packages for Debian Buster
     apt:
@@ -81,6 +84,9 @@
       - Percona-XtraDB-Cluster-full-57
       - Percona-XtraDB-Cluster-57
     when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: stop mysql service
     command: systemctl stop mysql
