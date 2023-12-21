@@ -149,7 +149,7 @@ void run_test() {
     TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
     TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
     rm -rf package-testing
-    git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+    git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-8-pl --depth 1
     cd package-testing/binary-tarball-tests/ps
     wget -q ${TARBALL_LINK}${TARBALL_NAME}
     ./run.sh || true
