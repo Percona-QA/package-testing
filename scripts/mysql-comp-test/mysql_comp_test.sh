@@ -56,8 +56,10 @@ for se in TokuDB RocksDB; do
     if [[ ${se} = "TokuDB" && " ${tokudb_comp_lib[@]} " =~ " ${comp_lib} " ]] || [[ ${se} = "RocksDB" && " ${rocksdb_comp_lib[@]} " =~ " ${comp_lib} " ]]; then
       if [ $1 = "ps56" -a ${se} = "RocksDB" ]; then
         echo "Skipping RocksDB since not supported in PS 5.6"
-      elif [ $1 = "ps80" -o $1 = "ps81" -a ${se} = "TokuDB" ]; then
-        echo "Skipping TokuDB since not supported in PS 8.0 and PS 8.1"
+      elif [ $1 = "ps80" -a ${se} = "TokuDB" ]; then
+        echo "Skipping TokuDB since not supported in PS 8.0"
+      elif [ $1 = "ps81" -a ${se} = "TokuDB" ]; then
+        echo "Skipping TokuDB since not supported in PS 8.1"
       else
         if [ ${comp_lib} != "dummy" ]; then
           old="${new}"
@@ -106,7 +108,7 @@ for se in TokuDB RocksDB; do
             sed -i "s/ @@COMMENT_PARTITIONED@@/ ${new_comment_partitioned}/g" /tmp/create_table.sql
             sed -i "s/ @@COMMENT@@/ ${new_comment}/g" /tmp/create_table.sql
           fi
-          if [ $1 != "ps80" -o $1 != "ps81"]; then
+          if [ "$1" != "ps80" ] && [ "$1" != "ps81" ]; then
             mysql -e "set global tokudb_row_format=${new_row_format};"
           else
 	    echo "Skipping TokuDB since not supported in PS 8.0 and PS 8.1"
@@ -179,7 +181,7 @@ for file in /var/lib/mysql/.rocksdb/*.sst; do
 done
 
 # check if TokuDB files contain proper compression libraries used
-if [ $1 != "ps80" -o $1 != "ps81"]; then
+if [ "$1" != "ps80" ] && [ "$1" != "ps81" ]; then
   for file in /var/lib/mysql/comp_test/*TokuDB*_main_*.tokudb;
   do
     filename_comp=$(echo "${file}" | sed "s:/.*/::" | sed "s:.*TokuDB_::" | sed "s:_main_.*::" | sed "s:_P_.*::")
@@ -192,7 +194,7 @@ if [ $1 != "ps80" -o $1 != "ps81"]; then
     fi
   done
 else 
-  echo "Tokudb is deprecated in PS8.0 and PS 8.1"
+  echo "Tokudb is deprecated in PS8.0 and PS8.1"
 fi  
 
 md5sum ${secure_file_priv}/*.txt > /tmp/comp_test_md5.sum
