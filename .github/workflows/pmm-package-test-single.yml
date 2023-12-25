@@ -71,5 +71,5 @@ jobs:
       repository: ${{ inputs.repository || 'release'}}
       metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
       playbook: ${{ inputs.playbook || 'pmm2-client_integration' }}
-#      test_name: ${{ matrix.os }}
+      test_name: ${{ matrix.os }}
       os: ${{ matrix.os }}
