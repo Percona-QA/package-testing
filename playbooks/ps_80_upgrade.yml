@@ -312,6 +312,24 @@
       - percona-server*
     when: ansible_os_family == "RedHat"
 
+  - name: remove mariadb rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - mariadb*
+    when: ansible_os_family == "RedHat"
+
+  - name: remove mysql rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - mysql
+    when: ansible_os_family == "RedHat"  
+
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
 
