@@ -36,7 +36,7 @@ PTBINS = ['pt-align', 'pt-archiver', 'pt-config-diff', 'pt-deadlock-logger', 'pt
           'pt-online-schema-change', 'pt-pmp', 'pt-query-digest', 'pt-show-grants', 'pt-sift',
           'pt-slave-delay', 'pt-slave-find', 'pt-slave-restart', 'pt-stalk', 'pt-summary',
           'pt-table-checksum', 'pt-table-sync', 'pt-table-usage', 'pt-upgrade',
-          'pt-variable-advisor', 'pt-visual-explain', 'pt-k8s-debug-collector',]
+          'pt-variable-advisor', 'pt-visual-explain', 'pt-k8s-debug-collector','pt-galera-log-explainer']
 
 @pytest.mark.parametrize("package", PXB_DEBPACKAGES)
 def test_check_pxb_deb_package(host, package):
