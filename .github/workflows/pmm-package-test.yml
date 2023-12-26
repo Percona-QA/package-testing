@@ -254,10 +254,14 @@ jobs:
               export install_repo=${{ env.REPO }}
               export tarball_link=${{ env.TARBALL }}
                 
-              if [[ "${{ env.VM_BOX }}" =~ "centos" || "${{ env.VM_BOX }}" =~ "oracle" ]]; then
+              if [[ "${{ env.VM_BOX }}" =~ "centos7" ]]; then
                 sudo yum install -y epel-release
                 sudo yum -y update
-                # sudo yum install -y ansible git wget
+                sudo yum install -y ansible git wget
+              fi
+              if [[ "${{ env.VM_BOX }}" =~ "oracle" ]]; then
+                sudo yum install -y epel-release
+                sudo yum -y update
                 sudo yum install -y ansible-core git wget
               fi
               if [[ "${{ env.VM_BOX }}" =~ "debian" ]]; then
