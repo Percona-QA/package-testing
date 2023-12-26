@@ -31,12 +31,13 @@ PXB_RPMPACKAGES = ['percona-xtrabackup-' + PXB_MAJOR_VER,
 
 PTBINS = ['pt-align', 'pt-archiver', 'pt-config-diff', 'pt-deadlock-logger', 'pt-diskstats',
           'pt-duplicate-key-checker', 'pt-fifo-split', 'pt-find', 'pt-fingerprint',
-          'pt-fk-error-logger', 'pt-heartbeat', 'pt-index-usage', 'pt-ioprofile', 'pt-kill',
+          'pt-fk-error-logger', 'pt-galera-log-explainer', 'pt-heartbeat', 'pt-index-usage', 'pt-ioprofile', 'pt-kill',
           'pt-mext', 'pt-mongodb-query-digest', 'pt-mongodb-summary', 'pt-mysql-summary',
           'pt-online-schema-change', 'pt-pmp', 'pt-query-digest', 'pt-show-grants', 'pt-sift',
           'pt-slave-delay', 'pt-slave-find', 'pt-slave-restart', 'pt-stalk', 'pt-summary',
           'pt-table-checksum', 'pt-table-sync', 'pt-table-usage', 'pt-upgrade',
-          'pt-variable-advisor', 'pt-visual-explain', 'pt-k8s-debug-collector','pt-galera-log-explainer']
+          'pt-variable-advisor', 'pt-visual-explain', 'pt-k8s-debug-collector', 'pt-mongodb-index-check',
+          'pt-pg-summary', 'pt-secure-collect']
 
 @pytest.mark.parametrize("package", PXB_DEBPACKAGES)
 def test_check_pxb_deb_package(host, package):
