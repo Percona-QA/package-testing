@@ -46,7 +46,7 @@ jobs:
     name: Get versions
     uses: percona/pmm-ui-tests/.github/workflows/pmm-version-getter.yml@main
     with:
-      repository: ${{ inputs.repository || 'dev-latest'}}
+      repository: ${{ inputs.repository || 'release'}}
 
   p_test:
     name: ${{ inputs.test_name || 'pmm2-client_integration' }}
