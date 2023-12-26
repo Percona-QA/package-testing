@@ -257,7 +257,8 @@ jobs:
               if [[ "${{ env.VM_BOX }}" =~ "centos" || "${{ env.VM_BOX }}" =~ "oracle" ]]; then
                 sudo yum install -y epel-release
                 sudo yum -y update
-                sudo yum install -y ansible git wget
+                # sudo yum install -y ansible git wget
+                sudo yum install -y ansible-core git wget
               fi
               if [[ "${{ env.VM_BOX }}" =~ "debian" ]]; then
                 sudo apt-get install -y dirmngr gnupg2
@@ -273,7 +274,7 @@ jobs:
                 sudo apt-get install -y ansible git wget
               fi
               cd /pmm/package-testing/playbooks
-              ansible-playbook --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 ${{ env.PLAYBOOK }}.yml
+              ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 ${{ env.PLAYBOOK }}.yml
               SHELL
           end
 
