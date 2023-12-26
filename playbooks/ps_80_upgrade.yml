@@ -300,7 +300,7 @@
       state: absent
     vars:
       packages:
-      - percona-server*
+      - percona-server-server
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server rpm packages
@@ -309,9 +309,11 @@
       state: absent
     vars:
       packages:
-      - percona-server*
+      - percona-server-server
     when: ansible_os_family == "RedHat"
 
+    
+    # Till https://perconadev.atlassian.net/browse/PS-9047 is not resolved
   - name: remove mariadb rpm packages
     yum:
       name: "{{ packages }}"
