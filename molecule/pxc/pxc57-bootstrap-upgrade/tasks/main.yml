@@ -1,5 +1,5 @@
 ---
-  - name: Fetch the vars from file
+  - name: Fetch the vars from file for upgrade
     ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
 
   - set_fact:
@@ -57,6 +57,9 @@
       - percona-xtradb-cluster-full-57
       - percona-xtradb-cluster-57
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install python mysql deb packages
     apt:
@@ -65,7 +68,7 @@
     vars:
       packages:
       - python-mysqldb
-    when: (ansible_os_family == "Debian") and (ansible_distribution_release != "focal" and ansible_distribution_release != "bionic" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "buster" and ansible_distribution_release != "jammy")
+    when: (ansible_os_family == "Debian") and (ansible_distribution_release != "focal" and ansible_distribution_release != "bionic" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "buster" and ansible_distribution_release != "jammy" and ansible_distribution_release != "bookworm")
 
   - name: install python mysql deb packages for focal and bionic
     apt:
@@ -74,7 +77,7 @@
     vars:
       packages:
       - python3-mysqldb
-    when: (ansible_os_family == "Debian") and (ansible_distribution_release == "focal" or ansible_distribution_release == "bionic" or ansible_distribution_release == "bullseye" or ansible_distribution_release == "jammy")
+    when: (ansible_os_family == "Debian") and (ansible_distribution_release == "focal" or ansible_distribution_release == "bionic" or ansible_distribution_release == "bullseye" or ansible_distribution_release == "jammy" or ansible_distribution_release == "bookworm")
 
   - name: Install python3 PyMySQL for Buster (Debian 10)
     apt:
@@ -94,6 +97,9 @@
       - Percona-XtraDB-Cluster-full-57
       - Percona-XtraDB-Cluster-57
     when: ansible_os_family == "RedHat" 
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install python mysql rpm packages
     yum:

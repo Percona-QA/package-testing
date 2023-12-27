@@ -23,7 +23,7 @@
   - set_fact:
       major_repo: "{{ lookup('env', 'MAJOR_REPO') }}"
 
-  - name: enable the pdps-{{ version }} repo
+  - name: enable the pdps-{{ version }} {{ repo }}
     command: percona-release enable-only pdps-{{ version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
@@ -236,4 +236,3 @@
       mode: 0744
     when: ansible_os_family == "RedHat"
     become: yes
-

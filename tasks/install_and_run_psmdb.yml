@@ -22,9 +22,11 @@
   - name: include tasks for installing psmdb packages
     vars:
       packages: percona-server-mongodb
-    include_tasks: ../tasks/install_psmdb.yml
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+    include_tasks: 
+      file: ../tasks/install_psmdb.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
 # Start psmdb service
   - name: start mongod service
