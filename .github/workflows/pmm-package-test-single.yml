@@ -56,7 +56,7 @@ jobs:
 
   p_test:
     name: ${{ inputs.test_name || 'pmm2-client_integration' }}
-    uses: ./.github/workflows/pmm-package-test.yml
+    uses: ./.github/workflows/pmm-package-test-runner.yml
     secrets: inherit
     needs: get_versions
     strategy:
