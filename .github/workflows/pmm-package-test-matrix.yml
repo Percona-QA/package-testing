@@ -39,18 +39,6 @@ jobs:
     with:
       repository: ${{ inputs.repository || 'release'}}
 
-
-      playbook:
-        description: 'Select test to run:'
-        default: 'pmm2-client_integration'
-        required: true
-        type: choice
-        options:
-          - pmm2-client_integration
-
-
-
-
   i_test:
     name: "pmm2-client_integration"
     uses: ./.github/workflows/pmm-package-test.yml
