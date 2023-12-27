@@ -28,9 +28,6 @@ on:
           - auto
           - push
           - pull
-  push:
-    branches:
-      - PMM-12770-gh-action
 
 jobs:
   get_versions:
