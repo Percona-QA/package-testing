@@ -4,7 +4,7 @@
 #   install PMM client deb/rpm
 #   perform correct setup
 #   setup PS 5.7
-#   setup PSMDB 6.0
+#   setup PSMDB 7.0
 #   setup PGSQL 13
 #   verify versions, metrics, exporters, etc.
 #
