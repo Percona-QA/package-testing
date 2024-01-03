@@ -4,7 +4,7 @@
 #   install PMM client deb/rpm
 #   perform correct setup
 #   setup PS 5.7
-#   setup PSMDB 4.4
+#   setup PSMDB 7.0
 #   setup PGSQL 13
 #   verify versions, metrics, exporters, etc.
 #
@@ -35,7 +35,7 @@
         - "{{ (false) | ternary('ps-8.0','') }}"
         - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '9') | ternary('ps-5.7','') }}"
         - "{{ (ansible_os_family == 'Debian') | ternary('ps-5.7','') }}"
-        - psmdb-6.0
+        - psmdb-7.0
         - "{{ (ansible_os_family == 'Debian') | ternary('pg-13','') }}"
         - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '8') | ternary('pg-13','') }}"
 
