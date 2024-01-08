@@ -51,8 +51,8 @@ class TestHAproxyEnvironment:
         assert host.group('mysql').gid == 1001
 
     def test_haproxy_permissions(self, host):
-        assert host.file('/usr/sbin/haproxy').user == 'mysql'
-        assert host.file('/usr/sbin/haproxy').group == 'mysql'
+        assert host.file('/usr/sbin/haproxy').user == 'root'
+        assert host.file('/usr/sbin/haproxy').group == 'root'
         assert oct(host.file('/usr/sbin/haproxy').mode) == '0o755'
 
     def test_check_pxc_permissions(self, host):
