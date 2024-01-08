@@ -15,18 +15,6 @@ pipeline {
   stages {
     stage('Binary tarball test') {
       parallel {
-        stage('Ubuntu Bionic') {
-          agent {
-            label "min-bionic-x64"
-          }
-          steps {
-            script {
-                currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
-              }
-            run_test()
-            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
-          } //End steps
-        } //End stage Ubuntu Bionic
         stage('Ubuntu Focal') {
           agent {
             label "min-focal-x64"
@@ -131,6 +119,7 @@ pipeline {
 void run_test() {
   sh '''
     echo ${BUILD_TYPE_MINIMAL}
+    PXC_VERSION_MAJOR="$(echo ${PXC_VERSION}|cut -d'-' -f1)"
     PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
     MINIMAL=""
     if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
@@ -145,7 +134,7 @@ void run_test() {
         fi
       fi
       TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
-      TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
+      TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
     elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
       export GLIBC_VERSION="2.17"
       if [ -f /etc/redhat-release ] && [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
@@ -160,7 +149,7 @@ void run_test() {
     else
       sudo apt install -y git wget tar
     fi
-    git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+    git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc-tarball --depth 1
     cd package-testing/binary-tarball-tests/pxc
     wget -q ${TARBALL_LINK}${TARBALL_NAME}
     ./run.sh || true
