@@ -71,16 +71,18 @@
     delay: 5
     retries: 5
 
+  - name: Grep PMM Client tempdir path from config
+    shell: cat {{ custom_path }}/config/pmm-agent.yaml | awk '/tempdir/ {print $NF}'
+    register: tmp_path
+    become: yes
+
   - name: PMM-8141 fix for deleted vmscrpconfig file, file being created with vmagent reload
-    command: "{{item}}"
-    with_items:
-      - "rm -r /tmp/vm_agent"
-      - "pkill -f vmagent"
+    command: "rm -r {{ tmp_path.stdout }}/vm_agent && pkill -f vmagent"
     become: yes
 
 
   - name: PMM-8141 verify new vmscrpconfig folder is created at tmp after killing vmagent process
-    command: "ls -la /tmp/vm_agent"
+    command: "ls -la {{ tmp_path.stdout }}/vm_agent"
     register: vm_agent_folder_ls
     become: yes
     until: vm_agent_folder_ls.stdout != ""
