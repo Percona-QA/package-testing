@@ -1,5 +1,5 @@
 ---
-name: package-test-pipeline
+name: package-test-runner
 
 on:
   workflow_dispatch:
@@ -160,11 +160,13 @@ jobs:
           fi
           if [[ "${{ inputs.repository }}" =~ "candidate" ]]; then
             echo "REPO=testing" >> $GITHUB_ENV
+            echo "EXPECTED_VERSION=$(echo ${{ inputs.expected_version }} | awk -F'-' '{print $1}')" >> $GITHUB_ENV
+            echo "expected version is ${{ env.EXPECTED_VERSION }}"
           fi
           if [[ "${{ inputs.repository }}" = "release" ]]; then
             echo "REPO=release" >> $GITHUB_ENV
           fi
-          echo "${{ env.REPO }}"
+          echo "repo=${{ env.REPO }}"
           
           ### vagrant vm ###
           if [[ "${{ inputs.os }}" =~ "buster" ]]; then
