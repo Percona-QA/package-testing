@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import re
 
 base_dir = os.getenv('BASE_DIR')
 ps_version = os.getenv('PS_VERSION')
@@ -165,7 +166,7 @@ ps8x_symlinks = (
 
 #####
 
-if [[ "${ps_version_major}" == ~ ^8\.[1-3]$ ]]; then
+if re.match(r'^8\.[1-3]$', ps_version_major):
     ps_binaries = ps8x_binaries
     ps_executables = ps8x_executables
     ps_plugins = ps8x_plugins
@@ -173,7 +174,7 @@ if [[ "${ps_version_major}" == ~ ^8\.[1-3]$ ]]; then
     ps_files = ps8x_files
     ps_symlinks = ps8x_symlinks
     ps_components = ps8x_components
-elif [[ "${ps_version_major}" == '8.0' ]]; then
+elif ps_version_major == '8.0':
     ps_binaries = ps80_binaries
     ps_executables = ps80_executables
     ps_plugins = ps80_plugins
@@ -181,14 +182,14 @@ elif [[ "${ps_version_major}" == '8.0' ]]; then
     ps_files = ps80_files
     ps_symlinks = ps80_symlinks
     ps_components = ps80_components
-elif [[ "${ps_version_major}" == '5.7' ]]; then
+elif ps_version_major == '5.7':
     ps_binaries = ps57_binaries
     ps_executables = ps57_executables
     ps_plugins = ps57_plugins
     ps_functions = ps57_functions
     ps_files = ps57_files
     ps_symlinks = ps57_symlinks
-elif [[ "${ps_version_major}" == '5.6' ]]; then
+elif ps_version_major == '5.6':
     ps_binaries = ps56_binaries
     ps_executables = ps56_executables
     ps_plugins = ps56_plugins
