@@ -166,7 +166,7 @@ ps8x_symlinks = (
 
 #####
 
-if re.match(r'^8\.[1-3]$', ps_version_major):
+if re.match(r'^8\.[1-9]$', ps_version_major):
     ps_binaries = ps8x_binaries
     ps_executables = ps8x_executables
     ps_plugins = ps8x_plugins
