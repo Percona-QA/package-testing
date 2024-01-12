@@ -1,0 +1,336 @@
+---
+name: Package Test Matrix(full)
+
+on:
+  workflow_dispatch:
+    inputs:
+      package_testing_branch:
+        description: 'Target branch for package-testing repository'
+        type: string
+        default: 'master'
+        required: true
+      repository:
+        description: 'Select Repo for Client:'
+        required: true
+        default: 'dev-latest'
+        type: choice
+        options:
+          - release
+          - release candidate
+          - dev-latest
+      metrics_mode:
+        description: 'Select the Metrics Mode for PMM Client:'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - push
+          - pull
+
+jobs:
+  get_versions:
+    name: Get versions
+    uses: percona/pmm-ui-tests/.github/workflows/pmm-version-getter.yml@main
+    with:
+      repository: ${{ inputs.repository || 'release'}}
+
+  c_test:
+    name: "pmm2-client"
+    uses: ./.github/workflows/pmm-package-test-runner.yml
+    secrets: inherit
+    needs: get_versions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["bionic-x64",
+             "bullseye-x64",
+             "buster-x64",
+             "focal-x64",
+             "jammy-x64",
+             "centos-7-x64",
+             "ol-8-x64",
+             "ol-9-x64"]
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      expected_version: ${{needs.get_versions.outputs.finish_version}}
+      repository: ${{ inputs.repository || 'release'}}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      playbook: "pmm2-client_integration"
+      test_name: ${{ matrix.os }}
+      os: ${{ matrix.os }}
+
+  cu_test:
+    name: "pmm2-client_upgrade"
+    uses: ./.github/workflows/pmm-package-test-runner.yml
+    secrets: inherit
+    needs: get_versions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["bionic-x64",
+             "bullseye-x64",
+             "buster-x64",
+             "focal-x64",
+             "jammy-x64",
+             "centos-7-x64",
+             "ol-8-x64",
+             "ol-9-x64"]
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      expected_version: ${{needs.get_versions.outputs.finish_version}}
+      repository: ${{ inputs.repository || 'release'}}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      playbook: "pmm2-client_upgrade"
+      test_name: ${{ matrix.os }}
+      os: ${{ matrix.os }}
+
+  tb_test:
+    name: "pmm2-client_custom_path"
+    uses: ./.github/workflows/pmm-package-test-runner.yml
+    secrets: inherit
+    needs: get_versions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["bionic-x64",
+             "bullseye-x64",
+             "buster-x64",
+             "focal-x64",
+             "jammy-x64",
+             "centos-7-x64",
+             "ol-8-x64",
+             "ol-9-x64"]
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      expected_version: ${{needs.get_versions.outputs.finish_version}}
+      repository: ${{ inputs.repository || 'release'}}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      playbook: "pmm2-client_custom_path"
+      test_name: ${{ matrix.os }}
+      os: ${{ matrix.os }}
+
+  auth_config_test:
+    name: "pmm2-client_integration_auth_config"
+    uses: ./.github/workflows/pmm-package-test-runner.yml
+    secrets: inherit
+    needs: get_versions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["bionic-x64",
+             "bullseye-x64",
+             "buster-x64",
+             "focal-x64",
+             "jammy-x64",
+             "centos-7-x64",
+             "ol-8-x64",
+             "ol-9-x64"]
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      expected_version: ${{needs.get_versions.outputs.finish_version}}
+      repository: ${{ inputs.repository || 'release'}}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      playbook: "pmm2-client_integration_auth_config"
+      test_name: ${{ matrix.os }}
+      os: ${{ matrix.os }}
+
+  auth_register_test:
+    name: "pmm2-client_integration_auth_register"
+    uses: ./.github/workflows/pmm-package-test-runner.yml
+    secrets: inherit
+    needs: get_versions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["bionic-x64",
+             "bullseye-x64",
+             "buster-x64",
+             "focal-x64",
+             "jammy-x64",
+             "centos-7-x64",
+             "ol-8-x64",
+             "ol-9-x64"]
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      expected_version: ${{needs.get_versions.outputs.finish_version}}
+      repository: ${{ inputs.repository || 'release'}}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      playbook: "pmm2-client_integration_auth_register"
+      test_name: ${{ matrix.os }}
+      os: ${{ matrix.os }}
+
+  auth_setup_test:
+    name: "pmm2-client_integration_auth_setup"
+    uses: ./.github/workflows/pmm-package-test-runner.yml
+    secrets: inherit
+    needs: get_versions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["bionic-x64",
+             "bullseye-x64",
+             "buster-x64",
+             "focal-x64",
+             "jammy-x64",
+             "centos-7-x64",
+             "ol-8-x64",
+             "ol-9-x64"]
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      expected_version: ${{needs.get_versions.outputs.finish_version}}
+      repository: ${{ inputs.repository || 'release'}}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      playbook: "pmm2-client_integration_auth_setup"
+      test_name: ${{ matrix.os }}
+      os: ${{ matrix.os }}
+
+  tbi_test:
+    name: "pmm2-client_integration_custom_path"
+    uses: ./.github/workflows/pmm-package-test-runner.yml
+    secrets: inherit
+    needs: get_versions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["bionic-x64",
+             "bullseye-x64",
+             "buster-x64",
+             "focal-x64",
+             "jammy-x64",
+             "centos-7-x64",
+             "ol-8-x64",
+             "ol-9-x64"]
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      expected_version: ${{needs.get_versions.outputs.finish_version}}
+      repository: ${{ inputs.repository || 'release'}}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      playbook: "pmm2-client_integration_custom_path"
+      test_name: ${{ matrix.os }}
+      os: ${{ matrix.os }}
+
+  port_test:
+    name: "pmm2-client_integration_custom_port"
+    uses: ./.github/workflows/pmm-package-test-runner.yml
+    secrets: inherit
+    needs: get_versions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["bionic-x64",
+             "bullseye-x64",
+             "buster-x64",
+             "focal-x64",
+             "jammy-x64",
+             "centos-7-x64",
+             "ol-8-x64",
+             "ol-9-x64"]
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      expected_version: ${{needs.get_versions.outputs.finish_version}}
+      repository: ${{ inputs.repository || 'release'}}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      playbook: "pmm2-client_integration_custom_port"
+      test_name: ${{ matrix.os }}
+      os: ${{ matrix.os }}
+
+  port_u_test:
+    name: "pmm2-client_integration_upgrade_custom_port"
+    uses: ./.github/workflows/pmm-package-test-runner.yml
+    secrets: inherit
+    needs: get_versions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["bionic-x64",
+             "bullseye-x64",
+             "buster-x64",
+             "focal-x64",
+             "jammy-x64",
+             "centos-7-x64",
+             "ol-8-x64",
+             "ol-9-x64"]
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      expected_version: ${{needs.get_versions.outputs.finish_version}}
+      repository: ${{ inputs.repository || 'release'}}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      playbook: "pmm2-client_integration_upgrade_custom_port"
+      test_name: ${{ matrix.os }}
+      os: ${{ matrix.os }}
+
+  i_test:
+    name: "pmm2-client_integration"
+    uses: ./.github/workflows/pmm-package-test-runner.yml
+    secrets: inherit
+    needs: get_versions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["bionic-x64",
+             "bullseye-x64",
+             "buster-x64",
+             "focal-x64",
+             "jammy-x64",
+             "centos-7-x64",
+             "ol-8-x64",
+             "ol-9-x64"]
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      expected_version: ${{needs.get_versions.outputs.finish_version}}
+      repository: ${{ inputs.repository || 'release'}}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      playbook: "pmm2-client_integration"
+      test_name: ${{ matrix.os }}
+      os: ${{ matrix.os }}
+
+  iu_test:
+    name: "pmm2-client_integration_upgrade"
+    uses: ./.github/workflows/pmm-package-test-runner.yml
+    secrets: inherit
+    needs: get_versions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["bionic-x64",
+             "bullseye-x64",
+             "buster-x64",
+             "focal-x64",
+             "jammy-x64",
+             "centos-7-x64",
+             "ol-8-x64",
+             "ol-9-x64"]
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      expected_version: ${{needs.get_versions.outputs.finish_version}}
+      repository: ${{ inputs.repository || 'release'}}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      playbook: "pmm2-client_integration_upgrade"
+      test_name: ${{ matrix.os }}
+      os: ${{ matrix.os }}
+
+  tu_test:
+    name: "pmm2-client_integration_upgrade_custom_path"
+    uses: ./.github/workflows/pmm-package-test-runner.yml
+    secrets: inherit
+    needs: get_versions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["bionic-x64",
+             "bullseye-x64",
+             "buster-x64",
+             "focal-x64",
+             "jammy-x64",
+             "centos-7-x64",
+             "ol-8-x64",
+             "ol-9-x64"]
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      expected_version: ${{needs.get_versions.outputs.finish_version}}
+      repository: ${{ inputs.repository || 'release'}}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      playbook: "pmm2-client_integration_upgrade_custom_path"
+      test_name: ${{ matrix.os }}
+      os: ${{ matrix.os }}

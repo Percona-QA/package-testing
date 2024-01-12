@@ -53,6 +53,9 @@
       - percona-xtradb-cluster-57
       - percona-xtradb-cluster-source-5.7
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install python mysql deb packages
     apt:
@@ -81,6 +84,12 @@
       - Percona-XtraDB-Cluster-full-57
       - Percona-XtraDB-Cluster-57
     when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: check telemetry (disabled)
+    command: /package-testing/check_telemetry.sh pxc -d
 
   - name: stop mysql service
     command: systemctl stop mysql
@@ -142,3 +151,67 @@
     ansible.builtin.fail:
       msg: "The cluster is less than 3 nodes FAILING the play"
     when: cluster_size_check.stdout != "3"
+
+  ## Changes done for telemetry: remove pxc package - add iptables rule for Telemetry Server - install only pxc package.
+## Expected resuld - telemetry_uuid file has only instanceID
+
+  - name: remove Percona Xtradb Cluster deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: absent
+    vars:
+      packages:
+      - percona-xtradb-cluster-server-5.7
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Xtradb Cluster rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+      disablerepo: "epel"
+    vars:
+      packages:
+      - Percona-XtraDB-Cluster-server-57
+    when: ansible_os_family == "RedHat"
+
+
+  - name: Block pmm.check-dev.percona.com IP
+    iptables:
+      chain: OUTPUT
+      destination: check-dev.percona.com
+      jump: DROP
+    when: lookup('env', 'upgrade_repo') == ""
+
+  - name: install PXC 8 deb packages with blocked Telemetry Server
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtradb-cluster-57
+    when: ansible_os_family == "Debian" and lookup('env', 'upgrade_repo') == ""
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC 8 rpm packages with blocked Telemetry Server
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - Percona-XtraDB-Cluster-57
+    when: ansible_os_family == "RedHat" and lookup('env', 'upgrade_repo') == ""
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: check telemetry file presence (unavailable)
+    command: /package-testing/check_telemetry.sh pxc -u
+
+  - name: get telemetry_uuid content
+    command: cat /usr/local/percona/telemetry_uuid
+    register: t_uuid_output
+
+  - name: output telemetry_uuid content
+    debug:
+      var: t_uuid_output

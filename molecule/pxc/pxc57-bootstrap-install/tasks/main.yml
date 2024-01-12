@@ -48,7 +48,7 @@
       flush: yes
     when: ansible_os_family == "RedHat"
 
-  - name: install PXC 5.7 previous deb packages
+  - name: install PXC 5.7 deb packages
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -57,6 +57,8 @@
       - percona-xtradb-cluster-full-57
       - percona-xtradb-cluster-57
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install python mysql deb packages
     apt:
@@ -85,7 +87,7 @@
       - python3-pymysql
     when: (ansible_os_family == "Debian") and (ansible_distribution_release == "buster")
 
-  - name: install PXC 5.7 previous rpm packages
+  - name: install PXC 5.7 rpm packages
     yum:
       name: "{{ packages }}"
       state: latest
@@ -93,7 +95,20 @@
       packages:
       - Percona-XtraDB-Cluster-full-57
       - Percona-XtraDB-Cluster-57
-    when: ansible_os_family == "RedHat" 
+    when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh pxc -e
+
+  - name: get telemetry_uuid content
+    command: cat /usr/local/percona/telemetry_uuid
+    register: t_uuid_output
+
+  - name: output telemetry_uuid content
+    debug:
+      var: t_uuid_output
 
   - name: install python mysql rpm packages for CentOS 6 and 7
     yum:

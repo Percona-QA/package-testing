@@ -12,7 +12,7 @@ load ps-admin_helper
   check_audit_notexists
 # check_pam_notexists
 # check_pam_compat_notexists
-  if ! [[ ${MYSQL_VERSION} = "5.6" ]] || [[ "${MYSQL_VERSION}" =~ ^8.[0-9]{1}$ ]]; then
+  if ! [[ ${MYSQL_VERSION} = "5.6" ]] && ! [[ "${MYSQL_VERSION}" =~ ^8.[0-9]{1}$ ]]; then
     check_mysqlx_notexists
     check_rocksdb_notexists
   fi

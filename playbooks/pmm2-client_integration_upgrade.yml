@@ -4,7 +4,7 @@
 #   install PMM old client deb/rpm
 #   perform correct setup
 #   setup PS 5.7
-#   setup PSMDB 4.4
+#   setup PSMDB 7.0
 #   setup PGSQL 13
 #   install PMM the latest client deb/rpm
 #   verify versions, exporters still work, metrics, etc.
@@ -36,7 +36,7 @@
         - "{{ (false) | ternary('ps-8.0','') }}"
         - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '9') | ternary('ps-5.7','') }}"
         - "{{ (ansible_os_family == 'Debian') | ternary('ps-5.7','') }}"
-        - psmdb-6.0
+        - psmdb-7.0
         - "{{ (ansible_os_family == 'Debian') | ternary('pg-13','') }}"
         - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '8') | ternary('pg-13','') }}"
 
@@ -67,7 +67,7 @@
 
   - name: Grep previous release PMM Client version from apt list
     when: test_repo == "main" and ansible_os_family == "Debian"
-    shell: "apt-cache madison pmm2-client | grep 2.{{ pmm_release_minor_version.stdout | int -1 }} | awk '{print $3}'"
+    shell: "apt-cache madison pmm2-client | grep 2.{{ pmm_release_minor_version.stdout | int -1 }} | head -n1 | awk '{print $3}'"
     register: pmm_old_version_deb
 
   - name: Set PMM Client package name with old version to install for apt

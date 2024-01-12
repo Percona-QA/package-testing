@@ -18,7 +18,6 @@ if [ -f /etc/mysql/my.cnf ]; then
 else
   MYCNF="/etc/my.cnf"
 fi
-
 # if the server supports RocksDB options for column families need to be specified before running mysql
 if [ $1 != "ps56" ]; then
   systemctl stop mysql
@@ -106,6 +105,7 @@ for se in TokuDB RocksDB; do
             sed -i "s/ @@COMMENT_PARTITIONED@@/ ${new_comment_partitioned}/g" /tmp/create_table.sql
             sed -i "s/ @@COMMENT@@/ ${new_comment}/g" /tmp/create_table.sql
           fi
+          
           if ! [[ "$1" =~ ^ps8[0-9]{1}$ ]]; then
             mysql -e "set global tokudb_row_format=${new_row_format};"
           else

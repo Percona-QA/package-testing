@@ -7,9 +7,11 @@
   - name: include tasks for installing ps80 packages
     vars:
       packages: percona-server-server
-    include_tasks: ../tasks/install_ps80.yml
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+    include_tasks:
+      file: ../tasks/install_ps80.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
 # Start mysql service
   - name: start mysql service on Debian
