@@ -22,7 +22,6 @@ on:
           - pmm2-client_integration_upgrade
           - pmm2-client_integration_auth_config
           - pmm2-client_integration_auth_register
-          - pmm2-client_integration_auth_setup
           - pmm2-client_integration_custom_path
           - pmm2-client_integration_custom_port
           - pmm2-client_integration_upgrade_custom_port
@@ -61,12 +60,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
+        os: ["bionic-x64",
+          "bullseye-x64",
+          "buster-x64",
+          "focal-x64",
+          "jammy-x64",
+          "centos-7-x64",
+          "ol-8-x64",
+          "ol-9-x64"]
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
-      repository: ${{ inputs.repository || 'dev-latest' }}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
+      repository: ${{ inputs.repository || 'release'}}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
       playbook: ${{ inputs.playbook || 'pmm2-client_integration' }}
       test_name: ${{ matrix.os }}
       os: ${{ matrix.os }}
