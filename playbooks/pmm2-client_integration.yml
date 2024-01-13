@@ -92,9 +92,6 @@
     loop:
       - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up 1' }
       - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up 1' }
-
-  - name: Remove MongoDB service from monitoring which was added via socket
-    command: pmm-admin remove mongodb {{ mongo_socket_service_name }}
 ### end PSMDB 6.0
 
 ### start PGSQL 13
@@ -121,59 +118,8 @@
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.lr"} 1' }
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
-
-  - name: Remove PostgreSQL service added via socket
-    when: '"pg-13" in enabled_db'
-    command: pmm-admin remove postgresql {{ pgsql_socket_service_name }}
 ### end PG
 
 ### verifications
-  - name: Check pmm2-client files
-    include_tasks: ../tasks/verify_pmm_client_files.yml
-
-  - name: Parse and set PMM minor version
-    shell: "pmm-admin --version | grep -oP '(?<=[.])\\w+(?=[.])' | head -1"
-    register: pmm_agent_minor_version
-
-  - name: Validate Exporters Port in output  for 2.29.0+
-    when: pmm_agent_minor_version.stdout | int >= 29
-    include_tasks: ../tasks/verify_exporter_port_output.yml
-    loop: "{{ ex_list|select|list }}"
-    vars:
-      ex_list:
-        - vmagent
-        - node_exporter
-        - "{{ ('ps-' in enabled_db | join('')) | ternary('mysqld_exporter','') }}"
-        - "{{ ('psmdb-' in enabled_db | join('')) | ternary('mongodb_exporter','') }}"
-        - "{{ ('pg-' in enabled_db | join('')) | ternary('postgres_exporter','') }}"
-
-  - name: "Wait for 'node_exporter' is Running"
-    include_tasks: ../tasks/wait_exporter_is_running.yml
-    vars:
-      process_name: "node_exporter"
-
-  - name: Verify Node Exporter metric endpoint with Auth works
-    include_tasks: ../tasks/verify_pmm2_metric.yml
-    vars:
-      retries: 3
-      delay: 10
-    loop:
-      - { service_name: 'node_exporter', metric: 'node_textfile_scrape_error 0' }
-
-
-  - name: "Wait for 'vmagent' is Running"
-    include_tasks: ../tasks/wait_exporter_is_running.yml
-    vars:
-      process_name: "vmagent"
-
-  - name: "Validate 'postgresql_pgstatements_agent' is Running"
-    when: '"pg-" in enabled_db | join("")'
-    include_tasks: ../tasks/verify_exporter_status.yml
-    vars:
-      process_name: "postgresql_pgstatements_agent"
-
-  - name: "Wait for 'postgres_exporter' is Running"
-    when: '"pg-" in enabled_db | join("")'
-    include_tasks: ../tasks/wait_exporter_is_running.yml
-    vars:
-      process_name: "postgres_exporter"
+  - name: Perform standard verifications set for PMM Client
+    include_tasks: ../tasks/verifications_set_for_pmm_client.yml

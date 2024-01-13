@@ -19,7 +19,7 @@
   assert:
     that:
       - "'Failed to get PMM Agent status from local pmm-agent' not in pmm_admin_status.stdout"
-#      - another message to check may be added here
+      - "'Connected' in pmm_admin_status.stdout"
     fail_msg: "pmm-agent is not connected to server!"
     success_msg: "pmm-agent is connected to server"
 
