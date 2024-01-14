@@ -77,7 +77,7 @@ jobs:
 
   fb_test:
     name: ${{ inputs.test_name || 'pmm2-client_integration_custom_path' }}
-    uses: ./.github/workflows/pmm-package-test-runner.yml@PMM-9527-package-tests-fb
+    uses: ./.github/workflows/pmm-package-test-runner.yml
     secrets: inherit
     needs: get_versions
     strategy:
@@ -85,9 +85,9 @@ jobs:
       matrix:
         os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
-      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      package_testing_branch: ${{ inputs.package_testing_branch || 'PMM-9527-package-tests-fb' }}
       pmm_server_image: ${{ inputs.package_testing_branch || 'perconalab/pmm-server-fb:PR-3499-af18f2c' }}
-      #      client docker - perconalab/pmm-client-fb:PR-3499-af18f2c
+#      client docker - perconalab/pmm-client-fb:PR-3499-af18f2c
       pmm_client_tarball: ${{ inputs.package_testing_branch || 'https://s3.us-east-2.amazonaws.com/pmm-build-cache/PR-BUILDS/pmm2-client/pmm2-client-PR-3499-af18f2c.tar.gz' }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
       repository: 'dev-latest'
