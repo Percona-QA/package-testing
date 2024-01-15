@@ -261,6 +261,10 @@
     include_tasks: ../tasks/install_pshell.yml
     when: install_mysql_shell == "yes" or install_mysql_shell == ""
 
+# Temporary restart mysql service till Ubuntu Focal restart issue is resolved.
+  - name: restart mysql service after upgrade
+    service: name=mysql state=restarted
+
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 

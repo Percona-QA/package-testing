@@ -33,7 +33,13 @@ mysql -e "INSTALL PLUGIN connection_control SONAME 'connection_control.so';"
 mysql -e "INSTALL PLUGIN connection_control_failed_login_attempts SONAME 'connection_control.so';"
 mysql -e "INSTALL PLUGIN authentication_ldap_simple SONAME 'authentication_ldap_simple.so';"
 mysql -e "INSTALL PLUGIN authentication_ldap_sasl SONAME 'authentication_ldap_sasl.so';"
-mysql -e "INSTALL PLUGIN authentication_fido SONAME 'authentication_fido.so';"
+
+if [ "$(grep "centos:7" /etc/os-release | wc -l)" = 1 ] || [ "$(grep "amazon_linux:2" /etc/os-release | wc -l) = 1" ]; then
+  echo "authentication_fido plugin is not supported on CentOS 7"
+else
+  mysql -e "INSTALL PLUGIN authentication_fido SONAME 'authentication_fido.so';"
+fi
+
 mysql -e "INSTALL PLUGIN clone SONAME 'mysql_clone.so';"
 
 for component in component_validate_password component_log_sink_syseventlog component_log_sink_json component_log_filter_dragnet component_audit_api_message_emit component_binlog_utils_udf component_percona_udf component_keyring_vault; do

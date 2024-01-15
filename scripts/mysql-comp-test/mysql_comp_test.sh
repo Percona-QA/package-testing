@@ -6,7 +6,7 @@ if [ "$#" -ne 1 ]; then
   echo "This script requires product parameter: ps56, ps57 or ps8x !"
   echo "Usage: ./comp_test.sh <prod>"
   exit 1
-elif ! [[ "$1" =~ ^ps5[0-9]{1}$ || "$1" =~ ^ps8[0-9]{1}$i ]]; then
+elif ! [[ "$1" =~ ^ps5[6-7]{1}$ || "$1" =~ ^ps8[0-9]{1}$i ]]; then
   echo "Product not recognized!"
   exit 1
 fi
