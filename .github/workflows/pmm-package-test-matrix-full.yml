@@ -33,7 +33,7 @@ jobs:
     name: Get versions
     uses: percona/pmm-ui-tests/.github/workflows/pmm-version-getter.yml@main
     with:
-      repository: ${{ inputs.repository || 'release'}}
+      repository: ${{ inputs.repository || 'dev-latest' }}
 
   c_test:
     name: "pmm2-client"
@@ -43,19 +43,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["bionic-x64",
-             "bullseye-x64",
-             "buster-x64",
-             "focal-x64",
-             "jammy-x64",
-             "centos-7-x64",
-             "ol-8-x64",
-             "ol-9-x64"]
+        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
-      repository: ${{ inputs.repository || 'release'}}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration"
       test_name: ${{ matrix.os }}
       os: ${{ matrix.os }}
@@ -68,19 +61,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["bionic-x64",
-             "bullseye-x64",
-             "buster-x64",
-             "focal-x64",
-             "jammy-x64",
-             "centos-7-x64",
-             "ol-8-x64",
-             "ol-9-x64"]
+        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
-      repository: ${{ inputs.repository || 'release'}}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_upgrade"
       test_name: ${{ matrix.os }}
       os: ${{ matrix.os }}
@@ -93,19 +79,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["bionic-x64",
-             "bullseye-x64",
-             "buster-x64",
-             "focal-x64",
-             "jammy-x64",
-             "centos-7-x64",
-             "ol-8-x64",
-             "ol-9-x64"]
+        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
-      repository: ${{ inputs.repository || 'release'}}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_custom_path"
       test_name: ${{ matrix.os }}
       os: ${{ matrix.os }}
@@ -118,19 +97,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["bionic-x64",
-             "bullseye-x64",
-             "buster-x64",
-             "focal-x64",
-             "jammy-x64",
-             "centos-7-x64",
-             "ol-8-x64",
-             "ol-9-x64"]
+        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
-      repository: ${{ inputs.repository || 'release'}}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration_auth_config"
       test_name: ${{ matrix.os }}
       os: ${{ matrix.os }}
@@ -143,19 +115,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["bionic-x64",
-             "bullseye-x64",
-             "buster-x64",
-             "focal-x64",
-             "jammy-x64",
-             "centos-7-x64",
-             "ol-8-x64",
-             "ol-9-x64"]
+        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
-      repository: ${{ inputs.repository || 'release'}}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration_auth_register"
       test_name: ${{ matrix.os }}
       os: ${{ matrix.os }}
@@ -168,19 +133,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["bionic-x64",
-             "bullseye-x64",
-             "buster-x64",
-             "focal-x64",
-             "jammy-x64",
-             "centos-7-x64",
-             "ol-8-x64",
-             "ol-9-x64"]
+        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
-      repository: ${{ inputs.repository || 'release'}}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration_auth_setup"
       test_name: ${{ matrix.os }}
       os: ${{ matrix.os }}
@@ -193,19 +151,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["bionic-x64",
-             "bullseye-x64",
-             "buster-x64",
-             "focal-x64",
-             "jammy-x64",
-             "centos-7-x64",
-             "ol-8-x64",
-             "ol-9-x64"]
+        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
-      repository: ${{ inputs.repository || 'release'}}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration_custom_path"
       test_name: ${{ matrix.os }}
       os: ${{ matrix.os }}
@@ -218,19 +169,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["bionic-x64",
-             "bullseye-x64",
-             "buster-x64",
-             "focal-x64",
-             "jammy-x64",
-             "centos-7-x64",
-             "ol-8-x64",
-             "ol-9-x64"]
+        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
-      repository: ${{ inputs.repository || 'release'}}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration_custom_port"
       test_name: ${{ matrix.os }}
       os: ${{ matrix.os }}
@@ -243,19 +187,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["bionic-x64",
-             "bullseye-x64",
-             "buster-x64",
-             "focal-x64",
-             "jammy-x64",
-             "centos-7-x64",
-             "ol-8-x64",
-             "ol-9-x64"]
+        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
-      repository: ${{ inputs.repository || 'release'}}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration_upgrade_custom_port"
       test_name: ${{ matrix.os }}
       os: ${{ matrix.os }}
@@ -268,19 +205,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["bionic-x64",
-             "bullseye-x64",
-             "buster-x64",
-             "focal-x64",
-             "jammy-x64",
-             "centos-7-x64",
-             "ol-8-x64",
-             "ol-9-x64"]
+        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
-      repository: ${{ inputs.repository || 'release'}}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration"
       test_name: ${{ matrix.os }}
       os: ${{ matrix.os }}
@@ -293,19 +223,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["bionic-x64",
-             "bullseye-x64",
-             "buster-x64",
-             "focal-x64",
-             "jammy-x64",
-             "centos-7-x64",
-             "ol-8-x64",
-             "ol-9-x64"]
+        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
-      repository: ${{ inputs.repository || 'release'}}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration_upgrade"
       test_name: ${{ matrix.os }}
       os: ${{ matrix.os }}
@@ -318,19 +241,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["bionic-x64",
-             "bullseye-x64",
-             "buster-x64",
-             "focal-x64",
-             "jammy-x64",
-             "centos-7-x64",
-             "ol-8-x64",
-             "ol-9-x64"]
+        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
-      repository: ${{ inputs.repository || 'release'}}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto'}}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration_upgrade_custom_path"
       test_name: ${{ matrix.os }}
       os: ${{ matrix.os }}

@@ -1,5 +1,5 @@
 ---
-name: package-test-pipeline
+name: package-test-runner
 
 on:
   workflow_dispatch:
@@ -17,12 +17,11 @@ on:
       pmm_client_tarball:
         description: "PMM Client tarball link or FB-code"
         type: string
-#      package_repo: experimental | testing | main | pmm2-client-main
       expected_version:
         description: "expected version"
         required: false
         type: string
-      # TODO: investigate switch to actual repo name
+      # TODO: investigate switch to actual repo name: experimental | testing | main | pmm2-client-main
       repository:
         description: "Select Repo to install PMM Client:"
         required: true
@@ -53,17 +52,17 @@ on:
       os:
         description: "Select OS to run test in:"
         required: true
-        default: "jammy-x64"
+        default: "jammy"
         type: choice
         options:
-          - bionic-x64
-          - bullseye-x64
-          - buster-x64
-          - focal-x64
-          - jammy-x64
-          - centos-7-x64
-          - ol-8-x64
-          - ol-9-x64
+          - bionic
+          - bullseye
+          - buster
+          - focal
+          - jammy
+          - centos-7
+          - ol-8
+          - ol-9
 
   workflow_call:
     inputs:
@@ -98,7 +97,7 @@ on:
       os:
         description: "Select OS to run test in:"
         required: true
-        default: "jammy-x64"
+        default: "jammy"
         type: string
 
 jobs:
@@ -116,6 +115,7 @@ jobs:
       REPO: ${{ inputs.repository || 'dev-latest' }}
       METRICS_MODE: ${{ inputs.metrics_mode || 'auto' }}
       PLAYBOOK: ${{ inputs.playbook }}
+      VERBOSE: "no"
 
     steps:
       - name: "Create status check"
@@ -160,11 +160,13 @@ jobs:
           fi
           if [[ "${{ inputs.repository }}" =~ "candidate" ]]; then
             echo "REPO=testing" >> $GITHUB_ENV
+            echo "EXPECTED_VERSION=$(echo ${{ inputs.expected_version }} | awk -F'-' '{print $1}')" >> $GITHUB_ENV
+            echo "expected version is ${{ env.EXPECTED_VERSION }}"
           fi
           if [[ "${{ inputs.repository }}" = "release" ]]; then
             echo "REPO=release" >> $GITHUB_ENV
           fi
-          echo "${{ env.REPO }}"
+          echo "repo=${{ env.REPO }}"
           
           ### vagrant vm ###
           if [[ "${{ inputs.os }}" =~ "buster" ]]; then
@@ -277,7 +279,8 @@ jobs:
                 sudo apt-get install -y ansible git wget
               fi
               cd /pmm/package-testing/playbooks
-              ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 ${{ env.PLAYBOOK }}.yml
+              ###TODO: consider adding "-vv" flag based on input."
+              ansible-playbook ${{env.VERBOSE == 'yes' && '-vv' || ''}} --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 ${{ env.PLAYBOOK }}.yml
               SHELL
           end
 
