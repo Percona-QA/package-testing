@@ -17,7 +17,7 @@
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
     custom_port: 17788
     port_flag: "--pmm-agent-listen-port={{ custom_port }}"
-    feature_build: "{{ lookup('env', 'feature_build') }}"
+    tarball_link: "{{ lookup('env', 'tarball_link') }}"
 
   tasks:
   - name: Register Instance IP
@@ -45,7 +45,7 @@
 
 ### install PMM Client from tarball
   - name: setup pmm2-client artifacts for custom path
-    command: "../scripts/pmm2_client_install_tarball.sh -l -v {{ (feature_build is defined) | ternary(feature_build, pmm_version) }}"
+    command: "../scripts/pmm2_client_install_tarball.sh -l -v {{ (tarball_link is defined) | ternary(tarball_link, pmm_version) }}"
 
   - name: check that PMM client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
