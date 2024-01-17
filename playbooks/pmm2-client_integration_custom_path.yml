@@ -18,7 +18,7 @@
     agent_password: "pmm-pass"
     pmm_repo: "{{ lookup('env', 'install_repo') }}"
     custom_path: "/pmm2-client-custom-path"
-    feature_build: "{{ lookup('env', 'feature_build') }}"
+    tarball_link: "{{ lookup('env', 'tarball_link') }}"
 
   tasks:
   - name: Register Instance IP
@@ -46,7 +46,7 @@
 
 ### install PMM Client from tarball
   - name: install pmm2-client tarball to custom path
-    command: "../scripts/pmm2_client_install_tarball.sh -v {{ (feature_build is defined) | ternary(feature_build, pmm_version) }} -p {{ custom_path }}"
+    command: "../scripts/pmm2_client_install_tarball.sh -v {{ (tarball_link is defined) | ternary(tarball_link, pmm_version) }} -p {{ custom_path }}"
 
   - name: check that PMM client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
