@@ -31,7 +31,7 @@ if version.parse(PXC_VER_UPSTREAM) >= version.parse("8.1.0"):
     DEB_SOFTWARE_FILES=['buster','bullseye', 'bookworm', 'focal', 'jammy']
     RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
 elif version.parse(PXC_VER_UPSTREAM) > version.parse("8.0.0") and version.parse(PXC_VER_UPSTREAM) < version.parse("8.1.0"):
-    DEB_SOFTWARE_FILES=['buster','bullseye', 'bookworm', 'bionic','focal', 'jammy']
+    DEB_SOFTWARE_FILES=['buster','bullseye', 'bookworm', 'focal', 'jammy']
     RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
 elif version.parse(PXC_VER_UPSTREAM) > version.parse("5.7.0") and version.parse(PXC_VER_UPSTREAM) < version.parse("8.0.0"):
     DEB_SOFTWARE_FILES=['buster', 'bullseye', 'bookworm', 'bionic','focal', 'jammy']
