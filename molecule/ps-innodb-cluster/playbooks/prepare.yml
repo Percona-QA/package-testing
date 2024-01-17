@@ -95,7 +95,7 @@
         state: latest
       vars:
         packages:
-#         - pv
+          - pv
           - libselinux-python
           - unzip
           - wget

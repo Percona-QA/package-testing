@@ -74,12 +74,13 @@
     until: result is not failed
     when: ansible_os_family == "Debian"
 
-  - name: install needed packages for running tests with yum(updated with amazon linux 2)
+  - name: install needed packages for running tests with yum
     yum:
       name: "{{ packages }}"
       state: latest
     vars:
       packages:
+      - pv       
       - libselinux-python
       - unzip
       - wget
@@ -132,10 +133,10 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/kaushikpuneet07/package-testing/archive/innodb.zip
+    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
     - unzip master.zip
     - rm -f master.zip
-    - mv package-testing-innodb /package-testing
+    - mv package-testing-master /package-testing
     when: lookup('env', 'USE_LOCAL_PKG_TEST') == "" or lookup('env', 'USE_LOCAL_PKG_TEST') == "0"
 
   - name: install latest bats from github

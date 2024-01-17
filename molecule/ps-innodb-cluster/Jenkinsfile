@@ -6,7 +6,7 @@ pipeline {
     string(name: 'UPSTREAM_VERSION', defaultValue: '8.0.26', description: 'Upstream MySQL version')
     string(name: 'PS_VERSION', defaultValue: '16', description: 'Percona part of version')
     string(name: 'PS_REVISION', defaultValue: '3d64165', description: 'Short git hash for release')
-    choice(name: 'TEST_DIST', choices: ['bento/ubuntu-20.04','bento/ubuntu-18.04','bento/debian-10','bento/centos-7','bento/oracle-8','generic/oracle9','bento/ubuntu-22.04','bento/debian-12','bento/amazonlinux-2'], description: 'On which image to run test.')
+    choice(name: 'TEST_DIST', choices: ['bento/ubuntu-20.04','bento/ubuntu-18.04','bento/debian-10','bento/centos-7','bento/oracle-8','generic/oracle9','bento/ubuntu-22.04','bento/debian-12'], description: 'On which image to run test.')
     choice(name: 'INSTALL_REPO', choices: ['testing','main','experimental'], description: 'Repo to install packages from.')
   }
   stages {
@@ -28,7 +28,7 @@ pipeline {
             pip3 install wheel
             pip3 install molecule==2.22 ansible python-vagrant testinfra pytest
             rm -rf package-testing
-            git clone https://github.com/kaushikpuneet07/package-testing.git --branch innodb --depth 1
+            git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
           '''
       } //end steps
     } //end Prepare stage
