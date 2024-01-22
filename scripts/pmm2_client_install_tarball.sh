@@ -106,7 +106,7 @@ fi
 ### Main program
 echo "Downloading ${tarball_url}"
 mkdir -p ./tmp/
-wget -O ./tmp/pmm2-client.tar.gz --progress=dot:giga "${tarball_url}"
+wget -O ./tmp/pmm2-client.tar.gz --progress=dot:giga "${tarball_url}" || exit 1
 tar -xvf "./tmp/pmm2-client.tar.gz" -C ./tmp/
 cd ./tmp
 extracted_folder_name=`ls -1td pmm2-client* 2>/dev/null | grep -v ".tar" | grep -v ".sh" | head -n1`

@@ -86,9 +86,8 @@ jobs:
         os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'PMM-9527-package-tests-fb' }}
-      pmm_server_image: ${{ inputs.package_testing_branch || 'perconalab/pmm-server-fb:PR-3499-af18f2c' }}
-#      client docker - perconalab/pmm-client-fb:PR-3499-af18f2c
-      pmm_client_tarball: ${{ inputs.package_testing_branch || 'https://s3.us-east-2.amazonaws.com/pmm-build-cache/PR-BUILDS/pmm2-client/pmm2-client-PR-3499-af18f2c.tar.gz' }}
+      pmm_server_image: ${{ inputs.package_testing_branch || 'perconalab/pmm-server-fb:PR-3510-9cb96a5' }}
+      pmm_client_tarball: ${{ inputs.package_testing_branch || 'https://s3.us-east-2.amazonaws.com/pmm-build-cache/PR-BUILDS/pmm2-client/pmm2-client-PR-3510-9cb96a5.tar.gz' }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
       repository: 'dev-latest'
       metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
