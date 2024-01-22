@@ -47,7 +47,7 @@ if version.parse(PXC_VER_PERCONA) > version.parse("8.1.0"):
     DEB_SOFTWARE_FILES=['buster', 'bullseye', 'bookworm', 'focal', 'jammy']
     RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
 elif version.parse(PXC_VER_PERCONA) > version.parse("8.0.0") and version.parse(PXC_VER_PERCONA) < version.parse("8.1.0"):
-    DEB_SOFTWARE_FILES=['buster', 'bullseye', 'bookworm', 'bionic', 'focal', 'jammy']
+    DEB_SOFTWARE_FILES=['buster', 'bullseye', 'bookworm', 'focal', 'jammy']
     RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
 elif version.parse(PXC_VER_PERCONA) > version.parse("5.7.0") and version.parse(PXC_VER_PERCONA) < version.parse("8.0.0"):
     assert not version.parse(PXC_VER_PERCONA) > version.parse("5.7.0") and version.parse(PXC_VER_PERCONA) < version.parse("8.0.0"), "PS 5.7 is not suported"
@@ -77,7 +77,7 @@ def get_package_tuples():
             assert "percona-xtrabackup-" + PXB_VER+ "-Linux-x86_64.glibc" + glibc_version + "-minimal.tar.gz" in req.text
             assert "percona-xtrabackup-" + PXB_VER+ "-Linux-x86_64.glibc" + glibc_version + ".tar.gz" in req.text
             # Check ProxySQL
-            glibc_versions=["2.17","2.23","2.27"]
+            glibc_versions=["2.17","2.23"]
             for glibc_version in glibc_versions:
                 assert "proxysql-" + PROXYSQL_VER + "-Linux-x86_64.glibc" + glibc_version + ".tar.gz" in req.text
         # Test source tarballs
