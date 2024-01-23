@@ -85,6 +85,8 @@
   - name: Verify if Metric Endpoint with Auth works for Mysqld Exporter
     when: '"ps-" in enabled_db | join("")'
     include_tasks: ../tasks/verify_pmm2_metric.yml
+    vars:
+      retries: 10
     loop:
       - { service_name: '{{ mysql_service_name }}', metric: 'mysql_up 1' }
 ## end PS
