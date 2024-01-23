@@ -15,7 +15,7 @@
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
     pmm_repo: "{{ lookup('env', 'install_repo') }}"
     custom_path: "/pmm2-client-custom-path"
-    feature_build: "{{ lookup('env', 'feature_build') }}"
+    tarball_link: "{{ lookup('env', 'tarball_link') }}"
 
   tasks:
   - name: Register Instance IP
