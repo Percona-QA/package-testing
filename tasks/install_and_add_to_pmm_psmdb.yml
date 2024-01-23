@@ -1,4 +1,4 @@
-# This task installs and starts Percona Server MongoDB 6.0 on Oracle Linux and Debian/Ubuntu
+# This task installs and starts Percona Server MongoDB on Oracle Linux and Debian/Ubuntu
 #
 # Task adjustments are handled by parent playbook vars:
 #             var "port_flag"      :  to access agent with custom port
