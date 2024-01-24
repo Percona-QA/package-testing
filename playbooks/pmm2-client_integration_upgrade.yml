@@ -3,9 +3,7 @@
 #   prepare Percona Repository and software
 #   install PMM old client deb/rpm
 #   perform correct setup
-#   setup PS 5.7
-#   setup PSMDB 7.0
-#   setup PGSQL 13
+#   setup PS, PSMDB and PDPGSQL;
 #   install PMM the latest client deb/rpm
 #   verify versions, exporters still work, metrics, etc.
 #
@@ -29,19 +27,7 @@
       instance_ip: "{{ instance_ip.stdout }}"
 
   - name: Set Integrations list
-    set_fact:
-      enabled_db: "{{ db_list|select|list }}"
-    vars:
-      db_list:
-        - "{{ (false) | ternary('ps-8.0','') }}"
-        - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '9') | ternary('ps-5.7','') }}"
-        - "{{ (ansible_os_family == 'Debian') | ternary('ps-5.7','') }}"
-        - "{{ (ansible_distribution == 'Debian' and ansible_distribution_major_version > '10') | ternary('psmdb-70','') }}"
-        - "{{ (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version <= '18') | ternary('psmdb-60','') }}"
-        - "{{ (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version > '18') | ternary('psmdb-70','') }}"
-        - "{{ (ansible_distribution == 'Debian' and ansible_distribution_major_version <= '10') | ternary('psmdb-60','') }}"
-        - "{{ (ansible_os_family == 'Debian') | ternary('pg-13','') }}"
-        - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '8') | ternary('pg-13','') }}"
+    include_tasks: ../tasks/pmm2-client_test_enabled_db.yml
 
   - set_fact:
       rnd: "{{ 1000 | random }}"
@@ -116,7 +102,7 @@
       fail_msg: "pmm-agent is not connected to server!"
       success_msg: "pmm-agent is connected to server"
 
-### start PS 5.7
+### start PS
   - set_fact:
       mysql_service_name: "mysql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
 #      mysql_service_name: "mysql_{{ rnd }}_{{ instance_ip }}"
@@ -132,7 +118,7 @@
       - { service_name: '{{ mysql_service_name }}', metric: 'mysql_up 1' }
 ## end PS
 
-### start PSMDB 6.0
+### start PSMDB
   - set_fact:
       mongo_service_name: "mongodb_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
       mongo_socket_service_name: "mongodb_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
@@ -150,9 +136,9 @@
     loop:
       - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up 1' }
       - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up 1' }
-### end PSMDB 6.0
+### end PSMDB
 
-### start PGSQL 13
+### start PDPGSQL
   - set_fact:
       pgsql_service_name: "pgsql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
       pgsql_socket_service_name: "pgsql_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"

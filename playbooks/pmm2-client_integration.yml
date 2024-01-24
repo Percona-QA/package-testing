@@ -3,9 +3,7 @@
 #   prepare Percona Repository and software
 #   install PMM client deb/rpm
 #   perform correct setup
-#   setup PS 5.7
-#   setup PSMDB 7.0
-#   setup PGSQL 13
+#   setup PS, PSMDB and PDPGSQL;
 #   verify versions, metrics, exporters, etc.
 #
 - hosts: all
@@ -28,19 +26,7 @@
       instance_ip: "{{ instance_ip.stdout }}"
 
   - name: Set Integrations list
-    set_fact:
-      enabled_db: "{{ db_list|select|list }}"
-    vars:
-      db_list:
-        - "{{ (false) | ternary('ps-8.0','') }}"
-        - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '9') | ternary('ps-5.7','') }}"
-        - "{{ (ansible_os_family == 'Debian') | ternary('ps-5.7','') }}"
-        - "{{ (ansible_distribution == 'Debian' and ansible_distribution_major_version > '10') | ternary('psmdb-70','') }}"
-        - "{{ (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version <= '18') | ternary('psmdb-60','') }}"
-        - "{{ (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version > '18') | ternary('psmdb-70','') }}"
-        - "{{ (ansible_distribution == 'Debian' and ansible_distribution_major_version <= '10') | ternary('psmdb-60','') }}"
-        - "{{ (ansible_os_family == 'Debian') | ternary('pg-13','') }}"
-        - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '8') | ternary('pg-13','') }}"
+    include_tasks: ../tasks/pmm2-client_test_enabled_db.yml
 
   - name: Setup environment
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
@@ -64,7 +50,7 @@
   - name: Check that PMM client version is correct
     include_tasks: ../tasks/verify_pmm_status_versions.yml
 
-### start PS 5.7
+### start PS
   - set_fact:
       mysql_service_name: "mysql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
 #      mysql_service_name: "mysql_{{ rnd }}_{{ instance_ip }}"
@@ -78,7 +64,7 @@
     include_tasks: ../tasks/verify_pmm2_metric.yml
     loop:
       - { service_name: '{{ mysql_service_name }}', metric: 'mysql_up 1' }
-## end PS 5.7
+## end PS
 
 ### start PSMDB
   - set_fact:
@@ -100,7 +86,7 @@
       - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up 1' }
 ### end PSMDB
 
-### start PGSQL 13
+### start PDPGSQL
   - set_fact:
       pgsql_service_name: "pgsql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
       pgsql_socket_service_name: "pgsql_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"

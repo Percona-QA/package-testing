@@ -29,19 +29,7 @@
       instance_ip: "{{ instance_ip.stdout }}"
 
   - name: Set Integrations list
-    set_fact:
-      enabled_db: "{{ db_list|select|list }}"
-    vars:
-      db_list:
-        - "{{ (false) | ternary('ps-8.0','') }}"
-        - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '9') | ternary('ps-5.7','') }}"
-        - "{{ (ansible_os_family == 'Debian') | ternary('ps-5.7','') }}"
-        - "{{ (ansible_distribution == 'Debian' and ansible_distribution_major_version > '10') | ternary('psmdb-70','') }}"
-        - "{{ (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version <= '18') | ternary('psmdb-60','') }}"
-        - "{{ (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version > '18') | ternary('psmdb-70','') }}"
-        - "{{ (ansible_distribution == 'Debian' and ansible_distribution_major_version <= '10') | ternary('psmdb-60','') }}"
-        - "{{ (ansible_os_family == 'Debian') | ternary('pg-13','') }}"
-        - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '8') | ternary('pg-13','') }}"
+    include_tasks: ../tasks/pmm2-client_test_enabled_db.yml
 
   - name: include tasks for test env setup
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
