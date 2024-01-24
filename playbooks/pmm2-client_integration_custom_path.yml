@@ -97,10 +97,11 @@
       mongo_socket_service_name: "mongodb_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
 #      mongo_service_name: "mongodb_{{ rnd }}_{{ instance_ip }}"
 
-  - name: Install and start Percona Server MongoDB 7.0
+  - name: Install and start Percona Server MongoDB
+    when: '"psmdb-" in enabled_db | join("")'
     include_tasks: ../tasks/install_and_add_to_pmm_psmdb.yml
     vars:
-      psmdb_to_test: "psmdb-70"
+      psmdb_to_test:  "{{ enabled_db | select('match', '^psmdb-*') | join('') }}"
 
   - name: Verify MongoDB Exporter metric endpoint with Auth(including service with socket)
     when: '"psmdb-" in enabled_db | join("")'
