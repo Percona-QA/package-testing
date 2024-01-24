@@ -33,7 +33,7 @@ on:
 
 jobs:
   i_test:
-    name: "pmm2-client_integration"
+    name: "pmm2-client Package"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
@@ -43,7 +43,7 @@ jobs:
       playbook: "pmm2-client_integration"
 
   u_test:
-    name: "pmm2-client_integration_upgrade"
+    name: "Package Upgrade"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
@@ -53,7 +53,7 @@ jobs:
       playbook: "pmm2-client_integration_upgrade"
 
   t_test:
-    name: "pmm2-client_integration_upgrade_custom_path"
+    name: "Tarball Upgrade (custom path)"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
