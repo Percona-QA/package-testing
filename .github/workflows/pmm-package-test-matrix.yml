@@ -33,7 +33,7 @@ on:
 
 jobs:
   i_test:
-    name: "pmm2-client Package"
+    name: "Package Install"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
