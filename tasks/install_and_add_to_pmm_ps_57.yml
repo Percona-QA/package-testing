@@ -40,11 +40,17 @@
 
 - name: add mysql instance for monitoring
   when: ansible_os_family == "RedHat"
-  command: pmm-admin add mysql {{ port_flag if port_flag is defined else '' }} --password='U?fY)9s7|3gxUm' --service-name={{ mysql_service_name }} --query-source=perfschema
+  command: >-
+    pmm-admin add mysql {{ port_flag if port_flag is defined else '' }}
+    --password='U?fY)9s7|3gxUm' --service-name={{ mysql_service_name }} --query-source=perfschema 
+    {{ '' if agent_password is not defined else '--agent-password=%s' | format(agent_password) }} 
 
 - name: add mysql instance for monitoring via socket
   when: ansible_os_family != "RedHat"
-  command: pmm-admin add mysql {{ port_flag if port_flag is defined else '' }} --socket=/var/run/mysqld/mysqld.sock --service-name={{ mysql_service_name }} --query-source=perfschema
+  command: >-
+    pmm-admin add mysql {{ port_flag if port_flag is defined else '' }}
+    --socket=/var/run/mysqld/mysqld.sock --service-name={{ mysql_service_name }} --query-source=perfschema
+    {{ '' if agent_password is not defined else '--agent-password=%s' | format(agent_password) }} 
 
 - name: "Validate pmm-admin list output contains 'MySQL'"
   include_tasks: ./verify_pmm-admin_list_contains.yml

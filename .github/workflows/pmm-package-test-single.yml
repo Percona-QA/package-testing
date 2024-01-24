@@ -53,7 +53,7 @@ jobs:
       repository: ${{ inputs.repository || 'release'}}
 
   p_test:
-    name: ${{ inputs.test_name || 'pmm2-client_integration' }}
+    name: ${{ inputs.playbook }}
     uses: ./.github/workflows/pmm-package-test-runner.yml
     secrets: inherit
     needs: get_versions
