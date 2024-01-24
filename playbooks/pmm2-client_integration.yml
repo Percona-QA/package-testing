@@ -98,7 +98,7 @@
     loop:
       - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up 1' }
       - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up 1' }
-### end PSMDB 6.0
+### end PSMDB
 
 ### start PGSQL 13
   - set_fact:
