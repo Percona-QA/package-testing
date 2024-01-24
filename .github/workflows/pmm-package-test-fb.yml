@@ -64,9 +64,6 @@ on:
         required: true
         default: 'auto'
         type: string
-  push:
-    branches:
-      - PMM-9527-package-tests-fb
 
 jobs:
   get_versions:
