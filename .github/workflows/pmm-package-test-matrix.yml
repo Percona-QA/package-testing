@@ -32,62 +32,32 @@ on:
           - pull
 
 jobs:
-  get_versions:
-    name: Get versions
-    uses: percona/pmm-ui-tests/.github/workflows/pmm-version-getter.yml@main
-    with:
-      repository: ${{ inputs.repository || 'dev-latest' }}
-
   i_test:
     name: "pmm2-client_integration"
-    uses: ./.github/workflows/pmm-package-test-runner.yml
+    uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
-    needs: get_versions
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
-      expected_version: ${{needs.get_versions.outputs.finish_version}}
       repository: ${{ inputs.repository || 'dev-latest' }}
       metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration"
-      test_name: ${{ matrix.os }}
-      os: ${{ matrix.os }}
 
   u_test:
     name: "pmm2-client_integration_upgrade"
-    uses: ./.github/workflows/pmm-package-test-runner.yml
+    uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
-    needs: get_versions
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
-      expected_version: ${{needs.get_versions.outputs.finish_version}}
       repository: ${{ inputs.repository || 'dev-latest' }}
       metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration_upgrade"
-      test_name: ${{ matrix.os }}
-      os: ${{ matrix.os }}
 
   t_test:
     name: "pmm2-client_integration_upgrade_custom_path"
-    uses: ./.github/workflows/pmm-package-test-runner.yml
+    uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
-    needs: get_versions
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
-      expected_version: ${{needs.get_versions.outputs.finish_version}}
       repository: ${{ inputs.repository || 'dev-latest' }}
       metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration_upgrade_custom_path"
-      test_name: ${{ matrix.os }}
-      os: ${{ matrix.os }}
