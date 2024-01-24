@@ -132,7 +132,7 @@ jobs:
           sha: ${{ env.SHA }}
 
       - name: 'Checkout package-testing: "${{ inputs.package_testing_branch }}"'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.package_testing_branch }}
 
