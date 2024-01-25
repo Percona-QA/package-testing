@@ -3,7 +3,7 @@
 # Task adjustments are handled by parent playbook vars:
 #         var "port_flag"      :  to access agent with custom port
 #                                 ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
-#         var "agentPassword"  :  password for specified username to authenticate to exporter
+#         var "agent_password"  :  password for specified username to authenticate to exporter
 #
 #   must be called with "include_tasks" and "with_items:" or "loop:", ex:
 #  - name: some name for the task

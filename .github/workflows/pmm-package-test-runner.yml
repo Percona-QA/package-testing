@@ -132,7 +132,7 @@ jobs:
           sha: ${{ env.SHA }}
 
       - name: 'Checkout package-testing: "${{ inputs.package_testing_branch }}"'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.package_testing_branch }}
 
@@ -164,7 +164,7 @@ jobs:
             echo "expected version is ${{ env.EXPECTED_VERSION }}"
           fi
           if [[ "${{ inputs.repository }}" = "release" ]]; then
-            echo "REPO=release" >> $GITHUB_ENV
+            echo "REPO=main" >> $GITHUB_ENV
           fi
           echo "repo=${{ env.REPO }}"
           
@@ -288,7 +288,7 @@ jobs:
 
           EOF
 
-      - name: "Run ${{ inputs.test_name }} test on ${{ inputs.os }}"
+      - name: "Run (${{ inputs.repository }})${{ inputs.test_name }} test on ${{ inputs.os }}"
         working-directory: ./
         run: vagrant up
 

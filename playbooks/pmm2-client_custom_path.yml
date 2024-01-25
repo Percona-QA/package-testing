@@ -16,6 +16,7 @@
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
     custom_path: "/pmm2-client-custom-path"
+    tarball_link: "{{ lookup('env', 'tarball_link') }}"
 
   tasks:
   - name: Register Instance IP
@@ -28,31 +29,44 @@
 
 ### install pmm2-client from tarball
   - name: Install pmm2-client tarball to custom path
-    command: "../scripts/pmm2_client_install_tarball.sh -v {{ pmm_version }} -p {{ custom_path }}"
+    command: "../scripts/pmm2_client_install_tarball.sh -v {{ (tarball_link|length > 0) | ternary(tarball_link, pmm_version) }} -p {{ custom_path }}"
 
   - name: check that PMM client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
 
-### Setup PMM Client
+### Setup PMM Client(wrong)
   - name: Use pmm-agent setup to configure pmm client with wrong path-base
-    shell: pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-insecure-tls --server-address={{ pmm_server_address }} --metrics-mode={{ metrics_mode }} --server-username=admin --server-password={{ pmm_server_password }} --paths-base=/wrong_folder/ {{ instance_ip }} generic node2_{{ instance_ip }}
+    shell: >-
+      pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-insecure-tls
+      --server-address={{ pmm_server_address }}
+      --metrics-mode={{ metrics_mode }}
+      --server-username=admin
+      --server-password={{ pmm_server_password }}
+      --paths-base=/wrong_folder/ {{ instance_ip }} generic node_{{ instance_ip }}
 
   - name: Start agent
     shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
 
-  - name: Wait for node_exporter to have Waiting Status.
-    shell: pmm-admin list | grep 'node_exporter' | awk -F" " '{print $2}'
+  - name: "Wait for 'node_exporter' is Waiting"
+    shell: pmm-admin list | grep 'node_exporter' | awk -F' ' '{print $2}'
     register: node_exporter_status
     until: node_exporter_status.stdout.find('Waiting') != -1
     delay: 5
     retries: 5
 
-  - name: Check pmm-agent log to see the error about wrong base path
+  - name: Assert pmm-agent.log contains the error about wrong base path
     shell: cat pmm-agent.log | grep 'no such file or directory'
 
 ### Setup PMM Client
   - name: Use "pmm-admin config" to set correct  path base
-    shell: pmm-admin config --force --server-insecure-tls --metrics-mode={{ metrics_mode }} --paths-base={{ custom_path }}/  --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
+    shell: >-
+      pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-insecure-tls
+      --server-address={{ pmm_server_address }}
+      --metrics-mode={{ metrics_mode }}
+      --server-username=admin
+      --server-password={{ pmm_server_password }}
+      --paths-base={{ custom_path }}/
+      {{ instance_ip }} generic node_{{ instance_ip }}
 
   - name: Check if the configuration generated with paths-base is using the custom path
     include_tasks: ../tasks/verify_pmm_client_config.yml
@@ -64,12 +78,10 @@
   - name: Check that PMM client version is correct
     include_tasks: ../tasks/verify_pmm_status_versions.yml
 
-  - name: Wait for node_exporter to have Running Status.
-    shell: pmm-admin list | grep 'node_exporter' | awk -F" " '{print $2}'
-    register: node_exporter_status
-    until: node_exporter_status.stdout.find('Running') != -1
-    delay: 5
-    retries: 5
+  - name: "Wait for 'node_exporter' is Running"
+    include_tasks: ../tasks/wait_exporter_is_running.yml
+    vars:
+      process_name: "node_exporter"
 
   - name: Grep PMM Client tempdir path from config
     shell: cat {{ custom_path }}/config/pmm-agent.yaml | awk '/tempdir/ {print $NF}'
@@ -80,6 +92,10 @@
     command: "rm -r {{ tmp_path.stdout }}/vm_agent && pkill -f vmagent"
     become: yes
 
+  - name: "Wait for 'vmagent' is Running"
+    include_tasks: ../tasks/wait_exporter_is_running.yml
+    vars:
+      process_name: "vmagent"
 
   - name: PMM-8141 verify new vmscrpconfig folder is created at tmp after killing vmagent process
     command: "ls -la {{ tmp_path.stdout }}/vm_agent"
@@ -88,10 +104,3 @@
     until: vm_agent_folder_ls.stdout != ""
     delay: 1
     retries: 10
-
-  - name: Wait for VMAGENT to have Running Status.
-    shell: pmm-admin list | grep 'vmagent' | awk -F" " '{print $2}'
-    register: vmagent_status
-    until: vmagent_status.stdout.find('Running') != -1
-    delay: 5
-    retries: 5
