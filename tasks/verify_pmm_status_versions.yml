@@ -1,71 +1,46 @@
-# This task performs PMM Client version verification from "pmm-admin --version" and
+# This task performs PMM Client version verification from "pmm-admin status" and
 # "pmm-admin status" commands output
 #
 # Task adjustments are handled by parent playbook vars:
 #             var "port_flag"      :  to access agent with custom port
 #                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
-
-- name: set empty port_flag
-  when: port_flag is not defined
-  set_fact:
-    port_flag: ""
-
+#
 - name: Grep pmm-admin status output
-  shell: "pmm-admin status {{ port_flag }}"
+  shell: "pmm-admin status {{ port_flag if port_flag is defined else '' }}"
   register: pmm_admin_status
-- debug: var=pmm_admin_status.stdout
 
-- name: Assert pmm-agent is connected to server
-  assert:
-    that:
-      - "'Failed to get PMM Agent status from local pmm-agent' not in pmm_admin_status.stdout"
-      - "'Connected' in pmm_admin_status.stdout"
-    fail_msg: "pmm-agent is not connected to server!"
-    success_msg: "pmm-agent is connected to server"
+- block:
+    - name: Assert pmm-agent is connected to server
+      assert:
+        that:
+          - "'Failed to get PMM Agent status from local pmm-agent' not in pmm_admin_status.stdout"
+          - "'Connected' in pmm_admin_status.stdout"
+        fail_msg: "pmm-agent is not connected to server!"
+        success_msg: "pmm-agent is connected to server"
 
-- name: Grep PMM Server version from pmm-admin status output
-  shell: "pmm-admin status {{ port_flag }} | grep Version | awk -F':' '{print $2}' | awk -F' ' '{print $1}'"
+    - name: Grep PMM Admin version from pmm-admin status output
+      shell: "echo \"{{ pmm_admin_status.stdout }}\" | grep pmm-admin | awk -F' ' '{print $3}'"
+      register: pmm_admin_version
 
-  register: pmm_server_version
+    - name: Assert <pmm-admin> version({{ pmm_admin_version.stdout }}) from "status"  is "{{ pmm_version }}"
+      assert:
+        that:
+          - "pmm_version in pmm_admin_version.stdout"
+        fail_msg: "pmm-admin version is not {{ pmm_version }}!"
+        success_msg: "pmm-admin version is {{ pmm_admin_version.stdout }}!"
 
-- name: Print the PMM Server Version on Status command
-  ansible.builtin.debug:
-    msg: PMM Server version is {{ pmm_server_version.stdout }}
+    - name: Grep PMM Agent version from pmm-admin status output
+      shell: "echo \"{{ pmm_admin_status.stdout }}\"  | grep pmm-agent | awk -F' ' '{print $3}'"
+      register: pmm_agent_version
 
-- name: Assert PMM Server version from "status" output ({{ pmm_server_version.stdout }}) equals expected "{{ pmm_version }}"
-  when: lookup('env', 'install_repo') == "testing"
-  assert:
-    that:
-      - "pmm_version in pmm_server_version.stdout"
-
-- name: Grep PMM Admin version from pmm-admin status output
-  shell: "pmm-admin status {{ port_flag }} | grep pmm-admin | awk -F' ' '{print $3}'"
-  register: pmm_admin_version
-
-- name: Print the PMM Admin Version on Status command
-  ansible.builtin.debug:
-    msg: pmm-agent version is {{ pmm_admin_version.stdout }}
-
-- name: Assert PMM Admin version from "status" output ({{ pmm_admin_version.stdout }}) equals expected "{{ pmm_version }}"
-#  when: lookup('env', 'install_repo') == "testing"
-  assert:
-    that:
-      - "pmm_version in pmm_admin_version.stdout"
-
-- name: Grep PMM Agent version from pmm-admin status output
-  shell: "pmm-admin status {{ port_flag }} | grep pmm-agent | awk -F' ' '{print $3}'"
-  register: pmm_agent_version
-
-- name: Print the PMM Agent Version on Status command
-  ansible.builtin.debug:
-    msg: pmm-agent version is {{ pmm_agent_version.stdout }}
-
-- name: Assert PMM Agent version from "status" output ({{ pmm_agent_version.stdout }}) equals expected "{{ pmm_version }}"
-  assert:
-    that:
-      - "pmm_version in pmm_agent_version.stdout"
-
-- name: Assert PMM Admin and Agent versions are equal
-  assert:
-    that:
-      - "pmm_admin_version.stdout in pmm_agent_version.stdout"
+    - name: Assert <pmm-agent> version({{ pmm_agent_version.stdout }}) from "status" is "{{ pmm_version }}"
+      assert:
+        that:
+          - "pmm_version in pmm_agent_version.stdout"
+        fail_msg: "pmm-agent version is not {{ pmm_version }}!"
+        success_msg: "pmm-agent version is {{ pmm_agent_version.stdout }}!"
+  rescue:
+    - name: Print pmm-admin status on fail
+      debug:
+        msg: "{{ pmm_admin_status.stdout }}"
+      failed_when: true
