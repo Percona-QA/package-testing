@@ -288,7 +288,7 @@ jobs:
 
           EOF
 
-      - name: "Run (${{ inputs.repository }})${{ env.PLAYBOOK }} test on ${{ inputs.os }}"
+      - name: "Run (${{ inputs.repository }})${{ inputs.playbook }} test on ${{ inputs.os }}"
         working-directory: ./
         run: vagrant up
 
