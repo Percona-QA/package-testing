@@ -28,7 +28,7 @@ pipeline {
             pip3 install wheel
             pip3 install molecule==2.22 ansible python-vagrant testinfra pytest
             rm -rf package-testing
-            git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+            git clone https://github.com/kaushikpuneet07/package-testing.git --branch innodb-inno --depth 1
           '''
       } //end steps
     } //end Prepare stage
