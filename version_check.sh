@@ -22,10 +22,10 @@ elif [ "$1" = "ps80" ]; then
   version=${PS80_VER}
   release=${PS80_VER#*-}
   revision=${PS80_REV}
-elif [ "$1" = "ps81" ]; then
-  version=${PS81_VER}
-  release=${PS81_VER#*-}
-  revision=${PS81_REV}  
+elif [[ $1 =~ ^ps8[1-9]{1}$ ]]; then
+  version=${PS_INN_LTS_VER}
+  release=${PS_INN_LTS_VER#*-}
+  revision=${PS_INN_LTS_REV}  
 elif [ "$1" = "pxc56" ]; then
   version=${PXC56_VER%-*}
   release=${PXC56_VER#*-}
@@ -54,6 +54,8 @@ elif [ "$1" = "pxb80" ]; then
   version=${PXB80_VER}
 elif [ "$1" = "pxb81" ]; then
   version=${PXB81_VER}
+elif [[ $1 =~ ^pxb8[2-9]{1}$ ]]; then
+  version=${PXB_INN_LTS_VER}
 elif [ "$1" = "pmm" ]; then
   version=${PMM_VER}
 elif [ "$1" = "pmm2" ]; then
@@ -90,7 +92,7 @@ product=$1
 log="/tmp/${product}_version_check.log"
 echo -n > "${log}"
 
-if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" -o "${product}" = "ps81" ]; then
+if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9]{1}$ ]]; then
   for i in @@INNODB_VERSION @@VERSION; do
     if [ "$(mysql -e "SELECT ${i}; "| grep -c "${version}")" = 1 ]; then
       echo "${i} is correct" >> "${log}"
@@ -114,7 +116,7 @@ if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" -o 
     exit 1
   fi
 
-  if [ ${product} = "ps80" -o ${product} = "ps81" ]; then
+  if [[ ${product} =~ ^ps8[0-9]{1}$ ]]; then
     if [ -z ${install_mysql_shell} ] || [ ${install_mysql_shell} = "yes" ] ; then
       if [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
         echo "mysql-shell version is correct" >> "${log}"
@@ -187,7 +189,7 @@ elif [ ${product} = "pmm2" -o ${product} = "pmm2-rc" ]; then
   fi
   bash -xe ./check_pmm2_client_upgrade.sh ${version}
 
-elif [ "${product}" = "pxb24" -o "${product}" = "pxb80" -o "${product}" = "pxb81" ]; then
+elif [[ "${product}" = "pxb24" ]] || [[ ${product} =~ ^pxb8[0-9]{1}$ ]]; then
     for binary in xtrabackup xbstream xbcloud xbcrypt; do
         version_check=$($binary --version 2>&1| grep -c "${version}")
         installed_version=$($binary --version 2>&1|tail -1|awk '{print $3}')
