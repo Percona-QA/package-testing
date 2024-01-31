@@ -53,15 +53,11 @@
       - wget
       - jq # for exporter end point metric fetch
 
-- name: "convert {{ test_repo }} into repository name"
-  set_fact:
-    repo_name: "{{ (test_repo is search('main')) | ternary ('release', test_repo) }}"
-
-- name: enable pmm2-client {{ repo_name }} repo
+- name: enable original {{ test_repo }} repo
   include_tasks: ./enable_repo.yml
   vars:
     only: yes
     package: "original"
 ### uncomment when ENG-1194 wil be fixed
 #    package: "pmm2-client"
-    repository: "{{ repo_name }}"
+    repository: "{{ test_repo }}"

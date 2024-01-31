@@ -40,35 +40,35 @@
 
 ### enable pmm2-client release and install old version to update
   - name: enable pmm2-client release repo
-    when: test_repo == "main"
+    when: test_repo == "release"
     command: percona-release enable pmm2-client release
 
   - name: update apt repositories
-    when: test_repo == "main" and ansible_os_family == "Debian"
+    when: test_repo == "release" and ansible_os_family == "Debian"
     command: apt-get update -y
 
   - name: update repo for redhat
-    when: test_repo == "main" and ansible_os_family == "RedHat"
+    when: test_repo == "release" and ansible_os_family == "RedHat"
     shell: yum update -y
     become: true
 
   - name: detect and save release minor version
-    when: test_repo == "main"
+    when: test_repo == "release"
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-client/tags -O - | jq -r .results[].name  | grep -v latest | sort -V | tail -n1 | awk -F. '{print $2}'"
     register: pmm_release_minor_version
 
   - name: grep previous release PMM Client version from yum list
-    when: test_repo == "main" and ansible_os_family == "RedHat"
+    when: test_repo == "release" and ansible_os_family == "RedHat"
     shell: "yum list pmm2-client --showduplicates | grep 2.{{ pmm_release_minor_version.stdout | int -1 | tail -n1}}"
     register: pmm_old_version
 
   - name: grep previous release PMM Client version from apt list
-    when: test_repo == "main" and ansible_os_family == "Debian"
+    when: test_repo == "release" and ansible_os_family == "Debian"
     shell: "apt-cache madison pmm2-client | grep 2.{{ pmm_release_minor_version.stdout | int -1 }} | awk '{print $3}'"
     register: pmm_old_version
 
   - name: set PMM Client package name with old version to install
-    when: test_repo == "main"
+    when: test_repo == "release"
     set_fact:
       pmm_client_old: "pmm2-client={{ pmm_old_version.stdout }}"
 
@@ -264,14 +264,14 @@
 
   - name: enable pmm2-client release repo
     command: percona-release enable pmm2-client release
-    when: test_repo == "main"
+    when: test_repo == "release"
 
   - name: update apt repositories
-    when: test_repo == "main" and ansible_os_family == "Debian"
+    when: test_repo == "release" and ansible_os_family == "Debian"
     command: apt-get update -y
 
   - name: update repo for redhat
-    when: test_repo == "main" and ansible_os_family == "RedHat"
+    when: test_repo == "release" and ansible_os_family == "RedHat"
     shell: yum update -y
     become: true
 

@@ -163,9 +163,6 @@ jobs:
             echo "EXPECTED_VERSION=$(echo ${{ inputs.expected_version }} | awk -F'-' '{print $1}')" >> $GITHUB_ENV
             echo "expected version is ${{ env.EXPECTED_VERSION }}"
           fi
-          if [[ "${{ inputs.repository }}" = "release" ]]; then
-            echo "REPO=main" >> $GITHUB_ENV
-          fi
           echo "repo=${{ env.REPO }}"
           
           ### vagrant vm ###
