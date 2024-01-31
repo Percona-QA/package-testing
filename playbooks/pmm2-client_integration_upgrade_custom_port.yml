@@ -254,38 +254,21 @@
 
 ## end PG
 
-  - name: include tasks for enabling testing repo
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-    include: ../tasks/enable_testing_repo.yml
+### Upgrade PMM Client package
+  - name: Enable original {{ test_repo }} repo
+    include_tasks: ../tasks/enable_repo.yml
+    vars:
+      only: yes
+      package: "original"
+      repository: "{{ test_repo }}"
 
-  - name: include tasks for enabling experimental repo
-    when: lookup('env', 'install_repo') == "experimental"
-    include_tasks: ../tasks/enable_experimental_repo.yml
-
-  - name: enable pmm2-client release repo
-    command: percona-release enable pmm2-client release
-    when: test_repo == "release"
-
-  - name: update apt repositories
-    when: test_repo == "release" and ansible_os_family == "Debian"
-    command: apt-get update -y
-
-  - name: update repo for redhat
-    when: test_repo == "release" and ansible_os_family == "RedHat"
-    shell: yum update -y
-    become: true
-
-  - name: upgrade PMM client to the latest deb packages
+  - name: Upgrade PMM client to the latest deb packages
     when: ansible_os_family == "Debian"
-    apt: name={{item}} update_cache=yes state=latest
-    with_items:
-    - pmm2-client
+    apt: name=pmm2-client update_cache=yes state=latest
 
-  - name: upgrade PMM client to the latest rpm packages
+  - name: Upgrade PMM client to the latest rpm packages
     when: ansible_os_family == "RedHat"
-    yum: name={{item}} state=latest
-    with_items:
-    - pmm2-client
+    yum: name=pmm2-client state=latest
 
 ### Checks after upgrade
   - name: check that PMM client version is correct

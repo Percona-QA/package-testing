@@ -164,7 +164,7 @@
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
 ### end PG
 
-### Upgrade PMM Client
+### Upgrade PMM Client package
   - name: Enable original {{ test_repo }} repo
     include_tasks: ../tasks/enable_repo.yml
     vars:
