@@ -163,9 +163,6 @@ jobs:
             echo "EXPECTED_VERSION=$(echo ${{ inputs.expected_version }} | awk -F'-' '{print $1}')" >> $GITHUB_ENV
             echo "expected version is ${{ env.EXPECTED_VERSION }}"
           fi
-          if [[ "${{ inputs.repository }}" = "release" ]]; then
-            echo "REPO=main" >> $GITHUB_ENV
-          fi
           echo "repo=${{ env.REPO }}"
           
           ### vagrant vm ###
@@ -179,7 +176,7 @@ jobs:
           echo "VM_BOX=generic/ubuntu1804" >> $GITHUB_ENV
           fi
           if [[ "${{ inputs.os }}" =~ "focal" ]]; then
-          echo "VM_BOX=ubuntu/focal64" >> $GITHUB_ENV
+          echo "VM_BOX=generic/ubuntu2004" >> $GITHUB_ENV
           fi
           if [[ "${{ inputs.os }}" =~ "jammy" ]]; then
           echo "VM_BOX=generic/ubuntu2204" >> $GITHUB_ENV
