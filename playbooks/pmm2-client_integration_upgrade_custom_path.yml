@@ -1,5 +1,5 @@
 ---
-# Advanced package tarball upgrade test:
+# Advanced tarball upgrade test:
 #   prepare Percona Repository and software;
 #   install PMM old client tarball;
 #   perform correct setup;
