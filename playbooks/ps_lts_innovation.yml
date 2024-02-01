@@ -56,7 +56,7 @@
     shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
     register: ps_inn_lts_repo_name
 
-  - name: Set major_release_version variable
+  - name: Set ps_inn_lts_repo_name variable
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
 

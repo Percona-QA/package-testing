@@ -13,19 +13,23 @@ log="/tmp/binary_check.log"
 
 source "${SCRIPT_PWD}"/VERSIONS
 
-if [ "$1" = "pxb81" ]; then
-    product=pxb81
-    version=${PXB81_VER}
-    major_version="${PXB81_VER}"
-    minor_version="${PXB81_PKG_VER}"
+if [[ "$1" =~ ^pxb8[1-9]{1}$  ]]; then
+    product=$1
+    data="pxb81"
+    data2=${data:3:2}
+    product_version_split="${data2:0:1}.${data2:1:1}"
+
+    version=${PXB_INN_LTS_VER}
+    major_version="${PXB_INN_LTS_MAJ_VER}"
+    minor_version="${PXB_INN_LTS_PKG_VER}"
     echo "Downloading ${1} latest version..." >> "${log}"
     if [ "$2" = "main" ]; then
         if [ "$3" = "normal" ]; then
-            wget https://downloads.percona.com/downloads/Percona-XtraBackup-8.1/Percona-XtraBackup-${major_version}-${minor_version}/binary/tarball/percona-xtrabackup-${major_version}-$  {minor_version}-Linux-x86_64.glibc2.17.tar.gz
+            wget https://downloads.percona.com/downloads/Percona-XtraBackup-${product_version_split}/Percona-XtraBackup-${major_version}-${minor_version}/binary/tarball/percona-xtrabackup-${major_version}-$  {minor_version}-Linux-x86_64.glibc2.17.tar.gz
             tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17"
         else
             # Download minimal version
-            wget https://downloads.percona.com/downloads/Percona-XtraBackup-8.1/Percona-XtraBackup-${major_version}-${minor_version}/binary/tarball/percona-xtrabackup-${major_version}-$  {minor_version}-Linux-x86_64.glibc2.17-minimal.tar.gz
+            wget https://downloads.percona.com/downloads/Percona-XtraBackup-${product_version_split}/Percona-XtraBackup-${major_version}-${minor_version}/binary/tarball/percona-xtrabackup-${major_version}-$  {minor_version}-Linux-x86_64.glibc2.17-minimal.tar.gz
             tarball_dir="percona-xtrabackup-${major_version}-${minor_version}-Linux-x86_64.glibc2.17-minimal"
         fi
     else
