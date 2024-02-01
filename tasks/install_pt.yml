@@ -20,5 +20,3 @@
       packages:
       - percona-toolkit
     when: ansible_os_family == "RedHat"
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"

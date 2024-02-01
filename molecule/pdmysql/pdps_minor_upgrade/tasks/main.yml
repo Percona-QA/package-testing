@@ -12,9 +12,10 @@
       yum makecache
     when: ansible_os_family == "RedHat"
 
-  - name: disable the mysql module on RHEL/CentOS 8
-    command: yum module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    # commenting it out because of percona-toolkit issue    
+    #  - name: disable the mysql module on RHEL/CentOS 8
+    #    command: yum module disable mysql -y
+    #    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: disable the mariadb module on RHEL/CentOS 8
     command: yum module disable mariadb -y
