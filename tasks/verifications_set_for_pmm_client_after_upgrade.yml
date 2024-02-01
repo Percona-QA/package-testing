@@ -13,7 +13,7 @@
   include_tasks: ./verify_pmm_client_config.yml
 
 - name: Get "pmm-admin list" output
-  command: pmm-admin list
+  command: "pmm-admin list {{ port_flag if port_flag is defined else '' }}"
   register: list_output
 
 - name: Assert if the pmm-admin list contains MongoDB instance
