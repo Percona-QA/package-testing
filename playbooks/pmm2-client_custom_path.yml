@@ -57,6 +57,10 @@
   - name: Assert pmm-agent.log contains the error about wrong base path
     shell: cat pmm-agent.log | grep 'no such file or directory'
 
+  - name: Kill pmm-agent process
+    command: "pkill -f pmm-agent"
+    become: yes
+
 ### Setup PMM Client
   - name: Use "pmm-admin config" to set correct  path base
     shell: >-
