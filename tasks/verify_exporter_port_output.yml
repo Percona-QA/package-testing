@@ -55,7 +55,7 @@
     success_msg: "Success: {{ port_from_ps.stdout }} == {{ status_port_output.stdout }}"
 
 - name: "{{ item }}: get port from pmm-admin inventory list agents output"
-  shell: "pmm-admin inventory list agents | awk '/{{ item }}/ {print $NF}'"
+  shell: "pmm-admin inventory list agents {{ port_flag if port_flag is defined else '' }}| awk '/{{ item }}/ {print $NF}'"
   register: inventory_list_agents_port_output
   when: item != "vmagent"
 
