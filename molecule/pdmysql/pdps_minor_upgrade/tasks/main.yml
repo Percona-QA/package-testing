@@ -25,6 +25,7 @@
   - name: install Percona Toolkit new deb packages
     include_tasks: ../../../tasks/install_pt.yml
     
+    # revert order once pt issue is resolved for OL8   
   - name: disable the mysql module on RHEL/CentOS 8
     command: yum module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"  
