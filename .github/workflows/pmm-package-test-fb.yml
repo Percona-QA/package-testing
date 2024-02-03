@@ -83,8 +83,8 @@ jobs:
         os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
-      pmm_server_image: ${{ inputs.package_testing_branch }}
-      pmm_client_tarball: ${{ inputs.package_testing_branch }}
+      pmm_server_image: ${{ inputs.pmm_server_image }}
+      pmm_client_tarball: ${{ inputs.pmm_client_tarball }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
       repository: 'dev-latest'
       metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
