@@ -86,8 +86,11 @@
     become: yes
 
   - name: PMM-8141 fix for deleted vmscrpconfig file, file being created with vmagent reload
-    command: "rm -rf {{ tmp_path.stdout }}/vm_agent && pkill -f vmagent"
+    command: "{{item}}"
     become: yes
+    with_items:
+      - rm -r {{ tmp_path.stdout }}/vm_agent
+      - pkill -f vmagent
 
   - name: "Wait for 'vmagent' is Running"
     include_tasks: ../tasks/wait_exporter_is_running.yml
