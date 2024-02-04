@@ -50,7 +50,6 @@
       --metrics-mode={{ metrics_mode }}
       --server-username=admin
       --server-password={{ pmm_server_password }}
-      --paths-base={{ custom_path }}/
       {{ instance_ip }} generic node2_{{ instance_ip }}
 
   - name: Verify that config generated with the custom port listening
