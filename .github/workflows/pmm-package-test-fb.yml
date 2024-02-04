@@ -73,7 +73,7 @@ jobs:
       repository: 'dev-latest'
 
   fb_test:
-    name: ${{ inputs.test_name || 'pmm2-client_integration_custom_path' }}
+    name: ${{ inputs.playbook }}
     uses: ./.github/workflows/pmm-package-test-runner.yml
     secrets: inherit
     needs: get_versions
