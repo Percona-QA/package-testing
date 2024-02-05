@@ -244,7 +244,7 @@ jobs:
             config.vm.define :CLIENT_TEST do |t|
             end
 
-            config.vm.synced_folder "/home/runner/work/package-testing/package-testing/", "/pmm/package-testing/"
+            config.vm.synced_folder "${{ github.workspace }}/package-testing/", "/pmm/package-testing/"
             config.vm.provision "shell", privileged: true, inline: <<-SHELL
               ## Set environment variables...
               export PMM_SERVER_IP=10.0.2.2:443
