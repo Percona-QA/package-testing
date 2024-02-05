@@ -21,6 +21,7 @@ def host():
 
 @pytest.mark.skipif(ps_version_major == "5.7", reason="Skipping tests for 5.7")
 @pytest.mark.skipif(docker_acc == "perconalab", reason="Skipping tests in 'testing' repo")
+@pytest.mark.skipif(re.match(r'^8\.[1-9]$', ps_version_major), reason="Skipping latest tests for innovation release")
 class TestMysqlEnvironment:
     @pytest.mark.parametrize("pkg_name", ps_packages)
     def test_packages(self, host, pkg_name):
