@@ -12,10 +12,6 @@
       yum makecache
     when: ansible_os_family == "RedHat"
 
-  - name: disable the mysql module on RHEL/CentOS 8
-    command: yum module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
   - name: disable the mariadb module on RHEL/CentOS 8
     command: yum module disable mariadb -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
@@ -38,6 +34,11 @@
 
   - name: install Percona Toolkit new deb packages
     include_tasks: ../../../tasks/install_pt.yml
+
+# revert order once pt issue(DISTMYSQL-400) is resolved for OL8    
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: yum module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"  
 
   - name: clean yum
     shell: |
@@ -76,10 +77,10 @@
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
 
-  - name: install Percona XtraBackup {{ pxb_version }} packages
-    include_tasks: ../../../tasks/install_pxb{{ pxb_version }}.yml
+  - name: install Percona XtraBackup {{ major_release_version }} packages
+    include_tasks: ../../../tasks/install_pxb_innovation_lts.yml
     vars:
-      pxb_version: "{{ lookup('env', 'VERSION').split('.')[:2]|join('') }}"
+      major_release_version: "{{ lookup('env', 'VERSION').split('.')[:2]|join('') }}"
 
   - name: install proxysql new deb packages
     apt:

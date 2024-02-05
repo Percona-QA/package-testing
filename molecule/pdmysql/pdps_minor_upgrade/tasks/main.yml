@@ -12,10 +12,6 @@
       yum makecache
     when: ansible_os_family == "RedHat"
 
-  - name: disable the mysql module on RHEL/CentOS 8
-    command: yum module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
   - name: disable the mariadb module on RHEL/CentOS 8
     command: yum module disable mariadb -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
@@ -28,6 +24,11 @@
 
   - name: install Percona Toolkit new deb packages
     include_tasks: ../../../tasks/install_pt.yml
+    
+    # revert order once pt issue(DISTMYSQL-400) is resolved for OL8   
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: yum module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"  
 
   - name: install Percona Server deb packages
     apt:
@@ -65,10 +66,10 @@
       PERCONA_TELEMETRY_DISABLE: "1"
 
 # At this moment RHEL PXB packages do not support packages upgrade so we do not install them for major update on rhel. Re-check https://perconacorp.slack.com/archives/C047F39JKEW/p1700822258537029
-  - name: install Percona XtraBackup {{ pxb_version }} packages
-    include_tasks: ../../../tasks/install_pxb{{ pxb_version }}.yml
+  - name: install Percona XtraBackup {{ major_release_version }} packages
+    include_tasks: ../../../tasks/install_pxb_innovation_lts.yml
     vars:
-      pxb_version: "{{ lookup('env', 'FROM_VERSION').split('.')[:2]|join('') }}"
+      major_release_version: "{{ lookup('env', 'FROM_VERSION').split('.')[:2]|join('') }}"
     when: ansible_os_family == "Debian" or (lookup('env', 'FROM_VERSION').split('.')[:2]|join('') == lookup('env', 'VERSION').split('.')[:2]|join('') and ansible_os_family == "RedHat")
 
 
@@ -241,11 +242,10 @@
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: install Percona XtraBackup {{ pxb_version }} packages
-    include_tasks: ../../../tasks/install_pxb{{ pxb_version }}.yml
+  - name: install Percona XtraBackup {{ major_release_version }} packages
+    include_tasks: ../../../tasks/install_pxb_innovation_lts.yml
     vars:
-      pxb_version: "{{ lookup('env', 'VERSION').split('.')[:2]|join('') }}"
-
+      major_release_version: "{{ lookup('env', 'VERSION').split('.')[:2]|join('') }}"
 
   - name: install proxysql new deb packages
     apt:
