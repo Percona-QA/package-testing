@@ -134,6 +134,7 @@ jobs:
       - name: 'Checkout package-testing: "${{ inputs.package_testing_branch }}"'
         uses: actions/checkout@v4
         with:
+          repository: Percona-QA/package-testing
           ref: ${{ inputs.package_testing_branch }}
 
       - name: 'Convert choices'
