@@ -13,7 +13,7 @@
   include_tasks: ./verify_pmm_client_config.yml
 
 - name: Get "pmm-admin list" output
-  command: pmm-admin list
+  command: "pmm-admin list {{ port_flag if port_flag is defined else '' }}"
   register: list_output
 
 - name: Assert if the pmm-admin list contains MongoDB instance
@@ -86,15 +86,15 @@
   #TODO: improve verify_exporter_port_output.yml to work without socket service removal
 - name: Remove MongoDB Socket service to verify Port output in pmm-admin list commands
   when: '"psmdb-" in enabled_db | join("")'
-  command: pmm-admin remove mongodb {{ mongo_socket_service_name }}
+  command: pmm-admin remove mongodb {{ mongo_socket_service_name }} {{ port_flag if port_flag is defined else '' }}
 
   #TODO: improve verify_exporter_port_output.yml to work without socket service removal
 - name: Remove PostgreSQL Socket service to verify Port output in pmm-admin list commands
   when: '"pg-" in enabled_db | join("")'
-  command: pmm-admin remove postgresql {{ pgsql_socket_service_name }}
+  command: pmm-admin remove postgresql {{ pgsql_socket_service_name }} {{ port_flag if port_flag is defined else '' }}
 
 - name: Parse and set PMM minor version
-  shell: "pmm-admin --version | grep ^Version | awk -F. '{print $2}'"
+  shell: "pmm-admin --version {{ port_flag if port_flag is defined else '' }} 2>&1| grep ^Version | awk -F. '{print $2}'"
   register: pmm_agent_minor_version
 
 - name: Include Exporters Port in output checks for 2.29.0+

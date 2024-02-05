@@ -37,7 +37,7 @@
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
 ### enable pmm2-client release and install old version to update
-  - name: enable pmm2-client release repo
+  - name: Enable pmm2-client release repo
     include_tasks: ../tasks/enable_repo.yml
     vars:
       only: yes
@@ -180,6 +180,6 @@
     when: ansible_os_family == "RedHat"
     yum: name=pmm2-client state=latest
 
-### verifications after upgrade
+### Verifications after upgrade
   - name: Perform standard verifications set for PMM Client
     include_tasks: ../tasks/verifications_set_for_pmm_client_after_upgrade.yml

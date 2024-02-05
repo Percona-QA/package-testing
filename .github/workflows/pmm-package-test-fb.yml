@@ -73,7 +73,7 @@ jobs:
       repository: 'dev-latest'
 
   fb_test:
-    name: ${{ inputs.test_name || 'pmm2-client_integration_custom_path' }}
+    name: ${{ inputs.playbook }}
     uses: ./.github/workflows/pmm-package-test-runner.yml
     secrets: inherit
     needs: get_versions
@@ -83,8 +83,8 @@ jobs:
         os: ${{ fromJSON(needs.get_versions.outputs.pt_os) }}
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
-      pmm_server_image: ${{ inputs.package_testing_branch }}
-      pmm_client_tarball: ${{ inputs.package_testing_branch }}
+      pmm_server_image: ${{ inputs.pmm_server_image }}
+      pmm_client_tarball: ${{ inputs.pmm_client_tarball == 'dev-latest' && needs.get_versions.outputs.finish_version || inputs.pmm_client_tarball }}
       expected_version: ${{needs.get_versions.outputs.finish_version}}
       repository: 'dev-latest'
       metrics_mode: ${{ inputs.metrics_mode || 'auto' }}

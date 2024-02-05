@@ -30,7 +30,7 @@ on:
 
 jobs:
   c_test:
-    name: "pmm2-client"
+    name: "Package Install (basic)"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
@@ -40,7 +40,7 @@ jobs:
       playbook: "pmm2-client_integration"
 
   cu_test:
-    name: "pmm2-client_upgrade"
+    name: "Package Upgrade (basic)"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
@@ -50,7 +50,7 @@ jobs:
       playbook: "pmm2-client_upgrade"
 
   tb_test:
-    name: "pmm2-client_custom_path"
+    name: "Tarball Install (basic)"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
@@ -60,7 +60,7 @@ jobs:
       playbook: "pmm2-client_custom_path"
 
   auth_config_test:
-    name: "pmm2-client_integration_auth_config"
+    name: "Package Install (auth config)"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
@@ -70,7 +70,7 @@ jobs:
       playbook: "pmm2-client_integration_auth_config"
 
   auth_register_test:
-    name: "pmm2-client_integration_auth_register"
+    name: "Package Install (auth register)"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
@@ -79,18 +79,8 @@ jobs:
       metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration_auth_register"
 
-  auth_setup_test:
-    name: "pmm2-client_integration_auth_setup"
-    uses: ./.github/workflows/pmm-package-test-single.yml
-    secrets: inherit
-    with:
-      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
-      repository: ${{ inputs.repository || 'dev-latest' }}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
-      playbook: "pmm2-client_integration_auth_setup"
-
   tbi_test:
-    name: "pmm2-client_integration_custom_path"
+    name: "Tarball Install (custom path)"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
@@ -100,7 +90,7 @@ jobs:
       playbook: "pmm2-client_integration_custom_path"
 
   port_test:
-    name: "pmm2-client_integration_custom_port"
+    name: "Tarball Install (custom port)"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
@@ -110,7 +100,7 @@ jobs:
       playbook: "pmm2-client_integration_custom_port"
 
   port_u_test:
-    name: "pmm2-client_integration_upgrade_custom_port"
+    name: "Package Upgrade: custom port"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
@@ -120,7 +110,7 @@ jobs:
       playbook: "pmm2-client_integration_upgrade_custom_port"
 
   i_test:
-    name: "pmm2-client_integration"
+    name: "Package Install"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
@@ -130,7 +120,7 @@ jobs:
       playbook: "pmm2-client_integration"
 
   iu_test:
-    name: "pmm2-client_integration_upgrade"
+    name: "Package Upgrade"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
@@ -140,7 +130,7 @@ jobs:
       playbook: "pmm2-client_integration_upgrade"
 
   tu_test:
-    name: "pmm2-client_integration_upgrade_custom_path"
+    name: "Tarball Upgrade (custom path)"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
