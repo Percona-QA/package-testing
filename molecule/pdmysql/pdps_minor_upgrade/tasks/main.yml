@@ -246,7 +246,6 @@
     include_tasks: ../../../tasks/install_pxb_innovation_lts.yml
     vars:
       major_release_version: "{{ lookup('env', 'VERSION').split('.')[:2]|join('') }}"
-    when: ansible_os_family == "Debian" or (lookup('env', 'FROM_VERSION').split('.')[:2]|join('') == lookup('env', 'VERSION').split('.')[:2]|join('') and ansible_os_family == "RedHat")
 
   - name: install proxysql new deb packages
     apt:
