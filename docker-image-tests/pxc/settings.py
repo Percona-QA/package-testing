@@ -105,7 +105,7 @@ pxc56_functions = (
 )
 #####
 
-if pxc_version_major == '8.0':
+if pxc_version_major == '8.1':
     pxc_packages = pxc80_packages
     pxc_binaries = pxc80_binaries
     pxc_plugins = pxc80_plugins
