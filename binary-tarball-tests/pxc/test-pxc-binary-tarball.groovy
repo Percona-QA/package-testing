@@ -149,9 +149,9 @@ void run_test() {
     else
       sudo apt install -y git wget tar
     fi
-    git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+    git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc81-tar --depth 1
     cd package-testing/binary-tarball-tests/pxc
-    wget -q ${TARBALL_LINK}${TARBALL_NAME}
+    wget -q https://downloads.percona.com/downloads/TESTING/pxc-8.1.0/Percona-XtraDB-Cluster_8.1.0-1.1_Linux.x86_64.glibc2.17.tar.gz
     ./run.sh || true
   '''
 }

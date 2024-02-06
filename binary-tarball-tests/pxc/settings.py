@@ -169,7 +169,7 @@ pxc56_symlinks = (
 )
 #####
 
-if pxc_version_major == '8.0':
+if pxc_version_major == '8.1':
     pxc_binaries = pxc80_binaries
     pxc_executables = pxc80_executables
     pxc_plugins = pxc80_plugins
