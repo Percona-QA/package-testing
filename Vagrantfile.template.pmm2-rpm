@@ -4,7 +4,6 @@
 Vagrant.require_version ">= 1.7.0"
 
 Vagrant.configure(2) do |config|
-
   ### Due to subscription issues oracle linux is used instead rhel for local package test run
 #  config.vm.box = "generic/oracle7"
 #  config.vm.box = "generic/oracle8"
@@ -23,7 +22,7 @@ Vagrant.configure(2) do |config|
   config.vm.synced_folder "/media/sf_work/PMM/package-testing/", "/pmm/package-testing/"
   config.vm.provision "shell", privileged: true, inline: <<-SHELL
     ## Set environment variables...
-    export PMM_SERVER_IP=192.168.1.43:443
+    export PMM_SERVER_IP=10.0.2.2:443
     export METRICS_MODE=auto
     export PMM_VERSION="2.33.0"
     export install_repo=main
@@ -35,24 +34,22 @@ Vagrant.configure(2) do |config|
     sudo yum install -y ansible-core git wget
     ### for Centos 7
     # sudo yum install -y ansible git wget
-    cd /pmm/package-testing
+    cd /pmm/package-testing/playbooks
 
-#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 playbooks/pmm2-client.yml
-#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 playbooks/pmm2-client_upgrade.yml
-#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 playbooks/pmm2-client_custom_path.yml
+#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 pmm2-client.yml
+#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 pmm2-client_upgrade.yml
+#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 pmm2-client_custom_path.yml
 
-#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 playbooks/pmm2-client_integration_auth_config.yml
-#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 playbooks/pmm2-client_integration_auth_register.yml
-    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 playbooks/pmm2-client_integration_auth_setup.yml
-
-#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 playbooks/pmm2-client_integration_custom_path.yml
-#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 playbooks/pmm2-client_integration_custom_port.yml
-#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 playbooks/pmm2-client_integration_upgrade_custom_port.yml
+#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 pmm2-client_integration_auth_config.yml
+#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 pmm2-client_integration_auth_register.yml
+#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 pmm2-client_integration_custom_path.yml
+#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 pmm2-client_integration_custom_port.yml
+#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 pmm2-client_integration_upgrade_custom_port.yml
 
 ######### Matrix tests
-#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 playbooks/pmm2-client_integration.yml
-#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 playbooks/pmm2-client_integration_upgrade.yml
-#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 playbooks/pmm2-client_integration_upgrade_custom_path.yml
+    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 pmm2-client_integration.yml
+#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 pmm2-client_integration_upgrade.yml
+#    ansible-playbook -vv --connection=local --inventory 127.0.0.1, --limit 127.0.0.1 pmm2-client_integration_upgrade_custom_path.yml
 #########
       SHELL
 end

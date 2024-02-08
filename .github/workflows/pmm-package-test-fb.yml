@@ -61,8 +61,10 @@ on:
         type: string
       metrics_mode:
         description: 'Select the Metrics Mode for PMM Client:'
-        required: true
         default: 'auto'
+        type: string
+      test_name:
+        description: 'Name of the test to pretty display in checks list'
         type: string
 
 jobs:
@@ -89,5 +91,5 @@ jobs:
       repository: 'dev-latest'
       metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: ${{ inputs.playbook || 'pmm2-client_integration_custom_path' }}
-      test_name: ${{ matrix.os }}
+      test_name: ${{ inputs.test_name > '' && format('{0} {1}', inputs.test_name, matrix.os) || matrix.os }}
       os: ${{ matrix.os }}

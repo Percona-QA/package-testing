@@ -39,25 +39,15 @@ jobs:
       metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration"
 
-  cu_test:
-    name: "Package Upgrade (basic)"
+  i_test:
+    name: "Package Install"
     uses: ./.github/workflows/pmm-package-test-single.yml
     secrets: inherit
     with:
       package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
       repository: ${{ inputs.repository || 'dev-latest' }}
       metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
-      playbook: "pmm2-client_upgrade"
-
-  tb_test:
-    name: "Tarball Install (basic)"
-    uses: ./.github/workflows/pmm-package-test-single.yml
-    secrets: inherit
-    with:
-      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
-      repository: ${{ inputs.repository || 'dev-latest' }}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
-      playbook: "pmm2-client_custom_path"
+      playbook: "pmm2-client_integration"
 
   auth_config_test:
     name: "Package Install (auth config)"
@@ -79,6 +69,46 @@ jobs:
       metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration_auth_register"
 
+  cu_test:
+    name: "Package Upgrade (basic)"
+    uses: ./.github/workflows/pmm-package-test-single.yml
+    secrets: inherit
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
+      playbook: "pmm2-client_upgrade"
+
+  iu_test:
+    name: "Package Upgrade"
+    uses: ./.github/workflows/pmm-package-test-single.yml
+    secrets: inherit
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
+      playbook: "pmm2-client_integration_upgrade"
+
+  port_u_test:
+    name: "Package Upgrade: custom port"
+    uses: ./.github/workflows/pmm-package-test-single.yml
+    secrets: inherit
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
+      playbook: "pmm2-client_integration_upgrade_custom_port"
+
+  tb_test:
+    name: "Tarball Install (basic)"
+    uses: ./.github/workflows/pmm-package-test-single.yml
+    secrets: inherit
+    with:
+      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
+      repository: ${{ inputs.repository || 'dev-latest' }}
+      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
+      playbook: "pmm2-client_custom_path"
+
   tbi_test:
     name: "Tarball Install (custom path)"
     uses: ./.github/workflows/pmm-package-test-single.yml
@@ -98,36 +128,6 @@ jobs:
       repository: ${{ inputs.repository || 'dev-latest' }}
       metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
       playbook: "pmm2-client_integration_custom_port"
-
-  port_u_test:
-    name: "Package Upgrade: custom port"
-    uses: ./.github/workflows/pmm-package-test-single.yml
-    secrets: inherit
-    with:
-      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
-      repository: ${{ inputs.repository || 'dev-latest' }}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
-      playbook: "pmm2-client_integration_upgrade_custom_port"
-
-  i_test:
-    name: "Package Install"
-    uses: ./.github/workflows/pmm-package-test-single.yml
-    secrets: inherit
-    with:
-      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
-      repository: ${{ inputs.repository || 'dev-latest' }}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
-      playbook: "pmm2-client_integration"
-
-  iu_test:
-    name: "Package Upgrade"
-    uses: ./.github/workflows/pmm-package-test-single.yml
-    secrets: inherit
-    with:
-      package_testing_branch: ${{ inputs.package_testing_branch || 'master' }}
-      repository: ${{ inputs.repository || 'dev-latest' }}
-      metrics_mode: ${{ inputs.metrics_mode || 'auto' }}
-      playbook: "pmm2-client_integration_upgrade"
 
   tu_test:
     name: "Tarball Upgrade (custom path)"
