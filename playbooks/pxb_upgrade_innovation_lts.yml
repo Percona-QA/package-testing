@@ -1,0 +1,152 @@
+---
+# This playbook does following:
+#   sets main Percona repo
+#   installs PS innovation lts, PXB innovation lts, PT
+#   changes repo to testing
+#   upgrades packages to the new version
+#   does some tests
+#
+
+# Cosmic is still missing python
+# - import_playbook: test_prep.yml
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+  - name: include tasks for test env setup
+    include: ../tasks/test_prep.yml
+
+# Install from testing repository
+
+#  - name: include tasks for enabling main repo
+#    include: ../tasks/enable_main_repo.yml
+
+  - name: Extract version number using shell commands
+    shell: cat ../VERSIONS | grep -oP 'PS_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    register: major_release_version
+
+  - name: Set major_release_version variable
+    set_fact:
+      major_release_version: "{{ major_release_version.stdout }}"
+
+  - name: Extract values using shell command for repo name used for innovation/lts release
+    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: ps_inn_lts_repo_name
+
+  - name: Set pxb_inn_lts_repo_name variable
+    set_fact:
+      ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
+
+  - name: include tasks for enabling PS {{ major_release_version }} main repo
+    include: ../tasks/enable_ps_innovation_repo_main.yml
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+# Disable Percona Toolkit installation till its supported in OL9 and Jammy
+#  - name: install Percona Toolkit new deb packages
+#    include_tasks: ../tasks/install_pt.yml
+
+  - name: install Percona Server {{ major_release_version }} packages
+    include_tasks: ../tasks/install_ps_innovation_lts.yml
+
+  - name: install Percona XtraBackup {{ major_release_version }} packages
+    include_tasks: ../tasks/install_pxb_innovation_lts.yml
+    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: start mysql service with service command
+    command: service mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+
+  - name: install plugins, import world database
+    command: /package-testing/plugins_test.sh
+
+  - name: install 3rd party packages with apt
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "Debian"
+
+  - name: install 3rd party packages with yum
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "RedHat"
+
+#
+# Enable testing repository
+#
+  - name: include tasks for enabling PS {{ major_release_version }} test repo
+    include: ../tasks/enable_ps_innovation_repo_testing.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+#
+# Upgrade packages
+#
+  - name: install Percona Server {{ major_release_version }} packages
+    include_tasks: ../tasks/install_ps_innovation_lts.yml
+
+  - name: install Percona XtraBackup {{ major_release_version }} packages
+    include_tasks: ../tasks/install_pxb_innovation_lts.yml
+    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb{{ major_release_version }}
+
+  - name: check that Percona XtraBackup package versions are correct
+    command: /package-testing/package_check.sh pxb{{ major_release_version }}
+
+  - name: run backup
+    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
+
+  - name: prepare backup
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
+
+  - name: remove Percona Server deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server-server
+      - percona-xtrabackup-8{{ major_release_version }}
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-server-server
+      - percona-xtrabackup-8{{ major_release_version }}
+    when: ansible_os_family == "RedHat"
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mysql stopped
