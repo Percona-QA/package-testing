@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import re
 
 docker_acc = os.getenv('DOCKER_ACC')
 docker_product = os.getenv('DOCKER_PRODUCT')
@@ -30,6 +31,33 @@ docker_network = 'pxc-network'
 
 base_node_name = 'pxc-docker-test-cluster-node'
 cluster_name = 'pxc-cluster1'
+
+# Innovation
+pxc8x_packages = [(package, pxc_version_upstream) for package in (
+  'percona-xtradb-cluster-client', 'percona-xtradb-cluster-server',
+  'percona-xtradb-cluster-shared', 'percona-xtradb-cluster-shared-compat'
+)]
+pxc8x_binaries = (
+  '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/mysqladmin',
+  '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow',
+  '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade',
+  '/usr/bin/mysql_tzinfo_to_sql','/usr/bin/mysql_keyring_encryption_test','/usr/bin/mysql_migrate_keyring',
+  '/usr/bin/mysqld_multi','/usr/bin/mysqld_safe','/usr/bin/mysql-systemd',
+  '/usr/bin/mysqlbinlog'
+)
+pxc8x_plugins = (
+  ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
+  ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
+  ('group_replication','group_replication.so'),('clone','mysql_clone.so')
+)
+pxc8x_functions = (
+  ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
+  ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_exclusive', 'version_token.so', 'INT'),
+  ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
+)
+pxc8x_components = (
+  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault')
+)  
 
 # 8.0
 pxc80_packages = [(package, pxc_version_upstream) for package in (
@@ -105,11 +133,12 @@ pxc56_functions = (
 )
 #####
 
-if pxc_version_major == '8.1':
-    pxc_packages = pxc80_packages
-    pxc_binaries = pxc80_binaries
-    pxc_plugins = pxc80_plugins
-    pxc_functions = pxc80_functions
+if re.match(r'^8\.[1-9]$', pxc_version_major):
+    pxc_packages = pxc8x_packages
+    pxc_binaries = pxc8x_binaries
+    pxc_plugins = pxc8x_plugins
+    pxc_functions = pxc8x_functions
+    pxc_components = pxc8x_components
 elif pxc_version_major == '5.7':
     pxc_packages = pxc57_packages
     pxc_binaries = pxc57_binaries
