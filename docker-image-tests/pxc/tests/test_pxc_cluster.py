@@ -149,10 +149,10 @@ class TestCluster:
         if pxc_version_major == '8.0' or re.match(r'^8\.[1-9]$', pxc_version_major):
             if cmpt == 'file://component_masking_functions':
                 cluster[0].run_query('UNINSTALL PLUGIN data_masking;')
-            cluster[0].run_query('INSTALL component \''+cmpt+'\';')
+            cluster[0].run_query(f'INSTALL COMPONENT \'{cmpt}\';')
             for node in cluster:
-                output = node.run_query('SELECT component_urn from mysql.component WHERE component_urn = \''+cmpt+'\';')
-                assert 'ACTIVE' in output
+                output = node.run_query(f'SELECT component_urn FROM mysql.component WHERE component_urn = \'{cmpt}\';')
+                assert cmpt in output
         else:
             pytest.mark.skip('Components are available from 8.0 onwards')        
 
