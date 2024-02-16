@@ -70,7 +70,7 @@ on:
 jobs:
   get_versions:
     name: Get versions
-    uses: percona/pmm-ui-tests/.github/workflows/pmm-version-getter.yml@PMM-12943-debian12-support-for-package-tests
+    uses: percona/pmm-ui-tests/.github/workflows/pmm-version-getter.yml@main
     with:
       repository: ${{ inputs.repository || 'release'}}
 
