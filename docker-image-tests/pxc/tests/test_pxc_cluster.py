@@ -107,7 +107,7 @@ class GardbNode:
     def connect_pxc(self):
         self.pxc_ips = subprocess.check_output(['docker', 'inspect', '-f' '"{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}"',
         base_node_name+'1', base_node_name+'2',base_node_name+'3']).decode().strip().replace('\n',',').replace('"','')
-        if pxc_version_major == "8.0":
+        if pxc_version_major == "8.0" or re.match(r'^8\.[1-9]$', pxc_version_major):
             subprocess.check_call(['docker', 'exec', '-d', self.docker_name, 'garbd', '--group='+cluster_name, '--address=gcomm://'+self.pxc_ips,
             '--option="socket.ssl_key=/cert/server-key.pem; socket.ssl_cert=/cert/server-cert.pem; socket.ssl_ca=/cert/ca.pem; socket.ssl_cipher=AES128-SHA256"'])
         else:
@@ -147,14 +147,14 @@ class TestCluster:
     @pytest.mark.parametrize("cmpt", pxc_components)
     def test_install_component(self, cluster, cmpt):
         if pxc_version_major == '8.0' or re.match(r'^8\.[1-9]$', pxc_version_major):
-            if cmpt == 'file://component_masking_functions':
-                cluster[0].run_query('UNINSTALL PLUGIN data_masking;')
+#            if cmpt == 'file://component_masking_functions':
+#                cluster[0].run_query('UNINSTALL PLUGIN data_masking;')
             cluster[0].run_query(f'INSTALL COMPONENT \'{cmpt}\';')
             for node in cluster:
                 output = node.run_query(f'SELECT component_urn FROM mysql.component WHERE component_urn = \'{cmpt}\';')
                 assert cmpt in output
         else:
-            pytest.mark.skip('Components are available from 8.0 onwards')        
+            pytest.mark.skip('Components are available from 8.0 onwards') 
 
     def test_replication(self, cluster):
         cluster[0].run_query('create database test;')
