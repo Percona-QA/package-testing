@@ -139,6 +139,11 @@ if re.match(r'^8\.[1-9]$', pxc_version_major):
     pxc_plugins = pxc8x_plugins
     pxc_functions = pxc8x_functions
     pxc_components = pxc8x_components
+elif pxc_version_major == '8.0':
+    pxc_packages = pxc80_packages
+    pxc_binaries = pxc80_binaries
+    pxc_plugins = pxc80_plugins
+    pxc_functions = pxc80_functions
 elif pxc_version_major == '5.7':
     pxc_packages = pxc57_packages
     pxc_binaries = pxc57_binaries
