@@ -75,9 +75,7 @@ pxc80_binaries = (
 pxc80_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
-  ('group_replication','group_replication.so'),('clone','mysql_clone.so'),('data_masking','data_masking.so'),
-  ('binlog_utils_udf','binlog_utils_udf.so')
-
+  ('group_replication','group_replication.so'),('clone','mysql_clone.so'),('binlog_utils_udf','binlog_utils_udf.so')
 )
 pxc80_functions = (
   ('fnv1a_64', 'libfnv1a_udf.so', 'INTEGER'),('fnv_64', 'libfnv_udf.so', 'INTEGER'),('murmur_hash', 'libmurmur_udf.so', 'INTEGER'),
@@ -87,6 +85,9 @@ pxc80_functions = (
   ('service_release_locks', 'locking_service.so', 'INT'),
   ('get_gtid_set_by_binlog', 'binlog_utils_udf.so', 'STRING'), ('get_binlog_by_gtid_set', 'binlog_utils_udf.so', 'STRING'), ('get_first_record_timestamp_by_binlog', 'binlog_utils_udf.so', 'STRING'),
   ('get_last_record_timestamp_by_binlog', 'binlog_utils_udf.so', 'STRING')
+)
+pxc80_components = (
+  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions')
 )
 
 # 5.7
@@ -144,6 +145,7 @@ elif pxc_version_major == '8.0':
     pxc_binaries = pxc80_binaries
     pxc_plugins = pxc80_plugins
     pxc_functions = pxc80_functions
+    pxc_components = pxc80_components
 elif pxc_version_major == '5.7':
     pxc_packages = pxc57_packages
     pxc_binaries = pxc57_binaries
