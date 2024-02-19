@@ -17,7 +17,7 @@ class PxcNode:
                  '-e', 'CLUSTER_NAME='+cluster_name, '-e', 'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport',
                  '--net='+docker_network, '-d', docker_image]).decode().strip()
             time.sleep(120)
-            if pxc_version_major == "8.0":
+            if pxc_version_major == "8.0" or re.match(r'^8\.[1-9]$', pxc_version_major):
                 subprocess.check_call(['mkdir', '-p', test_pwd+'/cert'])
                 subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/ca.pem', test_pwd+'/cert'])
                 subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/server-cert.pem', test_pwd+'/cert'])
@@ -26,7 +26,7 @@ class PxcNode:
                 subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/client-key.pem', test_pwd+'/cert'])
                 subprocess.check_call(['chmod','-R','a+r', test_pwd+'/cert'])
         else:
-            if pxc_version_major == "8.0":
+            if pxc_version_major == "8.0" or re.match(r'^8\.[1-9]$', pxc_version_major):
                 self.docker_id = subprocess.check_output(
                 ['docker', 'run', '--name', node_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd,
                 '-e', 'CLUSTER_NAME='+cluster_name, '-e', 'CLUSTER_JOIN='+base_node_name+'1',
@@ -72,7 +72,7 @@ class GardbNode:
         self.docker_image = "oraclelinux:8"
         self.docker_name = 'ol8_node'
         subprocess.check_call(['docker', 'pull', self.docker_image])
-        if pxc_version_major == "8.0":
+        if pxc_version_major == "8.0" or re.match(r'^8\.[1-9]$', pxc_version_major):
             self.docker_id = subprocess.check_output(['docker', 'run', '-d', '-i', '--name='+self.docker_name,
             '--net='+docker_network, '-v', test_pwd+'/cert:/cert', self.docker_image]).decode().strip()
         else:
@@ -86,12 +86,18 @@ class GardbNode:
             else:
                 self.repo_name = 'pxc-57 testing'
             self.image = 'Percona-XtraDB-Cluster-garbd-57'
-        else:
+        elif pxc_version_major == "8.0":
             if docker_acc == 'percona':
                 self.repo_name = 'pxc-80'
             else:
                 self.repo_name = 'pxc-80 testing'
             self.image = 'percona-xtradb-cluster-garbd'
+        elif re.match(r'^8\.[1-9]$', pxc_version_major):
+            if docker_acc == 'percona':
+                self.repo_name = 'pxc-8x-innovation'
+            else:
+                self.repo_name = 'pxc-8x-innovation testing'
+            self.image = 'percona-xtradb-cluster-garbd'    
         subprocess.check_call(['docker', 'exec', self.docker_name, 'yum', 'install', '-y', 'https://repo.percona.com/yum/percona-release-latest.noarch.rpm'])
         subprocess.check_call(['docker', 'exec', self.docker_name, 'percona-release', 'enable', self.repo_name])
         subprocess.check_call(['docker', 'exec', self.docker_name, 'rpm', '--import', 'https://repo.percona.com/yum/RPM-GPG-KEY-Percona'])
@@ -101,7 +107,7 @@ class GardbNode:
     def connect_pxc(self):
         self.pxc_ips = subprocess.check_output(['docker', 'inspect', '-f' '"{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}"',
         base_node_name+'1', base_node_name+'2',base_node_name+'3']).decode().strip().replace('\n',',').replace('"','')
-        if pxc_version_major == "8.0":
+        if pxc_version_major == "8.0" or re.match(r'^8\.[1-9]$', pxc_version_major):
             subprocess.check_call(['docker', 'exec', '-d', self.docker_name, 'garbd', '--group='+cluster_name, '--address=gcomm://'+self.pxc_ips,
             '--option="socket.ssl_key=/cert/server-key.pem; socket.ssl_cert=/cert/server-cert.pem; socket.ssl_ca=/cert/ca.pem; socket.ssl_cipher=AES128-SHA256"'])
         else:
@@ -137,6 +143,16 @@ class TestCluster:
         for node in cluster:
             output = node.run_query('SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = "'+pname+'";')
             assert 'ACTIVE' in output
+
+    @pytest.mark.parametrize("cmpt", pxc_components)
+    def test_install_component(self, cluster, cmpt):
+        if pxc_version_major == '8.0' or re.match(r'^8\.[1-9]$', pxc_version_major):
+            cluster[0].run_query(f'INSTALL COMPONENT \'{cmpt}\';')
+            for node in cluster:
+                output = node.run_query(f'SELECT component_urn FROM mysql.component WHERE component_urn = \'{cmpt}\';')
+                assert cmpt in output
+        else:
+            pytest.mark.skip('Components are available from 8.0 onwards') 
 
     def test_replication(self, cluster):
         cluster[0].run_query('create database test;')
