@@ -55,9 +55,8 @@ pxc8x_functions = (
 pxc8x_files = (
   'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.22.0.0' ,
   'lib/libmysqlservices.a' ,
-  'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so',
-  'lib/plugin/data_masking.ini', 'lib/plugin/keyring_file.so',
-  'lib/plugin/keyring_udf.so', 'lib/plugin/keyring_vault.so'
+  'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/keyring_file.so',
+  'lib/plugin/keyring_udf.so'
 )
 if glibc_version == '2.35':
   pxc8x_symlinks = (
@@ -80,7 +79,7 @@ else:
     ('lib/libssl3.so','lib/private/libssl3.so'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
   )
 pxc8x_components = (
-  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault')
+  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault'),('file://component_binlog_uts_udf')
 )
   
 # 8.0

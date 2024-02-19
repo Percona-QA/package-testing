@@ -4,6 +4,7 @@ import re
 import os
 import time
 import shlex
+import pytest
 
 def retry(func, times, wait):
     for _ in range(times):
@@ -136,3 +137,17 @@ class MySQL:
             output = self.run_query(query, node="node3")
             assert 'ACTIVE' in output
         retry(_assert_plugin, times=5, wait=0.2)
+
+    def test_install_component(self, cmpt):
+        if pxc_version_major == '8.0' or re.match(r'^8\.[1-9]$', pxc_version_major):
+            query = f'INSTALL COMPONENT \'{cmpt}\';'
+            self.run_query(query)
+        
+            query = f'SELECT component_urn FROM mysql.component WHERE component_urn = \'{cmpt}\';'
+        
+            def _assert_plugin():
+                output = self.run_query(query, node="node3")
+                assert cmpt in output
+            retry(_assert_plugin, times=5, wait=0.2)
+        else:
+            pytest.mark.skip('Components are available from 8.0 onwards')
