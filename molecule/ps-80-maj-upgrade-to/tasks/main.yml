@@ -70,11 +70,11 @@
     when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
 
   - name: include tasks for enabling PS 8 main repo
-    include: ../../../tasks/enable_ps8_main_repo.yml
+    include_tasks: ../../../tasks/enable_ps8_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling PS 8 test repo
-    include: ../../../tasks/enable_ps8_testing_repo.yml
+    include_tasks: ../../../tasks/enable_ps8_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: install Percona Server 8.0 packages

@@ -18,7 +18,7 @@
     - "'pxc3' in inventory_hostname"
     
   - name: include tasks for test env setup
-    include: ../../../../tasks/test_prep.yml
+    include_tasks: ../../../../tasks/test_prep.yml
 
   - name: download and extract world database
     command: "{{ item }}"

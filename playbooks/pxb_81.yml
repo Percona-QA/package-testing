@@ -16,19 +16,19 @@
     include_tasks: ../tasks/test_prep.yml
 
   - name: include tasks for enabling main repo
-    include: ../tasks/enable_main_repo.yml
+    include_tasks: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling PS 8.1 main repo
-    include: ../tasks/enable_ps81_main_repo.yml
+    include_tasks: ../tasks/enable_ps81_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling PS 8.1 test repo
-    include: ../tasks/enable_ps81_testing_repo.yml
+    include_tasks: ../tasks/enable_ps81_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling PS 8.1 experimental repo
-    include: ../tasks/enable_ps81_experimental_repo.yml
+    include_tasks: ../tasks/enable_ps81_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: download and extract world database

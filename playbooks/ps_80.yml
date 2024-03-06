@@ -45,15 +45,15 @@
     when: ansible_os_family == "RedHat"
 
   - name: include tasks for enabling PS 8 test repo
-    include: ../tasks/enable_ps8_main_repo.yml
+    include_tasks: ../tasks/enable_ps8_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling PS 8 test repo
-    include: ../tasks/enable_ps8_testing_repo.yml
+    include_tasks: ../tasks/enable_ps8_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling PS 8 experimental repo
-    include: ../tasks/enable_ps8_experimental_repo.yml
+    include_tasks: ../tasks/enable_ps8_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: download and extract world database

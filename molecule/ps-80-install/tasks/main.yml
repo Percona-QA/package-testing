@@ -12,19 +12,19 @@
               mode=0664 owner=root group=root
 
   - name: include tasks for enabling main repo
-    include: ../../../tasks/enable_main_repo.yml
+    include_tasks: ../../../tasks/enable_main_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "main"
 
   - name: include tasks for enabling PS 8 test repo
-    include: ../../../tasks/enable_ps8_main_repo.yml
+    include_tasks: ../../../tasks/enable_ps8_main_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "main"
 
   - name: include tasks for enabling PS 8 test repo
-    include: ../../../tasks/enable_ps8_testing_repo.yml
+    include_tasks: ../../../tasks/enable_ps8_testing_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "testing" or lookup('env', 'INSTALL_REPO') == ""
 
   - name: include tasks for enabling PS 8 experimental repo
-    include: ../../../tasks/enable_ps8_experimental_repo.yml
+    include_tasks: ../../../tasks/enable_ps8_experimental_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "experimental"
 
   - name: download and extract world database
