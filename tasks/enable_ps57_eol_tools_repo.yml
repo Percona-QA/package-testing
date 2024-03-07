@@ -1,3 +1,6 @@
+  - name: include playbook for removing Percona repo
+    include_tasks: remove_percona_repository.yml
+
   - name: Install percona release Debian
     apt:
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
