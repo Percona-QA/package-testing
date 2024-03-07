@@ -12,8 +12,12 @@
   - name: add pro repository on debian
     template: src=../templates/eol_deb_repo_file_ps57.j2
               dest=/etc/apt/sources.list.d/post-eol.list
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "{{ lookup('env', 'install_repo') | default('testing') }}"
     when:
-      - ansible_os_family == "Debian"
+      - ansible_os_family == "Debian"          
 
   - name: add pro repository on rmp
     template: src=../templates/pro_rpm_repo_file_ps80.j2
