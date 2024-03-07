@@ -19,9 +19,9 @@
     when:
       - ansible_os_family == "Debian"          
 
-  - name: add pro repository on rmp
-    template: src=../templates/pro_rpm_repo_file_ps80.j2
-             dest=/etc/yum.repos.d/psmysql-pro.repo
+  - name: add pro repository on Redhat
+    template: src=../templates/eol_rpm_repo_file_ps57.j2
+             dest=/etc/yum.repos.d/post-eol.repo
     vars:
       client_id: "{{ lookup('env', 'USERNAME') }}"
       client_token: "{{ lookup('env', 'PASSWORD') }}"
