@@ -1,4 +1,4 @@
-- name: Install percona release Debian
+  - name: Install percona release Debian
     apt:
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
     when: ansible_os_family == "Debian"
