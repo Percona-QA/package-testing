@@ -133,10 +133,10 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+    - wget --no-check-certificate -O master.zip https://github.com/kaushikpuneet07/package-testing/archive/ps-eol.zip
     - unzip master.zip
     - rm -f master.zip
-    - mv package-testing-master /package-testing
+    - mv package-testing-ps-eol /package-testing
     
   - name: install latest bats from github
     command: "{{ item }}"
