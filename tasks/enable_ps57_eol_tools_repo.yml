@@ -5,8 +5,6 @@
 
   - name: Install percona release RHEL
     command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-    args:
-      warn: no
     when: ansible_os_family == "RedHat"
 
   - name: add pro repository on debian
