@@ -44,7 +44,7 @@
       - lookup('env', 'EOL') != "yes"
 
   - name: include_tasks tasks for enabling PS 57 EOL repo
-    include_tasks: ..//tasks/enable_ps57_eol_tools_repo,yml
+    include_tasks: ../tasks/enable_ps57_eol_tools_repo.yml
     when:
       - lookup('env', 'EOL') == "yes"
 
