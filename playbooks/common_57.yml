@@ -14,10 +14,10 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"      
 
   tasks:
-  - name: include_tasks tasks for test env setup
+  - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
-  - name: include_tasks tasks for local vault setup
+  - name: include tasks for local vault setup
     include_tasks: ../tasks/setup_local_vault.yml
 
   - name: setup config file for keyring vault
@@ -29,25 +29,25 @@
       group: root
  
 
-  - name: include_tasks tasks for enabling test repo
+  - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_testing_repo.yml
     when: 
       - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
       - lookup('env', 'EOL') != "yes"
 
-  - name: include_tasks tasks for enabling main repo
+  - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_main_repo.yml
     when: 
       - lookup('env', 'install_repo') == "main"
       - lookup('env', 'EOL') != "yes"  
 
-  - name: include_tasks tasks for enabling experimental repo
+  - name: include tasks for enabling experimental repo
     include_tasks: ../tasks/enable_experimental_repo.yml
     when: 
       - lookup('env', 'install_repo') == "experimental"
       - lookup('env', 'EOL') != "yes"
 
-  - name: include_tasks tasks for enabling PS 57 EOL repo
+  - name: include tasks for enabling PS 57 EOL repo
     include_tasks: ../tasks/enable_ps57_eol_tools_repo.yml
     when:
       - lookup('env', 'EOL') == "yes"
