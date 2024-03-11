@@ -18,7 +18,7 @@
     - "'pxc3' in inventory_hostname"
 
   - name: include tasks for test env setup
-    include: ../../../../tasks/test_prep.yml
+    include_tasks: ../../../../tasks/test_prep.yml
 
   - name: Extract version number using shell commands
     shell: grep -oP 'PXC_INN_LTS_VER="\K(\d+)\.(\d+)' /package-testing/VERSIONS | tr -d '.'
@@ -133,13 +133,6 @@
   # other tests
 # - name: install plugins
 #   command: /package-testing/plugins_test_80.sh pxc
-
-  - name: register PXC version Molecule
-    shell: mysqld --version
-    register: pxc_version
-
-  - name: print PXC version Molecule
-    debug: var=pxc_version
 
   - name: check PXC {{ major_release_version}} version Molecule
     command: /package-testing/version_check.sh pxc{{ major_release_version}}

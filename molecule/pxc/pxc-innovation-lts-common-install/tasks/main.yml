@@ -18,7 +18,7 @@
     - "'pxc3' in inventory_hostname"
 
   - name: include tasks for test env setup
-    include: ../../../../tasks/test_prep.yml
+    include_tasks: ../../../../tasks/test_prep.yml
 
   - name: Extract version number using shell commands
     shell: grep -oP 'PXC_INN_LTS_VER="\K(\d+)\.(\d+)' /package-testing/VERSIONS | tr -d '.'
@@ -118,13 +118,6 @@
   - name: start mysql service
     service: name=mysql state=started
     throttle: 1
-    
-  - name: register PXC version Molecule
-    shell: mysqld --version
-    register: pxc_version
-
-  - name: print PXC version Molecule
-    debug: var=pxc_version
 
   - name: check that PXC version is correct Molecule
     command: /package-testing/version_check.sh pxc{{ major_release_version}}
@@ -135,7 +128,7 @@
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: Perform PXC package prechecks
-    command: chmod +x /package-testing/scripts/pxc-package-prechecks.sh && ./package-testing/scripts/pxc-package-prechecks.sh pxc{{ major_release_version}}
+    command: /package-testing/scripts/pxc-package-prechecks.sh pxc{{ major_release_version}}
     
 # - name: install plugins
 #   command: /package-testing/plugins_test_80.sh pxc
@@ -176,7 +169,6 @@
       packages:
       - percona-xtradb-cluster-server
     when: ansible_os_family == "RedHat"
-
 
   - name: Block pmm.check-dev.percona.com IP
     iptables:
