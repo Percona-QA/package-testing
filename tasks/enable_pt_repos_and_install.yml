@@ -25,4 +25,4 @@
     command: ../version_check.sh pt
 
   - name: remove pt packages
-    include: ../tasks/remove_pt.yml
+    include_tasks: ../tasks/remove_pt.yml

@@ -16,12 +16,12 @@
 
   tasks:
   - name: include tasks for test env setup
-    include: ../tasks/test_prep.yml
+    include_tasks: ../tasks/test_prep.yml
 
 # Install from testing repository
 
 #  - name: include tasks for enabling main repo
-#    include: ../tasks/enable_main_repo.yml
+#    include_tasks: ../tasks/enable_main_repo.yml
 
   - name: Extract version number using shell commands
     shell: cat ../VERSIONS | grep -oP 'PS_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
@@ -40,7 +40,7 @@
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
 
   - name: include tasks for enabling PS {{ major_release_version }} main repo
-    include: ../tasks/enable_ps_innovation_repo_main.yml
+    include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -102,7 +102,7 @@
 # Enable testing repository
 #
   - name: include tasks for enabling PS {{ major_release_version }} test repo
-    include: ../tasks/enable_ps_innovation_repo_testing.yml
+    include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
 #

@@ -15,7 +15,7 @@
   - debug: var=man_ip
 
   - name: include tasks for test env setup
-    include: ../tasks/test_prep.yml
+    include_tasks: ../tasks/test_prep.yml
 
   - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_pxc57_testing_repo.yml
@@ -30,7 +30,7 @@
     when: lookup('env', 'install_repo') == "experimental"
 
 # - name: include tasks for enabling experimental repo
-#   include: ../tasks/enable_pxc57_experimental_repo.yml
+#   include_tasks: ../tasks/enable_pxc57_experimental_repo.yml
 
   - name: disable selinux
     selinux: state=disabled
