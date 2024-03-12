@@ -32,28 +32,10 @@ ps57_functions = (
 )
 ps57_components = ()
 
-if re.match(r'^8\.[1-9]$', ps_version_major):
-    ps_packages = ps8x_packages
-    ps_binaries = ps8x_binaries
-    ps_plugins = ps8x_plugins
-    ps_functions = ps8x_functions
-    ps_components = ps8x_components
-elif ps_version_major == '8.0':
-    ps_packages = ps80_packages
-    ps_binaries = ps80_binaries
-    ps_plugins = ps80_plugins
-    ps_functions = ps80_functions
-    ps_components = ps80_components
-elif ps_version_major == '5.7':
-    ps_packages = ps57_packages
-    ps_binaries = ps57_binaries
-    ps_plugins = ps57_plugins
-    ps_functions = ps57_functions
-    ps_components = ps57_components
-elif ps_version_major == '5.6':
-    ps_packages = ps56_packages
-    ps_binaries = ps56_binaries
-    ps_plugins = ps56_plugins
-    ps_functions = ps56_functions
+ps_packages = ps57_packages
+ps_binaries = ps57_binaries
+ps_plugins = ps57_plugins
+ps_functions = ps57_functions
+ps_components = ps57_components
 
 ps_pwd = 'pwd1234#'

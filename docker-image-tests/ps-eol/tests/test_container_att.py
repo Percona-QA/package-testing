@@ -43,10 +43,5 @@ class TestContainerAttributes:
         assert inspect_data['Config']['Entrypoint'][0] == '/docker-entrypoint.sh'
 
     def test_exposed_ports(self, inspect_data):
-        if ps_version_major in ['5.7','5.6']:
-            assert len(inspect_data['Config']['ExposedPorts']) == 1
-            assert '3306/tcp' in inspect_data['Config']['ExposedPorts']
-        else:
-            assert len(inspect_data['Config']['ExposedPorts']) == 2
-            assert '3306/tcp' in inspect_data['Config']['ExposedPorts']
-            assert '33060/tcp' in inspect_data['Config']['ExposedPorts']
+        assert len(inspect_data['Config']['ExposedPorts']) == 1
+        assert '3306/tcp' in inspect_data['Config']['ExposedPorts']
