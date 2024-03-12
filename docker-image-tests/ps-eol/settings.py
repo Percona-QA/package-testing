@@ -7,6 +7,8 @@ ps_version = os.getenv('PS_VERSION')
 ps_revision = os.getenv('PS_REVISION')
 docker_image = "percona/percona-server:" + tag
 ps_version_upstream = ps_version.split('-')[0]
+ps_version_percona1 = ps_version.split('-')[1]
+ps_version_percona = ps_version_percona1.split('.')[0]
 
 # 5.7
 ps57_packages = (

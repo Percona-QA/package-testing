@@ -17,7 +17,7 @@ pipeline {
       stage ('Prepare Image') {
         steps {
             sh """
-              wget https://repo.percona.com/private/puneetkaushik-kK14Am4J5WJ15S6H5LA5Q8FVFp8ZZV7Q/qa-test/ps-gated-5.7.44-49/percona-server-5.7.44-49-1.docker.tar
+              wget -q https://repo.percona.com/private/puneetkaushik-kK14Am4J5WJ15S6H5LA5Q8FVFp8ZZV7Q/qa-test/ps-gated-5.7.44-49/percona-server-5.7.44-49-1.docker.tar
               sudo docker load -i percona-server-5.7.44-49-1.docker.tar
             """
          } //end steps
