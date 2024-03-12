@@ -56,14 +56,14 @@ pipeline {
               sudo yum install -y python3 python3-pip
               rm -rf package-testing
               git clone https://github.com/Percona-QA/package-testing.git --depth 1
-              cd package-testing/docker-image-tests/ps
+              cd package-testing/docker-image-tests/ps-eol
               pip3 install --user -r requirements.txt
               ./run.sh
             '''
         } //end steps
         post {
           always {
-          junit 'package-testing/docker-image-tests/ps/report.xml'
+          junit 'package-testing/docker-image-tests/ps-eol/report.xml'
         }
        }
      } //end Run tests
