@@ -69,21 +69,21 @@ if [[ $1 =~ ^pxc8[0-9]{1}$ ]]; then
   if [ -f /usr/bin/wsrep_sst_xtrabackup-v2 ]; then
     echo "File exists: /usr/bin/wsrep_sst_xtrabackup-v2"
 
-    pxc_version=$(mysql --version  | grep Ver | awk '{print$3}')
-    pxc_version_trimmed=$(echo $pxc_version | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  # Print the first two characters
-    pxc_version_trimmed_major_version=$( echo $pxc_version_trimmed | grep -o -E '[0-9]+\.[0-9]+')  # Print the first two characters
+    pxc_version=$(mysqld --version  | grep Ver | awk '{print$3}')
+    pxc_version_trimmed=$(echo $pxc_version | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  
+    pxc_version_trimmed_major_version=$( echo $pxc_version_trimmed | grep -o -E '[0-9]+\.[0-9]+')  
 
     xb_this_required_version=$(grep "XB_THIS_REQUIRED_VERSION=" /usr/bin/wsrep_sst_xtrabackup-v2 | cut -d "=" -f 2 | sed 's/"//g')
-    xb_this_required_version_trimmed=$(echo $xb_this_required_version |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  # Print the first two characters
-    xb_this_required_version_trimmed_major_version=$(echo $xb_this_required_version_trimmed |  grep -o -E '[0-9]+\.[0-9]+')  # Print the first two characters
+    xb_this_required_version_trimmed=$(echo $xb_this_required_version |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  
+    xb_this_required_version_trimmed_major_version=$(echo $xb_this_required_version_trimmed |  grep -o -E '[0-9]+\.[0-9]+')  
 
     xb_prev_required_version=$(grep "XB_PREV_REQUIRED_VERSION=" /usr/bin/wsrep_sst_xtrabackup-v2 | cut -d "=" -f 2 | sed 's/"//g')
-    xb_prev_required_version_trimmed=$(echo $xb_prev_required_version |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  # Print the first two characters
-    xb_prev_required_version_trimmed_major_version=$(echo $xb_prev_required_version_trimmed |  grep -o -E '[0-9]+\.[0-9]+')  # Print the first two characters
+    xb_prev_required_version_trimmed=$(echo $xb_prev_required_version |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  
+    xb_prev_required_version_trimmed_major_version=$(echo $xb_prev_required_version_trimmed |  grep -o -E '[0-9]+\.[0-9]+')  
 
     xb_prev_lts_required_version=$(grep "XB_PREV_LTS_REQUIRED_VERSION=" /usr/bin/wsrep_sst_xtrabackup-v2 | cut -d "=" -f 2 | sed 's/"//g')
-    xb_prev_lts_required_version_trimmed=$(echo $xb_prev_lts_required_version |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  # Print the first two characters
-    xb_prev_lts_required_version_trimmed_major_version=$(echo $xb_prev_lts_required_version_trimmed |  grep -o -E '[0-9]+\.[0-9]+')  # Print the first two characters
+    xb_prev_lts_required_version_trimmed=$(echo $xb_prev_lts_required_version |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  
+    xb_prev_lts_required_version_trimmed_major_version=$(echo $xb_prev_lts_required_version_trimmed |  grep -o -E '[0-9]+\.[0-9]+')  
 
 
     if [[ $1 == "pxc81" ]]; then
@@ -92,12 +92,12 @@ if [[ $1 =~ ^pxc8[0-9]{1}$ ]]; then
         sed -i "s/XB_PREV_LTS_REQUIRED_VERSION=\"$xb_prev_lts_required_version\"/XB_PREV_LTS_REQUIRED_VERSION=8.0.34/g" /usr/bin/wsrep_sst_xtrabackup-v2
 
         xb_prev_required_version=$(grep "XB_PREV_REQUIRED_VERSION=" /usr/bin/wsrep_sst_xtrabackup-v2 | cut -d "=" -f 2 | sed 's/"//g')
-        xb_prev_required_version_trimmed=$(echo $xb_prev_required_version |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  # Print the first two characters
-        xb_prev_required_version_trimmed_major_version=$(echo $xb_prev_required_version_trimmed |  grep -o -E '[0-9]+\.[0-9]+')  # Print the first two characters
+        xb_prev_required_version_trimmed=$(echo $xb_prev_required_version |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  
+        xb_prev_required_version_trimmed_major_version=$(echo $xb_prev_required_version_trimmed |  grep -o -E '[0-9]+\.[0-9]+')  
 
         xb_prev_lts_required_version=$(grep "XB_PREV_LTS_REQUIRED_VERSION=" /usr/bin/wsrep_sst_xtrabackup-v2 | cut -d "=" -f 2 | sed 's/"//g')
-        xb_prev_lts_required_version_trimmed=$(echo $xb_prev_lts_required_version |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  # Print the first two characters
-        xb_prev_lts_required_version_trimmed_major_version=$(echo $xb_prev_lts_required_version_trimmed |  grep -o -E '[0-9]+\.[0-9]+')  # Print the first two characters
+        xb_prev_lts_required_version_trimmed=$(echo $xb_prev_lts_required_version |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  
+        xb_prev_lts_required_version_trimmed_major_version=$(echo $xb_prev_lts_required_version_trimmed |  grep -o -E '[0-9]+\.[0-9]+')  
     else
         echo "Not PXC81"
     fi
@@ -106,7 +106,7 @@ if [[ $1 =~ ^pxc8[0-9]{1}$ ]]; then
 
         if [[ $(check_xb_file $xb_this_required_version_trimmed_major_version ; echo $?) -eq 1 ]]; then
             pxc_extras_xtrabackup_version_this_required=$(/usr/bin/pxc_extra/pxb-$xb_this_required_version_trimmed_major_version/bin/xtrabackup -v |& grep -oP '(?<=xtrabackup version ).*' | awk '{print$1}')
-            pxc_extras_xtrabackup_version_this_required_trimmed=$( echo $pxc_extras_xtrabackup_version_this_required |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  # Print the first two characters
+            pxc_extras_xtrabackup_version_this_required_trimmed=$( echo $pxc_extras_xtrabackup_version_this_required |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  
             echo "File exists.. for $xb_this_required_version_trimmed_major_version"
 
             if [[ $pxc_extras_xtrabackup_version_this_required_trimmed == $xb_this_required_version_trimmed ]]; then
@@ -126,7 +126,7 @@ if [[ $1 =~ ^pxc8[0-9]{1}$ ]]; then
         echo "XB CHECK!! xb_prev_required_version"
         if [[ $(check_xb_file $xb_prev_required_version_trimmed_major_version ; echo $?) -eq 1 ]]; then
             pxc_extras_xtrabackup_prev_required_version=$(/usr/bin/pxc_extra/pxb-$xb_prev_required_version_trimmed_major_version/bin/xtrabackup -v |& grep -oP '(?<=xtrabackup version ).*' | awk '{print$1}')
-            pxc_extras_xtrabackup_prev_required_version_trimmed=$( echo $pxc_extras_xtrabackup_prev_required_version |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  # Print the first two characters
+            pxc_extras_xtrabackup_prev_required_version_trimmed=$( echo $pxc_extras_xtrabackup_prev_required_version |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  
             echo "File exists.. for $pxc_extras_xtrabackup_prev_required_version_trimmed and value for xb_prev_required_version_trimmed is $xb_prev_required_version_trimmed"
 
             if [[ $(compare_versions $pxc_extras_xtrabackup_prev_required_version_trimmed $xb_prev_required_version_trimmed ; echo $?) -eq 1 ]]; then
@@ -146,7 +146,7 @@ if [[ $1 =~ ^pxc8[0-9]{1}$ ]]; then
         echo "XB CHECK!! xb_prev_lts_required_version"
         if [[ $(check_xb_file $xb_prev_lts_required_version_trimmed_major_version ; echo $?) -eq 1 ]]; then
             pxc_extras_xtrabackup_version_this_required=$(/usr/bin/pxc_extra/pxb-$xb_prev_lts_required_version_trimmed_major_version/bin/xtrabackup -v |& grep -oP '(?<=xtrabackup version ).*' | awk '{print$1}')
-            pxc_extras_xtrabackup_version_this_required_trimmed=$( echo $pxc_extras_xtrabackup_version_this_required |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  # Print the first two characters
+            pxc_extras_xtrabackup_version_this_required_trimmed=$( echo $pxc_extras_xtrabackup_version_this_required |  grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')  
             echo "File exists.. for $pxc_extras_xtrabackup_version_this_required_trimmed"
             
             if [[ $(compare_versions $pxc_extras_xtrabackup_version_this_required_trimmed $xb_prev_lts_required_version_trimmed ; echo $?) -eq 1 ]]; then

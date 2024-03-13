@@ -118,13 +118,6 @@
   - name: start mysql service
     service: name=mysql state=started
     throttle: 1
-    
-  - name: register PXC version Molecule
-    shell: mysqld --version
-    register: pxc_version
-
-  - name: print PXC version Molecule
-    debug: var=pxc_version
 
   - name: check that PXC version is correct Molecule
     command: /package-testing/version_check.sh pxc{{ major_release_version}}
@@ -176,7 +169,6 @@
       packages:
       - percona-xtradb-cluster-server
     when: ansible_os_family == "RedHat"
-
 
   - name: Block pmm.check-dev.percona.com IP
     iptables:

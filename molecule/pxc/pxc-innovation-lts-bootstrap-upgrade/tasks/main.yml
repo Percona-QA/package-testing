@@ -134,13 +134,6 @@
 # - name: install plugins
 #   command: /package-testing/plugins_test_80.sh pxc
 
-  - name: register PXC version Molecule
-    shell: mysqld --version
-    register: pxc_version
-
-  - name: print PXC version Molecule
-    debug: var=pxc_version
-
   - name: check PXC {{ major_release_version}} version Molecule
     command: /package-testing/version_check.sh pxc{{ major_release_version}}
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
