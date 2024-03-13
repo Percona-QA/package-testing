@@ -16,13 +16,14 @@ pipeline {
         }
       stage ('Prepare Image') {
         steps {
+            withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
             sh """
-              wget -q https://repo.percona.com/private/puneetkaushik-kK14Am4J5WJ15S6H5LA5Q8FVFp8ZZV7Q/qa-test/ps-gated-5.7.44-49/percona-server-5.7.44-49-1.docker.tar
-              sudo docker load -i percona-server-5.7.44-49-1.docker.tar
+              wget -q https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/percona-server-${PS_VERSION}-1.docker.tar
+              sudo docker load -i percona-server-${PS_VERSION}-1.docker.tar
             """
          } //end steps
-      } //End prepare stage
-
+       } //End prepare stage
+      }
       stage ('Run trivy analyzer') {
         steps {
             sh """
