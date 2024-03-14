@@ -5,7 +5,7 @@ pipeline {
     parameters {
         string(name: 'PS_VERSION', defaultValue: '5.7.44-49', description: 'PS full version')
         string(name: 'PS_REVISION', defaultValue: 'c643a1242d8', description: 'PS revision')
-        choice(name: 'REPO', choices: ['testing','main'], description: testing or main)
+        choice(name: 'REPO', choices: ['testing', 'main'], description: 'Choose repository: testing or main')
         booleanParam(defaultValue: false, name: 'BUILD_TYPE_MINIMAL')
         booleanParam(defaultValue: false, name: 'BUILD_TYPE_DEBUG')
     }
