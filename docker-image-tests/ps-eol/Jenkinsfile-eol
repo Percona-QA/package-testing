@@ -4,7 +4,7 @@ pipeline {
     string(name: 'PS_VERSION', defaultValue: '5.7.44-49', description: 'Full PS version')
     string(name: 'PS_REVISION', defaultValue: 'c643a1242d8', description: 'Short git hash for release')
     string(name: 'TAG', defaultValue: '5.7.44-49.1', description: 'Different tags that are going to be released')
-    string(name: 'REPO', defaultValue: 'testing', description: 'Repository name (main or testing)')
+    choice(name: 'REPO', choices: ['testing','main'], description: testing or main)
   }
   stages {
     stage('Prepare') {
