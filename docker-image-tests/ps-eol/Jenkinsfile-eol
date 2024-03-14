@@ -1,29 +1,36 @@
 pipeline {
   agent { label 'docker' }
   parameters {
-    string(name: 'PS_VERSION', defaultValue: '8.0.33-25', description: 'Full PS version')
-    string(name: 'PS_REVISION', defaultValue: '9468fd1d', description: 'Short git hash for release')
+    string(name: 'PS_VERSION', defaultValue: '5.7.44-49', description: 'Full PS version')
+    string(name: 'PS_REVISION', defaultValue: 'c643a1242d8', description: 'Short git hash for release')
     string(name: 'TAG', defaultValue: '5.7.44-49.1', description: 'Different tags that are going to be released')
+    string(name: 'REPO', defaultValue: 'testing', description: 'Repository name (main or testing)')
   }
   stages {
     stage('Prepare') {
       steps {
-          script {
-            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-            currentBuild.description = "${TAG}"
-          }
-         }
+        script {
+          currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+          currentBuild.description = "${TAG}"
         }
-      stage ('Prepare Image') {
-        steps {
-            withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-            sh """
-              wget -q https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/percona-server-${PS_VERSION}-1.docker.tar
-              sudo docker load -i percona-server-${PS_VERSION}-1.docker.tar
-            """
-         } //end steps
-       } //End prepare stage
       }
+    }
+    stage('Prepare Image') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+          script {
+            def dockerTarURL
+            if (REPO == 'testing') {
+              dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/percona-server-${PS_VERSION}-1.docker.tar"
+            } else {
+              dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/percona-server-${PS_VERSION}-1.docker.tar"
+            }
+            sh "wget -q ${dockerTarURL}"
+            sh "sudo docker load -i percona-server-${PS_VERSION}-1.docker.tar"
+          }
+        }
+      }
+    }  
       stage ('Run trivy analyzer') {
         steps {
             sh """
