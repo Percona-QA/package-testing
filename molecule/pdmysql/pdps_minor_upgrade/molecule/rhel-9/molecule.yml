@@ -1,0 +1,48 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: rhel9-${BUILD_NUMBER}-${JOB_NAME}
+    region: us-west-2
+    image: ami-00a5d5bcea31bb02c
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: t2.small
+    ssh_user: ec2-user
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-ps80-worker
+      job-name: ${JOB_NAME}
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    create: ../../../../playbooks/create.yml
+    destroy: ../../../../playbooks/destroy.yml
+    prepare: ../../../../playbooks/prepare.yml
+    cleanup: ../../playbooks/cleanup.yml
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../../tests/
+  options:
+    verbose: true
+    s: true
+    k: "test_pdps_ or test_common_"
+    m: "not pkg_source and not orch_source and not telemetry_enabled"
+    junitxml: report.xml
+scenario:
+  name: rhel-9
+  destroy_sequence:
+    - destroy
+  clenup_sequence:
+    - cleanup
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+    - destroy
