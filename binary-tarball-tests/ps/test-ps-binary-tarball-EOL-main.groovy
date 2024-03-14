@@ -28,20 +28,22 @@ pipeline {
                                     MINIMAL="-minimal"
                                 fi
                                 echo ${BUILD_TYPE_DEBUG}
-                                DEBUG=""
                                 if [ "${BUILD_TYPE_DEBUG}" = "true" ]; then
                                     DEBUG="-debug"
+                                else
+                                    DEBUG=""
                                 fi
                                 if [ -f /usr/bin/yum ]; then
                                     sudo yum install -y git wget
                                 else
                                     sudo apt install -y git wget
                                 fi
-                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.jammy${MINIMAL}{DEBUG}.tar.gz"
-                                if (REPO == 'main')
-                                TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.jammy${MINIMAL}${DEBUG}.tar.gz"
+                                if [ "${REPO}" = "main" ]; then
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
                                 else
-                                TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
+                                fi
                                 rm -rf package-testing
                                 git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
                                 cd package-testing/binary-tarball-tests/ps
