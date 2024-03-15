@@ -7,7 +7,6 @@ pipeline {
         string(name: 'PS_REVISION', defaultValue: 'c643a1242d8', description: 'PS revision')
         choice(name: 'REPO', choices: ['testing', 'main'], description: 'Choose repository: testing or main')
         booleanParam(defaultValue: false, name: 'BUILD_TYPE_MINIMAL')
-        booleanParam(defaultValue: false, name: 'BUILD_TYPE_DEBUG')
     }
     stages {
         stage('Binary tarball test') {
@@ -27,18 +26,12 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                     MINIMAL="-minimal"
                                 fi
-                                echo ${BUILD_TYPE_DEBUG}
-                                if [ "${BUILD_TYPE_DEBUG}" = "true" ]; then
-                                    DEBUG="-debug"
-                                else
-                                    DEBUG=""
-                                fi
                                 if [ -f /usr/bin/yum ]; then
                                     sudo yum install -y git wget
                                 else
                                     sudo apt install -y git wget
                                 fi
-                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.jammy${MINIMAL}${DEBUG}.tar.gz"
+                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.jammy${MINIMAL}.tar.gz"
                                 if [ "${REPO}" = "main" ]; then
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
                                 else
@@ -74,7 +67,11 @@ pipeline {
                                     sudo apt install -y git wget
                                 fi
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.focal${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                if [ "${REPO}" = "main" ]; then
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                else
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
+                                fi
                                 rm -rf package-testing
                                 git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
                                 cd package-testing/binary-tarball-tests/ps
@@ -105,7 +102,11 @@ pipeline {
                                     sudo apt install -y git wget
                                 fi
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.bionic${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                if [ "${REPO}" = "main" ]; then
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                else
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
+                                fi
                                 rm -rf package-testing
                                 git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
                                 cd package-testing/binary-tarball-tests/ps
@@ -136,7 +137,11 @@ pipeline {
                                     sudo apt install -y git wget
                                 fi
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.bookworm${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                if [ "${REPO}" = "main" ]; then
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                else
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
+                                fi
                                 rm -rf package-testing
                                 git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
                                 cd package-testing/binary-tarball-tests/ps
@@ -167,7 +172,11 @@ pipeline {
                                     sudo apt install -y git wget
                                 fi
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.bullseye${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                if [ "${REPO}" = "main" ]; then
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                else
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
+                                fi
                                 rm -rf package-testing
                                 git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
                                 cd package-testing/binary-tarball-tests/ps
@@ -198,7 +207,11 @@ pipeline {
                                     sudo apt install -y git wget
                                 fi
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.buster${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                if [ "${REPO}" = "main" ]; then
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                else
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
+                                fi
                                 rm -rf package-testing
                                 git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
                                 cd package-testing/binary-tarball-tests/ps
@@ -229,7 +242,11 @@ pipeline {
                                     sudo apt install -y git wget
                                 fi
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.ol9${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                if [ "${REPO}" = "main" ]; then
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                else
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
+                                fi
                                 rm -rf package-testing
                                 git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
                                 cd package-testing/binary-tarball-tests/ps
@@ -260,7 +277,11 @@ pipeline {
                                     sudo apt install -y git wget
                                 fi
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.el8${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                if [ "${REPO}" = "main" ]; then
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                else
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
+                                fi
                                 rm -rf package-testing
                                 git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
                                 cd package-testing/binary-tarball-tests/ps
@@ -291,7 +312,11 @@ pipeline {
                                     sudo apt install -y git wget
                                 fi
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.el7${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                if [ "${REPO}" = "main" ]; then
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/"
+                                else
+                                    TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
+                                fi
                                 rm -rf package-testing
                                 git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
                                 cd package-testing/binary-tarball-tests/ps
