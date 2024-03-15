@@ -7,7 +7,7 @@
 
   tasks:
   - name: include tasks for enabling testing repo
-    include: ../tasks/enable_testing_repo.yml
+    include_tasks: ../tasks/enable_testing_repo.yml
 
   - name: upgrade deb packages
     apt: update_cache=yes upgrade=safe

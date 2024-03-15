@@ -130,6 +130,7 @@
     include_tasks: ../tasks/enable_ps57_eol_tools_repo.yml
     when:
       - lookup('env', 'EOL') == "yes"      
+
 #
 # Upgrade packages
 #

@@ -51,15 +51,15 @@
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
 
   - name: include tasks for enabling PS {{ major_release_version }} main repo
-    include: ../tasks/enable_ps_innovation_repo_main.yml
+    include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
     when: lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling PS {{ major_release_version }} test repo
-    include: ../tasks/enable_ps_innovation_repo_testing.yml
+    include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling PS {{ major_release_version }} experimental repo
-    include: ../tasks/enable_ps_innovation_repo_experimental.yml
+    include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: download and extract world database

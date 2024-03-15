@@ -111,7 +111,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: include tasks for enabling tools test repo
-    include: ../tasks/enable_tools_testing_repo.yml
+    include_tasks: ../tasks/enable_tools_testing_repo.yml
 
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
