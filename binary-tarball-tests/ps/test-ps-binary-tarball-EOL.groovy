@@ -38,7 +38,7 @@ pipeline {
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -73,7 +73,7 @@ pipeline {
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -108,7 +108,7 @@ pipeline {
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -143,7 +143,7 @@ pipeline {
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -178,7 +178,7 @@ pipeline {
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -213,7 +213,7 @@ pipeline {
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -248,7 +248,7 @@ pipeline {
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -283,7 +283,7 @@ pipeline {
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -318,7 +318,7 @@ pipeline {
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps-eol --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true

@@ -1,7 +1,7 @@
 Before running set environment variables, eg.:
 ```
-export DOCKER_ACC="percona"
-export PS_VERSION="8.0.16-7"
+export REPO="testing or main"
+export PS_VERSION="5.7.44-49"
 export PS_REVISION="613e312"
 ```
 
