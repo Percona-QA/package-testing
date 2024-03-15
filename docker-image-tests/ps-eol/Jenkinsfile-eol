@@ -1,0 +1,78 @@
+pipeline {
+  agent { label 'docker' }
+  parameters {
+    string(name: 'PS_VERSION', defaultValue: '5.7.44-49', description: 'Full PS version')
+    string(name: 'PS_REVISION', defaultValue: 'c643a1242d8', description: 'Short git hash for release')
+    string(name: 'TAG', defaultValue: '5.7.44-49.1', description: 'Different tags that are going to be released')
+    choice(name: 'REPO', choices: ['testing', 'main'], description: 'Choose repository: testing or main')
+  }
+  stages {
+    stage('Prepare') {
+      steps {
+        script {
+          currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+          currentBuild.description = "${TAG}"
+        }
+      }
+    }
+    stage('Prepare Image') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+          script {
+            def dockerTarURL
+            if (REPO == 'testing') {
+              dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/percona-server-${PS_VERSION}-1.docker.tar"
+            } else {
+              dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/percona-server-${PS_VERSION}-1.docker.tar"
+            }
+            sh "wget -q ${dockerTarURL}"
+            sh "sudo docker load -i percona-server-${PS_VERSION}-1.docker.tar"
+          }
+        }
+      }
+    }  
+      stage ('Run trivy analyzer') {
+        steps {
+            sh """
+              sudo yum install -y curl wget git
+              TRIVY_VERSION=\$(curl --silent 'https://api.github.com/repos/aquasecurity/trivy/releases/latest' | grep '"tag_name":' | tr -d '"' | sed -E 's/.*v(.+),.*/\\1/')
+              wget https://github.com/aquasecurity/trivy/releases/download/v\${TRIVY_VERSION}/trivy_\${TRIVY_VERSION}_Linux-64bit.tar.gz
+              sudo tar zxvf trivy_\${TRIVY_VERSION}_Linux-64bit.tar.gz -C /usr/local/bin/
+              wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/junit.tpl
+              /usr/local/bin/trivy -q image --format template --template @junit.tpl  -o trivy-hight-junit.xml \
+              --timeout 10m0s --ignore-unfixed --exit-code 1 --severity HIGH,CRITICAL percona/percona-server:${TAG}
+            """
+         } //end steps
+         post {
+           always {
+                    junit testResults: "*-junit.xml", keepLongStdio: true, allowEmptyResults: true, skipPublishingChecks: true
+                }
+        }
+      } //end Run trivy analyzer
+     
+      stage('Run tests') {
+        steps {
+            sh '''
+              # disable THP on the host for TokuDB
+              echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" > disable_thp.sh
+              echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag" >> disable_thp.sh
+              chmod +x disable_thp.sh
+              sudo ./disable_thp.sh
+              # run test
+              export PATH=${PATH}:~/.local/bin
+              sudo yum install -y python3 python3-pip
+              rm -rf package-testing
+              git clone https://github.com/Percona-QA/package-testing.git --depth 1
+              cd package-testing/docker-image-tests/ps-eol
+              pip3 install --user -r requirements.txt
+              ./run.sh
+            '''
+        } //end steps
+        post {
+          always {
+          junit 'package-testing/docker-image-tests/ps-eol/report.xml'
+        }
+       }
+     } //end Run tests
+    } //end stages
+}
