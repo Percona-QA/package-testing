@@ -8,12 +8,7 @@ enforce-gtid-consistency
 binlog-format=row
 source-verify-checksum=ON
 binlog-checksum=CRC32
-innodb-undo-log-encrypt
-innodb-redo-log-encrypt
 default-table-encryption=ON
 binlog-encryption=ON
-encrypt-tmp-files=ON
-innodb-encrypt-online-alter-logs=ON
-innodb-sys-tablespace-encrypt=ON
-innodb-temp-tablespace-encrypt=ON
 table-encryption-privilege-check=ON
+early-plugin-load=keyring_file.so

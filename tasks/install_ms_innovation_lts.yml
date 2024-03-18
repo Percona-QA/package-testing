@@ -1,71 +1,5 @@
----
-# This playbook does following:
-#   enables Percona testing repository
-#   installs latest version of PS 8x Innovation-LTS, PT and PXB 8x Innovation-LTS
-#   does some tests
 
-# Cosmic is still missing python
-# - import_playbook: test_prep.yml
-
-- hosts: all
-  become: true
-  become_method: sudo
-
-  tasks:
-  - name: Echo server_to_test variable
-    debug:
-      msg: "{{ lookup('env', 'server_to_test') }}"
-
-  - name: include tasks for test env setup
-    include_tasks: ../tasks/test_prep.yml
-
-  - name: Extract PXB major and minor version number using shell commands
-    shell: cat ../VERSIONS | grep 'PXB_INN_LTS_MAJ_VER' | cut -d'=' -f2 | sed 's/"//g'
-    register: pxb_version_major_minor
-
-  - name: Extract PXB major version number using shell commands
-    shell: cat ../VERSIONS | grep PXB_INN_LTS_MAJ_VER | awk -F'[=".]' '{print $3"."$4}'
-    register: pxb_version_major
-
-  - name: Extract version number using shell commands
-    shell: cat ../VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
-    register: major_release_version
-
-  - name: Set major_release_version variable
-    set_fact:
-      major_release_version: "{{ major_release_version.stdout }}"
-
-  - name: Set pxb_version_major variable
-    set_fact:
-      pxb_version_major: "{{ pxb_version_major.stdout }}"
-
-  - name: Set pxb_version_major_minor variable
-    set_fact:
-      pxb_version_major_minor: "{{ pxb_version_major_minor.stdout }}"
-
-  - name: Extract values using shell command for repo name used for innovation/lts release
-    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
-    register: ps_inn_lts_repo_name
-
-  - name: Set pxb_inn_lts_repo_name variable
-    set_fact:
-      ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
-
-  - name: include tasks for enabling PS {{ major_release_version }} main repo
-    include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
-    when: lookup('env', 'install_repo') == "main"
-
-  - name: include tasks for enabling PS {{ major_release_version }} test repo
-    include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-
-  - name: include tasks for enabling PS {{ major_release_version }} experimental repo
-    include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
-    when: lookup('env', 'install_repo') == "experimental"
-
-
-### UPSTREAM 
-
+# MS-INSTALL START
 
   - name: install yum-utils for rhel
     yum:
@@ -73,12 +7,6 @@
       state: present
     when: 
       - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
-
-#  - name: Install MySQL apt repository package
-#    apt:
-#      deb: https://repo.mysql.com/mysql-apt-config_0.8.22-1_all.deb
-#    when: ansible_os_family == "Debian"
 
   - name: Install MySQL RHEL 6 yum repository package
     yum: name=https://repo.mysql.com/mysql80-community-release-el6.rpm state=present
@@ -165,17 +93,6 @@
     when: 
       - ansible_os_family == "Debian"
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
-
-#  - name: install MySQL Community deb packages
-#    apt:
-#      name: "{{ packages }}"
-#      update_cache: yes
-#    vars:
-#      packages:
-#      - mysql-community-server
-#    when: ansible_os_family == "Debian"
-
-# NEW URL 8.3 https://cdn.mysql.com//Downloads/MySQL-8.3/mysql-server_8.3.0-1ubuntu23.10_amd64.deb-bundle.tar
 
   - name: Install mysql deb packages using tarballs ubuntu 22.04
     command: wget https://cdn.mysql.com/archives/mysql-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar
@@ -284,7 +201,6 @@
       - ansible_distribution == 'Debian' and ansible_distribution_version == '12.0'
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
-##
   - name: install mysql deb packages
     shell: dpkg -i /tmp/*.deb || apt-get install -f -y
     environment:
@@ -337,179 +253,53 @@
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
-  - name: Start the MySQL service
-    service: name=mysql state=started
-    when: 
-      - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
-
-  - name: Start the MySQL service
-    service: name=mysqld state=started
-    when: 
-      - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
-
-  - name: set root password on centos
-    command: /package-testing/setpass_57.sh
-    when: 
-      - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
-###
-
-### PS START
-
-  - name: download and extract world database
-    command: "{{ item }}"
-    with_items:
-    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
-
-#  Disable Percona Toolkit installation till its supported in OL9 and Jammy
-#  - name: install Percona Toolkit new deb packages
-#    include_tasks: ../tasks/install_pt.yml
-
-  - name: install Percona Server {{ major_release_version }} packages
-    include_tasks: ../tasks/install_ps_innovation_lts.yml
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
-
-### PS END
-
-
-  - name: install Percona XtraBackup {{ major_release_version }} packages
-    include_tasks: ../tasks/install_pxb_innovation_lts.yml
-    when: 
-      - lookup('env', 'install_repo') != "experimental"
-
-### PS START
   - name: start mysql service with service command
     command: service mysql start
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
   - name: start mysql service with systemctl command
-    command: systemctl start mysql
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    command: systemctl start mysqld
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
-  - name: set root password on centos
-    command: /package-testing/setpass_57.sh
+  - name: Fetch current MySQL root password from log
+    shell: grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}' | tail -1
+    register: init_pass
+    ignore_errors: yes
+    changed_when: false
+
+  - name: Set root user password using current password
+    shell: |
+      mysql -uroot -p'{{ init_pass.stdout }}' --connect-expired-password -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'U?fY)9s7|3gxUm'; FLUSH PRIVILEGES;"
+    when: init_pass.stdout is defined and init_pass.stdout | length > 0
+    ignore_errors: true
+    
+  - name: Ensure MySQL service is restarted
+    service:
+      name: mysqld
+      state: restarted
+      enabled: yes
+    when: init_pass.stdout is defined and init_pass.stdout | length > 0
+
+  - name: Debug - Show fetched MySQL temporary root password
+    debug:
+      msg: "Fetched MySQL temporary root password is '{{ init_pass.stdout }}'"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
     when: 
       - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
-### PS END
-
-  - name: install plugins, import world database
-    command: /package-testing/plugins_test.sh
-
-  - name: check that Percona XtraBackup version is correct
-    command: /package-testing/version_check.sh pxb{{ major_release_version }}
-
-  - name: check that Percona XtraBackup package versions are correct
-    command: /package-testing/package_check.sh pxb{{ major_release_version }}
-
-  - name: run backup
-    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
-
-  - name: prepare backup
-    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
-
-### PS START
-
-  - name: install lz4 and zstd packages on Redhat/CentOS
-    yum:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - lz4
-      - zstd
-    when: 
+  - name: restart mysql service RHEL
+    command: systemctl restart mysqld
+    when:
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
-  - name: install lz4 and zstd packages on Ubuntu/Debian
-    apt:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - lz4
-      - zstd
-    when: 
-      - ansible_os_family == "Debian" and ansible_distribution_release != "bionic"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
-
-  - name: install lz4 and zstd packages on Bionic 
-    apt:
-      name: "{{ packages }}"
-    vars: 
-      packages:
-      - liblz4-tool
-      - zstd
-    when: 
-      - ansible_os_family == "Debian" and ansible_distribution_release == "bionic"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
-
-  - name: run backup with lz4 compression
-    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_l/ --compress=lz4 --compress-threads=10
+  - name: restart mysql service DEBIAN
+    command: systemctl restart mysql
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
-
-  - name: decompress backup
-    command: /usr/bin/xtrabackup --decompress --user=root --target-dir=/tmp/backup_l/
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
-
-  - name: prepare backup
-    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_l/
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
-
-  - name: run backup with zstd compression
-    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_z/ --compress=zstd --compress-threads=10
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
-
-  - name: decompress backup
-    command: /usr/bin/xtrabackup --decompress --user=root --target-dir=/tmp/backup_z/
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
-
-  - name: prepare backup
-    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_z/
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
-      
-  - name: remove Percona Server deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: absent
-    vars:
-      packages:
-      - percona-server-server*
-      - percona-xtrabackup-{{ major_release_version }}
-    when: 
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
-
-  - name: remove Percona Server rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: absent
-    vars:
-     packages:
-      - percona-server-server*
-      - percona-xtrabackup-{{ major_release_version }}
-    when: 
-      - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
-
-  - name: check if process is stopped after package removal
-    command: /package-testing/check_running.sh mysql stopped
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
-### PS END
