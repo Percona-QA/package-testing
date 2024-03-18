@@ -13,7 +13,7 @@
   tasks:
 
   - name: Extract version number using shell commands
-    shell: cat ../VERSIONS | grep -oP 'PS_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    shell: cat ../VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
     register: major_release_version
 
   - name: Set major_release_version variable
