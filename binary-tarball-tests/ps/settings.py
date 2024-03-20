@@ -70,7 +70,9 @@ ps80_symlinks = (
   ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.36'),
   ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.36'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
-
+ps80_openssl_files = (
+  'lib/libcrypto.so', 'lib/libk5crypto.so', 'lib/libssl.so', 'lib/libsasl2.so'
+)
 # 5.7
 ps57_binaries = [
   'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog',
