@@ -9,6 +9,21 @@ ps_revision = os.getenv('PS_REVISION')
 ps_version_upstream, ps_version_percona = ps_version.split('-')
 ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
 
+if os.getenv('PRO') == "yes":
+  pro='Pro '
+else:
+  pro=''
+
+if os.getenv('DEBUG') == "yes":
+  debug='-debug'
+else:
+  debug=''
+
+if os.getenv('FIPS_SUPPORTED') == "yes":
+  fips_supported=True
+else:
+  fips_supported=False
+
 # 8.0
 ps80_binaries = [
   'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog',
@@ -182,6 +197,7 @@ elif ps_version_major == '8.0':
     ps_files = ps80_files
     ps_symlinks = ps80_symlinks
     ps_components = ps80_components
+    ps_openssl_files=ps80_openssl_files
 elif ps_version_major == '5.7':
     ps_binaries = ps57_binaries
     ps_executables = ps57_executables
