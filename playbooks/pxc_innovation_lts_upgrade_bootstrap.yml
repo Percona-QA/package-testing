@@ -1,0 +1,112 @@
+---
+# This playbook upgrades the PXC node to the latest available version in testing repo
+
+- hosts: all
+  become: true
+  become_method: sudo
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  tasks:
+  - name: Extract version number using shell commands
+    shell: grep -oP 'PXC_INN_LTS_VER="\K(\d+)\.(\d+)' /package-testing/VERSIONS | tr -d '.'
+    register: major_release_version
+
+  - name: Set major_release_version variable
+    set_fact:
+      major_release_version: "{{ major_release_version.stdout }}"
+
+  - name: Extract values using shell command for repo name used for innovation/lts release
+    shell: grep 'PXC_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: pxc_inn_lts_repo_name
+
+  - name: Set pxc_inn_lts_repo_name variable
+    set_fact:
+      pxc_inn_lts_repo_name: "{{ pxc_inn_lts_repo_name.stdout }}"
+
+  - name: include tasks for enabling test repo
+    include_tasks: ../tasks/enable_pxc_innovation_lts_testing_repo.yml
+    when: lookup('env', 'upgrade_repo') == "testing" or lookup('env', 'upgrade_repo') == ""
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_pxc_innovation_lts_main_repo.yml
+    when: lookup('env', 'upgrade_repo') == "main"
+
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../tasks/enable_pxc_innovation_lts_experimental_repo.yml
+    when: lookup('env', 'upgrade_repo') == "experimental"
+
+  - name: upgrade PXC {{ pxc_inn_lts_repo_name }} to new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+      - percona-xtradb-cluster-test
+      - percona-xtradb-cluster-source
+      - percona-xtradb-cluster-server-debug
+      - percona-xtradb-cluster-server
+      - percona-xtradb-cluster-common
+      - percona-xtradb-cluster-dbg
+      - percona-xtradb-cluster-client
+      - percona-xtradb-cluster
+    when: ansible_os_family == "Debian"
+
+  - name: upgrade PXC {{ pxc_inn_lts_repo_name }} to new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-shared
+      - percona-xtradb-cluster-garbd
+      - percona-xtradb-cluster-test
+      - percona-xtradb-cluster-devel
+      - percona-xtradb-cluster-debuginfo
+      - percona-xtradb-cluster-server
+      - percona-xtradb-cluster-full
+      - percona-xtradb-cluster-client
+    when: ansible_os_family == "RedHat"
+
+  - name: install Percona Server new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+       - percona-xtradb-cluster-shared-compat
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: Sleep for 60 seconds
+    shell: sleep 60
+
+  - name: start mysql service
+    service: name=mysql state=restarted
+    throttle: 1
+
+  - name: register PXC version Side Effect
+    shell: mysqld --version
+    register: pxc_version
+
+  - name: print PXC version Side Effect
+    debug: var=pxc_version
+
+  - name: install plugins
+    command: /package-testing/plugins_test_innovation_lts.sh pxc
+
+  - name: register PXC version Side Effect
+    shell: mysqld --version
+    register: pxc_version
+
+  - name: print PXC version Side Effect
+    debug: var=pxc_version
+
+  - name: check that PXC version is correct Side Effect
+    command: /package-testing/version_check.sh pxc{{ major_release_version }}
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
+  - name: check that PXC package versions are correct Side Effect
+    command: /package-testing/package_check.sh pxc{{ major_release_version }}
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""

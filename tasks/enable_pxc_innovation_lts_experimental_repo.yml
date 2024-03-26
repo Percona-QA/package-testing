@@ -1,0 +1,27 @@
+  - name: include playbook for removing Percona repo
+    include_tasks: remove_percona_repository.yml
+
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: /usr/bin/dnf module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: Install percona repository package
+    apt:
+      deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+    when: ansible_os_family == "Debian"
+
+  - name: add the Percona yum repos for CentOS
+    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    when: ansible_os_family == "RedHat"
+
+  - name: change the default repo to experimental {{ pxc_inn_lts_repo_name }}
+    command: percona-release enable-only {{ pxc_inn_lts_repo_name }} experimental
+
+  - name: add the experimental tools repo
+    command: percona-release enable tools experimental
+
+  - name: clean and update yum cache
+    shell: |
+      yum clean all
+      yum makecache
+    when: ansible_os_family == "RedHat"
