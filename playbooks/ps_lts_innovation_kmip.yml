@@ -27,7 +27,7 @@
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
 
-  - name: include tasks for test env setup
+  - name: include tasks for test env setup(Puneet)
     include_tasks: ../tasks/test_prep.yml
 
   - name: disable selinux
