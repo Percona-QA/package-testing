@@ -53,7 +53,7 @@ pxc80_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 pxc80_files = (
-  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.35' ,
+  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.36' ,
   'lib/libmysqlservices.a' , 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini', 'lib/plugin/keyring_file.so',
@@ -62,7 +62,7 @@ pxc80_files = (
 if glibc_version == '2.35':
   pxc80_symlinks = (
     ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),('lib/libgcrypt.so', 'lib/private/libgcrypt.so.20.3.4',),
-    ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.35'),('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
+    ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.36'),('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
     ('lib/libssl.so', 'lib/private/libssl.so.3'),('lib/libtinfo.so', 'lib/private/libtinfo.so.6.3'),
     ('lib/libaio.so','lib/private/libaio.so.1.0.1'),('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
     ('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'), ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
