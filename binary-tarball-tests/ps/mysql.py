@@ -43,7 +43,7 @@ class MySQL:
             subprocess.check_call([self.mysqld, '--no-defaults', '--initialize-insecure','--basedir='+self.basedir,'--datadir='+self.datadir])
 
     def start(self):
-        self.basic_param=['--no-defaults','--basedir='+self.basedir,'--datadir='+self.datadir,'--tmpdir='+self.datadir,'--socket='+self.socket,'--port='+self.port,'--log-error='+self.logfile,'--pid-file='+self.pidfile,'--server-id=1','--master-info-repository=table','--relay-log-info-repository=table']
+        self.basic_param=['--no-defaults','--basedir='+self.basedir,'--datadir='+self.datadir,'--tmpdir='+self.datadir,'--socket='+self.socket,'--port='+self.port,'--log-error='+self.logfile,'--pid-file='+self.pidfile,'--server-id=1']
         subprocess.Popen([self.mysqld]+ self.basic_param + self.extra_param, env=os.environ)
         subprocess.call(['sleep','5'])
 
