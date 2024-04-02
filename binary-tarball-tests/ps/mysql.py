@@ -5,7 +5,7 @@ import os
 import shlex
 
 class MySQL:
-    def __init__(self, base_dir):
+    def __init__(self, base_dir, features=[]):
         self.basedir = base_dir
         self.port = '3306'
         self.datadir = base_dir+'/data'
@@ -16,6 +16,12 @@ class MySQL:
         self.mysqladmin = base_dir+'/bin/mysqladmin'
         self.pidfile = base_dir+'/mysql.pid'
         self.mysql_install_db = base_dir+'/scripts/mysql_install_db'
+        self.features=features
+
+        if 'fips' in self.features:
+            self.extra_param=['--ssl-fips-mode=ON', '--log-error-verbosity=3']
+        else:
+            self.extra_param=[]
 
         subprocess.call(['rm','-Rf',self.datadir])
         subprocess.call(['rm','-f',self.logfile])
@@ -37,7 +43,8 @@ class MySQL:
             subprocess.check_call([self.mysqld, '--no-defaults', '--initialize-insecure','--basedir='+self.basedir,'--datadir='+self.datadir])
 
     def start(self):
-        subprocess.Popen([self.mysqld,'--no-defaults','--basedir='+self.basedir,'--datadir='+self.datadir,'--tmpdir='+self.datadir,'--socket='+self.socket,'--port='+self.port,'--log-error='+self.logfile,'--pid-file='+self.pidfile,'--server-id=1','--master-info-repository=table','--relay-log-info-repository=table'], env=os.environ)
+        self.basic_param=['--no-defaults','--basedir='+self.basedir,'--datadir='+self.datadir,'--tmpdir='+self.datadir,'--socket='+self.socket,'--port='+self.port,'--log-error='+self.logfile,'--pid-file='+self.pidfile,'--server-id=1']
+        subprocess.Popen([self.mysqld]+ self.basic_param + self.extra_param, env=os.environ)
         subprocess.call(['sleep','5'])
 
     def stop(self):
@@ -85,4 +92,3 @@ class MySQL:
             return True
         else:
             return False
-

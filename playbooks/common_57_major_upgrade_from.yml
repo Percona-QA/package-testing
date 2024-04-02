@@ -27,21 +27,35 @@
     include_tasks: ../tasks/setup_local_vault.yml
 
   - name: setup config file for keyring vault
-    template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test_v2.j2
-              dest=/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
-              mode=0664 owner=root group=root
+    template:
+      src: ../scripts/ps_keyring_plugins_test/keyring_vault_test_v2.j2
+      dest: /package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
+      mode: '0644'
+      owner: root
+      group: root
 
   - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when:
+      - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+      - lookup('env', 'EOL') != "yes"
 
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+    when:
+      - lookup('env', 'install_repo') == "main"
+      - lookup('env', 'EOL') != "yes"
 
   - name: include tasks for enabling experimental repo
     include_tasks: ../tasks/enable_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+    when:
+      - lookup('env', 'install_repo') == "experimental"
+      - lookup('env', 'EOL') != "yes"
+
+  - name: include tasks for enabling PS 57 EOL repo
+    include_tasks: ../tasks/enable_ps57_eol_tools_repo.yml
+    when:
+      - lookup('env', 'EOL') == "yes"
 
   - name: download and extract world database
     command: "{{ item }}"
