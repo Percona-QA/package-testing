@@ -17,6 +17,9 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
+  - set_fact:
+      pro: "{{ 'pro' if 'yes' in lookup('env', 'pro_test') else '' }}"
+
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
@@ -46,15 +49,26 @@
 
   - name: include tasks for enabling PS 8 test repo
     include_tasks: ../tasks/enable_ps8_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+    when: 
+      - lookup('env', 'install_repo') == "main"
+      - lookup('env', 'pro_test') != "yes"
 
   - name: include tasks for enabling PS 8 test repo
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when:
+      - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+      - lookup('env', 'pro_test') != "yes"
 
   - name: include tasks for enabling PS 8 experimental repo
     include_tasks: ../tasks/enable_ps8_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+    when: 
+      - lookup('env', 'install_repo') == "experimental"
+      - lookup('env', 'pro_test') != "yes"
+
+  - name: include tasks for enabling PS 80 pro repo
+    include_tasks: ../tasks/enable_ps80_pro_tools_repo.yml
+    when:
+      - lookup('env', 'pro_test') == "yes"
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -65,8 +79,10 @@
 #  - name: install Percona Toolkit new deb packages
 #    include_tasks: ../tasks/install_pt.yml
 
-  - name: install Percona Server 8.0 packages
+  - name: install Percona Server{{ pro_suf }} 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
+    vars:
+      pro_suf: "{{ '-pro' if 'yes' in lookup('env', 'pro_test') else '' }}"
 
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
@@ -98,9 +114,6 @@
     shell: setenforce 0 || true
     when: ansible_os_family == "RedHat"
 
-  - name: run Group Replication tests
-    include_tasks: ../tasks/gr_test.yml
-
   - name: append include for RedHat
     lineinfile:
         path: /etc/my.cnf
@@ -113,8 +126,8 @@
 
   - name: Handle check that Percona Server version is correct
     block: 
-      - name: Run the version_check.sh script
-        shell: /package-testing/version_check.sh ps80 > version-check.log 2>&1
+      - name: Run the version_check.sh script {{ pro }}
+        shell: /package-testing/version_check.sh ps80 {{ pro }} > version-check.log 2>&1
 
       - name: Log check for warnings in the previous stage
         command: /package-testing/scripts/log-warning-check.sh version-check.log
@@ -133,11 +146,21 @@
         fail:
           msg: Failing the further tasks due to issues in the previous task.
 
-  - name: check that Percona Server package versions are correct
-    command: /package-testing/package_check.sh ps80
+  - name: check that Percona Server {{ pro }} package versions are correct
+    command: /package-testing/package_check.sh ps80 {{ pro }}
+
+# Bookworm does not support fips mode out of the box. It requires opennsl module rebuid. So we skip fips mode enabling for bookworm.
+  - name: include tasks for checking FIPS mode
+    include_tasks: ../tasks/check_ps80_fips.yml
+    when:
+      - lookup('env', 'pro_test') == "yes"
+      - ansible_distribution_release != "bookworm"
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
+
+  - name: run Group Replication tests
+    include_tasks: ../tasks/gr_test.yml
 
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
