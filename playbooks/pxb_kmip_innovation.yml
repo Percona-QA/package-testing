@@ -31,6 +31,14 @@
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
 
+  - name: Extract version number for PS with 3 values using shell commands
+    shell: cat ../VERSIONS | grep -P 'PXB_INN_LTS_VER=' | cut -d'=' -f2 | sed 's/\([0-9]\+\.[0-9]\+\).*/\1/' | sed 's/"//g'
+    register: pxb_major_release
+
+  - name: Set pxb_major_release variable
+    set_fact:
+      pxb_major_release: "{{ pxb_major_release.stdout }}"
+
   - name: include tasks for enabling PS {{ major_release_version }} main repo
     include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
     when: lookup('env', 'install_repo') == "main"
@@ -48,8 +56,22 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
+
+# INSTALL PS 
   - name: install Percona Server {{ major_release_version }} packages
     include_tasks: ../tasks/install_ps_innovation_lts.yml
+    when:
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+# INSTALL MS 
+
+  - name: install MYSQL MS Server {{ pxb_version_main }} packages
+    include_tasks: ../tasks/install_ms_innovation_lts.yml
+    vars:
+      pxb_version_major: "{{ pxb_major_release }}"
+      pxb_version_major_minor: "{{ pxb_major_release }}.0"
+    when:
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install sysbench new deb packages
     include_tasks: ../tasks/install_sysbench.yml
@@ -58,8 +80,15 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: stop mysql service
-    service: name=mysql state=stopped
+  - name: stop mysql service RedHat
+    service: name=mysqld state=stopped
+    when:
+      - ansible_os_family == "RedHat"
+
+  - name: stop mysql service DEBIAN
+    command: systemctl stop mysql
+    when:
+      - ansible_os_family == "Debian"
 
   - name: remove mysql data directory
     command: rm -r /var/lib/mysql
@@ -107,11 +136,13 @@
   - name: start pykmip server
     shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
 
-  - name: copy the global manifest for mysql
+  - name: copy the global manifest for mysql only for PS 
     copy:
         src: /package-testing/kmip/mysqld.my
         dest: /usr/sbin/
         remote_src: yes
+    when:
+    - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: copy the global configuration file for mysql in Redhat/CentOS
     copy:
@@ -127,12 +158,23 @@
         remote_src: yes
     when: ansible_os_family == "Debian"
 
-  - name: copy the encryption config file on Debian/Ubuntu
+  - name: copy the encryption config file on Debian/Ubuntu PS
     copy:
         src: /package-testing/kmip/encryption.j2
         dest: /etc/mysql/conf.d/encryption.cnf
         remote_src: yes
-    when: ansible_os_family == "Debian"
+    when: 
+      - ansible_os_family == "Debian"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+  - name: copy the encryption config file on Debian/Ubuntu MS
+    copy:
+        src: /package-testing/kmip/encryption_ms.j2
+        dest: /etc/mysql/conf.d/encryption.cnf
+        remote_src: yes
+    when: 
+      - ansible_os_family == "Debian"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: append include for RedHat
     lineinfile:
@@ -140,15 +182,33 @@
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
 
-  - name: copy the encryption config file on RHEL/CentOS/Amazon
+  - name: copy the encryption config file on RHEL/CentOS/Amazon PS
     copy:
         src: /package-testing/kmip/encryption.j2
         dest: /etc/my.cnf.d/encryption.cnf
         remote_src: yes
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
-  - name: start mysql service
-    service: name=mysql state=started
+  - name: copy the encryption config file on RHEL/CentOS/Amazon MS
+    copy:
+        src: /package-testing/kmip/encryption_ms.j2
+        dest: /etc/my.cnf.d/encryption.cnf
+        remote_src: yes
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+  - name: start mysql service RedHat
+    service: name=mysqld state=restarted
+    when:
+      - ansible_os_family == "RedHat"
+
+  - name: start mysql service DEBIAN
+    command: systemctl restart mysql
+    when:
+      - ansible_os_family == "Debian"
 
   - name: check mysql service status
     command: /package-testing/check_running.sh mysql running
