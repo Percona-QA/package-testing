@@ -37,12 +37,12 @@
       key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
-  - name: setup epel 9 repo
-    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
+  - name: setup epel 9 repo package
+    yum: name=epel-release state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: setup epel 9 repo
-    yum: name=epel-release state=present
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: add the Vault and epel CentOS 6 repos
