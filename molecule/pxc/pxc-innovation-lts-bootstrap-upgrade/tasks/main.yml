@@ -130,10 +130,6 @@
               mode=0640 owner=root group=root
     when: ansible_os_family == "RedHat"
 
-  # other tests
-# - name: install plugins
-#   command: /package-testing/plugins_test_80.sh pxc
-
   - name: check PXC {{ major_release_version}} version Molecule
     command: /package-testing/version_check.sh pxc{{ major_release_version}}
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""

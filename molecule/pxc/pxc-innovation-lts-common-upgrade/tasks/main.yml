@@ -125,12 +125,6 @@
     command: /package-testing/package_check.sh pxc{{ major_release_version}}
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
-# - name: install plugins
-#   command: /package-testing/plugins_test_80.sh pxc
-
-#  - name: Run tests and incase of failure save logs
-#    block:
-
   - name: run bats tests for mysql init scripts
     shell: sleep {{ sleep_before_tests | default('0') }}; /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
     throttle: 1
