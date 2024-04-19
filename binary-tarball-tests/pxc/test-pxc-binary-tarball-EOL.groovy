@@ -3,10 +3,10 @@ pipeline {
         label 'docker'
     }
     parameters {
-      string(name: 'PXC_VERSION', defaultValue: '8.0.30-22.1', description: 'PXC full version')
-      string(name: 'PXC_REVISION', defaultValue: '167c5ac', description: 'PXC revision')
-      string(name: 'WSREP_VERSION', defaultValue: '26.4.3', description: 'WSREP version')
-      string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.33-rel36-49.1', description: 'PXC-5.7 package version')
+      string(name: 'PXC_VERSION', defaultValue: '5.7.44.2', description: 'PXC full version')
+      string(name: 'PXC_REVISION', defaultValue: '38d2944', description: 'PXC revision')
+      string(name: 'WSREP_VERSION', defaultValue: '31.65', description: 'WSREP version')
+      string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.44-rel49-65.2', description: 'PXC-5.7 package version')
       choice(name: 'REPO', choices: ['testing', 'main'], description: 'Choose repository: testing or main')
       booleanParam( 
         defaultValue: false,
