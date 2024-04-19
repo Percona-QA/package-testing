@@ -7,6 +7,7 @@ pipeline {
       string(name: 'PXC_REVISION', defaultValue: '167c5ac', description: 'PXC revision')
       string(name: 'WSREP_VERSION', defaultValue: '26.4.3', description: 'WSREP version')
       string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.33-rel36-49.1', description: 'PXC-5.7 package version')
+      choice(name: 'REPO', choices: ['testing', 'main'], description: 'Choose repository: testing or main')
       booleanParam( 
         defaultValue: false,
         name: 'BUILD_TYPE_MINIMAL'
