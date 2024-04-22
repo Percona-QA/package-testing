@@ -17,23 +17,24 @@ pipeline {
         }
       }
     }
-    stage('Prepare Image') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-          script {
-            def dockerTarURL
-            if (REPO == 'testing') {
-              dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${pxc_version_upstream}.2/percona-xtradb-cluster-${TAG}.docker.tar"
-            } else {
-              dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-Xtradb-Cluster-${PS_VERSION}/percona-xtradb-cluster-${TAG}.docker.tar"
-            }
-            sh "wget -q ${dockerTarURL}"
-            sh "sudo docker load -i percona-xtradb-cluster-${TAG}.docker.tar"
-          }
-        }
-      }
-    } 
       
+      stage('Prepare Image') {
+          steps {
+              withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+                  script {
+                      def dockerTarURL
+                      if (REPO == 'testing') {
+                          dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-5.7.44.2/percona-xtradb-cluster-${TAG}.docker.tar"
+                      } else {
+                          dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-Xtradb-Cluster-${PS_VERSION}/percona-xtradb-cluster-${TAG}.docker.tar"
+                      }
+                      sh "wget -q ${dockerTarURL}"
+                      sh "sudo docker load -i percona-xtradb-cluster-${TAG}.docker.tar"
+                  }
+              }
+          }
+      }       
+
       stage ('Run trivy analyzer') {
         steps {
             sh """
