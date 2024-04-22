@@ -3,7 +3,7 @@ pipeline {
   parameters {
     string(name: 'PXC_VERSION', defaultValue: '5.7.44-49', description: 'Full PS version')
     string(name: 'PXC_REVISION', defaultValue: '38d2944', description: 'Short git hash for release')
-    string(name: 'TAG', defaultValue: '5.7.44-31.65.2', description: 'Different tags that are going to be released')
+    string(name: 'TAG', defaultValue: '5.7.44-31.65-2', description: 'Different tags that are going to be released')
     string(name: 'PXC_WSREP_VERSION', defaultValue: '31.65', description: 'Galera WSREP version')
     string(name: 'PXC_PXB_VERSION', defaultValue: '2.4.29', description: 'PXB version installed (only for PXC 5.7)')
     choice(name: 'REPO', choices: ['testing', 'main'], description: 'Choose repository: testing or main')
@@ -44,7 +44,7 @@ pipeline {
               sudo tar zxvf trivy_\${TRIVY_VERSION}_Linux-64bit.tar.gz -C /usr/local/bin/
               wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/junit.tpl
               /usr/local/bin/trivy -q image --format template --template @junit.tpl  -o trivy-hight-junit.xml \
-              --timeout 10m0s --ignore-unfixed --exit-code 1 --severity HIGH,CRITICAL percona/percona-xtradb-cluster:${PXC_VERSION}
+              --timeout 10m0s --ignore-unfixed --exit-code 1 --severity HIGH,CRITICAL percona/percona-xtradb-cluster:5.7.44-31.65
             """
          } //end steps
          post {

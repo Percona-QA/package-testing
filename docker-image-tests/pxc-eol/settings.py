@@ -1,25 +1,20 @@
 #!/usr/bin/env python3
 import os
 
+tag = os.getenv('TAG')
 pxc_version = os.getenv('PXC_VERSION')
 pxc_revision = os.getenv('PXC_REVISION')
-pxc57_pkg_version = os.getenv('PXC57_PKG_VERSION')
 pxc_pxb_version = os.getenv('PXC_PXB_VERSION')
 pxc_wsrep_version = os.getenv('PXC_WSREP_VERSION')
 test_pwd = os.path.dirname(os.path.realpath(__file__))
-docker_image = "percona/percona-xtradb-cluster:" + tag
+parts = tag.split("-")
+tag_1 = "-".join(parts[:2])
+docker_image = "percona/percona-xtradb-cluster:" + tag_1
 
 pxc_version_upstream, pxc_version_percona = pxc_version.split('-')
 pxc_version_major = pxc_version_upstream.split('.')[0] + '.' + pxc_version_upstream.split('.')[1]
 pxc_rel=pxc_version_percona.split('.')[0]
-
-if pxc_version_major == '5.7':
-  pxc57_client_version = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1][3:]
-  pxc57_server_release = pxc57_pkg_version.split('-')[1]
-  pxc57_server_version_norel = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1][3:] + '-' + pxc_version_major.replace('.', '')
-
 docker_network = 'pxc-network'
-
 base_node_name = 'pxc-docker-test-cluster-node'
 cluster_name = 'pxc-cluster1'
 
@@ -48,7 +43,6 @@ pxc57_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 
-pxc_version_major == '5.7':
 pxc_packages = pxc57_packages
 pxc_binaries = pxc57_binaries
 pxc_plugins = pxc57_plugins
