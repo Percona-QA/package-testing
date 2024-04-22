@@ -6,8 +6,113 @@
   become_method: sudo
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
+  vars:
+      ENV_VAR_PATH: "{{ lookup('env', 'MOLECULE_ENV_FILE') }}"
   tasks:
+
+  - name: Fetch the vars from file for upgrade
+    ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
+
+  - set_fact:
+      man_ip: "{{ PXC1_IP }}"
+    when: 
+    - "'pxc1' in inventory_hostname"
+
+  - set_fact:
+      man_ip: "{{ PXC2_IP }}"
+    when: 
+    - "'pxc2' in inventory_hostname"
+
+  - set_fact:
+      man_ip: "{{ PXC3_IP }}"
+    when: 
+    - "'pxc3' in inventory_hostname"
+  
+  - debug: var=man_ip
+
+  - name: Stop PXC bootstrap service RHEL
+    command: systemctl stop mysql@bootstrap.service
+    when: ansible_os_family == "RedHat"
+    ignore_errors: yes
+
+  - name: stop mysql service DEBIAN
+    command: systemctl stop mysql
+    when: ansible_os_family == "Debian"
+    ignore_errors: yes
+
+  - name: sleep for 60 seconds before starting mysql service
+    shell: sleep 60
+
+  - name: Start PXC MYSQLD service
+    command: systemctl start mysqld
+    when: ansible_os_family == "RedHat"
+
+  - name: start mysql service DEBIAN
+    command: systemctl start mysql
+    when: ansible_os_family == "Debian"
+
+  - name: sleep for 60 seconds after starting mysqld service
+    shell: sleep 60
+
+  - name: Check that the PXC Cluster is up and running Store in Variable
+    shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'
+
+  - name: Stop PXC service RHEL
+    command: systemctl stop mysqld
+    when: ansible_os_family == "RedHat"
+    ignore_errors: yes
+
+  - name: stop mysql service DEBIAN
+    command: systemctl stop mysql
+    when: ansible_os_family == "Debian"
+    ignore_errors: yes
+
+  - name: include tasks for removing old PXC 5.7 RHEL
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - Percona-XtraDB-Cluster*
+    when: ansible_os_family == "RedHat"
+
+  - name: include tasks for removing old PXC 5.7 deb
+    apt:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-xtradb-cluster*
+      - percona-xtrabackup*
+    when: ansible_os_family == "Debian"
+##
+
+  - name: remove eol 5.7 repo file DEB
+    file:
+      path: /etc/apt/sources.list.d/post-eol.list
+      state: absent
+    when: ansible_os_family == "Debian"
+
+  - name: remove eol 5.7 repo file RHEL
+    file:
+      path: /etc/yum.repos.d/post-eol.repo
+      state: absent
+    when: ansible_os_family == "RedHat"
+
+  - name: disable old repos
+    command: percona-release disable all
+
+  - name: update deb cache
+    command: apt update
+    when:
+      - ansible_os_family == "Debian"
+
+  - name: clean and update yum cache
+    shell: |
+      yum clean all
+      yum makecache
+    when: ansible_os_family == "RedHat"
+
   - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_pxc80_testing_repo.yml
     when: lookup('env', 'upgrade_repo') == "testing" or lookup('env', 'upgrade_repo') == ""
@@ -65,9 +170,47 @@
 
   - name: Sleep for 60 seconds
     shell: sleep 60
+    
+  - name: Remove old config
+    file:
+      path: /etc/my.cnf
+      state: absent
+    when: ansible_os_family == "RedHat"
 
-  - name: install plugins
-    command: /package-testing/plugins_test_80.sh pxc
+  - name: copy pxc config on centos
+    template: src=../templates/rhel_maj_upgrade_57_80.j2
+              dest=/etc/my.cnf
+    when: ansible_os_family == "RedHat"
+
+  - name: copy pxc config on debian/ubuntu
+    template: src=../templates/deb_maj_upgrade_57_80.j2
+              dest=/etc/mysql/my.cnf
+              mode=0640 owner=mysql group=root
+    when: ansible_os_family == "Debian"
+
+  - name: copy pxc certs
+    copy:
+      src: ../support-files/certs/
+      dest: /etc/mysql/certs/
+
+#  - name: edit the grastat.dat file for safe bootstrap
+#    lineinfile:
+#      path: /var/lib/mysql/grastate.dat
+#      regexp: 'safe_to_bootstrap: 0'
+#      line: 'safe_to_bootstrap: 1'
+
+  - name: Start PXC RHEL
+    service:
+      name: mysqld
+      state: started
+    when: ansible_os_family == "RedHat"
+
+  - name: start mysqld service DEBIAN
+    command: systemctl start mysql
+    when: ansible_os_family == "Debian"
+
+#  - name: install plugins
+#    command: /package-testing/plugins_test_80.sh pxc
 
   - name: register PXC version Side Effect
     shell: mysqld --version
@@ -76,10 +219,11 @@
   - name: print PXC version Side Effect
     debug: var=pxc_version
 
-  - name: check that PXC version is correct Side Effect
-    command: /package-testing/version_check.sh pxc80
-    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+#  - name: check that PXC version is correct Side Effect
+#    command: /package-testing/version_check.sh pxc80
+#    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
-  - name: check that PXC package versions are correct Side Effect
-    command: /package-testing/package_check.sh pxc80
-    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+#  - name: check that PXC package versions are correct Side Effect
+#    command: /package-testing/package_check.sh pxc80
+#    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+    

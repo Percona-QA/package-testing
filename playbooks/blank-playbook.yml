@@ -1,0 +1,11 @@
+---
+# This playbook installs PS/PXC client package and checks that it works correctly
+
+- hosts: all
+  name: Blank Run
+  become: true
+  become_method: sudo
+  tasks:
+  - name: Blank Run
+    debug:
+      msg: "Blank Run"
