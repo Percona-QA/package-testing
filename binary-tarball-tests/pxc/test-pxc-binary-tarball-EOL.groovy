@@ -31,11 +31,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                     MINIMAL="-minimal"
                                 fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
+                                sudo apt install -y git wget
                                 TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.jammy${MINIMAL}.tar.gz"
                                 if [ "${REPO}" = "main" ]; then
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${PXC_VERSION}/"
@@ -66,11 +62,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                     MINIMAL="-minimal"
                                 fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
+                                sudo apt install -y git wget
                                 TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.focal${MINIMAL}.tar.gz"
                                 if [ "${REPO}" = "main" ]; then
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${PXC_VERSION}/"
@@ -101,11 +93,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                     MINIMAL="-minimal"
                                 fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
+                                sudo apt install -y git wget
                                 TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.bionic${MINIMAL}.tar.gz"
                                 if [ "${REPO}" = "main" ]; then
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${PXC_VERSION}/"
@@ -136,11 +124,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                     MINIMAL="-minimal"
                                 fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
+                                sudo apt install -y git wget
                                 TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.bookworm${MINIMAL}.tar.gz"
                                 if [ "${REPO}" = "main" ]; then
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${PXC_VERSION}/"
@@ -171,11 +155,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                     MINIMAL="-minimal"
                                 fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
+                                sudo apt install -y git wget
                                 TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.bullseye${MINIMAL}.tar.gz"
                                 if [ "${REPO}" = "main" ]; then
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${PXC_VERSION}/"
@@ -206,11 +186,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                     MINIMAL="-minimal"
                                 fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
+                                sudo apt install -y git wget
                                 TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.buster${MINIMAL}.tar.gz"
                                 if [ "${REPO}" = "main" ]; then
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${PXC_VERSION}/"
@@ -241,11 +217,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                     MINIMAL="-minimal"
                                 fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
+                                sudo yum install -y git wget tar
                                 TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.ol9${MINIMAL}.tar.gz"
                                 if [ "${REPO}" = "main" ]; then
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${PXC_VERSION}/"
@@ -276,11 +248,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                     MINIMAL="-minimal"
                                 fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
+                                sudo yum install -y git wget tar
                                 TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.el8${MINIMAL}.tar.gz"
                                 if [ "${REPO}" = "main" ]; then
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${PXC_VERSION}/"
@@ -311,11 +279,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                     MINIMAL="-minimal"
                                 fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
+                                sudo yum install -y git wget
                                 TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.el7${MINIMAL}.tar.gz"
                                 if [ "${REPO}" = "main" ]; then
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${PXC_VERSION}/"
