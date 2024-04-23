@@ -41,6 +41,9 @@ class TestContainerAttributes:
     def test_entrypoint(self, inspect_data):
         assert len(inspect_data['Config']['Entrypoint']) == 1
         assert inspect_data['Config']['Entrypoint'][0] == '/entrypoint.sh'
+    
+    def test_mysql_version(self, host):
+        assert host.check_output('mysql --version') == 'mysql  Ver 14.14 Distrib '+pxc_version+', for Linux (x86_64) using  7.0'
 
     def test_exposed_ports(self, inspect_data):
         if pxc_version_major in ['5.7','5.6']:

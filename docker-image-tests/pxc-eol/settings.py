@@ -7,9 +7,11 @@ pxc_revision = os.getenv('PXC_REVISION')
 pxc_pxb_version = os.getenv('PXC_PXB_VERSION')
 pxc_wsrep_version = os.getenv('PXC_WSREP_VERSION')
 test_pwd = os.path.dirname(os.path.realpath(__file__))
-parts = tag.split("-")
-tag_1 = "-".join(parts[:2])
-docker_image = "percona/percona-xtradb-cluster:" + tag_1
+#parts = tag.split("-")
+#tag_1 = "-".join(parts[:2])
+converted_tag = tag.rsplit("-", 1)
+converted_tag = converted_tag[0] + "." + converted_tag[1]
+docker_image = "percona/percona-xtradb-cluster:" + converted_tag
 
 pxc_version_upstream, pxc_version_percona = pxc_version.split('-')
 pxc_version_major = pxc_version_upstream.split('.')[0] + '.' + pxc_version_upstream.split('.')[1]
