@@ -14,10 +14,7 @@ def host():
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd,
          '-e', 'PERCONA_TELEMETRY_DISABLE=1',
          '-d', docker_image]).decode().strip()
-    if pxc_version_major in ['8.0','5.7','5.6']:
-        exec_command = ['microdnf', 'install', 'net-tools']
-    else:
-         exec_command = ['yum', 'install', '-y', 'net-tools']
+    exec_command = ['microdnf', 'install', 'net-tools']
     subprocess.check_call(['docker','exec','--user','root',container_name] + exec_command)
     time.sleep(80)
     yield testinfra.get_host("docker://root@" + docker_id)
@@ -36,16 +33,10 @@ class TestMysqlEnvironment:
         assert oct(host.file(binary).mode) == '0o755'
 
     def test_mysql_version(self, host):
-        if pxc_version_major in ['5.7','5.6']:
-            assert host.check_output('mysql --version') == 'mysql  Ver 14.14 Distrib '+pxc57_client_version+', for Linux (x86_64) using  7.0'
-        else:
-            assert host.check_output('mysql --version') == 'mysql  Ver '+ pxc_version +' for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release rel'+ pxc_rel +', Revision '+ pxc_revision +', WSREP version '+ pxc_wsrep_version +')'
+        assert host.check_output('mysql --version') == 'mysql  Ver 14.14 Distrib '+pxc_version+', for Linux (x86_64) using  7.0'
 
     def test_mysqld_version(self, host):
-        if pxc_version_major in ['5.7','5.6']:
-            assert host.check_output('mysqld --version') == 'mysqld  Ver '+pxc57_server_version_norel+' for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release '+pxc57_server_release+', Revision '+pxc_revision+', WSREP version '+ pxc_wsrep_version +', wsrep_'+ pxc_wsrep_version +')'
-        else:
-            assert host.check_output('mysqld --version') == '/usr/sbin/mysqld  Ver '+ pxc_version +' for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release rel'+ pxc_rel +', Revision '+ pxc_revision +', WSREP version '+ pxc_wsrep_version +')'
+        assert host.check_output('mysqld --version') == 'mysqld  Ver '+pxc57_server_version_norel+' for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release '+pxc57_server_release+', Revision '+pxc_revision+', WSREP version '+ pxc_wsrep_version +', wsrep_'+ pxc_wsrep_version +')'
 
     def test_process_running(self, host):
         assert host.process.get(user="mysql", comm="mysqld")
