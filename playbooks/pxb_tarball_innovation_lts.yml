@@ -33,6 +33,14 @@
       packages:
       - libev
     when: ansible_os_family == "RedHat"
+  
+  - name: Extract version number for PS with 3 values using shell commands
+    shell: cat ../VERSIONS | grep -P 'PXB_INN_LTS_VER=' | cut -d'=' -f2 | sed 's/\([0-9]\+\.[0-9]\+\).*/\1/' | sed 's/"//g'
+    register: pxb_major_release
+
+  - name: Set pxb_major_release variable
+    set_fact:
+      pxb_major_release: "{{ pxb_major_release.stdout }}"
 
   - name: Extract version number using shell commands
     shell: cat ../VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
@@ -46,7 +54,7 @@
     shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
     register: ps_inn_lts_repo_name
 
-  - name: Set pxb_inn_lts_repo_name variable
+  - name: Set ps_inn_lts_repo_name variable
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
 
@@ -67,23 +75,48 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
+# INSTALL PS 
   - name: install Percona Server {{ major_release_version }} packages
     include_tasks: ../tasks/install_ps_innovation_lts.yml
+    when:
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+# INSTALL MS 
+
+  - name: install MYSQL MS Server {{ pxb_version_main }} packages
+    include_tasks: ../tasks/install_ms_innovation_lts.yml
+    vars:
+      pxb_version_major: "{{ pxb_major_release }}"
+      pxb_version_major_minor: "{{ pxb_major_release }}.0"
+    when:
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install and check Percona XtraBackup {{ major_release_version }} normal tarball from {{ install_repo }} downloads area
     command: /package-testing/test_binary_tarball.sh pxb{{ major_release_version }} {{ install_repo }} normal
 
   - name: start mysql service with service command
     command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
-  - name: start mysql service with systemctl command
+  - name: start mysql service with systemctl command for Redhat/Centos 7
+    command: systemctl start mysqld
+    when:
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+
+  - name: start mysql service with systemctl command for Redhat/Centos 7 for PS
     command: systemctl start mysql
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when:
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: install plugins, import world database
     command: /package-testing/plugins_test.sh
