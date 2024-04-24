@@ -124,7 +124,7 @@
               mode=0640 owner=mysql group=root
     when: ansible_os_family == "Debian"
 
-  # bootstrap the cluster
+  - name: attempt to bootstrap the cluster
     block: 
     - name: bootstrap cluster
       command: systemctl start mysql@bootstrap.service
