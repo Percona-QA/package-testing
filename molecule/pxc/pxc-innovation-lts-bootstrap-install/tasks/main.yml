@@ -125,8 +125,32 @@
     when: ansible_os_family == "Debian"
 
   # bootstrap the cluster
-  - name: bootstrap cluster on CentOS
-    command: systemctl start mysql@bootstrap.service
+    block: 
+    - name: bootstrap cluster
+      command: systemctl start mysql@bootstrap.service
+
+    rescue:
+
+    - name: Check the journal content
+      shell: |
+        journalctl -n 100 --no-pager
+      register: journal_content
+
+    - name: Print the journal
+      debug:
+        msg: "{{ journal_content }}"
+
+    - name: Check mysql logs
+      shell: |
+        cat /var/log/mysqld.log
+      register: mysqld_log
+
+    - name: Print mongod logs
+      debug:
+        msg: "{{ mongod_logs }}"
+
+    - name: Fail
+      command: /bin/false
 
   # set root password on centos
   - name: set root password on centos
