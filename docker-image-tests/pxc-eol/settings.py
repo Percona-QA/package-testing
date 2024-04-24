@@ -2,29 +2,27 @@
 import os
 
 tag = os.getenv('TAG')
-pxc_version = os.getenv('PXC_VERSION')
+upstream_version = os.getenv('UPSTREAM_VERSION')
+ps_version = os.getenv('PS_VERSION')
 pxc_revision = os.getenv('PXC_REVISION')
+pxc_pkg = os.getenv('PXC_PKG')
+pxc_pkg_version = os.getenv('PXC_PKG_VERSION')
 pxc_pxb_version = os.getenv('PXC_PXB_VERSION')
 pxc_wsrep_version = os.getenv('PXC_WSREP_VERSION')
 test_pwd = os.path.dirname(os.path.realpath(__file__))
-parts = tag.split("-")
-tag_1 = "-".join(parts[:2])
-docker_image = "percona/percona-xtradb-cluster:5.7.44-31.65.2"
+docker_image = "percona/percona-xtradb-cluster:" + tag
 
-pxc_version_upstream, pxc_version_percona = pxc_version.split('-')
-pxc_version_major = pxc_version_upstream.split('.')[0] + '.' + pxc_version_upstream.split('.')[1]
-pxc_rel=pxc_version_percona.split('.')[0]
-pxc57_server_version_norel = pxc_version + '-' + pxc_version_major.replace('.', '')
-pxc57_server_release = pxc_version.split('-')[1]
+pxc_version_major = upstream_version.split('.')[0] + '.' + upstream_version.split('.')[1]
+pxc57_server_version_norel = upstream_version + '-' + ps_version + '-' + pxc_version_major.replace('.', '')
 docker_network = 'pxc-network'
 base_node_name = 'pxc-docker-test-cluster-node'
 cluster_name = 'pxc-cluster1'
 
 # 5.7
 pxc57_packages = (
-  ('Percona-XtraDB-Cluster-shared-57', pxc_version_upstream),
-  ('Percona-XtraDB-Cluster-server-57', pxc_version_upstream),
-  ('Percona-XtraDB-Cluster-client-57', pxc_version_upstream),
+  ('Percona-XtraDB-Cluster-shared-57', upstream_version),
+  ('Percona-XtraDB-Cluster-server-57', upstream_version),
+  ('Percona-XtraDB-Cluster-client-57', upstream_version),
   ('percona-xtrabackup-24', pxc_pxb_version)
 )
 pxc57_binaries = (

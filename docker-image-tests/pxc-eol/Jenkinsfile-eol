@@ -1,9 +1,11 @@
 pipeline {
   agent { label 'docker' }
   parameters {
-    string(name: 'PXC_VERSION', defaultValue: '5.7.44-49', description: 'Full PS version')
+    string(name: 'UPSTREAM_VERSION', defaultValue: '5.7.44', description: 'only upstream version Example 5.7.44')
+    string(name: 'PS_VERSION', defaultValue: '49', description: 'Only Percona specific version example 49')
     string(name: 'PXC_REVISION', defaultValue: '38d2944', description: 'Short git hash for release')
-    string(name: 'TAG', defaultValue: '5.7.44-31.65-2', description: 'Different tags that are going to be released')
+    string(name: 'PXC_PKG_VERSION', defaultValue: '2', description: 'package version')
+    string(name: 'TAG', defaultValue: '5.7.44-31.65.2', description: 'Different tags that are going to be released')
     string(name: 'PXC_WSREP_VERSION', defaultValue: '31.65', description: 'Galera WSREP version')
     string(name: 'PXC_PXB_VERSION', defaultValue: '2.4.29', description: 'PXB version installed (only for PXC 5.7)')
     choice(name: 'REPO', choices: ['testing', 'main'], description: 'Choose repository: testing or main')
@@ -12,7 +14,7 @@ pipeline {
     stage('Prepare') {
       steps {
         script {
-          currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
+          currentBuild.displayName = "#${BUILD_NUMBER}-${UPSTREAM_VERSION}-${PXC_REVISION}-${REPO}"
           currentBuild.description = "${TAG}"
         }
       }
@@ -24,12 +26,12 @@ pipeline {
                   script {
                       def dockerTarURL
                       if (REPO == 'testing') {
-                          dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-5.7.44.2/percona-xtradb-cluster-${TAG}.docker.tar"
+                          dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${UPSTREAM_VERSION}.${PXC_PKG_VERSION}/percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar"
                       } else {
                           dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-Xtradb-Cluster-${PS_VERSION}/percona-xtradb-cluster-${TAG}.docker.tar"
                       }
                       sh "wget -q ${dockerTarURL}"
-                      sh "sudo docker load -i percona-xtradb-cluster-${TAG}.docker.tar"
+                      sh "sudo docker load -i percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar"
                   }
               }
           }
@@ -44,7 +46,7 @@ pipeline {
               sudo tar zxvf trivy_\${TRIVY_VERSION}_Linux-64bit.tar.gz -C /usr/local/bin/
               wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/junit.tpl
               /usr/local/bin/trivy -q image --format template --template @junit.tpl  -o trivy-hight-junit.xml \
-              --timeout 10m0s --ignore-unfixed --exit-code 1 --severity HIGH,CRITICAL percona/percona-xtradb-cluster:5.7.44-31.65.2
+              --timeout 10m0s --ignore-unfixed --exit-code 1 --severity HIGH,CRITICAL percona/percona-xtradb-cluster:${TAG}
             """
          } //end steps
          post {
