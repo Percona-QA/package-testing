@@ -1,0 +1,63 @@
+# This task contains common actions for the PMM Client all tests at preparation stage
+
+- name: Removing Percona Release package
+  include_tasks: ./remove_percona_repository.yml
+
+- name: Install EPEL and GPG
+  when: ansible_os_family == "RedHat"
+  include_tasks: ./install_epel.yml
+
+- name: Allow release-info to change for apt repositories
+  when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
+  command: apt-get update -y --allow-releaseinfo-change
+
+- name: Install percona-release package
+  include_tasks: install_percona-release.yml
+
+- name: Install needed packages for Debian/Ubuntu
+  when: ansible_os_family == "Debian"
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+    state: latest
+  vars:
+    packages:
+      - wget
+      - gnupg
+      - jq # for exporter endpoint metric fetch
+      - acl
+  retries: 60
+  delay: 10
+  register: result
+  until: result is not failed
+
+- name: Install needed packages for RHEL 7
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+      - libselinux-python
+      - wget
+      - jq # for exporter end point metric fetch
+
+- name: Install needed packages for RHEL 8+
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+      - unzip
+      - wget
+      - jq # for exporter end point metric fetch
+
+- name: enable original {{ test_repo }} repo
+  include_tasks: ./enable_repo.yml
+  vars:
+    only: yes
+    package: "original"
+### uncomment when ENG-1194 wil be fixed
+#    package: "pmm2-client"
+    repository: "{{ test_repo }}"
