@@ -117,27 +117,15 @@ pxc57_files = (
   'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so',
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
-
-if glibc_version == "2.12":
-  pxc57_symlinks = (
-    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.31'),
-    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.31'),
-    ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.1e'),
-    ('lib/libssl.so','lib/private/libssl.so.1.0.1e'),
-    ('lib/libtinfo.so','lib/private/libtinfo.so.5.7'),
-    ('lib/libsasl2.so','lib/private/libsasl2.so.2.0.23'),
-    ('lib/libreadline.so','lib/private/libreadline.so.6.0'),
-  )
-else:
-  pxc57_symlinks = (
-    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.31'),
-    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.31'),
-    ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'),
-    ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
-    ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
-    ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
-    ('lib/libreadline.so','lib/private/libreadline.so.6.2'),
-  )
+pxc57_symlinks = (
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.31'),
+  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.31'),
+#  ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'),
+  ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
+  ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
+  ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
+  ('lib/libreadline.so','lib/private/libreadline.so.6.2'),
+)
 
 # 5.6
 pxc56_binaries = [
