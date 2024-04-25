@@ -1,7 +1,7 @@
 # Final assertions suite for PMM Client components
 #
 - name: Check pmm2-client files
-  include_tasks: ./verify_pmm_client_files.yml
+  include_tasks: ./verify_pmm3_client_files.yml
 
 - name: "Wait for 'node_exporter' is Running"
   include_tasks: ./wait_exporter_is_running.yml
