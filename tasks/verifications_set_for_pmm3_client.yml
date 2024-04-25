@@ -1,7 +1,7 @@
 # Final assertions suite for PMM Client components
 #
-- name: Check pmm2-client files
-  include_tasks: ./verify_pmm_client_files.yml
+- name: Check pmm3-client files
+  include_tasks: ./verify_pmm3_client_files.yml
 
 - name: "Wait for 'node_exporter' is Running"
   include_tasks: ./wait_exporter_is_running.yml
@@ -49,7 +49,6 @@
   command: pmm-admin remove postgresql {{ pgsql_socket_service_name }} {{ port_flag if port_flag is defined else '' }}
 
 - name: Validate Exporters Port in output for 2.29.0+
-  when: pmm_agent_minor_version.stdout | int >= 29
   include_tasks: ./verify_exporter_port_output.yml
   loop: "{{ ex_list|select|list }}"
   vars:
