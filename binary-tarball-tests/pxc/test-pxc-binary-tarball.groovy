@@ -125,7 +125,7 @@ void run_test() {
     if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
       MINIMAL="-minimal"
     fi
-    if [[ "${PXC_MAJOR_VERSION}" == "8."* ]]; then
+    if [[ "${PXC_MAJOR_VERSION}" == 8.* ]]; then
       export GLIBC_VERSION="2.17"
       if [ -f /usr/bin/apt-get ]; then
         DEBIAN_VERSION=$(lsb_release -sc)
