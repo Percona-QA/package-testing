@@ -125,11 +125,15 @@ void run_test() {
     if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
       MINIMAL="-minimal"
     fi
-    if [[ "${PXC_MAJOR_VERSION}" == "8.0" || "${PXC_MAJOR_VERSION}" == 8.* && "${PXC_MAJOR_VERSION}" != 8.0 ]]; then
+    if [[ "${PXC_MAJOR_VERSION}" == "8.0" || ( "${PXC_MAJOR_VERSION}" == 8.* && "${PXC_MAJOR_VERSION}" != 8.0 ) ]]; then
+      echo "Matched condition 1"
       export GLIBC_VERSION="2.17"
       if [ -f /usr/bin/apt-get ]; then
+        echo "apt-get exists"
         DEBIAN_VERSION=$(lsb_release -sc)
+        echo "DEBIAN_VERSION: ${DEBIAN_VERSION}"
         if [ ${DEBIAN_VERSION} = "jammy" ]; then
+          echo "Debian version is jammy"
           export GLIBC_VERSION="2.35"
         fi
       fi
