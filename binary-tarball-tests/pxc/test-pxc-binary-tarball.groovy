@@ -125,7 +125,7 @@ void run_test() {
     if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
       MINIMAL="-minimal"
     fi
-    if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
+    if [[ "${PXC_MAJOR_VERSION}" == "8."* ]]; then
       export GLIBC_VERSION="2.17"
       if [ -f /usr/bin/apt-get ]; then
         DEBIAN_VERSION=$(lsb_release -sc)
@@ -151,7 +151,7 @@ void run_test() {
     fi
     git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc81-tar --depth 1
     cd package-testing/binary-tarball-tests/pxc
-    wget -q https://downloads.percona.com/downloads/TESTING/pxc-8.2.0/Percona-XtraDB-Cluster_8.2.0-1.1_Linux.x86_64.glibc2.17.tar.gz
+    wget -q ${TARBALL_LINK}${TARBALL_NAME}
     ./run.sh || true
   '''
 }
