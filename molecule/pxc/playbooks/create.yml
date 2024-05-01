@@ -194,7 +194,7 @@
       shell: echo "{{ instance_name }}"
       register: creates
 
-    - name: Dump instance private IPs install and bootstrap instance
+    - name: Dump instance private IPs install and bootstrap instance INSTALL_BOOTSTRAP_INSTANCE_PRIVATE_IP
       copy:
         content: "{{ instance_priv_ip | to_json }}"
         dest: "{{ lookup('env', 'INSTALL_BOOTSTRAP_INSTANCE_PRIVATE_IP') }}"
@@ -202,7 +202,7 @@
         - "'install' in creates.stdout"
         - "'bootstrap' in creates.stdout"
 
-    - name: Dump instance private IPs install and common instance
+    - name: Dump instance private IPs install and common instance INSTALL_COMMON_INSTANCE_PRIVATE_IP
       copy:
         content: "{{ instance_priv_ip | to_json }}"
         dest: "{{ lookup('env', 'INSTALL_COMMON_INSTANCE_PRIVATE_IP') }}"
@@ -210,7 +210,7 @@
         - "'install' in creates.stdout"
         - "'common' in creates.stdout"
 
-    - name: Dump instance public IPs install and bootstrap instance
+    - name: Dump instance public IPs install and bootstrap instance INSTALL_BOOTSTRAP_INSTANCE_PUBLIC_IP
       copy:
         content: "{{ instance_public_ip | to_json }}"
         dest: "{{ lookup('env', 'INSTALL_BOOTSTRAP_INSTANCE_PUBLIC_IP') }}"
@@ -218,7 +218,7 @@
         - "'install' in creates.stdout"
         - "'bootstrap' in creates.stdout"
 
-    - name: Dump instance public IPs install and common instance
+    - name: Dump instance public IPs install and common instance INSTALL_COMMON_INSTANCE_PUBLIC_IP
       copy:
         content: "{{ instance_public_ip | to_json }}"
         dest: "{{ lookup('env', 'INSTALL_COMMON_INSTANCE_PUBLIC_IP') }}"
@@ -226,38 +226,71 @@
         - "'install' in creates.stdout"
         - "'common' in creates.stdout"
 
-    - name: Dump instance private IPs upgrade and bootstrap instance
+    - name: Dump instance private IPs min_upgrade and bootstrap instance UPGRADE_BOOTSTRAP_INSTANCE_PRIVATE_IP
       copy:
         content: "{{ instance_priv_ip | to_json }}"
         dest: "{{ lookup('env', 'UPGRADE_BOOTSTRAP_INSTANCE_PRIVATE_IP') }}"
       when: 
-        - "'upgrade' in creates.stdout"
+        - "'min_upgrade' in creates.stdout"
         - "'bootstrap' in creates.stdout"
 
-    - name: Dump instance public IPs upgrade and bootstrap instance
+    - name: Dump instance public IPs min_upgrade and bootstrap instance UPGRADE_BOOTSTRAP_INSTANCE_PUBLIC_IP
       copy:
         content: "{{ instance_public_ip | to_json }}"
         dest: "{{ lookup('env', 'UPGRADE_BOOTSTRAP_INSTANCE_PUBLIC_IP') }}"
       when: 
-        - "'upgrade' in creates.stdout"
+        - "'min_upgrade' in creates.stdout"
         - "'bootstrap' in creates.stdout"
 
-    - name: Dump instance private IPs upgrade and common instance
+    - name: Dump instance private IPs min_upgrade and common instance UPGRADE_COMMON_INSTANCE_PRIVATE_IP
       copy:
         content: "{{ instance_priv_ip | to_json }}"
         dest: "{{ lookup('env', 'UPGRADE_COMMON_INSTANCE_PRIVATE_IP') }}"
       when: 
-        - "'upgrade' in creates.stdout"
+        - "'min_upgrade' in creates.stdout"
         - "'common' in creates.stdout"
 
-    - name: Dump instance public IPs upgrade and common instance
+    - name: Dump instance public IPs min_upgrade and common instance UPGRADE_COMMON_INSTANCE_PUBLIC_IP
       copy:
         content: "{{ instance_public_ip | to_json }}"
         dest: "{{ lookup('env', 'UPGRADE_COMMON_INSTANCE_PUBLIC_IP') }}"
       when:
-        - "'upgrade' in creates.stdout"
+        - "'min_upgrade' in creates.stdout"
         - "'common' in creates.stdout"
 
+##
+
+    - name: Dump instance private IPs maj_upgrade and bootstrap instance UPGRADE_MAJ_BOOTSTRAP_INSTANCE_PRIVATE_IP
+      copy:
+        content: "{{ instance_priv_ip | to_json }}"
+        dest: "{{ lookup('env', 'UPGRADE_MAJ_BOOTSTRAP_INSTANCE_PRIVATE_IP') }}"
+      when: 
+        - "'maj_upgrade' in creates.stdout"
+        - "'bootstrap' in creates.stdout"
+
+    - name: Dump instance public IPs maj_upgrade and bootstrap instance UPGRADE_MAJ_BOOTSTRAP_INSTANCE_PUBLIC_IP
+      copy:
+        content: "{{ instance_public_ip | to_json }}"
+        dest: "{{ lookup('env', 'UPGRADE_MAJ_BOOTSTRAP_INSTANCE_PUBLIC_IP') }}"
+      when: 
+        - "'maj_upgrade' in creates.stdout"
+        - "'bootstrap' in creates.stdout"
+
+    - name: Dump instance private IPs maj_upgrade and common instance UPGRADE_MAJ_COMMON_INSTANCE_PRIVATE_IP
+      copy:
+        content: "{{ instance_priv_ip | to_json }}"
+        dest: "{{ lookup('env', 'UPGRADE_MAJ_COMMON_INSTANCE_PRIVATE_IP') }}"
+      when: 
+        - "'maj_upgrade' in creates.stdout"
+        - "'common' in creates.stdout"
+
+    - name: Dump instance public IPs maj_upgrade and common instance UPGRADE_MAJ_COMMON_INSTANCE_PUBLIC_IP
+      copy:
+        content: "{{ instance_public_ip | to_json }}"
+        dest: "{{ lookup('env', 'UPGRADE_MAJ_COMMON_INSTANCE_PUBLIC_IP') }}"
+      when:
+        - "'maj_upgrade' in creates.stdout"
+        - "'common' in creates.stdout"
     # Mandatory configuration for Molecule to function.
 
     - name: Populate instance config dict
