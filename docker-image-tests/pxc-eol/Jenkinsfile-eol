@@ -28,7 +28,7 @@ pipeline {
                       if (REPO == 'testing') {
                           dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${UPSTREAM_VERSION}.${PXC_PKG_VERSION}/percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar"
                       } else {
-                          dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-Xtradb-Cluster-${PS_VERSION}/percona-xtradb-cluster-${TAG}.docker.tar"
+                          dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${UPSTREAM_VERSION}/percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar"
                       }
                       sh "wget -q ${dockerTarURL}"
                       sh "sudo docker load -i percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar"
