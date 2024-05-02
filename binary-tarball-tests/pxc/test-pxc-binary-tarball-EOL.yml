@@ -27,7 +27,7 @@
         description: WSREP version
     - string:
         name: PXC57_PKG_VERSION
-        default: "5.7.31-rel34-43.2"
+        default: "5.7.44-rel49-65.2"
         description: PXC-5.7 package version
     - choice:
         name: REPO
