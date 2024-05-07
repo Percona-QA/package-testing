@@ -20,24 +20,31 @@
   - debug: var=man_ip
     
   - name: include tasks for test env setup
-    include: ../../../../tasks/test_prep.yml
+    include_tasks: ../../../../tasks/test_prep.yml
 
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
+#
   - name: include tasks for enabling test repo
     include_tasks: ../../../../tasks/enable_pxc57_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing"
+    when: (lookup('env', 'install_repo') == "testing" and lookup('env', 'pxc57repo') != "EOL") or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling main repo
     include_tasks: ../../../../tasks/enable_pxc57_main_repo.yml
-    when: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    when: lookup('env', 'install_repo') == "main" and lookup('env', 'pxc57repo') != "EOL"
 
   - name: include tasks for enabling experimental repo
     include_tasks: ../../../../tasks/enable_pxc57_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+    when: lookup('env', 'install_repo') == "experimental" and lookup('env', 'pxc57repo') != "EOL"
+
+##
+
+  - name: include tasks for enabling EOL repo
+    include_tasks: ../../../../tasks/enable_pxc57_eol_tools_repo.yml
+    when: lookup('env', 'pxc57repo') == "EOL"
 
   - name: disable selinux
     selinux: state=disabled
@@ -47,6 +54,17 @@
     iptables:
       flush: yes
     when: ansible_os_family == "RedHat"
+
+  - name: update apt cache debian
+    apt:
+      update_cache: yes
+    when: ansible_os_family == "Debian"
+
+  - name: update rpm cache redhat
+    yum:
+      update_cache: yes
+    when: ansible_os_family == "RedHat" 
+##
 
   - name: install PXC 5.7 deb packages
     apt:
@@ -149,8 +167,8 @@
 
   - name: bootstrap cluster on RHEL7
     command: systemctl start mysql@bootstrap.service
-    when: ((ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7") or (ansible_distribution == "Amazon"))	
-
+    when: ansible_os_family == "RedHat"
+    
   - name: run the bootstrap service on debian/ubuntu
     command: service mysql bootstrap-pxc
     when: ansible_os_family == "Debian"
@@ -189,12 +207,15 @@
   - name: register PXC version
     shell: mysqld --version
     register: pxc_version
-    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
 
   - name: print PXC version
     debug: var=pxc_version
-    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
-
+    
   - name: check PXC 5.7 version
     command: /package-testing/version_check.sh pxc57
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
+
+
+
+

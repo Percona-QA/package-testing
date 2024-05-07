@@ -19,8 +19,16 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
+  - set_fact:
+      pro_suf: "{{ '-pro' if ('yes' in lookup('env', 'pro_test') and lookup('env', 'cur_action_to_test') != 'not_pro_to_pro') else '' }}"
+      allowerasing_value: "{{ true if 'yes' in lookup('env', 'pro_test') else false }}"
+
+  - name: Debug cur_action_to_test
+    debug:
+      msg: Current value of cur_action_to_test is {{ lookup('env', 'cur_action_to_test') | default('Not applicable') }}
+
   - name: include tasks for test env setup
-    include: ../tasks/test_prep.yml
+    include_tasks: ../tasks/test_prep.yml
 
   - name: include tasks for local vault setup
     include_tasks: ../tasks/setup_local_vault.yml
@@ -33,10 +41,19 @@
 # Install from main repository
 
   - name: include tasks for enabling main repo
-    include: ../tasks/enable_main_repo.yml
+    include_tasks: ../tasks/enable_main_repo.yml
+    when: 
+      - lookup('env', 'pro_test') != "yes"
 
   - name: include tasks for enabling PS 8 main repo
-    include: ../tasks/enable_ps8_main_repo.yml
+    include_tasks: ../tasks/enable_ps8_main_repo.yml
+    when: 
+      - lookup('env', 'pro_test') != "yes"
+
+  - name: include tasks for selecting PS 8 repos for PRO update tests
+    include_tasks: ../tasks/select_repo_ps80_pro_update.yml
+    when: 
+      - lookup('env', 'pro_test') == "yes"
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -130,10 +147,37 @@
 # Enable testing repository
 #
   - name: include tasks for enabling PS 8 testing repo
-    include: ../tasks/enable_ps8_testing_repo.yml
+    include_tasks: ../tasks/enable_ps8_testing_repo.yml
+    when:
+      - lookup('env', 'pro_test') != "yes"
+
+  - name: include tasks for enabling PS 80 pro testing repo
+    include_tasks: ../tasks/enable_ps80_pro_tools_repo.yml
+    when:
+      - lookup('env', 'pro_test') == "yes"
+      - lookup('env', 'cur_action_to_test') != 'downgrade'
+
+  - name: include tasks for enabling PDPS {{ version }} {{ repo }} repo
+    command: percona-release enable-only pdps-{{ version }} {{ repo }}
+    vars:
+      repo: "testing"
+      version: "{{ lookup('file', '../VERSIONS').split('\n') | regex_replace('^.*?(PS80_PRO_VER=\")([0-9]+\\.[0-9]+\\.[0-9]+).*?$', '\\2', multiline=True) }}"
+    when:
+      - lookup('env', 'pro_test') == "yes"
+      - lookup('env', 'cur_action_to_test') == 'downgrade'
+
+  - set_fact:
+      pro: "{{ 'pro' if ('yes' in lookup('env', 'pro_test') and lookup('env', 'cur_action_to_test') != 'downgrade') else '' }}"
+      pro_suf: "{{ '-pro' if ('yes' in lookup('env', 'pro_test') and lookup('env', 'cur_action_to_test') != 'downgrade') else '' }}"
 
 # Upgrade packages
 #
+  - name: stop mysql service with systemctl command
+    command: systemctl stop mysql
+    when:
+      - lookup('env', 'cur_action_to_test') == "not_pro_to_pro" or lookup('env', 'cur_action_to_test') == "downgrade"
+      - lookup('env', 'pro_test') == "yes"
+
   - name: upgrade Percona Toolkit to new deb packages
     apt:
       name: "{{ packages }}"
@@ -144,19 +188,20 @@
       - percona-toolkit
     when: ansible_os_family == "Debian"
 
-  - name: upgrade Percona Server to new deb packages
+  - name: upgrade Percona Server{{ pro_suf }} to new deb packages
     apt:
       name: "{{ packages }}"
       update_cache: no
       state: latest
     vars:
       packages:
-      - percona-server-server
-      - percona-server-test
-      - percona-server-client
-      - percona-server-dbg
-      - percona-server-source
-      - percona-server-rocksdb
+      - percona-server-server{{ pro_suf }}
+      - percona-server-test{{ pro_suf }}
+      - percona-server-client{{ pro_suf }}
+      - percona-server{{ pro_suf }}-dbg
+      - percona-server{{ pro_suf }}-source
+      - percona-server-rocksdb{{ pro_suf }}
+      - percona-mysql-router{{ pro_suf }}
     when: ansible_os_family == "Debian"
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
@@ -191,40 +236,51 @@
       - percona-release
     when: ansible_os_family == "RedHat"
 
-  - name: upgrade Percona Server to new rpm packages on CentOS
+  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on CentOS
     yum:
       name: "{{ packages }}"
       state: latest
+      allowerasing: "{{ allowerasing_value | default (false) }}"
     vars:
       packages:
-      - percona-server-server
-      - percona-server-test
-      - percona-server-debuginfo
-      - percona-server-devel
-      - percona-server-rocksdb
-      - percona-server-shared
-      - percona-server-shared-compat
-      - percona-server-client
+      - percona-server-server{{ pro_suf }}
+      - percona-server-test{{ pro_suf }}
+      - percona-server{{ pro_suf }}-debuginfo
+      - percona-server-devel{{ pro_suf }}
+      - percona-server-rocksdb{{ pro_suf }}
+      - percona-server-shared{{ pro_suf }}
+      - percona-server-shared{{ pro_suf }}-compat
+      - percona-server-client{{ pro_suf }}
+      - percona-mysql-router{{ pro_suf }}
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: upgrade Percona Server to new rpm packages on Oracle Linux 9
+  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on Oracle Linux 9
     yum:
       name: "{{ packages }}"
       state: latest
+      allowerasing: "{{ allowerasing_value | default (false) }}"
     vars:
       packages:
-      - percona-server-server
-      - percona-server-test
-      - percona-server-debuginfo
-      - percona-server-devel
-      - percona-server-rocksdb
-      - percona-server-shared
-      - percona-server-client
+      - percona-server-server{{ pro_suf }}
+      - percona-server-test{{ pro_suf }}
+      - percona-server{{ pro_suf }}-debuginfo
+      - percona-server-devel{{ pro_suf }}
+      - percona-server-rocksdb{{ pro_suf }}
+      - percona-server-shared{{ pro_suf }}
+      - percona-server-client{{ pro_suf }}
+      - percona-mysql-router{{ pro_suf }}
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when:
+      - lookup('env', 'cur_action_to_test') == "not_pro_to_pro" or lookup('env', 'cur_action_to_test') == "downgrade"
+      - lookup('env', 'pro_test') == "yes"
+      - ansible_os_family == "RedHat"
 
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh ps -d
@@ -247,11 +303,21 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: check that Percona Server version is correct
-    command: /package-testing/version_check.sh ps80
+  - name: check that Percona Server {{ pro }} version is correct
+    command: /package-testing/version_check.sh ps80 {{ pro }}
 
-  - name: check that Percona Server package versions are correct
-    command: /package-testing/package_check.sh ps80
+  - name: check that Percona Server {{ pro }} package versions are correct
+    command: /package-testing/package_check.sh ps80 {{ pro }}
+
+  - name: finish my.cnf change test
+    command: /package-testing/check_mycnf_post.sh
+
+  - name: include tasks for checking FIPS mode
+    include_tasks: ../tasks/check_ps80_fips.yml
+    when:
+      - lookup('env', 'pro_test') == "yes"
+      - lookup('env', 'cur_action_to_test') != 'downgrade'
+      - ansible_distribution_release != "bookworm"
 
 # - name: check that Percona Toolkit version is correct
 #   command: /package-testing/version_check.sh pt
@@ -264,9 +330,6 @@
 
   - name: check the audit log v2 plugin
     command: /package-testing/scripts/ps_audit_log_v2.sh
-
-  - name: finish my.cnf change test
-    command: /package-testing/check_mycnf_post.sh
 
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
@@ -293,23 +356,18 @@
   - name: start mysql service
     service: name=mysql state=started
 
-  - name: remove Percona Server deb packages
+  - name: remove Percona Server{{ pro_suf }} deb packages
     apt:
       name: "{{ packages }}"
       update_cache: no
       state: absent
     vars:
       packages:
-      - percona-server-server
+      - percona-server-server{{ pro_suf }}
     when: ansible_os_family == "Debian"
 
-  - name: remove Percona Server rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: absent
-    vars:
-      packages:
-      - percona-server-server
+  - name: remove Percona Server{{ pro_suf }} rpm packages
+    command: yum remove -y percona-server-server{{ pro_suf }}
     when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal
@@ -332,25 +390,44 @@
       destination: check-dev.percona.com
       jump: DROP
 
-  - name: install Percona Server deb package for telemetry
+  - name: install Percona Server{{ pro_suf }} deb package for telemetry
     apt:
       name: "{{ packages }}"
       update_cache: no
       state: latest
     vars:
       packages:
-      - percona-server-server
+      - percona-server-server{{ pro_suf }}
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Server rpm package for telemetry
+  - name: install Percona Server{{ pro_suf }} rpm package for telemetry
     yum:
       name: "{{ packages }}"
       state: latest
+      allowerasing: "{{ allowerasing_value | default (false) }}"
     vars:
       packages:
-      - percona-server-server
+      - percona-server-server{{ pro_suf }}
     when: ansible_os_family == "RedHat"
 
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh ps -u
 
+  - name: remove Percona Server{{ pro_suf }} deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server{{ pro_suf }} rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+    when: ansible_os_family == "RedHat"

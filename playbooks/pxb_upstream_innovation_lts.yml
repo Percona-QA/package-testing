@@ -1,0 +1,229 @@
+---
+# This playbook sets up the percona repo
+
+# - import_playbook: test_prep.yml
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: install yum-utils for rhel
+    yum:
+      name: yum-utils
+      state: present
+    when: ansible_os_family == "RedHat"
+
+#  - name: Install MySQL apt repository package
+#    apt:
+#      deb: https://repo.mysql.com/mysql-apt-config_0.8.22-1_all.deb
+#    when: ansible_os_family == "Debian"
+
+  - name: Install MySQL RHEL 6 yum repository package
+    yum: name=https://repo.mysql.com/mysql80-community-release-el6.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: Install MySQL RHEL 7 yum repository package
+    yum: name=https://repo.mysql.com//mysql80-community-release-el7.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: Import GPG key for RPM 7 (Centos 7)
+    rpm_key:
+      state: present
+      key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+
+  - name: Import key for mysql-repo add GPG key (Debian)
+    apt_key:
+      url: http://repo.mysql.com/RPM-GPG-KEY-mysql-2023  
+      state: present
+    when: ansible_os_family == "Debian"
+
+  - name: Import GPG key for RPM 8-3
+    rpm_key:
+      state: present
+      key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+
+  - name: Install MySQL RHEL 8 yum repository package
+    yum: name=https://repo.mysql.com/mysql80-community-release-el8.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: Install MySQL RHEL 9 yum repository package
+    yum: name=https://repo.mysql.com/mysql80-community-release-el9.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+
+  - name: epel 7 repo
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: setup epel 8 repo
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: /usr/bin/dnf module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: install deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - vim
+      - pv
+      - unzip
+    when: ansible_os_family == "Debian"
+
+#  - name: install MySQL Community deb packages
+#    apt:
+#      name: "{{ packages }}"
+#      update_cache: yes
+#    vars:
+#      packages:
+#      - mysql-community-server
+#    when: ansible_os_family == "Debian"
+
+  - name: Install mysql deb packages using tarballs ubuntu 22.04
+    command: wget https://cdn.mysql.com/archives/mysql-8.2/mysql-server_8.2.0-1ubuntu22.04_amd64.deb-bundle.tar
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
+
+  - name: Install mysql deb packages using tarballs ubuntu 23.04
+    command: wget https://cdn.mysql.com/archives/mysql-8.2/mysql-server_8.2.0-1ubuntu23.04_amd64.deb-bundle.tar
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.04'
+
+  - name: Install mysql deb packages using tarballs Debian 11
+    command: wget https://cdn.mysql.com/archives/mysql-8.2/mysql-server_8.2.0-1debian11_amd64.deb-bundle.tar
+    when: ansible_distribution == 'Debian' and ansible_distribution_version == '11'
+
+
+  - name: Install mysql deb packages using tarballs Debian 12
+    command: wget https://cdn.mysql.com/archives/mysql-8.2/mysql-server_8.2.0-1debian12_amd64.deb-bundle.tar
+    when: ansible_distribution == 'Debian' and ansible_distribution_version == '12.0'
+
+  - name: extract mysql deb packages for ubuntu 22.04
+    command: tar -xvf mysql-server_8.2.0-1ubuntu22.04_amd64.deb-bundle.tar -C /tmp
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
+
+  - name: extract mysql deb packages for ubuntu 23.04
+    command: tar -xvf mysql-server_8.2.0-1ubuntu23.04_amd64.deb-bundle.tar -C /tmp
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.04'
+
+  - name: extract mysql deb packages for Debian 11
+    command: tar -xvf mysql-server_8.2.0-1debian11_amd64.deb-bundle.tar -C /tmp
+    when: ansible_distribution == 'Debian' and ansible_distribution_version == '11'
+
+  - name: extract mysql deb packages for Debian 12
+    command: tar -xvf mysql-server_8.2.0-1debian12_amd64.deb-bundle.tar -C /tmp
+    when: ansible_distribution == 'Debian' and ansible_distribution_version == '12.0'
+
+  - name: install mysql deb packages
+    shell: dpkg -i /tmp/*.deb || apt-get install -f -y
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+    when: ansible_os_family == "Debian"
+
+  - name: Enable Innovation LTS repo for RHEL
+    shell: yum-config-manager --disable mysql80-community && yum-config-manager --enable mysql-innovation-community
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+
+  - name: install packages in centos
+    yum:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - libselinux-python
+      - pv
+      - unzip
+      - mysql-community-server-8.2.0-1.el7
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+
+  - name: install packages in rhel/centos 8
+    yum:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - python3-libselinux
+      - mysql-community-server-8.2.0-1.el8
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: install packages in rhel/centos 9
+    yum:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - python3-libselinux
+      - mysql-community-server-8.2.0-1.el9
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+
+  - name: Start the MySQL service
+    service: name=mysql state=started
+    when: ansible_os_family == "Debian"
+
+  - name: Start the MySQL service
+    service: name=mysqld state=started
+    when: ansible_os_family == "RedHat"
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: Extract version number using shell commands
+    shell: cat ../VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    register: major_release_version
+
+  - name: Set major_release_version variable
+    set_fact:
+      major_release_version: "{{ major_release_version.stdout }}"
+
+  - name: Extract values using shell command for repo name used for innovation/lts release
+    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: ps_inn_lts_repo_name
+
+  - name: Set pxb_inn_lts_repo_name variable
+    set_fact:
+      ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
+
+  - name: include tasks for enabling PS {{ major_release_version }} main repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling PS {{ major_release_version }} test repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling PS {{ major_release_version }} experimental repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: install Percona XtraBackup {{ major_release_version }} packages
+    include_tasks: ../tasks/install_pxb_innovation_lts.yml
+    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: install plugins, import world database
+    command: /package-testing/plugins_test.sh
+
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb{{ major_release_version }}
+
+  - name: check that Percona XtraBackup package versions are correct
+    command: /package-testing/package_check.sh pxb{{ major_release_version }}
+
+  - name: run backup
+    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
+
+  - name: prepare the backup
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
