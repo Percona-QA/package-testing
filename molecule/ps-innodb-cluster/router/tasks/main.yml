@@ -8,22 +8,22 @@
 
   - name: Determine Percona Server major version
     set_fact:
-      PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') if '8.2' in UPSTREAM_VERSION else 8 }}"
+      PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') if '8.3' in UPSTREAM_VERSION else 8 }}"
 
   - name: Print Percona Server major version
     debug:
       var: PS_MAJ_VER  
 
-  - name: include tasks for enabling PS 80/82 main repo
-    include: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_main_repo.yml
+  - name: include tasks for enabling PS 80/83 main repo
+    include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_main_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "main"
 
-  - name: include tasks for enabling PS 80/82 test repo
-    include: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_testing_repo.yml
+  - name: include tasks for enabling PS 80/83 test repo
+    include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_testing_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "testing" or lookup('env', 'INSTALL_REPO') == ""
 
-  - name: include tasks for enabling PS 80/82 experimental repo
-    include: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_experimental_repo.yml
+  - name: include tasks for enabling PS 80/83 experimental repo
+    include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_experimental_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "experimental"
 
   - name: enable tools main repo

@@ -4,16 +4,46 @@ import subprocess
 import testinfra
 import time
 import mysql
+from packaging import version
 
 from settings import *
 
 @pytest.fixture(scope='module')
 def mysql_server(request):
-    mysql_server = mysql.MySQL(base_dir)
+    features=[]
+    if pro and fips_supported:
+        features.append('fips')
+    mysql_server = mysql.MySQL(base_dir, features)
     mysql_server.start()
     time.sleep(10)
     yield mysql_server
     mysql_server.purge()
+
+def test_fips_md5(host, mysql_server):
+    if pro and fips_supported:
+        query="SELECT MD5('foo');"
+        output = mysql_server.run_query(query)
+        assert '00000000000000000000000000000000' in output
+    else:
+        pytest.skip("This test is only for PRO tarballs. Skipping")
+
+def test_fips_value(host,mysql_server):
+    if pro and fips_supported:
+        query="select @@ssl_fips_mode;"
+        output = mysql_server.run_query(query)
+        assert 'ON' in output
+    else:
+        pytest.skip("This test is only for PRO tarballs. Skipping")
+
+def test_fips_in_log(host, mysql_server):
+    if pro and fips_supported:
+        with host.sudo():
+            query="SELECT @@log_error;"
+            error_log = mysql_server.run_query(query)
+            logs=host.check_output(f'head -n30 {error_log}')
+            assert "A FIPS-approved version of the OpenSSL cryptographic library has been detected in the operating system with a properly configured FIPS module available for loading. Percona Server for MySQL will load this module and run in FIPS mode." in logs
+    else:
+        pytest.skip("This test is only for PRO tarballs. Skipping")
 
 def test_rocksdb_install(host, mysql_server):
     if ps_version_major not in ['5.6']:
@@ -55,4 +85,3 @@ def test_audit_log_v2(mysql_server):
         assert 'ACTIVE' in output
     else:
         pytest.skip('audit_log_v2 is checked from 8.0!')
-

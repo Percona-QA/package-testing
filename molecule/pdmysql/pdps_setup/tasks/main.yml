@@ -1,10 +1,10 @@
 ---
 # tasks file for pdps
   - name: include playbook for removing Percona repo
-    include: ../../../tasks/remove_percona_repository.yml
+    include_tasks: ../../../tasks/remove_percona_repository.yml
 
   - name: Install percona release
-    include: ../../tasks/install_percona_release.yml
+    include_tasks: ../../tasks/install_percona_release.yml
 
   - name: clean and update yum cache
     shell: |
@@ -26,7 +26,7 @@
     when: not major_repo
 
   - name: setup the major pdps-{{ version }} {{ repo }}
-    command: percona-release setup -y pdps-{{ version }} {{ repo }}
+    command: percona-release enable pdps-{{ version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
       version: "{{ '8.0' if '8.0.' in lookup('env', 'VERSION') else '8x-innovation' }}"

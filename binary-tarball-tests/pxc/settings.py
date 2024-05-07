@@ -17,7 +17,7 @@ if pxc_version_major == "5.7":
   pxc57_client_version = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1][3:]
   pxc57_server_version_norel = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1][3:] + '-' + pxc57_pkg_version.split('-')[2].split('.')[0]
   pxc57_server_version = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1] + '-' + pxc57_pkg_version.split('-')[2].split('.')[0]
-  pxc57_client_version_using = "6.0" if glibc_version == "2.12" else "6.2"
+  pxc57_client_version_using = "8.1"
 
 # 8.X
 
@@ -122,7 +122,7 @@ pxc80_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 pxc80_files = (
-  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.22.0.0' ,
+  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.36' ,
   'lib/libmysqlservices.a' , 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini', 'lib/plugin/keyring_file.so',
@@ -131,7 +131,7 @@ pxc80_files = (
 if glibc_version == '2.35':
   pxc80_symlinks = (
     ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),('lib/libgcrypt.so', 'lib/private/libgcrypt.so.20.3.4',),
-    ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.35'),('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
+    ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.36'),('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
     ('lib/libssl.so', 'lib/private/libssl.so.3'),('lib/libtinfo.so', 'lib/private/libtinfo.so.6.3'),
     ('lib/libaio.so','lib/private/libaio.so.1.0.1'),('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
     ('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'), ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
@@ -143,7 +143,7 @@ else:
 
     ('lib/libgcrypt.so','lib/private/libgcrypt.so.11.8.2'), ('lib/libnspr4.so','lib/private/libnspr4.so'),
     ('lib/libnss3.so','lib/private/libnss3.so'), ('lib/libnssutil3.so','lib/private/libnssutil3.so'),
-    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.35'), ('lib/libplc4.so','lib/private/libplc4.so'),
+    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.36'), ('lib/libplc4.so','lib/private/libplc4.so'),
     ('lib/libplds4.so','lib/private/libplds4.so'), ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
     ('lib/libsmime3.so','lib/private/libsmime3.so'), ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
     ('lib/libssl3.so','lib/private/libssl3.so'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
@@ -186,28 +186,15 @@ pxc57_files = (
   'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so',
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
-
-if glibc_version == "2.12":
-  pxc57_symlinks = (
-    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.31'),
-    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.31'),
-    ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.1e'),
-    ('lib/libssl.so','lib/private/libssl.so.1.0.1e'),
-    ('lib/libtinfo.so','lib/private/libtinfo.so.5.7'),
-    ('lib/libsasl2.so','lib/private/libsasl2.so.2.0.23'),
-    ('lib/libreadline.so','lib/private/libreadline.so.6.0'),
-  )
-else:
-  pxc57_symlinks = (
-    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.31'),
-    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.31'),
-    ('lib/libncurses.so','lib/private/libncurses.so.5.9'),
-    ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'),
-    ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
-    ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
-    ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
-    ('lib/libreadline.so','lib/private/libreadline.so.6.2'),
-  )
+pxc57_symlinks = (
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.31'),
+  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.31'),
+  ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'),
+  ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
+  ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
+  ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
+  ('lib/libreadline.so','lib/private/libreadline.so.6.2'),
+)
 
 # 5.6
 pxc56_binaries = [

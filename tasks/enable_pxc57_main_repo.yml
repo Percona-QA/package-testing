@@ -1,6 +1,6 @@
 
   - name: include playbook for removing Percona repo
-    include: remove_percona_repository.yml
+    include_tasks: remove_percona_repository.yml
 
   - name: disable the mysql module on RHEL/CentOS 8
     command: /usr/bin/dnf module disable mysql -y

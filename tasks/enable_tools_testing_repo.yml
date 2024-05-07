@@ -1,5 +1,5 @@
   - name: include playbook for removing Percona repo
-    include: remove_percona_repository.yml
+    include_tasks: remove_percona_repository.yml
 
   - name: Install percona repository package
     apt:

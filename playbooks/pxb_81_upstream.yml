@@ -111,15 +111,15 @@
     when: ansible_os_family == "RedHat"
 
   - name: include tasks for enabling tools test repo
-    include: ../tasks/enable_tools_testing_repo.yml
+    include_tasks: ../tasks/enable_tools_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling tools experimental repo
-    include: ../tasks/enable_tools_experimental_repo.yml
+    include_tasks: ../tasks/enable_tools_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: include tasks for enabling tools main repo
-    include: ../tasks/enable_tools_main_repo.yml
+    include_tasks: ../tasks/enable_tools_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
   - name: install Percona XtraBackup 8.1 packages
