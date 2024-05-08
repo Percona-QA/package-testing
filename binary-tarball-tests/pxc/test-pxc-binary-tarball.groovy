@@ -125,7 +125,7 @@ void run_test() {
     if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
       MINIMAL="-minimal"
     fi
-    if [ "${PXC_MAJOR_VERSION}" = "8.3" ] || [ "${PXC_MAJOR_VERSION}" = "8.4" ]; then
+    if [ "${PXC_MAJOR_VERSION}" = "8.0" ] || [ "${PXC_MAJOR_VERSION}" = "8.3" ] || [ "${PXC_MAJOR_VERSION}" = "8.4" ]; then
       export GLIBC_VERSION="2.17"
       if [ -f /usr/bin/apt-get ]; then
         DEBIAN_VERSION=$(lsb_release -sc)
@@ -149,7 +149,7 @@ void run_test() {
     else
       sudo apt install -y git wget tar
     fi
-    git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+    git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc81-tar --depth 1
     cd package-testing/binary-tarball-tests/pxc
     wget -q ${TARBALL_LINK}${TARBALL_NAME}
     ./run.sh || true
