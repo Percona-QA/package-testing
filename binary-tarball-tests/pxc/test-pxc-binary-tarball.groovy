@@ -125,7 +125,7 @@ void run_test() {
     if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
       MINIMAL="-minimal"
     fi
-    if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
+    if [ "${PXC_MAJOR_VERSION}" = "8.0" ] || [ "${PXC_MAJOR_VERSION}" = "8.3" ] || [ "${PXC_MAJOR_VERSION}" = "8.4" ]; then
       export GLIBC_VERSION="2.17"
       if [ -f /usr/bin/apt-get ]; then
         DEBIAN_VERSION=$(lsb_release -sc)
@@ -135,7 +135,7 @@ void run_test() {
       fi
       TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
       TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
-    elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
+    elif [ "${PXC_MAJOR_VERSION}" = 5.7 ]; then
       export GLIBC_VERSION="2.17"
       if [ -f /etc/redhat-release ] && [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
         export GLIBC_VERSION="2.12"
