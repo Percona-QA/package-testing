@@ -1,6 +1,6 @@
 ---
 scenario:
-  name: ubuntu-jammy
+  name: ubuntu-noble
 dependency:
   name: galaxy
 driver:
@@ -8,7 +8,7 @@ driver:
 lint:
   name: yamllint
 platforms:
-  - name: ps-node1-ubuntu-jammy
+  - name: ps-node1-ubuntu-noble
     region: us-west-2
     image: ami-00b0c1efb144c2176
     vpc_subnet_id: subnet-03136d8c244f56036
@@ -18,7 +18,7 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
       job-name: ${JOB_NAME}
-  - name: ps-node2-ubuntu-jammy
+  - name: ps-node2-ubuntu-noble
     region: us-west-2
     image: ami-00b0c1efb144c2176
     vpc_subnet_id: subnet-03136d8c244f56036
@@ -28,7 +28,7 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
       job-name: ${JOB_NAME}
-  - name: ps-node3-ubuntu-jammy
+  - name: ps-node3-ubuntu-noble
     region: us-west-2
     image: ami-00b0c1efb144c2176
     vpc_subnet_id: subnet-03136d8c244f56036
