@@ -121,30 +121,6 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Oracle Linux 9
-        stage('RHEL 8') {
-          agent {
-            label "min-rhel-8-x64"
-          }
-          steps {
-            script {
-                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-              }
-            run_test()
-            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-          } //End steps
-        } //End stage RHEL 8
-        stage('RHEL 9') {
-          agent {
-            label "min-rhel-9-x64"
-          }
-          steps {
-            script {
-                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-              }
-            run_test()
-            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-          } //End steps
-        } //End stage RHEL 9
       } //End parallel
     } //End stage Run tests
   } //End stages
