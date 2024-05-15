@@ -10,8 +10,8 @@ lint:
 platforms:
   - name: ps-node1-ubuntu-noble
     region: us-west-2
-    image: ami-00b0c1efb144c2176
-    vpc_subnet_id: subnet-03136d8c244f56036
+    image: ami-0cf2b4e024cdb6960
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.small
     ssh_user: ubuntu
     root_device_name: /dev/sda1
@@ -20,8 +20,8 @@ platforms:
       job-name: ${JOB_NAME}
   - name: ps-node2-ubuntu-noble
     region: us-west-2
-    image: ami-00b0c1efb144c2176
-    vpc_subnet_id: subnet-03136d8c244f56036
+    image: ami-0cf2b4e024cdb6960
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.small
     ssh_user: ubuntu
     root_device_name: /dev/sda1
@@ -30,8 +30,8 @@ platforms:
       job-name: ${JOB_NAME}
   - name: ps-node3-ubuntu-noble
     region: us-west-2
-    image: ami-00b0c1efb144c2176
-    vpc_subnet_id: subnet-03136d8c244f56036
+    image: ami-0cf2b4e024cdb6960
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.small
     ssh_user: ubuntu
     root_device_name: /dev/sda1
