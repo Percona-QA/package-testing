@@ -25,7 +25,7 @@ else
     sudo apt install -y python3 python3-pip
   fi
   sudo apt-get update -y
-  sudo apt install -y libaio1 libnuma1 libldap-2.4-2
+  sudo apt install -y libaio1 libnuma1 libldap-2.4-2 libaio-dev
 fi
 
 if [[ $(lsb_release -sc) == 'bookworm' || $(lsb_release -sc) == 'noble' ]]; then
