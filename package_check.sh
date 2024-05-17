@@ -53,6 +53,10 @@ elif [ $1 = "pxc80" ]; then
   version=${PXC80_VER}
   release=${PXC80_VER#*-}
   revision=${PXC80_REV}
+elif [[ "$1" =~ ^pxc8[1-9]{1}$ ]]; then
+  version=${PXC_INN_LTS_VER}
+  release=${PXC_INN_LTS_VER#*-}
+  revision=${PXC_INN_LTS_REV}
 elif [ $1 = "pt" ]; then
   version=${PT_VER}
 elif [ $1 = "pxb23" ]; then
@@ -261,8 +265,8 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
     fi
   fi
 
-elif [ ${product} = "pxc80" ]; then
-  echo "Package check for PXC-80 is not implemented!"
+elif [[ ${product} =~ ^pxc8[1-9]{1}$ ]]; then
+  echo "Package check for PXC-8x is not implemented!"
   exit 0
 
 elif [ ${product} = "pt" ]; then
