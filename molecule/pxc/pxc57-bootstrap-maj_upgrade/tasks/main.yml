@@ -64,7 +64,6 @@
     yum:
       update_cache: yes
     when: ansible_os_family == "RedHat" 
-##
 
   - name: install PXC 5.7 deb packages
     apt:
@@ -77,6 +76,7 @@
     when: ansible_os_family == "Debian"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install python mysql deb packages
     apt:
@@ -116,6 +116,7 @@
     when: ansible_os_family == "RedHat"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh pxc -e
@@ -203,7 +204,7 @@
   # other tests
   - name: install plugins
     command: /package-testing/plugins_test_57.sh pxc
-
+    
   - name: register PXC version
     shell: mysqld --version
     register: pxc_version
@@ -214,8 +215,3 @@
   - name: check PXC 5.7 version
     command: /package-testing/version_check.sh pxc57
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
-
-
-
-
-
