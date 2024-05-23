@@ -6,8 +6,65 @@
   become_method: sudo
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
+  vars:
+      ENV_VAR_PATH: "{{ lookup('env', 'MOLECULE_ENV_FILE') }}"
   tasks:
+
+  - name: Fetch the vars from file for upgrade
+    ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
+
+  - set_fact:
+      man_ip: "{{ PXC1_IP }}"
+    when: 
+    - "'pxc1' in inventory_hostname"
+
+  - set_fact:
+      man_ip: "{{ PXC2_IP }}"
+    when: 
+    - "'pxc2' in inventory_hostname"
+
+  - set_fact:
+      man_ip: "{{ PXC3_IP }}"
+    when: 
+    - "'pxc3' in inventory_hostname"
+  
+  - debug: var=man_ip
+
+  - name: Stop PXC mysqld service RHEL on Node PXC2
+    command: systemctl stop mysqld
+    when: 
+      - ansible_os_family == "RedHat"
+      - "'pxc2' in inventory_hostname"
+    ignore_errors: yes
+
+  - name: Sleep for 30 seconds on RHEL
+    shell: sleep 30
+    when: ansible_os_family == "RedHat" 
+
+  - name: Stop PXC mysqld service RHEL on Node PXC3
+    command: systemctl stop mysqld
+    when: 
+      - ansible_os_family == "RedHat"
+      - "'pxc3' in inventory_hostname"
+    ignore_errors: yes
+
+  - name: stop mysql service DEBIAN on Node PXC2
+    command: systemctl stop mysql
+    when: 
+      - ansible_os_family == "Debian"
+      - "'pxc2' in inventory_hostname"
+    ignore_errors: yes
+
+  - name: Sleep 30 seconds on Debian
+    shell: sleep 30
+    when: ansible_os_family == "Debian"
+
+  - name: stop mysql service DEBIAN on Node PXC3
+    command: systemctl stop mysql
+    when: 
+      - ansible_os_family == "Debian"
+      - "'pxc3' in inventory_hostname"
+    ignore_errors: yes
 
   - name: include tasks for removing old PXC 5.7 RHEL
     yum:
@@ -16,7 +73,6 @@
     vars:
       packages:
       - Percona-XtraDB-Cluster*
-      - percona-xtrabackup*
     when: ansible_os_family == "RedHat"
 
   - name: include tasks for removing old PXC 5.7 deb
@@ -29,11 +85,23 @@
       - percona-xtrabackup*
     when: ansible_os_family == "Debian"
 
-  - name: remove eol 5.7 repo file
+  - name: Remove old config
     file:
-      path: /etc/apt/sources.list.d/percona-release.list
+      path: /etc/my.cnf
+      state: absent
+    when: ansible_os_family == "RedHat"
+
+  - name: remove eol 5.7 repo file DEB
+    file:
+      path: /etc/apt/sources.list.d/post-eol.list
       state: absent
     when: ansible_os_family == "Debian"
+
+  - name: remove eol 5.7 repo file RHEL
+    file:
+      path: /etc/yum.repos.d/post-eol.repo
+      state: absent
+    when: ansible_os_family == "RedHat"
 
   - name: disable old repos
     command: percona-release disable all
@@ -109,13 +177,52 @@
       packages:
        - percona-xtradb-cluster-shared-compat
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+  
+  - name: copy pxc config on RHEL
+    template: src=../templates/rhel_maj_upgrade_57_80.j2
+              dest=/etc/my.cnf
+    when: ansible_os_family == "RedHat"
+
+  - name: copy pxc config on DEBIAN
+    template: src=../templates/deb_maj_upgrade_57_80.j2
+              dest=/etc/mysql/my.cnf
+              mode=0640 owner=mysql group=root
+    when: ansible_os_family == "Debian"
 
   - name: Sleep for 60 seconds
     shell: sleep 60
 
-  - name: start mysql service
-    service: name=mysql state=restarted
-    throttle: 1
+  - name: start mysqld service on PXC2 Node RHEL
+    service: name=mysqld state=started
+    when: 
+      - ansible_os_family == "RedHat"
+      - "'pxc2' in inventory_hostname"
+
+  - name: Sleep 30 seconds on RHEL
+    shell: sleep 30
+    when: ansible_os_family == "RedHat" 
+
+  - name: start mysqld service on PXC3 Node RHEL
+    service: name=mysqld state=started
+    when: 
+      - ansible_os_family == "RedHat"
+      - "'pxc3' in inventory_hostname"
+
+  - name: start mysql service DEBIAN PXC2 Node
+    command: systemctl start mysql
+    when:
+      - ansible_os_family == "Debian"
+      - "'pxc2' in inventory_hostname"
+
+  - name: Sleep 30 seconds on DEBIAN
+    shell: sleep 30
+    when: ansible_os_family == "Debian"
+
+  - name: start mysql service DEBIAN PXC3 NODE
+    command: systemctl start mysql
+    when: 
+      - ansible_os_family == "Debian"
+      - "'pxc3' in inventory_hostname"
 
   - name: register PXC version Side Effect
     shell: mysqld --version

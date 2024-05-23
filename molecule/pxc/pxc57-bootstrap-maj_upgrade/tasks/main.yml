@@ -1,5 +1,5 @@
 ---
-  - name: Fetch the vars from file for upgrade
+  - name: Fetch the vars from file
     ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
 
   - set_fact:
@@ -16,7 +16,7 @@
       man_ip: "{{ PXC3_IP }}"
     when: 
     - "'pxc3' in inventory_hostname"
-  
+
   - debug: var=man_ip
     
   - name: include tasks for test env setup
@@ -55,7 +55,17 @@
       flush: yes
     when: ansible_os_family == "RedHat"
 
-  - name: install PXC 5.7 previous deb packages
+  - name: update apt cache debian
+    apt:
+      update_cache: yes
+    when: ansible_os_family == "Debian"
+
+  - name: update rpm cache redhat
+    yum:
+      update_cache: yes
+    when: ansible_os_family == "RedHat" 
+
+  - name: install PXC 5.7 deb packages
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -95,7 +105,7 @@
       - python3-pymysql
     when: (ansible_os_family == "Debian") and (ansible_distribution_release == "buster")
 
-  - name: install PXC 5.7 previous rpm packages
+  - name: install PXC 5.7 rpm packages
     yum:
       name: "{{ packages }}"
       state: latest
@@ -103,12 +113,23 @@
       packages:
       - Percona-XtraDB-Cluster-full-57
       - Percona-XtraDB-Cluster-57
-    when: ansible_os_family == "RedHat" 
+    when: ansible_os_family == "RedHat"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: install python mysql rpm packages
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh pxc -e
+
+  - name: get telemetry_uuid content
+    command: cat /usr/local/percona/telemetry_uuid
+    register: t_uuid_output
+
+  - name: output telemetry_uuid content
+    debug:
+      var: t_uuid_output
+
+  - name: install python mysql rpm packages for CentOS 6 and 7
     yum:
       name: "{{ packages }}"
       state: latest
@@ -117,7 +138,7 @@
       - MySQL-python
     when: ansible_os_family == "RedHat" and (ansible_distribution_major_version != "8" and ansible_distribution_major_version != "9")
 
-  - name: install python mysql rpm packages for OL8 and OL9
+  - name: install python mysql rpm packages for CentOS 8
     yum:
       name: "{{ packages }}"
       state: latest
@@ -126,7 +147,7 @@
       - python3-PyMySQL
     when: ansible_os_family == "RedHat" and (ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9")
 
-  - name: stop mysql service
+  - name: stop mysql service with service command
     command: systemctl stop mysql
 
   - name: copy pxc config on centos 6
@@ -147,8 +168,8 @@
 
   - name: bootstrap cluster on RHEL7
     command: systemctl start mysql@bootstrap.service
-    when: ((ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7") or (ansible_distribution == "Amazon"))	
-
+    when: ansible_os_family == "RedHat"
+    
   - name: run the bootstrap service on debian/ubuntu
     command: service mysql bootstrap-pxc
     when: ansible_os_family == "Debian"
@@ -183,11 +204,14 @@
   # other tests
   - name: install plugins
     command: /package-testing/plugins_test_57.sh pxc
-
-  - name: register PXC version before upgrade
+    
+  - name: register PXC version
     shell: mysqld --version
     register: pxc_version
 
-  - name: print PXC version before upgrade
+  - name: print PXC version
     debug: var=pxc_version
-
+    
+  - name: check PXC 5.7 version
+    command: /package-testing/version_check.sh pxc57
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
