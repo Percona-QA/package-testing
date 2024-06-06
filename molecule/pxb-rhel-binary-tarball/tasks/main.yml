@@ -52,11 +52,6 @@
   - name: install Percona Server 8.0 packages
     include_tasks: ../../../tasks/install_ps80.yml
 
-#  - name: Download install and check Percona XtraBackup 8.0 normal tarball from downloads area
-#    command: /package-testing/download_pxb_binary_tarball.sh pxb80 main normal
-#    environment:
-#      PXB_VERSION: "{{ lookup('env', 'PXB_VERSION') }}"
-
   - name: Download {{ TARBALL_NAME_REGULAR }} REGULAR
     ansible.builtin.get_url:
       url: https://downloads.percona.com/downloads/TESTING/issue-PKG56/{{ TARBALL_NAME_REGULAR }}
@@ -95,10 +90,7 @@
     command: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --prepare --target-dir=backups/
 
   - name: remove backup files
-    command: rm -r pxb80 backups /tmp/backups
-
-#  - name: Download install and check Percona XtraBackup 8.0 minimal tarball from downloads area
-#    command: /package-testing/download_pxb_binary_tarball.sh pxb80 main minimal
+    command: rm -r /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }} backups /tmp/backups
 
   - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL
     ansible.builtin.get_url:
