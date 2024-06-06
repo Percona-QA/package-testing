@@ -1,6 +1,6 @@
 ---
 
-  - name: SET PXC_VERSION VAR
+  - name: SET PXB_VERSION VAR
     set_fact:
       PXB_VERSION: "{{ lookup('env', 'PXB_VERSION') }}"
 
@@ -38,11 +38,25 @@
       - libev
     when: ansible_os_family == "RedHat"
 
-  - name: include tasks for enabling main repo
-    include_tasks: ../../../tasks/enable_main_repo.yml
- 
-  - name: include tasks for enabling PS 8 test repo
-    include_tasks: ../../../tasks/enable_ps8_main_repo.yml
+  - name: include playbook for removing Percona repo
+    include_tasks: ../../../tasks/remove_percona_repository.yml
+
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: /usr/bin/dnf module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: add the main Percona yum repos for centos
+    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    when: ansible_os_family == "RedHat"
+
+  - name: Enable PDPS-{{ major_version }}
+    command: percona-release enable pdps-{{ major_version }} release
+
+  - name: clean and update yum cache
+    shell: |
+      yum clean all
+      yum makecache
+    when: ansible_os_family == "RedHat"
 
   - name: download and extract world database
     command: "{{ item }}"
