@@ -1,4 +1,31 @@
 ---
+
+  - name: SET PXC_VERSION VAR
+    set_fact:
+      PXB_VERSION: "{{ lookup('env', 'PXB_VERSION') }}"
+
+  - name: Set Tarball and Folder name for REGULAR
+    set_fact:
+      TARBALL_NAME_REGULAR: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc2.28.tar.gz"
+      TARBALL_NAME_REGULAR_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc2.28"
+
+  - name: Set Tarball and Folder name for MINIMAL
+    set_fact:
+      TARBALL_NAME_MINIMAL: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc2.28-minimal.tar.gz"
+      TARBALL_NAME_MINIMAL_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc2.28-minimal"
+
+  - name: Extract major version
+    set_fact:
+      major_version: "{{ PXB_VERSION.split('-')[0] }}"
+
+  - name: Extract minor version
+    set_fact:
+      minor_version: "{{ PXB_VERSION.split('-')[1] }}"
+
+  - name: Print major and minor versions
+    debug:
+      msg: "Major version: {{ major_version }}, Minor version: {{ minor_version }}"
+
   - name: include tasks for test env setup
     include_tasks: ../../../tasks/test_prep.yml
 
@@ -25,10 +52,22 @@
   - name: install Percona Server 8.0 packages
     include_tasks: ../../../tasks/install_ps80.yml
 
-  - name: Download install and check Percona XtraBackup 8.0 normal tarball from downloads area
-    command: /package-testing/download_pxb_binary_tarball.sh pxb80 main normal
-    environment:
-      PXB_VERSION: "{{ lookup('env', 'PXB_VERSION') }}"
+#  - name: Download install and check Percona XtraBackup 8.0 normal tarball from downloads area
+#    command: /package-testing/download_pxb_binary_tarball.sh pxb80 main normal
+#    environment:
+#      PXB_VERSION: "{{ lookup('env', 'PXB_VERSION') }}"
+
+  - name: Download {{ TARBALL_NAME_REGULAR }} REGULAR
+    ansible.builtin.get_url:
+      url: https://downloads.percona.com/downloads/TESTING/issue-PKG56/{{ TARBALL_NAME_REGULAR }}
+      dest: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR }}
+      mode: '0644'
+
+  - name: Extract {{ TARBALL_NAME_REGULAR }} REGULAR
+    ansible.builtin.unarchive:
+      src: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR }}
+      dest: /package-testing/molecule/pxb-rhel-binary-tarball/
+      remote_src: yes
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
@@ -41,37 +80,49 @@
     command: /package-testing/plugins_test.sh
 
   - name: run backup for Redhat/Centos
-    command: pxb80/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
+    command: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
 
   - name: prepare backup
-    command: pxb80/bin/xtrabackup --prepare --target-dir=/tmp/backups/
+    command: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --prepare --target-dir=/tmp/backups/
 
   - name: run backup for Redhat/Centos with streaming and encryption enabled
-    shell: pxb80/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    shell: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
 
   - name: extract and decrypt backup
-    shell: pxb80/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream
+    shell: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream
 
   - name: prepare backup
-    command: pxb80/bin/xtrabackup --prepare --target-dir=backups/
+    command: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --prepare --target-dir=backups/
 
   - name: remove backup files
     command: rm -r pxb80 backups /tmp/backups
 
-  - name: Download install and check Percona XtraBackup 8.0 minimal tarball from downloads area
-    command: /package-testing/download_pxb_binary_tarball.sh pxb80 main minimal
+#  - name: Download install and check Percona XtraBackup 8.0 minimal tarball from downloads area
+#    command: /package-testing/download_pxb_binary_tarball.sh pxb80 main minimal
+
+  - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL
+    ansible.builtin.get_url:
+      url: https://downloads.percona.com/downloads/TESTING/issue-PKG56/{{ TARBALL_NAME_MINIMAL }}
+      dest: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_MINIMAL }}
+      mode: '0644'
+
+  - name: Extract {{ TARBALL_NAME_MINIMAL }} MINIMAL
+    ansible.builtin.unarchive:
+      src: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_MINIMAL }}
+      dest: /package-testing/molecule/pxb-rhel-binary-tarball/
+      remote_src: yes
 
   - name: run backup for Redhat/Centos
-    command: pxb80/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
+    command: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
 
   - name: prepare backup
-    command: pxb80/bin/xtrabackup --prepare --target-dir=/tmp/backups/
+    command: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup --prepare --target-dir=/tmp/backups/
 
   - name: run backup for Redhat/Centos with streaming and encryption enabled
-    shell: pxb80/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    shell: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
 
   - name: extract and decrypt backup
-    shell: pxb80/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream
+    shell: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream
 
   - name: prepare backup
-    command: pxb80/bin/xtrabackup --prepare --target-dir=backups/
+    command: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup --prepare --target-dir=backups/
