@@ -1,4 +1,10 @@
 ---
+  - name: Setup SSH keys for Oracle Linux or Amazon
+    authorized_key:
+      user: ec2-user
+      key: "{{ lookup('file', 'public_keys') }}"
+      state: present
+      exclusive: False
 
   - name: SET PXB_VERSION VAR
     set_fact:
