@@ -15,7 +15,7 @@
     yum: name=https://repo.mysql.com/mysql80-community-release-el7-5.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: Import GPG key for MySQL repo
+  - name: Download GPG key for MySQL repo
     command: curl -O https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
 
@@ -23,9 +23,17 @@
     command: rpm --import RPM-GPG-KEY-mysql-2023
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
 
+  - name: Display OS Family
+    debug:
+       msg: "OS Family: {{ ansible_os_family }}"
+
+  - name: Display OS Major Version
+    debug:
+      msg: "OS Major Version: {{ ansible_distribution_major_version|int }}"
+
   - name: Install MySQL repository package
     command: yum install -y https://repo.mysql.com/mysql80-community-release-el8-3.noarch.rpm
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
 
   - name: Install MySQL RHEL 9 yum repository package
     command: yum install -y https://repo.mysql.com/mysql80-community-release-el9-1.noarch.rpm
