@@ -8,6 +8,46 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
+  - name: include tasks for removing old PXC 5.7 RHEL
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - Percona-XtraDB-Cluster*
+      - percona-xtrabackup*
+    when: ansible_os_family == "RedHat"
+
+  - name: include tasks for removing old PXC 5.7 deb
+    apt:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-xtradb-cluster*
+      - percona-xtrabackup*
+    when: ansible_os_family == "Debian"
+
+  - name: remove eol 5.7 repo file
+    file:
+      path: /etc/apt/sources.list.d/percona-release.list
+      state: absent
+    when: ansible_os_family == "Debian"
+
+  - name: disable old repos
+    command: percona-release disable all
+
+  - name: update deb cache
+    command: apt update
+    when:
+      - ansible_os_family == "Debian"
+
+  - name: clean and update yum cache
+    shell: |
+      yum clean all
+      yum makecache
+    when: ansible_os_family == "RedHat"
+
   - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_pxc80_testing_repo.yml
     when: lookup('env', 'upgrade_repo') == "testing" or lookup('env', 'upgrade_repo') == ""

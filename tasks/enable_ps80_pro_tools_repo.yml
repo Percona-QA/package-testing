@@ -1,0 +1,47 @@
+- name: include playbook for removing Percona repo
+  include_tasks: remove_percona_repository.yml
+
+- name: Install percona release Debian
+  apt:
+    deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+  when: ansible_os_family == "Debian"
+
+- name: Install percona release RHEL
+  command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+  args:
+    warn: no
+  when: ansible_os_family == "RedHat"
+
+- name: add pro repository on debian
+  template: src=../templates/pro_deb_repo_file_ps80.j2
+            dest=/etc/apt/sources.list.d/psmysql-pro.list
+  vars:
+    client_id: "{{ lookup('env', 'USERNAME') }}"
+    client_token: "{{ lookup('env', 'PASSWORD') }}"
+    repo: "{{ lookup('env', 'install_repo') | default('testing') }}"
+  when:
+    - ansible_os_family == "Debian"
+
+- name: update deb cache
+  command: apt update
+  when:
+    - ansible_os_family == "Debian"
+
+- name: add pro repository on rmp
+  template: src=../templates/pro_rpm_repo_file_ps80.j2
+            dest=/etc/yum.repos.d/psmysql-pro.repo
+  vars:
+    client_id: "{{ lookup('env', 'USERNAME') }}"
+    client_token: "{{ lookup('env', 'PASSWORD') }}"
+    repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
+  when:
+    - ansible_os_family == "RedHat"
+
+- name: enable the tools repo
+  command: percona-release enable-only tools
+
+- name: clean and update yum cache
+  shell: |
+    yum clean all
+    yum makecache
+  when: ansible_os_family == "RedHat"

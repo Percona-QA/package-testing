@@ -8,22 +8,22 @@
     
   - name: Determine Percona Server major version
     set_fact:
-      PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') if '8.1' in UPSTREAM_VERSION else 8 }}"      
+      PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') if '8.3' in UPSTREAM_VERSION else 8 }}"      
 
   - name: Print Percona Server major version
     debug:
       var: PS_MAJ_VER
     
-  - name: include tasks for enabling PS 80/81 main repo
-    include: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_main_repo.yml
+  - name: include tasks for enabling PS 80/83 main repo
+    include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_main_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "main"
 
-  - name: include tasks for enabling PS 80/81 test repo
-    include: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_testing_repo.yml
+  - name: include tasks for enabling PS 80/83 test repo
+    include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_testing_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "testing" or lookup('env', 'INSTALL_REPO') == ""
 
-  - name: include tasks for enabling PS 80/81 experimental repo
-    include: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_experimental_repo.yml
+  - name: include tasks for enabling PS 80/83 experimental repo
+    include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_experimental_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "experimental"
 
   - name: setup hosts file
@@ -114,7 +114,6 @@
         binlog_transaction_dependency_tracking=WRITESET
         slave_preserve_commit_order=ON
         slave_parallel_type=LOGICAL_CLOCK
-        transaction_write_set_extraction=XXHASH64
     when: ansible_os_family == "Debian"
 
   - name: add options to my.cnf on Centos/RedHat
@@ -133,7 +132,6 @@
         binlog_transaction_dependency_tracking=WRITESET
         slave_preserve_commit_order=ON
         slave_parallel_type=LOGICAL_CLOCK
-        transaction_write_set_extraction=XXHASH64
     when: ansible_os_family == "RedHat"
 
   - name: allow all users to connect to mysql

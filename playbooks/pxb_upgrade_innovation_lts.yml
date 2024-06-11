@@ -1,0 +1,355 @@
+---
+# This playbook does following:
+#   sets main Percona repo
+#   installs PS innovation lts, PXB innovation lts, PT
+#   changes repo to testing
+#   upgrades packages to the new version
+#   does some tests
+#
+
+# Cosmic is still missing python
+# - import_playbook: test_prep.yml
+
+- hosts: all
+  become: true
+  become_method: sudo
+
+  tasks:
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+# VARS definition START
+
+  - name: Extract PXB major and minor version number using shell commands
+    shell: cat ../VERSIONS | grep 'PXB_INN_LTS_MAJ_VER' | cut -d'=' -f2 | sed 's/"//g'
+    register: pxb_version_major_minor
+
+  - name: Extract PXB major version number using shell commands
+    shell: cat ../VERSIONS | grep PXB_INN_LTS_MAJ_VER | awk -F'[=".]' '{print $3"."$4}'
+    register: pxb_version_major
+
+  - name: Extract version number using shell commands
+    shell: cat ../VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    register: major_release_version
+
+  - name: Set major_release_version variable
+    set_fact:
+      major_release_version: "{{ major_release_version.stdout }}"
+
+  - name: Set pxb_version_major variable
+    set_fact:
+      pxb_version_major: "{{ pxb_version_major.stdout }}"
+
+  - name: Set pxb_version_major_minor variable
+    set_fact:
+      pxb_version_major_minor: "{{ pxb_version_major_minor.stdout }}"
+
+  - name: Extract values using shell command for repo name used for innovation/lts release PS
+    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: ps_inn_lts_repo_name
+
+  - name: Set ps_inn_lts_repo_name variable PS
+    set_fact:
+      ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
+
+  - name: Extract values using shell command for repo name used for innovation/lts release PXB
+    shell: grep 'PXB_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: pxb_inn_lts_repo_name
+
+  - name: Set pxb_inn_lts_repo_name variable PXB
+    set_fact:
+      pxb_inn_lts_repo_name: "{{ pxb_inn_lts_repo_name.stdout }}"
+
+  - name: VERSION in testing repo
+    shell: curl -s https://repo.percona.com/pxb-8x-innovation/apt/pool/testing/p/ | grep -oP '"\K[^"]+' | grep percona-xtrabackup | sed -e 's|</a.*||' -e 's/\///g' -e 's/>//g' | grep -v '^$'~ | uniq | sort -t '-' -k 3 -nr | head -n 1 | sed '-e s/percona-xtrabackup-//g' |  sed -E 's/(.)(.)/\1.\2/'
+    register: pxb_version_testing
+
+  - name: VERSION in main repo
+    shell: curl -s https://repo.percona.com/pxb-8x-innovation/apt/pool/main/p/ | grep -oP '"\K[^"]+' | grep percona-xtrabackup | sed -e 's|</a.*||' -e 's/\///g' -e 's/>//g' | grep -v '^$'~ | uniq | sort -t '-' -k 3 -nr | head -n 1 | sed '-e s/percona-xtrabackup-//g' | sed -E 's/(.)(.)/\1.\2/'
+    register: pxb_version_main
+
+  - name: Set pxb_version_testing variable
+    set_fact:
+      pxb_version_testing: "{{ pxb_version_testing.stdout }}"
+
+  - name: Set pxb_version_main variable
+    set_fact:
+      pxb_version_main: "{{ pxb_version_main.stdout }}"
+
+#
+  - name: VERSION in testing repo NO 
+    shell: curl -s https://repo.percona.com/pxb-8x-innovation/apt/pool/testing/p/ | grep -oP '"\K[^"]+' | grep percona-xtrabackup | sed -e 's|</a.*||' -e 's/\///g' -e 's/>//g' | grep -v '^$'~ | uniq | sort -t '-' -k 3 -nr | head -n 1 | sed '-e s/percona-xtrabackup-//g'
+    register: pxb_version_testing_no_cs
+
+  - name: VERSION in main repo NO CS
+    shell: curl -s https://repo.percona.com/pxb-8x-innovation/apt/pool/main/p/ | grep -oP '"\K[^"]+' | grep percona-xtrabackup | sed -e 's|</a.*||' -e 's/\///g' -e 's/>//g' | grep -v '^$'~ | uniq | sort -t '-' -k 3 -nr | head -n 1 | sed '-e s/percona-xtrabackup-//g'
+    register: pxb_version_main_no_cs
+
+  - name: Set pxb_version_testing_no_cs variable
+    set_fact:
+      pxb_version_testing_no_cs: "{{ pxb_version_testing_no_cs.stdout }}"
+
+  - name: Set pxb_version_main_no_cs variable
+    set_fact:
+      pxb_version_main_no_cs: "{{ pxb_version_main_no_cs.stdout }}"
+
+#
+# VARS definition END
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+# PS INSTALL START
+  - name: include tasks for enabling PS {{ pxb_version_main }} main repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
+    when:
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+  - name: install Percona Server {{ pxb_version_main }} packages main
+    include_tasks: ../tasks/install_ps_innovation_lts.yml
+    when:
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+# PS INSTALL END
+
+
+# ENABLE PXB MAIN REPO
+
+
+# INSTALL MS 
+
+  - name: install MYSQL MS Server {{ pxb_version_main }} packages
+    include_tasks: ../tasks/install_ms_innovation_lts.yml
+    vars:
+      pxb_version_major: "{{ pxb_version_main }}"
+      pxb_version_major_minor: "{{ pxb_version_main }}.0"
+    when:
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+##
+###
+
+
+# MS END
+
+# ENABLE PXB MAIN REPO
+
+  - name: ENABLE PXB MAIN REPO
+    include_tasks: ../tasks/enable_pxb_innovation_lts_main_repo.yml
+    when:
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+# INSTALL PXB
+
+  - name: install Percona XtraBackup {{ major_release_version }} packages
+    include_tasks: ../tasks/install_pxb_innovation_lts.yml
+    vars:
+      major_release_version: "{{ pxb_version_main_no_cs }}"
+    when: lookup('env', 'install_repo') != "experimental"
+
+
+# PXB INSTALL END
+
+  - name: start mysql service with service command
+    command: service mysql start
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+    when:
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+  - name: install plugins, import world database
+    command: /package-testing/plugins_test.sh
+    when:
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+  - name: install 3rd party packages with apt
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: 
+      - ansible_os_family == "Debian"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+  - name: install 3rd party packages with yum
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+
+# RUN BACKUPS MAIN REPOS
+
+  - name: run backup main
+    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
+
+  - name: prepare backup main
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
+
+# REMOVE PXB
+
+  - name: remove PXB deb packages main
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-xtrabackup-{{ pxb_version_main_no_cs }}*
+    when: 
+      - ansible_os_family == "Debian"
+
+  - name: remove PXB rpm packages main
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-xtrabackup-{{ pxb_version_main_no_cs }}*
+    when: 
+      - ansible_os_family == "RedHat"
+
+## REMOVE MS
+  - name: List the packages with mysql installed Debian
+    shell: apt list --installed | grep mysql | awk '{print$1}'
+    register: mysql_packages_raw
+    when: 
+      - ansible_facts['os_family'] == "Debian"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+  - name: Set fact for mysql_packages
+    set_fact:
+      mysql_packages: "{{ mysql_packages_raw.stdout_lines }}"
+    when: 
+      - ansible_facts['os_family'] == "Debian"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+  - name: Remove Percona Server deb packages MS
+    apt:
+      name: "{{ item }}"
+      update_cache: no
+      state: absent
+    loop: "{{ mysql_packages }}"
+    when: 
+      - ansible_facts['os_family'] == "Debian"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+# REMOVE old log file PXB
+
+  - name: remove pxb log files backup
+    command: rm -rf /tmp/backups
+
+# INSTALL MS TESTING REPO VERSION OF PXB
+
+  - name: install MYSQL MS Server {{ pxb_version_testing }} packages
+    include_tasks: ../tasks/install_ms_innovation_lts.yml
+    vars:
+      pxb_version_major: "{{ pxb_version_testing }}"
+      pxb_version_major_minor: "{{ pxb_version_testing }}.0"
+    when:
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+##
+###
+
+# INSTALL PS START
+
+  - name: include tasks for enabling PS {{ pxb_version_testing }} testing repo 
+    include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
+    when:
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+  - name: install Percona Server {{ pxb_version_testing }} packages testing repo
+    include_tasks: ../tasks/install_ps_innovation_lts.yml
+    when:
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+# INSTALL PS END
+
+
+# ENABLE TESTING REPO START PXB
+#
+  - name: ENABLE Percona XTRABACKUP MAIN REPO
+    include_tasks: ../tasks/enable_pxb_innovation_lts_testing_repo.yml
+
+# ENABLE TESTING REPO END
+
+  - name: install Percona XtraBackup {{ major_release_version }} packages
+    include_tasks: ../tasks/install_pxb_innovation_lts.yml
+    vars:
+      major_release_version: "{{ pxb_version_testing_no_cs }}"
+    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb{{ major_release_version }}
+
+  - name: check that Percona XtraBackup package versions are correct
+    command: /package-testing/package_check.sh pxb{{ major_release_version }}
+
+# RUN BACKUPS TESTING REPOS
+
+  - name: run backup testing
+    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
+
+  - name: prepare backup testing
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
+
+## REMOVE PS 
+
+  - name: remove Percona Server deb packages PS
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server-server
+      - percona-xtrabackup-8{{ major_release_version }}
+    when: 
+      - ansible_os_family == "Debian"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+  - name: remove Percona Server rpm packages PS
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-server-server
+      - percona-xtrabackup-8{{ major_release_version }}
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+
+
+#  - name: check if process is stopped after package removal
+#    command: /package-testing/check_running.sh mysql stopped

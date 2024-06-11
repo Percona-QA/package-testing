@@ -1,0 +1,256 @@
+---
+# This playbook does following:
+#   enables Percona testing repository
+#   installs latest version of PS 8.1, PT and PXB 8.1
+#   does some tests
+
+# Cosmic is still missing python
+# import_playbook: test_prep.yml
+
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    install_mysql_shell: "{{ lookup('env', 'install_mysql_shell', default='') }}"
+  environment:
+    install_mysql_shell: '{{ install_mysql_shell }}'
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  tasks:
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: include tasks for local vault setup
+    include_tasks: ../tasks/setup_local_vault.yml
+
+  - name: setup config file for keyring vault
+    template: src=../scripts/ps_keyring_plugins_test/keyring_vault_component_test_v2.j2
+              dest=/package-testing/scripts/ps_keyring_plugins_test/component_keyring_vault.cnf
+              mode=0664 owner=root group=root
+
+  - name: enforce SELinux on CentOS
+    selinux:
+      policy: targeted
+      state: enforcing
+    when: ansible_os_family == "RedHat"
+
+  - name: get selinux status
+    command: sestatus
+    register: selinux_status
+    when: ansible_os_family == "RedHat"
+
+  - name: list selinux status
+    debug:
+      var: selinux_status
+    when: ansible_os_family == "RedHat"
+
+  - name: Extract version number using shell commands
+    shell: cat ../VERSIONS | grep -oP 'PS_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    register: major_release_version
+
+  - name: Set major_release_version variable
+    set_fact:
+      major_release_version: "{{ major_release_version.stdout }}"
+
+  - name: Extract values using shell command for repo name used for innovation/lts release
+    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: ps_inn_lts_repo_name
+
+  - name: Set ps_inn_lts_repo_name variable
+    set_fact:
+      ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
+
+  - name: include tasks for enabling PS {{ major_release_version }} main repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling PS {{ major_release_version }} test repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling PS {{ major_release_version }} experimental repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: install Percona Server {{ major_release_version }} packages
+    include_tasks: ../tasks/install_ps_innovation_lts.yml
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e  
+
+  - name: install sysbench new deb packages
+    include_tasks: ../tasks/install_sysbench.yml
+    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: install Percona XtraBackup {{ major_release_version }} packages
+    include_tasks: ../tasks/install_pxb_innovation_lts.yml
+    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: list installed packages
+    include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: start mysql service with service command
+    command: service mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7)
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: disable selinux on centos7 for TokuDB to work
+    shell: setenforce 0 || true
+    when: ansible_os_family == "RedHat"
+
+  - name: run Group Replication tests
+    include_tasks: ../tasks/gr_test.yml
+
+  - name: append include for RedHat
+    lineinfile:
+        path: /etc/my.cnf
+        line: '!includedir /etc/my.cnf.d'
+    when: ansible_os_family == "RedHat"
+
+  - name: install percona-mysql-shell package
+    include_tasks: ../tasks/install_pshell.yml
+    when: install_mysql_shell == "yes" or install_mysql_shell == ""
+
+  - name: check that Percona Server package versions are correct for ps{{ major_release_version }}
+    command: /package-testing/package_check.sh ps{{ major_release_version }}
+
+  - name: Handle check that Percona Server version is correct
+    block: 
+      - name: Run the version_check.sh script for ps{{ major_release_version }}
+        shell: /package-testing/version_check.sh ps{{ major_release_version }} > version-check.log 2>&1
+
+      - name: Log check for warnings in the previous stage
+        command: /package-testing/scripts/log-warning-check.sh version-check.log
+        when: (lookup('env', 'check_warnings') == "yes")
+
+    rescue:
+      - name: Fetch the output of the version_check.sh logfile on the script failure
+        command: cat "version-check.log"
+        register: versioncheckoutput
+
+      - name: Display the fetched output of the version_check.log logfile
+        debug:
+          msg: "Version check output: {{ versioncheckoutput.stdout }}"
+
+      - name: Fail the task due to previous issues
+        fail:
+          msg: Failing the further tasks due to issues in the previous task.
+
+  - name: keyring Vault Component and plugins test
+    include_tasks: ../tasks/ps_keyring_vault_component_test.yml
+
+  - name: re-run ps_admin to install rocksdb
+    command: /usr/bin/ps-admin --enable-rocksdb
+
+  - name: install plugins, import world database ps-{{ major_release_version }}
+    command: /package-testing/plugins_test_innovation_lts.sh ps
+
+  - name: check the clone plugin
+    command: /package-testing/scripts/ps_clone_plugin_test_innovation_lts.sh
+
+  - name: check the data masking component
+    command: /package-testing/scripts/ps_dm_component.sh
+
+  - name: check the audit log v2 Component
+    command: /package-testing/scripts/ps_audit_log_v2_component.sh
+
+  - name: run some MyRocks tests
+    command: /package-testing/scripts/ps_myrocks_test.sh
+
+  - name: run mysql compression tests script
+    command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps{{ major_release_version }}
+
+  - name: run bats unit tests for ps-admin script
+    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
+
+  - name: run bats integration tests for ps-admin script
+    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
+
+  - name: run PAM tests
+    include_tasks: ../tasks/pam_test.yml
+
+  - name: install 3rd party packages with apt
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "Debian"
+
+  - name: install 3rd party packages with yum
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "RedHat"
+
+  - name: list installed packages
+    include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: run bats tests for mysql init scripts
+    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+
+  - name: start mysql service
+    service: name=mysql state=started
+
+    #  - name: check that mysqladmin shutdown works correctly
+    #    command: /package-testing/madmin_check.sh
+
+  - name: disable all percona repos
+    command: percona-release disable all
+
+  - name: get my.cnf stats
+    stat: path=/etc/my.cnf
+    register: mycnf
+
+  - name: copy config file to backup
+    copy:
+      src: /etc/my.cnf
+      dest: /etc/my.cnf.backup
+      remote_src: yes
+    when: mycnf.stat.exists and ansible_os_family == "RedHat"
+
+  - name: remove Percona Server deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server*
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+     packages:
+      - percona-server*
+    when: ansible_os_family == "RedHat"
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mysql stopped
+
+  - stat:
+      path: /var/lib/mysql
+    register: p
+
+  - name: check /var/lib/mysql exists and not empty
+    fail:
+      msg: "Path exists and is a directory and is not empty"
+    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
+

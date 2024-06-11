@@ -15,18 +15,6 @@ pipeline {
   stages {
     stage('Binary tarball test') {
       parallel {
-        stage('Ubuntu Bionic') {
-          agent {
-            label "min-bionic-x64"
-          }
-          steps {
-            script {
-                currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
-              }
-            run_test()
-            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
-          } //End steps
-        } //End stage Ubuntu Bionic
         stage('Ubuntu Focal') {
           agent {
             label "min-focal-x64"
@@ -131,12 +119,13 @@ pipeline {
 void run_test() {
   sh '''
     echo ${BUILD_TYPE_MINIMAL}
+    PXC_VERSION_MAJOR="$(echo ${PXC_VERSION}|cut -d'-' -f1)"
     PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
     MINIMAL=""
     if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
       MINIMAL="-minimal"
     fi
-    if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
+    if [ "${PXC_MAJOR_VERSION}" = "8.0" ] || [ "${PXC_MAJOR_VERSION}" = "8.3" ] || [ "${PXC_MAJOR_VERSION}" = "8.4" ]; then
       export GLIBC_VERSION="2.17"
       if [ -f /usr/bin/apt-get ]; then
         DEBIAN_VERSION=$(lsb_release -sc)
@@ -145,8 +134,8 @@ void run_test() {
         fi
       fi
       TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
-      TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
-    elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
+      TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
+    elif [ "${PXC_MAJOR_VERSION}" = 5.7 ]; then
       export GLIBC_VERSION="2.17"
       if [ -f /etc/redhat-release ] && [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
         export GLIBC_VERSION="2.12"

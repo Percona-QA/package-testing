@@ -15,11 +15,11 @@
     include_tasks: ../tasks/test_prep.yml
 
   - name: include tasks for enabling test repo
-    include: ../tasks/enable_testing_repo.yml
+    include_tasks: ../tasks/enable_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling main repo
-    include: ../tasks/enable_main_repo.yml
+    include_tasks: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
   - name: download and extract world database

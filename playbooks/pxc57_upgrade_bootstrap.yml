@@ -9,15 +9,21 @@
 
   - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_pxc57_testing_repo.yml
-    when: lookup('env', 'upgrade_repo') == "testing" or lookup('env', 'upgrade_repo') == ""
+    when: (lookup('env', 'install_repo') == "testing" and lookup('env', 'pxc57repo') != "EOL") or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_pxc57_main_repo.yml
-    when: lookup('env', 'upgrade_repo') == "main"
+    when: lookup('env', 'install_repo') == "main" and lookup('env', 'pxc57repo') != "EOL"
 
   - name: include tasks for enabling experimental repo
     include_tasks: ../tasks/enable_pxc57_experimental_repo.yml
-    when: lookup('env', 'upgrade_repo') == "experimental"
+    when: lookup('env', 'install_repo') == "experimental" and lookup('env', 'pxc57repo') != "EOL"
+
+##
+
+  - name: include tasks for enabling EOL repo
+    include_tasks: ../tasks/enable_pxc57_eol_tools_repo.yml
+    when: lookup('env', 'pxc57repo') == "EOL"
 
 # restart the bootstrapped node before upgrading
  
@@ -110,14 +116,12 @@
     when: (ansible_os_family == "RedHat" and ansible_distribution_major_version == "7") or (ansible_distribution == "Amazon")
     throttle: 1
 
-  - name: register PXC version
+  - name: register PXC version after upgrade
     shell: mysqld --version
     register: pxc_version
-    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
 
-  - name: print PXC version
+  - name: print PXC version version after upgrade
     debug: var=pxc_version
-    when: lookup('env', 'check_version') != "yes" and lookup('env', 'check_version') != ""
 
   - name: check that PXC version is correct
     command: /package-testing/version_check.sh pxc57

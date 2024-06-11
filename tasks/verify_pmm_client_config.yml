@@ -8,7 +8,7 @@
 
 # TODO: remove it in favor of inline string destruct, eg.: pmm_version.split('.')[1]
 - name: Parse and set PMM minor version
-  shell: "pmm-admin --version | grep -oP '(?<=[.])\\w+(?=[.])' | head -1"
+  shell: "pmm-admin --version | grep ^Version | awk -F. '{print $2}'"
   register: minor_version
 
 - set_fact:

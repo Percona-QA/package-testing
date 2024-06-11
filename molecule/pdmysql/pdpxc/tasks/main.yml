@@ -2,10 +2,10 @@
 # tasks file for pdpxc
 
 - name: include playbook for removing Percona repo
-  include: ../../../tasks/remove_percona_repository.yml
+  include_tasks: ../../../tasks/remove_percona_repository.yml
 
 - name: Install percona release
-  include: ../../tasks/install_percona_release.yml
+  include_tasks: ../../tasks/install_percona_release.yml
 
 - set_fact:
     major_repo: "{{ lookup('env', 'MAJOR_REPO') }}"

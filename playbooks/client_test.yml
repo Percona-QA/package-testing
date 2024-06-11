@@ -14,21 +14,33 @@
   - name: include tasks for test env setup
     import_tasks: ../tasks/test_prep.yml
 
-  - name: include tasks for enabling main repo
-    include: ../tasks/enable_main_repo.yml
-    when: (lookup('env', 'install_repo') == "main") and (lookup('env', 'client_to_test') != "ps80")
+  - name: include tasks for enabling main repo ps ps57
+    include_tasks: ../tasks/enable_main_repo.yml
+    when: (lookup('env', 'install_repo') == "main") and (lookup('env', 'client_to_test') == "ps57")
 
   - name: include tasks for enabling main repo
-    include: ../tasks/enable_ps8_main_repo.yml
+    include_tasks: ../tasks/enable_ps8_main_repo.yml
     when: (lookup('env', 'install_repo') == "main") and (lookup('env', 'client_to_test') == "ps80")
 
   - name: include tasks for enabling PS 8 test repo
-    include: ../tasks/enable_ps8_testing_repo.yml
+    include_tasks: ../tasks/enable_ps8_testing_repo.yml
     when: (lookup('env', 'install_repo') == "testing") and (lookup('env', 'client_to_test') == "ps80")
 
-  - name: include tasks for enabling test repo
-    include: ../tasks/enable_testing_repo.yml
-    when: (lookup('env', 'install_repo') == "testing") and (lookup('env', 'client_to_test') != "ps80")
+  - name: include tasks for enabling test repo ps ps57
+    include_tasks: ../tasks/enable_testing_repo.yml
+    when: (lookup('env', 'install_repo') == "testing") and (lookup('env', 'client_to_test') == "ps57")
+
+  - name: include tasks for enabling PS {{ major_release_version }} main repo 
+    include_tasks: ../tasks/enable_ps_innovation_repo_main.yml 
+    when: (lookup('env', 'install_repo') == "main") and (lookup('env', 'client_to_test') == "innovation-lts")
+
+  - name: include tasks for enabling PS {{ major_release_version }} test repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
+    when: (lookup('env', 'install_repo') == "testing") and (lookup('env', 'client_to_test') == "innovation-lts")
+
+  - name: include tasks for enabling PS {{ major_release_version }} experimental repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
+    when: (lookup('env', 'install_repo') == "experimental") and (lookup('env', 'client_to_test') == "innovation-lts")
 
   - name: install deb packages
     apt:

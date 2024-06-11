@@ -1,8 +1,15 @@
 #!/bin/bash
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" = 2 ]; then
+  if [ $2 = "pro" ]; then
+    pro="yes"
+  else
+    echo "Wrong second argument! It is not pro!"
+    exit 1
+  fi
+elif [ "$#" -ne 1 ]; then
   echo "This script requires product parameter: ps56, ps57, ps80, ps81 !"
-  echo "Usage: ./version_check.sh <prod>"
+  echo "Usage: ./version_check.sh <prod> [pro]"
   exit 1
 fi
 
@@ -19,13 +26,19 @@ elif [ "$1" = "ps57" ]; then
   release=${PS57_VER#*-}
   revision=${PS57_REV}
 elif [ "$1" = "ps80" ]; then
-  version=${PS80_VER}
-  release=${PS80_VER#*-}
-  revision=${PS80_REV}
-elif [ "$1" = "ps81" ]; then
-  version=${PS81_VER}
-  release=${PS81_VER#*-}
-  revision=${PS81_REV}  
+  if [ "$2" = "pro" ]; then
+    version=${PS80_PRO_VER}
+    release=${PS80_PRO_VER#*-}
+    revision=${PS80_PRO_REV}
+  else
+    version=${PS80_VER}
+    release=${PS80_VER#*-}
+    revision=${PS80_REV}
+  fi
+elif [[ $1 =~ ^ps8[1-9]{1}$ ]]; then
+  version=${PS_INN_LTS_VER}
+  release=${PS_INN_LTS_VER#*-}
+  revision=${PS_INN_LTS_REV}  
 elif [ "$1" = "pxc56" ]; then
   version=${PXC56_VER%-*}
   release=${PXC56_VER#*-}
@@ -44,6 +57,12 @@ elif [ "$1" = "pxc80" ]; then
   revision=${PXC80_REV}
   innodb_ver=${PXC80_INNODB}
   wsrep=${PXC80_WSREP}
+elif [[ "$1" =~ ^pxc8[1-9]{1}$ ]]; then
+  version=${PXC_INN_LTS_VER%-*}
+  release=${PXC_INN_LTS_VER#*-}
+  revision=${PXC_INN_LTS_REV}
+  innodb_ver=${PXC_INN_LTS_INNODB}
+  wsrep=${PXC_INN_LTS_WSREP}
 elif [ "$1" = "pt" ]; then
   version=${PT_VER}
 elif [ "$1" = "pxb23" ]; then
@@ -54,6 +73,8 @@ elif [ "$1" = "pxb80" ]; then
   version=${PXB80_VER}
 elif [ "$1" = "pxb81" ]; then
   version=${PXB81_VER}
+elif [[ $1 =~ ^pxb8[2-9]{1}$ ]]; then
+  version=${PXB_INN_LTS_VER}
 elif [ "$1" = "pmm" ]; then
   version=${PMM_VER}
 elif [ "$1" = "pmm2" ]; then
@@ -87,10 +108,11 @@ else
 fi
 
 product=$1
+
 log="/tmp/${product}_version_check.log"
 echo -n > "${log}"
 
-if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" -o "${product}" = "ps81" ]; then
+if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9]{1}$ ]]; then
   for i in @@INNODB_VERSION @@VERSION; do
     if [ "$(mysql -e "SELECT ${i}; "| grep -c "${version}")" = 1 ]; then
       echo "${i} is correct" >> "${log}"
@@ -98,8 +120,8 @@ if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" -o 
       echo "${i} is incorrect it shows $(mysql -e "SELECT ${i};")"
       exit 1
     fi
- done
- if [ "${product}" = "ps56" -o "${product}" = "ps57" ]; then
+  done
+  if [ "${product}" = "ps56" -o "${product}" = "ps57" ]; then
     if [ "$(mysql -e "SELECT @@TOKUDB_VERSION; "| grep -c "${version}")" = 1 ]; then
       echo "@@TOKUDB_VERSION is correct" >> "${log}"
     else
@@ -110,11 +132,26 @@ if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" -o 
   if [ "$(mysql -e "SELECT @@VERSION_COMMENT;" | grep ${revision} | grep -c ${release})" = 1 ]; then
     echo "@@VERSION COMMENT is correct" >> "${log}"
   else
-    echo "@@VERSION_COMMENT is incorrect. It is: $(mysql -e "SELECT @@VERSION_COMMENT;") . Revision is ${revision}. Release is ${release}"
+    echo "@@VERSION_COMMENT is incorrect. Server comment is: $(mysql -e "SELECT @@VERSION_COMMENT;") . VERSION's revision is ${revision}. VERSION's release is ${release}"
     exit 1
   fi
 
-  if [ ${product} = "ps80" -o ${product} = "ps81" ]; then
+  if [ "${pro}" = 'yes' ]; then
+    if [ "$(mysql -e "SELECT @@VERSION_COMMENT;" | grep -c 'Percona Server Pro (GPL)')" = 1 ]; then
+      echo "@@VERSION COMMENT is correct with Pro" >> "${log}"
+    else
+      echo "@@VERSION_COMMENT is incorrect. Pro is missing. Server comment is: $(mysql -e "SELECT @@VERSION_COMMENT;") ."
+      exit 1
+    fi
+    if [ "$(mysql --version | grep -c 'Percona Server Pro (GPL)')"  = 1 ]; then
+      echo "mysql --version is correct with Pro" >> "${log}"
+    else
+      echo "mysql --version is incorrect. Pro is missing. mysql --version: $(mysql --version) ."
+      exit 1
+    fi
+  fi
+
+  if [[ ${product} =~ ^ps8[0-9]{1}$ ]]; then
     if [ -z ${install_mysql_shell} ] || [ ${install_mysql_shell} = "yes" ] ; then
       if [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
         echo "mysql-shell version is correct" >> "${log}"
@@ -129,7 +166,7 @@ if [ "${product}" = "ps56" -o "${product}" = "ps57" -o "${product}" = "ps80" -o 
     fi
   fi
 
-elif [ ${product} = "pxc56" -o ${product} = "pxc57" -o ${product} = "pxc80" ]; then
+elif [[ ${product} = "pxc56" || ${product} = "pxc57" ]] || [[ ${product} =~ ^pxc8[0-9]{1}$ ]]; then
   for i in @@INNODB_VERSION @@VERSION; do
     if [ "$(mysql -e "SELECT ${i}; "| grep -c ${version}-${innodb_ver})" = 1 ]; then
       echo "${i} is correct" >> "${log}"
@@ -187,7 +224,7 @@ elif [ ${product} = "pmm2" -o ${product} = "pmm2-rc" ]; then
   fi
   bash -xe ./check_pmm2_client_upgrade.sh ${version}
 
-elif [ "${product}" = "pxb24" -o "${product}" = "pxb80" -o "${product}" = "pxb81" ]; then
+elif [[ "${product}" = "pxb24" ]] || [[ ${product} =~ ^pxb8[0-9]{1}$ ]]; then
     for binary in xtrabackup xbstream xbcloud xbcrypt; do
         version_check=$($binary --version 2>&1| grep -c "${version}")
         installed_version=$($binary --version 2>&1|tail -1|awk '{print $3}')
