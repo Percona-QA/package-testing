@@ -37,6 +37,25 @@
     command: yum module disable mariadb -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
+  - name: install Percona Server rpm packages RHEL7
+    yum:
+      name: "{{ packages }}"
+      state: latest
+      disablerepo: "epel"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf | default('') }}
+      - percona-mysql-router{{ pro_suf | default('') }}
+      - percona-server-client{{ pro_suf | default('') }}
+      - percona-server-test{{ pro_suf | default('') }}
+      - percona-server{{ pro_suf | default('') }}-debuginfo
+      - percona-server-devel{{ pro_suf | default('') }}
+      - percona-server-rocksdb{{ pro_suf | default('') }}
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
   - name: install Percona Server rpm packages RHEL8+
     yum:
       allowerasing: "{{ allowerasing_value | default (false) }}"
@@ -54,24 +73,5 @@
       - percona-server-devel{{ pro_suf | default('') }}
       - percona-server-rocksdb{{ pro_suf | default('') }}
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
-  - name: install Percona Server rpm packages RHEL7
-    yum:
-      name: "{{ packages }}"
-      state: latest
-      disablerepo: "epel"
-      update_cache: yes
-    vars:
-      packages:
-      - percona-server-server{{ pro_suf | default('') }}
-      - percona-mysql-router{{ pro_suf | default('') }}
-      - percona-server-client{{ pro_suf | default('') }}
-      - percona-server-test{{ pro_suf | default('') }}
-      - percona-server{{ pro_suf | default('') }}-debuginfo
-      - percona-server-devel{{ pro_suf | default('') }}
-      - percona-server-rocksdb{{ pro_suf | default('') }}
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version < "8"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
