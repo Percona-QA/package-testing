@@ -37,7 +37,7 @@
     command: yum module disable mariadb -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: install Percona Server rpm packages
+  - name: install Percona Server rpm packages RHEL8+
     yum:
       allowerasing: "{{ allowerasing_value | default (false) }}"
       name: "{{ packages }}"
@@ -57,7 +57,7 @@
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: install Percona Server rpm packages
+  - name: install Percona Server rpm packages RHEL7
     yum:
       name: "{{ packages }}"
       state: latest
