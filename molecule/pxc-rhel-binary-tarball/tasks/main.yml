@@ -31,11 +31,6 @@
     debug:
       msg: "PXC_VERSION is {{ PXC_VERSION }} PXC_REVISION is {{ PXC_REVISION }} WSREP_VERSION is {{ WSREP_VERSION }} PATH is {{ PATH }} BUILD_TYPE_MINIMAL is {{ BUILD_TYPE_MINIMAL }}"
 
-  - name: Update packages in rhel-86
-    yum:
-      name: "*"
-      state: latest
-
   - name: install needed packages for running tests with yum
     yum:
       name: "{{ packages }}"
