@@ -37,6 +37,18 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/ps/report.xml'
           } //End steps
         } //End stage Ubuntu Focal
+        stage('Ubuntu Noble') {
+          agent {
+            label "min-noble-x64"
+          }
+          steps {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+              }
+            run_test()
+            junit 'package-testing/binary-tarball-tests/ps/report.xml'
+          } //End steps
+        } //End stage Ubuntu Noble
         stage('Debian Bookworm') {
           agent {
             label "min-bookworm-x64"
@@ -137,7 +149,7 @@ void run_test() {
     TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
     TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
     rm -rf package-testing
-    git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+    git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-dist --depth 1
     cd package-testing/binary-tarball-tests/ps
     wget -q ${TARBALL_LINK}${TARBALL_NAME}
     ./run.sh || true

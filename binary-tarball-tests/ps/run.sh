@@ -25,10 +25,10 @@ else
     sudo apt install -y python3 python3-pip
   fi
   sudo apt-get update -y
-  sudo apt install -y libaio1 libnuma1 libldap-2.4-2
+  sudo apt install -y libaio1 libnuma1 libldap-2.4-2 libaio-dev
 fi
 
-if [[ $(lsb_release -sc) == 'bookworm' ]]; then
+if [[ $(lsb_release -sc) == 'bookworm' || $(lsb_release -sc) == 'noble' ]]; then
   pip3 install --user --break-system-packages pytest-testinfra pytest
 else
   pip3 install --user pytest-testinfra pytest
