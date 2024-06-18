@@ -59,12 +59,11 @@ pipeline {
               echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag" >> disable_thp.sh
               chmod +x disable_thp.sh
               sudo ./disable_thp.sh
-              sudo echo "THP enabled status:"; cat /sys/kernel/mm/transparent_hugepage/enabled; echo "THP defrag status:"; cat /sys/kernel/mm/transparent_hugepage/defrag
               # run test
               export PATH=${PATH}:~/.local/bin
               sudo yum install -y python3 python3-pip
               rm -rf package-testing
-              git clone -b check-dock https://github.com/kaushikpuneet07/package-testing.git --depth 1
+              git clone https://github.com/Percona-QA/package-testing.git --depth 1
               cd package-testing/docker-image-tests/ps-eol
               pip3 install --user -r requirements.txt
               ./run.sh
