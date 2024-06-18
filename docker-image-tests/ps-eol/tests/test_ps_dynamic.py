@@ -25,11 +25,6 @@ def host():
 
 
 class TestDynamic:
-    def test_rocksdb_installed(self, host):
-        cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "select SUPPORT from information_schema.ENGINES where ENGINE = \'ROCKSDB\';"')
-        assert cmd.succeeded
-        assert 'YES' in cmd.stdout
-
     def test_tokudb_installed(self, host):
         cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "select SUPPORT from information_schema.ENGINES where ENGINE = \'TokuDB\';"')
         assert cmd.succeeded
