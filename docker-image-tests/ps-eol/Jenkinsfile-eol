@@ -30,7 +30,8 @@ pipeline {
           }
         }
       }
-    }  
+    } 
+
       stage ('Run trivy analyzer') {
         steps {
             sh """
@@ -49,7 +50,7 @@ pipeline {
                 }
         }
       } //end Run trivy analyzer
-     
+
       stage('Run tests') {
         steps {
             sh '''
