@@ -32,3 +32,13 @@
       - percona-server-tokudb
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
+
+  - name: remove Percona Server shared rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+      disablerepo: "epel"
+    vars:
+      packages:
+      - percona-server-shared
+    when: ansible_distribution_major_version == "9" and major_upgrade is undefined
