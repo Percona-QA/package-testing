@@ -25,7 +25,7 @@
     vars:
       packages:
       - percona-server-shared
-    when: ansible_distribution_major_version == "9" and major_upgrade is undefined
+    when: ansible_distribution_major_version == "9"
 
   - name: remove Percona Server rpm packages
     yum:
