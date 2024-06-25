@@ -11,6 +11,7 @@
   become_method: sudo
 
   tasks:
+  
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
 
