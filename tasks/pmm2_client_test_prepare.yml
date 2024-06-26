@@ -1,7 +1,7 @@
 # This task contains common actions for the PMM Client all tests at preparation stage
 
 - name: Removing Percona Release package
-  ansible.builtin.include: ./remove_percona_repository.yml
+  include_tasks: ./remove_percona_repository.yml
 
 - name: Install EPEL and GPG
   when: ansible_os_family == "RedHat"
