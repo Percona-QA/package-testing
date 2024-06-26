@@ -1,7 +1,7 @@
 # This task contains common actions for the PMM Client all tests at preparation stage
 
 - name: Removing Percona Release package
-  include_tasks: ./remove_percona_repository.yml
+  ansible.builtin.include: ./remove_percona_repository.yml
 
 - name: Install EPEL and GPG
   when: ansible_os_family == "RedHat"
@@ -53,11 +53,9 @@
       - wget
       - jq # for exporter end point metric fetch
 
-- name: enable original {{ test_repo }} repo
+- name: enable {{ test_package }} {{ test_repo }} repo
   include_tasks: ./enable_repo.yml
   vars:
     only: yes
-    package: "original"
-### uncomment when ENG-1194 wil be fixed
-#    package: "pmm2-client"
+    package: "{{ test_package }}"
     repository: "{{ test_repo }}"
