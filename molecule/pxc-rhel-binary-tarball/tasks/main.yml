@@ -1,0 +1,142 @@
+---
+# tasks file for tarball tests
+  - name: Setup SSH keys for Oracle Linux or Amazon
+    authorized_key:
+      user: ec2-user
+      key: "{{ lookup('file', 'public_keys') }}"
+      state: present
+      exclusive: False
+
+  - name: CHECK IF ENV ARE PASSED
+    debug: 
+      msg: "PXC_VERSION is {{ lookup('env', 'PXC_VERSION') }}"
+
+  - name: SET PXC_VERSION VAR
+    set_fact:
+      PXC_VERSION: "{{ lookup('env', 'PXC_VERSION') }}"
+      PXC_REVISION: "{{ lookup('env', 'PXC_REVISION') }}"
+      WSREP_VERSION: "{{ lookup('env', 'WSREP_VERSION') }}"
+      PATH: "{{ ansible_env.HOME }}/.local/bin:{{ ansible_env.PATH }}"
+      BUILD_TYPE_MINIMAL: "{{ lookup('env', 'BUILD_TYPE_MINIMAL') }}"
+
+  - name: Set PXC_MAJOR_VERSION
+    set_fact:
+      PXC_MAJOR_VERSION: "{{ PXC_VERSION.split('.')[0] }}.{{ PXC_VERSION.split('.')[1] }}"
+
+  - name: CHECK OS
+    debug:
+      msg: "OS is {{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+  - name: CHECK VARIABLES
+    debug:
+      msg: "PXC_VERSION is {{ PXC_VERSION }} PXC_REVISION is {{ PXC_REVISION }} WSREP_VERSION is {{ WSREP_VERSION }} PATH is {{ PATH }} BUILD_TYPE_MINIMAL is {{ BUILD_TYPE_MINIMAL }}"
+
+  - name: install needed packages for running tests with yum
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - git
+      - unzip
+      - wget
+      - libaio
+      - numactl
+      - tar
+      - gawk
+      - python3
+      - python3-pip
+      - libtirpc
+      - openldap
+    when: ansible_os_family == "RedHat"
+
+  - name: Set REGULAR as TARBALL_NAME
+    set_fact:
+      TARBALL_NAME: "Percona-XtraDB-Cluster_{{ lookup('env', 'PXC_VERSION') }}_Linux.x86_64.glibc2.28.tar.gz"
+    when: BUILD_TYPE_MINIMAL != True
+
+  - name: Set MINIMAL as TARBALL_NAME
+    set_fact:
+      TARBALL_NAME: "Percona-XtraDB-Cluster_{{ lookup('env', 'PXC_VERSION') }}_Linux.x86_64.glibc2.28-minimal.tar.gz"
+    when: BUILD_TYPE_MINIMAL == True
+
+  - name: download package-testing repo branch with wget
+    command: "{{ item }}"
+    with_items:
+    - rm -rf package-testing
+    - rm -f master.zip
+    - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
+    - unzip master.zip
+    - rm -f master.zip
+    - mv "package-testing-{{ branch }}" /package-testing
+    vars:
+      branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
+      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
+
+  - name: Download {{ TARBALL_NAME }}
+    get_url:
+      url: https://downloads.percona.com/downloads/TESTING/issue-PKG56/{{ TARBALL_NAME }}
+      dest: /package-testing/molecule/pxc-rhel-binary-tarball/{{ TARBALL_NAME }}
+      mode: '0644'
+
+  - name: Install required packages on RedHat/CentOS
+    when: ansible_facts['os_family'] == "RedHat"
+    yum:
+      name:
+        - libaio
+        - numactl
+        - openssl
+        - socat
+        - lsof
+        - perl-Data-Dumper
+        - libev
+        - python3
+        - python3-pip
+      state: present
+
+  - name: Install pytest and pytest-testinfra using pip3
+    command: pip3 install pytest pytest-testinfra
+
+  - name: Ensure PXC_VERSION is set
+    fail:
+      msg: "PXC_VERSION environment variable needs to be set!"
+    when: PXC_VERSION is not defined
+
+  - name: Ensure PXC_REVISION is set
+    fail:
+      msg: "PXC_REVISION environment variable needs to be set!"
+    when: PXC_REVISION is not defined
+
+  - name: Run tests
+    command: ./run.sh
+    environment:
+      PXC_VERSION: "{{ PXC_VERSION }}"
+      PXC_REVISION: "{{ PXC_REVISION }}"
+      WSREP_VERSION: "{{ WSREP_VERSION }}"
+    args:
+      chdir: "/package-testing/molecule/pxc-rhel-binary-tarball/"
+
+  - name: Copy logs of the output of the yum list --installed to /log/yum-list-output.log
+    shell: cat /etc/os-release > /var/log/yum-list-output.log && yum list --installed >> /var/log/yum-list-output.log
+
+  - name: Set the primary IPv4 address
+    set_fact:
+      ipv4_address: "{{ ansible_facts.all_ipv4_addresses[0] }}"
+
+  - name: Set the primary IPv4 address path
+    set_fact:
+      ipv4_address_path: "/tmp/{{ ipv4_address }}.tar.gz"
+
+  - name: Create a tar.gz archive of the logs using command
+    command: tar -czf {{ ipv4_address_path }} /var/log/yum-list-output.log
+    register: archive_command_result
+
+  - name: Debug the tar command result
+    debug:
+      var: archive_command_result
+
+  - name: Fetch the tar.gz file from the remote host
+    ansible.builtin.fetch:
+      src: "{{ ipv4_address_path }}"
+      dest: "{{ lookup('env', 'WORKSPACE') }}/{{ ipv4_address }}.tar.gz"
+      flat: yes

@@ -236,6 +236,25 @@
       - percona-release
     when: ansible_os_family == "RedHat"
 
+  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on RHEL7
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+      - percona-server-test{{ pro_suf }}
+      - percona-server{{ pro_suf }}-debuginfo
+      - percona-server-devel{{ pro_suf }}
+      - percona-server-rocksdb{{ pro_suf }}
+      - percona-server-shared{{ pro_suf }}
+      - percona-server-shared{{ pro_suf }}-compat
+      - percona-server-client{{ pro_suf }}
+      - percona-mysql-router{{ pro_suf }}
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
+
   - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on CentOS
     yum:
       name: "{{ packages }}"
@@ -252,7 +271,7 @@
       - percona-server-shared{{ pro_suf }}-compat
       - percona-server-client{{ pro_suf }}
       - percona-mysql-router{{ pro_suf }}
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8" 
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
@@ -400,7 +419,16 @@
       - percona-server-server{{ pro_suf }}
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Server{{ pro_suf }} rpm package for telemetry
+  - name: install Percona Server{{ pro_suf }} rpm RHEL7 package for telemetry
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+
+  - name: install Percona Server{{ pro_suf }} rpm RHEL8+ package for telemetry
     yum:
       name: "{{ packages }}"
       state: latest
@@ -408,7 +436,7 @@
     vars:
       packages:
       - percona-server-server{{ pro_suf }}
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh ps -u

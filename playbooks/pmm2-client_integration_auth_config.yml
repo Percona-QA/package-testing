@@ -10,6 +10,7 @@
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
     pmm_server_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default('admin', true) }}"
+    test_package: "{{ lookup('env', 'install_package') | default('pmm2-client', true)}}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
     cmd_admin_list: "pmm-admin list"
