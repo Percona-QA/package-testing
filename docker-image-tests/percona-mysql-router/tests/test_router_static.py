@@ -82,6 +82,8 @@ def add_slave():
         'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=clone'
     ], check=True)
     time.sleep(120)
+    subprocess.run(['docker', 'exec', mysql2 , 'service', 'mysql', 'restart'], check=True)
+    shell.options["dba.restartWaitTimeout"] = 300
     subprocess.run([
         'docker', 'exec', 'mysql1',
         'mysqlsh', '-uinno', '-pinno', '--',
