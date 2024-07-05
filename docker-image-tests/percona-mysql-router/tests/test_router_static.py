@@ -88,24 +88,6 @@ def add_slave():
         'cluster', 'add-instance', '--uri=inno@mysql4', '--recoveryMethod=clone'
     ], check=True)
 
-@pytest.fixture(scope='module')
-def inspect_data():
-    docker_id = subprocess.check_output([
-        'docker', 'run', '-d',
-        '--name', container_name_mysql_router,
-        '--net=innodbnet',
-        '-e', 'MYSQL_HOST=mysql1',
-        '-e', 'MYSQL_PORT=3306',
-        '-e', 'MYSQL_USER=inno',
-        '-e', 'MYSQL_PASSWORD=inno',
-        '-e', 'MYSQL_INNODB_CLUSTER_MEMBERS=4',
-        router_docker_image
-    ]).decode().strip()
-    inspect_data = json.loads(subprocess.check_output(['docker','inspect', container_name_mysql_router]))
-    yield inspect_data[0]
-    subprocess.check_call(['docker', 'rm', '-f', docker_id])
-
-
 create_network()
 create_mysql_config()
 start_mysql_containers()
