@@ -115,3 +115,28 @@
       WSREP_VERSION: "{{ WSREP_VERSION }}"
     args:
       chdir: "/package-testing/molecule/pxc-rhel-binary-tarball/"
+
+  - name: Copy logs of the output of the yum list --installed to /log/yum-list-output.log
+    shell: cat /etc/os-release > /var/log/yum-list-output.log && yum list --installed >> /var/log/yum-list-output.log
+
+  - name: Set the primary IPv4 address
+    set_fact:
+      ipv4_address: "{{ ansible_facts.all_ipv4_addresses[0] }}"
+
+  - name: Set the primary IPv4 address path
+    set_fact:
+      ipv4_address_path: "/tmp/{{ ipv4_address }}.tar.gz"
+
+  - name: Create a tar.gz archive of the logs using command
+    command: tar -czf {{ ipv4_address_path }} /var/log/yum-list-output.log
+    register: archive_command_result
+
+  - name: Debug the tar command result
+    debug:
+      var: archive_command_result
+
+  - name: Fetch the tar.gz file from the remote host
+    ansible.builtin.fetch:
+      src: "{{ ipv4_address_path }}"
+      dest: "{{ lookup('env', 'WORKSPACE') }}/{{ ipv4_address }}.tar.gz"
+      flat: yes
