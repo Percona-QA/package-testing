@@ -79,6 +79,12 @@ def add_slave():
     subprocess.run([
         'docker', 'exec', 'mysql1',
         'mysqlsh', '-uinno', '-pinno', '--',
+        'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=clone'
+    ], check=True)
+    time.sleep(10)
+    subprocess.run([
+        'docker', 'exec', 'mysql1',
+        'mysqlsh', '-uinno', '-pinno', '--',
         'cluster', 'add-instance', '--uri=inno@mysql3', '--recoveryMethod=clone'
     ], check=True)
     time.sleep(10)
@@ -87,6 +93,7 @@ def add_slave():
         'mysqlsh', '-uinno', '-pinno', '--',
         'cluster', 'add-instance', '--uri=inno@mysql4', '--recoveryMethod=clone'
     ], check=True)
+    time.sleep(120)
 
 create_network()
 create_mysql_config()
