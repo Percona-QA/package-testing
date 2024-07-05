@@ -79,13 +79,13 @@ def add_slave():
     subprocess.run([
         'docker', 'exec', 'mysql1',
         'mysqlsh', '-uinno', '-pinno', '--',
-        'cluster', 'add-instance', '--uri=inno@mysql3', '--recoveryMethod=incremental'
+        'cluster', 'add-instance', '--uri=inno@mysql3', '--recoveryMethod=clone'
     ], check=True)
     time.sleep(10)
     subprocess.run([
         'docker', 'exec', 'mysql1',
         'mysqlsh', '-uinno', '-pinno', '--',
-        'cluster', 'add-instance', '--uri=inno@mysql4', '--recoveryMethod=incremental'
+        'cluster', 'add-instance', '--uri=inno@mysql4', '--recoveryMethod=clone'
     ], check=True)
 
 @pytest.fixture(scope='module')
