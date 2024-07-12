@@ -147,7 +147,7 @@ void run_test() {
         export GLIBC_VERSION="2.35"
       fi
     fi
-    TARBALL_NAME="Percona-XtraDB-Cluster_${PXC57_PKG_VERSION}.Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
+    TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
     if [ "${REPO}" = "main" ]; then
         TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${PXC_VERSION}/"
     else
