@@ -51,10 +51,32 @@
       shell: amazon-linux-extras install epel -y
       when: ansible_distribution == "Amazon"
 
+    - name: Ensure buster-backports is in sources.list
+      lineinfile:
+        path: /etc/apt/sources.list
+        line: 'deb http://deb.debian.org/debian buster-backports main'
+        state: present
+      when: ansible_os_family == "Debian"  and ansible_distribution_release == "buster"
+
+    - name: Update the apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"  and ansible_distribution_release == "buster"
+
+    - name: Allow release info change
+      command: apt-get update --allow-releaseinfo-change
+      when: ansible_os_family == "Debian"  and ansible_distribution_release == "buster"
+
+    - name: Upgrade all packages from backports
+      apt:
+        upgrade: dist
+        default_release: buster-backports
+      when: ansible_os_family == "Debian"  and ansible_distribution_release == "buster"
+
     - name: upgrade deb packages apt
       apt: update_cache=yes upgrade=safe
       when: ansible_os_family == "Debian"
-
 
     - name: install needed packages for running tests with apt
       apt:
