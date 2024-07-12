@@ -51,10 +51,11 @@
       shell: amazon-linux-extras install epel -y
       when: ansible_distribution == "Amazon"
 
+
+
     - name: upgrade deb packages apt
       apt: update_cache=yes upgrade=safe
       when: ansible_os_family == "Debian"
-
 
     - name: install needed packages for running tests with apt
       apt:
