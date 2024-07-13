@@ -142,7 +142,7 @@ void run_test() {
     export GLIBC_VERSION="2.17"
     if [ -f /usr/bin/apt-get ]; then
       DEBIAN_VERSION=$(lsb_release -sc)
-      if [ ${DEBIAN_VERSION} = "jammy" ]; then
+      if [ "${DEBIAN_VERSION}" = "jammy" ] || [ "${DEBIAN_VERSION}" = "noble" ]; then
         export GLIBC_VERSION="2.35"
       fi
     fi
