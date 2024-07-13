@@ -47,6 +47,8 @@
       var: selinux_status
     when: ansible_os_family == "RedHat"
 
+    
+
   - name: include tasks for enabling PS 8 test repo
     include_tasks: ../tasks/enable_ps8_main_repo.yml
     when: 
@@ -78,7 +80,22 @@
 # Disable Percona Toolkit installation till its supported in OL9 and Jammy
 #  - name: install Percona Toolkit new deb packages
 #    include_tasks: ../tasks/install_pt.yml
+#
+#
+  - name: enable ps-80 experimental repo to install telemetry
+    command: percona-release enable ps-80 experimental
+      
+  - name: Install telemetry
+    command: apt-get install percona-telemetry-agent
+    when: ansible_os_family == "Debian"
 
+  - name: Install telemetry
+    command: apt-get install percona-telemetry-agent
+    when: ansible_os_family == "RedHat"  
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+      
   - name: install Percona Server{{ pro_suf }} 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
     vars:
