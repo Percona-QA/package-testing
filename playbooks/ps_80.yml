@@ -83,7 +83,7 @@
 #
 #
   - name: enable ps-80 experimental repo to install telemetry
-    command: percona-release enable ps-80 experimental
+    command: percona-release enable telemetry experimental
       
   - name: Install telemetry
     command: apt-get install percona-telemetry-agent
