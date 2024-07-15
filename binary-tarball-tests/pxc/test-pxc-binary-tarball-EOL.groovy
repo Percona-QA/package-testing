@@ -44,7 +44,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
                         }
                     }
                 }
@@ -76,7 +76,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
                         }
                     }
                 }
@@ -108,7 +108,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
                         }
                     }
                 }
@@ -140,7 +140,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
                         }
                     }
                 }
@@ -172,7 +172,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pcx/report.xml'
                         }
                     }
                 }
@@ -204,7 +204,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
                         }
                     }
                 }
@@ -236,7 +236,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
                         }
                     }
                 }
@@ -268,7 +268,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
                         }
                     }
                 }
@@ -300,7 +300,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml' 
+                            junit 'package-testing/binary-tarball-tests/pxc/report.xml' 
                         }
                     }
                 }
