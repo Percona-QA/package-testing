@@ -186,7 +186,7 @@ pxc57_files = (
   'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so',
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
-if glibc_version in ['2.35', '2.34', '2.28']:
+if glibc_version == '2.35':
   pxc57_symlinks = (
     ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),
     ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.20.3.31'),
