@@ -17,6 +17,13 @@ def test_mysql_version(host):
         # Use regex to check if the expected version is in the output
         match = re.search(rf'{re.escape(expected_version)}', output)
         assert match, f"Expected version string not found in output: {output}"
+    else:
+        expected = (
+            'mysql  Ver ' + pxc_version + ' for Linux on x86_64 (Percona XtraDB Cluster binary (GPL) ' +
+            pxc_version_percona + ', Revision ' + pxc_revision + ', WSREP version ' + wsrep_version + ')'
+        )
+        assert expected in host.check_output(base_dir+'/bin/mysql --version')
+    
 
 def test_mysqld_version(host):
     if pxc_version_major in ['5.7','5.6']:

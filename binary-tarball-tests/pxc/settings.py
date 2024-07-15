@@ -17,7 +17,7 @@ if pxc_version_major == "5.7":
   pxc57_client_version = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1][3:]
   pxc57_server_version_norel = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1][3:] + '-' + pxc57_pkg_version.split('-')[2].split('.')[0]
   pxc57_server_version = pxc57_pkg_version.split('-')[0] + '-' + pxc57_pkg_version.split('-')[1] + '-' + pxc57_pkg_version.split('-')[2].split('.')[0]
-  pxc57_client_version_using = "6.2"
+  pxc57_client_version_using = "8.1"
 
 # 8.X
 
@@ -186,14 +186,26 @@ pxc57_files = (
   'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so',
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
-pxc57_symlinks = (
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.31'),
-  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.31'),
-  ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'),
-  ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
-  ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
-  ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
-  ('lib/libreadline.so','lib/private/libreadline.so.6.2'),
+if glibc_version in ['2.35', '2.34', '2.28']:
+  pxc57_symlinks = (
+    ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),
+    ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.20.3.31'),
+    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.31'),
+    ('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
+    ('lib/libssl.so', 'lib/private/libssl.so.3'),
+    ('lib/libtinfo.so', 'lib/private/libtinfo.so.6.3'), 
+    ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'), 
+    ('lib/libreadline.so','lib/private/libreadline.so.8.1'),
+  )
+else:
+  pxc57_symlinks = (
+    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.31'),
+    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.31'),
+    ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'),
+    ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
+    ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
+    ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
+    ('lib/libreadline.so','lib/private/libreadline.so.6.2'),
 )
 
 # 5.6
