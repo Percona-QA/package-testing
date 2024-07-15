@@ -86,7 +86,7 @@
     when: ansible_os_family == "Debian"
 
   - name: Install telemetry
-    command: apt-get install percona-telemetry-agent
+    command: yum install percona-telemetry-agent
     when: ansible_os_family == "RedHat"  
 
   - name: install Percona Server{{ pro_suf }} 8.0 packages
