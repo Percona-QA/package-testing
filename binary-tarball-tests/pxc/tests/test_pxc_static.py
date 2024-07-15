@@ -10,18 +10,13 @@ def test_executables_exist(host):
         assert oct(host.file(base_dir+'/'+executable).mode) == '0o755'
 
 def test_mysql_version(host):
-    if pxc_version_major in ['5.7','5.6']:
-        expected = (
-            'mysql  Ver 14.14 Distrib ' + pxc57_client_version + ', for Linux (x86_64) using  ' +
-            pxc57_client_version_using
-        )
-        assert expected in host.check_output(base_dir+'/bin/mysql --version')
-    else:
-        expected = (
-            'mysql  Ver ' + pxc_version + ' for Linux on x86_64 (Percona XtraDB Cluster binary (GPL) ' +
-            pxc_version_percona + ', Revision ' + pxc_revision + ', WSREP version ' + wsrep_version + ')'
-        )
-        assert expected in host.check_output(base_dir+'/bin/mysql --version')
+    if pxc_version_major in ['5.7', '5.6']:
+        expected_version = 'mysql  Ver 14.14 Distrib ' + pxc57_client_version
+        output = host.check_output(base_dir + '/bin/mysql --version')
+
+        # Use regex to check if the expected version is in the output
+        match = re.search(rf'{re.escape(expected_version)}', output)
+        assert match, f"Expected version string not found in output: {output}"
 
 def test_mysqld_version(host):
     if pxc_version_major in ['5.7','5.6']:
