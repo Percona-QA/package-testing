@@ -84,12 +84,12 @@
 #
 #
       
-  - name: Install ##telemetry
-    command: apt-get install percona-telemetry-agent
+  - name: Install telemetryi in Debian
+    command: apt-get install -y percona-telemetry-agent
     when: ansible_os_family == "Debian"
 
-  - name: Install telemetry
-    command: yum install percona-telemetry-agent
+  - name: Install telemetry in RHEL
+    command: yum install -y percona-telemetry-agent
     when: ansible_os_family == "RedHat"  
 
   - name: install Percona Server{{ pro_suf }} 8.0 packages
