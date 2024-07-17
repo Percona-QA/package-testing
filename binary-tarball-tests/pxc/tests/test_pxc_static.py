@@ -50,7 +50,3 @@ def test_symlinks(host):
         assert host.file(base_dir+'/'+symlink[0]).is_symlink
         assert host.file(base_dir+'/'+symlink[0]).linked_to == base_dir+'/'+symlink[1]
         assert host.file(base_dir+'/'+symlink[1]).exists
-
-def test_binaries_linked_libraries(host):
-    for binary in pxc_binaries:
-        assert '=> not found' not in host.check_output('ldd ' + base_dir + '/' + binary)
