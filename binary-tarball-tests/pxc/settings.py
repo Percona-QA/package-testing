@@ -186,20 +186,9 @@ pxc57_files = (
   'lib/mysql/plugin/auth_pam.so', 'lib/mysql/plugin/auth_pam_compat.so',
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
-if glibc_version == '2.35':
-  pxc57_symlinks = (
-    ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.20.3.31'),
-    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.31'),
-    ('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
-    ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'), 
-    ('lib/libreadline.so','lib/private/libreadline.so.8.1'),
-  )
-else:
-  pxc57_symlinks = (
-    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.31'),
-    ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.31'),
-    ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
-    ('lib/libreadline.so','lib/private/libreadline.so.6.2'),
+pxc57_symlinks = (
+  ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.20.3.31'),
+  ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.31'),
 )
 
 # 5.6
