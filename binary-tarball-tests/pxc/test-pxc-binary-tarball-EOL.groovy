@@ -160,7 +160,7 @@ pipeline {
                                     MINIMAL="-minimal"
                                 fi
                                 sudo apt install -y git wget
-                                TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.bulseye${MINIMAL}.tar.gz"
+                                TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.bullseye${MINIMAL}.tar.gz"
                                 if [ "${REPO}" = "main" ]; then
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${PXC_VERSION}/"
                                 else
