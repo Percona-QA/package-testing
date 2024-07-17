@@ -191,7 +191,6 @@ if glibc_version == '2.35':
     ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.20.3.31'),
     ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.31'),
     ('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
-    ('lib/libtinfo.so', 'lib/private/libtinfo.so.6.3'), 
     ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'), 
     ('lib/libreadline.so','lib/private/libreadline.so.8.1'),
   )
@@ -199,7 +198,6 @@ else:
   pxc57_symlinks = (
     ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.31'),
     ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.31'),
-    ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
     ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
     ('lib/libreadline.so','lib/private/libreadline.so.6.2'),
 )
