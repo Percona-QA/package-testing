@@ -36,19 +36,8 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: install Percona Server 5.7 rpm packages
-    yum:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - Percona-Server-server-57
-      - Percona-Server-test-57
-      - Percona-Server-57-debuginfo
-      - Percona-Server-devel-57
-      - Percona-Server-tokudb-57
-      - Percona-Server-rocksdb-57
-      - Percona-Server-shared-57
-      - Percona-Server-client-57
-    when: ansible_os_family == "RedHat"
+    shell: |
+      yum install -y Percona-Server-server-57 Percona-Server-test-57 Percona-Server-57-debuginfo Percona-Server-devel-57 Percona-Server-tokudb-57 Percona-Server-rocksdb-57 Percona-Server-shared-57 Percona-Server-client-57
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
