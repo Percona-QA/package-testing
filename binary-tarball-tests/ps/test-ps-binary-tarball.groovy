@@ -29,7 +29,7 @@ pipeline {
                                 else
                                     sudo apt install -y git wget
                                 fi
-                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.39${MINIMAL}.tar.gz"
+                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.35${MINIMAL}.tar.gz"
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
                                 rm -rf package-testing
                                 git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-dist --depth 1
@@ -37,6 +37,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
+                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
@@ -67,6 +68,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
+                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
@@ -97,6 +99,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
+                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
@@ -119,7 +122,7 @@ pipeline {
                                 else
                                     sudo apt install -y git wget
                                 fi
-                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.36${MINIMAL}.tar.gz"
+                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.35${MINIMAL}.tar.gz"
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
                                 rm -rf package-testing
                                 git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-dist --depth 1
@@ -127,6 +130,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
+                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
@@ -157,6 +161,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
+                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
@@ -187,6 +192,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
+                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
@@ -217,6 +223,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
+                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
@@ -247,6 +254,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
+                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
@@ -277,6 +285,7 @@ pipeline {
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
+                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
