@@ -280,6 +280,7 @@ pipeline {
                             junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
-            }
-        }
-    }
+               }
+          }
+     }
+}
