@@ -40,7 +40,6 @@ pipeline {
                             junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
-                }
                 stage('Ubuntu Jammy') {
                     agent {
                         label "min-jammy-x64"
@@ -71,7 +70,6 @@ pipeline {
                             junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
-                }
                 stage('Ubuntu Focal') {
                     agent {
                         label "min-focal-x64"
@@ -102,7 +100,6 @@ pipeline {
                             junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
-                }
                 stage('Debian Bookworm') {
                     agent {
                         label "min-bookworm-x64"
@@ -133,7 +130,6 @@ pipeline {
                             junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
-                }
                 stage('Debain Bullseye') {
                     agent {
                         label "min-bullseye-x64"
@@ -164,7 +160,6 @@ pipeline {
                             junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
-                }
                 stage('Debian Buster') {
                     agent {
                         label "min-buster-x64"
@@ -195,7 +190,6 @@ pipeline {
                             junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
-                }
                 stage('Oracle Linux 9') {
                     agent {
                         label "min-ol-9-x64"
@@ -226,7 +220,6 @@ pipeline {
                             junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
-                }
                 stage('Oracle Linux 8') {
                     agent {
                         label "min-ol-8-x64"
@@ -257,7 +250,6 @@ pipeline {
                             junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
-                }
                 stage('Centos 7') {
                     agent {
                         label "min-centos-7-x64"
@@ -288,7 +280,6 @@ pipeline {
                             junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
-                }
             }
         }
     }
