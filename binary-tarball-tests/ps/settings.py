@@ -40,8 +40,7 @@ ps80_executables = ps80_binaries + [
 ps80_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
-  ('clone','mysql_clone.so'),('data_masking','data_masking.so'),
-  ('procfs', 'procfs.so'), ('authentication_ldap_sasl','authentication_ldap_sasl.so')
+  ('clone','mysql_clone.so'),('data_masking','data_masking.so'), ('procfs', 'procfs.so')
 )
 ps80_functions = (
   ('fnv1a_64', 'libfnv1a_udf.so', 'INTEGER'),('fnv_64', 'libfnv_udf.so', 'INTEGER'),('murmur_hash', 'libmurmur_udf.so', 'INTEGER'),
