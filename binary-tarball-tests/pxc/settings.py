@@ -187,13 +187,8 @@ pxc57_files = (
   'lib/mysql/plugin/keyring_file.so', 'lib/mysql/plugin/keyring_udf.so', 'lib/mysql/plugin/keyring_vault.so'
 )
 pxc57_symlinks = (
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.20.3.31'),
+  ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.20.3.31'),
   ('lib/libperconaserverclient.so.20','lib/libperconaserverclient.so.20.3.31'),
-  ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'),
-  ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
-  ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
-  ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
-  ('lib/libreadline.so','lib/private/libreadline.so.6.2'),
 )
 
 # 5.6
