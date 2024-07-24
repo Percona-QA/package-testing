@@ -106,9 +106,7 @@ class TestMysqlEnvironment:
         telemetry_agent_process = host.process.filter(comm="percona-telemetry-agent")
         assert not telemetry_agent_process, "/usr/bin/percona-telemetry-agent process is running"
 
-    def test_ta_dirs(host):
-        dist = host.system_info.distribution
-        rel = host.system_info.release
+    def test_telemetry_agent_dirs(host):
         assert host.file("/usr/local/percona/telemetry/").is_directory
         assert host.file("/usr/local/percona/telemetry/").user == 'daemon'
         assert host.file("/usr/local/percona/telemetry/").group == 'percona-telemetry'
