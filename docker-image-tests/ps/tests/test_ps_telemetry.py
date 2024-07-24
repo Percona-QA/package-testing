@@ -24,14 +24,17 @@ def host():
 
 
 class TestMysqlEnvironment:
-    def test_telemetry_process_running(self, host):
-        # Check if telemetry-agent-supervisor.sh process is running
-        telemetry_supervisor_process = host.process.filter(comm="telemetry-agent-supervisor.sh")
-        assert telemetry_supervisor_process, "/usr/bin/telemetry-agent-supervisor.sh process is not running"
+    def test_ta_process_running(self, host):
+        cmd = 'ps auxww| grep -v grep  | grep -c "percona-telemetry-agent"'
+        result = host.run(cmd)
+        stdout = int(result.stdout)
+        assert stdout == 1
 
-        # Check if percona-telemetry-agent process is running
-        telemetry_agent_process = host.process.filter(comm="percona-telemetry-agent")
-        assert telemetry_agent_process, "/usr/bin/percona-telemetry-agent process is not running"
+    def test_telemetry_agent_supervisor_running(self, host):
+        cmd = 'ps auxww| grep -v grep  | grep -c "telemetry-agent-supervisor.sh"'
+        result = host.run(cmd)
+        stdout = int(result.stdout)
+        assert stdout == 1    
 
     def test_telemetry_agent_dirs_present(self, host):
         assert host.file("/usr/local/percona/telemetry/").is_directory
@@ -44,8 +47,8 @@ class TestMysqlEnvironment:
         assert oct(host.file("/usr/local/percona/telemetry/history").mode) == '0o6755'
         assert host.file("/usr/local/percona/telemetry_uuid").is_file
         assert host.file("/usr/local/percona/telemetry_uuid").group == 'mysql'
-        assert oct(host.file("/usr/local/percona/telemetry_uuid").mode) == '0o664'
-        assert host.file(ps_pillar_dir).is_directory
-        assert host.file(ps_pillar_dir).user == 'mysql'
-        assert host.file(ps_pillar_dir).group == 'percona-telemetry'
-        assert oct(host.file(ps_pillar_dir).mode) == '0o6775'
+        assert oct(host.file("/usr/local/percona/telemetry_uuid").mode) == '0o644'
+        assert host.file("/usr/local/percona/telemetry/ps").is_directory
+        assert host.file("/usr/local/percona/telemetry/ps").user == 'mysql'
+        assert host.file("/usr/local/percona/telemetry/ps").group == 'percona-telemetry'
+        assert oct(host.file("/usr/local/percona/telemetry/ps").mode) == '0o6775'

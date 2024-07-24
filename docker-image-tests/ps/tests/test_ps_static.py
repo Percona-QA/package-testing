@@ -115,10 +115,3 @@ class TestMysqlEnvironment:
         assert host.file("/usr/local/percona/telemetry/history").user == 'mysql'
         assert host.file("/usr/local/percona/telemetry/history").group == 'percona-telemetry'
         assert oct(host.file("/usr/local/percona/telemetry/history").mode) == '0o6755'
-#        assert host.file("/usr/local/percona/telemetry_uuid").is_file
-#        assert host.file("/usr/local/percona/telemetry_uuid").group == 'mysql'
-#        assert oct(host.file("/usr/local/percona/telemetry_uuid").mode) == '0o664'
-        assert host.file(ps_pillar_dir).is_directory
-        assert host.file(ps_pillar_dir).user == 'mysql'
-        assert host.file(ps_pillar_dir).group == 'percona-telemetry'
-        assert oct(host.file(ps_pillar_dir).mode) == '0o6775'        
