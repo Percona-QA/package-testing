@@ -90,18 +90,20 @@ def test_telemetry_status(mysql_server):
     # Fetch telemetry settings
     query = "SHOW VARIABLES LIKE '%percona_telemetry%';"
     telemetry_vars = mysql_server.run_query(query)
-    
+
     # Debug: Print the raw output for inspection
     print("Telemetry Query Output:", telemetry_vars)
-    
+
     # Convert the output to a dictionary
     telemetry_settings = {}
-    for row in telemetry_vars:
-        if len(row) >= 2:
-            key, value = row[0], row[1]
+    lines = telemetry_vars.split('\n')
+    for line in lines:
+        parts = line.split('\t')
+        if len(parts) == 2:
+            key, value = parts
             telemetry_settings[key] = value
         else:
-            print(f"Skipping row due to insufficient data: {row}")
+            print(f"Skipping line due to insufficient data: {line}")
 
     # Debug: Print the parsed telemetry settings
     print("Parsed Telemetry Settings:", telemetry_settings)
@@ -112,3 +114,4 @@ def test_telemetry_status(mysql_server):
     # Check if the telemetry directory exists
     telemetry_dir = telemetry_settings.get('percona_telemetry.telemetry_root_dir')
     assert telemetry_dir and os.path.isdir(telemetry_dir), f"Telemetry directory {telemetry_dir} does not exist"
+
