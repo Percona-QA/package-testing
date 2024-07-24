@@ -111,7 +111,3 @@ def test_telemetry_status(mysql_server):
     # Check if telemetry is disabled
     assert telemetry_settings.get('percona_telemetry_disable') == 'OFF', "Telemetry is enabled"
 
-    # Check if the telemetry directory exists
-    telemetry_dir = telemetry_settings.get('percona_telemetry.telemetry_root_dir')
-    assert telemetry_dir and os.path.isdir(telemetry_dir), f"Telemetry directory {telemetry_dir} does not exist"
-

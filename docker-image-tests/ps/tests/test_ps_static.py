@@ -97,6 +97,15 @@ class TestMysqlEnvironment:
         else:
             assert not host.file('/usr/local/percona/telemetry_uuid').exists
 
+    def test_telemetry_process(self, host):
+        # Check if telemetry-agent-supervisor.sh process is not running
+        telemetry_supervisor_process = host.process.filter(comm="telemetry-agent-supervisor.sh")
+        assert not telemetry_supervisor_process, "/usr/bin/telemetry-agent-supervisor.sh process is running"
+
+        # Check if percona-telemetry-agent process is not running
+        telemetry_agent_process = host.process.filter(comm="percona-telemetry-agent")
+        assert not telemetry_agent_process, "/usr/bin/percona-telemetry-agent process is running"
+
     def test_ta_dirs(host):
         dist = host.system_info.distribution
         rel = host.system_info.release
