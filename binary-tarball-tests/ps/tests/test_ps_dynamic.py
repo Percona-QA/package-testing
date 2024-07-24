@@ -86,17 +86,29 @@ def test_audit_log_v2(mysql_server):
     else:
         pytest.skip('audit_log_v2 is checked from 8.0!')
 
-
 def test_telemetry_status(mysql_server):
     # Fetch telemetry settings
     query = "SHOW VARIABLES LIKE '%percona_telemetry%';"
     telemetry_vars = mysql_server.run_query(query)
     
-    telemetry_settings = {row[0]: row[1] for row in telemetry_vars}
+    # Debug: Print the raw output for inspection
+    print("Telemetry Query Output:", telemetry_vars)
+    
+    # Convert the output to a dictionary
+    telemetry_settings = {}
+    for row in telemetry_vars:
+        if len(row) >= 2:
+            key, value = row[0], row[1]
+            telemetry_settings[key] = value
+        else:
+            print(f"Skipping row due to insufficient data: {row}")
+
+    # Debug: Print the parsed telemetry settings
+    print("Parsed Telemetry Settings:", telemetry_settings)
 
     # Check if telemetry is disabled
     assert telemetry_settings.get('percona_telemetry_disable') == 'OFF', "Telemetry is enabled"
 
     # Check if the telemetry directory exists
     telemetry_dir = telemetry_settings.get('percona_telemetry.telemetry_root_dir')
-    assert os.path.isdir(telemetry_dir), f"Telemetry directory {telemetry_dir} does not exist"        
+    assert telemetry_dir and os.path.isdir(telemetry_dir), f"Telemetry directory {telemetry_dir} does not exist"
