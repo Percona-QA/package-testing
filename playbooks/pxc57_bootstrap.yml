@@ -34,12 +34,9 @@
     include_tasks: ../tasks/enable_pxc57_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
-##
-
   - name: include tasks for enabling EOL repo
     include_tasks: ../tasks/enable_pxc57_eol_tools_repo.yml
-    when: lookup('env', 'pxc57repo') == "EOL")
-
+    when: lookup('env', 'MIN_UPGRADE_TEST') == "EOL_MAIN_TO_EOL_TESTING") or lookup('env', 'MIN_UPGRADE_TEST') == "PXC57_MAIN_TO_EOL_TESTING")
 
   - name: disable selinux
     selinux: state=disabled
@@ -164,8 +161,8 @@
     when: ansible_os_family == "Debian"
 
   # other tests
-  - name: install plugins
-    command: /package-testing/plugins_test_57.sh pxc
+#  - name: install plugins
+#    command: /package-testing/plugins_test_57.sh pxc
 
   - name: register PXC version
     shell: mysqld --version

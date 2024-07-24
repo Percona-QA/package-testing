@@ -1,7 +1,6 @@
 ---
   - name: Fetch the vars from file
     ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
-
   - set_fact:
       man_ip: "{{ PXC1_IP }}"
     when: 
@@ -31,6 +30,11 @@
 
   - name: include tasks for enabling main repo
     include_tasks: ../../../../tasks/enable_pxc57_main_repo.yml
+    when: lookup('env', 'MIN_UPGRADE_TEST') == "PXC57_MAIN_TO_EOL_TESTING"
+
+  - name: include tasks for enabling EOL repo
+    include_tasks: ../../../../tasks/enable_pxc57_eol_tools_repo.yml
+    when: lookup('env', 'MIN_UPGRADE_TEST') == "EOL_MAIN_TO_EOL_TESTING"
 
 #  - name: include tasks for enabling experimental repo
 #    include_tasks: ../../../../tasks/enable_pxc57_experimental_repo.yml
