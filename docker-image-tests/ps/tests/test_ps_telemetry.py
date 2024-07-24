@@ -14,24 +14,24 @@ def host():
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e',
          'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport',
          '-e', 'PERCONA_TELEMETRY_ENABLE=1', '-d', docker_image]).decode().strip()
-    if ps_version_major in ['5.7','5.6']:
-        subprocess.check_call(['docker','exec','--user','root',container_name,'microdnf','install','net-tools'])
+    if ps_version_major in ['5.7', '5.6']:
+        subprocess.check_call(['docker', 'exec', '--user', 'root', container_name, 'microdnf', 'install', 'net-tools'])
     else:
-        subprocess.check_call(['docker','exec','--user','root',container_name,'yum','-y','install','net-tools'])
+        subprocess.check_call(['docker', 'exec', '--user', 'root', container_name, 'yum', '-y', 'install', 'net-tools'])
     time.sleep(20)
     yield testinfra.get_host("docker://root@" + docker_id)
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
 
 
 class TestMysqlEnvironment:
-     def test_telemetry_process_running(self, host):
-        # Check if telemetry-agent-supervisor.sh process is not running
+    def test_telemetry_process_running(self, host):
+        # Check if telemetry-agent-supervisor.sh process is running
         telemetry_supervisor_process = host.process.filter(comm="telemetry-agent-supervisor.sh")
-        assert telemetry_supervisor_process, "/usr/bin/telemetry-agent-supervisor.sh process is running"
+        assert telemetry_supervisor_process, "/usr/bin/telemetry-agent-supervisor.sh process is not running"
 
-        # Check if percona-telemetry-agent process is not running
+        # Check if percona-telemetry-agent process is running
         telemetry_agent_process = host.process.filter(comm="percona-telemetry-agent")
-        assert telemetry_agent_process, "/usr/bin/percona-telemetry-agent process is running"
+        assert telemetry_agent_process, "/usr/bin/percona-telemetry-agent process is not running"
 
     def test_telemetry_agent_dirs_present(self, host):
         assert host.file("/usr/local/percona/telemetry/").is_directory
@@ -48,4 +48,4 @@ class TestMysqlEnvironment:
         assert host.file(ps_pillar_dir).is_directory
         assert host.file(ps_pillar_dir).user == 'mysql'
         assert host.file(ps_pillar_dir).group == 'percona-telemetry'
-        assert oct(host.file(ps_pillar_dir).mode) == '0o6775'    
+        assert oct(host.file(ps_pillar_dir).mode) == '0o6775'
