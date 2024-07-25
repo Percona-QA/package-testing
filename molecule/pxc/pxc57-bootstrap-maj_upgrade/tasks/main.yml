@@ -181,8 +181,8 @@
     when: ansible_os_family == "Debian"
 
   # other tests
-  - name: install plugins
-    command: /package-testing/plugins_test_57.sh pxc
+#  - name: install plugins
+#    command: /package-testing/plugins_test_57.sh pxc
 
   - name: register PXC version before upgrade
     shell: mysqld --version

@@ -132,6 +132,14 @@
     until: result is not failed
     when: ansible_os_family == "Debian"
 
+  - name: Clean yum cache
+    command: yum clean all
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
+
+  - name: update cache
+    command: yum update -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
+
   - name: install needed packages for running tests with yum
     yum:
       name: "{{ packages }}"
@@ -236,4 +244,8 @@
   - name: list enabled dnf modules on rhel 8
     debug:
       var: enabled_dnf_modules
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: disable mysql dnf for rhel 8
+    shell: dnf module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"

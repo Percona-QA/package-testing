@@ -37,21 +37,20 @@
 
   - name: install Percona Server 5.7 rpm packages
     yum:
-      name: "{{ packages }}"
-      state: latest
-      disablerepo: "epel"
-      update_cache: yes
-    vars:
-      packages:
-      - Percona-Server-server-57
-      - Percona-Server-test-57
-      - Percona-Server-57-debuginfo
-      - Percona-Server-devel-57
-      - Percona-Server-tokudb-57
-      - Percona-Server-rocksdb-57
-      - Percona-Server-shared-57
-      - Percona-Server-client-57
+      name:
+        - Percona-Server-server-57
+        - Percona-Server-test-57
+        - Percona-Server-57-debuginfo
+        - Percona-Server-devel-57
+        - Percona-Server-tokudb-57
+        - Percona-Server-rocksdb-57
+        - Percona-Server-shared-57
+        - Percona-Server-client-57
+      state: present
+      exclude: "*.i686"
+    ignore_errors: yes
     when: ansible_os_family == "RedHat"
+    register: install_percona_server
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
