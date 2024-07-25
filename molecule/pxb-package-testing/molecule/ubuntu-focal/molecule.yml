@@ -32,7 +32,7 @@ scenario:
   test_sequence:
     - destroy
     - create
-#    - prepare
+    - prepare
     - converge
     - verify
     - cleanup
