@@ -5,7 +5,7 @@
     command: /usr/bin/dnf module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: Install percona repository package for Debain 
+  - name: Install percona repository package for Debain
     apt:
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
 #     deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-21.generic_all.deb
@@ -15,7 +15,7 @@
     command: "gpg --batch --keyserver keyserver.ubuntu.com --recv-keys {{ percona_key1 }}"
     environment:
       GNUPGHOME: "{{ gnupg_home }}"
-    when: ansible_os_family == "RedHat"     
+    when: ansible_os_family == "RedHat"
 
   - name: Export GPG key 1
     command: "gpg --batch --export --armor {{ percona_key1 }}"
@@ -33,7 +33,7 @@
 
   - name: Import GPG keys with rpmkeys
     command: "rpmkeys --import {{ percona_key1_file }}"
-    when: ansible_os_family == "RedHat"  
+    when: ansible_os_family == "RedHat"
 
   - name: Install percona repository package for RHEL
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
@@ -44,6 +44,11 @@
 
   - name: enable the tools testing repo
     command: percona-release enable tools testing
+    when: ansible_distribution_release != "noble"
+
+  - name: enable the pxb-80 release repo
+    command: percona-release enable pxb-80 release
+    when: ansible_distribution_release == "noble"
 
   - name: enable the telemetry testing repo
     command: percona-release enable telemetry testing
@@ -53,3 +58,4 @@
       yum clean all
       yum makecache
     when: ansible_os_family == "RedHat"
+

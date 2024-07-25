@@ -19,6 +19,10 @@
   - name: enable the PS-80 main repo
     command: percona-release setup ps-80 -y
 
+  - name: enable the pxb-80 release repo
+    command: percona-release enable pxb-80 release
+    when: ansible_distribution_release == "noble"
+
 # - name: enable the tools main repo
 #   command: percona-release enable tools release
 
