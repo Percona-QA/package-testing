@@ -52,7 +52,6 @@
         vpc_id: "{{ subnet_dict[item.vpc_subnet_id] }}"
         region: "{{ item.region|default(default_region) }}"
         state: present
-        ignore_existing: yes
       with_items: "{{ molecule_yml.platforms }}"
 
     - name: Setup keypair for molecule ec2

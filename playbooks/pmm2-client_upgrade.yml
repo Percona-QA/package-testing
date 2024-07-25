@@ -12,6 +12,7 @@
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
     pmm_server_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default('admin', true) }}"
+    test_package: "{{ lookup('env', 'install_package') | default('pmm2-client', true)}}"
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
@@ -110,11 +111,11 @@
       success_msg: "pmm-agent is connected to server"
 
 ### Upgrade PMM Client package
-  - name: Enable original {{ test_repo }} repo
+  - name: Enable {{ test_package }} {{ test_repo }} repo
     include_tasks: ../tasks/enable_repo.yml
     vars:
       only: yes
-      package: "original"
+      package: "{{ test_package }}"
       repository: "{{ test_repo }}"
 
   - name: Upgrade PMM client to the latest deb packages

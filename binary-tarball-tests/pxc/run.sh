@@ -18,6 +18,7 @@ if [ -f /etc/redhat-release ]; then
   sudo yum install -y libev
   if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     sudo yum install -y https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    sudo percona-release enable pxb-24 testing
     sudo yum install -y percona-xtrabackup-24
   fi
 else
