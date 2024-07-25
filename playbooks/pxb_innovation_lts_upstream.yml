@@ -182,7 +182,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: Extract version number using shell commands
-    shell: cat ../VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    shell: cat /package-testing/VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
     register: major_release_version
 
   - name: Set major_release_version variable
@@ -190,7 +190,7 @@
       major_release_version: "{{ major_release_version.stdout }}"
 
   - name: Extract values using shell command for repo name used for innovation/lts release
-    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
+    shell: grep 'PS_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
     register: ps_inn_lts_repo_name
 
   - name: Set pxb_inn_lts_repo_name variable

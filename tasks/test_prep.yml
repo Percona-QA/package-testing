@@ -1,3 +1,48 @@
+  - name: Gather facts about the system
+    ansible.builtin.setup:
+
+  - name: DEBUG
+    debug:
+      var: ansible_facts['distribution']
+
+  - name: Execute Bash command if the system is Red Hat-based
+    shell: |
+      echo "This is a Red Hat-based system"
+      # Add your Bash command here
+    when: ansible_facts['distribution'] == "RedHat"
+
+  - name: Execute Bash command if the system is Oracle Linux-based
+    shell: |
+      echo "This is an Oracle Linux-based system"
+      # Add your Bash command here
+    when: ansible_facts['distribution'] == "OracleLinux"
+
+  - name: Execute Bash command if the system is not Red Hat-based nor Oracle Linux-based
+    shell: |
+      echo "This is not a Red Hat-based or Oracle Linux-based system"
+      # Add your Bash command here
+    when: ansible_facts['distribution'] != "RedHat" and ansible_facts['distribution'] != "OracleLinux"
+
+  - name: Install wget to download RPM packages
+    yum:
+      name: wget
+      state: present
+    when:
+    - ansible_facts['distribution'] == "RedHat"
+
+  - name: Download gflags RPM package
+    get_url:
+      url: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
+      dest: /tmp/gflags-2.2.2-9.el9.x86_64.rpm
+    when:
+    - ansible_facts['distribution'] == "RedHat"
+
+  - name: Install gflags RPM package
+    command: rpm -ivh /tmp/gflags-2.2.2-9.el9.x86_64.rpm
+    args:
+      creates: /usr/lib64/libgflags.so.2.2
+    when:
+    - ansible_facts['distribution'] == "RedHat"
 
 # - name: setup epel 6 repo
 #   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm state=present
@@ -15,7 +60,9 @@
     rpm_key:
       state: present
       key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: 
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    - ansible_facts['distribution'] != "RedHat"
 
   - name: install GPG key for Percona repos
     rpm_key:
@@ -29,21 +76,28 @@
 
   - name: setup epel 8 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: 
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: install GPG key for epel 9
     rpm_key:
       state: present
       key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    when: 
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    - ansible_facts['distribution'] != "RedHat"
 
   - name: setup epel 9 repo package
     yum: name=epel-release state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    when: 
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    - ansible_facts['distribution'] != "RedHat"
 
   - name: setup epel 9 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    when: 
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    - ansible_facts['distribution'] != "RedHat"
 
   - name: add the Vault and epel CentOS 6 repos
     shell: |
@@ -100,7 +154,7 @@
       - jq # for exporter end point metric fetch
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
 
-  - name: install needed packages for running tests with yum on RHEL 8+
+  - name: install needed packages for running tests with yum on RHEL 8
     yum:
       name: "{{ packages }}"
       state: latest
@@ -109,7 +163,16 @@
       - unzip
       - wget
       - jq # for exporter end point metric fetch
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
+
+  - name: Install needed packages for running tests with yum on RHEL 9
+    dnf:
+      name: 
+        - unzip
+        - wget
+        - jq # for exporter end point metric fetch
+      state: latest
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 9
 
   - name: register SLES for updates with suse_register
     command: suse_register -a email="@@SLES_REG_EMAIL@@" -a regcode-sles=@@SLES_REG_CODE@@

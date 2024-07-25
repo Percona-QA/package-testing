@@ -1,6 +1,11 @@
 
 # MS-INSTALL START
 
+  - name: PRINT VARIABLES
+    debug:
+      msg: "VER {{ pxb_version_major }} MAJ MIN{{ pxb_version_major_minor }} "
+    when: lookup('env', 'server_to_test') == "ms_innovation_lts"
+
   - name: install yum-utils for rhel
     yum:
       name: yum-utils
@@ -34,7 +39,7 @@
       state: present
     when: 
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
 
   - name: Import GPG key for RPM 8-3
     rpm_key:
@@ -73,13 +78,13 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
     when:
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
 
   - name: disable the mysql module on RHEL/CentOS 8
     command: /usr/bin/dnf module disable mysql -y
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
 
   - name: install deb packages
     apt:
@@ -92,7 +97,7 @@
       - unzip
     when: 
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
 
   - name: Install mysql deb packages using tarballs ubuntu 22.04
     command: wget https://cdn.mysql.com/archives/mysql-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar
@@ -153,11 +158,23 @@
 ##
 # NEW URL 8.3 https://cdn.mysql.com//Downloads/MySQL-8.3/mysql-server_8.3.0-1ubuntu23.10_amd64.deb-bundle.tar
 
+  - name: Install mysql deb packages using tarballs ubuntu 20.04 MS80
+    command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu20.04_amd64.deb-bundle.tar
+    when: 
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+      - lookup('env', 'server_to_test') == "ms-80"
+
   - name: Install mysql deb packages using tarballs ubuntu 22.04
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+  - name: Install mysql deb packages using tarballs ubuntu 22.04 MS80
+    command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar
+    when: 
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
+      - lookup('env', 'server_to_test') == "ms-80"
 
   - name: Install mysql deb packages using tarballs ubuntu 23.04
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu23.10_amd64.deb-bundle.tar  
@@ -165,11 +182,23 @@
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.04'
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
+  - name: Install mysql deb packages using tarballs ubuntu 23.04 MS80
+    command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu23.10_amd64.deb-bundle.tar
+    when: 
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.10'
+      - lookup('env', 'server_to_test') == "ms-80"
+
   - name: Install mysql deb packages using tarballs Debian 11
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1debian11_amd64.deb-bundle.tar
     when: 
       - ansible_distribution == 'Debian' and ansible_distribution_version == '11'
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+  - name: Install mysql deb packages using tarballs Debian 11 MS80
+    command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-server_"{{ pxb_version_major_minor }}"-1debian11_amd64.deb-bundle.tar
+    when: 
+      - ansible_distribution == 'Debian' and ansible_distribution_version == '11'
+      - lookup('env', 'server_to_test') == "ms-80"
 
   - name: Install mysql deb packages using tarballs Debian 12
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1debian12_amd64.deb-bundle.tar
@@ -177,29 +206,41 @@
       - ansible_distribution == 'Debian' and ansible_distribution_version == '12.0'
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
+  - name: Install mysql deb packages using tarballs Debian 12 MS80
+    command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-server_"{{ pxb_version_major_minor }}"-1debian12_amd64.deb-bundle.tar
+    when: 
+      - ansible_distribution == 'Debian' and ansible_distribution_version == '12.0'
+      - lookup('env', 'server_to_test') == "ms-80"
+
+  - name: extract mysql deb packages for ubuntu 20.04
+    command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu20.04_amd64.deb-bundle.tar -C /tmp
+    when: 
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+      - lookup('env', 'server_to_test') == "ms-80"
+
   - name: extract mysql deb packages for ubuntu 22.04
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar -C /tmp
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
 
   - name: extract mysql deb packages for ubuntu 23.04
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu23.04_amd64.deb-bundle.tar -C /tmp
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.04'
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
 
   - name: extract mysql deb packages for Debian 11
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1debian11_amd64.deb-bundle.tar -C /tmp
     when: 
       - ansible_distribution == 'Debian' and ansible_distribution_version == '11'
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
 
   - name: extract mysql deb packages for Debian 12
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1debian12_amd64.deb-bundle.tar -C /tmp
     when: 
       - ansible_distribution == 'Debian' and ansible_distribution_version == '12.0'
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
 
   - name: install mysql deb packages
     shell: dpkg -i /tmp/*.deb || apt-get install -f -y
@@ -207,10 +248,16 @@
       DEBIAN_FRONTEND: noninteractive
     when: 
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
 
   - name: Enable Innovation LTS repo for RHEL
     shell: yum-config-manager --disable mysql80-community && yum-config-manager --enable mysql-innovation-community
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+  - name: YUM UPDATE after RHEL REPO ENABLE
+    shell: yum update -y
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
@@ -229,6 +276,20 @@
       - ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
+  - name: YUM List available packages
+    shell: yum list available | grep mysql-community-server
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+    register: yum_list
+
+  - name: Debug - Show available MySQL packages in RHEL
+    debug:
+      msg: "Available MySQL packages are '{{ yum_list.stdout }}'"
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
   - name: install packages in rhel/centos 8
     yum:
       name: "{{ packages }}"
@@ -236,7 +297,7 @@
     vars:
       packages:
       - python3-libselinux
-      - mysql-community-server-"{{ pxb_version_major_minor }}"-1.el8
+      - mysql-community-server-"{{ pxb_version_major_minor }}".0-1.el8
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
@@ -253,36 +314,119 @@
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
+
+## INSTALL MS .rpm packages RHEL/OL 8 & 9
+
+  - name: install tar on rhel
+    yum:
+      name: tar
+      state: present
+    when: 
+      - ansible_os_family == "RedHat"
+
+  - name: Install mysql RPM packages using tarballs OL8 
+    command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-"{{ pxb_version_major_minor }}"-1.el8.x86_64.rpm-bundle.tar 
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+      - lookup('env', 'server_to_test') == "ms-80"
+      - pxb_version_major != "8.3"
+
+  - name: Install mysql RPM packages using tarballs OL9
+    command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-"{{ pxb_version_major_minor }}"-1.el9.x86_64.rpm-bundle.tar 
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+      - lookup('env', 'server_to_test') == "ms-80"
+      - pxb_version_major != "8.3"
+
+  - name: List the dirs ol8 and ol9
+    command: ls -l
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ms-80"
+    register: ls_output
+
+  - name: debug List the dirs ol8 and ol9
+    debug:
+      var: ls_output
+
+  - name: extract mysql RPM packages for OL8
+    command: tar -xvf mysql-"{{ pxb_version_major_minor }}"-1.el8.x86_64.rpm-bundle.tar -C /tmp
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+      - lookup('env', 'server_to_test') == "ms-80"
+      - pxb_version_major != "8.3"
+
+  - name: extract mysql RPM packages for OL9
+    command: tar -xvf mysql-"{{ pxb_version_major_minor }}"-1.el9.x86_64.rpm-bundle.tar -C /tmp
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+      - lookup('env', 'server_to_test') == "ms-80"
+      - pxb_version_major != "8.3"
+
+  - name: install mysql RPM packages
+    shell: dnf install -y /tmp/*.rpm
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ms-80"
+      - pxb_version_major != "8.3"
+
   - name: start mysql service with service command
     command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
-  - name: start mysql service with systemctl command
-    command: systemctl start mysqld
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+  - name: start mysql service with ansible module for ms_innovation_lts
+    ansible.builtin.systemd:
+      name: mysqld
+      enabled: yes
+      state: started
+    become: yes
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+  - name: start mysql service with systemctl MS80
+    ansible.builtin.systemd:
+      name: mysqld
+      enabled: yes
+      state: started
+    become: yes
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ms-80"
 
   - name: Fetch current MySQL root password from log
     shell: grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}' | tail -1
     register: init_pass
     ignore_errors: yes
     changed_when: false
+    when:
+      - lookup('env', 'server_to_test') != "ms-80"
 
   - name: Set root user password using current password
     shell: |
       mysql -uroot -p'{{ init_pass.stdout }}' --connect-expired-password -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'U?fY)9s7|3gxUm'; FLUSH PRIVILEGES;"
-    when: init_pass.stdout is defined and init_pass.stdout | length > 0
+    when: 
+      - init_pass.stdout is defined and init_pass.stdout | length > 0
+      - lookup('env', 'server_to_test') != "ms-80"
     ignore_errors: true
-    
+
   - name: Ensure MySQL service is restarted
     service:
       name: mysqld
       state: restarted
       enabled: yes
-    when: init_pass.stdout is defined and init_pass.stdout | length > 0
+    when: 
+      - init_pass.stdout is defined and init_pass.stdout | length > 0
+      - lookup('env', 'server_to_test') != "ms-80"
 
   - name: Debug - Show fetched MySQL temporary root password
     debug:
       msg: "Fetched MySQL temporary root password is '{{ init_pass.stdout }}'"
+    when: 
+      - init_pass.stdout is defined and init_pass.stdout | length > 0
+      - lookup('env', 'server_to_test') != "ms-80"
 
   - name: copy .my.cnf with credentials on centos
     template: src=../templates/my_57.j2
