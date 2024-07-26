@@ -15,6 +15,9 @@
   vars:
     major_upgrade: true
     install_mysql_shell: "{{ lookup('env', 'install_mysql_shell', default='') }}"
+    gnupg_home: /root/.gnupg
+    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
   environment:
     install_mysql_shell: '{{ install_mysql_shell }}'
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
