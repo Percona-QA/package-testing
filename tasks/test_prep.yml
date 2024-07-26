@@ -30,24 +30,6 @@
     when:
     - ansible_facts['distribution'] == "RedHat"
 
-  - name: Download gflags RPM package
-    get_url:
-      url: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
-      dest: /tmp/gflags-2.2.2-9.el9.x86_64.rpm
-    when:
-    - ansible_facts['distribution'] == "RedHat"
-
-  - name: Install gflags RPM package
-    command: rpm -ivh /tmp/gflags-2.2.2-9.el9.x86_64.rpm
-    args:
-      creates: /usr/lib64/libgflags.so.2.2
-    when:
-    - ansible_facts['distribution'] == "RedHat"
-
-# - name: setup epel 6 repo
-#   yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm state=present
-#   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
   - name: setup epel 7 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
@@ -98,16 +80,6 @@
     when: 
     - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
     - ansible_facts['distribution'] != "RedHat"
-
-  - name: add the Vault and epel CentOS 6 repos
-    shell: |
-      curl https://www.getpagespeed.com/files/centos6-eol.repo --output /etc/yum.repos.d/CentOS-Base.repo
-      curl https://www.getpagespeed.com/files/centos6-epel-eol.repo --output /etc/yum.repos.d/epel.repo
-      yum -y install centos-release-scl
-      curl https://www.getpagespeed.com/files/centos6-scl-eol.repo --output /etc/yum.repos.d/CentOS-SCLo-scl.repo
-      curl https://www.getpagespeed.com/files/centos6-scl-rh-eol.repo --output /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
-      yum -y install epel-release.noarch
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
   - name: allow release-info to change for apt repositories
     command: apt-get update -y --allow-releaseinfo-change
@@ -208,10 +180,10 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+    - wget --no-check-certificate -O master.zip https://github.com/panchal-yash/package-testing/archive/ps-pt-molecule.zip
     - unzip master.zip
     - rm -f master.zip
-    - mv package-testing-master /package-testing
+    - mv package-testing-ps-pt-molecule /package-testing
     
   - name: install latest bats from github
     command: "{{ item }}"

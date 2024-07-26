@@ -81,4 +81,4 @@ class TestDynamic:
         else:
             assert host.file('/usr/local/percona/telemetry_uuid').exists
             assert host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PS')
-            assert host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')        
+            assert host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$') 

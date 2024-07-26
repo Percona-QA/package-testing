@@ -11,6 +11,10 @@
 #  args:
 #    warn: no
 
+- name: Add ARM support into percona-release
+  command: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
+  when: ( ansible_architecture == "aarch64" or ansible_architecture == "arm64" ) and prel_version != "latest"
+
 - name: clean and update yum cache
   when: ansible_os_family == "RedHat"
   shell: |

@@ -49,7 +49,7 @@ mysql -e "CREATE FUNCTION get_first_record_timestamp_by_binlog RETURNS STRING SO
 mysql -e "CREATE FUNCTION get_last_record_timestamp_by_binlog RETURNS STRING SONAME 'binlog_utils_udf.so';"
 mysql -e "INSTALL PLUGIN authentication_ldap_sasl SONAME 'authentication_ldap_sasl.so';"
 
-for component in component_validate_password component_log_sink_syseventlog component_log_sink_json component_log_filter_dragnet component_audit_api_message_emit; do
+for component in component_validate_password component_log_sink_syseventlog component_log_sink_json component_log_filter_dragnet component_audit_api_message_emit component_percona_telemetry; do
   if [ $(mysql -Ns -e "select count(*) from mysql.component where component_urn=\"file://${component}\";") -eq 0 ]; then
     mysql -e "INSTALL COMPONENT \"file://${component}\";"
   fi

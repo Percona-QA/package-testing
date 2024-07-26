@@ -45,7 +45,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: Extract version number using shell commands
-    shell: cat ../VERSIONS | grep -oP 'PS_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    shell: cat /package-testing/VERSIONS | grep -oP 'PS_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
     register: major_release_version
 
   - name: Set major_release_version variable
@@ -53,12 +53,16 @@
       major_release_version: "{{ major_release_version.stdout }}"
 
   - name: Extract values using shell command for repo name used for innovation/lts release
-    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
+    shell: grep 'PS_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
     register: ps_inn_lts_repo_name
 
   - name: Set ps_inn_lts_repo_name variable
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
+
+  - name: Print major_release_version ps_inn_lts_repo_name
+    debug:
+      msg: "major_release_version: {{ major_release_version }} ps_inn_lts_repo_name:{{ ps_inn_lts_repo_name }}"
 
   - name: include tasks for enabling PS {{ major_release_version }} main repo
     include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
