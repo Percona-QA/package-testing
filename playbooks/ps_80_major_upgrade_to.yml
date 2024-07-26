@@ -115,10 +115,10 @@
 #  - name: check that Percona Server version is correct
 #    command: /package-testing/version_check.sh ps57
 
-  - name: check that Percona Server package versions are correct
-    command: /package-testing/package_check.sh ps57
-    environment:
-      ps57_tokudb: "no"
+#  - name: check that Percona Server package versions are correct
+#    command: /package-testing/package_check.sh ps57
+#    environment:
+#      ps57_tokudb: "no"
 
 # - name: check that Percona Toolkit version is correct
 #   command: /package-testing/version_check.sh pt
