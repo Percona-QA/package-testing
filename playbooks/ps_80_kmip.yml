@@ -96,11 +96,15 @@
 
   - name: downgrade SQLAlchemy as new version doesn't work with pykmip
     command: pip3 install SQLAlchemy==1.4.46
-    when: ansible_distribution_release != "bookworm"
+    when:
+        - ansible_distribution_release != "bookworm"
+        - ansible_distribution_release != "noble"
 
   - name: downgrade SQLAlchemy as new version doesn't work with pykmip
     command: pip3 install --break-system-packages SQLAlchemy==1.4.46
-    when: ansible_distribution_release == "bookworm"  
+    when:
+        - ansible_distribution_release == "bookworm"
+        - ansible_distribution_release == "noble"
 
   - name: start pykmip server
     shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
