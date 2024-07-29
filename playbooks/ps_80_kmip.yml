@@ -80,7 +80,9 @@
         - python3 -m pip install -U setuptools
         - python3 -m pip install urllib3==1.26.6
         - python3 -m pip install -U pykmip
-    when: ansible_distribution_release != "bookworm"
+    when:
+        - ansible_distribution_release != "bookworm"
+        - ansible_distribution_release != "noble"
 
   - name: install pykmip
     command: "{{ item }}"
@@ -88,7 +90,9 @@
         - python3 -m pip install -U --break-system-packages pip
         - python3 -m pip install -U --break-system-packages setuptools
         - python3 -m pip install -U --break-system-packages pykmip
-    when: ansible_distribution_release == "bookworm"
+    when:
+        - ansible_distribution_release == "bookworm"
+        - ansible_distribution_release == "noble"
 
   - name: downgrade SQLAlchemy as new version doesn't work with pykmip
     command: pip3 install SQLAlchemy==1.4.46
