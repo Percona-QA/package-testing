@@ -26,7 +26,12 @@ pipeline {
             source ${WORKSPACE}/python-venv-molecule/bin/activate
 	    python -m pip install -U pip
             pip3 install wheel
-            pip3 install molecule==2.22 ansible python-vagrant testinfra pytest
+            if grep -q 'Noble' /etc/os-release; then
+              pip3 install molecule==3.0.0
+            else
+              pip3 install molecule==2.22
+            fi
+            pip3 install ansible python-vagrant testinfra pytest
             rm -rf package-testing
             git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-dist --depth 1
           '''
