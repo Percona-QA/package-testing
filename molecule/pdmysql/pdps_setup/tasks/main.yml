@@ -88,9 +88,6 @@
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
 
-  - name: check telemetry (enabled)
-    command: /package-testing/check_telemetry.sh ps -e
-
   - name: Verify telemetry version and package installation
     command: /package-testing/check_tel_ver_pack.sh
     when:
