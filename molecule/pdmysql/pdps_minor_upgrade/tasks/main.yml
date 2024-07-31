@@ -28,18 +28,7 @@
     # revert order once pt issue(DISTMYSQL-400) is resolved for OL8   
   - name: disable the mysql module on RHEL/CentOS 8
     command: yum module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"  
-
-  - name: Install telemetry in Debian
-    command: apt-get install -y percona-telemetry-agent
-    when: ansible_os_family == "Debian"
-
-  - name: Install telemetry in RHEL
-    command: yum install -y percona-telemetry-agent
-    when:
-      - ansible_os_family == "RedHat"
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: install Percona Server deb packages
     apt:
@@ -75,15 +64,6 @@
     when: ansible_os_family == "RedHat"
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: check telemetry (enabled)
-    command: /package-testing/check_telemetry.sh ps -e
-
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
 
 # At this moment RHEL PXB packages do not support packages upgrade so we do not install them for major update on rhel. Re-check https://perconacorp.slack.com/archives/C047F39JKEW/p1700822258537029
   - name: install Percona XtraBackup {{ major_release_version }} packages
@@ -228,6 +208,17 @@
   - name: install Percona Toolkit new deb packages
     include_tasks: ../../../tasks/install_pt.yml
 
+  - name: Install telemetry in Debian
+    command: apt-get install -y percona-telemetry-agent
+    when: ansible_os_family == "Debian"
+
+  - name: Install telemetry in RHEL
+    command: yum install -y percona-telemetry-agent
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
+
   - name: install Percona Server deb packages
     apt:
       name: "{{ packages }}"
@@ -261,6 +252,15 @@
     when: ansible_os_family == "RedHat"
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
 
   - name: install Percona XtraBackup {{ major_release_version }} packages
     include_tasks: ../../../tasks/install_pxb_innovation_lts.yml
