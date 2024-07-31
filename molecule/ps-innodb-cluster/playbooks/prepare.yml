@@ -73,6 +73,7 @@
           - gnupg2
           - rsync
           - acl
+          - jq
       retries: 60
       delay: 10
       register: result
