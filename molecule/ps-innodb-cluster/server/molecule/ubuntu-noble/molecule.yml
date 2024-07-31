@@ -8,7 +8,7 @@ driver:
 platforms:
   - name: ps-node1-ubuntu-noble
     region: us-west-2
-    image: ami-0c29a2c5cf69b5a9c
+    image: ami-0cf2b4e024cdb6960
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.small
     ssh_user: ubuntu
@@ -18,7 +18,7 @@ platforms:
       job-name: ${JOB_NAME}
   - name: ps-node2-ubuntu-noble
     region: us-west-2
-    image: ami-0c29a2c5cf69b5a9c
+    image: ami-0cf2b4e024cdb6960
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.small
     ssh_user: ubuntu
@@ -28,7 +28,7 @@ platforms:
       job-name: ${JOB_NAME}
   - name: ps-node3-ubuntu-noble
     region: us-west-2
-    image: ami-0c29a2c5cf69b5a9c
+    image: ami-0cf2b4e024cdb6960
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.small
     ssh_user: ubuntu
