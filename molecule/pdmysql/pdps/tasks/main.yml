@@ -72,12 +72,6 @@
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
 
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
-
   - name: install Percona Server rpm packages
     yum:
       name: "{{ packages }}"
@@ -173,6 +167,12 @@
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
