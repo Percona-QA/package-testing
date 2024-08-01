@@ -191,7 +191,7 @@
       set_fact:
         instance_priv_ip_dict: {
           'instance': "{{ item.instances[0].tags.Name }}",
-          'private_ip': "{{ item.instances[0].private_ip }}",
+          'private_ip': "{{ item.instances[0].private_ip_address }}",
         }
       with_items: "{{ ec2_jobs.results }}"
       register: instance_private_ip_dict
