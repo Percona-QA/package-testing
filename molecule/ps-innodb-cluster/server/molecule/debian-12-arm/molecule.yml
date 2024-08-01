@@ -8,7 +8,7 @@ driver:
 platforms:
   - name: ps-node1-debian-12-arm
     region: us-west-2
-    image: 093939e1f4317142c
+    image: ami-093939e1f4317142c
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t4g.nano
     ssh_user: admin
