@@ -1,40 +1,42 @@
 ---
 scenario:
-  name: ubuntu-noble-arm
+  name: rhel-8-arm
 dependency:
   name: galaxy
 driver:
   name: ec2
+lint:
+  name: yamllint
 platforms:
-  - name: ps-node1-ubuntu-noble-arm
+  - name: ps-node1-rhel-8-arm
     region: us-west-2
-    image: ami-0f3b814f07ac0db32
-    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    image: ami-0bb199dd39edd7d71
+    vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: c6g.large
-    ssh_user: ubuntu
+    ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
-      iit-billing-tag: jenkins-ps-worker
+      iit-billing-tag: jenkins-ps80-worker
       job-name: ${JOB_NAME}
-  - name: ps-node2-ubuntu-noble-arm
+  - name: ps-node2-rhel-8-arm
     region: us-west-2
-    image: ami-0f3b814f07ac0db32
-    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    image: ami-0bb199dd39edd7d71
+    vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: c6g.large
-    ssh_user: ubuntu
+    ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
-      iit-billing-tag: jenkins-ps-worker
+      iit-billing-tag: jenkins-ps80-worker
       job-name: ${JOB_NAME}
-  - name: ps-node3-ubuntu-noble-arm
+  - name: ps-node3-rhel-8-arm
     region: us-west-2
-    image: ami-0f3b814f07ac0db32
-    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    image: ami-0bb199dd39edd7d71
+    vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: c6g.large
-    ssh_user: ubuntu
+    ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
-      iit-billing-tag: jenkins-ps-worker
+      iit-billing-tag: jenkins-ps80-worker
       job-name: ${JOB_NAME}
 provisioner:
   name: ansible
@@ -42,7 +44,7 @@ provisioner:
     name: ansible-lint
   playbooks:
     create: ../../../playbooks/create.yml
-    destroy: ../../../playbooks/destroy.yml
+    destroy: ../../../../playbooks/destroy.yml
     prepare: ../../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
 verifier:
