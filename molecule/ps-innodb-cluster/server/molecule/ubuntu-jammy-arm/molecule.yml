@@ -1,0 +1,56 @@
+---
+scenario:
+  name: ubuntu-jammy-arm
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: ps-node1-ubuntu-jammy-arm
+    region: us-west-2
+    image: ami-00415b9066218a528
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: c6g.large
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+      job-name: ${JOB_NAME}
+  - name: ps-node2-ubuntu-jammy-arm
+    region: us-west-2
+    image: ami-00415b9066218a528
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: c6g.large
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+      job-name: ${JOB_NAME}
+  - name: ps-node3-ubuntu-jammy-arm
+    region: us-west-2
+    image: ami-00415b9066218a528
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: c6g.large
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+      job-name: ${JOB_NAME}
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  playbooks:
+    create: ../../../playbooks/create.yml
+    destroy: ../../../../playbooks/destroy.yml
+    prepare: ../../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../tests/
+  options:
+    verbose: true
+    s: true
+    junitxml: report.xml
+  lint:
+    name: flake8
