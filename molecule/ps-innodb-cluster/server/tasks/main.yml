@@ -16,7 +16,7 @@
   - name: Print Percona Server major version
     debug:
       var: PS_MAJ_VER
-    
+
   - name: include tasks for enabling PS 80/83 main repo
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_main_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "main"
@@ -50,6 +50,23 @@
       owner: root
       mode: 0644
 
+  - name: Install telemetry in Debian
+    command: apt-get install -y percona-telemetry-agent
+    when: ansible_os_family == "Debian"
+
+  - name: Install telemetry in RHEL
+    command: yum install -y percona-telemetry-agent
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
+
   - name: install Percona Server deb packages
     apt:
       name: "{{ packages }}"
@@ -81,7 +98,7 @@
     service:
       name: mysql
       state: started
-  
+
   - name: setup mysql user on Centos/RedHat
     shell: |
       mysql --connect-expired-password -uroot --password="$(grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}')" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Test1234#';"
