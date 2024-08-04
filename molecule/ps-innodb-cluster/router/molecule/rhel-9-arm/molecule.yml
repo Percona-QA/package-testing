@@ -5,8 +5,6 @@ dependency:
   name: galaxy
 driver:
   name: ec2
-lint:
-  name: yamllint
 platforms:
   - name: mysql-router-rhel-9-arm
     region: us-west-2
