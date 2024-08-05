@@ -1,0 +1,35 @@
+---
+scenario:
+  name: ubuntu-focal-arm
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: mysql-router-ubuntu-focal-arm
+    region: us-west-2
+    image: ami-0d8cea2b786fccd0c
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t4g.nano
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  playbooks:
+    create: ../../../playbooks/create.yml
+    destroy: ../../../../playbooks/destroy.yml
+    prepare: ../../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../tests/
+  options:
+    verbose: true
+    s: true
+    junitxml: report.xml
+  lint:
+    name: flake8
