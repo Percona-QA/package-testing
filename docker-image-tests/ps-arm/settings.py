@@ -65,7 +65,7 @@ ps80_plugins = (
   ('authentication_ldap_sasl','authentication_ldap_sasl.so'),('authentication_fido','authentication_fido.so')
 )
 ps80_components = (
-('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms')
+  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms')
 )
 ps80_functions = (
   ('fnv1a_64', 'libfnv1a_udf.so', 'INTEGER'),('fnv_64', 'libfnv_udf.so', 'INTEGER'),('murmur_hash', 'libmurmur_udf.so', 'INTEGER'),
