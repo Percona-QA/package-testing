@@ -223,6 +223,9 @@
   - name: install Percona Server 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
 
+  - name: enable the Tools release repo
+    command: percona-release enable tools release
+
   - name: install PXB 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
 
