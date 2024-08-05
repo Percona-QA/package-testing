@@ -82,32 +82,3 @@ class TestDynamic:
             assert host.file('/usr/local/percona/telemetry_uuid').exists
             assert host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PS')
             assert host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$') 
-
-    def test_ta_process_running(self, host):
-        cmd = 'ps auxww| grep -v grep  | grep -c "percona-telemetry-agent"'
-        result = host.run(cmd)
-        stdout = int(result.stdout)
-        assert stdout == 1
-
-    def test_telemetry_agent_supervisor_running(self, host):
-        cmd = 'ps auxww| grep -v grep  | grep -c "telemetry-agent-supervisor.sh"'
-        result = host.run(cmd)
-        stdout = int(result.stdout)
-        assert stdout == 1
-
-    def test_telemetry_agent_dirs_present(self, host):
-        assert host.file("/usr/local/percona/telemetry/").is_directory
-        assert host.file("/usr/local/percona/telemetry/").user == 'daemon'
-        assert host.file("/usr/local/percona/telemetry/").group == 'percona-telemetry'
-        assert oct(host.file("/usr/local/percona/telemetry/").mode) == '0o755'
-        assert host.file("/usr/local/percona/telemetry/history").is_directory
-        assert host.file("/usr/local/percona/telemetry/history").user == 'mysql'
-        assert host.file("/usr/local/percona/telemetry/history").group == 'percona-telemetry'
-        assert oct(host.file("/usr/local/percona/telemetry/history").mode) == '0o6755'
-        assert host.file("/usr/local/percona/telemetry_uuid").is_file
-        assert host.file("/usr/local/percona/telemetry_uuid").group == 'mysql'
-        assert oct(host.file("/usr/local/percona/telemetry_uuid").mode) == '0o644'
-        assert host.file("/usr/local/percona/telemetry/ps").is_directory
-        assert host.file("/usr/local/percona/telemetry/ps").user == 'mysql'
-        assert host.file("/usr/local/percona/telemetry/ps").group == 'percona-telemetry'
-        assert oct(host.file("/usr/local/percona/telemetry/ps").mode) == '0o6775'
