@@ -50,9 +50,6 @@
     command: percona-release enable pxb-80 release
     when: ansible_distribution_release == "noble"
 
-  - name: enable the telemetry testing repo
-    command: percona-release enable telemetry testing
-
   - name: clean and update yum cache
     shell: |
       yum clean all
