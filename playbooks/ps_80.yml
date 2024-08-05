@@ -84,17 +84,6 @@
 #
 #
 
-  - name: Install telemetry in Debian
-    command: apt-get install -y percona-telemetry-agent
-    when: ansible_os_family == "Debian"
-
-  - name: Install telemetry in RHEL
-    command: yum install -y percona-telemetry-agent
-    when:
-      - ansible_os_family == "RedHat"
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
-
   - name: install Percona Server{{ pro_suf }} 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
     vars:
@@ -108,6 +97,9 @@
     when:
       - ansible_distribution != "Amazon"
       - ansible_distribution_major_version|int != 7
+
+  - name: enable the Tools release repo
+    command: percona-release enable tools release
 
   - name: install sysbench new deb packages
     include_tasks: ../tasks/install_sysbench.yml
