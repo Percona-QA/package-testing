@@ -2,12 +2,11 @@
 - name: Create
   hosts: localhost
   connection: local
-  gather_facts: false
-  no_log: "{{ not (lookup('env', 'MOLECULE_DEBUG') | bool or molecule_yml.provisioner.log|default(false) | bool) }}"
+  gather_facts: no
   vars:
     ssh_user: ubuntu
     ssh_port: 22
-    default_region: "{{ lookup('env', 'AWS_DEFAULT_REGION') | default('us-east-1', true) }}"
+    default_region: "{{ lookup('env', 'AWS_DEFAULT_REGION') | default('us-east-1') }}"
     security_group_name_prefix: molecule
     security_group_description: Security group for testing Molecule
     security_group_rules:
@@ -29,88 +28,55 @@
 
   tasks:
     - name: Check subnet
-      ec2_vpc_subnet_info:
-        region: "{{ item.region|default(default_region) }}"
+      amazon.aws.ec2_vpc_subnet_info:
+        region: "{{ item.region | default(default_region) }}"
         filters:
           subnet-id: "{{ item.vpc_subnet_id }}"
-      with_items: "{{ molecule_yml.platforms }}"
+      loop: "{{ molecule_yml.platforms }}"
       register: subnet_facts
 
     - name: Populate subnet vpc
       set_fact:
-        subnet_dict: "{{ subnet_dict|default({}) | combine({ item.subnets[0].id: item.subnets[0].vpc_id }) }}"
-      with_items: "{{ subnet_facts.results }}"
+        subnet_dict: "{{ subnet_dict | default({}) | combine({ item.subnets[0].id: item.subnets[0].vpc_id }) }}"
+      loop: "{{ subnet_facts.results }}"
 
     - name: Create security group
-      ec2_group:
+      amazon.aws.ec2_security_group:
         name: "{{ security_group_name_prefix }}-{{ subnet_dict[item.vpc_subnet_id] }}"
         description: "{{ security_group_description }}"
         rules: "{{ security_group_rules }}"
         rules_egress: "{{ security_group_rules_egress }}"
         vpc_id: "{{ subnet_dict[item.vpc_subnet_id] }}"
-        region: "{{ item.region|default(default_region) }}"
-      with_items: "{{ molecule_yml.platforms }}"
-
-#    - name: Delete remote keypair
-#      ec2_key:
-#        name: "{{ keypair_name }}"
-#        state: absent
-#        region: "{{ item.item.region|default(default_region) }}"
-#      with_items: "{{ keypair_local.results}}"
-#      when: not item.stat.exists
-
-#    - name: Create keypair
-#      ec2_key:
-#        name: "{{ keypair_name }}"
-#        region: "{{ item.region|default(default_region) }}"
-#      with_items: "{{ molecule_yml.platforms }}"
-#      register: keypair
+        region: "{{ item.region | default(default_region) }}"
+      loop: "{{ molecule_yml.platforms }}"
 
     - name: Setup keypair for molecule ec2
       copy:
-        dest: "{{ keypair_path }}-{{ item.region|default(default_region) }}"
+        dest: "{{ keypair_path }}-{{ item.region | default(default_region) }}"
         src: "{{ lookup('env', 'MOLECULE_AWS_PRIVATE_KEY') }}"
-        mode: 0600
+        mode: '0600'
       no_log: True
-      with_items: "{{ molecule_yml.platforms }}"
+      loop: "{{ molecule_yml.platforms }}"
 
-#    - name: Get the ec2 ami(s) by owner and name, if image not set
-#      ec2_ami_facts:
-#        owners: "{{ item.image_owner }}"
-#        filters:
-#          name: "{{ item.image_name }}"
-#        region: "{{ item.region|default(default_region) }}"
-#      loop: "{{ molecule_yml.platforms }}"
-#      when: item.image is not defined
-#      register: ami_facts
-    - name: Create spot instance or on-demand if spot is not avalable
+    - name: Create spot instance or on-demand if spot is not available
       block:
         - name: Create spot molecule instance(s)
-          ec2:
+          amazon.aws.ec2_instance:
             key_name: "{{ keypair_name }}"
-            image: "{{ item.image }}"
+            image_id: "{{ item.image }}"
             instance_type: "{{ item.instance_type }}"
-            vpc_subnet_id: "{{ item.vpc_subnet_id }}"
-            group: "{{ security_group_name_prefix }}-{{ subnet_dict[item.vpc_subnet_id] }}"
-            instance_tags: "{{
-                item.instance_tags | combine({
-                  'Name': item.name,
-                  'ssh_user': item.ssh_user|default(ssh_user)
-                })
-                if item.instance_tags is defined
-                else {
-                    'Name': item.name,
-                    'ssh_user': item.ssh_user|default(ssh_user)
-                }
-            }}"
+            subnet_id: "{{ item.vpc_subnet_id }}"
+            security_groups: "{{ security_group_name_prefix }}-{{ subnet_dict[item.vpc_subnet_id] }}"
+            tags:
+              Name: "{{ item.name }}"
+              ssh_user: "{{ item.ssh_user | default(ssh_user) }}"
             wait: true
             spot_price: "0.0100"
-            spot_type: "one-time"
-            assign_public_ip: true
-            exact_count: 1
-            count_tag:
-              Name: "{{ item.name }}"
-            region: "{{ item.region|default(default_region) }}"
+            spot_instance_type: "one-time"
+            associate_public_ip_address: true
+            min_count: 1
+            max_count: 1
+            region: "{{ item.region | default(default_region) }}"
             volumes:
               - device_name: "{{ item.root_device_name }}"
                 volume_type: gp2
@@ -130,33 +96,24 @@
           register: ec2_jobs
           until: ec2_jobs.finished
           retries: 300
-          with_items: "{{ server.results }}"
+          loop: "{{ server.results }}"
 
       rescue:
         - name: Create on-demand molecule instance(s) because spot is not available
-          ec2:
+          amazon.aws.ec2_instance:
             key_name: "{{ keypair_name }}"
-            image: "{{ item.image }}"
+            image_id: "{{ item.image }}"
             instance_type: "{{ item.instance_type }}"
-            vpc_subnet_id: "{{ item.vpc_subnet_id }}"
-            group: "{{ security_group_name_prefix }}-{{ subnet_dict[item.vpc_subnet_id] }}"
-            instance_tags: "{{
-                item.instance_tags | combine({
-                  'Name': item.name,
-                  'ssh_user': item.ssh_user|default(ssh_user)
-                })
-                if item.instance_tags is defined
-                else {
-                    'Name': item.name,
-                    'ssh_user': item.ssh_user|default(ssh_user)
-                }
-            }}"
-            wait: true
-            assign_public_ip: true
-            exact_count: 1
-            count_tag:
+            subnet_id: "{{ item.vpc_subnet_id }}"
+            security_groups: "{{ security_group_name_prefix }}-{{ subnet_dict[item.vpc_subnet_id] }}"
+            tags:
               Name: "{{ item.name }}"
-            region: "{{ item.region|default(default_region) }}"
+              ssh_user: "{{ item.ssh_user | default(ssh_user) }}"
+            wait: true
+            associate_public_ip_address: true
+            min_count: 1
+            max_count: 1
+            region: "{{ item.region | default(default_region) }}"
             volumes:
               - device_name: "{{ item.root_device_name }}"
                 volume_type: gp2
@@ -175,9 +132,7 @@
           register: ec2_jobs
           until: ec2_jobs.finished
           retries: 300
-          with_items: "{{ server.results }}"
-
-    # Mandatory configuration for Molecule to function.
+          loop: "{{ server.results }}"
 
     - name: Populate instance config dict
       set_fact:
@@ -190,7 +145,7 @@
           'instance_id': "{{ item.tagged_instances[0].id }}",
           'region': "{{ item.tagged_instances[0].region }}",
         }
-      with_items: "{{ ec2_jobs.results }}"
+      loop: "{{ ec2_jobs.results }}"
       register: instance_config_dict
       when: server.changed | bool
 
@@ -216,7 +171,7 @@
         search_regex: SSH
         delay: 10
         timeout: 320
-      with_items: "{{ lookup('file', molecule_instance_config) | from_yaml }}"
+      loop: "{{ lookup('file', molecule_instance_config) | from_yaml }}"
 
     - name: Wait for boot process to finish
       pause:
