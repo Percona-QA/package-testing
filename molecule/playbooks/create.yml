@@ -202,7 +202,7 @@
     - name: Dump instance private IPs
       copy:
         content: "{{ instance_priv_ip | to_json }}"
-        dest: "{{ lookup('env', 'INSTANCE_PRIVATE_IP') }}"
+        dest: "{{ lookup('env', 'INSTANCE_PRIVATE_IP') | default('/tmp/instance_private_ip.json', true) }}"
 
     - name: Print instance private IPs
       debug:
