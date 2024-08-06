@@ -5,8 +5,6 @@ dependency:
   name: galaxy
 driver:
   name: ec2
-lint:
-  name: yamllint
 platforms:
   - name: mysql-router-ubuntu-focal
     region: us-west-2
