@@ -112,7 +112,6 @@
         wait: true
         network:
           assign_public_ip: true
-        exact_count: 1
         region: "{{ item.region|default(default_region) }}"
         volumes:
           - device_name: "{{ item.root_device_name }}"
