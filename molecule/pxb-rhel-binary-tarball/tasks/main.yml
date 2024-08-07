@@ -51,8 +51,10 @@
     command: /usr/bin/dnf module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: add the main Percona yum repos for centos
-    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+  - name: Add the Percona Release yum repo without GPG check
+    yum:
+      name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+      disable_gpg_check: yes
     when: ansible_os_family == "RedHat"
 
   - name: Enable PDPS-{{ major_version }}

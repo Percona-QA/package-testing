@@ -4,7 +4,7 @@
 #   enables Percona testing repository
 #   installs latest version of PS innovation lts, PXB innovation lts with kms component and runs some tests
 
-- import_playbook: ps_lts_innovation_kms.yml
+- import_playbook: ps_innovation_lts_kms.yml
 
 - hosts: all
   become: true
@@ -13,7 +13,7 @@
   tasks:
 
   - name: Extract version number using shell commands
-    shell: cat ../VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    shell: cat /package-testing/VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
     register: major_release_version
 
   - name: Set major_release_version variable
@@ -21,13 +21,17 @@
       major_release_version: "{{ major_release_version.stdout }}"
 
   - name: Extract values using shell command for repo name used for innovation/lts release
-    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
+    shell: grep 'PS_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
     register: ps_inn_lts_repo_name
 
   - name: Set pxb_inn_lts_repo_name variable
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
 
+  - name: debug the vars
+    debug:
+      msg: "major_release_version: {{ major_release_version }} ps_inn_lts_repo_name: {{ ps_inn_lts_repo_name }}"
+    
   - name: install Percona XtraBackup {{ major_release_version }} packages
     include_tasks: ../tasks/install_pxb_innovation_lts.yml
     when: lookup('env', 'install_repo') != "experimental"

@@ -35,9 +35,10 @@
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
     when: ansible_os_family == "Debian"
 
-  - name: add the Percona testing yum repos for centos 6 and 7
-    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-#   yum: name=https://repo.percona.com/yum/testing/7Server/RPMS/noarch/percona-release-1.0-21.noarch.rpm
+  - name: Add the Percona Release yum repo without GPG check
+    yum:
+      name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+      disable_gpg_check: yes
     when: ansible_os_family == "RedHat"
 
   - name: enable the PS-80 main repo
