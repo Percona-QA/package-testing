@@ -73,6 +73,7 @@
           - gnupg2
           - rsync
           - acl
+          - jq
       retries: 60
       delay: 10
       register: result
@@ -122,3 +123,12 @@
         name: firewalld
         state: stopped
       when: ansible_distribution == "OracleLinux" and (ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9") 
+
+    - name: update cache
+      command: apt-get update
+      when: ansible_os_family == "debian"
+
+    - name: update cache
+      command: yum makecache
+      when: ansible_os_family == "RedHat" 
+

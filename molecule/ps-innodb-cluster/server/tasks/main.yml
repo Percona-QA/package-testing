@@ -5,7 +5,10 @@
 
   - set_fact:
       UPSTREAM_VERSION: "{{ lookup('env', 'UPSTREAM_VERSION') }}"
-    
+      gnupg_home: "/root/.gnupg"
+      percona_key1: "4D1BB29D63D98E422B2113B19334A25F8507EFA5"
+      percona_key1_file: "/root/.gnupg/PERCONA-PACKAGING-KEY"
+
   - name: Determine Percona Server major version
     set_fact:
       PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') if '8.3' in UPSTREAM_VERSION else 8 }}"      
@@ -13,7 +16,7 @@
   - name: Print Percona Server major version
     debug:
       var: PS_MAJ_VER
-    
+
   - name: include tasks for enabling PS 80/83 main repo
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_main_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "main"
@@ -74,11 +77,17 @@
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
 
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
+
   - name: start mysql service
     service:
       name: mysql
       state: started
-  
+
   - name: setup mysql user on Centos/RedHat
     shell: |
       mysql --connect-expired-password -uroot --password="$(grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}')" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Test1234#';"

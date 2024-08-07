@@ -5,8 +5,6 @@ dependency:
   name: galaxy
 driver:
   name: ec2
-lint:
-  name: yamllint
 platforms:
   - name: ps-node1-oracle-9
     region: us-west-2

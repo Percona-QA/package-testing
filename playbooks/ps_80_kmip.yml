@@ -6,6 +6,10 @@
 - hosts: all
   become: true
   become_method: sudo
+  vars:
+    gnupg_home: /root/.gnupg
+    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
@@ -37,9 +41,14 @@
   - name: install Percona Server 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
 
+  - name: enable the Tools Release repo
+    command: percona-release enable tools release
+
   - name: install sysbench new deb packages
     include_tasks: ../tasks/install_sysbench.yml
-    when: lookup('env', 'install_repo') != "experimental"
+    when:
+       - lookup('env', 'install_repo') != "experimental"
+       - ansible_distribution_release != "noble"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -69,11 +78,14 @@
   - name: install pykmip
     command: "{{ item }}"
     with_items:
+        - python3 -m pip install --upgrade importlib-metadata
         - python3 -m pip install -U pip
         - python3 -m pip install -U setuptools
-        - python3 -m pip install urllib3==1.26.6  
+        - python3 -m pip install urllib3==1.26.6
         - python3 -m pip install -U pykmip
-    when: ansible_distribution_release != "bookworm"
+    when:
+        - ansible_distribution_release != "bookworm"
+        - ansible_distribution_release != "noble"
 
   - name: install pykmip
     command: "{{ item }}"
@@ -81,15 +93,21 @@
         - python3 -m pip install -U --break-system-packages pip
         - python3 -m pip install -U --break-system-packages setuptools
         - python3 -m pip install -U --break-system-packages pykmip
-    when: ansible_distribution_release == "bookworm"  
+    when:
+        - ansible_distribution_release == "bookworm"
+        - ansible_distribution_release == "noble"
 
   - name: downgrade SQLAlchemy as new version doesn't work with pykmip
     command: pip3 install SQLAlchemy==1.4.46
-    when: ansible_distribution_release != "bookworm"
+    when:
+        - ansible_distribution_release != "bookworm"
+        - ansible_distribution_release != "noble"
 
   - name: downgrade SQLAlchemy as new version doesn't work with pykmip
     command: pip3 install --break-system-packages SQLAlchemy==1.4.46
-    when: ansible_distribution_release == "bookworm"  
+    when:
+        - ansible_distribution_release == "bookworm"
+        - ansible_distribution_release == "noble"
 
   - name: start pykmip server
     shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &

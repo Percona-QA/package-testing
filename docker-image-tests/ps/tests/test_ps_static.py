@@ -96,3 +96,22 @@ class TestMysqlEnvironment:
             pytest.skip('telemetry was added in 5.7, 8.0 and 8.x')
         else:
             assert not host.file('/usr/local/percona/telemetry_uuid').exists
+
+    def test_telemetry_process(self, host):
+        # Check if telemetry-agent-supervisor.sh process is not running
+        telemetry_supervisor_process = host.process.filter(comm="telemetry-agent-supervisor.sh")
+        assert not telemetry_supervisor_process, "/usr/bin/telemetry-agent-supervisor.sh process is running"
+
+        # Check if percona-telemetry-agent process is not running
+        telemetry_agent_process = host.process.filter(comm="percona-telemetry-agent")
+        assert not telemetry_agent_process, "/usr/bin/percona-telemetry-agent process is running"
+
+    def test_telemetry_agent_dirs(self, host):
+        assert host.file("/usr/local/percona/telemetry/").is_directory
+        assert host.file("/usr/local/percona/telemetry/").user == 'daemon'
+        assert host.file("/usr/local/percona/telemetry/").group == 'percona-telemetry'
+        assert oct(host.file("/usr/local/percona/telemetry/").mode) == '0o755'
+        assert host.file("/usr/local/percona/telemetry/history").is_directory
+        assert host.file("/usr/local/percona/telemetry/history").user == 'mysql'
+        assert host.file("/usr/local/percona/telemetry/history").group == 'percona-telemetry'
+        assert oct(host.file("/usr/local/percona/telemetry/history").mode) == '0o6755'

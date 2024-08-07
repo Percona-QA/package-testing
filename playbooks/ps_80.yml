@@ -12,6 +12,9 @@
   become_method: sudo
   vars:
     install_mysql_shell: "{{ lookup('env', 'install_mysql_shell', default='') }}"
+    gnupg_home: /root/.gnupg
+    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
   environment:
     install_mysql_shell: '{{ install_mysql_shell }}'
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -49,7 +52,7 @@
 
   - name: include tasks for enabling PS 8 test repo
     include_tasks: ../tasks/enable_ps8_main_repo.yml
-    when: 
+    when:
       - lookup('env', 'install_repo') == "main"
       - lookup('env', 'pro_test') != "yes"
 
@@ -61,7 +64,7 @@
 
   - name: include tasks for enabling PS 8 experimental repo
     include_tasks: ../tasks/enable_ps8_experimental_repo.yml
-    when: 
+    when:
       - lookup('env', 'install_repo') == "experimental"
       - lookup('env', 'pro_test') != "yes"
 
@@ -78,6 +81,8 @@
 # Disable Percona Toolkit installation till its supported in OL9 and Jammy
 #  - name: install Percona Toolkit new deb packages
 #    include_tasks: ../tasks/install_pt.yml
+#
+#
 
   - name: install Percona Server{{ pro_suf }} 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
@@ -87,9 +92,20 @@
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
 
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
+
+  - name: enable the Tools release repo
+    command: percona-release enable tools release
+
   - name: install sysbench new deb packages
     include_tasks: ../tasks/install_sysbench.yml
-    when: lookup('env', 'install_repo') != "experimental"
+    when:
+      - lookup('env', 'install_repo') != "experimental"
+      - ansible_distribution_release != "noble"
 
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
@@ -167,6 +183,9 @@
 
   - name: install plugins, import world database
     command: /package-testing/plugins_test_80.sh ps
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
 
   - name: check the clone and data masking plugins
     command: /package-testing/scripts/ps_clone_dm_plugin_test.sh

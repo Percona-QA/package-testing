@@ -40,8 +40,7 @@ ps80_executables = ps80_binaries + [
 ps80_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
-  ('group_replication','group_replication.so'),('clone','mysql_clone.so'),('data_masking','data_masking.so'),
-  ('procfs', 'procfs.so'), ('authentication_ldap_sasl','authentication_ldap_sasl.so')
+  ('clone','mysql_clone.so'),('data_masking','data_masking.so'), ('procfs', 'procfs.so')
 )
 ps80_functions = (
   ('fnv1a_64', 'libfnv1a_udf.so', 'INTEGER'),('fnv_64', 'libfnv_udf.so', 'INTEGER'),('murmur_hash', 'libmurmur_udf.so', 'INTEGER'),
@@ -54,7 +53,7 @@ ps80_functions = (
 )
 
 ps80_components = (
-  'component_masking_functions',
+  'component_masking_functions', 'component_encryption_udf', 'component_keyring_kmip', 'component_keyring_kms',
 )
 ps80_files = (
   'lib/libcoredumper.a', 
@@ -64,7 +63,7 @@ ps80_files = (
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini','lib/plugin/keyring_file.so',
   'lib/plugin/keyring_udf.so', 'lib/plugin/keyring_vault.so', 'lib/plugin/binlog_utils_udf.so',
-  'lib/plugin/audit_log_filter.so', 'lib/plugin/component_masking_functions.so'
+  'lib/plugin/audit_log_filter.so', 'lib/plugin/component_masking_functions.so', 'lib/plugin/component_percona_telemetry.so'
 )
 ps80_symlinks = (
   ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.37'),
