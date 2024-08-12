@@ -5,6 +5,12 @@
     command: /usr/bin/dnf module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
+  - name: Install percona repository package for Debain
+    apt:
+      deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+#     deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-21.generic_all.deb
+    when: ansible_os_family == "Debian"
+
   - name: Receive GPG key 1
     command: "gpg --batch --keyserver keyserver.ubuntu.com --recv-keys {{ percona_key1 }}"
     environment:
@@ -29,27 +35,20 @@
     command: "rpmkeys --import {{ percona_key1_file }}"
     when: ansible_os_family == "RedHat"
 
-  - name: Install percona repository package
-    apt:
-#     deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-21.generic_all.deb
-      deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
-    when: ansible_os_family == "Debian"
-
-  - name: Add the Percona Release yum repo without GPG check
-    yum:
-      name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-      disable_gpg_check: yes
+  - name: Install percona repository package for RHEL
+    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
 
-  - name: enable the PS-80 main repo
-    command: percona-release setup ps-80 -y
+  - name: Add ARM support into percona-release
+    shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
+    when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"
 
-  - name: enable the pxb-80 release repo
-    command: percona-release enable pxb-80 release
+  - name: enable the PS-84-LTS testing repo
+    command: percona-release enable-only ps-84-lts testing
+
+  - name: enable the pxb-84 release repo
+    command: percona-release enable pxb-84-lts release
     when: ansible_distribution_release == "noble"
-
-# - name: enable the tools main repo
-#   command: percona-release enable tools release
 
   - name: clean and update yum cache
     shell: |
@@ -57,6 +56,8 @@
       yum makecache
     when: ansible_os_family == "RedHat"
 
-  - name: Add ARM support into percona-release
-    shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
-    when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+  - name: Update APT cache
+    apt:
+      update_cache: yes
+    when: ansible_os_family == "Debian"
+

@@ -30,20 +30,6 @@
     when:
     - ansible_facts['distribution'] == "RedHat"
 
-  - name: Download gflags RPM package
-    get_url:
-      url: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
-      dest: /tmp/gflags-2.2.2-9.el9.x86_64.rpm
-    when:
-    - ansible_facts['distribution'] == "RedHat"
-
-  - name: Install gflags RPM package
-    command: rpm -ivh /tmp/gflags-2.2.2-9.el9.x86_64.rpm
-    args:
-      creates: /usr/lib64/libgflags.so.2.2
-    when:
-    - ansible_facts['distribution'] == "RedHat"
-
   - name: setup epel release centos 7
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
@@ -105,6 +91,12 @@
   - name: update mirrors for CentOS8
     shell: sed -i 's/mirror\.centos\.org/vault\.centos\.org/g;s/\#baseurl=/baseurl=/g;s/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS*.repo
     when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "8"
+
+  - name: update YUM cache for CentOS 8
+    yum:
+      update_cache: yes
+      state: present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: setup epel 8 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present

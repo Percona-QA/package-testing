@@ -17,10 +17,14 @@
   environment:
     install_mysql_shell: '{{ install_mysql_shell }}'
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
   tasks:
 
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
   - name: Extract version number using shell commands
-    shell: cat ../VERSIONS | grep -oP 'PS_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    shell: cat /package-testing/VERSIONS | grep -oP 'PS_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
     register: major_release_version
 
   - name: Set major_release_version variable
@@ -28,16 +32,13 @@
       major_release_version: "{{ major_release_version.stdout }}"
 
   - name: Extract values using shell command for repo name used for innovation/lts release
-    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
+    shell: grep 'PS_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
     register: ps_inn_lts_repo_name
 
   - name: Set major_release_version variable
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
       
-  - name: include tasks for test env setup
-    include_tasks: ../tasks/test_prep.yml
-
   - name: include tasks for local vault setup
     include_tasks: ../tasks/setup_local_vault.yml
 
