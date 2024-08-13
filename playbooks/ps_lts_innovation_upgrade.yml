@@ -31,10 +31,6 @@
     set_fact:
       ps_inn_lts_repo_name: ps-8x-innovation
 
-  - name: Set major_release_version variable
-    set_fact:
-      ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
-
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
