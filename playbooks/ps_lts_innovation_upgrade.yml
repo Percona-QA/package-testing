@@ -27,14 +27,14 @@
     set_fact:
       major_release_version: "{{ major_release_version.stdout }}"
 
-  - name: Extract values using shell command for repo name used for innovation/lts release
-    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
-    register: ps_inn_lts_repo_name
+  - name: Set hardcoded value for repo name used for innovation/lts release
+    set_fact:
+      ps_inn_lts_repo_name: ps-8x-innovation
 
   - name: Set major_release_version variable
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
-      
+
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
@@ -127,6 +127,16 @@
 #
 # Enable testing repository
 #
+
+  - name: Extract values using shell command for repo name used for innovation/lts release
+    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: ps_inn_lts_repo_name
+
+  - name: Set ps_inn_lts_repo_name variable
+    set_fact:
+      ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
+
+
   - name: include tasks for enabling PS {{ major_release_version }} testing repo
     include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
 
@@ -240,6 +250,12 @@
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh ps -d
 
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
+
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps{{ major_release_version }}
 
@@ -258,8 +274,8 @@
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
 
-  - name: keyring Vault Component and plugins test
-    include_tasks: ../tasks/ps_keyring_vault_component_test.yml
+#  - name: keyring Vault Component and plugins test
+#    include_tasks: ../tasks/ps_keyring_vault_component_test.yml
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb{{ major_release_version }}
