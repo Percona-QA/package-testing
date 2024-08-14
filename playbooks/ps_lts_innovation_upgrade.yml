@@ -19,6 +19,22 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
   tasks:
 
+  - name: Extract version number using shell commands
+    shell: cat ../VERSIONS | grep -oP 'PS_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    register: major_release_version
+
+  - name: Set major_release_version variable
+    set_fact:
+      major_release_version: "{{ major_release_version.stdout }}"
+
+  - name: Extract values using shell command for repo name used for innovation/lts release
+    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: ps_inn_lts_repo_name
+
+  - name: Set major_release_version variable
+    set_fact:
+      ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
+
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
@@ -111,19 +127,7 @@
 #
 # Enable testing repository
 #
-
-  - name: Extract values using shell command for repo name used for innovation/lts release
-    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
-    register: ps_inn_lts_repo_name
-
-  - name: Set ps_inn_lts_repo_name variable
-    set_fact:
-      ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
-
-  - name: Hardcode major_release_version
-    set_fact:
-      major_release_version: "84"
-
+  
 
   - name: include tasks for enabling PS {{ major_release_version }} testing repo
     include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
@@ -164,9 +168,9 @@
       state: latest
     vars:
       packages:
-      - percona-xtrabackup-{{ major_release_version }}
-      - percona-xtrabackup-test-{{ major_release_version }}
-      - percona-xtrabackup-dbg-{{ major_release_version }}
+      - percona-xtrabackup-84
+      - percona-xtrabackup-test-84
+      - percona-xtrabackup-dbg-84
     when: ansible_os_family == "Debian"
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
@@ -221,9 +225,9 @@
       state: latest
     vars:
       packages:
-      - percona-xtrabackup-{{ major_release_version }}
-      - percona-xtrabackup-test-{{ major_release_version }}
-      - percona-xtrabackup-{{ major_release_version }}-debuginfo
+      - percona-xtrabackup-84
+      - percona-xtrabackup-test-84
+      - percona-xtrabackup-84-debuginfo
     when: ansible_os_family == "RedHat"
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
