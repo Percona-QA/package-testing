@@ -17,8 +17,8 @@
   - name: enable the PS-8X  Innovation main repo
     command: percona-release enable-only ps-8x-innovation release
 
-  - name: enable the tools main repo
-    command: percona-release enable tools release
+  - name: enable the PXB-8X Innovation main repo
+    command: percona-release enable pxb-8x-innovation release
 
   - name: clean and update yum cache
     shell: |

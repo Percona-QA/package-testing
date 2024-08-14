@@ -48,24 +48,44 @@
 
 # Install from main repository
 
-  - name: include tasks for enabling PS {{ major_release_version }} main repo
-    include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
+  - name: include tasks for enabling PS and PXB 83 main repo
+    include_tasks: ../tasks/enable_ps83_main_repo.yml
 
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: install Percona Server {{ major_release_version }} packages
+  - name: install Percona Server 83 packages
     include_tasks:
       file: ../tasks/install_ps_innovation_lts.yml
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: install Percona XtraBackup {{ major_release_version }} packages
-    include_tasks: ../tasks/install_pxb_innovation_lts.yml
-    when: lookup('env', 'install_repo') != "experimental"
+  - name: install Percona XtraBackup new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup-83
+      - percona-xtrabackup-test-83
+      - percona-xtrabackup-dbg-83
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona XtraBackup new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtrabackup-83
+      - percona-xtrabackup-test-83
+      - percona-xtrabackup-83-debuginfo
+    when: ansible_os_family == "RedHat"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -127,7 +147,6 @@
 #
 # Enable testing repository
 #
-  
 
   - name: include tasks for enabling PS {{ major_release_version }} testing repo
     include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
