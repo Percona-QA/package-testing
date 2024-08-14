@@ -19,9 +19,9 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
   tasks:
 
-  - name: Extract version number using shell commands
-    shell: cat ../VERSIONS | grep -oP 'PS_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
-    register: major_release_version
+  - name: Hardcode major_release_version
+    set_fact:
+      major_release_version: "83"
 
   - name: Set major_release_version variable
     set_fact:
@@ -131,6 +131,10 @@
   - name: Set ps_inn_lts_repo_name variable
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
+
+  - name: Hardcode major_release_version
+    set_fact:
+      major_release_version: "84"
 
 
   - name: include tasks for enabling PS {{ major_release_version }} testing repo

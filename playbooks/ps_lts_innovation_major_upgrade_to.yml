@@ -143,6 +143,10 @@
 #
 # Enable testing/main repository
 #
+  - name: Hardcode major_release_version
+    set_fact:
+      major_release_version: "84"
+
   - name: include tasks for enabling PS {{ major_release_version }} testing repo
     include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
