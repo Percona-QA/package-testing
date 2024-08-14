@@ -5,10 +5,8 @@
     enabled_db: "{{ db_list|select|list }}"
   vars:
     db_list:
-      - "{{ (false) | ternary('ps-8.0','') }}"
-      - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '9') | ternary('ps-5.7','') }}"
-      - "{{ (ansible_os_family == 'Debian') | ternary('ps-5.7','') }}"
-      - "{{ (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int >= 24) | ternary('ps-8.0','') }}"
+      - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '9') | ternary('ps-8.0','') }}"
+      - "{{ (ansible_os_family == 'Debian') | ternary('ps-8.0','') }}"
       - "{{ (ansible_distribution == 'Debian' and ansible_distribution_major_version > '10') | ternary('psmdb-70','') }}"
       - "{{ (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version <= '18') | ternary('psmdb-60','') }}"
       - "{{ (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version > '18') | ternary('psmdb-70','') }}"
