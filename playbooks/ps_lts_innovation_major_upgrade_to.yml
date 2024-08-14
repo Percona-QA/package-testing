@@ -33,22 +33,6 @@
               dest=/package-testing/scripts/ps_keyring_plugins_test/component_keyring_vault.cnf
               mode=0664 owner=root group=root
 
-  - name: Extract version number using shell commands
-    shell: cat ../VERSIONS | grep -oP 'PS_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
-    register: major_release_version
-
-  - name: Set major_release_version variable
-    set_fact:
-      major_release_version: "{{ major_release_version.stdout }}"
-
-  - name: Extract values using shell command for repo name used for innovation/lts release
-    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
-    register: ps_inn_lts_repo_name
-
-  - name: Set major_release_version variable
-    set_fact:
-      ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
-
 # Install from main repository
 
   - name: include tasks for enabling main repo

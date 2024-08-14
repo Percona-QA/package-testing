@@ -19,18 +19,6 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
   tasks:
 
-  - name: Hardcode major_release_version
-    set_fact:
-      major_release_version: "83"
-
-  - name: Set major_release_version variable
-    set_fact:
-      major_release_version: "{{ major_release_version.stdout }}"
-
-  - name: Set hardcoded value for repo name used for innovation/lts release
-    set_fact:
-      ps_inn_lts_repo_name: ps-8x-innovation
-
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
