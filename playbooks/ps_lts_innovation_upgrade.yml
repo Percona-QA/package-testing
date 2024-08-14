@@ -133,16 +133,6 @@
     include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
 
 # Upgrade packages
-#
-  - name: upgrade Percona Toolkit to new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - percona-toolkit
-    when: ansible_os_family == "Debian"
 
   - name: upgrade Percona Server to new deb packages
     apt:
