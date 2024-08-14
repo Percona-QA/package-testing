@@ -142,7 +142,7 @@ ps8x_binaries = [
   'bin/mysqldump', 'bin/mysqlimport', 'bin/mysqlshow',
   'bin/mysqlslap', 'bin/mysqlcheck', 'bin/mysql_config_editor',
   'bin/mysqlrouter', 'bin/mysqlrouter_passwd', 'bin/mysqlrouter_plugin_info', 'bin/mysql_secure_installation',
-  'bin/mysql_upgrade', 'bin/mysql_tzinfo_to_sql'
+  'bin/mysql_tzinfo_to_sql'
 ]
 ps8x_executables = ps8x_binaries + [
   'bin/ps-admin',
@@ -170,13 +170,13 @@ ps8x_files = (
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
   'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.0' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so',
-  'lib/plugin/keyring_file.so','lib/plugin/component_binlog_utils_udf.so',
+  'lib/plugin/component_binlog_utils_udf.so',
   'lib/plugin/keyring_udf.so', 'lib/plugin/component_keyring_vault.so', 'lib/plugin/component_binlog_utils_udf.so',
   'lib/plugin/component_audit_log_filter.so', 'lib/plugin/component_masking_functions.so'
 )
 
 ps8x_symlinks = (
-  ('lib/libperconaserverclient.so.23','lib/libperconaserverclient.so.24.0.0'),
+  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.0.0'),
   ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.0'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 
