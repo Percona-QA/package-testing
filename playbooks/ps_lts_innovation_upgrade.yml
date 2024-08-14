@@ -49,7 +49,7 @@
 # Install from main repository
 
   - name: include tasks for enabling PS and PXB 83 main repo
-    include_tasks: ../tasks/enable_ps83_main_repo.yml
+    include_tasks: ../tasks/enable_ps84_main_repo.yml
 
   - name: download and extract world database
     command: "{{ item }}"
