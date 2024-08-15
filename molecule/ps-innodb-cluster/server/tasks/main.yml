@@ -93,7 +93,7 @@
       mysql --connect-expired-password -uroot --password="$(grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}')" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Test1234#';"
       mysql -uroot -pTest1234# -e "create user root@'%' identified with caching_sha2_password by 'Test1234#'"
       mysql -uroot -pTest1234# -e "grant all privileges on *.* to root@'%' with grant option;"
-      mysql -uroot -pTest1234# -e "create user sysbench@'%' identified with caching_sha2_password by 'Test1234#'"
+      mysql -uroot -pTest1234# -e "create user sysbench@'%' identified by 'Test1234#'"
       mysql -uroot -pTest1234# -e "grant all privileges on *.* to sysbench@'%';"
     when: ansible_os_family == "RedHat"
 
@@ -101,7 +101,7 @@
     shell: |
       mysql -uroot -e "create user root@'%' identified with caching_sha2_password by 'Test1234#'"
       mysql -uroot -e "grant all privileges on *.* to root@'%' with grant option;"
-      mysql -uroot -e "create user sysbench@'%' identified with caching_sha2_password by 'Test1234#'"
+      mysql -uroot -e "create user sysbench@'%' identified by 'Test1234#'"
       mysql -uroot -e "grant all privileges on *.* to sysbench@'%';"
       mysql -uroot -e "alter user root@localhost identified with caching_sha2_password by 'Test1234#';"
     when: ansible_os_family == "Debian"
