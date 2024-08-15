@@ -17,8 +17,8 @@
   - name: enable the PS-8x Innovation  testing repo
     command: percona-release enable-only ps-84-lts testing
 
-  - name: enable the tools release repo
-    command: percona-release enable tools release
+  - name: enable the tools testing repo
+    command: percona-release enable tools testing
 
   - name: clean and update yum cache
     shell: |
