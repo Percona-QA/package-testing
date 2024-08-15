@@ -85,10 +85,10 @@
       seconds: 10
 
   - name: add slave1
-    shell: mysqlsh --uri=root@ps-node1 --password=Test1234# -- cluster add-instance root@ps-node2:3306 --options-password=Test1234# --recoveryMethod=clone
+    shell: mysqlsh --uri=root@ps-node1 --password=Test1234# -- cluster add-instance root@ps-node2:3306 --recoveryMethod=clone
 
   - name: add slave2
-    shell: mysqlsh --uri=root@ps-node1 --password=Test1234# -- cluster add-instance root@ps-node3:3306 --options-password=Test1234# --recoveryMethod=clone
+    shell: mysqlsh --uri=root@ps-node1 --password=Test1234# -- cluster add-instance root@ps-node3:3306 --recoveryMethod=clone
 
   - name: bootstrap router
     shell: echo "Test1234#" | sudo mysqlrouter --bootstrap root@ps-node1 --user=mysqlrouter
