@@ -11,15 +11,15 @@
 
   - name: Determine Percona Server major version
     set_fact:
-      PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') if '8.4' in UPSTREAM_VERSION else 8 }}'
+      PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') if '8.4' in UPSTREAM_VERSION else 8 }}"
 
   - name: Print Percona Server major version
     debug:
       var: PS_MAJ_VER
 
-#  - name: include tasks for enabling PS 80/84 main repo
-#    include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_main_repo.yml
-#    when: lookup('env', 'INSTALL_REPO') == "main"
+  - name: include tasks for enabling PS 80/84 main repo
+    include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_main_repo.yml
+    when: lookup('env', 'INSTALL_REPO') == "main"
 
   - name: include tasks for enabling PS 80/84 test repo
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_testing_repo.yml
