@@ -119,10 +119,6 @@
         group_replication_group_name="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
         group_replication_start_on_boot=OFF
         relay_log={{ ansible_hostname }}-relay-bin
-        innodb_dedicated_server=ON
-        binlog_transaction_dependency_tracking=WRITESET
-        slave_preserve_commit_order=ON
-        slave_parallel_type=LOGICAL_CLOCK
     when: ansible_os_family == "Debian"
 
   - name: add options to my.cnf on Centos/RedHat
@@ -137,10 +133,6 @@
         group_replication_group_name="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
         group_replication_start_on_boot=OFF
         relay_log={{ ansible_hostname }}-relay-bin
-        innodb_dedicated_server=ON
-        binlog_transaction_dependency_tracking=WRITESET
-        slave_preserve_commit_order=ON
-        slave_parallel_type=LOGICAL_CLOCK
     when: ansible_os_family == "RedHat"
 
   - name: allow all users to connect to mysql
