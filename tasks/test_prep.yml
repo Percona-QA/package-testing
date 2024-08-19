@@ -30,20 +30,6 @@
     when:
     - ansible_facts['distribution'] == "RedHat"
 
-  - name: Download gflags RPM package
-    get_url:
-      url: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
-      dest: /tmp/gflags-2.2.2-9.el9.x86_64.rpm
-    when:
-    - ansible_facts['distribution'] == "RedHat"
-
-  - name: Install gflags RPM package
-    command: rpm -ivh /tmp/gflags-2.2.2-9.el9.x86_64.rpm
-    args:
-      creates: /usr/lib64/libgflags.so.2.2
-    when:
-    - ansible_facts['distribution'] == "RedHat"
-
   - name: setup epel release centos 7
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
@@ -271,3 +257,15 @@
   - name: disable mysql dnf for rhel 8
     shell: dnf module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: Download gflags RPM package
+    get_url:
+      url: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
+      dest: /tmp/gflags-2.2.2-9.el9.x86_64.rpm
+   when: ansible_os_family == "RedHat"
+
+  - name: Install gflags RPM package
+    command: rpm -ivh /tmp/gflags-2.2.2-9.el9.x86_64.rpm
+    args:
+      creates: /usr/lib64/libgflags.so.2.2
+    when: ansible_os_family == "RedHat"
