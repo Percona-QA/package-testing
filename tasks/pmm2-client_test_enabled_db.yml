@@ -12,6 +12,7 @@
       - "{{ (ansible_distribution == 'Debian' and ansible_distribution_major_version > '10') | ternary('psmdb-70','') }}"
       - "{{ (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version <= '18') | ternary('psmdb-60','') }}"
       - "{{ (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version > '18') | ternary('psmdb-70','') }}"
+      - "{{ (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version >= '24') | ternary('psmdb-60','') }}"
       - "{{ (ansible_distribution == 'Debian' and ansible_distribution_major_version <= '10') | ternary('psmdb-60','') }}"
       - "{{ (ansible_os_family == 'RedHat') | ternary('psmdb-70','') }}"
       - "{{ (ansible_os_family == 'Debian') | ternary('pg-13','') }}"
