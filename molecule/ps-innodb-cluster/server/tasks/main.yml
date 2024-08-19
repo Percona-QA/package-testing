@@ -99,11 +99,11 @@
 
   - name: setup mysql user on Debian/Ubuntu
     shell: |
-      mysql -uroot -e "create user root@'%' identified with caching_sha2_password by 'Test1234#'"
-      mysql -uroot -e "grant all privileges on *.* to root@'%' with grant option;"
-      mysql -uroot -e "create user sysbench@'%' identified by 'Test1234#'"
-      mysql -uroot -e "grant all privileges on *.* to sysbench@'%';"
-      mysql -uroot -e "alter user root@localhost identified with caching_sha2_password by 'Test1234#';"
+      mysql -uroot -pTest1234# -e "create user root@'%' identified with caching_sha2_password by 'Test1234#'"
+      mysql -uroot -pTest1234# -e "grant all privileges on *.* to root@'%' with grant option;"
+      mysql -uroot -pTest1234# -e "create user sysbench@'%' identified by 'Test1234#'"
+      mysql -uroot -pTest1234# -e "grant all privileges on *.* to sysbench@'%';"
+      mysql -uroot -pTest1234# -e "alter user root@localhost identified with caching_sha2_password by 'Test1234#';"
     when: ansible_os_family == "Debian"
 
   - name: add options to my.cnf on Debian/Ubuntu
