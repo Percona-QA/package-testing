@@ -229,7 +229,7 @@
       PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: upgrade Percona XtraBackup to new rpm packages
-    yum:
+    dnf:
       name: "{{ packages }}"
       state: latest
       allow_erasing: yes
