@@ -26,6 +26,9 @@
     set_fact:
       instance_ip: "{{ instance_ip.stdout }}"
 
+  - name: Set Integrations list
+    include_tasks: ../tasks/pmm2-client_test_enabled_db.yml
+
   - name: include tasks for test env setup
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
@@ -52,17 +55,22 @@
     when: lookup('env', 'metrics_mode') == "pull"
     shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --agent-password={{ pmm_auth_password }} --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
 
-# investigate adding split pmm-admin config --force --agent-password=<PASSWORD> and restart the agent
+  - set_fact:
+      mysql_service_name: "mysql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"   
 
-### start PS 5.7
-  - name: install and start Percona Server 5.7
+  - name: Install and start Percona Server 5.7
+    when: '"ps-5.7" in enabled_db'
     include_tasks: ../tasks/install_and_add_to_pmm_ps_57.yml
+
+  - name: Install and start Percona Server 8.0
+    when: '"ps-8.0" in enabled_db'
+    include_tasks: ../tasks/install_and_add_to_pmm_ps_80.yml
 
   - name: check if Metric End point with Auth works for Mysqld Exporter
     shell: "{{item}}"
     with_items:
       - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
-## end PS
+
 
 ### start PSMDB 4.4
   - name: install and start Percona Server MongoDB 4.4
