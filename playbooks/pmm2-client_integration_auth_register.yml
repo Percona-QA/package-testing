@@ -26,6 +26,9 @@
     set_fact:
       instance_ip: "{{ instance_ip.stdout }}"
 
+  - name: Set Integrations list
+    include_tasks: ../tasks/pmm2-client_test_enabled_db.yml
+
   - set_fact:
       rnd: "{{ 1000 | random }}"
     run_once: yes
@@ -82,9 +85,13 @@
     delay: 1
     retries: 5
 
-### start PS 5.7
-  - name: install and start Percona Server 5.7
+  - name: Install and start Percona Server 5.7
+    when: '"ps-5.7" in enabled_db'
     include_tasks: ../tasks/install_and_add_to_pmm_ps_57.yml
+
+  - name: Install and start Percona Server 8.0
+    when: '"ps-8.0" in enabled_db'
+    include_tasks: ../tasks/install_and_add_to_pmm_ps_80.yml
 
   - name: check if Metric End point with Auth works for Mysqld Exporter
     shell: "{{item}}"
