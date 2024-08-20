@@ -103,6 +103,10 @@
 ## end PS
 
 ### start PSMDB 
+  - set_fact:
+      mongo_service_name: "mongodb_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+      mongo_socket_service_name: "mongodb_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+
   - name: Install and start Percona Server MongoDB
     when: '"psmdb-" in enabled_db | join("")'
     include_tasks: ../tasks/install_and_add_to_pmm_psmdb.yml
