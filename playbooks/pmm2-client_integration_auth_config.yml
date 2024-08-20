@@ -93,6 +93,9 @@
 ### end PSMDB
 
 ### start pgsql 13
+  - set_fact:
+      pgsql_service_name: "pgsql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+
   - name: Install and start Percona Server PostgreSQL 13
     when: '"pg-13" in enabled_db'
     include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql_13.yml
