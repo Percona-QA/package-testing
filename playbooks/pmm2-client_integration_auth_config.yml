@@ -66,28 +66,30 @@
     when: '"ps-8.0" in enabled_db'
     include_tasks: ../tasks/install_and_add_to_pmm_ps_80.yml
 
-  - name: check if Metric End point with Auth works for Mysqld Exporter
-    shell: "{{item}}"
-    with_items:
-      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
-
+  - name: Verify if Metric Endpoint with Auth works for Mysqld Exporter
+    when: '"ps-" in enabled_db | join("")'
+    include_tasks: ../tasks/verify_pmm2_metric.yml
+    loop:
+      - { service_name: '{{ mysql_service_name }}', metric: 'mysql_up 1' }
 
 ### start PSMDB 4.4
-  - name: install and start Percona Server MongoDB 4.4
-    include_tasks: ../tasks/install_and_add_to_pmm_psmdb_44.yml
+  - set_fact:
+      mongo_service_name: "mongodb_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+      mongo_socket_service_name: "mongodb_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+#      mongo_service_name: "mongodb_{{ rnd }}_{{ instance_ip }}"
 
-  - name: check if Metric End point with Auth works for MongoDB Exporter
-    shell: "{{item}}"
-    with_items:
-      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1 "
+  - name: Install and start Percona Server MongoDB
+    when: '"psmdb-" in enabled_db | join("")'
+    include_tasks: ../tasks/install_and_add_to_pmm_psmdb.yml
+    vars:
+      psmdb_to_test:  "{{ enabled_db | select('match', '^psmdb-*') | join('') }}"
 
-  - name: check if Metric End point with Auth works for MongoDB Exporter for service with socket
-    shell: "{{item}}"
-    with_items:
-      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1 "
-
-  - name: remove mongodb service from monitoring which was added via socket
-    command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
+  - name: Verify MongoDB Exporter metric endpoint with Auth(including service with socket)
+    when: '"psmdb-" in enabled_db | join("")'
+    include_tasks: ../tasks/verify_pmm2_metric.yml
+    loop:
+      - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up 1' }
+      - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up 1' }
 ### end PSMDB
 
 ### start pgsql 13
