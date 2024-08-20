@@ -93,8 +93,9 @@
 ### end PSMDB
 
 ### start pgsql 13
-  - name: install and start Percona Distribution for PostgreSQL 13
-    include_tasks: ../tasks/start_psql13.yml
+  - name: Install and start Percona Server PostgreSQL 13
+    when: '"pg-13" in enabled_db'
+    include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql_13.yml
 
   - name: check if Metric End point with Auth works for Postgres Exporter
     shell: "{{item}}"
