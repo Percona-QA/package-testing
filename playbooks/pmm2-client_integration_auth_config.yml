@@ -15,6 +15,7 @@
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
     cmd_admin_list: "pmm-admin list"
     pmm_auth_password: "pmm-pass"
+    test_repo: "{{ lookup('env', 'install_repo') }}"
 
   tasks:
   - name: Register Instance IP
