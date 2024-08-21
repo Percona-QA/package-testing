@@ -16,7 +16,7 @@
     vars:
       client_id: "{{ lookup('env', 'USERNAME') }}"
       client_token: "{{ lookup('env', 'PASSWORD') }}"
-      repo: "release"
+      repo: "main"
     when:
       - ansible_os_family == "Debian"
 
