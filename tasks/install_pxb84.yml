@@ -1,0 +1,25 @@
+# This task install Percona XtraBackup 8.0 on CentOS and Debian/Ubuntu
+#
+  - name: install Percona XtraBackup new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup-84
+      - percona-xtrabackup-test-84
+      - percona-xtrabackup-dbg-84
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona XtraBackup new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtrabackup-84
+      - percona-xtrabackup-test-84
+      - percona-xtrabackup-84-debuginfo
+    when: ansible_os_family == "RedHat"

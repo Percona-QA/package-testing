@@ -1,0 +1,38 @@
+---
+# This playbook does the following:
+#   requires the environment vars to be set: KMS_KEY_ID, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+#   enables Percona testing repository
+#   installs latest version of PS 8.4, PXB 8.4 with kms component and runs some tests
+
+- import_playbook: ps_84_kms.yml
+
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    gnupg_home: /root/.gnupg
+    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+  tasks:
+  - name: Enable PXB 84 repo
+    command: percona-release enable-only pxb-84-lts testing
+
+  - name: install Percona XtraBackup 8.4 packages
+    include_tasks: ../tasks/install_pxb84.yml
+
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb84
+
+  - name: check that Percona XtraBackup package versions are correct
+    command: /package-testing/package_check.sh pxb84
+
+  - name: run backup
+    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
+
+  - name: prepare backup on Redhat/CentOS
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --component-keyring-config=/usr/lib64/mysql/plugin/component_keyring_kms.cnf
+    when: ansible_os_family == "RedHat"
+
+  - name: prepare backup on Debian/Ubuntu
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --component-keyring-config=/usr/lib/mysql/plugin/component_keyring_kms.cnf
+    when: ansible_os_family == "Debian"
