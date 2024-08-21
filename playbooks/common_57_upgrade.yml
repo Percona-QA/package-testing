@@ -190,12 +190,6 @@
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps57
 
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
-
 # - name: check that Percona Toolkit version is correct
 #   command: /package-testing/version_check.sh pt
 

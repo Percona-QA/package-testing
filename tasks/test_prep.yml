@@ -257,3 +257,7 @@
   - name: disable mysql dnf for rhel 8
     shell: dnf module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: enable  epel-release for OL8
+    command: dnf install -y oracle-epel-release-el8
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"

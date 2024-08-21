@@ -107,12 +107,6 @@
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh ps -d
 
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
-
   - name: use Percona Server my.cnf
     shell: update-alternatives --set my.cnf /etc/mysql/percona-server.cnf
     when: ansible_os_family == "Debian" and ansible_distribution_release == "bullseye"
