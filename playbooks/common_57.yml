@@ -11,7 +11,7 @@
   become: true
   become_method: sudo
   environment:
-    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"      
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
   - name: include tasks for test env setup
@@ -27,7 +27,7 @@
       mode: '0644'
       owner: root
       group: root
- 
+
 
   - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_testing_repo.yml
@@ -143,6 +143,12 @@
 
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
 
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
