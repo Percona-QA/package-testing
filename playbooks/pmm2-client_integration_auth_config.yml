@@ -139,9 +139,12 @@
         - "'Running' in node_exporter_status.stdout"
 
   - name: check if Metric End point with Auth works for Node Exporter
-    shell: "{{item}}"
+    include_tasks: ../tasks/verify_pmm2_metric.yml
+    loop:
+    #node_{{ instance_ip }}
+      - { service_name: 'node_exporter', metric: 'mongodb_up 1' }
     with_items:
-      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0 --agent_password {{pmm_auth_password}}"
+      - "bash -x ../package-testing/scripts/pmm2_check_metric.sh --metric_name node_textfile_scrape_error --pmm_server_ip {{pmm_server_address}} --agent_type node_exporter --metric_value 0 --agent_password {{pmm_auth_password}}"
 
   - name: Fetch PMM-Admin version via pmm-admin status output
     shell: pmm-admin status | grep pmm-admin | awk -F' ' '{print $3}'
