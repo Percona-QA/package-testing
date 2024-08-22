@@ -1,4 +1,5 @@
-# This task install Percona XtraBackup 8.0 on CentOS and Debian/Ubuntu
+# This task install Percona XtraBackup 8.4 on CentOS and Debian/Ubuntu
+
 #
   - name: install Percona XtraBackup new deb packages
     apt:

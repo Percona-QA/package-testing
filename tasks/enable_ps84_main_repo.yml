@@ -41,6 +41,10 @@
       disable_gpg_check: yes
     when: ansible_os_family == "RedHat"
 
+  - name: Add ARM support into percona-release
+    shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
+    when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+
   - name: enable the PS-84 main repo
     command: percona-release enable-only ps-84-lts release
 

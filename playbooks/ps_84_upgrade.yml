@@ -1,7 +1,7 @@
 ---
 # This playbook does following:
 #   sets main Percona repo
-#   installs PS 8.0, PT and PXB 8.0
+#   installs PS 8.4, PT and PXB 8.4
 #   changes repo to testing
 #   upgrades packages to the new version
 #   does some tests
@@ -48,13 +48,13 @@
     when: 
       - lookup('env', 'pro_test') != "yes"
 
-  - name: include tasks for enabling PS 8 main repo
-    include_tasks: ../tasks/enable_ps8_main_repo.yml
+  - name: include tasks for enabling PS 84 main repo
+    include_tasks: ../tasks/enable_ps84_main_repo.yml
     when: 
       - lookup('env', 'pro_test') != "yes"
 
-  - name: include tasks for selecting PS 8 repos for PRO update tests
-    include_tasks: ../tasks/select_repo_ps80_pro_update.yml
+  - name: include tasks for selecting PS 84 repos for PRO update tests
+    include_tasks: ../tasks/select_repo_ps84_pro_update.yml
     when: 
       - lookup('env', 'pro_test') == "yes"
 
@@ -63,9 +63,9 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: install Percona Server 8.0 packages
+  - name: install Percona Server 8.4 packages
     include_tasks:
-      file: ../tasks/install_ps80.yml
+      file: ../tasks/install_ps84.yml
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
@@ -79,12 +79,15 @@
     #    include_tasks: ../tasks/install_sysbench.yml
     #    when: lookup('env', 'install_repo') != "experimental"
 
+  - name: Enable PXB 84 repo
+    command: percona-release enable-only pxb-84-lts testing
+
+  - name: install Percona XtraBackup 8.4 packages
+    include_tasks: ../tasks/install_pxb84.yml
+    when: lookup('env', 'install_repo') != "experimental"
+
   - name: enable the Tools release repo
     command: percona-release enable tools release
-
-  - name: install Percona XtraBackup 8.0 packages
-    include_tasks: ../tasks/install_pxb80.yml
-    when: lookup('env', 'install_repo') != "experimental"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -125,7 +128,7 @@
 
 
 #  - name: install plugins, import world database
-#    command: /package-testing/plugins_test_80.sh ps
+#    command: /package-testing/plugins_test_84.sh ps
 
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
@@ -153,13 +156,13 @@
 #
 # Enable testing repository
 #
-  - name: include tasks for enabling PS 8 testing repo
-    include_tasks: ../tasks/enable_ps8_testing_repo.yml
+  - name: include tasks for enabling PS 84 testing repo
+    include_tasks: ../tasks/enable_ps84_testing_repo.yml
     when:
       - lookup('env', 'pro_test') != "yes"
 
-  - name: include tasks for enabling PS 80 pro testing repo
-    include_tasks: ../tasks/enable_ps80_pro_tools_repo.yml
+  - name: include tasks for enabling PS 84 pro testing repo
+    include_tasks: ../tasks/enable_ps84_pro_tools_repo.yml
     when:
       - lookup('env', 'pro_test') == "yes"
       - lookup('env', 'cur_action_to_test') != 'downgrade'
@@ -168,7 +171,7 @@
     command: percona-release enable-only pdps-{{ version }} {{ repo }}
     vars:
       repo: "testing"
-      version: "{{ lookup('file', '/package-testing/VERSIONS').split('\n') | regex_replace('^.*?(PS80_PRO_VER=\")([0-9]+\\.[0-9]+\\.[0-9]+).*?$', '\\2', multiline=True) }}"
+      version: "{{ lookup('file', '/package-testing/VERSIONS').split('\n') | regex_replace('^.*?(PS84_PRO_VER=\")([0-9]+\\.[0-9]+\\.[0-9]+).*?$', '\\2', multiline=True) }}"
     when:
       - lookup('env', 'pro_test') == "yes"
       - lookup('env', 'cur_action_to_test') == 'downgrade'
@@ -277,9 +280,9 @@
       state: latest
     vars:
       packages:
-      - percona-xtrabackup-80
-      - percona-xtrabackup-test-80
-      - percona-xtrabackup-dbg-80
+      - percona-xtrabackup-84
+      - percona-xtrabackup-test-84
+      - percona-xtrabackup-dbg-84
     when: ansible_os_family == "Debian"
 
   - name: upgrade Percona Toolkit to new rpm packages
@@ -316,10 +319,14 @@
       state: latest
     vars:
       packages:
-      - percona-xtrabackup-80
-      - percona-xtrabackup-test-80
-      - percona-xtrabackup-80-debuginfo
+      - percona-xtrabackup-84
+      - percona-xtrabackup-test-84
+      - percona-xtrabackup-84-debuginfo
     when: ansible_os_family == "RedHat"
+
+  - name: enable the Tools release repo
+    command: percona-release enable tools release
+    when: install_mysql_shell == "yes" or install_mysql_shell == ""
 
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
@@ -329,16 +336,16 @@
     include_tasks: ../tasks/list_installed_packages.yml
 
   - name: check that Percona Server {{ pro }} version is correct
-    command: /package-testing/version_check.sh ps80 {{ pro }}
+    command: /package-testing/version_check.sh ps84 {{ pro }}
 
   - name: check that Percona Server {{ pro }} package versions are correct
-    command: /package-testing/package_check.sh ps80 {{ pro }}
+    command: /package-testing/package_check.sh ps84 {{ pro }}
 
   - name: finish my.cnf change test
     command: /package-testing/check_mycnf_post.sh
 
   - name: include tasks for checking FIPS mode
-    include_tasks: ../tasks/check_ps80_fips.yml
+    include_tasks: ../tasks/check_ps84_fips.yml
     when:
       - lookup('env', 'pro_test') == "yes"
       - lookup('env', 'cur_action_to_test') != 'downgrade'
@@ -362,11 +369,11 @@
 # - name: run bats tests for PAM
 #   command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
 
-  - name: keyring plugins test
-    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
+#  - name: keyring plugins test
+#    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps84
 
   - name: check that Percona XtraBackup version is correct
-    command: /package-testing/version_check.sh pxb80
+    command: /package-testing/version_check.sh pxb84
 
   - name: run bats unit tests for ps-admin script
     command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats

@@ -39,7 +39,11 @@
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
 
-  - name: enable the ps-84-lts testing repo
+  - name: Add ARM support into percona-release
+    shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
+    when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+
+  - name: enable the PS-84-LTS testing repo
     command: percona-release enable-only ps-84-lts testing
 
   - name: enable the pxb-84 release repo
@@ -52,3 +56,7 @@
       yum makecache
     when: ansible_os_family == "RedHat"
 
+  - name: Update APT cache
+    apt:
+      update_cache: yes
+    when: ansible_os_family == "Debian"

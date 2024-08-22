@@ -1,0 +1,34 @@
+# This task removes Percona Server 8.0 on CentOS and Debian/Ubuntu
+#
+
+  - name: remove Percona Server deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: absent
+    vars:
+      packages:
+      - percona-server-server
+      - percona-server-test
+      - percona-server-dbg
+      - percona-server-source
+      - percona-server-client
+      - percona-server-tokudb
+      - percona-server-rocksdb
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+      disablerepo: "epel"
+    vars:
+      packages:
+      - percona-server-server
+      - percona-server-client
+      - percona-server-test
+      - percona-server-debuginfo
+      - percona-server-devel
+      - percona-server-tokudb
+      - percona-server-rocksdb
+    when: ansible_os_family == "RedHat"
