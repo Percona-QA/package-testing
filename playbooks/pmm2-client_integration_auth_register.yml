@@ -96,10 +96,11 @@
     when: '"ps-8.0" in enabled_db'
     include_tasks: ../tasks/install_and_add_to_pmm_ps_80.yml
 
-  - name: check if Metric End point with Auth works for Mysqld Exporter
-    shell: "{{item}}"
-    with_items:
-      - "bash -x ../scripts/pmm2_check_metric.sh --service_name mysql_{{ instance_ip }} --metric_name mysql_up --pmm_server_ip {{pmm_server_address}} --agent_type mysqld_exporter --metric_value 1"
+  - name: Verify if Metric Endpoint with Auth works for Mysqld Exporter
+    when: '"ps-" in enabled_db | join("")'
+    include_tasks: ../tasks/verify_pmm2_metric.yml
+    loop:
+      - { service_name: '{{ mysql_service_name }}', metric: 'mysql_up 1' }
 ## end PS
 
 ### start PSMDB 
