@@ -5,29 +5,29 @@
     command: /usr/bin/dnf module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-#  - name: Receive GPG key 1
-#    command: "gpg --batch --keyserver keyserver.ubuntu.com --recv-keys {{ percona_key1 }}"
-#    environment:
-#      GNUPGHOME: "{{ gnupg_home }}"
-#    when: ansible_os_family == "RedHat"
+  - name: Receive GPG key 1
+    command: "gpg --batch --keyserver keyserver.ubuntu.com --recv-keys {{ percona_key1 }}"
+    environment:
+      GNUPGHOME: "{{ gnupg_home }}"
+    when: ansible_os_family == "RedHat"
 
-#  - name: Export GPG key 1
-#    command: "gpg --batch --export --armor {{ percona_key1 }}"
-#    register: gpg_key1
-#    environment:
-#      GNUPGHOME: "{{ gnupg_home }}"
-#    when: ansible_os_family == "RedHat"
+  - name: Export GPG key 1
+    command: "gpg --batch --export --armor {{ percona_key1 }}"
+    register: gpg_key1
+    environment:
+      GNUPGHOME: "{{ gnupg_home }}"
+    when: ansible_os_family == "RedHat"
 
- # - name: Save GPG key 1 to file
- #   copy:
- #     content: "{{ gpg_key1.stdout }}"
- #     dest: "{{ percona_key1_file }}"
- #     mode: '0644'
- #   when: ansible_os_family == "RedHat"
+  - name: Save GPG key 1 to file
+    copy:
+      content: "{{ gpg_key1.stdout }}"
+      dest: "{{ percona_key1_file }}"
+      mode: '0644'
+    when: ansible_os_family == "RedHat"
 
-#  - name: Import GPG keys with rpmkeys
-#    command: "rpmkeys --import {{ percona_key1_file }}"
-#    when: ansible_os_family == "RedHat"
+  - name: Import GPG keys with rpmkeys
+    command: "rpmkeys --import {{ percona_key1_file }}"
+    when: ansible_os_family == "RedHat"
 
   - name: Install percona repository package
     apt:
