@@ -236,7 +236,7 @@
     yum:
       name: "{{ packages }}"
       state: latest
-      skip_broken: yes
+      allowerasing: yes
     vars:
       packages:
       - percona-xtrabackup-84
