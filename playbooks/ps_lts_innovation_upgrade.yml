@@ -175,6 +175,7 @@
       name: "{{ packages }}"
       update_cache: no
       state: latest
+      allowerasing: yes
     vars:
       packages:
       - percona-xtrabackup-84
