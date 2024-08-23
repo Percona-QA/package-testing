@@ -41,7 +41,6 @@
       state: latest
       disablerepo: "epel"
       update_cache: yes
-      allowerasing: yes
     vars:
       packages:
       - percona-server-server
