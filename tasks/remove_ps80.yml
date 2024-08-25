@@ -22,7 +22,6 @@
       name: "{{ packages }}"
       state: absent
       disablerepo: "epel"
-      allowerasing: yes
     vars:
       packages:
       - percona-server-server
