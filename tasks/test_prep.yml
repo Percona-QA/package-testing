@@ -222,10 +222,10 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+    - wget --no-check-certificate -O master.zip https://github.com/eleo007/package-testing/archive/telem_ph1_pull.zip
     - unzip master.zip
     - rm -f master.zip
-    - mv package-testing-master /package-testing
+    - mv package-testing-telem_ph1_pull /package-testing
 
   - name: install latest bats from github
     command: "{{ item }}"
