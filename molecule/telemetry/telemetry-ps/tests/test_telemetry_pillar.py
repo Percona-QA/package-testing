@@ -237,8 +237,15 @@ def test_ta_logrotate_dependency(host):
         print(dependencies_list)
         assert 'logrotate' in dependencies_list
 
+def test_ta_no_restart(host):
+    with host.sudo("root"):
+        if update != 'yes':
+            ta_started_num = host.run(f'grep -c "values from config:" {ta_log_file}')
+            assert int(ta_started_num.stdout) == 1, (ta_started_num.stdout, ta_started_num.stderr)
+            ta_terminated_num = host.run(f'grep -c "Received signal: terminated, shutdow" {ta_log_file}')
+            assert int(ta_terminated_num.stdout) == 0, (ta_terminated_num.stdout, ta_terminated_num.stderr)
 
-# check that the old lo0g file is not present after update and that its content is copied to the new log
+# check that the old log file is not present after update and that its content is copied to the new log.  To be removed after 1.0.1-1 to 1.0.1-2 update
 def test_ta_update(host):
     with host.sudo("root"):
         if update == 'yes':
