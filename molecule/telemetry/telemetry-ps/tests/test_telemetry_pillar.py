@@ -176,20 +176,21 @@ def test_ta_dirs(host):
     assert host.file('/usr/local/percona/telemetry_uuid').group == 'percona-telemetry'
     assert oct(host.file('/usr/local/percona/telemetry_uuid').mode) == '0o664'
 
+# The rights for TA logs were updated starting from 1.0.1-2
 def test_ta_log_files(host):
-    assert host.file(ta_log_dir).user == 'daemon'
-    assert host.file(ta_log_dir).group == 'percona-telemetry'
     if pak_version != '1.0.1-1':
+        assert host.file(ta_log_dir).user == 'daemon'
+        assert host.file(ta_log_dir).group == 'percona-telemetry'
         assert oct(host.file(ta_log_dir).mode) == '0o775'
     assert host.file(ta_log_file).is_file
-    assert host.file(ta_log_file).user == 'daemon'
-    assert host.file(ta_log_file).group == 'percona-telemetry'
     if pak_version != '1.0.1-1':
+        assert host.file(ta_log_file).user == 'daemon'
+        assert host.file(ta_log_file).group == 'percona-telemetry'
         assert oct(host.file(ta_log_file).mode) == '0o660'
     assert host.file(ta_error_log_file).is_file
-    assert host.file(ta_error_log_file).user == 'daemon'
-    assert host.file(ta_error_log_file).group == 'percona-telemetry'
     if pak_version != '1.0.1-1':
+        assert host.file(ta_error_log_file).user == 'daemon'
+        assert host.file(ta_error_log_file).group == 'percona-telemetry'
         assert oct(host.file(ta_error_log_file).mode) == '0o660'
 
 def test_ta_rotation_params(host):
@@ -234,14 +235,16 @@ def test_ta_platform_default_values(host, ta_key, ref_value):
         assert platform_config[ta_key] == ref_value
 
 def test_ta_logrotate_dependency(host):
-    with host.sudo("root"):
-        dist = host.system_info.distribution
-        if dist.lower() in deb_dists:
-            dependencies_list = host.run('apt-cache depends percona-telemetry-agent').stdout
-        else:
-            dependencies_list = host.run('yum deplist percona-telemetry-agent').stdout
-        print(dependencies_list)
-        assert 'logrotate' in dependencies_list
+    if pak_version == '1.0.1-1':
+        pytest.skip("This check only for 1.0.1-1 package version")
+    else:
+        with host.sudo("root"):
+            dist = host.system_info.distribution
+            if dist.lower() in deb_dists:
+                dependencies_list = host.run('apt-cache depends percona-telemetry-agent').stdout
+            else:
+                dependencies_list = host.run('yum deplist percona-telemetry-agent').stdout
+            assert 'logrotate' in dependencies_list
 
 def test_ta_no_restart(host):
     with host.sudo("root"):
@@ -449,7 +452,6 @@ def test_ps_telem_disabled_permanent(host):
         time.sleep(15)
         log_file_content = host.file(log_file).content_string
         telemetry_opt_result = host.check_output(f'mysql -Ns -e "show variables like \'percona_telemetry%\';"')
-        print(telemetry_opt_result)
         percona_telemetry_disable_result = host.check_output(f'mysql -Ns -e  "select @@percona_telemetry_disable;"')
         assert "Component percona_telemetry reported: 'Applying Telemetry grace interval" not in log_file_content
         assert 'percona_telemetry.grace_interval' not in telemetry_opt_result
@@ -688,7 +690,6 @@ def test_ps_packages_values(host):
                         else:
                             get_pkg_info = host.run(f"yum repoquery --qf '%{{version}}|%{{release}}|%{{from_repo}}' --installed {hist_pkg_name}")
                             if hist_pkg_name == 'percona-icu-data-files':
-                                print(get_pkg_info.stdout)
                         pkg_info = get_pkg_info.stdout.strip('\n').split('|')
                         pkg_version, pkg_release, pkg_repository = pkg_info
                         pkg_release = pkg_release.replace('.','-')
