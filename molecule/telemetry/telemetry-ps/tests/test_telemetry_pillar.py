@@ -34,7 +34,10 @@ packages_list = ['percona-server-server', 'percona-server-client', 'percona-xtra
 ta_root_dir = '/usr/local/percona/telemetry/'
 ta_pillar_dir_ps = ta_root_dir + 'ps'
 ta_history_dir = ta_root_dir + 'history/'
-ta_log_dir = "/var/log/percona/telemetry-agent/"
+if pak_version == '1.0.1-1':
+    ta_log_dir = "/var/log/percona/"
+else:
+    ta_log_dir = "/var/log/percona/telemetry-agent/"
 ta_log_file = ta_log_dir + "telemetry-agent.log"
 ta_error_log_file = ta_log_dir + "telemetry-agent-error.log"
 
@@ -176,15 +179,18 @@ def test_ta_dirs(host):
 def test_ta_log_files(host):
     assert host.file(ta_log_dir).user == 'daemon'
     assert host.file(ta_log_dir).group == 'percona-telemetry'
-    assert oct(host.file(ta_log_dir).mode) == '0o775'
+    if pak_version != '1.0.1-1':
+        assert oct(host.file(ta_log_dir).mode) == '0o775'
     assert host.file(ta_log_file).is_file
     assert host.file(ta_log_file).user == 'daemon'
     assert host.file(ta_log_file).group == 'percona-telemetry'
-    assert oct(host.file(ta_log_file).mode) == '0o660'
+    if pak_version != '1.0.1-1':
+        assert oct(host.file(ta_log_file).mode) == '0o660'
     assert host.file(ta_error_log_file).is_file
     assert host.file(ta_error_log_file).user == 'daemon'
     assert host.file(ta_error_log_file).group == 'percona-telemetry'
-    assert oct(host.file(ta_error_log_file).mode) == '0o660'
+    if pak_version != '1.0.1-1':
+        assert oct(host.file(ta_error_log_file).mode) == '0o660'
 
 def test_ta_rotation_params(host):
     rotate_file_content = host.file("/etc/logrotate.d/percona-telemetry-agent").content_string
@@ -738,20 +744,23 @@ def test_disable_service(host):
 
 
 def test_log_rotation(host):
-    with host.sudo("root"):
-        log_files_num_before = len(host.file(ta_log_dir).listdir())
-        assert log_files_num_before == 2
-        # we do not rorate empty files but error log is empty by default so we need to write smth into it
-        host.check_output(f"echo 'String for test' >> {ta_error_log_file}")
-        host.check_output("logrotate -f /etc/logrotate.d/percona-telemetry-agent")
-        log_files_num_after = len(host.file(ta_log_dir).listdir())
-        assert log_files_num_after == 4
-        log_files_list = host.file(ta_log_dir).listdir()
-        log_files_string = ''.join(log_files_list)
-        assert re.search(r'telemetry-agent.log-[0-9]+.gz', log_files_string)
-        assert re.search(r'telemetry-agent-error.log-[0-9]+.gz', log_files_string)
-        # # remove old rotated logs add with old date and rotate again to check that no more than 4 logs are kept
-        # host.check_output(f"touch {ta_log_dir}/telemetry-agent.log-20240812.gz {ta_log_dir}/telemetry-agent.log-20240812.gz telemetry-agent.log-20240812.gz")
+    if pak_version == '1.0.1-1':
+        pytest.skip("This test for package version 1.0.1-2+")
+    else:
+        with host.sudo("root"):    
+            log_files_num_before = len(host.file(ta_log_dir).listdir())
+            assert log_files_num_before == 2
+            # we do not rorate empty files but error log is empty by default so we need to write smth into it
+            host.check_output(f"echo 'String for test' >> {ta_error_log_file}")
+            host.check_output("logrotate -f /etc/logrotate.d/percona-telemetry-agent")
+            log_files_num_after = len(host.file(ta_log_dir).listdir())
+            assert log_files_num_after == 4
+            log_files_list = host.file(ta_log_dir).listdir()
+            log_files_string = ''.join(log_files_list)
+            assert re.search(r'telemetry-agent.log-[0-9]+.gz', log_files_string)
+            assert re.search(r'telemetry-agent-error.log-[0-9]+.gz', log_files_string)
+            # # remove old rotated logs add with old date and rotate again to check that no more than 4 logs are kept
+            # host.check_output(f"touch {ta_log_dir}/telemetry-agent.log-20240812.gz {ta_log_dir}/telemetry-agent.log-20240812.gz telemetry-agent.log-20240812.gz")
 
 
 def test_path_absent_after_removal(host):
