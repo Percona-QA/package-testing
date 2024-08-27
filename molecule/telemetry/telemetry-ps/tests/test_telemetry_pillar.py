@@ -266,12 +266,12 @@ def test_ps_ta_dir(host):
     assert host.file(ta_pillar_dir_ps).user == 'mysql'
     assert host.file(ta_pillar_dir_ps).group == 'percona-telemetry'
     assert oct(host.file(ta_pillar_dir_ps).mode) == '0o6775'
-    #Skip till fixed
     with host.sudo("root"):
         dist = host.system_info.distribution
         if dist.lower() in deb_dists:
             pytest.skip("This check only for RPM distributions")
         else:
+            # Check for SElinux attr
             security_attrs = host.run(f'ls -laZ {ta_root_dir} | grep ps').stdout
             assert 'system_u:object_r:mysqld_db_t:s0' in security_attrs
 
@@ -469,7 +469,7 @@ def test_ps_telem_disabled_permanent(host):
 ############# TA FUNCTIONS  #############
 #########################################
 
-# We generate 1 record nd copy generated file to '/package-testing/telemetry/reference/'
+# We generate 1 record and copy generated file to '/package-testing/telemetry/reference/'
 def test_telemetry_scrape_postponed(host):
     with host.sudo("root"):
         host.run('systemctl stop mysql')
@@ -767,16 +767,18 @@ def test_path_absent_after_removal(host):
                 host.check_output("yum remove -y percona-server-server")
         assert not host.file(ta_pillar_dir_ps).exists
 
-def test_ta_package_removed(host):
-    dist = host.system_info.distribution
-    with host.sudo("root"):
-        pkg = host.package("percona-telemetry-agent")
-        if pkg.is_installed:
-            if dist.lower() in deb_dists:
-                host.check_output("apt autoremove -y percona-telemetry-agent")
-            else:
-                host.check_output("yum remove -y percona-telemetry-agent")       
-        assert not pkg.is_installed
+# In case ta package is installed before PS package (not as dependency) - it is not removed with the pillar package.
+# So to check that everything is cleaned up - we delete it separately. Keeping JIC commented out
+# def test_ta_package_removed(host):
+#     dist = host.system_info.distribution
+#     with host.sudo("root"):
+#         pkg = host.package("percona-telemetry-agent")
+#         if pkg.is_installed:
+#             if dist.lower() in deb_dists:
+#                 host.check_output("apt autoremove -y percona-telemetry-agent")
+#             else:
+#                 host.check_output("yum remove -y percona-telemetry-agent")
+#         assert not pkg.is_installed
 
 def test_ta_service_removed_deb(host):
     dist = host.system_info.distribution
