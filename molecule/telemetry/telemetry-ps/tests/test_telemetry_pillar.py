@@ -769,23 +769,22 @@ def test_path_absent_after_removal(host):
 
 # In case ta package is installed before PS package (not as dependency) - it is not removed with the pillar package.
 # So to check that everything is cleaned up - we delete it separately. Keeping JIC commented out
-# def test_ta_package_removed(host):
-#     dist = host.system_info.distribution
-#     with host.sudo("root"):
-#         pkg = host.package("percona-telemetry-agent")
-#         if pkg.is_installed:
-#             if dist.lower() in deb_dists:
-#                 host.check_output("apt autoremove -y percona-telemetry-agent")
-#             else:
-#                 host.check_output("yum remove -y percona-telemetry-agent")
-#         assert not pkg.is_installed
+def test_ta_package_removed(host):
+    dist = host.system_info.distribution
+    with host.sudo("root"):
+        pkg = host.package("percona-telemetry-agent")
+        assert not pkg.is_installed
+
+def test_ta_service_removed_both(host):
+    with host.sudo("root"):
+        ta_serv = host.service("percona-telemetry-agent")
+        assert ta_serv.exists
 
 def test_ta_service_removed_deb(host):
     dist = host.system_info.distribution
     if dist.lower() not in deb_dists:
         pytest.skip("This test only for DEB distributions")
     with host.sudo("root"):
-        # host.run("systemctl daemon-reload")
         ta_serv_result = host.run("systemctl status percona-telemetry-agent").stderr
     assert "Unit percona-telemetry-agent.service could not be found." in ta_serv_result
     assert host.file(ta_history_dir).exists
