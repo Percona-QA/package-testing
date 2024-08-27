@@ -6,7 +6,6 @@
   vars:
     db_list:
       - "{{ (false) | ternary('ps-8.0','') }}"
-      - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '9') | ternary('ps-5.7','') }}"
       - "{{ (ansible_distribution == 'Debian') | ternary('ps-8.0','') }}"
       - "{{ (ansible_distribution == 'Ubuntu') | ternary('ps-8.0','') }}"
       - "{{ (ansible_distribution == 'Debian' and ansible_distribution_major_version > '10') | ternary('psmdb-70','') }}"
