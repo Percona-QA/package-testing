@@ -132,7 +132,7 @@
     command: percona-release enable-only telemetry {{ repo }}
     vars:
       repo: "{{ lookup('env', 'TA_INSTALL_REPO') }}"
-    when: lookup('env', 'TA_INSTALL_REPO') != "main" and lookup('env', 'TA_UPDATE') != "yes"
+    when: lookup('env', 'TA_INSTALL_REPO') != "release" and lookup('env', 'TA_UPDATE') != "yes"
 
   - name: enable the ps-84-lts {{ repo }} 
     command: percona-release enable ps-84-lts {{ repo }} 
@@ -177,7 +177,7 @@
     command: percona-release enable telemetry {{ repo }}
     vars:
       repo: "{{ lookup('env', 'TA_INSTALL_REPO') }}"
-    when: lookup('env', 'TA_INSTALL_REPO') != "main" and lookup('env', 'TA_UPDATE') == "yes"
+    when: lookup('env', 'TA_INSTALL_REPO') != "release" and lookup('env', 'TA_UPDATE') == "yes"
 
 ## TA UPGRADE START
 # install telemetry-agent package from testing/experimental
