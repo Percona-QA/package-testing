@@ -778,16 +778,15 @@ def test_ta_package_removed(host):
 def test_ta_service_removed_both(host):
     with host.sudo("root"):
         ta_serv = host.service("percona-telemetry-agent")
-        assert ta_serv.exists
+        assert not ta_serv.exists
 
 def test_ta_service_removed_deb(host):
     dist = host.system_info.distribution
     if dist.lower() not in deb_dists:
         pytest.skip("This test only for DEB distributions")
     with host.sudo("root"):
-        ta_serv_result = host.run("systemctl status percona-telemetry-agent").stderr
-    assert "Unit percona-telemetry-agent.service could not be found." in ta_serv_result
-    assert host.file(ta_history_dir).exists
+        ta_serv_result = host.run("systemctl status percona-telemetry-agent")
+    assert "Unit percona-telemetry-agent.service could not be found." in ta_serv_result.stderr, ta_serv_result
 
 def test_ta_service_removed_rpm(host):
     dist = host.system_info.distribution
@@ -795,8 +794,11 @@ def test_ta_service_removed_rpm(host):
         pytest.skip("This test only for RPM distributions")
     with host.sudo("root"):
         # https://perconadev.atlassian.net/browse/PKG-46
-        ta_serv_result = host.run("systemctl status percona-telemetry-agent").stderr
-    assert "Unit percona-telemetry-agent.service could not be found." in ta_serv_result
+        ta_serv_result = host.run("systemctl status percona-telemetry-agent")
+    assert "Unit percona-telemetry-agent.service could not be found." in ta_serv_result.stderr, ta_serv_result
+
+
+def test_ta_history_dir_kept(host):
     assert host.file(ta_history_dir).exists
 
 def test_ta_process_not_running(host):
