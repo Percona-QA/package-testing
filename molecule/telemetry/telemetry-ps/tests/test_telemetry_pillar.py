@@ -275,6 +275,8 @@ def test_ps_ta_dir(host):
     assert host.file(ta_pillar_dir_ps).user == 'mysql'
     assert host.file(ta_pillar_dir_ps).group == 'percona-telemetry'
     assert oct(host.file(ta_pillar_dir_ps).mode) == '0o6775'
+
+def test_ps_ta_dir_selinux_attr(host):
     with host.sudo("root"):
         dist = host.system_info.distribution
         if dist.lower() in deb_dists:
