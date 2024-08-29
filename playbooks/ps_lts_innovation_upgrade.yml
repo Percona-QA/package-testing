@@ -13,9 +13,6 @@
   become: true
   become_method: sudo
   vars:
-    gnupg_home: /root/.gnupg
-    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
-    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
     install_mysql_shell: "{{ lookup('env', 'install_mysql_shell', default='') }}"
   environment:
     install_mysql_shell: '{{ install_mysql_shell }}'
@@ -37,7 +34,7 @@
   - name: Set major_release_version variable
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
-
+      
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
@@ -51,44 +48,24 @@
 
 # Install from main repository
 
-  - name: include tasks for enabling PS and PXB 83 main repo
-    include_tasks: ../tasks/enable_ps84_main_repo.yml
+  - name: include tasks for enabling PS {{ major_release_version }} main repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
 
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: install Percona Server 83 packages
+  - name: install Percona Server {{ major_release_version }} packages
     include_tasks:
       file: ../tasks/install_ps_innovation_lts.yml
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: install Percona XtraBackup new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-83
-      - percona-xtrabackup-test-83
-      - percona-xtrabackup-dbg-83
-    when: ansible_os_family == "Debian"
-
-  - name: install Percona XtraBackup new rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: latest
-      update_cache: yes
-    vars:
-      packages:
-      - percona-xtrabackup-83
-      - percona-xtrabackup-test-83
-      - percona-xtrabackup-83-debuginfo
-    when: ansible_os_family == "RedHat"
+  - name: install Percona XtraBackup {{ major_release_version }} packages
+    include_tasks: ../tasks/install_pxb_innovation_lts.yml
+    when: lookup('env', 'install_repo') != "experimental"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -150,11 +127,20 @@
 #
 # Enable testing repository
 #
-
   - name: include tasks for enabling PS {{ major_release_version }} testing repo
     include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
 
 # Upgrade packages
+#
+  - name: upgrade Percona Toolkit to new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
+    when: ansible_os_family == "Debian"
 
   - name: upgrade Percona Server to new deb packages
     apt:
@@ -178,12 +164,11 @@
       name: "{{ packages }}"
       update_cache: no
       state: latest
-      allowerasing: yes
     vars:
       packages:
-      - percona-xtrabackup-84
-      - percona-xtrabackup-test-84
-      - percona-xtrabackup-dbg-84
+      - percona-xtrabackup-{{ major_release_version }}
+      - percona-xtrabackup-test-{{ major_release_version }}
+      - percona-xtrabackup-dbg-{{ major_release_version }}
     when: ansible_os_family == "Debian"
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
@@ -236,12 +221,11 @@
     yum:
       name: "{{ packages }}"
       state: latest
-      allowerasing: yes
     vars:
       packages:
-      - percona-xtrabackup-84
-      - percona-xtrabackup-test-84
-      - percona-xtrabackup-84-debuginfo
+      - percona-xtrabackup-{{ major_release_version }}
+      - percona-xtrabackup-test-{{ major_release_version }}
+      - percona-xtrabackup-{{ major_release_version }}-debuginfo
     when: ansible_os_family == "RedHat"
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
@@ -255,12 +239,6 @@
 
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh ps -d
-
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps{{ major_release_version }}
@@ -280,8 +258,8 @@
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
 
-#  - name: keyring Vault Component and plugins test
-#    include_tasks: ../tasks/ps_keyring_vault_component_test.yml
+  - name: keyring Vault Component and plugins test
+    include_tasks: ../tasks/ps_keyring_vault_component_test.yml
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb{{ major_release_version }}

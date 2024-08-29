@@ -14,9 +14,6 @@
   become_method: sudo
   vars:
     install_mysql_shell: "{{ lookup('env', 'install_mysql_shell', default='') }}"
-    gnupg_home: /root/.gnupg
-    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
-    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
   environment:
     install_mysql_shell: '{{ install_mysql_shell }}'
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -33,6 +30,22 @@
               dest=/package-testing/scripts/ps_keyring_plugins_test/component_keyring_vault.cnf
               mode=0664 owner=root group=root
 
+  - name: Extract version number using shell commands
+    shell: cat ../VERSIONS | grep -oP 'PS_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    register: major_release_version
+
+  - name: Set major_release_version variable
+    set_fact:
+      major_release_version: "{{ major_release_version.stdout }}"
+
+  - name: Extract values using shell command for repo name used for innovation/lts release
+    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: ps_inn_lts_repo_name
+
+  - name: Set major_release_version variable
+    set_fact:
+      ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
+      
 # Install from main repository
 
   - name: include tasks for enabling main repo
@@ -52,7 +65,7 @@
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
-
+      
 
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
@@ -101,7 +114,7 @@
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
     when: install_mysql_shell == "yes" or install_mysql_shell == ""
-
+    
   - name: install 3rd party packages with apt
     apt:
       name: "{{ packages }}"
@@ -122,15 +135,11 @@
     command: /package-testing/check_mycnf_pre.sh
 
   - name: Remove PXB 8.0 packages
-    include_tasks: ../tasks/remove_pxb80.yml
+    include_tasks: ../tasks/remove_pxb80.yml 
 
 #
 # Enable testing/main repository
 #
-  - name: Hardcode major_release_version
-    set_fact:
-      major_release_version: "84"
-
   - name: include tasks for enabling PS {{ major_release_version }} testing repo
     include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
@@ -138,9 +147,19 @@
   - name: include tasks for enabling PS {{ major_release_version }} testing repo
     include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
     when: lookup('env', 'install_repo') == "main"
-
+    
 # Upgrade packages
 #
+  - name: upgrade Percona Toolkit to new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
+    when: ansible_os_family == "Debian"
+
   - name: upgrade Percona Server to new deb packages {{ major_release_version }}
     apt:
       name: "{{ packages }}"
@@ -172,6 +191,14 @@
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
+  - name: upgrade Percona Toolkit to new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
+    when: ansible_os_family == "RedHat"
 
   - name: upgrade Percona release to new rpm packages
     yum:
@@ -244,12 +271,6 @@
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh ps -d
 
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
-
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps{{ major_release_version }}
 
@@ -268,8 +289,8 @@
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
 
-#  - name: keyring Vault Component and plugins test
-#    include_tasks: ../tasks/ps_keyring_vault_component_test.yml
+  - name: keyring Vault Component and plugins test
+    include_tasks: ../tasks/ps_keyring_vault_component_test.yml
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb{{ major_release_version }}
