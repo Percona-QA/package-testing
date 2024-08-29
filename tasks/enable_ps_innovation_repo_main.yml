@@ -23,11 +23,11 @@
   - name: Lit dir
     shell: ls -la && pwd
 
-  - name: enable the ps-84-lts testing repo
-    command: percona-release enable-only ps-8x-innovation release
+  - name: enable the PS-{{ major_release_version }} {{ ps_inn_lts_repo_name }} release repo
+    command: percona-release enable-only {{ ps_inn_lts_repo_name }} release
 
-  - name: enable the pxb-84 release repo
-    command: percona-release enable pxb-84-lts release
+  - name: enable the tools testing repo
+    command: percona-release enable tools testing
 
   - name: clean and update yum cache
     shell: |

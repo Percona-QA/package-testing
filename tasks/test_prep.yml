@@ -92,12 +92,6 @@
     shell: sed -i 's/mirror\.centos\.org/vault\.centos\.org/g;s/\#baseurl=/baseurl=/g;s/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS*.repo
     when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "8"
 
-  - name: update YUM cache for CentOS 8
-    yum:
-      update_cache: yes
-      state: present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
   - name: setup epel 8 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
     when: 
@@ -222,10 +216,10 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/kaushikpuneet07/package-testing/archive/fix-noble.zip
+    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
     - unzip master.zip
     - rm -f master.zip
-    - mv package-testing-fix-noble /package-testing
+    - mv package-testing-master /package-testing
 
   - name: install latest bats from github
     command: "{{ item }}"
