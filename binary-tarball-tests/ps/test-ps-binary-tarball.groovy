@@ -32,7 +32,7 @@ pipeline {
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.35${MINIMAL}.tar.gz"
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -62,7 +62,7 @@ pipeline {
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.35${MINIMAL}.tar.gz"
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -92,7 +92,7 @@ pipeline {
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.31${MINIMAL}.tar.gz"
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -122,7 +122,7 @@ pipeline {
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.35${MINIMAL}.tar.gz"
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -152,7 +152,7 @@ pipeline {
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.31${MINIMAL}.tar.gz"
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -182,7 +182,7 @@ pipeline {
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.34${MINIMAL}.tar.gz"
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -212,7 +212,7 @@ pipeline {
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.28${MINIMAL}.tar.gz"
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -242,7 +242,7 @@ pipeline {
                                 TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.17${MINIMAL}.tar.gz"
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
