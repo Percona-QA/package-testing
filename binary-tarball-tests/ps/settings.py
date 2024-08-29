@@ -87,7 +87,6 @@ ps57_executables = ps57_binaries + [
 ps57_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
-  ('group_replication','group_replication.so')
 )
 ps57_functions = (
   ('fnv1a_64', 'libfnv1a_udf.so', 'INTEGER'),('fnv_64', 'libfnv_udf.so', 'INTEGER'),('murmur_hash', 'libmurmur_udf.so', 'INTEGER'),
@@ -139,10 +138,10 @@ ps56_symlinks = (
 # 8.x
 ps8x_binaries = [
   'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog',
-  'bin/mysqldump', 'bin/mysqlimport', 'bin/mysqlpump', 'bin/mysqlshow',
+  'bin/mysqldump', 'bin/mysqlimport', 'bin/mysqlshow',
   'bin/mysqlslap', 'bin/mysqlcheck', 'bin/mysql_config_editor',
-  'bin/mysqlrouter', 'bin/mysqlrouter_passwd', 'bin/mysqlrouter_plugin_info', 'bin/mysql_secure_installation', 'bin/mysql_ssl_rsa_setup',
-  'bin/mysql_upgrade', 'bin/mysql_tzinfo_to_sql'
+  'bin/mysqlrouter', 'bin/mysqlrouter_passwd', 'bin/mysqlrouter_plugin_info', 'bin/mysql_secure_installation',
+  'bin/mysql_tzinfo_to_sql'
 ]
 ps8x_executables = ps8x_binaries + [
   'bin/ps-admin',
@@ -153,7 +152,7 @@ ps8x_plugins = (
   ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
   ('group_replication','group_replication.so'),('clone','mysql_clone.so'),
-  ('procfs', 'procfs.so'), ('authentication_ldap_sasl','authentication_ldap_sasl.so')
+  ('procfs', 'procfs.so')
 )
 ps8x_functions = (
   ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
@@ -168,16 +167,16 @@ ps8x_components = (
 ps8x_files = (
   'lib/libcoredumper.a', 
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.23.0.0' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.0' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so',
-  'lib/plugin/keyring_file.so','lib/plugin/component_binlog_utils_udf.so',
+  'lib/plugin/component_binlog_utils_udf.so',
   'lib/plugin/keyring_udf.so', 'lib/plugin/component_keyring_vault.so', 'lib/plugin/component_binlog_utils_udf.so',
   'lib/plugin/component_audit_log_filter.so', 'lib/plugin/component_masking_functions.so'
 )
 
 ps8x_symlinks = (
-  ('lib/libperconaserverclient.so.23','lib/libperconaserverclient.so.23.0.0'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.23.0.0'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.0.0'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.0'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 
 #####

@@ -55,15 +55,25 @@ source "${SCRIPT_PWD}/VERSIONS"
 
 # Extract the version from the output
 version=$(echo "$output" | grep -oP 'Version:\s*v?\K[0-9]+\.[0-9]+\.[0-9]+')
+commit_hash=$(echo "$output" | grep -oP 'Commit:\s*\K[0-9a-f]+')
 
 # Expected version
 expected_version="${TA_VER}"
+expected_commit="${TA_COMMIT}"
 
 # Compare the extracted version with the expected version
 if [ "$version" == "$expected_version" ]; then
     echo "Telemetry Agent version is correct: $version"
-    exit 0
 else
     echo "Telemetry Agent version is incorrect: $version (expected: $expected_version)"
+    exit 1
+fi
+
+# Compare the extracted commit hash with the expected commit hash
+if [ "$commit_hash" == "$expected_commit" ]; then
+    echo "Telemetry Agent commit hash is correct: $commit_hash"
+    exit 0
+else
+    echo "Telemetry Agent commit hash is incorrect: $commit_hash (expected: $expected_commit)"
     exit 1
 fi
