@@ -38,12 +38,11 @@ pipeline {
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'    
                         }
                     }
                 }
@@ -74,12 +73,11 @@ pipeline {
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
@@ -110,12 +108,11 @@ pipeline {
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
@@ -146,12 +143,11 @@ pipeline {
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
@@ -182,12 +178,11 @@ pipeline {
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
@@ -218,12 +213,11 @@ pipeline {
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
@@ -233,7 +227,7 @@ pipeline {
                     }
                     steps {
                         script {
-y                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
                         }
                         withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
                             sh '''
@@ -254,12 +248,11 @@ y                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_V
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
@@ -290,12 +283,11 @@ y                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_V
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
@@ -326,12 +318,11 @@ y                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_V
                                     TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/"
                                 fi
                                 rm -rf package-testing
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-noble --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/ps
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
                 }
