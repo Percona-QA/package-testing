@@ -164,9 +164,14 @@
       - lookup('env', 'pro_test') == "yes"
       - lookup('env', 'cur_action_to_test') != 'downgrade'
 
-  - name: Test file lookup
-    debug:
-      msg: "{{ lookup('file', '/package-testing/VERSIONS') }}"
+  - name: List files in the root directory
+    ansible.builtin.shell:
+      cmd: ls -la /
+    register: root_directory_listing
+
+  - name: Display the files in the root directory
+    ansible.builtin.debug:
+      var: root_directory_listing.stdout_lines
 
   - name: include tasks for enabling PDPS {{ version }} {{ repo }} repo
     command: percona-release enable-only pdps-{{ version }} {{ repo }}
