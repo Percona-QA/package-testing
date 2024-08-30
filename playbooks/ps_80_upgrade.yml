@@ -164,33 +164,15 @@
       - lookup('env', 'pro_test') == "yes"
       - lookup('env', 'cur_action_to_test') != 'downgrade'
 
-  - name: Verify file access
-    command: cat /package-testing/VERSIONS
-    register: file_content
-    failed_when: file_content.rc != 0
-
-  - name: Debug file content
-    debug:
-      var: file_content.stdout
-
   - name: Extract PS80_PRO_VER from VERSIONS file
     ansible.builtin.shell: |
-      grep 'PS80_PRO_VER=' /package-testing/VERSIONS | sed -E 's/.*PS80_PRO_VER="([0-9]+\.[0-9]+\.[0-9]+)".*/\1/'
+      grep 'PS80_PRO_VER=' /package-testing/VERSIONS | cut -d '=' -f2 | tr -d '"'
     register: extracted_version
 
   - name: Include tasks for enabling PDPS {{ extracted_version.stdout }} {{ repo }} repo
     ansible.builtin.command: percona-release enable-only pdps-{{ extracted_version.stdout }} {{ repo }}
     vars:
       repo: "testing"
-    when:
-      - lookup('env', 'pro_test') == "yes"
-      - lookup('env', 'cur_action_to_test') == 'downgrade'
-
-  - name: include tasks for enabling PDPS {{ version }} {{ repo }} repo
-    command: percona-release enable-only pdps-{{ version }} {{ repo }}
-    vars:
-      repo: "testing"
-      version: "{{ lookup('file', '/package-testing/VERSIONS').split('\n') | regex_replace('^.*?(PS80_PRO_VER=\")([0-9]+\\.[0-9]+\\.[0-9]+).*?$', '\\2', multiline=True) }}"
     when:
       - lookup('env', 'pro_test') == "yes"
       - lookup('env', 'cur_action_to_test') == 'downgrade'
