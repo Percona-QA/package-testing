@@ -166,7 +166,7 @@
 
   - name: List files in the root directory
     ansible.builtin.shell:
-      cmd: ls -la /
+      cmd: ls -la /package-testing/
     register: root_directory_listing
 
   - name: Display the files in the root directory
