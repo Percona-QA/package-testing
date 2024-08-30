@@ -164,6 +164,10 @@
       - lookup('env', 'pro_test') == "yes"
       - lookup('env', 'cur_action_to_test') != 'downgrade'
 
+  - name: Test file lookup
+      debug:
+        msg: "{{ lookup('file', '/package-testing/VERSIONS') }}"
+
   - name: include tasks for enabling PDPS {{ version }} {{ repo }} repo
     command: percona-release enable-only pdps-{{ version }} {{ repo }}
     vars:
