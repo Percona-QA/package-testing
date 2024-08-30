@@ -166,7 +166,7 @@
 
   - name: Extract PS80_PRO_VER from VERSIONS file
     ansible.builtin.shell: |
-      grep 'PS80_PRO_VER=' /package-testing/VERSIONS | cut -d '=' -f2 | tr -d '"'
+      grep 'PS80_PRO_VER=' /package-testing/VERSIONS | cut -d '=' -f2 | tr -d '"' | cut -d '-' -f1
     register: extracted_version
 
   - name: Include tasks for enabling PDPS {{ extracted_version.stdout }} {{ repo }} repo
