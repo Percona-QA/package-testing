@@ -99,9 +99,9 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage CentOS7
-        stage('Centos8') {
+        stage('Oracle Linux 8') {
           agent {
-            label "min-centos-8-x64"
+            label "min-ol-8-x64"
           }
           steps {
             script {
