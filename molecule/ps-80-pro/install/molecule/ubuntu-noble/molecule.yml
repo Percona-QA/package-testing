@@ -6,9 +6,9 @@ driver:
 platforms:
   - name: unoble-${BUILD_NUMBER}-${JOB_NAME}-${cur_action_to_test}
     region: us-west-2
-    image: ami-0cf2b4e024cdb6960
+    image: ami-08c47e4b2806964ce
     vpc_subnet_id: subnet-0430e63d7cdbcd237
-    instance_type: t2.small
+    instance_type: t2.micro
     ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:

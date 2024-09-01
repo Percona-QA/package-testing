@@ -6,7 +6,7 @@ driver:
 platforms:
   - name: unoble-arm-${BUILD_NUMBER}-${JOB_NAME}-${cur_action_to_test}
     region: us-west-2
-    image: ami-0f3b814f07ac0db32
+    image: ami-023ef1ac7b171db52
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: c6g.large
     ssh_user: ubuntu
