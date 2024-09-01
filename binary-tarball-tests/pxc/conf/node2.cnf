@@ -6,6 +6,7 @@ innodb_autoinc_lock_mode=2
 innodb_flush_log_at_trx_commit=0
 core-file
 log-output=none
+wsrep_slave_threads=8
 wsrep_cluster_address=gcomm://127.0.0.1:3406,127.0.0.1:3407,127.0.0.1:3408,
 log_error_verbosity=3
 port=3307
