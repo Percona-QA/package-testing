@@ -5,7 +5,7 @@ PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
 
 echo "Installing dependencies..."
 if [ -f /etc/redhat-release ]; then
-  sudo yum install -y libaio numactl openssl socat lsof  openssl-devel  compat-openssl10
+  sudo yum install -y libaio numactl openssl socat lsof openssl
   # below needed for 5.6 mysql_install_db
   sudo yum install -y perl-Data-Dumper
   if [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
@@ -33,7 +33,7 @@ else
   else
     sudo apt install -y python3 python3-pip
   fi
-  sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof curl libev4 libssl-dev
+  sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof curl libev4 openssl
   if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     wget -q https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb
     sudo dpkg -i percona-release_latest.$(lsb_release -sc)_all.deb
