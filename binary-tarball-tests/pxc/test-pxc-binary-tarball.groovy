@@ -39,6 +39,18 @@ pipeline {
             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
           } //End steps
         } //End stage Ubuntu Jammy
+        stage('Ubuntu Noble') {
+          agent {
+            label "min-noble-x64"
+          }
+          steps {
+            script {
+                currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
+              }
+            run_test()
+            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+          } //End steps
+        } //End stage Ubuntu Noble
         stage('Debian Buster') {
           agent {
             label "min-buster-x64"
@@ -129,7 +141,7 @@ void run_test() {
       export GLIBC_VERSION="2.17"
       if [ -f /usr/bin/apt-get ]; then
         DEBIAN_VERSION=$(lsb_release -sc)
-        if [ ${DEBIAN_VERSION} = "jammy" ]; then
+        if [ ${DEBIAN_VERSION} = "jammy" ] || [ ${DEBIAN_VERSION} = "noble" ]; then
           export GLIBC_VERSION="2.35"
         fi
       fi
@@ -149,7 +161,7 @@ void run_test() {
     else
       sudo apt install -y git wget tar
     fi
-    git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+    git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-pxc-tarball --depth 1
     cd package-testing/binary-tarball-tests/pxc
     wget -q ${TARBALL_LINK}${TARBALL_NAME}
     ./run.sh || true
