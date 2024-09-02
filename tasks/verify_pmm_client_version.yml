@@ -8,6 +8,10 @@
   shell: "pmm-admin --version {{ port_flag if port_flag is defined else '' }} 2>&1|grep ^Version | awk -F ' ' '{print $2}'"
   register: pmm_client_version
 
+- name: Print pmm client version
+  debug:
+    msg: "PMM Client Version: {{ pmm_client_version.stdout }}"
+
 - name: Assert PMM Admin version from "--version" output ({{ pmm_client_version.stdout }}) equals expected "{{ pmm_version }}"
   assert:
     that:
