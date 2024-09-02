@@ -11,6 +11,6 @@
 - name: Assert PMM Admin version from "--version" output ({{ pmm_client_version.stdout }}) equals expected "{{ pmm_version }}"
   assert:
     that:
-      - "pmm_version in pmm_client_version.stdout"
+      - "PMMVersion in pmm_client_version.stdout"
     fail_msg: "pmm-admin version is '{{ pmm_client_version.stdout }}' but expected '{{ pmm_version }}'"
     success_msg: "pmm-admin version is '{{ pmm_client_version.stdout }}'"
