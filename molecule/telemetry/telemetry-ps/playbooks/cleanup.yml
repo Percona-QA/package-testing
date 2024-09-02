@@ -1,0 +1,49 @@
+---
+- name: Cleanup
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: remove PDPS deb packages
+      apt:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+          - percona-server-server
+          - percona-server-test
+          - percona-server-dbg
+          - percona-server-source
+          - percona-server-client
+          - percona-server-rocksdb
+          - percona-mysql-router
+          - percona-mysql-shell
+      when: ansible_os_family == "Debian"
+
+    - name: remove PDPS rpm packages
+      yum:
+        name: "{{ packages }}"
+        state: absent
+      vars:
+        packages:
+          - percona-server-server
+          - percona-server-client
+          - percona-server-test
+          - percona-server-debuginfo
+          - percona-server-devel
+          - percona-server-rocksdb
+          - percona-mysql-router
+          - percona-mysql-shell
+      when: ansible_os_family == "RedHat"
+
+    - name: check if process is stopped after package removal
+      command: /package-testing/check_running.sh mysql stopped
+
+    - stat:
+        path: /var/lib/mysql
+      register: p
+
+    - name: check /var/lib/mysql exists and not empty
+      fail:
+        msg: "Path exists and is a directory and is not empty"
+      when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
