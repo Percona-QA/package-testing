@@ -149,7 +149,7 @@ void run_test() {
         sudo yum install -y epel-release
         sudo yum install -y lsb_release
         RHEL_VERSION=$(lsb_release -a | grep 'Release:' | awk '{print $2}')
-        if [ ${RHEL_VERSION} = "9.0" ]; then
+        if [ ${RHEL_VERSION} = "9.1" ]; then
           export GLIBC_VERSION="2.34"
         fi
       fi
