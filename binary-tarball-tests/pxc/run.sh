@@ -5,7 +5,8 @@ PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
 
 echo "Installing dependencies..."
 if [ -f /etc/redhat-release ]; then
-  sudo yum install -y libaio numactl openssl socat lsof openssl
+  sudo yum install -y libaio numactl openssl socat lsof openssl epel-release
+  sudo yum install -y lsb_release
   # below needed for 5.6 mysql_install_db
   sudo yum install -y perl-Data-Dumper
   if [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
