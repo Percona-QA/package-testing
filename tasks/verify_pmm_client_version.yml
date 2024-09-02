@@ -10,7 +10,7 @@
 
 - name: Print pmm client version
   debug:
-    var: { { pmm_client_version_second.stdout } }
+    var: pmm_client_version_second.stdout
 
 - name: Grep PMM Admin version from pmm-admin --version output
   shell: "pmm-admin --version {{ port_flag if port_flag is defined else '' }} 2>&1"
@@ -18,7 +18,7 @@
 
 - name: Print pmm client version
   debug:
-    var: {{ pmm_client_version.stdout }}
+    var: pmm_client_version.stdout
 
 - name: Assert PMM Admin version from "--version" output ({{ pmm_client_version.stdout }}) equals expected "{{ pmm_version }}"
   assert:
