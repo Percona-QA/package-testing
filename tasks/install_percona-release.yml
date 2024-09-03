@@ -1,9 +1,17 @@
 # Installs Percona Release Tool
 #
+- name: Install percona-release package Debian Noble
+  shell: |
+    wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+    apt install ./percona-release_latest.generic_all.deb
+    apt update
+  when: ansible_os_family == "Debian" and ansible_distribution_release == "noble"
+
 - name: Install percona-release package Debian
   when: ansible_os_family == "Debian"
   apt:
     deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+  when: ansible_os_family == "Debian" and ansible_distribution_release != "noble"
 
 - name: Install percona-release package RedHat
   when: ansible_os_family == "RedHat"

@@ -10,8 +10,10 @@
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
     when: ansible_os_family == "Debian"
 
-  - name: add the Percona yum repos for CentOS
-    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+  - name: Add the Percona Release yum repo without GPG check
+    yum:
+      name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+      disable_gpg_check: yes
     when: ansible_os_family == "RedHat"
 
   - name: change the default repo to testing
