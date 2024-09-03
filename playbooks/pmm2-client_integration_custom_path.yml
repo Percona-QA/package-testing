@@ -35,6 +35,18 @@
   - name: include tasks for test env setup
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
 
+  - name: Print tarball link
+    debug:
+      var: tarball_link
+
+  - name: Print pmm version
+    debug:
+      var: pmm_version
+
+  - name: Print custom path
+    debug:
+      var: custom_path
+
 ### install PMM Client from tarball
   - name: install pmm2-client tarball to custom path
     command: "../scripts/pmm2_client_install_tarball.sh -v {{ (tarball_link | length > 0) | ternary(tarball_link, pmm_version) }} -p {{ custom_path }}"
