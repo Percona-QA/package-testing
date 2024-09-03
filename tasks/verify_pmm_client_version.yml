@@ -4,16 +4,9 @@
 #             var "port_flag"      :  to access agent with custom port
 #                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
 #
-- name: Grep PMM Admin version from pmm-admin --version output
-  command: pmm-admin --version
-  register: pmm_client_version_second
-
-- name: Print pmm client version
-  debug:
-    var: pmm_client_version_second.stdout
 
 - name: Grep PMM Admin version from pmm-admin --version output
-  shell: "pmm-admin --version {{ port_flag if port_flag is defined else '' }} 2>&1"
+  shell: pmm-admin --version
   register: pmm_client_version
 
 - name: Print pmm client version
