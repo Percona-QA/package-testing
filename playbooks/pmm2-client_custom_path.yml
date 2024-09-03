@@ -28,6 +28,18 @@
     set_fact:
       instance_ip: "{{ instance_ip.stdout }}"
 
+  - name: Print tarball link
+    debug:
+      var: tarball_link
+
+  - name: Print pmm version
+    debug:
+      var: pmm_version
+
+  - name: Print custom path
+    debug:
+      var: custom_path
+
 ### install pmm2-client from tarball
   - name: Install pmm2-client tarball to custom path
     command: "../scripts/pmm2_client_install_tarball.sh -v {{ (tarball_link|length > 0) | ternary(tarball_link, pmm_version) }} -p {{ custom_path }}"
