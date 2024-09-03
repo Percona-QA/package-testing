@@ -5,7 +5,7 @@
 #                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
 #
 - name: Grep PMM Admin version from pmm-admin --version output
-  command: pmm-admin --version 2>&1
+  command: pmm-admin --version
   register: pmm_client_version_second
 
 - name: Print pmm client version
