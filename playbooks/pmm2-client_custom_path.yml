@@ -28,6 +28,10 @@
     set_fact:
       instance_ip: "{{ instance_ip.stdout }}"
 
+  - name: Register Instance IP as a variable
+    set_fact:
+      pmm_version: "2.43.0"
+
   - name: Print tarball link
     debug:
       var: tarball_link
