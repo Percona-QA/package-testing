@@ -162,9 +162,9 @@ void run_test() {
     fi
     rm -rf package-testing
     if [ -f /usr/bin/yum ]; then
-      sudo yum install -y git wget tar
+      sudo yum install -y git wget tar socat
     else
-      sudo apt install -y git wget tar
+      sudo apt install -y git wget tar socat
     fi
     git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-pxc-tarball --depth 1
     cd package-testing/binary-tarball-tests/pxc
