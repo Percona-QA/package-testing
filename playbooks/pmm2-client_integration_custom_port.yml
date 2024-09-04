@@ -40,6 +40,10 @@
     set_fact:
       pmm_version: "2.43.0"
 
+  - name: Register Instance IP as a variable
+    set_fact:
+      pmm_server_address: "127.0.0.1"
+
   - name: Print tarball link
     debug:
       var: tarball_link
@@ -51,6 +55,10 @@
   - name: Print custom path
     debug:
       var: custom_path
+
+  - name: Print server address
+    debug:
+      var: pmm_server_address
 
   - name: Print command
     debug:
