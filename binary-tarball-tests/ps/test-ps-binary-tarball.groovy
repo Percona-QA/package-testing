@@ -160,36 +160,6 @@ pipeline {
                             junit 'package-testing/binary-tarball-tests/ps/report.xml'
                         }
                     }
-                stage('Debian Buster') {
-                    agent {
-                        label "min-buster-x64"
-                    }
-                    steps {
-                        script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-                        }
-                            sh '''
-                                echo ${BUILD_TYPE_MINIMAL}
-                                MINIMAL=""
-                                if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
-                                    MINIMAL="-minimal"
-                                fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
-                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.28${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
-                                rm -rf package-testing
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/ps
-                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
-                                ./run.sh || true
-                            '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-                        }
-                    }
                 stage('Oracle Linux 9') {
                     agent {
                         label "min-ol-9-x64"

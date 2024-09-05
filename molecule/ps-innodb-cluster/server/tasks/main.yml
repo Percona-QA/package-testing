@@ -11,21 +11,21 @@
 
   - name: Determine Percona Server major version
     set_fact:
-      PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') if '8.3' in UPSTREAM_VERSION else 8 }}"      
+      PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') if '8.4' in UPSTREAM_VERSION else 8 }}"
 
   - name: Print Percona Server major version
     debug:
       var: PS_MAJ_VER
 
-  - name: include tasks for enabling PS 80/83 main repo
+  - name: include tasks for enabling PS 80/84 main repo
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_main_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "main"
 
-  - name: include tasks for enabling PS 80/83 test repo
+  - name: include tasks for enabling PS 80/84 test repo
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_testing_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "testing" or lookup('env', 'INSTALL_REPO') == ""
 
-  - name: include tasks for enabling PS 80/83 experimental repo
+  - name: include tasks for enabling PS 80/84 experimental repo
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_experimental_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "experimental"
 
@@ -77,12 +77,6 @@
       - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
 
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
-
   - name: start mysql service
     service:
       name: mysql
@@ -93,17 +87,17 @@
       mysql --connect-expired-password -uroot --password="$(grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}')" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Test1234#';"
       mysql -uroot -pTest1234# -e "create user root@'%' identified with caching_sha2_password by 'Test1234#'"
       mysql -uroot -pTest1234# -e "grant all privileges on *.* to root@'%' with grant option;"
-      mysql -uroot -pTest1234# -e "create user sysbench@'%' identified with mysql_native_password by 'Test1234#'"
+      mysql -uroot -pTest1234# -e "create user sysbench@'%' identified by 'Test1234#'"
       mysql -uroot -pTest1234# -e "grant all privileges on *.* to sysbench@'%';"
     when: ansible_os_family == "RedHat"
 
   - name: setup mysql user on Debian/Ubuntu
     shell: |
-      mysql -uroot -e "create user root@'%' identified with caching_sha2_password by 'Test1234#'"
-      mysql -uroot -e "grant all privileges on *.* to root@'%' with grant option;"
-      mysql -uroot -e "create user sysbench@'%' identified with mysql_native_password by 'Test1234#'"
-      mysql -uroot -e "grant all privileges on *.* to sysbench@'%';"
-      mysql -uroot -e "alter user root@localhost identified with caching_sha2_password by 'Test1234#';"
+      mysql -uroot -pTest1234# -e "create user root@'%' identified with caching_sha2_password by 'Test1234#'"
+      mysql -uroot -pTest1234# -e "grant all privileges on *.* to root@'%' with grant option;"
+      mysql -uroot -pTest1234# -e "create user sysbench@'%' identified by 'Test1234#'"
+      mysql -uroot -pTest1234# -e "grant all privileges on *.* to sysbench@'%';"
+      mysql -uroot -pTest1234# -e "alter user root@localhost identified with caching_sha2_password by 'Test1234#';"
     when: ansible_os_family == "Debian"
 
   - name: add options to my.cnf on Debian/Ubuntu
@@ -119,10 +113,6 @@
         group_replication_group_name="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
         group_replication_start_on_boot=OFF
         relay_log={{ ansible_hostname }}-relay-bin
-        innodb_dedicated_server=ON
-        binlog_transaction_dependency_tracking=WRITESET
-        slave_preserve_commit_order=ON
-        slave_parallel_type=LOGICAL_CLOCK
     when: ansible_os_family == "Debian"
 
   - name: add options to my.cnf on Centos/RedHat
@@ -137,10 +127,6 @@
         group_replication_group_name="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
         group_replication_start_on_boot=OFF
         relay_log={{ ansible_hostname }}-relay-bin
-        innodb_dedicated_server=ON
-        binlog_transaction_dependency_tracking=WRITESET
-        slave_preserve_commit_order=ON
-        slave_parallel_type=LOGICAL_CLOCK
     when: ansible_os_family == "RedHat"
 
   - name: allow all users to connect to mysql

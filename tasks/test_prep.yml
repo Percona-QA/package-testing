@@ -222,10 +222,13 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/Percona-QA/package-testing/archive/master.zip
+    - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
     - unzip master.zip
     - rm -f master.zip
-    - mv package-testing-master /package-testing
+    - mv "package-testing-{{ branch }}" /package-testing
+    vars:
+      branch: "{{ lookup('env', 'TESTING_BRANCH') | default('master', true) }}"
+      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
 
   - name: install latest bats from github
     command: "{{ item }}"

@@ -164,11 +164,15 @@
       - lookup('env', 'pro_test') == "yes"
       - lookup('env', 'cur_action_to_test') != 'downgrade'
 
-  - name: include tasks for enabling PDPS {{ version }} {{ repo }} repo
-    command: percona-release enable-only pdps-{{ version }} {{ repo }}
+  - name: Extract PS80_PRO_VER from VERSIONS file
+    ansible.builtin.shell: |
+      grep 'PS80_PRO_VER=' /package-testing/VERSIONS | cut -d '=' -f2 | tr -d '"' | cut -d '-' -f1
+    register: extracted_version
+
+  - name: Include tasks for enabling PDPS {{ extracted_version.stdout }} {{ repo }} repo
+    ansible.builtin.command: percona-release enable-only pdps-{{ extracted_version.stdout }} {{ repo }}
     vars:
       repo: "testing"
-      version: "{{ lookup('file', '/package-testing/VERSIONS').split('\n') | regex_replace('^.*?(PS80_PRO_VER=\")([0-9]+\\.[0-9]+\\.[0-9]+).*?$', '\\2', multiline=True) }}"
     when:
       - lookup('env', 'pro_test') == "yes"
       - lookup('env', 'cur_action_to_test') == 'downgrade'
@@ -239,6 +243,8 @@
       - percona-server-client{{ pro_suf }}
       - percona-mysql-router{{ pro_suf }}
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on Oracle Linux 9
     yum:
@@ -256,6 +262,8 @@
       - percona-server-client{{ pro_suf }}
       - percona-mysql-router{{ pro_suf }}
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: enable the Tools release repo
     command: percona-release enable tools release
