@@ -73,17 +73,6 @@ if glibc_version == '2.35':
     ('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'), ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
     ('lib/librtmp.so', 'lib/private/librtmp.so.1'),('lib/libtirpc.so', 'lib/private/libtirpc.so.3.0.0')
   )
-elif glibc_version == '2.34':
-  pxc8x_symlinks = (
-    ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'), ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
-
-    ('lib/libgcrypt.so','lib/private/libgcrypt.so.11.8.2'), ('lib/libnspr4.so','lib/private/libnspr4.so'),
-    ('lib/libnssutil3.so','lib/private/libnssutil3.so'),
-    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.23.0.0'), ('lib/libplc4.so','lib/private/libplc4.so'),
-    ('lib/libplds4.so','lib/private/libplds4.so'), ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
-    ('lib/libsmime3.so','lib/private/libsmime3.so'), ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
-    ('lib/libssl3.so','lib/private/libssl3.so'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
-  )
 else:
   pxc8x_symlinks = (
     ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'), ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
@@ -142,17 +131,27 @@ pxc80_files = (
 if glibc_version == '2.35':
   pxc80_symlinks = (
     ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.37'),('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
-    ('lib/libtinfo.so', 'lib/private/libtinfo.so.6.3'),
+    ('lib/libssl.so', 'lib/private/libssl.so.3'),('lib/libtinfo.so', 'lib/private/libtinfo.so.6.3'),
     ('lib/libaio.so','lib/private/libaio.so.1.0.1'),('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
     ('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'), ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
     ('lib/librtmp.so', 'lib/private/librtmp.so.1'),('lib/libtirpc.so', 'lib/private/libtirpc.so.3.0.0')
   )
+elif glibc_version == '2.34':
+  pxc80_symlinks = (
+    ('lib/libnssutil3.so','lib/private/libnssutil3.so'),
+    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.37'),
+    ('lib/libplds4.so','lib/private/libplds4.so'), ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
+    ('lib/libsmime3.so','lib/private/libsmime3.so'), ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
+    ('lib/libssl3.so','lib/private/libssl3.so'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
+  )
 else:
   pxc80_symlinks = (
+    ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
+    ('lib/libnspr4.so','lib/private/libnspr4.so'),
     ('lib/libnss3.so','lib/private/libnss3.so'), ('lib/libnssutil3.so','lib/private/libnssutil3.so'),
     ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.37'), ('lib/libplc4.so','lib/private/libplc4.so'),
     ('lib/libplds4.so','lib/private/libplds4.so'), ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
-    ('lib/libsmime3.so','lib/private/libsmime3.so'),
+    ('lib/libsmime3.so','lib/private/libsmime3.so'), ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
     ('lib/libssl3.so','lib/private/libssl3.so'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
   )
 
