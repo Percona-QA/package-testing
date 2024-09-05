@@ -131,41 +131,41 @@ pipeline {
 void run_test() {
   sh '''
     echo ${BUILD_TYPE_MINIMAL}
-    PXC_VERSION_MAJOR="$(echo ${PXC_VERSION}|cut -d'-' -f1)"
-    PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
+    PXC_VERSION_MAJOR="$(echo ${PXC_VERSION} | cut -d'-' -f1)"
+    PXC_MAJOR_VERSION="$(echo ${PXC_VERSION} | cut -d'.' -f1,2)"
     MINIMAL=""
+    
     if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
       MINIMAL="-minimal"
     fi
-    if [ "${PXC_MAJOR_VERSION}" = "8.0" ] || [ "${PXC_MAJOR_VERSION}" = "8.3" ] || [ "${PXC_MAJOR_VERSION}" = "8.4" ]; then
+
+    # Check for Oracle Linux 9
+    if grep -q "Oracle Linux 9" /etc/os-release; then
+      export GLIBC_VERSION="2.34"
+    elif [ "${PXC_MAJOR_VERSION}" = "8.0" ] || [ "${PXC_MAJOR_VERSION}" = "8.3" ] || [ "${PXC_MAJOR_VERSION}" = "8.4" ]; then
       export GLIBC_VERSION="2.17"
       if [ -f /usr/bin/apt-get ]; then
         DEBIAN_VERSION=$(lsb_release -sc)
-        if [ ${DEBIAN_VERSION} = "jammy" ] || [ ${DEBIAN_VERSION} = "noble" ]; then
+        if [ "${DEBIAN_VERSION}" = "jammy" ] || [ "${DEBIAN_VERSION}" = "noble" ]; then
           export GLIBC_VERSION="2.35"
-        fi
-      fi
-      if [ -f /usr/bin/yum ]; then
-        sudo yum install -y epel-release
-        sudo yum install -y lsb_release
-        RHEL_VERSION=$(lsb_release -a | grep 'Release:' | awk '{print $2}')
-        if [ ${RHEL_VERSION} = "9.1" ]; then
-          export GLIBC_VERSION="2.34"
         fi
       fi
       TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
       TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
-    elif [ "${PXC_MAJOR_VERSION}" = 5.7 ]; then
+    elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
       export GLIBC_VERSION="2.17"
       TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
       TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
     fi
+
     rm -rf package-testing
+    
     if [ -f /usr/bin/yum ]; then
       sudo yum install -y git wget tar socat
     else
       sudo apt install -y git wget tar socat
     fi
+
     git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-pxc-tarball --depth 1
     cd package-testing/binary-tarball-tests/pxc
     wget -q ${TARBALL_LINK}${TARBALL_NAME}
