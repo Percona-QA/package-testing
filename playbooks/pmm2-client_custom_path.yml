@@ -35,23 +35,24 @@
   - name: check that PMM client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
 
-### Setup PMM Client(wrong) Unskip after https://perconadev.atlassian.net/browse/PMM-13348 is done
-#  - name: Use pmm-agent setup to configure pmm client with wrong path-base
-#    shell: >-
-#      pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-insecure-tls
-#      --server-address={{ pmm_server_address }}
-#      --metrics-mode={{ metrics_mode }}
-#      --server-username=admin
-#      --server-password={{ pmm_server_password }}
-#      --paths-base=/wrong_folder/ {{ instance_ip }} generic node_{{ instance_ip }}
-#
-#  - name: Start agent
-#    shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
-#
-#  - name: "Wait for 'node_exporter' is Done"
+### Setup PMM Client(wrong)
+  - name: Use pmm-agent setup to configure pmm client with wrong path-base
+    shell: >-
+      pmm-agent setup --config-file={{ custom_path }}/config/pmm-agent.yaml --force --server-insecure-tls
+      --server-address={{ pmm_server_address }}
+      --metrics-mode={{ metrics_mode }}
+      --server-username=admin
+      --server-password={{ pmm_server_password }}
+      --paths-base=/wrong_folder/ {{ instance_ip }} generic node_{{ instance_ip }}
+
+  - name: Start agent
+    shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
+
+#  Unskip after https://perconadev.atlassian.net/browse/PMM-13348 is done
+#  - name: "Wait for 'node_exporter' is Waiting"
 #    shell: pmm-admin list | grep 'node_exporter' | awk -F' ' '{print $2}'
 #    register: node_exporter_status
-#    until: node_exporter_status.stdout.find('Done') != -1
+#    until: node_exporter_status.stdout.find('Waiting') != -1
 #    delay: 5
 #    retries: 5
 #
