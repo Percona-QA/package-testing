@@ -116,8 +116,8 @@
     when: '"psmdb-" in enabled_db | join("")'
     include_tasks: ../tasks/verify_pmm2_metric.yml
     loop:
-      - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up 1' }
-      - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up 1' }
+      - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up.* 1' }
+      - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up.* 1' }
 ### end PSMDB
 
 ### start PDPGSQL
