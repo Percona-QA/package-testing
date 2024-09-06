@@ -146,7 +146,6 @@ elif glibc_version == '2.34':
   )
 else:
   pxc80_symlinks = (
-    ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
     ('lib/libnspr4.so','lib/private/libnspr4.so'),
     ('lib/libnss3.so','lib/private/libnss3.so'), ('lib/libnssutil3.so','lib/private/libnssutil3.so'),
     ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.37'), ('lib/libplc4.so','lib/private/libplc4.so'),
