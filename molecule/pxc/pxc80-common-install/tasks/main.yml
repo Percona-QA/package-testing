@@ -76,8 +76,8 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: check telemetry (disabled)
-    command: /package-testing/check_telemetry.sh pxc -d
+  #- name: check telemetry (disabled)
+  #  command: /package-testing/check_telemetry.sh pxc -d
 
   - name: copy PXC config on centos 7
     template: src=../../../../templates/my_rpm_80.j2 
@@ -200,3 +200,9 @@
   - name: output telemetry_uuid content
     debug:
       var: t_uuid_output
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7

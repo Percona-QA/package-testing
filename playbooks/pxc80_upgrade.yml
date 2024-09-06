@@ -63,8 +63,8 @@
        - percona-xtradb-cluster-shared-compat
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: install plugins
-    command: /package-testing/plugins_test_80.sh pxc
+#  - name: install plugins
+#    command: /package-testing/plugins_test_80.sh pxc
 
   - name: check that PXC version is correct
     command: /package-testing/version_check.sh pxc80

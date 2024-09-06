@@ -9,32 +9,6 @@
 
   tasks:
 
-  - name: include tasks for removing old PXC 5.7 RHEL
-    yum:
-      name: "{{ packages }}"
-      state: absent
-    vars:
-      packages:
-      - Percona-XtraDB-Cluster*
-      - percona-xtrabackup*
-    when: ansible_os_family == "RedHat"
-
-  - name: include tasks for removing old PXC 5.7 deb
-    apt:
-      name: "{{ packages }}"
-      state: absent
-    vars:
-      packages:
-      - percona-xtradb-cluster*
-      - percona-xtrabackup*
-    when: ansible_os_family == "Debian"
-
-  - name: remove eol 5.7 repo file
-    file:
-      path: /etc/apt/sources.list.d/percona-release.list
-      state: absent
-    when: ansible_os_family == "Debian"
-
   - name: disable old repos
     command: percona-release disable all
 
@@ -113,9 +87,9 @@
   - name: Sleep for 60 seconds
     shell: sleep 60
 
-  - name: start mysql service
-    service: name=mysql state=restarted
-    throttle: 1
+#  - name: start mysql service
+#    service: name=mysql state=restarted
+#    throttle: 1
 
   - name: register PXC version Side Effect
     shell: mysqld --version
@@ -131,3 +105,19 @@
   - name: check that PXC package versions are correct Side Effect
     command: /package-testing/package_check.sh pxc80
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
+  - name: Sleep 10 mins
+    shell: sleep 600
+
+  - name: Check that the PXC Cluster is up and running
+    shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'
+    register: cluster_size
+
+  - name: print cluster size Side Effect
+    debug: var=cluster_size
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
