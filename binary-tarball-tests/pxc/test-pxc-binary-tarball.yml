@@ -15,16 +15,20 @@
     parameters:
     - string:
         name: PXC_VERSION
-        default: "8.0.30-22.1"
+        default: "8.0.37-29.1"
         description: PXC full version
     - string:
         name: PXC_REVISION
-        default: "167c5ac"
+        default: "f735605"
         description: PXC revision
     - string:
         name: WSREP_VERSION
-        default: "26.4.3"
+        default: "26.1.4.3"
         description: WSREP version
+    - string:
+        name: PXC_VERSION_MAJOR
+        default: "8.0.37"
+        description: PXC full version
     - bool:
         default: false
         description: Test minimal tarball

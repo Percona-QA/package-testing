@@ -6,6 +6,7 @@ pipeline {
         string(name: 'PXC_VERSION', defaultValue: '8.0.37-29.1', description: 'PXC full version')
         string(name: 'PXC_REVISION', defaultValue: 'f735605', description: 'PXC revision')
         string(name: 'WSREP_VERSION', defaultValue: '26.1.4.3', description: 'WSREP version')
+        string(name: 'PXC_VERSION_MAJOR', defaultValue: '8.0.37', description: 'PXC_VERSION_MAJOR')
         booleanParam(
             defaultValue: false,
             name: 'BUILD_TYPE_MINIMAL'
@@ -216,9 +217,9 @@ pipeline {
                     }
                     steps {
                         script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}-${REPO}"
+                            currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
                         }
-                        withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', use>
+                        withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVa>
                             sh '''
                                 echo ${BUILD_TYPE_MINIMAL}
                                 MINIMAL=""
@@ -244,9 +245,9 @@ pipeline {
                     }
                     steps {
                         script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}-${REPO}"
+                            currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
                         }
-                        withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', use>
+                        withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVa>
                             sh '''
                                 echo ${BUILD_TYPE_MINIMAL}
                                 MINIMAL=""
