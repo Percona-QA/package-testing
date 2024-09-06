@@ -227,7 +227,7 @@ pipeline {
                                  MINIMAL="-minimal"
                                fi
                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.28${MINIMAL}.tar.gz"
-                               TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/${PXC_VERSION}/"
+                               TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                rm -rf package-testing
                                sudo yum install -y git wget tar
                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-pxc-tarball --depth 1
@@ -255,7 +255,7 @@ pipeline {
                                   MINIMAL="-minimal"
                                 fi
                                 TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.34${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/${PXC_VERSION}/"
+                                TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
                                 git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-pxc-tarball --depth 1
