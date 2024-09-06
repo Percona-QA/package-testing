@@ -249,19 +249,19 @@ pipeline {
                         }
                         withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVa>
                             sh '''
-                                echo ${BUILD_TYPE_MINIMAL}
-                                MINIMAL=""
-                                if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
-                                  MINIMAL="-minimal"
-                                fi
-                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.34${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
-                                rm -rf package-testing
-                                sudo yum install -y git wget tar
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-pxc-tarball --depth 1
-                                cd package-testing/binary-tarball-tests/pxc
-                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
-                                ./run.sh || true
+                               echo ${BUILD_TYPE_MINIMAL}
+                               MINIMAL=""
+                               if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
+                                 MINIMAL="-minimal"
+                               fi
+                               TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.34${MINIMAL}.tar.gz"
+                               TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/${PXC_VERSION}/"
+                               rm -rf package-testing
+                               sudo yum install -y git wget tar
+                               git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-pxc-tarball --depth 1
+                               cd package-testing/binary-tarball-tests/pxc
+                               wget -q ${TARBALL_LINK}${TARBALL_NAME}
+                              ./run.sh || true
                               '''
                             junit 'package-testing/binary-tarball-tests/pxc/report.xml'
                         }
