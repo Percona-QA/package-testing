@@ -49,4 +49,4 @@ class TestMysqlEnvironment:
         assert host.file("/usr/local/percona/telemetry/pxc").is_directory
         assert host.file("/usr/local/percona/telemetry/pxc").user == 'mysql'
         assert host.file("/usr/local/percona/telemetry/pxc").group == 'percona-telemetry'
-        assert oct(host.file("/usr/local/percona/telemetry/pxc").mode) == '0o6775'
+        assert oct(host.file("/usr/local/percona/telemetry/pxc").mode) == '0o2775'
