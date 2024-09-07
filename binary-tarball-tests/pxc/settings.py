@@ -138,7 +138,7 @@ if glibc_version == '2.35':
   )
 else:
   pxc80_symlinks = (
-    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.37'), ('lib/libplc4.so','lib/private/libplc4.so'),
+    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.37'),
     ('lib/libplds4.so','lib/private/libplds4.so'), ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
     ('lib/libsmime3.so','lib/private/libsmime3.so'), ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
     ('lib/libssl3.so','lib/private/libssl3.so'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
