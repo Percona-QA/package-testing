@@ -41,7 +41,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: enable main repo
-    command: percona-release enable proxysql release
+    command: percona-release enable-only original release
 
   - name: clean and update yum cache
     shell: |
