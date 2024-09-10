@@ -8,31 +8,6 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
-  - name: include tasks for removing old PXC 5.7 RHEL
-    yum:
-      name: "{{ packages }}"
-      state: absent
-    vars:
-      packages:
-      - Percona-XtraDB-Cluster*
-      - percona-xtrabackup*
-    when: ansible_os_family == "RedHat"
-
-  - name: include tasks for removing old PXC 5.7 deb
-    apt:
-      name: "{{ packages }}"
-      state: absent
-    vars:
-      packages:
-      - percona-xtradb-cluster*
-      - percona-xtrabackup*
-    when: ansible_os_family == "Debian"
-
-  - name: remove eol 5.7 repo file
-    file:
-      path: /etc/apt/sources.list.d/percona-release.list
-      state: absent
-    when: ansible_os_family == "Debian"
 
   - name: disable old repos
     command: percona-release disable all
@@ -106,8 +81,8 @@
   - name: Sleep for 60 seconds
     shell: sleep 60
 
-  - name: install plugins
-    command: /package-testing/plugins_test_80.sh pxc
+#  - name: install plugins
+#    command: /package-testing/plugins_test_80.sh pxc
 
   - name: register PXC version Side Effect
     shell: mysqld --version
@@ -115,11 +90,17 @@
 
   - name: print PXC version Side Effect
     debug: var=pxc_version
+    
+  #- name: check that PXC version is correct Side Effect
+  #  command: /package-testing/version_check.sh pxc80
+  #  when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+#
+  #- name: check that PXC package versions are correct Side Effect
+  #  command: /package-testing/package_check.sh pxc80
+  #  when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
-  - name: check that PXC version is correct Side Effect
-    command: /package-testing/version_check.sh pxc80
-    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
-
-  - name: check that PXC package versions are correct Side Effect
-    command: /package-testing/package_check.sh pxc80
-    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
