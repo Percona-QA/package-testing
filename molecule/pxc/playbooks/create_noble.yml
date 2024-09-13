@@ -99,15 +99,51 @@
       async: 7200
       poll: 0
 
+    - name: Pause for 60 seconds to allow instance(s) to boot up
+      pause:
+        seconds: 120
+
     - name: Wait for instance(s) creation to complete
       async_status:
         jid: "{{ item.ansible_job_id }}"
       register: ec2_jobs
       until: ec2_jobs.finished
-      retries: 300
+      retries: 600  # Increase retry count if instance creation takes more time
+      delay: 15     # Increase delay between retries to allow more time for initialization
       with_items: "{{ server.results }}"
 
     # Mandatory configuration for Molecule to function.
+    - name: Wait for instances to be running
+      amazon.aws.ec2_instance_info:
+        region: "{{ item.invocation.module_args.region }}"
+        instance_ids: "{{ item.instance_ids }}"
+      register: ec2_instance_facts
+      with_items: "{{ ec2_jobs.results }}"
+      until: ec2_instance_facts.instances[0].state.name == 'running'
+      retries: 20  # Number of retries (adjust as needed)
+      delay: 15    # Delay in seconds between retries
+
+    - name: Debug EC2 results before update
+      debug: 
+        var: ec2_jobs.results
+
+    - name: Re-register ec2_jobs with updated info
+      set_fact:
+        ec2_jobs: "{{ ec2_instance_facts }}"
+
+    - name: Debug EC2 results after update
+      debug: 
+        var: ec2_jobs.results
+
+    # Wait for the public IP to be reachable
+    - name: Wait for public IP address to be available
+      wait_for:
+        host: "{{ item.instances[0].public_ip_address }}"
+        port: 22
+        timeout: 600
+      with_items: "{{ ec2_jobs.results }}"
+      retries: 5  # Retry if the public IP is not yet available
+      delay: 30   # Delay between retries
 
     - name: Populate instance config dict
       set_fact:
