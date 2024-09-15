@@ -99,7 +99,6 @@
     - name: allow release-info to change for apt repositories
       command: apt-get update -y --allow-releaseinfo-change
       when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
-      ignore_errors: yes  # Optional: Ignore errors for a non-critical failure
 
     - name: install needed packages for running tests with apt
       apt:
@@ -155,17 +154,6 @@
         - git
         - wget
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
-
-    - name: Download libssl1.1 package
-      get_url:
-        url: http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-        dest: /tmp/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-      when: ansible_os_family == "Debian" and ansible_distribution_release == "noble"
-
-    - name: Install libssl1.1 package
-      apt:
-        deb: /tmp/libssl1.1_1.1.1f-1ubuntu2_amd64.deb
-      when: ansible_os_family == "Debian" and ansible_distribution_release == "noble"
 
     - name: Setup SSH keys CentOS
       authorized_key:
