@@ -254,18 +254,18 @@ def test_ta_no_restart(host):
             ta_terminated_num = host.run(f'grep -c "Received signal: terminated, shutdow" {ta_log_file}')
             assert int(ta_terminated_num.stdout) == 0, (ta_terminated_num.stdout, ta_terminated_num.stderr)
 
-# Uncomment after https://perconadev.atlassian.net/browse/PKG-168 is fixed.
 # check that the old log file is not present after update and that its content is copied to the new log.  To be removed after 1.0.1-1 to 1.0.1-2 update
-# def test_ta_update(host):
-#     with host.sudo("root"):
-#         if update == 'yes':
-#             ta_started_num = host.run(f'grep -c "values from config:" {ta_log_file}')
-#            assert int(ta_started_num.stdout) == 2, (ta_started_num.stdout, ta_started_num.stderr)
-#            ta_terminated_num = host.run(f'grep -c "Received signal: terminated, shutdow" {ta_log_file}')
-#            assert int(ta_terminated_num.stdout) == 1, (ta_terminated_num.stdout, ta_terminated_num.stderr)
-#            assert not host.file('/var/log/percona/telemetry-agent.log').is_file
-#         else:
-#             pytest.skip("This check only for TA update")
+def test_ta_update(host):
+    with host.sudo("root"):
+        if update == 'yes':
+            ta_started_num = host.run(f'grep -c "values from config:" {ta_log_file}')
+            assert int(ta_started_num.stdout) in [2, 3], (ta_started_num.stdout, ta_started_num.stderr)
+            ta_terminated_num = host.run(f'grep -c "Received signal: terminated, shutdow" {ta_log_file}')
+            assert int(ta_terminated_num.stdout) in [1, 2], (ta_terminated_num.stdout, ta_terminated_num.stderr)
+            assert not host.file('/var/log/percona/telemetry-agent.log').is_file
+        else:
+            pytest.skip("This check only for TA update")
+
 ###############################################
 ################## MYSQL ######################
 ###############################################
@@ -421,7 +421,7 @@ def test_ps_telem_pillar_dir_cleaned_up_hist_max(host):
 
 def test_ps_telem_disable_running(host):
     with host.sudo("root"):
-        update_ps_options(host, '20', '10', '604800') 
+        update_ps_options(host, '20', '10', '604800')
         host.check_output(f'mysql -Ns -e "UNINSTALL COMPONENT \'file://component_percona_telemetry\';"')
         telemetry_opt_result = host.check_output(f'mysql -Ns -e "show variables like \'percona_telemetry%\';"')
         percona_telemetry_disable_result = host.check_output(f'mysql -Ns -e  "select @@percona_telemetry_disable;"')
@@ -643,7 +643,7 @@ def test_ps_mandatory_packages(host, pkg_name):
             pytest.skip("This package not supported by aarch")
         if dist.lower() in deb_dists:
             if 'noble' in host.system_info.codename and pkg_name in ['percona-haproxy','proxysql2']:
-                pytest.skip("This package is supported on noble now") 
+                pytest.skip("This package is supported on noble now")
         pillar_ref_name = host.file('/package-testing/telemetry/reference/').listdir()[0]
         hist_file = host.file(ta_history_dir + pillar_ref_name).content_string
         hist_values=json.loads(hist_file)
@@ -750,7 +750,7 @@ def test_log_rotation(host):
     if pak_version == '1.0.1-1':
         pytest.skip("This test for package version 1.0.1-2+")
     else:
-        with host.sudo("root"):    
+        with host.sudo("root"):
             log_files_num_before = len(host.file(ta_log_dir).listdir())
             assert log_files_num_before == 2
             # we do not rorate empty files but error log is empty by default so we need to write smth into it
@@ -780,13 +780,14 @@ def test_path_absent_after_removal(host):
         assert not host.file(ta_pillar_dir_ps).exists
 
 def test_ta_manually_remove_service_deb(host):
-    dist = host.system_info.distribution
-    if dist.lower() not in deb_dists:
-        pytest.skip("This test only for DEB distributions")
-    with host.sudo("root"):
-        pkg = host.package("percona-telemetry-agent")
-        host.check_output("apt autoremove -y percona-telemetry-agent")
-        assert not pkg.is_installed
+    if update == 'yes':
+        dist = host.system_info.distribution
+        if dist.lower() not in deb_dists:
+            pytest.skip("This test only for DEB distributions")
+        with host.sudo("root"):
+            pkg = host.package("percona-telemetry-agent")
+            host.check_output("apt autoremove -y percona-telemetry-agent")
+            assert not pkg.is_installed
 
 # In case ta package is installed before PS package (not as dependency) - it is not removed with the pillar package.
 # So to check that everything is cleaned up - we delete it separately. Keeping JIC commented out
