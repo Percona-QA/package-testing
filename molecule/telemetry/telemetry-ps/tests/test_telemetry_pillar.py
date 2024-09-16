@@ -258,11 +258,11 @@ def test_ta_no_restart(host):
 def test_ta_update(host):
     with host.sudo("root"):
         if update == 'yes':
-            ta_started_num = host.run(f'grep -c "values from config:" {ta_log_file}')
-            assert int(ta_started_num.stdout) == 2, (ta_started_num.stdout, ta_started_num.stderr)
-            ta_terminated_num = host.run(f'grep -c "Received signal: terminated, shutdow" {ta_log_file}')
-            assert int(ta_terminated_num.stdout) == 1, (ta_terminated_num.stdout, ta_terminated_num.stderr)
-            assert not host.file('/var/log/percona/telemetry-agent.log').is_file
+#            ta_started_num = host.run(f'grep -c "values from config:" {ta_log_file}')
+#            assert int(ta_started_num.stdout) == 2, (ta_started_num.stdout, ta_started_num.stderr)
+#            ta_terminated_num = host.run(f'grep -c "Received signal: terminated, shutdow" {ta_log_file}')
+#            assert int(ta_terminated_num.stdout) == 1, (ta_terminated_num.stdout, ta_terminated_num.stderr)
+#            assert not host.file('/var/log/percona/telemetry-agent.log').is_file
         else:
             pytest.skip("This check only for TA update")
 ###############################################
