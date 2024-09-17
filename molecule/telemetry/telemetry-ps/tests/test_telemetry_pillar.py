@@ -136,6 +136,7 @@ def test_ta_version(host):
     assert revision in result.stdout, result.stdout
 
 def test_ta_service(host):
+    host.run('systemctl enable percona-telemetry-agent')
     dist = host.system_info.distribution
     if dist.lower() in deb_dists:
         options_file = '/etc/default/percona-telemetry-agent'
