@@ -34,11 +34,11 @@
 ### install pmm2-client
   - name: Install PMM client new deb packages
     when: ansible_os_family == "Debian"
-    apt: name=pmm2-client update_cache=yes state=latest
+    apt: name=pmm-client update_cache=yes state=latest
 
   - name: Install PMM client new rpm packages
     when: ansible_os_family == "RedHat"
-    yum: name=pmm2-client state=latest
+    yum: name=pmm-client state=latest
 
   - name: Check that PMM Client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
