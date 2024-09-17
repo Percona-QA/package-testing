@@ -35,11 +35,17 @@
 ### install pmm2-client
   - name: Install PMM client new deb packages
     when: ansible_os_family == "Debian"
-    apt: name=pmm3-client update_cache=yes state=latest
+    shel: |
+      sudo percona-release enable-only pmm3-client experimental
+      sudo apt-get update
+      sudo apt-get install pmm-client
 
   - name: Install PMM client new rpm packages
     when: ansible_os_family == "RedHat"
-    yum: name=pmm3-client state=latest
+    shel: |
+      sudo percona-release enable-only pmm3-client experimental
+      sudo yum -y update
+      sudo yum -y install pmm-client
 
   - name: Check that PMM Client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
