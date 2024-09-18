@@ -21,12 +21,6 @@
 
   - name: add the main tools repo
     command: percona-release enable tools release
-    when: ansible_distribution_release != "noble"
-
-# Added just for noble as qpress is not available in tools release repo
-  - name: add the main tools repo
-    command: percona-release enable tools testing
-    when: ansible_distribution_release == "noble"
 
   - name: clean and update yum cache
     shell: |
