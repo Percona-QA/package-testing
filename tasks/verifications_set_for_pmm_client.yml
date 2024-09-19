@@ -22,13 +22,13 @@
     process_name: "vmagent"
 
 - name: "Validate 'postgresql_pgstatements_agent' is Running"
-  when: '"pg-" in enabled_db | join("")'
+  when: '"pg-13" in enabled_db | join("")'
   include_tasks: ./verify_exporter_status.yml
   vars:
     process_name: "postgresql_pgstatements_agent"
 
 - name: "Wait for 'postgres_exporter' is Running"
-  when: '"pg-" in enabled_db | join("")'
+  when: '"pg-13" in enabled_db | join("")'
   include_tasks: ./wait_exporter_is_running.yml
   vars:
     process_name: "postgres_exporter"
@@ -45,7 +45,7 @@
 
   #TODO: improve verify_exporter_port_output.yml to work without socket service removal
 - name: Remove PostgreSQL Socket service to verify Port output in pmm-admin list commands
-  when: '"pg-" in enabled_db | join("")'
+  when: '"pg-13" in enabled_db | join("")'
   command: pmm-admin remove postgresql {{ pgsql_socket_service_name }} {{ port_flag if port_flag is defined else '' }}
 
 - name: Validate Exporters Port in output for 2.29.0+
@@ -58,4 +58,4 @@
       - node_exporter
       - "{{ ('ps-' in enabled_db | join('')) | ternary('mysqld_exporter','') }}"
       - "{{ ('psmdb-' in enabled_db | join('')) | ternary('mongodb_exporter','') }}"
-      - "{{ ('pg-' in enabled_db | join('')) | ternary('postgres_exporter','') }}"
+      - "{{ ('13' in enabled_db | join('')) | ternary('postgres_exporter','') }}"

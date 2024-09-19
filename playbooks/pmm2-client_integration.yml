@@ -96,7 +96,7 @@
     include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql_13.yml
 
   - name: Verify Postgres Exporter metric endpoint with Auth works
-    when: '"pg-" in enabled_db | join("")'
+    when: '"pg-13" in enabled_db | join("")'
     include_tasks: ../tasks/verify_pmm2_metric.yml
     vars:
       retries: 3
