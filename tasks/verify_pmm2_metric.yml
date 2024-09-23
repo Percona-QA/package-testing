@@ -30,11 +30,15 @@
       when: item.service_name != 'node_exporter'
       shell: "echo '{{ list_output.stdout }}' | grep {{ item.service_name }} | awk -F' ' '{print $4}'"
       register: service_id
+      debug:
+        msg: {{ service_id }}
 
     - name: "{{ item.service_name }}: grep Agent ID"
       when: item.service_name != 'node_exporter'
       shell: "echo '{{ list_output.stdout }}' | grep '{{ service_id.stdout }}' | awk '/_exporter/ {print $4}'"
       register: service_agent_id
+      debug:
+        msg: {{ service_agent_id }}
 
     - set_fact:
         agent_id: "{{ (item.service_name == 'node_exporter') | ternary(node_exporter_agent_id, service_agent_id) }}"
@@ -75,9 +79,7 @@
             msg: "'{{ item.metric }}' is not found!"
           failed_when: true
   rescue:
-    - name: Pring mongodb metrics
-      shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_password) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics'"
-      register: mongodb_results
+    - name: Print pmm-admin list output on fail
       debug:
-        msg: "{{ mongodb_results }}"
+        msg: "{{ list_output.stdout }}"
       failed_when: true
