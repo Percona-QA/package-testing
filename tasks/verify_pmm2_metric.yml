@@ -31,17 +31,19 @@
       shell: "echo '{{ list_output.stdout }}' | grep {{ item.service_name }} | awk -F' ' '{print $4}'"
       register: service_id
       debug:
-        msg: {{ service_id }}
+        msg: "{{ service_id }}"
 
     - name: "{{ item.service_name }}: grep Agent ID"
       when: item.service_name != 'node_exporter'
       shell: "echo '{{ list_output.stdout }}' | grep '{{ service_id.stdout }}' | awk '/_exporter/ {print $4}'"
       register: service_agent_id
       debug:
-        msg: {{ service_agent_id }}
+        msg: "{{ service_agent_id }}"
 
     - set_fact:
         agent_id: "{{ (item.service_name == 'node_exporter') | ternary(node_exporter_agent_id, service_agent_id) }}"
+      debug:
+        msg: " {{ agent_id.stdout }}"
 
     - set_fact:
         agent_password: "{{ agent_id.stdout }}"
