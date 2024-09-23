@@ -35,8 +35,8 @@
       when: item.service_name != 'node_exporter'
       shell: "echo '{{ list_output.stdout }}' | grep '{{ service_id.stdout }}' | awk '/_exporter/ {print $4}'"
       register: service_agent_id
-      debug:
-        msg: "{{ service_agent_id }}"
+      
+    - debug: msg="{{ service_agent_id }}"
 
     - set_fact:
         agent_id: "{{ (item.service_name == 'node_exporter') | ternary(node_exporter_agent_id, service_agent_id) }}"
@@ -48,15 +48,16 @@
     - name: "{{ item.service_name }}:: grep exporter port"
       shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id.stdout }}' | awk '/_exporter/ {print $NF}'"
       register: exporter_port
-      debug:
-        msg: "{{ exporter_port }}"
+
+    - debug: msg="{{ exporter_port }}"
 
     - name: "{{ item.service_name }}: curl metric with no auth"
       shell: "curl -s 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep -q '{{ item.metric }}'"
       register: metric_without_auth
-      debug:
-        msg: "{{ metric_without_auth }}"
+      
       ignore_errors: yes
+
+    - debug: msg="{{ metric_without_auth }}"
 
     - name: "{{ item.service_name }}: assert metrics cannot be accessed without authentication"
       assert:
