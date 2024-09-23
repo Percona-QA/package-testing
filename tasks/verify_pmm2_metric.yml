@@ -75,12 +75,6 @@
             msg: "'{{ item.metric }}' is not found!"
           failed_when: true
   rescue:
-    - name: Print pmm-admin list output on fail
-      debug:
-        msg: "{{ list_output.stdout }}"
-      failed_when: true
-
-  rescue:
     - name: Pring mongodb metrics
       shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_password) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics'"
       register: mongodb_results
