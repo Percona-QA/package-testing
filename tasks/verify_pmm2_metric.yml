@@ -54,7 +54,6 @@
     - name: "{{ item.service_name }}: curl metric with no auth"
       shell: "curl -s 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep -q '{{ item.metric }}'"
       register: metric_without_auth
-      
       ignore_errors: yes
 
     - debug: msg="{{ metric_without_auth }}"
@@ -65,6 +64,8 @@
           - metric_without_auth.stdout.find(item.metric) == -1
         fail_msg: "Authentication for exporter Broken, metrics fetched without basic auth!"
         success_msg: "{{ item.service_name }}: metrics are not accessible without auth"
+
+    - debug: msg="Agent id is {{ agent_password }}"
 
     - block:
         - name: "{{ item.service_name }}: curl metric with auth token"
