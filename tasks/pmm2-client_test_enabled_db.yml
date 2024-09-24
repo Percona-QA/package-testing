@@ -14,3 +14,4 @@
       - "{{ (ansible_os_family == 'RedHat') | ternary('psmdb-70','') }}"
       - "{{ (ansible_os_family == 'Debian') | ternary('pg-16','') }}"
       - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version < '8') | ternary('pg-13','') }}"
+      - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version >= '8') | ternary('pg-16','') }}"

@@ -30,6 +30,10 @@
     --service-name={{ mongo_socket_service_name }}
     {{ '' if agent_password is not defined or '/agent_id/' in agent_password else '--agent-password=%s' | format(agent_password) }}
 
+- name: Print agent password
+  ansible.builtin.debug:
+    msg: Agent Password is {{ agent_password }}
+
 - name: "Validate pmm-admin list output contains 'MongoDB'"
   include_tasks: ./verify_pmm-admin_list_contains.yml
   vars:

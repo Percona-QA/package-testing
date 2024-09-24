@@ -42,8 +42,8 @@
         agent_id: "{{ (item.service_name == 'node_exporter') | ternary(node_exporter_agent_id, service_agent_id) }}"
 
     - set_fact:
-        agent_password: "{{ agent_id.stdout }}"
-      when: agent_password is not defined or '/agent_id/' in agent_password
+        agent_id: "{{ agent_password }}"
+      when: agent_password is defined or '/agent_id/' in agent_password
 
     - name: "{{ item.service_name }}:: grep exporter port"
       shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id.stdout }}' | awk '/_exporter/ {print $NF}'"
@@ -65,10 +65,10 @@
         fail_msg: "Authentication for exporter Broken, metrics fetched without basic auth!"
         success_msg: "{{ item.service_name }}: metrics are not accessible without auth"
 
-    - debug: msg="Agent id is {{ agent_password }}"
+    - debug: msg="Agent id is {{ agent_id }}"
 
     - name: "{{ item.service_name }}: curl metric with auth token"
-      shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_password) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics'"
+      shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_id) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics'"
       register: metric_with_auth_debug
 
     - debug: msg="{{ metric_with_auth_debug }}"
