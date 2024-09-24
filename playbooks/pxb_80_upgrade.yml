@@ -35,6 +35,25 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
+  - name: Install libgflags-dev for rhel9 aarm64
+    yum:
+      name: https://dl.fedoraproject.org/pub/epel/9/Everything/aarch64/Packages/g/gflags-2.2.2-9.el9.aarch64.rpm
+      state: present
+      disable_gpg_check: yes
+    when: 
+      - ansible_os_family == "RedHat" 
+      - ansible_distribution_major_version == "9"
+      - ansible_architecture == "aarch64"
+
+  - name: Install libgflags-dev for rhel9 amd64
+    yum:
+      name: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
+      state: present
+      disable_gpg_check: yes
+    when: 
+      - ansible_os_family == "RedHat" 
+      - ansible_distribution_major_version == "9"
+      - ansible_architecture != "aarch64"
 # Disable Percona Toolkit installation till its supported in OL9 and Jammy
 #  - name: install Percona Toolkit new deb packages
 #    include_tasks: ../tasks/install_pt.yml
