@@ -58,4 +58,4 @@
       - node_exporter
       - "{{ ('ps-' in enabled_db | join('')) | ternary('mysqld_exporter','') }}"
       - "{{ ('psmdb-' in enabled_db | join('')) | ternary('mongodb_exporter','') }}"
-      - "{{ ('13' in enabled_db | join('')) | ternary('postgres_exporter','') }}"
+      - "{{ ('pg-' in enabled_db | join('')) | ternary('postgres_exporter','') }}"
