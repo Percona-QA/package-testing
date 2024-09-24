@@ -96,13 +96,11 @@
   command: >-
     pmm-admin add postgresql {{ port_flag if port_flag is defined else '' }}
     --password={{ random_pgsql_password }} --service-name={{ pgsql_service_name }} --query-source="pgstatements"
-    {{ '' if agent_password is not defined or '/agent_id/' in agent_password else '--agent-password=%s' | format(agent_password) }}
 
 - name: add postgresql metrics to monitoring via socket
   command: >-
     pmm-admin add postgresql {{ port_flag if port_flag is defined else '' }} --socket /var/run/postgresql/
     --username=postgres --service-name={{ pgsql_socket_service_name }} --query-source="pgstatements"
-    {{ '' if agent_password is not defined or '/agent_id/' in agent_password else '--agent-password=%s' | format(agent_password) }}
 
 - name: "Validate pmm-admin list output contains 'PostgreSQL'"
   include_tasks: ./verify_pmm-admin_list_contains.yml
