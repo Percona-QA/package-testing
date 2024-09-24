@@ -67,6 +67,12 @@
 
     - debug: msg="Agent id is {{ agent_password }}"
 
+    - name: "{{ item.service_name }}: curl metric with auth token"
+      shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_password) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics'"
+      register: metric_with_auth_debug
+
+    - debug: msg="{{ metric_with_auth_debug }}"
+
     - block:
         - name: "{{ item.service_name }}: curl metric with auth token"
           shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_password) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
@@ -87,7 +93,3 @@
       debug:
         msg: "{{ list_output.stdout }}"
       failed_when: true
-    - name: "{{ item.service_name }}: curl metric with auth token"
-      shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_password) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics'"
-      register: metric_with_auth_rescue
-    - debug: msg="{{ metric_with_auth_rescue }}"
