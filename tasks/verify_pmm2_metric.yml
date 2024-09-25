@@ -67,6 +67,8 @@
 
     - debug: msg="Agent id is {{ agent_id.stdout }}"
 
+    - debug: msg="Linux distribution is {{ ansible_distribution }}"
+
 #    - name: "{{ item.service_name }}: curl metric with auth token"
 #      shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_id.stdout) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics'"
 #      register: metric_with_auth_debug
