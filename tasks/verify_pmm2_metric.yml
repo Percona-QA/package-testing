@@ -43,7 +43,7 @@
 
     - set_fact:
         agent_id: "{{ agent_password }}"
-      when: agent_password is defined or '/agent_id/' in agent_password
+      when: agent_password is defined
 
     - name: "{{ item.service_name }}:: grep exporter port"
       shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id.stdout }}' | awk '/_exporter/ {print $NF}'"
