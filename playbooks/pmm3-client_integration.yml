@@ -25,6 +25,8 @@
   - name: Register Instance IP as a variable
     set_fact:
       instance_ip: "{{ instance_ip.stdout }}"
+  
+  - debug: msg = {{ ansible_architecture }} 
 
   - name: Set Integrations list
     include_tasks: ../tasks/pmm3-client_test_enabled_db.yml
