@@ -1,3 +1,5 @@
+# Encapsulates "enabled_db" variable initialization
+
 - name: Set Databases list
   set_fact:
     enabled_db: "{{ db_list|select|list }}"
