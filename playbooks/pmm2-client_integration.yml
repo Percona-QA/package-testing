@@ -27,7 +27,13 @@
       instance_ip: "{{ instance_ip.stdout }}"
 
   - name: Set Integrations list
+    include_tasks: ../tasks/pmm2-client_test_enabled_db_arm.yml
+    when: ansible_architecture == "aarch64"
+
+
+  - name: Set Integrations list
     include_tasks: ../tasks/pmm2-client_test_enabled_db.yml
+    when: ansible_architecture != "aarch64"
 
   - name: Setup environment
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
