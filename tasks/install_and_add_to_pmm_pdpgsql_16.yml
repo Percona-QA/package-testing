@@ -1,0 +1,113 @@
+# This task installs and starts PostgreSQL 16 on CentOS and Debian/Ubuntu
+#
+# Task adjustments are handled by parent playbook vars:
+#             var "port_flag"      :  to access agent with custom port
+#                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
+#
+- name: Download install_ppg16.yml
+  get_url:
+    url: https://raw.githubusercontent.com/Percona-QA/ppg-testing/main/tasks/install_ppg16.yml
+    dest: /tmp
+    mode: 0777
+
+- name: Enable postgresql repository
+  command: percona-release setup -y ppg-16
+
+- name: Run install_ppg16.yml
+  include_tasks: /tmp/install_ppg16.yml
+
+- name: Initialize Postgres RHEL
+  command: /usr/pgsql-16/bin/postgresql-16-setup initdb
+  environment:
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  when: ansible_os_family == "RedHat"
+
+- name: Start Postgres RHEL
+  service:
+    name: postgresql-16
+    state: started
+    enabled: true
+  when: ansible_os_family == "RedHat"
+
+- name: Start postgresql service for Debian based
+  service:
+    name: postgresql
+    state: started
+    enabled: true
+  when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
+
+- name: create lowercase 8 character password for pgsql
+  set_fact:
+    random_pgsql_password: "psql-{{ lookup('password', '/tmp/pgsqlpassword chars=ascii_lowercase,digits length=8') }}"
+
+- name: Change Postgresql Password
+  command: psql -c "ALTER USER postgres PASSWORD '{{ random_pgsql_password }}';"
+  become: yes
+  become_user: postgres
+
+- name: setup postgresql pg_stat_statements for Debian based Systems
+  shell: "{{item}}"
+  with_items:
+    - chmod a+w /etc/postgresql/16/main/postgresql.conf
+    - echo "shared_preload_libraries = 'pg_stat_statements'" >> /etc/postgresql/16/main/postgresql.conf
+    - cat /etc/postgresql/16/main/postgresql.conf | grep "pg_stat_statements"
+  become: yes
+  when: ansible_os_family == "Debian"
+
+- name: setup postgresql pg_stat_statements for redhat based systems
+  shell: "{{item}}"
+  with_items:
+    - chmod a+w /var/lib/pgsql/16/data/postgresql.conf
+    - echo "shared_preload_libraries = 'pg_stat_statements'" >> /var/lib/pgsql/16/data/postgresql.conf
+    - cat /var/lib/pgsql/16/data/postgresql.conf | grep "pg_stat_statements"
+  become: yes
+  when: ansible_os_family == "RedHat"
+
+- name: Enable Socket Based Connection for pgsql via pgsql configuration for debian based systems
+  command: sed -i 's/local   all             postgres                                peer/local   all             postgres                                trust/' /etc/postgresql/16/main/pg_hba.conf
+  become: yes
+  when: ansible_os_family == "Debian"
+
+- name: Enable Socket Based Connection for pgsql via pgsql configuration for redhat based systems
+  command: sed -i 's/local   all             all                                     peer/local   all             all                                     trust/' /var/lib/pgsql/16/data/pg_hba.conf
+  become: yes
+  when: ansible_os_family == "RedHat"
+
+- name: Start Postgres RHEL
+  service:
+    name: postgresql-16
+    state: restarted
+    enabled: true
+  when: ansible_os_family == "RedHat"
+
+- name: Start postgresql service for Debian based
+  service:
+    name: postgresql
+    state: restarted
+    enabled: true
+  when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
+
+- name: Create Extension pg_stat_statements
+  command: psql -c "create extension pg_stat_statements;"
+  become: yes
+  become_user: postgres
+
+- name: add postgresql metrics to monitoring
+  command: >-
+    pmm-admin add postgresql {{ port_flag if port_flag is defined else '' }}
+    --password={{ random_pgsql_password }} --service-name={{ pgsql_service_name }} --query-source="pgstatements"
+
+- name: add postgresql metrics to monitoring via socket
+  command: >-
+    pmm-admin add postgresql {{ port_flag if port_flag is defined else '' }} --socket /var/run/postgresql/
+    --username=postgres --service-name={{ pgsql_socket_service_name }} --query-source="pgstatements"
+
+- name: "Validate pmm-admin list output contains 'PostgreSQL'"
+  include_tasks: ./verify_pmm-admin_list_contains.yml
+  vars:
+    expected: "PostgreSQL"
+
+- name: "Wait for 'postgres_exporter' is Running"
+  include_tasks: ./wait_exporter_is_running.yml
+  vars:
+    process_name: "postgres_exporter"

@@ -52,8 +52,8 @@
       - unzip
       - wget
       - jq # for exporter end point metric fetch
-
-- name: enable original {{ test_repo }} repo
+ 
+- name: enable {{ test_package }} {{ test_repo }} repo
   include_tasks: ./enable_repo.yml
   vars:
     only: yes
