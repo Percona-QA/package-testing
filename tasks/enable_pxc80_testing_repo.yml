@@ -16,11 +16,14 @@
       disable_gpg_check: yes
     when: ansible_os_family == "RedHat"
 
-  - name: change the default repo to testing
+  - name: Add pxc-80 testing repo for qpress
     command: percona-release enable-only pxc-80 testing
-
+    
   - name: add the testing tools repo
-    command: percona-release enable tools testing
+    command: percona-release enable tools release
+
+  - name: enable pxb repo 
+    command: percona-release enable pxb-80 release
 
   - name: clean and update yum cache
     shell: |

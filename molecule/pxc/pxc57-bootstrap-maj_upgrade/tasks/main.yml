@@ -53,7 +53,7 @@
   - name: flush iptables
     iptables:
       flush: yes
-    when: ansible_os_family == "RedHat"
+    when: (ansible_os_family == "RedHat") and (ansible_facts['distribution'] == "OracleLinux")
 
   - name: install PXC 5.7 previous deb packages
     apt:
@@ -135,7 +135,7 @@
 
   - name: copy pxc config on centos 7
     template: src=../../../../templates/my_rpm_7.j2 dest=/etc/my.cnf
-    when: ((ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7") or (ansible_distribution == "Amazon"))	
+    when: ((ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7") or (ansible_distribution == "Amazon")) 
 
   - name: configure PXC on debian/ubuntu
     template: src=../../../../templates/my.j2
@@ -147,7 +147,7 @@
 
   - name: bootstrap cluster on RHEL7
     command: systemctl start mysql@bootstrap.service
-    when: ((ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7") or (ansible_distribution == "Amazon"))	
+    when: ((ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7") or (ansible_distribution == "Amazon")) 
 
   - name: run the bootstrap service on debian/ubuntu
     command: service mysql bootstrap-pxc

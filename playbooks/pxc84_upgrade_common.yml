@@ -1,0 +1,123 @@
+---
+# This playbook upgrades the PXC node to the latest available version in testing repo
+
+- hosts: all
+  become: true
+  become_method: sudo
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  tasks:
+
+  - name: disable old repos
+    command: percona-release disable all
+
+  - name: update deb cache
+    command: apt update
+    when:
+      - ansible_os_family == "Debian"
+
+  - name: clean and update yum cache
+    shell: |
+      yum clean all
+      yum makecache
+    when: ansible_os_family == "RedHat"
+
+  - name: include tasks for enabling test repo
+    include_tasks: ../tasks/enable_pxc84_testing_repo.yml
+    when: lookup('env', 'upgrade_repo') == "testing" or lookup('env', 'upgrade_repo') == ""
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_pxc84_main_repo.yml
+    when: lookup('env', 'upgrade_repo') == "main"
+
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../tasks/enable_pxc84_experimental_repo.yml
+    when: lookup('env', 'upgrade_repo') == "experimental"
+
+  - name: upgrade PXC 8.0 to new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+      - percona-xtradb-cluster-test
+      - percona-xtradb-cluster-source
+      - percona-xtradb-cluster-server-debug
+      - percona-xtradb-cluster-server
+      - percona-xtradb-cluster-common
+      - percona-xtradb-cluster-dbg
+      - percona-xtradb-cluster-client
+      - percona-xtradb-cluster
+    when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: upgrade PXC 8.0 to new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-shared
+      - percona-xtradb-cluster-garbd
+      - percona-xtradb-cluster-test
+      - percona-xtradb-cluster-devel
+      - percona-xtradb-cluster-debuginfo
+      - percona-xtradb-cluster-server
+      - percona-xtradb-cluster-full
+      - percona-xtradb-cluster-client
+    when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: install Percona Server new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+       - percona-xtradb-cluster-shared-compat
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: Sleep for 60 seconds
+    shell: sleep 60
+
+#  - name: start mysql service
+#    service: name=mysql state=restarted
+#    throttle: 1
+
+  - name: register PXC version Side Effect
+    shell: mysqld --version
+    register: pxc_version
+
+  - name: print PXC version Side Effect
+    debug: var=pxc_version
+
+  - name: check that PXC version is correct Side Effect
+    command: /package-testing/version_check.sh pxc84
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
+  - name: check that PXC package versions are correct Side Effect
+    command: /package-testing/package_check.sh pxc84
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
+  - name: Sleep 10 mins
+    shell: sleep 600
+
+  - name: Check that the PXC Cluster is up and running
+    shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'
+    register: cluster_size
+
+  - name: print cluster size Side Effect
+    debug: var=cluster_size
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7

@@ -1,0 +1,42 @@
+---
+scenario:
+  name: vagrant
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+lint:
+  name: yamllint
+platforms:
+  - name: pxc2-84-common
+    box: "${TEST_DIST}"
+    groups:
+      - common
+    memory: 1024
+    interfaces:
+      - network_name: private_network
+        ip: ${PXC2_IP}
+  - name: pxc3-84-common
+    box: "${TEST_DIST}"
+    groups:
+      - common
+    memory: 1024
+    interfaces:
+      - network_name: private_network
+        ip: ${PXC3_IP}
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  playbooks:
+    converge: ../../playbooks/playbook.yml
+    prepare: ../../../playbooks/vagrant.yml
+  inventory:
+    host_vars:
+      pxc2-84-common:
+        ip_env: PXC2_IP
+      pxc3-84-common:
+        ip_env: PXC3_IP
+        sleep_before_tests: 40

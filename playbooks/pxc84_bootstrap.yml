@@ -1,0 +1,135 @@
+---
+# This playbook sets up the first PXC node from Percona main repo
+
+- hosts: all
+  become: true
+  become_method: sudo
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  tasks:
+  # find vm ip so that it can be used in templates
+  - debug: var=ansible_all_ipv4_addresses
+  - set_fact:
+      man_ip: "{{ item }}"
+    with_items: "{{ ansible_all_ipv4_addresses }}"
+    when: "item.startswith('192.168')"
+  - debug: var=man_ip
+
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: include tasks for enabling test repo
+    include_tasks: ../tasks/enable_pxc84_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" 
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_pxc84_main_repo.yml
+    when: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../tasks/enable_pxc84_experimental_repo.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: install python3-libselinux 
+    yum:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - python3-libselinux
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+# - name: disable selinux
+#   selinux:
+#     policy: targeted
+#     state: enforcing
+#   when: ansible_os_family == "RedHat"
+
+  - name: add firewall rules
+    command: /sbin/iptables -I INPUT -s {{item}} -p tcp -j ACCEPT
+    with_items:
+    - 192.168.70.63
+    - 192.168.70.62
+    - 192.168.70.61
+    when: ansible_os_family == "RedHat"
+
+  - name: install PXC 8 deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+      - percona-xtrabackup-84
+      - percona-toolkit
+    when: ansible_os_family == "Debian"
+
+  - name: install PXC 8 rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+      - percona-xtrabackup-84
+      - percona-toolkit
+    when: ansible_os_family == "RedHat"
+
+  - name: stop mysql service with service command
+    command: service mysql stop
+
+  - name: copy pxc config on Redhat
+    template: src=../templates/my_rpm_80.j2 dest=/etc/my.cnf
+    when: ansible_os_family == "RedHat"
+
+  - name: copy pxc certs
+    copy:
+      src: ../support-files/certs/
+      dest: /etc/mysql/certs/
+
+  - name: configure PXC on debian/ubuntu
+    template: src=../templates/my_8.j2
+              dest=/etc/mysql/my.cnf
+              mode=0640 owner=mysql group=root
+    when: ansible_os_family == "Debian"
+
+  # bootstrap the cluster
+  - name: bootstrap cluster
+    command: systemctl start mysql@bootstrap.service
+
+  # set root password on Redhat
+  - name: set root password on Redhat
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on Redhat
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
+
+  # other tests
+# - name: install plugins
+#   command: /package-testing/plugins_test_80.sh pxc
+
+  - name: register PXC version Install
+    shell: mysqld --version
+    register: pxc_version
+
+  - name: print PXC version Install
+    debug: var=pxc_version
+
+  - name: check that PXC version is correct Install
+    command: /package-testing/version_check.sh pxc84
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
+  - name: check that PXC package versions are correct Install
+    command: /package-testing/package_check.sh pxc84
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
