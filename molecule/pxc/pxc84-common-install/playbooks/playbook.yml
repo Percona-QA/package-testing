@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  become_method: sudo
+  vars:
+      ENV_VAR_PATH: "{{ lookup('env', 'MOLECULE_ENV_FILE') }}"
+  roles:
+    - role: pxc84-common-install

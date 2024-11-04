@@ -417,11 +417,29 @@
 
 ## Changes done for telemetry: add iptables rule for Telemetry Server - install only ps package.
 ## Expected resuld - telemetry_uuid file has only instanceID
-  - name: Block pmm.check-dev.percona.com IP
+
+  - name: Install iptables on RHEL 
+    yum:
+      name:
+        - iptables
+        - iptables-services
+      state: present
+    when: ansible_facts['distribution'] == "RedHat"
+
+  - name: Enable and start iptables service
+    systemd:
+      name: iptables
+      state: started
+      enabled: true
+    when: ansible_facts['distribution'] == "RedHat"
+
+  - name: Block pmm.check-dev.percona.com IP for non REDHAT
     iptables:
       chain: OUTPUT
       destination: check-dev.percona.com
       jump: DROP
+    when: 
+      - lookup('env', 'upgrade_repo') == ""  
 
   - name: install Percona Server{{ pro_suf }} deb package for telemetry
     apt:

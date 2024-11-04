@@ -13,11 +13,13 @@
   - name: Add the Percona Release yum repo without GPG check
     yum:
       name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-      disable_gpg_check: yes
     when: ansible_os_family == "RedHat"
 
-  - name: enable main repo
+  - name: enable main repo pxc-80
     command: percona-release enable-only pxc-80 release
+
+  - name: enable pxb repo 
+    command: percona-release enable pxb-80 release
 
   - name: add the main tools repo
     command: percona-release enable tools release

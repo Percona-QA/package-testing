@@ -44,7 +44,7 @@
   - name: flush iptables
     iptables:
       flush: yes
-    when: ansible_os_family == "RedHat"
+    when: (ansible_os_family == "RedHat") and (ansible_facts['distribution'] == "OracleLinux")
 
   - name: install PXC 8 deb packages
     apt:
@@ -62,7 +62,7 @@
       PERCONA_TELEMETRY_DISABLE: "1"
 
 
-  - name: install PXC 8 rpm packages
+  - name: install PXC 8 rpm packages amd64
     yum:
       name: "{{ packages }}"
       state: latest
@@ -71,7 +71,24 @@
       - percona-xtradb-cluster-full
       - percona-toolkit
       - percona-xtrabackup-80
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_os_family == "RedHat" 
+      - ansible_architecture == "x86_64"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: install PXC 8 rpm packages arm OS
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+      - percona-xtrabackup-80
+    when: 
+      - ansible_os_family == "RedHat"
+      - ansible_architecture == "aarch64"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
       PERCONA_TELEMETRY_DISABLE: "1"
@@ -160,13 +177,28 @@
       - percona-xtradb-cluster-server
     when: ansible_os_family == "RedHat"
 
+  - name: Install iptables on RHEL 9
+    yum:
+      name:
+        - iptables
+        - iptables-services
+      state: present
+    when: ansible_facts['distribution'] == "RedHat"
 
-  - name: Block pmm.check-dev.percona.com IP
+  - name: Enable and start iptables service
+    systemd:
+      name: iptables
+      state: started
+      enabled: true
+    when: ansible_facts['distribution'] == "RedHat"
+
+  - name: Block pmm.check-dev.percona.com IP for non REDHAT 8 and 9 
     iptables:
       chain: OUTPUT
       destination: check-dev.percona.com
       jump: DROP
-    when: lookup('env', 'upgrade_repo') == ""
+    when: 
+      - lookup('env', 'upgrade_repo') == ""  
 
   - name: install PXC 8 deb packages with blocked Telemetry Server
     apt:

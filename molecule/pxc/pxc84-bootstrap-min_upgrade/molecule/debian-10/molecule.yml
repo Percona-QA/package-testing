@@ -1,0 +1,30 @@
+---
+scenario:
+  name: debian-10
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: pxc1-84-bootstrap-debian-10-min_upgrade
+    region: us-west-1
+    image: ami-024fe42989cf9e876
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    instance_type: t2.large
+    ssh_user: admin
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: ${JOB_NAME}
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../../../playbooks/create_noble.yml
+    destroy: ../../../playbooks/destroy_noble.yml
+    prepare: ../../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+    side_effect: ../../../../../playbooks/pxc84_upgrade_bootstrap.yml
+  inventory:
+    host_vars:
+      pxc1-84-bootstrap-debian-10-min_upgrade:
+        ip_env: "{{ ansible_host }}"

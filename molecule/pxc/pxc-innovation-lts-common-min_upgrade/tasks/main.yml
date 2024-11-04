@@ -42,16 +42,16 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: include tasks for enabling test repo pxc 80
-    include_tasks: ../../../../tasks/enable_pxc80_testing_repo.yml
+  - name: include tasks for enabling test repo pxc 84
+    include_tasks: ../../../../tasks/enable_pxc84_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" 
 
-  - name: include tasks for enabling main repo pxc 80
-    include_tasks: ../../../../tasks/enable_pxc80_main_repo.yml
+  - name: include tasks for enabling main repo pxc 84
+    include_tasks: ../../../../tasks/enable_pxc84_main_repo.yml
     when: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
 
-  - name: include tasks for enabling experimental repo pxc 80
-    include_tasks: ../../../../tasks/enable_pxc80_experimental_repo.yml
+  - name: include tasks for enabling experimental repo pxc 84
+    include_tasks: ../../../../tasks/enable_pxc84_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: allow all users to connect to mysql
@@ -61,7 +61,7 @@
   - name: flush iptables
     iptables:
       flush: yes
-    when: ansible_os_family == "RedHat"
+    when: (ansible_os_family == "RedHat") and (ansible_facts['distribution'] == "OracleLinux")
 
   - name: install PXC {{ major_release_version}} deb packages
     apt:
