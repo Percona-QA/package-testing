@@ -169,6 +169,14 @@
         state: stopped
       when: (ansible_os_family == "OracleLinux") and (ansible_distribution_major_version|int == 8 or ansible_distribution_major_version|int == 9)
 
+    - name: Setup SSH keys for RedHat
+      authorized_key:
+        user: ec2-user
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: ansible_os_family == "RedHat"
+      
     - name: Setup SSH keys CentOS
       authorized_key:
         user: centos
