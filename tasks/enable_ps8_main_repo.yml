@@ -51,10 +51,12 @@
 # - name: enable the tools main repo
 #   command: percona-release enable tools release
 
-  - name: clean and update yum cache
-    shell: |
-      yum clean all
-      yum makecache
+  - name: Clean YUM cache
+    command: yum clean all
+    when: ansible_os_family == "RedHat"
+
+  - name: Update YUM cache
+    command: yum makecache
     when: ansible_os_family == "RedHat"
 
   - name: Add ARM support into percona-release

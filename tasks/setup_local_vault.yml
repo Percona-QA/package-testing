@@ -17,7 +17,15 @@
        - unzip
        - wget
        - openssl
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 8
+
+  - name: Install needed rpm packages for setting up vault rhel 9
+    yum:
+      state: latest
+      name:
+       - unzip
+       - wget
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 9
 
   - name: Download get_download_link.sh script
     get_url:
