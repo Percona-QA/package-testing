@@ -29,7 +29,7 @@
     command: percona-release enable pdps-{{ version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
-      version: "{{ '8.0' if '8.0.' in lookup('env', 'VERSION') else '8x-innovation' }}"
+      version: "{{ '84-lts' if '8.4' in lookup('env', 'VERSION') else '8.0' if '8.0.' in lookup('env', 'VERSION') else '8x-innovation' }}"
     when: major_repo
 
 #  - name: install Percona Toolkit new deb packages
