@@ -35,15 +35,13 @@
       when: item.service_name != 'node_exporter'
       shell: "echo '{{ list_output.stdout }}' | grep '{{ service_id.stdout }}' | awk '/_exporter/ {print $4}'"
       register: service_agent_id
-      
-    - debug: msg="Service agent id is {{ service_agent_id }}"
 
     - set_fact:
         agent_id: "{{ (item.service_name == 'node_exporter') | ternary(node_exporter_agent_id, service_agent_id) }}"
 
     - set_fact:
-        agent_id: "{{ agent_password }}"
-      when: agent_password is defined
+        agent_password: "{{ agent_id.stdout }}"
+      when: agent_password is not defined or '/agent_id/' in agent_password
 
     - name: "{{ item.service_name }}:: grep exporter port"
       shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id.stdout }}' | awk '/_exporter/ {print $NF}'"
