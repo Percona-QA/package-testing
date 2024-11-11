@@ -13,9 +13,9 @@ VERSION = os.getenv("VERSION")
 @pytest.fixture
 def prepare_test(host):
     with host.sudo("root"):
-        cmd = "mysql -e \"CREATE USER 'clustercheckuser'@'%' IDENTIFIED WITH mysql_native_password by 'clustercheckpassword!';\
+        cmd = "mysql -e \"CREATE USER 'clustercheckuser'@'%' IDENTIFIED by 'clustercheckpassword!';\
             GRANT PROCESS ON *.* TO 'clustercheckuser'@'%';\
-            CREATE USER 'haproxy_user'@'%' IDENTIFIED WITH mysql_native_password by '$3Kr$t';\""
+            CREATE USER 'haproxy_user'@'%' IDENTIFIED by '$3Kr$t';\""
         result = host.run(cmd)
         assert result.rc == 0, result.stdout
         cmd = 'service xinetd restart'
