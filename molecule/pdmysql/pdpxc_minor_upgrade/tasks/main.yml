@@ -134,8 +134,8 @@
     dnf clean all
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
-- name: install Percona XtraBackup-{{ VERSION }}  packages
-  include_tasks: ../../../tasks/install_pxb{{ VERSION }}.yml
+- name: install Percona XtraBackup-{{ version }}  packages
+  include_tasks: ../../../tasks/install_pxb{{ version }}.yml
   vars:
     version: "{{ lookup('env', 'FROM_VERSION').split('.')[0] + lookup('env', 'FROM_VERSION').split('.')[1] }}"
 
