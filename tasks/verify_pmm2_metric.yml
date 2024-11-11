@@ -62,6 +62,7 @@
     - name: "{{ item.service_name }}: curl metric with auth token"
       shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_password) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics'"
       register: debug_response
+      ignore_errors: yes
 
     - debug:
         var: debug_response
