@@ -60,9 +60,7 @@ PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    "mysql -e \"INSTALL PLUGIN"
                    " rpl_semi_sync_slave SONAME 'semisync_slave.so';\"",
                    "mysql -e \"INSTALL PLUGIN"
-                   " connection_control SONAME 'connection_control.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " mysql_native_password SONAME 'mysql_native_password.so';\""]
+                   " connection_control SONAME 'connection_control.so';\""]
 
 COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_log_sink_json', 'component_log_filter_dragnet',
