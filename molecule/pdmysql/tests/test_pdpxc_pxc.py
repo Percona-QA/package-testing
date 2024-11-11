@@ -62,7 +62,7 @@ PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    "mysql -e \"INSTALL PLUGIN"
                    " connection_control SONAME 'connection_control.so';\"",
                    "mysql -e \"INSTALL PLUGIN"
-                   " connection_control_failed_login_attempts SONAME 'connection_control.so';\""]
+                   " mysql_native_password SONAME 'mysql_native_password.so';\""]
 
 COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_log_sink_json', 'component_log_filter_dragnet',
