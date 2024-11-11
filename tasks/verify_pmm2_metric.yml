@@ -64,7 +64,7 @@
       register: debug_response
 
     - debug:
-      msg: "{{ debug_response }}"
+        var: debug_response
 
     - block:
         - name: "{{ item.service_name }}: curl metric with auth token"
