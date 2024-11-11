@@ -1,0 +1,31 @@
+---
+scenario:
+  name: vagrant
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+lint:
+  name: yamllint
+platforms:
+  - name: pxc1-84-bootstrap
+    box: "${TEST_DIST}"
+    groups:
+      - bootstrap
+    memory: 1024
+    interfaces:
+      - network_name: private_network
+        ip: ${PXC1_IP}
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  playbooks:
+    converge: ../../playbooks/playbook.yml
+    prepare: ../../../playbooks/vagrant.yml
+  inventory:
+    host_vars:
+      pxc1-84-bootstrap:
+        ip_env: PXC1_IP

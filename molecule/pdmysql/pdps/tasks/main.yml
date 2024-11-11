@@ -34,11 +34,11 @@
     command: percona-release enable-only pdps-{{ version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
-      version: "{{ '8.0' if '8.0.' in lookup('env', 'VERSION') else '8x-innovation' }}"
+      version: "{{ '84-lts' if '8.4' in lookup('env', 'VERSION') else '8.0' if '8.0.' in lookup('env', 'VERSION') else '8x-innovation' }}"
     when: major_repo
 
-  - name: install Percona Toolkit
-    include_tasks: ../../../tasks/install_pt.yml
+#  - name: install Percona Toolkit
+#    include_tasks: ../../../tasks/install_pt.yml
 
   - name: clean yum
     shell: |
@@ -156,6 +156,9 @@
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh

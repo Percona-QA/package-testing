@@ -1,0 +1,30 @@
+---
+scenario:
+  name: rhel-9-arm
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: pxc1-84-bootstrap-rhel-9-arm-install
+    region: us-west-1
+    image: ami-04dbd1a24794a6d04
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    instance_type: c6g.large
+    ssh_user: ec2-user
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: ${JOB_NAME}
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../../../playbooks/create_noble.yml
+    destroy: ../../../playbooks/destroy_noble.yml
+    prepare: ../../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+    side_effect: ../../../../../playbooks/pxc84_upgrade_bootstrap.yml
+  inventory:
+    host_vars:
+      pxc1-84-bootstrap-rhel-9-arm-install:
+        ip_env: "{{ ansible_host }}"

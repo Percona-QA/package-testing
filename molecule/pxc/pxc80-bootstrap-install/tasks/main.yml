@@ -53,7 +53,7 @@
   - name: flush iptables
     iptables:
       flush: yes
-    when: ansible_os_family == "RedHat"
+    when: (ansible_os_family == "RedHat") and (ansible_facts['distribution'] == "OracleLinux")
 
   - name: install PXC 8 deb packages
     apt:
@@ -68,7 +68,22 @@
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: install PXC 8 rpm packages
+  - name: install PXC 8 rpm packages amd64
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+      - percona-toolkit
+      - percona-xtrabackup-80
+    when: 
+      - ansible_os_family == "RedHat" 
+      - ansible_architecture == "x86_64"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC 8 rpm packages arm OS
     yum:
       name: "{{ packages }}"
       state: latest
@@ -76,8 +91,9 @@
       packages:
       - percona-xtradb-cluster-full
       - percona-xtrabackup-80
-      - percona-toolkit
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_os_family == "RedHat"
+      - ansible_architecture == "aarch64"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
@@ -139,7 +155,13 @@
   - name: check PXC 8.0 version Molecule
     command: /package-testing/version_check.sh pxc80
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
-      
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
+
   - name: Sleep 60 seconds
     command: sleep 60
 

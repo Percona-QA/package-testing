@@ -12,6 +12,7 @@
   vars:
     pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
     pmm_server_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default('admin', true) }}"
+    test_package: "{{ lookup('env', 'install_package') | default('pmm2-client', true)}}"
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') | regex_search('\\S(.*\\S)?') }}"
@@ -26,7 +27,12 @@
       instance_ip: "{{ instance_ip.stdout }}"
 
   - name: Set Integrations list
+    include_tasks: ../tasks/pmm2-client_test_enabled_db_arm.yml
+    when: ansible_architecture == "aarch64"
+
+  - name: Set Integrations list
     include_tasks: ../tasks/pmm2-client_test_enabled_db.yml
+    when: ansible_architecture != "aarch64"
 
   - name: Setup environment
     include_tasks: ../tasks/pmm2_client_test_prepare.yml
@@ -59,6 +65,10 @@
     when: '"ps-5.7" in enabled_db'
     include_tasks: ../tasks/install_and_add_to_pmm_ps_57.yml
 
+  - name: Install and start Percona Server 8.0
+    when: '"ps-8.0" in enabled_db'
+    include_tasks: ../tasks/install_and_add_to_pmm_ps_80.yml    
+
   - name: Verify if Metric Endpoint with Auth works for Mysqld Exporter
     when: '"ps-" in enabled_db | join("")'
     include_tasks: ../tasks/verify_pmm2_metric.yml
@@ -82,8 +92,8 @@
     when: '"psmdb-" in enabled_db | join("")'
     include_tasks: ../tasks/verify_pmm2_metric.yml
     loop:
-      - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up 1' }
-      - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up 1' }
+      - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up.* 1' }
+      - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up.* 1' }
 ### end PSMDB
 
 ### start PDPGSQL
@@ -93,6 +103,10 @@
 
   - name: Install and start Percona Server PostgreSQL 13
     when: '"pg-13" in enabled_db'
+    include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql_13.yml
+  
+  - name: Install and start Percona Server PostgreSQL 16
+    when: '"pg-16" in enabled_db'
     include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql_13.yml
 
   - name: Verify Postgres Exporter metric endpoint with Auth works

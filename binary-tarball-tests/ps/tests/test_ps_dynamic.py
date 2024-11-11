@@ -85,3 +85,32 @@ def test_audit_log_v2(mysql_server):
         assert 'ACTIVE' in output
     else:
         pytest.skip('audit_log_v2 is checked from 8.0!')
+
+def test_telemetry_status(mysql_server):
+    if ps_version_major in ['8.0']:
+        # Fetch telemetry settings
+        query = "SHOW VARIABLES LIKE '%percona_telemetry%';"
+        telemetry_vars = mysql_server.run_query(query)
+
+        # Debug: Print the raw output for inspection
+        print("Telemetry Query Output:", telemetry_vars)
+
+        # Convert the output to a dictionary
+        telemetry_settings = {}
+        lines = telemetry_vars.split('\n')
+        for line in lines:
+            parts = line.split('\t')
+            if len(parts) == 2:
+                key, value = parts
+                telemetry_settings[key] = value
+            else:
+                print(f"Skipping line due to insufficient data: {line}")
+
+        # Debug: Print the parsed telemetry settings
+        print("Parsed Telemetry Settings:", telemetry_settings)
+
+        # Check if telemetry is disabled
+        assert telemetry_settings.get('percona_telemetry_disable') == 'OFF', "Telemetry is enabled"
+
+    else:
+        pytest.skip('telemetry agent is checked from 8.0!')

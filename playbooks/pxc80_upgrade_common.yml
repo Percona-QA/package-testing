@@ -8,6 +8,21 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
+
+  - name: disable old repos
+    command: percona-release disable all
+
+  - name: update deb cache
+    command: apt update
+    when:
+      - ansible_os_family == "Debian"
+
+  - name: clean and update yum cache
+    shell: |
+      yum clean all
+      yum makecache
+    when: ansible_os_family == "RedHat"
+
   - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_pxc80_testing_repo.yml
     when: lookup('env', 'upgrade_repo') == "testing" or lookup('env', 'upgrade_repo') == ""
@@ -72,9 +87,9 @@
   - name: Sleep for 60 seconds
     shell: sleep 60
 
-  - name: start mysql service
-    service: name=mysql state=restarted
-    throttle: 1
+#  - name: start mysql service
+#    service: name=mysql state=restarted
+#    throttle: 1
 
   - name: register PXC version Side Effect
     shell: mysqld --version
@@ -90,3 +105,19 @@
   - name: check that PXC package versions are correct Side Effect
     command: /package-testing/package_check.sh pxc80
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
+  - name: Sleep 10 mins
+    shell: sleep 600
+
+  - name: Check that the PXC Cluster is up and running
+    shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'
+    register: cluster_size
+
+  - name: print cluster size Side Effect
+    debug: var=cluster_size
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7

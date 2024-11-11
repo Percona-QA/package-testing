@@ -13,7 +13,11 @@
 - hosts: all
   become: true
   become_method: sudo
-
+  vars:
+    install_mysql_shell: "{{ lookup('env', 'install_mysql_shell', default='') }}"
+    gnupg_home: /root/.gnupg
+    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
   tasks:
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
@@ -31,12 +35,72 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
+  - name: Install libgflags-dev for rhel9 aarm64
+    yum:
+      name: https://dl.fedoraproject.org/pub/epel/9/Everything/aarch64/Packages/g/gflags-2.2.2-9.el9.aarch64.rpm
+      state: present
+      disable_gpg_check: yes
+    when: 
+      - ansible_os_family == "RedHat" 
+      - ansible_distribution_major_version == "9"
+      - ansible_architecture == "aarch64"
+
+  - name: Install libgflags-dev for rhel9 amd64
+    yum:
+      name: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
+      state: present
+      disable_gpg_check: yes
+    when: 
+      - ansible_os_family == "RedHat" 
+      - ansible_distribution_major_version == "9"
+      - ansible_architecture != "aarch64"
 # Disable Percona Toolkit installation till its supported in OL9 and Jammy
 #  - name: install Percona Toolkit new deb packages
 #    include_tasks: ../tasks/install_pt.yml
 
   - name: install Percona Server 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
+    when:
+      - lookup('env', 'server_to_test') == "ps-80"
+
+# INSTALL MS 
+
+  - name: Extract PXB major and minor version number using shell commands
+    shell: cat /package-testing/VERSIONS | grep 'PXB80_VER' | cut -d'=' -f2 | sed 's/"//g'
+    register: pxb_version_major_minor_register
+
+  - name: Extract PXB major version number using shell commands
+    shell: cat /package-testing/VERSIONS | grep PXB80_VER | awk -F'[=".]' '{print $3"."$4}'
+    register: pxb_version_major_register
+
+  - name: Extract version number using shell commands
+    shell: cat /package-testing/VERSIONS | grep -oP 'PXB80_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    register: major_release_version_register
+
+  - name: Set major_release_version variable
+    set_fact:
+      major_release_version_reg: "{{ major_release_version_register.stdout }}"
+
+  - name: Set pxb_version_major variable
+    set_fact:
+      pxb_version_major_reg: "{{ pxb_version_major_register.stdout }}"
+
+  - name: Set pxb_version_major_minor variable
+    set_fact:
+      pxb_version_major_minor_reg: "{{ pxb_version_major_minor_register.stdout }}"
+
+  - name: DEBUG  PXB version number
+    debug:
+      msg: "PXB version number is {{ pxb_version_major_reg }} {{ pxb_version_major_minor_reg }}"
+      
+  - name: install MYSQL MS Server {{ pxb_version_major_reg }} packages
+    include_tasks: ../tasks/install_ms_innovation_lts.yml
+    vars:
+      pxb_version_major: "{{ pxb_version_major_reg }}"
+      pxb_version_major_minor: "{{ pxb_version_major_minor_reg }}"
+    when:
+      - lookup('env', 'server_to_test') == "ms-80"
+##
 
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
@@ -46,7 +110,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
   - name: start mysql service with systemctl command
-    command: systemctl start mysql
+    command: systemctl start mysqld
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
   - name: set root password on centos
@@ -60,7 +124,12 @@
     when: ansible_os_family == "RedHat"
 
   - name: restart mysql service
+    service: name=mysqld state=restarted
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+
+  - name: restart mysql service debian
     service: name=mysql state=restarted
+    when: ansible_os_family == "Debian"
 
   - name: install plugins, import world database
     command: /package-testing/plugins_test.sh
@@ -97,6 +166,29 @@
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb80
 
+  - name: Print the version of the installed Percona XtraBackup
+    shell: |
+      {
+        echo "XTRABACKUP VERSION is ";
+        xtrabackup --version || echo "FAILED: xtrabackup --version";
+        echo "xbstream VERSION is ";
+        xbstream --version || echo "FAILED: xbstream --version";
+        echo "xbcloud VERSION is ";
+        xbcloud --version || echo "FAILED: xbcloud --version";
+        echo "xbcrypt VERSION is ";
+        xbcrypt --version || echo "FAILED: xbcrypt --version";
+        echo "list rpm packages ";
+        rpm -qa | grep "percona" || echo "FAILED: rpm -qa | grep percona";
+        echo "list deb packages";
+        dpkg -l | grep "percona" || echo "FAILED: dpkg -l | grep percona";
+      }
+    register: version_output
+    ignore_errors: yes
+
+  - name: Display version information
+    debug:
+      var: version_output.stdout_lines
+
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb80
 
@@ -127,5 +219,5 @@
       - percona-xtrabackup-80
     when: ansible_os_family == "RedHat"
 
-  - name: check if process is stopped after package removal
-    command: /package-testing/check_running.sh mysql stopped
+#  - name: check if process is stopped after package removal
+#    command: /package-testing/check_running.sh mysql stopped

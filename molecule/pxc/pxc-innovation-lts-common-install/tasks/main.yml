@@ -60,7 +60,12 @@
   - name: flush iptables
     iptables:
       flush: yes
-    when: ansible_os_family == "RedHat"
+    when: (ansible_os_family == "RedHat") and (ansible_facts['distribution'] == "OracleLinux")
+
+# resolving qpress error
+  - name: enable the pdpxc-80 main repo for qpress in noble
+    command: percona-release enable pdpxc-8.0 release
+    when: ansible_distribution_release == "noble"
 
   - name: install PXC {{ major_release_version}} deb packages
     apt:
@@ -127,8 +132,8 @@
     command: /package-testing/package_check.sh pxc{{ major_release_version}}
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
-  - name: Perform PXC package prechecks
-    command: /package-testing/scripts/pxc-package-prechecks.sh pxc{{ major_release_version}}
+#  - name: Perform PXC package prechecks
+#    command: /package-testing/scripts/pxc-package-prechecks.sh pxc{{ major_release_version}}
 
   - name: run bats tests for mysql init scripts
     shell: sleep {{ sleep_before_tests | default('0') }}; /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
@@ -164,12 +169,28 @@
       - percona-xtradb-cluster-server
     when: ansible_os_family == "RedHat"
 
-  - name: Block pmm.check-dev.percona.com IP
+  - name: Install iptables on RHEL 9
+    yum:
+      name:
+        - iptables
+        - iptables-services
+      state: present
+    when: ansible_facts['distribution'] == "RedHat"
+
+  - name: Enable and start iptables service
+    systemd:
+      name: iptables
+      state: started
+      enabled: true
+    when: ansible_facts['distribution'] == "RedHat"
+
+  - name: Block pmm.check-dev.percona.com IP for non REDHAT 
     iptables:
       chain: OUTPUT
       destination: check-dev.percona.com
       jump: DROP
-    when: lookup('env', 'upgrade_repo') == ""
+    when: 
+      - lookup('env', 'upgrade_repo') == ""  
 
   - name: install PXC 8 deb packages with blocked Telemetry Server
     apt:

@@ -29,11 +29,11 @@
     command: percona-release enable pdps-{{ version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
-      version: "{{ '8.0' if '8.0.' in lookup('env', 'VERSION') else '8x-innovation' }}"
+      version: "{{ '84-lts' if '8.4' in lookup('env', 'VERSION') else '8.0' if '8.0.' in lookup('env', 'VERSION') else '8x-innovation' }}"
     when: major_repo
 
-  - name: install Percona Toolkit new deb packages
-    include_tasks: ../../../tasks/install_pt.yml
+#  - name: install Percona Toolkit new deb packages
+#    include_tasks: ../../../tasks/install_pt.yml
 
 # revert order once pt issue(DISTMYSQL-400) is resolved for OL8    
   - name: disable the mysql module on RHEL/CentOS 8
@@ -165,6 +165,9 @@
 
   - name: restart mysql service
     service: name=mysql state=restarted
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
 
   - name: install percona-mysql-shell package for CentOS
     yum:

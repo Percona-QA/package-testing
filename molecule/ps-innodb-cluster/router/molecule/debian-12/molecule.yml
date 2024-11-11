@@ -5,8 +5,6 @@ dependency:
   name: galaxy
 driver:
   name: ec2
-lint:
-  name: yamllint
 platforms:
   - name: mysql-router-debian-12
     region: us-west-2
@@ -23,7 +21,7 @@ provisioner:
     name: ansible-lint
   playbooks:
     create: ../../../playbooks/create.yml
-    destroy: ../../../../playbooks/destroy.yml
+    destroy: ../../../playbooks/destroy.yml
     prepare: ../../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
 verifier:

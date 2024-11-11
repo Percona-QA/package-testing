@@ -11,6 +11,30 @@
      deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
     when: ansible_os_family == "Debian"
 
+  - name: Receive GPG key 1
+    command: "gpg --batch --keyserver keyserver.ubuntu.com --recv-keys {{ percona_key1 }}"
+    environment:
+      GNUPGHOME: "{{ gnupg_home }}"
+    when: ansible_os_family == "RedHat"
+
+  - name: Export GPG key 1
+    command: "gpg --batch --export --armor {{ percona_key1 }}"
+    register: gpg_key1
+    environment:
+      GNUPGHOME: "{{ gnupg_home }}"
+    when: ansible_os_family == "RedHat"
+
+  - name: Save GPG key 1 to file
+    copy:
+      content: "{{ gpg_key1.stdout }}"
+      dest: "{{ percona_key1_file }}"
+      mode: '0644'
+    when: ansible_os_family == "RedHat"
+
+  - name: Import GPG keys with rpmkeys
+    command: "rpmkeys --import {{ percona_key1_file }}"
+    when: ansible_os_family == "RedHat"
+
   - name: add the main Percona yum repos for centos
 #   yum: name=https://repo.percona.com/yum/testing/latest/RPMS/noarch/percona-release-1.0-21.noarch.rpm
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
@@ -24,3 +48,7 @@
       yum clean all
       yum makecache
     when: ansible_os_family == "RedHat"
+
+  - name: Add ARM support into percona-release
+    shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
+    when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"

@@ -1,0 +1,43 @@
+---
+scenario:
+  name: ubuntu-noble-arm
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: pxc2-84-common-ubuntu-noble-arm-install
+    region: us-west-1
+    image: ami-06098d756d39a2267
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    instance_type: c6g.large
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: ${JOB_NAME}
+  - name: pxc3-84-common-ubuntu-noble-arm-install
+    region: us-west-1
+    image: ami-06098d756d39a2267
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    instance_type: c6g.large
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: ${JOB_NAME}
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../../../playbooks/create_noble.yml
+    destroy: ../../../playbooks/destroy_noble.yml
+    prepare: ../../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+    side_effect: ../../../../../playbooks/pxc84_upgrade_common.yml
+  inventory:
+    host_vars:
+      pxc2-84-common-ubuntu-noble-arm-install:
+        ip_env: "{{ ansible_host }}"
+      pxc3-84-common-ubuntu-noble-arm-install:
+        ip_env: "{{ ansible_host }}"
+        sleep_before_tests: 40

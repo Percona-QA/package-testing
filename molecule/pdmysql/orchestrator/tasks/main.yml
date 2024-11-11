@@ -49,7 +49,7 @@
 
   - name: download golang tar
     get_url:
-      url: "https://golang.org/dl/go1.16.5.linux-amd64.tar.gz"
+      url: "https://golang.org/dl/go1.22.6.linux-amd64.tar.gz"
       dest: "/tmp"
       mode: 0440
     when: ansible_os_family == "Debian"
@@ -63,7 +63,7 @@
 
   - name: Extract the Go tarball
     unarchive:
-      src: "/tmp/go1.16.5.linux-amd64.tar.gz"
+      src: "/tmp/go1.22.6.linux-amd64.tar.gz"
       dest: /usr/local
       copy: no
     become: yes
@@ -209,16 +209,16 @@
       - /root/sandboxes/ci/node2
       - /root/sandboxes/ci/node3
 
-  - name: Start mysql master
+  - name: Start mysql source
     shell: "mysqld_safe --defaults-file=/root/sandboxes/ci/master/my.sandbox.cnf &"
 
-  - name: Start mysql slave1
+  - name: Start mysql replica1
     shell: "mysqld_safe --defaults-file=/root/sandboxes/ci/node1/my.sandbox.cnf &"
 
-  - name: Start mysql slave2
+  - name: Start mysql replica2
     shell: "mysqld_safe --defaults-file=/root/sandboxes/ci/node2/my.sandbox.cnf &"
 
-  - name: Start mysql slave3
+  - name: Start mysql replica3
     shell: "mysqld_safe --defaults-file=/root/sandboxes/ci/node3/my.sandbox.cnf &"
 
   - name: Sleep for mysql
@@ -241,7 +241,8 @@
   - name: Create CI user
     mysql_user:
       name: ci
-      password: ci
+      plugin: caching_sha2_password
+      plugin_auth_string: ci
       priv: '*.*:ALL'
       state: present
       login_port: 10111
@@ -251,14 +252,15 @@
   - name: Create heartbeat user
     mysql_user:
       name: heartbeat
-      password: heartbeat
+      plugin: caching_sha2_password
+      plugin_auth_string: heartbeat
       priv: 'test.*:ALL'
       state: present
       login_port: 10111
       login_user: root
       login_host: 127.0.0.1
 
-  - name: Set master global read_only
+  - name: Set source global read_only
     mysql_query:
       query: set global read_only=0;
       login_user: root
@@ -277,25 +279,18 @@
       login_port: 10111
       login_host: 127.0.0.1
 
-  - name: Configure slaves
-    mysql_replication:
-      mode: changeprimary
+  - name: Configure replicas
+    mysql_query:
+      query: change replication source to source_host='localhost',source_port=10111, source_user='ci', source_password='ci', source_ssl=1, source_connect_retry=1;
       login_user: root
       login_port: "{{ item }}"
       login_host: 127.0.0.1
-      primary_host: localhost
-      primary_port: 10111
-      primary_user: ci
-      primary_password: ci
-      primary_ssl: no
-      master_connect_retry: 1
-      master_auto_position: no
     with_items:
       - 10112
       - 10113
       - 10114
 
-  - name: Start slaves
+  - name: Start replicas
     mysql_replication:
       mode: startreplica
       login_user: root
@@ -306,55 +301,55 @@
       - 10113
       - 10114
 
-  - name: Get master
-    mysql_replication:
-      mode: getprimary
+  - name: Get replicas on source
+    mysql_query:
+      query: show replicas;
       login_user: root
       login_port: 10111
       login_host: 127.0.0.1
-    register: master_status
+    register: source_replication_status
 
-  - name: Print master_status
+  - name: Print source_replication_status
     debug:
-      var: master_status
+      var: source_replication_status
 
-  - name: Get slave1
+  - name: Get replica1
     mysql_replication:
       mode: getreplica
       login_user: root
       login_port: 10112
       login_host: 127.0.0.1
-    register: slave1_status
+    register: replica1_status
 
-  - name: Print slave1_status
+  - name: Print replica1_status
     debug:
-      var: slave1_status
+      var: replica1_status
 
-  - name: Get slave2
+  - name: Get replica2
     mysql_replication:
       mode: getreplica
       login_user: root
       login_port: 10113
       login_host: 127.0.0.1
-    register: slave2_status
+    register: replica2_status
 
-  - name: Print slave2_status
+  - name: Print replica2_status
     debug:
-      var: slave2_status
+      var: replica2_status
 
-  - name: Get slave3
+  - name: Get replica3
     mysql_replication:
       mode: getreplica
       login_user: root
       login_port: 10114
       login_host: 127.0.0.1
-    register: slave3_status
+    register: replica3_status
 
-  - name: Print slave3_status
+  - name: Print replica3_status
     debug:
-      var: slave3_status
+      var: replica3_status
 
-  - name: test mysql master
+  - name: test mysql source
     shell: mysql -uci -pci -h 127.0.0.1 --port 10111 -s -s -e "select @@report_port" | grep -q 10111
 
   - name: test read_only
@@ -371,7 +366,7 @@
       fi
       echo "read_only" validated
 
-  - name: test haproxy routing to mysql master
+  - name: test haproxy routing to mysql source
     shell: mysql -uci -pci -h 127.0.0.1 --port 13306 -s -s -e "select @@report_port" | grep -q 10111
 
   - name: Deploy mysql heartbeat
