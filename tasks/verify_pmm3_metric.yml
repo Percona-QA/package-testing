@@ -36,12 +36,14 @@
       shell: "echo '{{ list_output.stdout }}' | grep '{{ service_id.stdout }}' | awk '/_exporter/ {print $4}'"
       register: service_agent_id
 
+    - debug: msg="Service agent id is {{ service_agent_id }}"
+
     - set_fact:
         agent_id: "{{ (item.service_name == 'node_exporter') | ternary(node_exporter_agent_id, service_agent_id) }}"
 
     - set_fact:
-        agent_password: "{{ agent_id.stdout }}"
-      when: agent_password is not defined or '/agent_id/' in agent_password
+        agent_id: "{{ agent_password }}"
+      when: agent_password is defined
 
     - name: "{{ item.service_name }}:: grep exporter port"
       shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id.stdout }}' | awk '/_exporter/ {print $NF}'"
@@ -61,7 +63,7 @@
 
     - block:
         - name: "{{ item.service_name }}: curl metric with auth token"
-          shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_password) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
+          shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_id.stdout) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
           register: metric_with_auth
           until: metric_with_auth.stdout | regex_search(item.metric)
           delay: "{{ delay | default(10, true) }}"
