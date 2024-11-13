@@ -51,7 +51,7 @@
 
     - set_fact:
         agent_id: "{{ agent_password }}"
-      when: agent_password is defined
+      when: (agent_password is defined) and (item.service_name != 'node_exporter')
 
     - name: "Agent Id is: "
       debug:
@@ -60,8 +60,6 @@
     - name: "Agent Password is: "
       debug:
         var: agent_password
-
-
 
     - name: "{{ item.service_name }}: curl metric with no auth"
       shell: "curl -s 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep -q '{{ item.metric }}'"
