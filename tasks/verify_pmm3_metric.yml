@@ -31,6 +31,10 @@
       shell: "echo '{{ list_output.stdout }}' | grep {{ item.service_name }} | awk -F' ' '{print $4}'"
       register: service_id
 
+    - name: "Service ID is:"
+      debug:
+        var: service_id
+
     - name: "{{ item.service_name }}: grep Agent ID"
       when: item.service_name != 'node_exporter'
       shell: "echo '{{ list_output.stdout }}' | grep '{{ service_id.stdout }}' | awk '/_exporter/ {print $4}'"
