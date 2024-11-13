@@ -1,0 +1,38 @@
+# Repo selection:
+# - enable PS 80 PRO main repo for pro_to_pro test (eg. 8.0.35 PRO to 8.0.36 PRO)
+# - enable PDPS-being-released-version for not_pro_to_pro test (eg. 8.0.36 not PRO to 8.0.36 PRO)
+# - enable PS 80 PRO testing repo for downgrade test (eg. 8.0.36 PRO to 8.0.36 not PRO)
+
+  - name: include tasks for enabling PS 84 pro main repo
+    include_tasks: ../tasks/enable_ps84_pro_tools_repo.yml
+    vars:
+      repo: "{{ 'release' if 'RedHat' in ansible_os_family else 'main' }}"
+    when:
+      - lookup('env', 'cur_action_to_test') == "pro_to_pro"
+
+  - name: install Percona repository package on debian/ubuntu
+    apt:
+      deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+    when: ansible_os_family == "Debian" and lookup('env', 'cur_action_to_test') == "not_pro_to_pro"
+    ignore_errors: true
+
+  - name: Install percona release RHEL
+    command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    when: ansible_os_family == "RedHat" and lookup('env', 'cur_action_to_test') == "not_pro_to_pro"
+    ignore_errors: true
+
+# We are using pdps testing here for case if the pro is released much later than regular release and packages in main are of not the same release as pro
+  - name: include tasks for enabling PDPS {{ version }} {{ repo }} repo
+    command: percona-release enable pdps-{{ version }} {{ repo }}
+    vars:
+      repo: "testing"
+      version: "{{ lookup('file', '../VERSIONS').split('\n') | regex_replace('^.*?(PS80_PRO_VER=\")([0-9]+\\.[0-9]+\\.[0-9]+).*?$', '\\2', multiline=True) }}"
+    when:
+      - lookup('env', 'cur_action_to_test') == "not_pro_to_pro"
+
+  - name: include tasks for enabling PS 84 pro testing repo
+    include_tasks: ../tasks/enable_ps84_pro_tools_repo.yml
+    vars:
+      repo: "testing"
+    when:
+      - lookup('env', 'cur_action_to_test') == "downgrade"
