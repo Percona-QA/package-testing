@@ -45,8 +45,8 @@
     - set_fact:
         agent_id: "{{ (item.service_name == 'node_exporter') | ternary(node_exporter_agent_id, service_agent_id.stdout) }}"
 
-    - set_fact:
-        agent_id: "{{ agent_password }}"
+#    - set_fact:
+#        agent_id: "{{ agent_password }}"
 #      when: agent_password is defined
 
     - name: "Agent Id is: "
