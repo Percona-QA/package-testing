@@ -47,7 +47,7 @@
 
     - name: "Agent Id is: "
       debug:
-        vars: agent_id
+        var: agent_id
 
     - name: "{{ item.service_name }}:: grep exporter port"
       shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id.stdout }}' | awk '/_exporter/ {print $NF}'"
