@@ -116,7 +116,7 @@
 
   - name: Verify Postgres Exporter metric endpoint with Auth works
     when: '"pg-" in enabled_db | join("")'
-    include_tasks: ../tasks/verify_pmm3_metric.yml
+    include_tasks: ../tasks/verify_pmm2_metric.yml
     vars:
       retries: 3
       delay: 10

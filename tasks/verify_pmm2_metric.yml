@@ -63,9 +63,9 @@
         - name: "{{ item.service_name }}: curl metric with auth token"
           shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_password) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
           register: metric_with_auth
-          until: metric_with_auth.stdout | regex_search(item.metric)
-          delay: "{{ delay | default(10, true) }}"
-          retries: "{{ retries | default(5, true) }}"
+          until: metric_with_auth.stdout == item.metric
+          delay: "{{ delay | default(5, true) }}"
+          retries: "{{ retries | default(3, true) }}"
         - name: "{{ item.service_name }}: assert metric is received"
           debug:
             msg: "{{ item.service_name }}: metric received!"
