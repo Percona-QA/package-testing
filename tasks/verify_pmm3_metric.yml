@@ -45,13 +45,17 @@
     - set_fact:
         agent_id: "{{ (item.service_name == 'node_exporter') | ternary(node_exporter_agent_id, service_agent_id.stdout) }}"
 
-#    - set_fact:
-#        agent_id: "{{ agent_password }}"
-#      when: agent_password is defined
+    - set_fact:
+        agent_id: "{{ agent_password }}"
+      when: agent_password is defined
 
     - name: "Agent Id is: "
       debug:
         var: agent_id
+
+    - name: "Agent Password is: "
+      debug:
+        var: agent_password
 
     - name: "{{ item.service_name }}:: grep exporter port"
       shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id }}' | awk '/_exporter/ {print $NF}'"
