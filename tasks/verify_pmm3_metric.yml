@@ -45,6 +45,10 @@
     - set_fact:
         agent_id: "{{ (item.service_name == 'node_exporter') | ternary(node_exporter_agent_id, service_agent_id.stdout) }}"
 
+    - name: "{{ item.service_name }}:: grep exporter port"
+      shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id }}' | awk '/_exporter/ {print $NF}'"
+      register: exporter_port
+
     - set_fact:
         agent_id: "{{ agent_password }}"
       when: agent_password is defined
@@ -57,9 +61,7 @@
       debug:
         var: agent_password
 
-    - name: "{{ item.service_name }}:: grep exporter port"
-      shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id }}' | awk '/_exporter/ {print $NF}'"
-      register: exporter_port
+
 
     - name: "{{ item.service_name }}: curl metric with no auth"
       shell: "curl -s 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep -q '{{ item.metric }}'"
