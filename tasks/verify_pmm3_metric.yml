@@ -50,7 +50,7 @@
         var: agent_id
 
     - name: "{{ item.service_name }}:: grep exporter port"
-      shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id.stdout }}' | awk '/_exporter/ {print $NF}'"
+      shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id }}' | awk '/_exporter/ {print $NF}'"
       register: exporter_port
 
     - name: "{{ item.service_name }}: curl metric with no auth"
@@ -67,7 +67,7 @@
 
     - block:
         - name: "{{ item.service_name }}: curl metric with auth token"
-          shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_id.stdout) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
+          shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_id) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
           register: metric_with_auth
           until: metric_with_auth.stdout | regex_search(item.metric)
           delay: "{{ delay | default(10, true) }}"
