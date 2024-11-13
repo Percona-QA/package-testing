@@ -43,7 +43,7 @@
     - debug: msg="Service agent id is {{ service_agent_id }}"
 
     - set_fact:
-        agent_id: "{{ (item.service_name == 'node_exporter') | ternary(node_exporter_agent_id, service_agent_id.stdout) }}"
+        agent_id: "{{ (item.service_name == 'node_exporter') | ternary(node_exporter_agent_id.stdout, service_agent_id.stdout) }}"
 
     - name: "{{ item.service_name }}:: grep exporter port"
       shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id }}' | awk '/_exporter/ {print $NF}'"
