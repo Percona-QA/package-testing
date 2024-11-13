@@ -6,4 +6,4 @@
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
  
-- import_playbook: ../../../../playbooks/ps_80_upgrade.yml
+- import_playbook: ../../../../playbooks/ps_84_upgrade.yml
