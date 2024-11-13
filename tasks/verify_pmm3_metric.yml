@@ -47,7 +47,7 @@
 
     - set_fact:
         agent_id: "{{ agent_password }}"
-      when: agent_password is defined
+#      when: agent_password is defined
 
     - name: "Agent Id is: "
       debug:
