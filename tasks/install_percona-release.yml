@@ -2,7 +2,7 @@
 #
 - name: Install percona-release package Debian Noble
   shell: |
-    wget https://repo.percona.com/prel/apt/pool/testing/p/percona-release/percona-release_1.0-30.generic_all.deb
+    wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb
     apt install ./percona-release_latest.generic_all.deb
     apt update
   when: ansible_os_family == "Debian" and ansible_distribution_release == "noble"
@@ -10,7 +10,7 @@
 - name: Install percona-release package Debian
   when: ansible_os_family == "Debian"
   apt:
-    deb: https://repo.percona.com/prel/apt/pool/testing/p/percona-release/percona-release_1.0-30.generic_all.deb
+    deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
   when: ansible_os_family == "Debian" and ansible_distribution_release != "noble"
 
 - name: Install percona-release package RedHat
