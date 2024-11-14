@@ -58,7 +58,7 @@
         var: agent_password
 
     - set_fact:
-        agent_password: "{{ agent_id.stdout }}"
+        agent_password: "{{ agent_id }}"
       when: agent_password | length == 0
 
     - name: "Agent password is: "
