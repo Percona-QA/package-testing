@@ -51,7 +51,7 @@
 
     - set_fact:
         agent_password: "{{ agent_id.stdout }}"
-      when: agent_password | length > 0 or '/agent_id/' in agent_password
+      when: agent_password | length == 0 or '/agent_id/' in agent_password
 
     - name: "{{ item.service_name }}: curl metric with no auth"
       shell: "curl -s 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep -q '{{ item.metric }}'"
