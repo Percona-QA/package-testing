@@ -21,7 +21,7 @@
   command: percona-release enable-only pdpxc-{{ version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
-    version: "{{ lookup('env', 'VERSION').split('.')[0] + '.' + lookup('env', 'VERSION').split('.')[1] }}"
+    version: "{{ '84-lts' if '8.4' in lookup('env', 'VERSION') else '8.0' if '8.0.' in lookup('env', 'VERSION') else ''  }}"
   when: major_repo
 
 - name: clean and update yum cache
