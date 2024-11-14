@@ -10,7 +10,7 @@
   become: true
   become_method: sudo
   vars:
-    pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
+    pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') | default('127.0.0.1', true)}}"
     pmm_server_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default('admin', true) }}"
     test_package: "{{ lookup('env', 'install_package') | default('pmm3-client', true)}}"
     test_repo: "{{ lookup('env', 'install_repo') }}"
