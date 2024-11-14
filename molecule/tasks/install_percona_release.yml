@@ -1,12 +1,12 @@
   - name: Install percona release package Debian
     apt:
-     deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+     deb: https://repo.percona.com/prel/apt/pool/testing/p/percona-release/percona-release_1.0-30.generic_all.deb
     when: ansible_os_family == "Debian"
 
   - name: Install percona release RHEL
 #    yum: name=https://repo.percona.com/yum/release/latest/RPMS/noarch/percona-release-1.0-27.noarch.rpm
     # Due problem with ansible 2.9.3 version about GPG Key check
-    command: yum -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    command: yum -y install https://repo.percona.com/prel/yum/testing/7/RPMS/noarch/percona-release-1.0-30.noarch.rpm
     when: ansible_os_family == "RedHat"
 
 
