@@ -75,6 +75,9 @@
         - name: "{{ item.service_name }}: assert metric is received"
           debug:
             msg: "{{ item.service_name }}: metric received!"
+        - set_fact:
+            agent_password: ""
+          when: agent_password | length > 0 or '/agent_id/' in agent_password
       rescue:
         - name: Waiting failed
           debug:
@@ -86,6 +89,3 @@
         msg: "{{ list_output.stdout }}"
       failed_when: true
 
-    - set_fact:
-        agent_password: ""
-      when: agent_password | length > 0 or '/agent_id/' in agent_password
