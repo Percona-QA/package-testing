@@ -15,7 +15,7 @@
 
 - name: Install percona-release package RedHat
   when: ansible_os_family == "RedHat"
-  command: yum -y install https://repo.percona.com/prel/yum/testing/7/RPMS/noarch/percona-release-1.0-30.noarch.rpm
+  command: yum -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
 #  args:
 #    warn: no
 
