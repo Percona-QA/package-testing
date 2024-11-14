@@ -35,19 +35,19 @@
       when: item.service_name != 'node_exporter'
       shell: "echo '{{ list_output.stdout }}' | grep '{{ service_id.stdout }}' | awk '/_exporter/ {print $4}'"
       register: service_agent_id
-      
+
     - debug: msg="Service agent id is {{ service_agent_id }}"
 
     - set_fact:
-        agent_id: "{{ (item.service_name == 'node_exporter') | ternary(node_exporter_agent_id, service_agent_id) }}"
-
-    - set_fact:
-        agent_id: "{{ agent_password }}"
-      when: agent_password is defined
+        agent_id: "{{ (item.service_name == 'node_exporter') | ternary(node_exporter_agent_id.stdout, service_agent_id.stdout) }}"
 
     - name: "{{ item.service_name }}:: grep exporter port"
-      shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id.stdout }}' | awk '/_exporter/ {print $NF}'"
+      shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id }}' | awk '/_exporter/ {print $NF}'"
       register: exporter_port
+
+    - set_fact:
+        agent_password: "{{ agent_id }}"
+      when: agent_password | d("") | length == 0
 
     - name: "{{ item.service_name }}: curl metric with no auth"
       shell: "curl -s 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep -q '{{ item.metric }}'"
@@ -63,7 +63,7 @@
 
     - block:
         - name: "{{ item.service_name }}: curl metric with auth token"
-          shell: "curl -s -H 'Authorization: Basic {{ '%s:%s' | format('pmm', agent_id.stdout) | b64encode }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
+          shell: "curl -s -u 'pmm:{{ agent_password }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
           register: metric_with_auth
           until: metric_with_auth.stdout | regex_search(item.metric)
           delay: "{{ delay | default(10, true) }}"
@@ -71,6 +71,9 @@
         - name: "{{ item.service_name }}: assert metric is received"
           debug:
             msg: "{{ item.service_name }}: metric received!"
+        - set_fact:
+            agent_password: ""
+          when: agent_password | length > 0 or '/agent_id/' in agent_password
       rescue:
         - name: Waiting failed
           debug:
@@ -81,3 +84,4 @@
       debug:
         msg: "{{ list_output.stdout }}"
       failed_when: true
+

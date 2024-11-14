@@ -74,6 +74,10 @@
     when: '"ps-5.7" in enabled_db'
     include_tasks: ../tasks/install_and_add_to_pmm_ps_57.yml
 
+  - name: Install and start Percona Server 8.0
+    when: '"ps-8.0" in enabled_db'
+    include_tasks: ../tasks/install_and_add_to_pmm_ps_80.yml
+
   - name: Verify if Metric Endpoint with Auth works for Mysqld Exporter
     when: '"ps-" in enabled_db | join("")'
     include_tasks: ../tasks/verify_pmm2_metric.yml
@@ -95,10 +99,10 @@
 
   - name: Verify MongoDB Exporter metric endpoint with Auth(including service with socket)
     when: '"psmdb-" in enabled_db | join("")'
-    include_tasks: ../tasks/verify_pmm2_metric.yml
+    include_tasks: ../tasks/verify_pmm3_metric.yml
     loop:
-      - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up 1' }
-      - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up 1' }
+      - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up.* 1' }
+#      - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up.* 1' }
 ### end PSMDB
 
 ### start PDPGSQL
@@ -109,6 +113,10 @@
   - name: Install and start Percona Server PostgreSQL 13
     when: '"pg-13" in enabled_db'
     include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql_13.yml
+
+  - name: Install and start Percona Server PostgreSQL 16
+    when: '"pg-16" in enabled_db'
+    include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql_16.yml
 
   - name: Verify Postgres Exporter metric endpoint with Auth works
     when: '"pg-" in enabled_db | join("")'

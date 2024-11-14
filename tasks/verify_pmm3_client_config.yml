@@ -30,6 +30,8 @@
       - "pt_pg_summary: {{ path_base }}/tools/pt-pg-summary"
       - "pt_mysql_summary: {{ path_base }}/tools/pt-mysql-summary"
       - "pt_mongodb_summary: {{ path_base }}/tools/pt-mongodb-summary"
+      - "nomad: {{ path_base }}/tools/nomad"
+      - "nomad_data_dir: {{ path_base }}/data/nomad"
 
 - name: Check if the configuration generated with paths-base is using the custom path
   shell: cat {{path_base}}/config/pmm-agent.yaml | grep "{{path_base}}"

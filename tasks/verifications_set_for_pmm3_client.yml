@@ -9,7 +9,7 @@
     process_name: "node_exporter"
 
 - name: Verify Node Exporter metric endpoint with Auth works
-  include_tasks: ./verify_pmm2_metric.yml
+  include_tasks: ./verify_pmm3_metric.yml
   vars:
     retries: 3
     delay: 10
