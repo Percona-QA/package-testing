@@ -140,11 +140,13 @@
     dnf clean all
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
-- name: install Percona XtraBackup 8.0 packages
-  include_tasks: ../../../tasks/install_pxb80.yml
+- name: install Percona XtraBackup-{{ version }}  packages
+  include_tasks: ../../../tasks/install_pxb{{ version }}.yml
+  vars:
+    version: "{{ lookup('env', 'VERSION').split('.')[0] + lookup('env', 'VERSION').split('.')[1] }}"
 
-- name: install Percona Toolkit new deb packages
-  include_tasks: ../../../tasks/install_pt.yml
+#- name: install Percona Toolkit new deb packages
+#  include_tasks: ../../../tasks/install_pt.yml
 
 - name: install proxysql new deb packages
   apt:
