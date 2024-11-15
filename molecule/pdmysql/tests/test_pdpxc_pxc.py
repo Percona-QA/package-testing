@@ -7,6 +7,8 @@ from .settings import *
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
+VERSION = os.environ['VERSION']
+
 DEBPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-client',
                'percona-xtradb-cluster-common', 'percona-xtradb-cluster-dbg',
                'percona-xtradb-cluster-garbd-debug', 'percona-xtradb-cluster-garbd',
@@ -62,11 +64,21 @@ PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                    "mysql -e \"INSTALL PLUGIN"
                    " connection_control SONAME 'connection_control.so';\""]
 
-COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
-              'component_log_sink_json', 'component_log_filter_dragnet',
-              'component_audit_api_message_emit']
+if VERSION.startswith('8.4'):
 
-VERSION = os.environ['VERSION']
+    COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
+                 'component_log_sink_json', 'component_log_filter_dragnet',
+                 'component_audit_api_message_emit', 'component_percona-udf']
+
+elif VERSION.startswith('8.0'):
+
+    COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
+                 'component_log_sink_json', 'component_log_filter_dragnet',
+                 'component_audit_api_message_emit', 'component_percona-udf']
+
+else:
+    raise ValueError(f"Unsupported version {VERSION}. Only versions starting with 8.4 or 8.0 are supported.")
+
 DEB_PERCONA_BUILD_VERSION = ''
 RPM_PERCONA_BUILD_VERSION = ''
 if re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', VERSION): # if full package VERSION 8.0.32-24.2 is passed we need to re-assign it for tests
