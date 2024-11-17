@@ -94,9 +94,6 @@
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
     when: install_mysql_shell == "yes" or install_mysql_shell == ""
-    
-  - name: check telemetry (enabled)
-    command: /package-testing/check_telemetry.sh ps -e
 
   - name: Verify telemetry version and package installation
     command: /package-testing/check_tel_ver_pack.sh
@@ -169,6 +166,9 @@
 
   - name: check that Percona Server {{ pro }} package versions are correct
     command: /package-testing/package_check.sh ps84 {{ pro }}
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
 
 # Bookworm does not support fips mode out of the box. It requires opennsl module rebuid. So we skip fips mode enabling for bookworm.
   - name: include tasks for checking FIPS mode
