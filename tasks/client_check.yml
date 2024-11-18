@@ -24,6 +24,20 @@
   include_tasks: ../tasks/enable_ps8_experimental_repo.yml
   when: (lookup('env', 'client_to_test') == "ps80") and (lookup('env', 'repo_for_client_to_test') == "experimental")
 
+##
+- name: include tasks for enabling PS 84 main repo for client_test
+  include_tasks: ../tasks/enable_ps84_main_repo.yml
+  when: (lookup('env', 'client_to_test') == "ps84") and (lookup('env', 'repo_for_client_to_test') == "main")
+
+- name: include tasks for enabling PS 84 testing repo for client_test
+  include_tasks: ../tasks/enable_ps84_testing_repo.yml
+  when: (lookup('env', 'client_to_test') == "ps84") and (lookup('env', 'repo_for_client_to_test') == "testing")
+
+- name: include tasks for enabling PS 84 experimental repo for client_test
+  include_tasks: ../tasks/enable_ps84_experimental_repo.yml
+  when: (lookup('env', 'client_to_test') == "ps84") and (lookup('env', 'repo_for_client_to_test') == "experimental")
+##
+
 - name: include tasks for enabling PXC 8 main repo for client_test
   include_tasks: ../tasks/enable_pxc80_main_repo.yml
   when: (lookup('env', 'client_to_test') == "pxc80") and (lookup('env', 'repo_for_client_to_test') == "main")
