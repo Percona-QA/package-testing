@@ -34,7 +34,7 @@
     include_tasks: ../tasks/test_prep.yml
 
   - name: Extract PS84_PRO_VER version using shell
-    shell: "grep '^PS84_PRO_VER=' /package-testing/VERSIONS | sed 's/^PS84_PRO_VER=\\([0-9]*\\.[0-9]*\\.[0-9]*\\)-.*$/\\1/'"
+    shell: "grep '^PS84_PRO_VER==' /package-testing/VERSIONS | sed 's/^PS84_PRO_VER==\([0-9]*\.[0-9]*\.[0-9]*\)-.*$/\1/'"
     register: version_output
 
   - name: Set versionpdps fact
