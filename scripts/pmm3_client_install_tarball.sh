@@ -80,7 +80,15 @@ if [ -z "${path}" ]; then
   path=$default_path
 fi
 client_tar=pmm-client-${version}.tar.gz
-tarball_url=https://downloads.percona.com/downloads/TESTING/pmm/${client_tar}
+architecture=$(dpkg --print-architecture)
+echo $architecture
+
+if [[ "$architecture" == "arm64" ]]; then
+    tarball_url=https://downloads.percona.com/downloads/TESTING/pmm-arm/${client_tar}
+elif [[ "$architecture" == "amd64" ]]; then
+    tarball_url=https://downloads.percona.com/downloads/TESTING/pmm/${client_tar}
+fi
+
 if [ -n "${fb}" ]; then
   client_tar=pmm-client-${fb}.tar.gz
   ### Handle FB url
