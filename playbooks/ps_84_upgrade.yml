@@ -33,6 +33,9 @@
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
+  - set_fact:
+      versionpdps: "{{ lookup('file', '/package-testing/VERSIONS').split('\n') | regex_replace('^.*?(PS84_PRO_VER=\")([0-9]+\\.[0-9]+\\.[0-9]+).*?$', '\\2', multiline=True) }}"
+
   - name: include tasks for local vault setup
     include_tasks: ../tasks/setup_local_vault.yml
 
@@ -45,17 +48,17 @@
 
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_main_repo.yml
-    when: 
+    when:
       - lookup('env', 'pro_test') != "yes"
 
   - name: include tasks for enabling PS 84 main repo
     include_tasks: ../tasks/enable_ps84_main_repo.yml
-    when: 
+    when:
       - lookup('env', 'pro_test') != "yes"
 
   - name: include tasks for selecting PS 84 repos for PRO update tests
     include_tasks: ../tasks/select_repo_ps84_pro_update.yml
-    when: 
+    when:
       - lookup('env', 'pro_test') == "yes"
 
   - name: download and extract world database
@@ -167,26 +170,11 @@
       - lookup('env', 'pro_test') == "yes"
       - lookup('env', 'cur_action_to_test') != 'downgrade'
 
-  - name: download package-testing repo branch with wget
-    command: "{{ item }}"
-    with_items:
-    - rm -rf /package-testing
-    - rm -f master.zip
-    - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
-    - unzip master.zip
-    - rm -f master.zip
-    - mv "package-testing-{{ branch }}" /package-testing
-
-  - name: Read the VERSIONS file
-    debug:
-      msg: "{{ lookup('file', '/package-testing/VERSIONS') }}"
-
-
   - name: include tasks for enabling PDPS {{ version }} {{ repo }} repo
     command: percona-release enable-only pdps-{{ version }} {{ repo }}
     vars:
       repo: "testing"
-      version: "{{ lookup('file', '/package-testing/VERSIONS').split('\n') | regex_replace('^.*?(PS84_PRO_VER=\")([0-9]+\\.[0-9]+\\.[0-9]+).*?$', '\\2', multiline=True) }}"
+      version: "{{ versionpdps }}"
     when:
       - lookup('env', 'pro_test') == "yes"
       - lookup('env', 'cur_action_to_test') == 'downgrade'
