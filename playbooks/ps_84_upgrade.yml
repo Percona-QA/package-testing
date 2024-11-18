@@ -167,6 +167,16 @@
       - lookup('env', 'pro_test') == "yes"
       - lookup('env', 'cur_action_to_test') != 'downgrade'
 
+  - name: download package-testing repo branch with wget
+    command: "{{ item }}"
+    with_items:
+    - rm -rf /package-testing
+    - rm -f master.zip
+    - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
+    - unzip master.zip
+    - rm -f master.zip
+    - mv "package-testing-{{ branch }}" /package-testing
+
   - name: Read the VERSIONS file
     debug:
       msg: "{{ lookup('file', '/package-testing/VERSIONS') }}"
