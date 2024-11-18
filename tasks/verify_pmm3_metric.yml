@@ -84,4 +84,3 @@
       debug:
         msg: "{{ list_output.stdout }}"
       failed_when: true
-
