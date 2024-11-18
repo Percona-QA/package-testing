@@ -133,7 +133,7 @@
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
     when: install_mysql_shell == "yes" or install_mysql_shell == ""
-    
+
   - name: install 3rd party packages with apt
     apt:
       name: "{{ packages }}"
@@ -166,6 +166,11 @@
     when:
       - lookup('env', 'pro_test') == "yes"
       - lookup('env', 'cur_action_to_test') != 'downgrade'
+
+  - name: Read the VERSIONS file
+    debug:
+      msg: "{{ lookup('file', '/package-testing/VERSIONS') }}"
+
 
   - name: include tasks for enabling PDPS {{ version }} {{ repo }} repo
     command: percona-release enable-only pdps-{{ version }} {{ repo }}
