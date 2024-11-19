@@ -33,9 +33,8 @@
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
-  - name: Extract PS84_PRO_VER version using shell
-    shell: ''' "grep '^PS84_PRO_VER=' /package-testing/VERSIONS" | "sed 's/^PS84_PRO_VER=\([0-9]*\.[0-9]*\.[0-9]*\)-.*$/\\1/'" '''
-
+  - name: Extract PS84_PRO_VER version number using shell commands
+    shell: grep -oP 'PS84_PRO_VER="\K(\d+\.\d+\.\d+)' /package-testing/VERSIONS
     register: version_output
 
   - name: Set versionpdps fact
