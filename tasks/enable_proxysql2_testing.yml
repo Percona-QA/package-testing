@@ -52,3 +52,18 @@
   - name: Add ARM support into percona-release
     shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
     when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+
+## PXC 57 EOL 
+
+  - name: Enable PXC 57 EOL repos
+    include_tasks: enable_pxc57_eol_proxysql2.yml
+    when: lookup('env', 'client_to_test') == "pxc57"
+
+
+## PS 57 EOL 
+
+  - name: Enable PS 57 EOL repos
+    include_tasks: enable_ps57_eol_tools_repo.yml
+    when: lookup('env', 'client_to_test') == "ps57"
+
+
