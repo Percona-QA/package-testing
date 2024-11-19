@@ -34,7 +34,7 @@
     include_tasks: ../tasks/test_prep.yml
 
   - name: Extract PS84_PRO_VER version number using shell commands
-    shell: grep -oP 'PS84_PRO_VER="\K(\d+\.\d+\.\d+)' /package-testing/VERSIONS
+    shell: grep -oP 'PS_INN_LTS_VER="\K(\d+\.\d+\.\d+)' /package-testing/VERSIONS
     register: version_output
 
   - name: Set versionpdps fact
@@ -362,8 +362,20 @@
 # - name: check that Percona Toolkit version is correct
 #   command: /package-testing/version_check.sh pt
 
+  - name: check the clone and data masking plugins
+    command: /package-testing/scripts/ps_clone_dm_plugin_test.sh
+    when:
+      - lookup('env', 'product_to_test') == "ps80"
+
+  - name: check the data masking component
+    command: /package-testing/scripts/ps_dm_component.sh
+    when:
+      - lookup('env', 'product_to_test') == "ps80"
+
   - name: check the audit log v2 plugin
     command: /package-testing/scripts/ps_audit_log_v2.sh
+    when:
+      - lookup('env', 'product_to_test') == "ps80"
 
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
