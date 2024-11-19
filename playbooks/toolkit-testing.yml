@@ -1,0 +1,70 @@
+---
+# This playbook does following:
+#   enables Percona testing repository
+#   installs latest version of PS 8.4, PT and PXB 8.4
+#   does some tests
+
+# Cosmic is still missing python
+# import_playbook: test_prep.yml
+
+- hosts: all
+  become: true
+  become_method: sudo
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+  tasks:
+    - set_fact:
+        percona_version: "{{ lookup('env', 'PERCONA_VERSION', default='8.0') }}"
+        PERCONA_TOOLKIT_BRANCH : "{{ lookup('env', 'PERCONA_TOOLKIT_BRANCH') }}"
+        TMP_DIR: "{{ lookup('env', 'TMP_DIR') }}"
+        LOG_FILE: "{{ lookup('env', 'LOG_FILE') }}"
+        MYSQL_BASEDIR: "{{ lookup('env', 'MYSQL_BASEDIR') }}"
+        PERCONA_TOOLKIT_SANDBOX: "{{ lookup('env', 'PERCONA_TOOLKIT_SANDBOX') }}"
+        DOWNLOAD_URL: "{{ lookup('env', 'DOWNLOAD_URL') }}"
+        PATH: "{{ lookup('env', 'PATH') }}"
+        SSL_PATH: "{{ lookup('env', 'SSL_PATH') }}"
+        LD_LIBRARY_PATH: "{{ lookup('env', 'LD_LIBRARY_PATH') }}"
+
+    - name: Download Percona release package
+      ansible.builtin.get_url:
+        url: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+        dest: /tmp/percona-release_latest.generic_all.deb
+
+    - name: Install required dependencies
+      ansible.builtin.apt:
+        name: 
+          - gnupg2
+          - lsb-release
+        state: present
+        update_cache: yes
+
+    - name: Install Percona release package
+      ansible.builtin.command:
+        cmd: dpkg -i /tmp/percona-release_latest.generic_all.deb
+        creates: /etc/apt/sources.list.d/percona-release.list
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Setup Percona pdps-8.0
+      ansible.builtin.command: percona-release setup pdps-8.0
+
+    - name: Upgrade Perl package
+      ansible.builtin.apt:
+        name: perl
+        state: latest
+
+    - name: Print the variables
+      ansible.builtin.debug:
+        msg:
+          - "PERCONA_TOOLKIT_BRANCH: {{ PERCONA_TOOLKIT_BRANCH }}"
+          - "TMP_DIR: {{ TMP_DIR }}"
+          - "LOG_FILE: {{ LOG_FILE }}"
+          - "MYSQL_BASEDIR: {{ MYSQL_BASEDIR }}"
+          - "PERCONA_TOOLKIT_SANDBOX: {{ PERCONA_TOOLKIT_SANDBOX }}"
+          - "DOWNLOAD_URL: {{ DOWNLOAD_URL }}"
+          - "PATH: {{ PATH }}"
+          - "SSL_PATH: {{ SSL_PATH }}"
+          - "LD_LIBRARY_PATH: {{ LD_LIBRARY_PATH }}"
+

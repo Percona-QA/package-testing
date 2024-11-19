@@ -1,0 +1,33 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: debian10-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
+    region: us-west-2
+    image: ami-066465db4bde59473
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: t2.medium
+    ssh_user: admin
+    instance_tags:
+      iit-billing-tag: toolkit-package-testing
+      job-name: ${JOB_NAME}
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    create: ../../playbooks/create.yml
+    destroy: ../../playbooks/destroy.yml
+    prepare: ../../playbooks/prepare.yml
+    converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
+scenario:
+  name: debian-10
+  destroy_sequence:
+    - destroy
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - destroy
