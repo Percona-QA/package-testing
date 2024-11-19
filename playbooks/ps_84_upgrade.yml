@@ -34,7 +34,7 @@
     include_tasks: ../tasks/test_prep.yml
 
   - name: Extract PS84_PRO_VER version number using shell commands
-    shell: grep -oP 'PS_INN_LTS_VER="\K(\d+\.\d+\.\d+)' /package-testing/VERSIONS
+    shell: grep -oP 'PS84_PRO_VER="\K(\d+\.\d+\.\d+)' /package-testing/VERSIONS
     register: version_output
 
   - name: Set versionpdps fact
