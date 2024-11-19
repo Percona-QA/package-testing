@@ -40,19 +40,6 @@
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
 
-  - name: enable proxysql main repo
-    command: percona-release enable-only proxysql release
-
-  - name: clean and update yum cache
-    shell: |
-      yum clean all
-      yum makecache
-    when: ansible_os_family == "RedHat"
-
-  - name: Add ARM support into percona-release
-    shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
-    when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"
-
 ## PXC 57 EOL 
 
   - name: Enable PXC 57 EOL repos
@@ -65,3 +52,23 @@
   - name: Enable PS 57 EOL repos
     include_tasks: enable_ps57_eol_tools_repo.yml
     when: lookup('env', 'client_to_test') == "ps57"
+
+#  - name: Mandatory step for PXC 57 EOL (Disable all old repos)
+#    command: percona-release disable all
+#    when: lookup('env', 'client_to_test') == "ps57"
+
+## Enable Proxysql2 release repo 
+
+  - name: enable proxysql main repo
+    command: percona-release enable proxysql release
+
+  - name: clean and update yum cache
+    shell: |
+      yum clean all
+      yum makecache
+    when: ansible_os_family == "RedHat"
+
+  - name: Add ARM support into percona-release
+    shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
+    when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+

@@ -44,11 +44,6 @@
   - name: Mandatory step for PXC 57 EOL (Enable only pxc-57)
     command: percona-release setup -y pxc-57 
 
-  - name: enable the tools {{ repo }}
-    command: percona-release enable tools {{ repo }}
-    vars:
-      repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
-
   - name: update deb cache
     apt:
       update_cache: yes
