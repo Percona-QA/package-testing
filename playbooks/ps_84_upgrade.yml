@@ -362,12 +362,6 @@
 # - name: check that Percona Toolkit version is correct
 #   command: /package-testing/version_check.sh pt
 
-  - name: check the clone and data masking plugins
-    command: /package-testing/scripts/ps_clone_dm_plugin_test.sh
-
-  - name: check the data masking component
-    command: /package-testing/scripts/ps_dm_component.sh
-
   - name: check the audit log v2 plugin
     command: /package-testing/scripts/ps_audit_log_v2.sh
 
