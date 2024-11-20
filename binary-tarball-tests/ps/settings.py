@@ -179,6 +179,10 @@ ps8x_symlinks = (
   ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.0'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 
+ps8x_openssl_files = (
+  'lib/libcrypto.so', 'lib/libk5crypto.so', 'lib/libssl.so', 'lib/libsasl2.so'
+)
+
 #####
 
 if re.match(r'^8\.[1-9]$', ps_version_major):
@@ -189,6 +193,7 @@ if re.match(r'^8\.[1-9]$', ps_version_major):
     ps_files = ps8x_files
     ps_symlinks = ps8x_symlinks
     ps_components = ps8x_components
+    ps_openssl_files=ps8x_openssl_files
 elif ps_version_major == '8.0':
     ps_binaries = ps80_binaries
     ps_executables = ps80_executables
