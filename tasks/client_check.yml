@@ -50,6 +50,18 @@
   include_tasks: ../tasks/enable_pxc80_experimental_repo.yml
   when: (lookup('env', 'client_to_test') == "pxc80") and (lookup('env', 'repo_for_client_to_test') == "experimental")
 
+- name: include tasks for enabling PXC 84 main repo for client_test
+  include_tasks: ../tasks/enable_pxc84_main_repo.yml
+  when: (lookup('env', 'client_to_test') == "pxc84") and (lookup('env', 'repo_for_client_to_test') == "main")
+
+- name: include tasks for enabling PXC 84 testing repo for client_test
+  include_tasks: ../tasks/enable_pxc84_testing_repo.yml
+  when: (lookup('env', 'client_to_test') == "pxc84") and (lookup('env', 'repo_for_client_to_test') == "testing")
+
+- name: include tasks for enabling PXC 84 experimental repo for client_test
+  include_tasks: ../tasks/enable_pxc84_experimental_repo.yml
+  when: (lookup('env', 'client_to_test') == "pxc84") and (lookup('env', 'repo_for_client_to_test') == "experimental")
+
 - name: install deb packages
   apt:
     name: "{{ packages }}"
