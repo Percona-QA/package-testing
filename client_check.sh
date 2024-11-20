@@ -35,6 +35,10 @@ elif [ "$1" = "pxc57" ]; then
 elif [ "$1" = "pxc80" ]; then
   deb_version=""
   rpm_version=""
+elif [ "$1" = "pxc84" ]; then
+  deb_version=""
+  rpm_version=""
+  version=${PXC84_VER}
 else
   echo "Invalid product selected"
   exit 1
@@ -58,7 +62,7 @@ if [ -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
     yum install -y percona-server-client percona-mysql-router
   elif [ "${product}" = "pxc56" ] || [ "${product}" = "pxc57" ]; then
     yum install -y Percona-XtraDB-Cluster-client${rpm_version}
-  elif [ "${product}" = "pxc80" ]; then
+  elif [ "${product}" = "pxc80" ] || [ "${product}" = "pxc84" ]; then
     yum install -y percona-xtradb-cluster-client
   else
     echo "client version is incorrect"
@@ -77,7 +81,7 @@ else
     apt-get update; apt-get install -y percona-server-client percona-mysql-router
   elif [ "${product}" = "pxc56" ] || [ "${product}" = "pxc57" ]; then
     apt-get install -y percona-xtradb-cluster-client${deb_version}
-  elif [ "${product}" = "pxc80" ]; then
+  elif [ "${product}" = "pxc80" ] || [ "${product}" = "pxc84" ]; then
     apt-get update; apt-get install -y percona-xtradb-cluster-client
   else
     echo "client version is incorrect"
