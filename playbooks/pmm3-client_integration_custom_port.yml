@@ -26,6 +26,10 @@
     shell: echo $(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
     register: instance_ip
 
+  - name: Debug tarball link
+    debug:
+      var: tarball_link
+
   - name: Register Instance IP as a variable
     set_fact:
       instance_ip: "{{ instance_ip.stdout }}"
