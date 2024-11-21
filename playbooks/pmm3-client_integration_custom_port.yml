@@ -18,7 +18,7 @@
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
     custom_port: 17788
     port_flag: "--pmm-agent-listen-port={{ custom_port }}"
-    tarball_link: "{{ lookup('env', 'tarball_link') }}"
+    tarball_link: "{{ lookup('env', 'TARBALL_LINK') }}"
     install_path: "/usr/local/percona/pmm"
 
   tasks:
