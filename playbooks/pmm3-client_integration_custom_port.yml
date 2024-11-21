@@ -30,6 +30,10 @@
     debug:
       var: tarball_link
 
+  - name: Debug pmm version
+    debug:
+      var: pmm_version
+
   - name: Register Instance IP as a variable
     set_fact:
       instance_ip: "{{ instance_ip.stdout }}"
