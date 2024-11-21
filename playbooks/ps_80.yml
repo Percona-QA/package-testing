@@ -89,6 +89,9 @@
     vars:
       pro_suf: "{{ '-pro' if 'yes' in lookup('env', 'pro_test') else '' }}"
 
+  - name: install Percona Shell
+    include_tasks: ../tasks/install_pshell.yml
+
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
 
@@ -98,18 +101,69 @@
       - ansible_distribution != "Amazon"
       - ansible_distribution_major_version|int != 7
 
-  - name: enable the Tools release repo
-    command: percona-release enable tools release
+#  - name: enable the Tools release repo
+#    command: percona-release enable tools release
+
+#  - name: enable the mysql shell testing repo
+#    command: percona-release enable mysql-shell testing
+#    when: install_mysql_shell == "yes" or install_mysql_shell == ""
+
+  - name: install Percona XtraBackup 8.0 packages
+    include_tasks: ../tasks/install_pxb80.yml
+    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: enable the sysbench repo
+    command: percona-release enable sysbench testing
+    when: 
+      - install_mysql_shell == "yes" or install_mysql_shell == ""
+      - ansible_distribution_release != "noble"
+      - ansible_distribution_release != "bullseye"
+      - ansible_distribution_release != "jammy"
+      - ansible_distribution_release != "bookworm"
 
   - name: install sysbench new deb packages
     include_tasks: ../tasks/install_sysbench.yml
     when:
       - lookup('env', 'install_repo') != "experimental"
       - ansible_distribution_release != "noble"
+      - ansible_distribution_release != "bullseye"
+      - ansible_distribution_release != "jammy"
+      - ansible_distribution_release != "bookworm"
 
-  - name: install Percona XtraBackup 8.0 packages
-    include_tasks: ../tasks/install_pxb80.yml
-    when: lookup('env', 'install_repo') != "experimental"
+#  - name: enable the mysql shell testing repo
+#    command: percona-release enable mysql-shell testing
+#    when: install_mysql_shell == "yes" or install_mysql_shell == ""
+
+#  - name: install percona-mysql-shell package
+#    include_tasks: ../tasks/install_pshell_ver.yml
+#    vars:
+#      pshell_version: "8.0"
+#    when: install_mysql_shell == "yes" or install_mysql_shell == ""
+
+# Enable only tools repo to install pt
+  - name: include tasks for enabling "{{ repo_name }}" test repo
+    include_tasks: ../tasks/enable_only_repo_for_pt.yml
+    vars:
+      repo_type: testing
+      repo_name: pt
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling "{{ repo_name }}" main repo
+    include_tasks: ../tasks/enable_only_repo_for_pt.yml
+    vars:
+      repo_type: release
+      repo_name: pt
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling  "{{ repo_name }}" experimental repo
+    include_tasks: ../tasks/enable_only_repo_for_pt.yml
+    vars:
+      repo_type: experimental
+      repo_name: pt
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: include tasks for pt installation
+    include_tasks: ../tasks/install_pt.yml
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -135,10 +189,6 @@
         path: /etc/my.cnf
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
-
-  - name: install percona-mysql-shell package
-    include_tasks: ../tasks/install_pshell.yml
-    when: install_mysql_shell == "yes" or install_mysql_shell == ""
 
   - name: Handle check that Percona Server version is correct
     block: 

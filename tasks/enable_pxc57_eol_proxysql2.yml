@@ -1,0 +1,51 @@
+  - name: add eol repository on debian testing PXC57
+    template: src=../templates/eol_deb_repo_file_pxc57.j2
+              dest=/etc/apt/sources.list.d/post-eol.list
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "{{ lookup('env', 'install_repo') }}"
+    when:
+      - ansible_os_family == "Debian"
+
+  - name: add eol repository on Redhat testing PXC57
+    template: src=../templates/eol_rpm_repo_file_pxc57.j2
+             dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "{{ lookup('env', 'install_repo') }}"
+    when:
+      - ansible_os_family == "RedHat"
+
+  - name: add eol repository on debian main PXC57
+    template: src=../templates/eol_deb_repo_file_pxc57.j2
+              dest=/etc/apt/sources.list.d/post-eol.list
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "{{ lookup('env', 'install_repo') }}"
+    when:
+      - ansible_os_family == "Debian"
+
+  - name: add eol repository on Redhat main PXC57
+    template: src=../templates/eol_rpm_repo_file_pxc57.j2
+             dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "{{ lookup('env', 'install_repo') }}"
+    when:
+      - ansible_os_family == "RedHat"
+
+  - name: Mandatory step for PXC 57 EOL (Disable all old repos)
+    command: percona-release disable all
+
+  - name: Mandatory step for PXC 57 EOL (Enable only pxc-57)
+    command: percona-release setup -y pxc-57 
+
+  - name: update deb cache
+    apt:
+      update_cache: yes
+    when:
+      - ansible_os_family == "Debian"

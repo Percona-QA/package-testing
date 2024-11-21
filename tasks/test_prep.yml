@@ -157,14 +157,32 @@
       - jq # for exporter end point metric fetch
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
 
-  - name: Install needed packages for running tests with yum on RHEL 9
-    dnf:
-      name: 
-        - unzip
-        - wget
-        - jq # for exporter end point metric fetch
-      state: latest
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 9
+  - name: Install needed packages for running tests with dnf on RHEL 9
+    block:
+      - name: Install packages using dnf
+        dnf:
+          name:
+            - unzip
+            - wget
+            - jq # for exporter endpoint metric fetch
+          state: latest
+        register: dnf_result
+        failed_when: dnf_result is failed
+        when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 9
+
+    rescue:
+      - name: Log DNF failure and switch to yum
+        debug:
+          msg: "DNF installation failed. Attempting installation with yum."
+
+      - name: Install packages using yum as fallback
+        yum:
+          name:
+            - unzip
+            - wget
+            - jq
+          state: latest
+        when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 9
 
   - name: register SLES for updates with suse_register
     command: suse_register -a email="@@SLES_REG_EMAIL@@" -a regcode-sles=@@SLES_REG_CODE@@

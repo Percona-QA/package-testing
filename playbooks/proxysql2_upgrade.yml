@@ -22,7 +22,7 @@
 #
 
   - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_main_repo.yml
+    include_tasks: ../tasks/enable_proxysql2_main.yml
 
   - name: install proxysql new deb packages
     apt:
@@ -55,8 +55,8 @@
 #
 # Enable testing repository
 #
-  - include_tasks: ../tasks/enable_testing_repo.yml
 
+  - include_tasks: ../tasks/enable_proxysql2_testing.yml
 #
 # Upgrade packages
 #
