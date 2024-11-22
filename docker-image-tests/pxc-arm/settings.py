@@ -40,7 +40,7 @@ pxc8x_packages = [(package, pxc_version_upstream) for package in (
 pxc8x_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/mysqladmin',
   '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow',
-  '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade',
+  '/usr/bin/mysql_secure_installation',
   '/usr/bin/mysql_tzinfo_to_sql','/usr/bin/mysql_keyring_encryption_test','/usr/bin/mysql_migrate_keyring',
   '/usr/bin/mysqld_multi','/usr/bin/mysqld_safe','/usr/bin/mysql-systemd',
   '/usr/bin/mysqlbinlog'
