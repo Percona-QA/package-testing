@@ -35,8 +35,29 @@ class TestMysqlEnvironment:
     def test_mysql_version(self, host):
         assert host.check_output('mysql --version') == 'mysql  Ver '+ pxc_version +' for Linux on aarch64 (Percona XtraDB Cluster (GPL), Release rel'+ pxc_rel +', Revision '+ pxc_revision +', WSREP version '+ pxc_wsrep_version +')'
 
+#    def test_mysqld_version(self, host):
+#        assert host.check_output('mysqld --version') == '/usr/sbin/mysqld  Ver '+ pxc_version +' for Linux on aarch64 (Percona XtraDB Cluster (GPL), Release rel'+ pxc_rel +', Revision '+ pxc_revision +', WSREP version '+ pxc_wsrep_version +')'
+
     def test_mysqld_version(self, host):
-        assert host.check_output('mysqld --version') == '/usr/sbin/mysqld  Ver '+ pxc_version +' for Linux on aarch64 (Percona XtraDB Cluster (GPL), Release rel'+ pxc_rel +', Revision '+ pxc_revision +', WSREP version '+ pxc_wsrep_version +')'
+    # Define the expected output based on the docker_tag
+        if "debug" in docker_tag:
+            expected_output = (
+                '/usr/sbin/mysqld -ps Ver ' + pxc_version +
+                ' for Linux on aarch64 (Percona XtraDB Cluster (GPL), Release rel' +
+                pxc_rel + ', Revision ' + pxc_revision + ', WSREP version ' +
+                pxc_wsrep_version + ')'
+        )
+    else:
+            expected_output = (
+                '/usr/sbin/mysqld  Ver ' + pxc_version +
+                ' for Linux on aarch64 (Percona XtraDB Cluster (GPL), Release rel' +
+                pxc_rel + ', Revision ' + pxc_revision + ', WSREP version ' +
+                pxc_wsrep_version + ')'
+        )
+
+    # Run the assertion
+    assert host.check_output('mysqld --version') == expected_output
+
 
     def test_process_running(self, host):
         assert host.process.get(user="mysql", comm="mysqld")
