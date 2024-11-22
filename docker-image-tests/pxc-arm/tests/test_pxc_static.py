@@ -47,7 +47,7 @@ class TestMysqlEnvironment:
                 pxc_rel + ', Revision ' + pxc_revision + ', WSREP version ' +
                 pxc_wsrep_version + ')'
         )
-    else:
+        else:
             expected_output = (
                 '/usr/sbin/mysqld  Ver ' + pxc_version +
                 ' for Linux on aarch64 (Percona XtraDB Cluster (GPL), Release rel' +
@@ -55,8 +55,8 @@ class TestMysqlEnvironment:
                 pxc_wsrep_version + ')'
         )
 
-    # Run the assertion
-    assert host.check_output('mysqld --version') == expected_output
+        # Run the assertion
+        assert host.check_output('mysqld --version') == expected_output
 
 
     def test_process_running(self, host):
