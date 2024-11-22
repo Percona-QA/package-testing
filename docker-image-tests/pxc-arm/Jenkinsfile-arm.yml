@@ -6,9 +6,9 @@
     pipeline-scm:
       scm:
         - git:
-            url: https://github.com/kaushikpuneet07/package-testing.git
+            url: https://github.com/Percona-QA/package-testing.git
             branches:
-            - 'pxc-arm'
+            - 'master'
             wipe-workspace: false
       lightweight-checkout: true
       script-path: docker-image-tests/pxc-arm/Jenkinsfile-arm
