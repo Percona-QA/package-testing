@@ -33,7 +33,7 @@ class TestMysqlEnvironment:
         assert oct(host.file(binary).mode) == '0o755'
 
     def test_mysql_version(self, host):
-        assert host.check_output('mysql --version') == 'mysql  Ver '+ pxc_version +' for Linux on aarch64  (Percona XtraDB Cluster (GPL), Release rel'+ pxc_rel +', Revision '+ pxc_revision +', WSREP version '+ pxc_wsrep_version +')'
+        assert host.check_output('mysql --version') == 'mysql  Ver '+ pxc_version +' for Linux on aarch64 (Percona XtraDB Cluster (GPL), Release rel'+ pxc_rel +', Revision '+ pxc_revision +', WSREP version '+ pxc_wsrep_version +')'
 
     def test_mysqld_version(self, host):
         assert host.check_output('mysqld --version') == '/usr/sbin/mysqld  Ver '+ pxc_version +' for Linux on aarch64 (Percona XtraDB Cluster (GPL), Release rel'+ pxc_rel +', Revision '+ pxc_revision +', WSREP version '+ pxc_wsrep_version +')'

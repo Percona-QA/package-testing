@@ -35,7 +35,7 @@ cluster_name = 'pxc-cluster1'
 # Innovation
 pxc8x_packages = [(package, pxc_version_upstream) for package in (
   'percona-xtradb-cluster-client', 'percona-xtradb-cluster-server',
-  'percona-xtradb-cluster-shared', 'percona-xtradb-cluster-shared-compat'
+  'percona-xtradb-cluster-shared'
 )]
 pxc8x_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/mysqladmin',
@@ -62,7 +62,7 @@ pxc8x_components = (
 # 8.0
 pxc80_packages = [(package, pxc_version_upstream) for package in (
   'percona-xtradb-cluster-client', 'percona-xtradb-cluster-server',
-  'percona-xtradb-cluster-shared', 'percona-xtradb-cluster-shared-compat'
+  'percona-xtradb-cluster-shared'
 )]
 pxc80_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/mysqladmin',
@@ -90,49 +90,6 @@ pxc80_components = (
   ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions')
 )
 
-# 5.7
-pxc57_packages = (
-  ('Percona-XtraDB-Cluster-shared-57', pxc_version_upstream),
-  ('Percona-XtraDB-Cluster-server-57', pxc_version_upstream),
-  ('Percona-XtraDB-Cluster-client-57', pxc_version_upstream),
-  ('percona-xtrabackup-24', pxc_pxb_version)
-)
-pxc57_binaries = (
-  '/usr/bin/mysql', '/usr/sbin/mysqld',
-  '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow',
-  '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade',
-  '/usr/bin/mysql_tzinfo_to_sql'
-)
-pxc57_plugins = (
-  ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
-  ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so')
-)
-pxc57_functions = (
-  ('fnv1a_64', 'libfnv1a_udf.so', 'INTEGER'),('fnv_64', 'libfnv_udf.so', 'INTEGER'),('murmur_hash', 'libmurmur_udf.so', 'INTEGER'),
-  ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
-  ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_exclusive', 'version_token.so', 'INT'),
-  ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'),
-  ('service_release_locks', 'locking_service.so', 'INT')
-)
-
-# 5.6
-pxc56_packages = [(package, pxc_version_upstream) for package in (
-  'Percona-Server-client-56', 'Percona-Server-server-56', 'Percona-Server-shared-56',
-  'Percona-Server-tokudb-56'
-)]
-pxc56_binaries = (
-  '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/mysqladmin', '/usr/bin/mysqlbinlog', '/usr/sbin/mysqld-debug',
-  '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow', '/usr/bin/mysqlimport', '/usr/bin/mysqlshow', '/usr/bin/mysqlslap',
-  '/usr/bin/mysqlcheck', '/usr/bin/mysql_config_editor', '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_upgrade', '/usr/bin/mysql_tzinfo_to_sql'
-)
-pxc56_plugins = (
-  ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
-  ('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so')
-)
-pxc56_functions = (
-  ('fnv1a_64', 'libfnv1a_udf.so', 'INTEGER'),('fnv_64', 'libfnv_udf.so', 'INTEGER'),('murmur_hash', 'libmurmur_udf.so', 'INTEGER')
-)
-#####
 
 if re.match(r'^8\.[1-9]$', pxc_version_major):
     pxc_packages = pxc8x_packages
@@ -146,15 +103,5 @@ elif pxc_version_major == '8.0':
     pxc_plugins = pxc80_plugins
     pxc_functions = pxc80_functions
     pxc_components = pxc80_components
-elif pxc_version_major == '5.7':
-    pxc_packages = pxc57_packages
-    pxc_binaries = pxc57_binaries
-    pxc_plugins = pxc57_plugins
-    pxc_functions = pxc57_functions
-elif pxc_version_major == '5.6':
-    pxc_packages = pxc56_packages
-    pxc_binaries = pxc56_binaries
-    pxc_plugins = pxc56_plugins
-    pxc_functions = pxc56_functions
 
 pxc_pwd = 'pwd1234#'
