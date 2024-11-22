@@ -42,7 +42,7 @@ class TestMysqlEnvironment:
     # Define the expected output based on the docker_tag
         if "debug" in docker_tag:
             expected_output = (
-                '/usr/sbin/mysqld -ps Ver ' + pxc_version +
+                '/usr/sbin/mysqld-ps Ver ' + pxc_version +
                 ' for Linux on aarch64 (Percona XtraDB Cluster (GPL), Release rel' +
                 pxc_rel + ', Revision ' + pxc_revision + ', WSREP version ' +
                 pxc_wsrep_version + ')'
