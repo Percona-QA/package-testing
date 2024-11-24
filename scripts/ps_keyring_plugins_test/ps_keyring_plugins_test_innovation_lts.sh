@@ -11,9 +11,9 @@ LOG="/tmp/keyring_plugins_test_run.log"
 echo -n > ${LOG}
 
 if [ -z "$1" ]; then
-  echo "This script needs parameter ps57|ps80|ps81|ps82"
+  echo "This script needs parameter ps57|ps80|ps81|ps82|ps90"
   exit 1
-elif ! [[ "$1" =~ ^ps8[0-9]{1}$ ]]; then
+elif ! [[ "$1" =~ ^ps9[0-9]{1}$ ]] || [[ "$1" =~ ^ps8[0-9]{1}$ ]]; then
   echo "Version not recognized!"
   exit 1
 #else
