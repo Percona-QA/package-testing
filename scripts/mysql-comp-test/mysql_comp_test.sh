@@ -56,7 +56,7 @@ for se in TokuDB RocksDB; do
       if [ $1 = "ps56" -a ${se} = "RocksDB" ]; then
         echo "Skipping RocksDB since not supported in PS 5.6"
       elif [[ "$1" =~ ^ps8[0-9]{1}$ ]] || [[ "$1" =~ ^ps9[0-9]{1}$ ]] && [[ ${se} = "TokuDB" ]]; then
-        echo "Skipping TokuDB since not supported in PS 8.X and PS 9.X"
+        echo "Skipping TokuDB since not supported in PS 9.X and PS 8.X"
       else
         if [ ${comp_lib} != "dummy" ]; then
           old="${new}"
@@ -106,10 +106,10 @@ for se in TokuDB RocksDB; do
             sed -i "s/ @@COMMENT@@/ ${new_comment}/g" /tmp/create_table.sql
           fi
           
-          if ! [[ "$1" =~ ^ps9[0-9]{1}$ ]] || [[ "$1" =~ ^ps8[0-9]{1}$ ]]; then
+          if ! [[ "$1" =~ ^ps8[0-9]{1}$ ]] || [[ "$1" =~ ^ps9[0-9]{1}$ ]]; then
             mysql -e "set global tokudb_row_format=${new_row_format};"
           else
-	    echo "Skipping TokuDB since not supported in PS 9.X and PS 8.X"
+	    echo "Skipping TokuDB since not supported in PS 9.0 and PS 8.0"
 	  fi  
 	  mysql < /tmp/create_table.sql
         fi
@@ -179,7 +179,7 @@ for file in /var/lib/mysql/.rocksdb/*.sst; do
 done
 
 # check if TokuDB files contain proper compression libraries used
-if ! [[ "$1" =~ ^ps9[0-9]{1}$ ]] || [[ "$1" =~ ^ps8[0-9]{1}$ ]] ; then
+if ! [[ "$1" =~ ^ps8[0-9]{1}$ ]] || [[ "$1" =~ ^ps9[0-9]{1}$ ]] ; then
   for file in /var/lib/mysql/comp_test/*TokuDB*_main_*.tokudb;
   do
     filename_comp=$(echo "${file}" | sed "s:/.*/::" | sed "s:.*TokuDB_::" | sed "s:_main_.*::" | sed "s:_P_.*::")
@@ -192,7 +192,7 @@ if ! [[ "$1" =~ ^ps9[0-9]{1}$ ]] || [[ "$1" =~ ^ps8[0-9]{1}$ ]] ; then
     fi
   done
 else 
-  echo "Tokudb is deprecated in PS8.X and PS9.X"
+  echo "Tokudb is deprecated in PS8.0 and PS8.1"
 fi  
 
 md5sum ${secure_file_priv}/*.txt > /tmp/comp_test_md5.sum
@@ -203,7 +203,7 @@ sed -i '/^rocksdb/d' ${MYCNF}
 nr1=$(grep -c "e7821682046d961fb2b5ff5d11894491" /tmp/comp_test_md5.sum)
 nr2=$(grep -c "3284a0c3a1f439892f6e07f75408b2c2" /tmp/comp_test_md5.sum)
 nr3=$(grep -c "72f7e51a16c2f0af31e39586b571b902" /tmp/comp_test_md5.sum)
-if ! [[ "$1" =~ ^ps9[0-9]{1}$ ]] || [[ "$1" =~ ^ps8[0-9]{1}$ ]]; then
+if ! [[ "$1" =~ ^ps8[0-9]{1}$ ]] || [[ "$1" =~ ^ps9[0-9]{1}$ ]]; then
   if [ ${nr1} -ne 24 -o ${nr2} -ne 24 -o ${nr3} -ne 24 ]; then
     echo "md5sums of test files do not match. check files in ${secure_file_priv}"
     exit 1
