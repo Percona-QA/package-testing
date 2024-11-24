@@ -10,7 +10,7 @@ if [ "$#" = 2 ]; then
     exit 1
   fi
 elif [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps56, ps57, ps80, ps81 !"
+  echo "This script requires product parameter: ps56, ps57, ps80, ps81,ps90 !"
   echo "Usage: ./version_check.sh <prod> [pro]"
   exit 1
 fi
@@ -37,14 +37,10 @@ elif [ $1 = "ps80" ]; then
     release=${PS80_VER#*-}
     revision=${PS80_REV}
   fi
-elif [ $1 = "ps84" ] && [ "$2" = "pro" ]; then
-  version=${PS84_PRO_VER}
-  release=${PS84_PRO_VER#*-}
-  revision=${PS84_PRO_REV}
-elif [[ $1 =~ ^ps8[1-9]{1}$ ]]; then
+elif [[ $1 =~ ^ps9[0-9]{1}$ ]]; then
   version=${PS_INN_LTS_VER}
   release=${PS_INN_LTS_VER#*-}
-  revision=${PS_INN_LTS_REV}
+  revision=${PS_INN_LTS_REV}  
 elif [ $1 = "pxc56" ]; then
   version=${PXC56_VER}
   release=${PXC56_VER#*-}
@@ -107,7 +103,7 @@ product=$1
 log="/tmp/${product}_package_check.log"
 echo -n > $log
 
-if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9]{1}$ ]]; then
+if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
   if [ -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
     if [ -f /etc/system-release -a $(grep -c Amazon /etc/system-release) -eq 1 ]; then
       centos_maj_version="7"
@@ -139,7 +135,7 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
         rpm_num_pkgs="8"
         rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-rocksdb-${rpm_maj_version}"
       fi
-    elif [[ ${product} =~ ^ps8[0-9]{1}$ ]]; then
+    elif [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
       if [ "${centos_maj_version}" == "9" ]; then
         rpm_num_pkgs="7"
         rpm_opt_package="percona-server-rocksdb${pro_suf}"
@@ -148,7 +144,7 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
         rpm_opt_package="percona-server-rocksdb percona-server-shared-compat"
       fi
     fi
-    if [[ ${product} =~ ^ps8[0-9]{1}$ ]]; then
+    if [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
       ps_name="percona-server"
       rpm_pkgs_list="${ps_name}-server${pro_suf} ${ps_name}-test${pro_suf} ${ps_name}${pro_suf}-debuginfo ${ps_name}-devel${pro_suf} ${ps_name}-shared${pro_suf} ${ps_name}-client${pro_suf}"
     else
@@ -182,7 +178,7 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
       deb_opt_package="percona-server-rocksdb"
       deb_num_pkgs="7"
     fi
-    if [[ ${product} =~ ^ps8[0-9]{1}$ ]]; then
+    if [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
       deb_dbg_pkg="percona-server${pro_suf}-dbg"
     else
       deb_dbg_pkg="percona-server-${deb_maj_version}-dbg"

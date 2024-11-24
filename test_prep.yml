@@ -1,0 +1,264 @@
+  - name: DEBUG
+    debug:
+      var: ansible_facts['distribution']
+
+  - name: Execute Bash command if the system is Red Hat-based
+    shell: |
+      echo "This is a Red Hat-based system"
+      # Add your Bash command here
+    when: ansible_facts['distribution'] == "RedHat"
+
+  - name: Execute Bash command if the system is Oracle Linux-based
+    shell: |
+      echo "This is an Oracle Linux-based system"
+      # Add your Bash command here
+    when: ansible_facts['distribution'] == "OracleLinux"
+
+  - name: Execute Bash command if the system is not Red Hat-based nor Oracle Linux-based
+    shell: |
+      echo "This is not a Red Hat-based or Oracle Linux-based system"
+      # Add your Bash command here
+    when: ansible_facts['distribution'] != "RedHat" and ansible_facts['distribution'] != "OracleLinux"
+
+  - name: Install wget to download RPM packages
+    yum:
+      name: wget
+      state: present
+    when:
+    - ansible_facts['distribution'] == "RedHat"
+
+  - name: setup epel release centos 7
+    yum: name=https://dl.fedoraproject.org/pub/archive/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm state=present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+  - name: setup epel 7 repo for Amazon Linux 2
+    yum: name=https://dl.fedoraproject.org/pub/archive/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm state=present
+    when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2"
+
+  - name: install GPG key for epel 8
+    rpm_key:
+      state: present
+      key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+    when: 
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    - ansible_facts['distribution'] != "RedHat"
+
+  - name: install GPG key for Percona repos
+    rpm_key:
+      state: present
+      key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+
+  - name: install GPG key for Percona repos PACKAGING 
+    rpm_key:
+      state: present
+      key: https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+
+  - name: update mirrors for CentOS8
+    shell: sed -i 's/mirror\.centos\.org/vault\.centos\.org/g;s/\#baseurl=/baseurl=/g;s/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS*.repo
+    when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "8"
+
+  - name: update YUM cache for CentOS 8
+    yum:
+      update_cache: yes
+      state: present
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: install GPG key for epel 8
+    rpm_key:
+      state: present
+      key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+    when: 
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: Yum update for epel 8
+    command: yum update -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: setup epel 8 repo
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
+    when: 
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: install GPG key for epel 9
+    rpm_key:
+      state: present
+      key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9
+    when: 
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    - ansible_facts['distribution'] != "RedHat"
+
+  - name: setup epel 9 repo package
+    yum: name=epel-release state=present
+    when: 
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    - ansible_facts['distribution'] != "RedHat"
+
+  - name: setup epel 9 repo
+    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
+    when: 
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    - ansible_facts['distribution'] != "RedHat"
+
+  - name: allow release-info to change for apt repositories
+    command: apt-get update -y --allow-releaseinfo-change
+    when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
+
+  - name: install needed packages for running tests with apt
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - unzip
+      - wget
+      - gnupg
+      - rsync
+      - jq # for exporter end point metric fetch
+      - acl
+    retries: 60
+    delay: 10
+    register: result
+    until: result is not failed
+    when: ansible_os_family == "Debian"
+
+  - name: Clean yum cache
+    command: yum clean all
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
+
+  - name: update cache
+    command: yum update -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
+
+  - name: install needed packages for running tests with yum
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - pv
+      - libselinux-python
+      - unzip
+      - wget
+      - rsync
+      - jq # for exporter end point metric fetch
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
+
+  - name: install needed packages for running tests with yum on RHEL 8
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - unzip
+      - wget
+      - jq # for exporter end point metric fetch
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
+
+  - name: Install needed packages for running tests with dnf on RHEL 9
+    block:
+      - name: Install packages using dnf
+        dnf:
+          name:
+            - unzip
+            - wget
+            - jq # for exporter endpoint metric fetch
+          state: latest
+        register: dnf_result
+        failed_when: dnf_result is failed
+        when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 9
+
+    rescue:
+      - name: Log DNF failure and switch to yum
+        debug:
+          msg: "DNF installation failed. Attempting installation with yum."
+
+      - name: Install packages using yum as fallback
+        yum:
+          name:
+            - unzip
+            - wget
+            - jq
+          state: latest
+        when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 9
+
+  - name: register SLES for updates with suse_register
+    command: suse_register -a email="@@SLES_REG_EMAIL@@" -a regcode-sles=@@SLES_REG_CODE@@
+    when: ansible_os_family == "Suse" and ansible_distribution_major_version == "11"
+
+  - name: register SLES for updates with SUSEConnect
+    command: SUSEConnect --email="@@SLES_REG_EMAIL@@" --regcode=@@SLES_REG_CODE@@
+    when: ansible_os_family == "Suse" and ansible_distribution_major_version == "12"
+
+  - name: import rpm gpg key on sles12
+    command: rpmkeys --import https://www.percona.com/downloads/RPM-GPG-KEY-percona
+    when: ansible_os_family == "Suse" and ansible_distribution_major_version == "12"
+
+  - name: get abs path of package-testing into pkg_testing_path variable
+    shell: echo '{{ hostvars["localhost"]["playbook_dir"] }}' | grep -oE '^.*package-testing'
+    register: pkg_testing_path_output
+    when: lookup('env', 'USE_LOCAL_PKG_TEST') == "1"
+
+  - set_fact:
+      pkg_testing_path: "{{ pkg_testing_path_output.stdout }}"
+    when: lookup('env', 'USE_LOCAL_PKG_TEST') == "1"
+
+  - name: copy package-testing directory to remote
+    synchronize:
+      src: "{{ pkg_testing_path }}"
+      dest: /
+      recursive: yes
+      perms: yes
+    when: lookup('env', 'USE_LOCAL_PKG_TEST') == "1"
+
+  - name: download package-testing repo branch with wget
+    command: "{{ item }}"
+    with_items:
+    - rm -rf /package-testing
+    - rm -f master.zip
+    - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
+    - unzip master.zip
+    - rm -f master.zip
+    - mv "package-testing-{{ branch }}" /package-testing
+    vars:
+      branch: "{{ lookup('env', 'TESTING_BRANCH') | default('add-ps-90-pt-support', true) }}"
+      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Grishma123-Eng', true) }}"
+
+  - name: install latest bats from github
+    command: "{{ item }}"
+    with_items:
+    - rm -f master.zip
+    - wget --no-check-certificate -O master.zip https://github.com/sstephenson/bats/archive/master.zip
+    - unzip master.zip
+    - rm -f master.zip
+    - bats-master/install.sh /usr/local
+    - rm -rf bats-master
+
+  - name: include tasks for listing already installed packages
+    include_tasks: list_installed_packages.yml
+
+  - name: get selinux status
+    command: sestatus
+    register: selinux_status
+    when: ansible_os_family == "RedHat"
+
+  - name: list selinux status
+    debug:
+      var: selinux_status
+    when: ansible_os_family == "RedHat"
+
+  - name: get list of enabled dnf modules on rhel 8
+    command: dnf module list --enabled
+    register: enabled_dnf_modules
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: list enabled dnf modules on rhel 8
+    debug:
+      var: enabled_dnf_modules
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: disable mysql dnf for rhel 8
+    shell: dnf module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
