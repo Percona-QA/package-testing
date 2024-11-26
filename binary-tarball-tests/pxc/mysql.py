@@ -147,6 +147,6 @@ class MySQL:
             def _assert_component():
                 output = self.run_query(query, node="node3")
                 assert cmpt in output
-            retry(_assert_plugin, times=5, wait=0.2)
+            retry(_assert_component, times=5, wait=0.2)
         else:
             pytest.mark.skip('Components are available from 8.0 onwards')
