@@ -130,7 +130,6 @@ pxc80_files = (
 )
 if glibc_version == '2.35':
   pxc80_symlinks = (
-    ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),('lib/libgcrypt.so', 'lib/private/libgcrypt.so.20.3.4',),
     ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.39'),('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
     ('lib/libssl.so', 'lib/private/libssl.so.3'),('lib/libtinfo.so', 'lib/private/libtinfo.so.6.3'),
     ('lib/libaio.so','lib/private/libaio.so.1.0.1'),('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
@@ -139,7 +138,7 @@ if glibc_version == '2.35':
   )
 else:
   pxc80_symlinks = (
-    ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'), ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
+    ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
     ('lib/libgcrypt.so','lib/private/libgcrypt.so.11.8.2'), ('lib/libnspr4.so','lib/private/libnspr4.so'),
     ('lib/libnss3.so','lib/private/libnss3.so'), ('lib/libnssutil3.so','lib/private/libnssutil3.so'),
     ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.39'), ('lib/libplc4.so','lib/private/libplc4.so'),
