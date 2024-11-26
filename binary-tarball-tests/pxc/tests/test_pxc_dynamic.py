@@ -21,6 +21,10 @@ def test_install_plugin(mysql_server):
     for plugin in pxc_plugins:
         mysql_server.install_plugin(plugin[0], plugin[1])
 
+def test_install_components(mysql_server):
+    for plugin in pxc_components:
+        mysql_server.install_component(component[0])
+
 def test_cluster_size(mysql_server):
     output = mysql_server.run_query('SHOW STATUS LIKE "wsrep_cluster_size";')
     assert output.split('\t')[1].strip() == "3"
