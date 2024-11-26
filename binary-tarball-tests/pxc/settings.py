@@ -136,7 +136,7 @@ pxc80_symlinks = (
     ('lib/librtmp.so', 'lib/private/librtmp.so.1'),('lib/libtirpc.so', 'lib/private/libtirpc.so.3.0.0')
 )
 pxc80_components = (
-  'component_masking_functions', 'component_encryption_udf', 'component_keyring_kmip', 'component_keyring_kms',
+  ('file://component_encryption_udf'), ('file://component_masking_functions'), ('file://component_keyring_kmip'), ('file://component_keyring_kms'),
 )
 
 # 5.7

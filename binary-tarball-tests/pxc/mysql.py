@@ -143,9 +143,7 @@ class MySQL:
         if pxc_version_major == '8.0' or re.match(r'^8\.[1-9]$', pxc_version_major):
             query = f'INSTALL COMPONENT \'{cmpt}\';'
             self.run_query(query)
-        
             query = f'SELECT component_urn FROM mysql.component WHERE component_urn = \'{cmpt}\';'
-        
             def _assert_plugin():
                 output = self.run_query(query, node="node3")
                 assert cmpt in output
