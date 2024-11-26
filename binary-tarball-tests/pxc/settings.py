@@ -135,7 +135,7 @@ if glibc_version == '2.35':
     ('lib/libaio.so','lib/private/libaio.so.1.0.1'),('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
     ('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'), ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
     ('lib/librtmp.so', 'lib/private/librtmp.so.1'),('lib/libtirpc.so', 'lib/private/libtirpc.so.3.0.0')
-  )
+)
 else:
   pxc80_symlinks = (
     ('lib/libnspr4.so','lib/private/libnspr4.so'),
@@ -144,7 +144,10 @@ else:
     ('lib/libplds4.so','lib/private/libplds4.so'), ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
     ('lib/libsmime3.so','lib/private/libsmime3.so'), ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
     ('lib/libssl3.so','lib/private/libssl3.so'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
-  )
+)
+pxc80_components = (
+  'component_masking_functions', 'component_encryption_udf', 'component_keyring_kmip', 'component_keyring_kms',
+)
 
 # 5.7
 pxc57_binaries = [
@@ -232,6 +235,7 @@ elif pxc_version_major == '8.0':
     pxc_functions = pxc80_functions
     pxc_files = pxc80_files
     pxc_symlinks = pxc80_symlinks
+    pxc_components = pxc80_components
 elif pxc_version_major == '5.7':
     pxc_binaries = pxc57_binaries
     pxc_executables = pxc57_executables
