@@ -22,7 +22,7 @@ def test_install_plugin(mysql_server):
         mysql_server.install_plugin(plugin[0], plugin[1])
 
 def test_install_components(mysql_server):
-    for plugin in pxc_components:
+    for component in pxc_components:
         mysql_server.test_install_component(component[0])
 
 def test_cluster_size(mysql_server):
