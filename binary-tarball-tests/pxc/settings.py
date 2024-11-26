@@ -138,7 +138,7 @@ if glibc_version == '2.35':
   )
 else:
   pxc80_symlinks = (
-    ('lib/libgcrypt.so','lib/private/libgcrypt.so.11.8.2'), ('lib/libnspr4.so','lib/private/libnspr4.so'),
+    ('lib/libnspr4.so','lib/private/libnspr4.so'),
     ('lib/libnss3.so','lib/private/libnss3.so'), ('lib/libnssutil3.so','lib/private/libnssutil3.so'),
     ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.39'), ('lib/libplc4.so','lib/private/libplc4.so'),
     ('lib/libplds4.so','lib/private/libplds4.so'), ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
