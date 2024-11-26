@@ -250,6 +250,8 @@
       - percona-server-client{{ pro_suf }}
       - percona-mysql-router{{ pro_suf }}
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on Oracle Linux 9
     yum:
@@ -267,6 +269,8 @@
       - percona-server-client{{ pro_suf }}
       - percona-mysql-router{{ pro_suf }}
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: enable the Tools release repo
     command: percona-release enable tools release
