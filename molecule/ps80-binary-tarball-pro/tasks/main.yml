@@ -35,15 +35,16 @@
       - git
       - unzip
       - wget
+      - tar
       - libaio
       - numactl
-      - tar
       - gawk
       - python3
       - python3-pip
       - libtirpc
-      - openldap
     when: ansible_os_family == "RedHat"
+
+#      - openldap // this package causes issue on OL-9
 
   - name: get GLIBC_VERSION
     set_fact:

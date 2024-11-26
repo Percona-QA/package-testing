@@ -18,8 +18,8 @@ provisioner:
   name: ansible
   log: True
   playbooks:
-    create: ../../../playbooks/create.yml
-    destroy: ../../../playbooks/destroy.yml
+    create: ../../../playbooks/create-noble-arm.yml
+    destroy: ../../../playbooks/destroy-noble-arm.yml
     cleanup: ../../playbooks/cleanup.yml
     prepare: ../../playbooks/prepare-ubuntu-pro.yml
     converge: ../../playbooks/playbook.yml
