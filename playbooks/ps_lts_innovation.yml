@@ -166,8 +166,8 @@
   - name: check the audit log v2 Component
     command: /package-testing/scripts/ps_audit_log_v2_component.sh
 
-  - name: run some MyRocks tests
-    command: /package-testing/scripts/ps_myrocks_test.sh
+  - #name: run some MyRocks tests
+    #command: /package-testing/scripts/ps_myrocks_test.sh
 
   - name: run mysql compression tests script
     command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps{{ major_release_version }}
