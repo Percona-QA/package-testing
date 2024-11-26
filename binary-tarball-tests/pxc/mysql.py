@@ -144,7 +144,7 @@ class MySQL:
             query = f'INSTALL COMPONENT \'{cmpt}\';'
             self.run_query(query)
             query = f'SELECT component_urn FROM mysql.component WHERE component_urn = \'{cmpt}\';'
-            def _assert_plugin():
+            def _assert_component():
                 output = self.run_query(query, node="node3")
                 assert cmpt in output
             retry(_assert_plugin, times=5, wait=0.2)
