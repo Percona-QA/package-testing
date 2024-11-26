@@ -34,8 +34,8 @@ pxc8x_binaries = [
   'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog',
   'bin/mysqldump', 'bin/mysqlimport', 'bin/mysqlpump', 'bin/mysqlshow',
   'bin/mysqlslap', 'bin/mysqlcheck', 'bin/mysql_config_editor',
-  'bin/mysqlrouter', 'bin/mysqlrouter_passwd', 'bin/mysqlrouter_plugin_info', 'bin/mysql_secure_installation', 'bin/mysql_ssl_rsa_setup',
-  'bin/mysql_upgrade', 'bin/mysql_tzinfo_to_sql'
+  'bin/mysqlrouter', 'bin/mysqlrouter_passwd', 'bin/mysqlrouter_plugin_info', 'bin/mysql_secure_installation',
+  'bin/mysql_tzinfo_to_sql'
 ]
 pxc8x_executables = pxc8x_binaries + [
   'bin/clustercheck', 'bin/wsrep_sst_common', 'bin/wsrep_sst_xtrabackup-v2',
@@ -87,7 +87,7 @@ else:
 pxc8x_components = (
   ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault'),('file://component_binlog_uts_udf')
 )
-  
+
 # 8.0
 pxc80_binaries = [
   'bin/garbd',
@@ -122,7 +122,7 @@ pxc80_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 pxc80_files = (
-  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.37' ,
+  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.39' ,
   'lib/libmysqlservices.a' , 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini', 'lib/plugin/keyring_file.so',
@@ -130,7 +130,8 @@ pxc80_files = (
 )
 if glibc_version == '2.35':
   pxc80_symlinks = (
-    ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.37'),('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
+    ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),('lib/libgcrypt.so', 'lib/private/libgcrypt.so.20.3.4',),
+    ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.39'),('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
     ('lib/libssl.so', 'lib/private/libssl.so.3'),('lib/libtinfo.so', 'lib/private/libtinfo.so.6.3'),
     ('lib/libaio.so','lib/private/libaio.so.1.0.1'),('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
     ('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'), ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
@@ -138,8 +139,11 @@ if glibc_version == '2.35':
   )
 else:
   pxc80_symlinks = (
-    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.37'),
-    ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
+    ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'), ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
+    ('lib/libgcrypt.so','lib/private/libgcrypt.so.11.8.2'), ('lib/libnspr4.so','lib/private/libnspr4.so'),
+    ('lib/libnss3.so','lib/private/libnss3.so'), ('lib/libnssutil3.so','lib/private/libnssutil3.so'),
+    ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.39'), ('lib/libplc4.so','lib/private/libplc4.so'),
+    ('lib/libplds4.so','lib/private/libplds4.so'), ('lib/libsasl2.so','lib/private/libsasl2.so.3.0.0'),
     ('lib/libsmime3.so','lib/private/libsmime3.so'), ('lib/libssl.so','lib/private/libssl.so.1.0.2k'),
     ('lib/libssl3.so','lib/private/libssl3.so'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
   )

@@ -19,6 +19,12 @@
         key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
       when: (ansible_os_family == "RedHat") and (ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9") 
 
+    - name: install GPG key for Percona repos PACKAGING 
+      rpm_key:
+        state: present
+        key: https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+      
     - name: setup epel 8 repo
       yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
@@ -41,7 +47,7 @@
       when: ansible_os_family == "RedHat"
 
     - name: setup epel release centos 7
-      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
+      yum: name=https://dl.fedoraproject.org/pub/archive/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm state=present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
     - name: Remove the base repo for CentOS 7
@@ -161,8 +167,16 @@
       service:
         name: firewalld
         state: stopped
-      when: (ansible_os_family == "RedHat") and (ansible_distribution_major_version|int == 8 or ansible_distribution_major_version|int == 9)
+      when: (ansible_os_family == "OracleLinux") and (ansible_distribution_major_version|int == 8 or ansible_distribution_major_version|int == 9)
 
+    - name: Setup SSH keys for RedHat
+      authorized_key:
+        user: ec2-user
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: ansible_os_family == "RedHat"
+      
     - name: Setup SSH keys CentOS
       authorized_key:
         user: centos

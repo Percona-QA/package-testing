@@ -35,10 +35,20 @@ elif [ "$1" = "ps80" ]; then
     release=${PS80_VER#*-}
     revision=${PS80_REV}
   fi
+elif [ "$1" = "ps84" ]; then
+  if [ "$2" = "pro" ]; then
+    version=${PS84_PRO_VER}
+    release=${PS84_PRO_VER#*-}
+    revision=${PS84_PRO_REV}
+  else
+    version=${PS_INN_LTS_VER}
+    release=${PS_INN_LTS_VER#*-}
+    revision=${PS_INN_LTS_REV}
+  fi
 elif [[ $1 =~ ^ps8[1-9]{1}$ ]]; then
   version=${PS_INN_LTS_VER}
   release=${PS_INN_LTS_VER#*-}
-  revision=${PS_INN_LTS_REV}  
+  revision=${PS_INN_LTS_REV}
 elif [ "$1" = "pxc56" ]; then
   version=${PXC56_VER%-*}
   release=${PXC56_VER#*-}
@@ -57,7 +67,13 @@ elif [ "$1" = "pxc80" ]; then
   revision=${PXC80_REV}
   innodb_ver=${PXC80_INNODB}
   wsrep=${PXC80_WSREP}
-elif [[ "$1" =~ ^pxc8[1-9]{1}$ ]]; then
+elif [ "$1" = "pxc84" ]; then
+  version=${PXC84_VER%-*}
+  release=${PXC84_VER#*-}
+  revision=${PXC84_REV}
+  innodb_ver=${PXC84_INNODB}
+  wsrep=${PXC84_WSREP}
+elif [[ "$1" =~ ^pxc8[5-9]{1}$ ]]; then
   version=${PXC_INN_LTS_VER%-*}
   release=${PXC_INN_LTS_VER#*-}
   revision=${PXC_INN_LTS_REV}

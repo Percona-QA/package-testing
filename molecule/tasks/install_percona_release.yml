@@ -7,8 +7,6 @@
 #    yum: name=https://repo.percona.com/yum/release/latest/RPMS/noarch/percona-release-1.0-27.noarch.rpm
     # Due problem with ansible 2.9.3 version about GPG Key check
     command: yum -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-    args:
-      warn: no
     when: ansible_os_family == "RedHat"
 
 

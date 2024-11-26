@@ -48,15 +48,16 @@
   - name: Start agent
     shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
 
-  - name: "Wait for 'node_exporter' is Waiting"
-    shell: pmm-admin list | grep 'node_exporter' | awk -F' ' '{print $2}'
-    register: node_exporter_status
-    until: node_exporter_status.stdout.find('Waiting') != -1
-    delay: 5
-    retries: 5
-
-  - name: Assert pmm-agent.log contains the error about wrong base path
-    shell: cat pmm-agent.log | grep 'no such file or directory'
+#  Unskip after https://perconadev.atlassian.net/browse/PMM-13348 is done
+#  - name: "Wait for 'node_exporter' is Waiting"
+#    shell: pmm-admin list | grep 'node_exporter' | awk -F' ' '{print $2}'
+#    register: node_exporter_status
+#    until: node_exporter_status.stdout.find('Waiting') != -1
+#    delay: 5
+#    retries: 5
+#
+#  - name: Assert pmm-agent.log contains the error about wrong base path
+#    shell: cat pmm-agent.log | grep 'no such file or directory'
 
 ### Setup PMM Client
   - name: Use "pmm-admin config" to set correct  path base

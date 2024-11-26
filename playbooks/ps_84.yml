@@ -78,23 +78,44 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-# Disable Percona Toolkit installation till its supported in OL9 and Jammy
-#  - name: install Percona Toolkit new deb packages
-#    include_tasks: ../tasks/install_pt.yml
-#
   - name: install Percona Server{{ pro_suf }} 8.4 packages
     include_tasks: ../tasks/install_ps84.yml
     vars:
       pro_suf: "{{ '-pro' if 'yes' in lookup('env', 'pro_test') else '' }}"
 
-  - name: enable the Tools release repo
-    command: percona-release enable tools release
+# Enable only tools repo to install pt
+#  - name: include tasks for enabling "{{ repo_name }}" test repo
+#    include_tasks: ../tasks/enable_only_repo_for_pt.yml
+#    vars:
+#      repo_type: testing
+#      repo_name: pt
+#    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+#
+#  - name: include tasks for enabling "{{ repo_name }}" main repo
+#    include_tasks: ../tasks/enable_only_repo_for_pt.yml
+#    vars:
+#      repo_type: release
+#      repo_name: pt
+#    when: lookup('env', 'install_repo') == "main"
+#
+#  - name: include tasks for enabling  "{{ repo_name }}" experimental repo
+#    include_tasks: ../tasks/enable_only_repo_for_pt.yml
+#    vars:
+#      repo_type: experimental
+#      repo_name: pt
+#    when: lookup('env', 'install_repo') == "experimental"
+#
+#  - name: include tasks for pt installation
+#    include_tasks: ../tasks/install_pt.yml
+#
+  - name: enable the mysql shell testing repo
+    command: percona-release enable mysql-shell testing
     when: install_mysql_shell == "yes" or install_mysql_shell == ""
 
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
     when: install_mysql_shell == "yes" or install_mysql_shell == ""
-    
+
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
 
@@ -169,6 +190,9 @@
 
   - name: check that Percona Server {{ pro }} package versions are correct
     command: /package-testing/package_check.sh ps84 {{ pro }}
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
 
 # Bookworm does not support fips mode out of the box. It requires opennsl module rebuid. So we skip fips mode enabling for bookworm.
   - name: include tasks for checking FIPS mode

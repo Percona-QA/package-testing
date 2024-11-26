@@ -58,7 +58,7 @@ ps80_components = (
 ps80_files = (
   'lib/libcoredumper.a', 
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.37' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.39' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini','lib/plugin/keyring_file.so',
@@ -66,8 +66,8 @@ ps80_files = (
   'lib/plugin/audit_log_filter.so', 'lib/plugin/component_masking_functions.so', 'lib/plugin/component_percona_telemetry.so'
 )
 ps80_symlinks = (
-  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.37'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.37'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.39'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.39'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 ps80_openssl_files = (
   'lib/libcrypto.so', 'lib/libk5crypto.so', 'lib/libssl.so', 'lib/libsasl2.so'
@@ -179,6 +179,10 @@ ps8x_symlinks = (
   ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.0'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 
+ps8x_openssl_files = (
+  'lib/libcrypto.so', 'lib/libk5crypto.so', 'lib/libssl.so', 'lib/libsasl2.so'
+)
+
 #####
 
 if re.match(r'^8\.[1-9]$', ps_version_major):
@@ -189,6 +193,7 @@ if re.match(r'^8\.[1-9]$', ps_version_major):
     ps_files = ps8x_files
     ps_symlinks = ps8x_symlinks
     ps_components = ps8x_components
+    ps_openssl_files=ps8x_openssl_files
 elif ps_version_major == '8.0':
     ps_binaries = ps80_binaries
     ps_executables = ps80_executables

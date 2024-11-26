@@ -114,10 +114,10 @@
     vars:
       psmdb_to_test:  "{{ enabled_db | select('match', '^psmdb-*') | join('') }}"
 
-  - name: check if Metric End point with Auth works for MongoDB Exporter
-    shell: "{{item}}"
-    with_items:
-      - "bash -x ../scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1"
+  - name: Check if Metric End point with Auth works for MongoDB Exporter
+    include_tasks: ../tasks/verify_pmm2_metric.yml
+    loop:
+      - { service_name: 'mongodb_{{ instance_ip }}', metric: 'mongodb_up.* 1' }
 ### end PSMDB
 
 ### start pgsql 13

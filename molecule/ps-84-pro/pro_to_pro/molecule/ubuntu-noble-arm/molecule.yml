@@ -1,0 +1,38 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: unoble-arm-${BUILD_NUMBER}-${JOB_NAME}-${cur_action_to_test}
+    region: us-west-2
+    image: ami-0f3b814f07ac0db32
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: c6g.large
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+      job-name: ${JOB_NAME}
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    create: ../../../../playbooks/create_noble.yml
+    destroy: ../../../../playbooks/destroy-noble-arm.yml
+    prepare: ../../playbooks/prepare-ubuntu-pro.yml
+    converge: ../../playbooks/playbook.yml
+scenario:
+  name: ubuntu-noble-arm
+  destroy_sequence:
+    - destroy
+  clenup_sequence:
+    - cleanup
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+    - destroy

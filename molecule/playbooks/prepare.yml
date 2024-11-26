@@ -61,6 +61,35 @@
       when: ansible_os_family == "RedHat"
 
     - name: setup epel release centos 7
+      yum: name=https://dl.fedoraproject.org/pub/archive/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm state=present
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    - name: Remove the base repo for CentOS 7
+      shell: |
+          sudo sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* || true
+          sudo sed -i 's|#\\s*baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-* || true
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    - name: Remove the base repo for CentOS 7
+      shell: rm /etc/yum.repos.d/CentOS-Base.repo
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    - name: Ensure base.repo exists CentOS 7
+      ansible.builtin.copy:
+        dest: /etc/yum.repos.d/base.repo
+        content: |
+          [base]
+          name=CentOS-$releasever - Base
+          baseurl=http://vault.centos.org/centos/$releasever/os/$basearch/
+          gpgcheck=1
+          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+          enabled=1
+        owner: root
+        group: root
+        mode: '0644'
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    - name: Update YUM cache CentOS 7
       yum:
         name: epel-release
         update_cache: yes
@@ -134,14 +163,23 @@
         exclusive: False
       when: (ansible_distribution == "CentOS") and (lookup('env', 'DESTROY_ENV') == "no")
 
-    - name: Setup SSH keys for Oracle Linux or Amazon
+    - name: Setup SSH keys for Oracle Linux/Amazon/RHEL
       authorized_key:
         user: ec2-user
         key: "{{ lookup('file', 'public_keys') }}"
         state: present
         exclusive: False
       when: (ansible_distribution == "OracleLinux" and lookup('env', 'DESTROY_ENV') == "no") or
-            (ansible_distribution == "Amazon" and lookup('env', 'DESTROY_ENV') == "no")
+            (ansible_distribution == "Amazon" and lookup('env', 'DESTROY_ENV') == "no") or
+            (ansible_distribution == "RedHat" and lookup('env', 'DESTROY_ENV') == "no")
+
+    - name: Setup SSH keys for Rocky Linux
+      authorized_key:
+        user: rocky
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: (ansible_distribution == "Rocky" and lookup('env', 'DESTROY_ENV') == "no")
 
     - name: Setup SSH keys Debian
       authorized_key:

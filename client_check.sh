@@ -22,6 +22,10 @@ elif [ "$1" = "ps80" ]; then
   deb_version=""
   rpm_version=""
   version=${PS80_VER}
+elif [ "$1" = "ps84" ]; then
+  deb_version=""
+  rpm_version=""
+  version=${PS84_VER}
 elif [ "$1" = "pxc56" ]; then
   deb_version="-5.6"
   rpm_version="-56"
@@ -31,6 +35,10 @@ elif [ "$1" = "pxc57" ]; then
 elif [ "$1" = "pxc80" ]; then
   deb_version=""
   rpm_version=""
+elif [ "$1" = "pxc84" ]; then
+  deb_version=""
+  rpm_version=""
+  version=${PXC84_VER}
 else
   echo "Invalid product selected"
   exit 1
@@ -48,9 +56,13 @@ if [ -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
     yum install -y percona-server-client percona-mysql-router percona-mysql-shell
   elif [ "${product}" = "ps80" ] && [ "${install_mysql_shell}" = "no" ]; then
     yum install -y percona-server-client percona-mysql-router
+  elif ([ -z ${install_mysql_shell} ] && [ "${product}" = "ps84" ]) || [ "${product}" = "ps84" -a "${install_mysql_shell}" = "yes" ]; then
+    yum install -y percona-server-client percona-mysql-router percona-mysql-shell
+  elif [ "${product}" = "ps84" ] && [ "${install_mysql_shell}" = "no" ]; then
+    yum install -y percona-server-client percona-mysql-router
   elif [ "${product}" = "pxc56" ] || [ "${product}" = "pxc57" ]; then
     yum install -y Percona-XtraDB-Cluster-client${rpm_version}
-  elif [ "${product}" = "pxc80" ]; then
+  elif [ "${product}" = "pxc80" ] || [ "${product}" = "pxc84" ]; then
     yum install -y percona-xtradb-cluster-client
   else
     echo "client version is incorrect"
@@ -63,9 +75,13 @@ else
     apt-get update; apt-get install -y percona-server-client percona-mysql-router percona-mysql-shell
   elif [ "${product}" = "ps80" ] && [ "${install_mysql_shell}" = "no" ]; then
     apt-get update; apt-get install -y percona-server-client percona-mysql-router
+  elif ([ -z ${install_mysql_shell} ] && [ "${product}" = "ps84" ]) || [ "${product}" = "ps84" -a "${install_mysql_shell}" = "yes" ]; then
+    apt-get update; apt-get install -y percona-server-client percona-mysql-router percona-mysql-shell
+  elif [ "${product}" = "ps84" ] && [ "${install_mysql_shell}" = "no" ]; then
+    apt-get update; apt-get install -y percona-server-client percona-mysql-router
   elif [ "${product}" = "pxc56" ] || [ "${product}" = "pxc57" ]; then
     apt-get install -y percona-xtradb-cluster-client${deb_version}
-  elif [ "${product}" = "pxc80" ]; then
+  elif [ "${product}" = "pxc80" ] || [ "${product}" = "pxc84" ]; then
     apt-get update; apt-get install -y percona-xtradb-cluster-client
   else
     echo "client version is incorrect"
@@ -73,7 +89,7 @@ else
   fi
 fi
 
-if [ "${product}" = "ps80" ]; then
+if [ "${product}" = "ps80" || "${product}" = "ps84" ]; then
   echo "checking client version"
   if [ "$(mysql --version | grep -c "$version")" == 1 ]; then
     echo "mysql client version is correct"

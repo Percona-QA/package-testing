@@ -22,8 +22,8 @@
       repo: "{{ lookup('env', 'FROM_REPO') }}"
       pdmysql_version: "{{ lookup('env', 'FROM_VERSION').split('-')[0] }}"
 
-  - name: install Percona Toolkit new deb packages
-    include_tasks: ../../../tasks/install_pt.yml
+#  - name: install Percona Toolkit new deb packages
+#    include_tasks: ../../../tasks/install_pt.yml
 
     # revert order once pt issue(DISTMYSQL-400) is resolved for OL8   
   - name: disable the mysql module on RHEL/CentOS 8
@@ -71,7 +71,6 @@
     vars:
       major_release_version: "{{ lookup('env', 'FROM_VERSION').split('.')[:2]|join('') }}"
     when: ansible_os_family == "Debian" or (lookup('env', 'FROM_VERSION').split('.')[:2]|join('') == lookup('env', 'VERSION').split('.')[:2]|join('') and ansible_os_family == "RedHat")
-
 
   - name: install proxysql new deb packages
     apt:
@@ -139,10 +138,10 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
+    - wget --no-check-certificate -O master.zip "https://github.com/Percona-QA/package-testing/archive/pdps-84-lts-mods-1.zip"
     - unzip master.zip
     - rm -f master.zip
-    - mv "package-testing-{{ branch }}" /package-testing
+    - mv "package-testing-pdps-84-lts-mods-1" /package-testing
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
@@ -203,10 +202,11 @@
     command: percona-release enable pdps-{{ pdmysql_version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'TO_REPO') }}"
-      pdmysql_version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
+      pdmysql_version: "{{ lookup('env', 'FROM_VERSION').split('-')[0] }}"
 
-  - name: install Percona Toolkit new deb packages
-    include_tasks: ../../../tasks/install_pt.yml
+
+#  - name: install Percona Toolkit new deb packages
+#    include_tasks: ../../../tasks/install_pt.yml
 
   - name: install Percona Server deb packages
     apt:
