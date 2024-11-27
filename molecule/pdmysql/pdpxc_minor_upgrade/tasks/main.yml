@@ -139,8 +139,8 @@
   vars:
     version: "{{ lookup('env', 'FROM_VERSION').split('.')[0] + lookup('env', 'FROM_VERSION').split('.')[1] }}"
 
-#- name: install Percona Toolkit new deb packages
-#  include_tasks: ../../../tasks/install_pt.yml
+- name: install Percona Toolkit new deb packages
+  include_tasks: ../../../tasks/install_pt.yml
 
 - name: install proxysql new deb packages
   apt:
@@ -349,8 +349,8 @@
   vars:
     version: "{{ lookup('env', 'VERSION').split('.')[0] + lookup('env', 'VERSION').split('.')[1] }}"
 
-#- name: install Percona Toolkit new deb packages
-#  include_tasks: ../../../tasks/install_pt.yml
+- name: install Percona Toolkit new deb packages
+  include_tasks: ../../../tasks/install_pt.yml
 
 - name: install proxysql new deb packages
   apt:
