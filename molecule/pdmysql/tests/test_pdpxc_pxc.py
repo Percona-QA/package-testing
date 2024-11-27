@@ -7,7 +7,7 @@ from .settings import *
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-VERSION = os.environ['VERSION']
+VERSION = os.environ['VERSION'].strip()
 
 DEBPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-client',
                'percona-xtradb-cluster-common', 'percona-xtradb-cluster-dbg',
@@ -99,7 +99,7 @@ if VERSION.startswith('8.4'):
                        "mysql -e \"INSTALL PLUGIN"
                        " connection_control SONAME 'connection_control.so';\""]
 else:
-    raise ValueError(f"Unsupported version {VERSION}. Only versions starting with 8.4 or 8.0 are supported.")
+    raise ValueError(f"Unsupported version-puneet {VERSION}. Only versions starting with 8.4 or 8.0 are supported.")
 
 if VERSION.startswith('8.4'):
 
