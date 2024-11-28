@@ -15,19 +15,22 @@ def prepare_test(host):
     with host.sudo("root"):
         if VERSION.startswith("8.4."):
             # Commands for version 8.4.*
-            cmd = "mysql -e \"CREATE USER 'clustercheckuser'@'%' IDENTIFIED by 'clustercheckpassword!';\
-                GRANT PROCESS ON *.* TO 'clustercheckuser'@'%';\
-                CREATE USER 'haproxy_user'@'%' IDENTIFIED by '$3Kr$t';\""
+            cmd = (
+                "mysql -e \"CREATE USER 'clustercheckuser'@'%' IDENTIFIED by 'clustercheckpassword!';"
+                "GRANT PROCESS ON *.* TO 'clustercheckuser'@'%';"
+                "CREATE USER 'haproxy_user'@'%' IDENTIFIED by '$3Kr$t';\""
+            )
         else:
             # Commands for other versions
-            cmd = "mysql -e \"CREATE USER 'clustercheckuser'@'%' IDENTIFIED WITH mysql_native_password by 'clustercheckpassword!';\
-                GRANT ALL PRIVILEGES ON *.* TO 'clustercheckuser'@'%';\""
-                CREATE USER 'haproxy_user'@'%' IDENTIFIED WITH mysql_native_password by '$3Kr$t';\""
+            cmd = (
+                "mysql -e \"CREATE USER 'clustercheckuser'@'%' IDENTIFIED WITH mysql_native_password by 'clustercheckpassword!';"
+                "GRANT ALL PRIVILEGES ON *.* TO 'clustercheckuser'@'%';"
+                "CREATE USER 'haproxy_user'@'%' IDENTIFIED WITH mysql_native_password by '$3Kr$t';\""
+            )
 
         # Run the command
         result = host.run(cmd)
         assert result.rc == 0, result.stdout
-
         # Restart services (common for all versions)
         restart_cmds = [
             'service xinetd restart',
