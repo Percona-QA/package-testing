@@ -31,6 +31,7 @@ verifier:
     s: true
   env:
     FIPS_SUPPORTED: "yes"
+    ANSIBLE_SSH_TRANSFER_METHOD: piped
 scenario:
   name: oracle-9
   destroy_sequence:

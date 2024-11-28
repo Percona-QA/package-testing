@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 export PATH=${HOME}/.local/bin:${PATH}
+echo "FETCHING from /etc/environment"
+source /etc/environment 
 
 echo "Installing dependencies..."
 if [ -f /etc/redhat-release ]; then
