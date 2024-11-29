@@ -7,8 +7,8 @@
 
 - name:
   debug:
-    msg: enabled_db
+    var: enabled_db
 
 - name:
   debug:
-    msg: item.enabled_db
+    var: item.enabled_db
