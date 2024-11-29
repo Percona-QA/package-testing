@@ -70,32 +70,13 @@
 ## end PS
 
 ### start PSMDB
-  - name: Install and start Percona Server
+  - name: Install and start Percona Server for Mongo DB
     include_tasks: ../../tasks/install_add_and_verify_psmdb.yml
 ### end PSMDB
 
-### start pgsql 13
-  - name: install and start Percona Distribution for PostgreSQL 13
-    include_tasks: ../tasks/start_psql13.yml
-
-  - name: check if Metric End point with Auth works for Postgres Exporter
-    shell: "{{item}}"
-    with_items:
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-
-  - name: check if Metric End point with Auth works for Postgres Exporter when service added via socket
-    shell: "{{item}}"
-    with_items:
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.hr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.lr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\custom_query.mr\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-      - bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name pgsql_socket_{{ instance_ip }} --metric_name pg_up{collector=\"\exporter\"\} --pmm_server_ip {{pmm_server_address}} --agent_type postgres_exporter --metric_value 1
-
-  - name: remove postgresql instances added via socket
-    command: pmm-admin remove postgresql pgsql_socket_{{ instance_ip }}
+### start PDPGSQL
+  - name: Install and start Percona Distribution for PGSQL
+    include_tasks: ../../tasks/install_add_and_verify_pdpgsql.yml
 ## end PG
 
   - name: Wait for node_exporter to be Running Status.
