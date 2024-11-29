@@ -28,18 +28,23 @@
       instance_ip: "{{ instance_ip.stdout }}"
 
   - name: Set Integrations list
-    include_tasks: ../tasks/pmm2-client_test_enabled_db.yml
+    include_tasks: ../tasks/pmm3-client_test_enabled_db_arm.yml
+    when: ansible_architecture == "aarch64"
+
+  - name: Set Integrations list
+    include_tasks: ../tasks/pmm3-client_test_enabled_db.yml
+    when: ansible_architecture != "aarch64"
 
   - set_fact:
       rnd: "{{ 1000 | random }}"
     run_once: yes
 
   - name: Setup environment
-    include_tasks: ../tasks/pmm3_client_test_prepare.yml
+    include_tasks: ../../tasks/pmm3_client_test_prepare.yml
 
 ### enable pmm3-client release and install old version to update
   - name: Enable pmm3-client release repo
-    include_tasks: ../tasks/enable_repo.yml
+    include_tasks: ../../tasks/enable_repo.yml
     vars:
       only: yes
       package: "pmm-client"
@@ -104,70 +109,23 @@
       success_msg: "pmm-agent is connected to server"
 
 ### start PS
-  - set_fact:
-      mysql_service_name: "mysql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
-#      mysql_service_name: "mysql_{{ rnd }}_{{ instance_ip }}"
-
-  - name: Install and start Percona Server 5.7
-    when: '"ps-5.7" in enabled_db'
-    include_tasks: ../tasks/install_and_add_to_pmm_ps_57.yml
-
-  - name: Verify if Metric Endpoint with Auth works for Mysqld Exporter
-    when: '"ps-" in enabled_db | join("")'
-    include_tasks: ../tasks/verify_pmm2_metric.yml
-    loop:
-      - { service_name: '{{ mysql_service_name }}', metric: 'mysql_up 1' }
+  - name: Install and start Percona Server
+    include_tasks: ../../tasks/install_add_and_verify_ps.yml
 ## end PS
 
 ### start PSMDB
-  - set_fact:
-      mongo_service_name: "mongodb_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
-      mongo_socket_service_name: "mongodb_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
-#      mongo_service_name: "mongodb_{{ rnd }}_{{ instance_ip }}"
-
-  - name: Install and start Percona Server MongoDB
-    when: '"psmdb-" in enabled_db | join("")'
-    include_tasks: ../tasks/install_and_add_to_pmm_psmdb.yml
-    vars:
-      psmdb_to_test:  "{{ enabled_db | select('match', '^psmdb-*') | join('') }}"
-
-  - name: Verify MongoDB Exporter metric endpoint with Auth(including service with socket)
-    when: '"psmdb-" in enabled_db | join("")'
-    include_tasks: ../tasks/verify_pmm2_metric.yml
-    loop:
-      - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up 1' }
-      - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up 1' }
+  - name: Install and start Percona Server for Mongo DB
+    include_tasks: ../../tasks/install_add_and_verify_psmdb.yml
 ### end PSMDB
 
 ### start PDPGSQL
-  - set_fact:
-      pgsql_service_name: "pgsql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
-      pgsql_socket_service_name: "pgsql_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
-
-  - name: Install and start Percona Server PostgreSQL 13
-    when: '"pg-13" in enabled_db'
-    include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql_13.yml
-
-  - name: Verify Postgres Exporter metric endpoint with Auth works(including service with socket)
-    when: '"pg-" in enabled_db | join("")'
-    include_tasks: ../tasks/verify_pmm2_metric.yml
-    vars:
-      retries: 3
-      delay: 10
-    loop:
-      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.hr"} 1' }
-      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.lr"} 1' }
-      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
-      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
-      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.hr"} 1' }
-      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.lr"} 1' }
-      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
-      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
+  - name: Install and start Percona Distribution for PGSQL
+    include_tasks: ../../tasks/install_add_and_verify_pdpgsql.yml
 ### end PG
 
 ### Upgrade PMM Client package
   - name: Enable {{ test_package }} {{ test_repo }} repo
-    include_tasks: ../tasks/enable_repo.yml
+    include_tasks: ../../tasks/enable_repo.yml
     vars:
       only: yes
       package: "{{ test_package }}"
@@ -183,4 +141,4 @@
 
 ### Verifications after upgrade
   - name: Perform standard verifications set for PMM Client
-    include_tasks: ../tasks/verifications_set_for_pmm3_client_after_upgrade.yml
+    include_tasks: ../../tasks/verifications_set_for_pmm3_client_after_upgrade.yml
