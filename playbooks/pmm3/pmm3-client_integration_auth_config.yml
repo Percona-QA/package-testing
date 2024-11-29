@@ -66,7 +66,7 @@
 
 ### start PS
   - name: Install and start Percona Server
-    include_tasks: ../tasks/install_add_and_verify_ps.yml
+    include_tasks: ../../tasks/install_add_and_verify_ps.yml
 ## end PS
 
 ### start PSMDB 4.4
