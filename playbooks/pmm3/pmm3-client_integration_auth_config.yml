@@ -81,4 +81,4 @@
 
 ### verifications
   - name: Perform standard verifications set for PMM Client
-    include_tasks: ../tasks/verifications_set_for_pmm3_client.yml
+    include_tasks: ../../tasks/verifications_set_for_pmm3_client.yml
