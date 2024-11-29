@@ -8,12 +8,15 @@
   become: true
   become_method: sudo
   vars:
-    pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
+    pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') | default('127.0.0.1', true)}}"
     pmm_server_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default('admin', true) }}"
-    metrics_mode: "{{ lookup('env', 'METRICS_MODE') }}"
+    test_package: "{{ lookup('env', 'install_package') | default('pmm3-client', true)}}"
+    test_repo: "{{ lookup('env', 'install_repo') }}"
+    metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
-    cmd_admin_list: "pmm-admin list"
-    pmm_auth_password: "pmm-pass"
+    custom_path: "/pmm-client-custom-path"
+    tarball_link: "{{ lookup('env', 'tarball_link') }}"
+    agent_password: "pmm-pass"
 
   tasks:
   - name: Register Instance IP
