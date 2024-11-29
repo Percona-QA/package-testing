@@ -1,0 +1,14 @@
+# This task install Percona Serverver adds it to the pmm client and verifies that metrics hits the server.
+#
+#  - name: some name for the task
+#    include_tasks: ../tasks/install_add_and_verify_ps.yml
+#    loop:
+#      - { enabled_db: enabled_db }
+
+- name:
+    debug:
+      msg: enabled_db
+
+- name:
+    debug:
+      msg: item.enabled_db
