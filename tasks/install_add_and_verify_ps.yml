@@ -1,4 +1,4 @@
-# This task install Percona Serverver adds it to the pmm client and verifies that metrics hits the server.
+# This task install Percona Server adds it to the pmm client and verifies that metrics hits the server.
 
 - name:
   debug:

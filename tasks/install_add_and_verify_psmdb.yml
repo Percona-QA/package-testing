@@ -1,0 +1,22 @@
+# This task install Percona Server for mongodb adds it to the pmm client and verifies that metrics hits the server.
+
+- name:
+  debug:
+    var: enabled_db
+
+- set_fact:
+    mongo_service_name: "mongodb_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+    mongo_socket_service_name: "mongodb_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+
+- name: Install and start Percona Server MongoDB
+  when: '"psmdb-" in enabled_db | join("")'
+  include_tasks: ../tasks/install_and_add_to_pmm_psmdb.yml
+  vars:
+    psmdb_to_test:  "{{ enabled_db | select('match', '^psmdb-*') | join('') }}"
+
+- name: Verify MongoDB Exporter metric endpoint with Auth(including service with socket)
+  when: '"psmdb-" in enabled_db | join("")'
+  include_tasks: ../tasks/verify_pmm3_metric.yml
+  loop:
+    - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up.* 1' }
+    - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up.* 1' }

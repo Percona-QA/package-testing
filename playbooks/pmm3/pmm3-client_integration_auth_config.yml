@@ -69,22 +69,9 @@
     include_tasks: ../../tasks/install_add_and_verify_ps.yml
 ## end PS
 
-### start PSMDB 4.4
-  - name: install and start Percona Server MongoDB 4.4
-    include_tasks: ../../tasks/install_and_add_to_pmm_psmdb_44.yml
-
-  - name: check if Metric End point with Auth works for MongoDB Exporter
-    shell: "{{item}}"
-    with_items:
-      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1 "
-
-  - name: check if Metric End point with Auth works for MongoDB Exporter for service with socket
-    shell: "{{item}}"
-    with_items:
-      - "bash -x /package-testing/scripts/pmm2_check_metric.sh --service_name mongodb_socket_{{ instance_ip }} --metric_name mongodb_up --pmm_server_ip {{pmm_server_address}} --agent_type mongodb_exporter --metric_value 1 "
-
-  - name: remove mongodb service from monitoring which was added via socket
-    command: pmm-admin remove mongodb mongodb_socket_{{ instance_ip }}
+### start PSMDB
+  - name: Install and start Percona Server
+    include_tasks: ../../tasks/install_add_and_verify_psmdb.yml
 ### end PSMDB
 
 ### start pgsql 13
