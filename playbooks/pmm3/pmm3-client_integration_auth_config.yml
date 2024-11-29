@@ -14,7 +14,6 @@
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
-    custom_path: "/pmm-client-custom-path"
     tarball_link: "{{ lookup('env', 'tarball_link') }}"
     agent_password: "pmm-pass"
     pmm_auth_password: "pmm-pass"
