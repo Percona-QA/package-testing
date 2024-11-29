@@ -6,9 +6,9 @@
 #      - { enabled_db: enabled_db }
 
 - name:
-    debug:
-      msg: enabled_db
+  debug:
+    msg: enabled_db
 
 - name:
-    debug:
-      msg: item.enabled_db
+  debug:
+    msg: item.enabled_db
