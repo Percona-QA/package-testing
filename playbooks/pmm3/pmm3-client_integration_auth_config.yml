@@ -79,5 +79,9 @@
 ## end PG
 
 ### verifications
+  - name: Set correct pass for node exporter
+    set_fact:
+      agent_password: "pmm-pass"
+
   - name: Perform standard verifications set for PMM Client
     include_tasks: ../../tasks/verifications_set_for_pmm3_client.yml
