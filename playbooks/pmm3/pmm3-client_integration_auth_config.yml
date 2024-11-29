@@ -29,15 +29,15 @@
       instance_ip: "{{ instance_ip.stdout }}"
 
   - name: Set Integrations list
-    include_tasks: ../../../tasks/pmm3-client_test_enabled_db_arm.yml
+    include_tasks: ../../tasks/pmm3-client_test_enabled_db_arm.yml
     when: ansible_architecture == "aarch64"
 
   - name: Set Integrations list
-    include_tasks: ../../../tasks/pmm3-client_test_enabled_db.yml
+    include_tasks: ../../tasks/pmm3-client_test_enabled_db.yml
     when: ansible_architecture != "aarch64"
 
   - name: include tasks for test env setup
-    include_tasks: ../../../tasks/pmm3_client_test_prepare.yml
+    include_tasks: ../../tasks/pmm3_client_test_prepare.yml
 
   - name: Install PMM client new deb packages
     when: ansible_os_family == "Debian"
@@ -52,7 +52,7 @@
       sudo yum -y install pmm-client
 
   - name: check that PMM client version is correct
-    include_tasks: ../../../tasks/verify_pmm_client_version.yml
+    include_tasks: ../../tasks/verify_pmm_client_version.yml
 
   - name: configure pmm client to connect to server in push/auto Mode
     when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
@@ -71,7 +71,7 @@
 
 ### start PSMDB 4.4
   - name: install and start Percona Server MongoDB 4.4
-    include_tasks: ../../../tasks/install_and_add_to_pmm_psmdb_44.yml
+    include_tasks: ../../tasks/install_and_add_to_pmm_psmdb_44.yml
 
   - name: check if Metric End point with Auth works for MongoDB Exporter
     shell: "{{item}}"
