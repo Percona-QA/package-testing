@@ -107,7 +107,11 @@
   
   - name: Install and start Percona Server PostgreSQL 16
     when: '"pg-16" in enabled_db'
-    include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql_13.yml
+    include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql_16.yml
+
+  - name: Install and start Percona Server PostgreSQL 17
+    when: '"pg-17" in enabled_db'
+    include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql_17.yml
 
   - name: Verify Postgres Exporter metric endpoint with Auth works
     when: '"pg-" in enabled_db | join("")'
