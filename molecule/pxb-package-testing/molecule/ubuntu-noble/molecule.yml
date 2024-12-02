@@ -4,9 +4,9 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: ufocal-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
+  - name: unoble-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
     region: us-west-2
-    image: ami-09dd2e08d601bff67
+    image: ami-0cf2b4e024cdb6960
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.medium
     ssh_user: ubuntu
@@ -24,7 +24,7 @@ provisioner:
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
 scenario:
-  name: ubuntu-focal
+  name: ubuntu-noble
   destroy_sequence:
     - destroy
   clenup_sequence:
