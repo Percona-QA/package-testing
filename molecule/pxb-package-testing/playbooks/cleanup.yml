@@ -3,7 +3,91 @@
   hosts: all
   become: true
   become_method: sudo
+  vars:
+    WORKSPACE_VAR: "{{ lookup('env', 'WORKSPACE_VAR') }}"
   tasks:
+    - name: PRINT WORKSPACE_VAR
+      debug:
+        msg: "WORKSPACE_VAR: {{ WORKSPACE_VAR }}"
+
+    - name: Check if mysqld.log exists
+      stat:
+        path: /var/log/mysqld.log
+      register: mysqld_log
+
+    - name: Check if mysql error log exists
+      stat:
+        path: /var/log/mysql/error.log
+      register: mysql_error_log
+
+    - name: Create a temporary directory for zipping logs
+      file:
+        path: /var/tmp/mysql_logs
+        state: directory
+        mode: '0755'
+      when:
+        - mysqld_log.stat.exists or mysql_error_log.stat.exists
+
+    - name: Copy mysqld.log to temporary directory if it exists
+      shell: cp /var/log/mysqld.log /var/tmp/mysql_logs/mysqld.log
+      when: mysqld_log.stat.exists
+
+    - name: Copy mysql error log to temporary directory if it exists
+      shell: cp /var/log/mysql/error.log /var/tmp/mysql_logs/error.log
+      when: mysql_error_log.stat.exists
+
+    - name: Zip the log files if any exist
+      archive:
+        path: /var/tmp/mysql_logs
+        dest: /var/tmp/mysql_logs.zip
+        format: zip
+      when:
+        - mysqld_log.stat.exists or mysql_error_log.stat.exists
+##
+
+    - name: Get the arch value from /etc/os-release
+      shell: uname -m 
+      register: arch_output
+
+    - name: Replace spaces with dashes in arch_output
+      set_fact:
+        arch_output: "{{ arch_output.stdout | trim }}"
+        
+##
+    - name: Get the PRETTY_NAME value from /etc/os-release
+      shell: |
+        grep '^PRETTY_NAME=' /etc/os-release | cut -d'=' -f2 | tr -d '"'
+      register: pretty_name_output
+
+    - name: Replace spaces with dashes in PRETTY_NAME
+      set_fact:
+        os_id: "{{ pretty_name_output.stdout | replace(' ', '-') | trim }}"
+
+    - name: Debug the arch_output
+      debug:
+        msg: "The arch_output is {{ arch_output }}"
+
+    - name: Debug the OS ID
+      debug:
+        msg: "The OS ID is {{ os_id }}"
+
+    - name: Fetch the logs archive on localhost
+      fetch:
+        src: /var/tmp/mysql_logs.zip
+        dest: "/{{ WORKSPACE_VAR }}/{{ ansible_hostname }}_{{ os_id }}_{{ arch_output }}_mysql_logs.zip"
+        flat: yes
+      become: true
+      
+    - name: Debug the fetch task status on localhost
+      command: ls -l "/{{ WORKSPACE_VAR }}"
+      register: fetch_list  
+      delegate_to: localhost
+
+    - name: Debug the list of files in /{{ WORKSPACE_VAR }} on localhost
+      debug:
+        msg: "Files in /{{ WORKSPACE_VAR }}: {{ fetch_list.stdout_lines }}"
+      delegate_to: localhost
+
     - name: remove Tarball directories
       file:
         path: "{{ paths }}"
