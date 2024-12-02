@@ -9,11 +9,9 @@
       - "{{ (ansible_distribution == 'Debian') | ternary('ps-8.0','') }}"
       - "{{ (ansible_distribution == 'Ubuntu') | ternary('ps-8.0','') }}"
       - "{{ (ansible_os_family == 'RedHat') | ternary('ps-8.0','') }}"
-      - "{{ (ansible_distribution == 'Debian') | ternary('psmdb-70','') }}"
-      - "{{ (ansible_distribution == 'Ubuntu') | ternary('psmdb-70','') }}"
-      - "{{ (ansible_os_family == 'RedHat') | ternary('psmdb-70','') }}"
-      - "{{ (ansible_distribution == 'Debian') | ternary('pg-16','') }}"
-      - "{{ (ansible_distribution == 'Ubuntu') | ternary('pg-16','') }}"
-      - "{{ (ansible_os_family == 'RedHat') | ternary('pg-16','') }}"
-      
-      
+      - "{{ (ansible_distribution == 'Debian') | ternary('psmdb-80','') }}"
+      - "{{ (ansible_distribution == 'Ubuntu') | ternary('psmdb-80','') }}"
+      - "{{ (ansible_os_family == 'RedHat') | ternary('psmdb-80','') }}"
+      - "{{ (ansible_distribution == 'Debian') | ternary('pg-17','') }}"
+      - "{{ (ansible_distribution == 'Ubuntu') | ternary('pg-17','') }}"
+      - "{{ (ansible_os_family == 'RedHat') | ternary('pg-17','') }}"
