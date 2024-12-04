@@ -1,3 +1,4 @@
+
 - job:
     name: test-ps-binary-tarball
     project-type: pipeline
@@ -12,3 +13,12 @@
             wipe-workspace: false
       lightweight-checkout: true
       script-path: binary-tarball-tests/ps/test-ps-binary-tarball.groovy
+      parameters:
+        - choice:
+            name: product_to_test
+            choices:
+                - "PS80"
+                - "PS84"
+                #- "ps_9x_innovation_lts"
+                - "PS_INN_LTS"
+            description: "Product for which the packages will be tested"
