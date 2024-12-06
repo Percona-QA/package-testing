@@ -106,10 +106,17 @@
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - pxb_version_major != "8.3"
 
-  - name: Install mysql deb packages using tarballs ubuntu 23.04
-    command: wget https://cdn.mysql.com/archives/mysql-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu23.04_amd64.deb-bundle.tar
+  - name: Install mysql deb packages using tarballs ubuntu 23.10
+    command: wget https://cdn.mysql.com/archives/mysql-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu23.10_amd64.deb-bundle.tar
     when: 
-      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.04'
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.10'
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - pxb_version_major != "8.3"
+
+  - name: Install mysql deb packages using tarballs ubuntu 24.04
+    command: wget https://cdn.mysql.com/archives/mysql-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu24.04_amd64.deb-bundle.tar
+    when: 
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04'
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - pxb_version_major != "8.3"
 
@@ -134,10 +141,17 @@
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - pxb_version_major != "8.3"
 
-  - name: extract mysql deb packages for ubuntu 23.04
-    command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu23.04_amd64.deb-bundle.tar -C /tmp
+  - name: extract mysql deb packages for ubuntu 23.10
+    command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu23.10_amd64.deb-bundle.tar -C /tmp
     when: 
-      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.04'
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.10'
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - pxb_version_major != "8.3"
+
+  - name: extract mysql deb packages for ubuntu 24.04
+    command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu24.04_amd64.deb-bundle.tar -C /tmp
+    when: 
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04'
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - pxb_version_major != "8.3"
 
@@ -176,18 +190,32 @@
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
       - lookup('env', 'server_to_test') == "ms-80"
 
-  - name: Install mysql deb packages using tarballs ubuntu 23.04
+  - name: Install mysql deb packages using tarballs ubuntu 23.10
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu23.10_amd64.deb-bundle.tar  
     when: 
-      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.04'
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.10'
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
-  - name: Install mysql deb packages using tarballs ubuntu 23.04 MS80
+  - name: Install mysql deb packages using tarballs ubuntu 23.10 MS80
     command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu23.10_amd64.deb-bundle.tar
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.10'
       - lookup('env', 'server_to_test') == "ms-80"
 
+##
+  - name: Install mysql deb packages using tarballs ubuntu 24.04
+    command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu24.04_amd64.deb-bundle.tar  
+    when: 
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04'
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+  - name: Install mysql deb packages using tarballs ubuntu 24.04 MS80
+    command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu24.04_amd64.deb-bundle.tar
+    when: 
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04'
+      - lookup('env', 'server_to_test') == "ms-80"
+
+##
   - name: Install mysql deb packages using tarballs Debian 11
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1debian11_amd64.deb-bundle.tar
     when: 
@@ -224,10 +252,16 @@
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
       - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
 
-  - name: extract mysql deb packages for ubuntu 23.04
-    command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu23.04_amd64.deb-bundle.tar -C /tmp
+  - name: extract mysql deb packages for ubuntu 23.10
+    command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu23.10_amd64.deb-bundle.tar -C /tmp
     when: 
-      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.04'
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.10'
+      - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
+
+  - name: extract mysql deb packages for ubuntu 24.04
+    command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu24.04_amd64.deb-bundle.tar -C /tmp
+    when: 
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04'
       - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
 
   - name: extract mysql deb packages for Debian 11
