@@ -11,7 +11,7 @@
             - 'master'
             wipe-workspace: false
       lightweight-checkout: true
-      script-path: docker-image-tests/ps/Jenkinsfile_test
+      script-path: package-testing/docker-image-tests/ps/Jenkinsfile_test
       parameters:
         - choice:
             name: product_to_test
