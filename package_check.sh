@@ -37,10 +37,16 @@ elif [ $1 = "ps80" ]; then
     release=${PS80_VER#*-}
     revision=${PS80_REV}
   fi
-elif [ $1 = "ps84" ] && [ "$2" = "pro" ]; then
-  version=${PS84_PRO_VER}
-  release=${PS84_PRO_VER#*-}
-  revision=${PS84_PRO_REV}
+elif [ "$1" = "ps84" ]; then
+  if [ "$2" = "pro" ]; then
+    version=${PS84_PRO_VER}
+    release=${PS84_PRO_VER#*-}
+    revision=${PS84_PRO_REV}
+  else
+    version=${PS84_VER}
+    release=${PS84_VER#*-}
+    revision=${PS84_REV}
+  fi
 elif [[ $1 =~ ^ps8[1-9]{1}$ ]]; then
   version=${PS_INN_LTS_VER}
   release=${PS_INN_LTS_VER#*-}
