@@ -1,5 +1,5 @@
 - job:
-    name: test-ps-docker-image
+    name: test-ps-docker-image-test
     project-type: pipeline
     description: |
         Do not edit this job through the web!

@@ -1,5 +1,5 @@
 - job:
-    name: test-ps-docker-image
+    name: test-ps-docker-image-arm-test
     project-type: pipeline
     description: |
         Do not edit this job through the web!
@@ -11,7 +11,7 @@
             - 'master'
             wipe-workspace: false
       lightweight-checkout: true
-      script-path: docker-image-tests/ps/Jenkinsfile_test
+      script-path: docker-image-tests/ps-arm/Jenkinsfile-arm-test
       parameters:
         - choice:
             name: product_to_test
@@ -20,5 +20,4 @@
                 - "PS84"
                 - "PS_INN_LTS"
             description: "Product for which the packages will be tested"
-
-
+        
