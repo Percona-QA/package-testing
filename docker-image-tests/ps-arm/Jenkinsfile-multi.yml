@@ -11,7 +11,7 @@
             - 'master'
             wipe-workspace: false
       lightweight-checkout: true
-      script-path: docker-image-tests/ps-arm/Jenkinsfile-multi-test
+      script-path: docker-image-tests/ps-arm/Jenkinsfile-multi
       parameters:
         - choice:
             name: product_to_test
@@ -20,4 +20,5 @@
                 - "PS84"
                 - "PS_INN_LTS"
             description: "Product for which the packages will be tested"
+
         
