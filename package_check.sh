@@ -41,7 +41,7 @@ elif [ $1 = "ps84" ] && [ "$2" = "pro" ]; then
   version=${PS84_PRO_VER}
   release=${PS84_PRO_VER#*-}
   revision=${PS84_PRO_REV}
-elif [[ $1 =~ ^ps8[1-9]{1}$ ]]; then
+elif [[ $1 =~ ^ps9[1-9]{1}$ ]]; then
   version=${PS_INN_LTS_VER}
   release=${PS_INN_LTS_VER#*-}
   revision=${PS_INN_LTS_REV}
@@ -72,7 +72,10 @@ elif [ $1 = "pxb24" ]; then
 elif [ $1 = "pxb80" ]; then
   version=${PXB80_VER}
   pkg_version=${PXB80_PKG_VER}
-elif [[ $1 =~ ^pxb8[1-9]{1}$ ]]; then
+elif [ $1 = "pxb84" ]; then
+  version=${PXB84_VER}
+  pkg_version=${PXB84_PKG_VER}
+elif [[ $1 =~ ^pxb9[1-9]{1}$ ]]; then
   version=${PXB_INN_LTS_VER}
   pkg_version=${PXB_INN_LTS_PKG_VER}
 elif [ $1 = "psmdb30" ]; then
@@ -215,7 +218,7 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
     if [ ${product} = "pxc56" ]; then
       rpm_opt_package=""
       rpm_num_pkgs="11"
-	  garbd_maj_version=3
+      garbd_maj_version=3
     elif [ ${product} = "pxc57" ]; then
       if [ ${centos_maj_version} == "7" ]; then
         rpm_num_pkgs="10"
@@ -224,7 +227,7 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
         rpm_num_pkgs="9"
         rpm_opt_package=""
       fi      
-	  garbd_maj_version=$(echo ${product} | sed 's/^[a-z]*//')
+      garbd_maj_version=$(echo ${product} | sed 's/^[a-z]*//')
     echo "RPM Num Packages: $rpm_num_pkgs and $rpm_opt_package"
     fi
 
@@ -281,11 +284,13 @@ elif [ ${product} = "pmm" ]; then
   echo "Package check for PMM is not implemented!"
   exit 1
 
-elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; then
+elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" -o ${product} = "pxb84" ]; then
   if [ ${product} = "pxb24" ]; then
     extra_version="-24"
   elif [ ${product} = "pxb80" ]; then
     extra_version="-80"
+  elif [ ${product} = "pxb84" ]; then
+    extra_version="-84"
   else
     extra_version=""
   fi
