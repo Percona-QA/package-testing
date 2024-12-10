@@ -162,13 +162,13 @@
   - name: Print the version of the installed Percona XtraBackup
     shell: |
       {
-        echo "XTRABACKUP VERSION is ";
+        echo " xtrabackup --version is ";
         xtrabackup --version || echo "FAILED: xtrabackup --version";
-        echo "xbstream VERSION is ";
+        echo "xbstream --version  is ";
         xbstream --version || echo "FAILED: xbstream --version";
-        echo "xbcloud VERSION is ";
+        echo "xbcloud --version  is ";
         xbcloud --version || echo "FAILED: xbcloud --version";
-        echo "xbcrypt VERSION is ";
+        echo "xbcrypt --version  is ";
         xbcrypt --version || echo "FAILED: xbcrypt --version";
       }
     register: version_output
@@ -180,23 +180,20 @@
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb84
+    when:
+      - lookup('env', 'REPO_TYPE') != "PRO"
 
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb84
     when:
       - lookup('env', 'REPO_TYPE') != "PRO"
 
-  - name: check that Percona XtraBackup version is correct
-    command: /package-testing/version_check.sh pxb84
-    when:
-      - lookup('env', 'REPO_TYPE') != "PRO"
-
-  - name: check that Percona XtraBackup package versions are correct PRO
-    command: /package-testing/package_check.sh pxb84
+  - name: check that Percona XtraBackup package_check.sh is correct PRO
+    command: /package-testing/package_check.sh pxb84 pro
     when:
       - lookup('env', 'REPO_TYPE') == "PRO"
 
-  - name: check that Percona XtraBackup version is correct
+  - name: check that Percona XtraBackup version_check.sh is correct PRO
     command: /package-testing/version_check.sh pxb84 pro
     when:
       - lookup('env', 'REPO_TYPE') == "PRO"

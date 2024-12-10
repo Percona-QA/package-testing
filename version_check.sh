@@ -258,16 +258,16 @@ elif [[ "${product}" = "pxb24" ]] || [[ ${product} =~ ^pxb8[0-9]{1}$ ]]; then
     done
 
     if [ "${pro}" = 'yes' ]; then
-      if [ "$(xtrabackup --version | grep -c 'Pro')" = 1 ]; then
+      if [ "$(xtrabackup --version 2>&1 | grep -c 'pro')" = 1 ]; then
         echo "@@VERSION COMMENT is correct with Pro" >> "${log}"
       else
-        echo "@@VERSION_COMMENT is incorrect. Pro is missing. Server comment is: $(xtrabackup --version) ."
+        echo "@@VERSION_COMMENT is incorrect. Pro is missing. Server comment is: $(xtrabackup --version 2>&1) ."
         exit 1
       fi
-      if [ "$(xtrabackup --version| grep -c 'Pro')"  = 1 ]; then
-        echo "xtrabackup --version is correct with Pro" >> "${log}"
+      if [ "$(xtrabackup --version 2>&1 | grep -c 'pro')"  = 1 ]; then
+        echo "xtrabackup --version 2>&1 is correct with Pro" >> "${log}"
       else
-        echo "xtrabackup --version is incorrect. Pro is missing. xtrabackup --version: $(xtrabackup --version) ."
+        echo "xtrabackup --version is incorrect. Pro is missing. xtrabackup --version 2>&1: $(xtrabackup --version 2>&1) ."
         exit 1
       fi
     fi
