@@ -75,6 +75,9 @@ elif [ $1 = "pxb80" ]; then
 elif [ $1 = "pxb84" ]; then
   version=${PXB84_VER}
   pkg_version=${PXB84_PKG_VER}
+elif [ $1 = "pxb84" ] && [ "$2" = "pro" ]; then
+  version=${PXB84_PRO_VER}
+  pkg_version=${PXB84_PRO_PKG_VER}
 elif [[ $1 =~ ^pxb9[1-9]{1}$ ]]; then
   version=${PXB_INN_LTS_VER}
   pkg_version=${PXB_INN_LTS_PKG_VER}
@@ -295,8 +298,21 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" -o $
     extra_version=""
   fi
   if [ -f /etc/redhat-release ] || [ -f /etc/system-release ] ; then
-    if [ "$(rpm -qa | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" == "3" ]; then
+    if [ "$(rpm -qa | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" -ge "3" ]; then
       echo "all packages are installed"
+    else
+      echo "all packages are not installed"
+    fi
+###
+    if [ "$2" = "pro" ]; then
+      for package in percona-xtrabackup-pro${extra_version} percona-xtrabackup-test-pro${extra_version} percona-xtrabackup-pro${extra_version}-debuginfo; do
+        if [ "$(rpm -qa | grep -c ${package}-${version}-${pkg_version})" -gt 0 ]; then
+          echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
+        else
+          echo "WARNING: ${package}-${version}-${pkg_version} is not installed"
+          exit 1
+        fi
+      done
     else
       for package in percona-xtrabackup${extra_version} percona-xtrabackup-test${extra_version} percona-xtrabackup${extra_version}-debuginfo; do
         if [ "$(rpm -qa | grep -c ${package}-${version}-${pkg_version})" -gt 0 ]; then
@@ -307,30 +323,34 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" -o $
         fi
       done
     fi
+###
   else
-    if [ "$(dpkg -l | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" == "3" ]; then
+    if [ "$(dpkg -l | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" -ge "3" ]; then
       echo "all packages are installed"
     else
-      if [ "$2" = "pro" ]; then
-        for package in percona-xtrabackup-dbg-pro${extra_version} percona-xtrabackup-test-pro${extra_version} percona-xtrabackup-pro${extra_version}; do
-          if [ "$(dpkg -l | grep -c ${package})" -gt 0 ] && [ "$dpkg -l | grep ${package} | awk '{$print $3}' == ${version}-${pkg_version}.$(lsb_release -sc)" ] ; then
-            echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
-          else
-            echo "WARNING: ${package}-${version}-${pkg_version} is not installed"
-            exit 1
-          fi
-        done
-      else
-        for package in percona-xtrabackup-dbg${extra_version} percona-xtrabackup-test${extra_version} percona-xtrabackup${extra_version}; do
-          if [ "$(dpkg -l | grep -c ${package})" -gt 0 ] && [ "$dpkg -l | grep ${package} | awk '{$print $3}' == ${version}-${pkg_version}.$(lsb_release -sc)" ] ; then
-            echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
-          else
-            echo "WARNING: ${package}-${version}-${pkg_version} is not installed"
-            exit 1
-          fi
-        done
-      fi
+      echo "all packages are not installed"
     fi
+###
+    if [ "$2" = "pro" ]; then
+      for package in percona-xtrabackup-dbg-pro${extra_version} percona-xtrabackup-test-pro${extra_version} percona-xtrabackup-pro${extra_version}; do
+        if [ "$(dpkg -l | grep -c ${package})" -gt 0 ] && [ "$dpkg -l | grep ${package} | awk '{$print $3}' == ${version}-${pkg_version}.$(lsb_release -sc)" ] ; then
+          echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
+        else
+          echo "WARNING: ${package}-${version}-${pkg_version} is not installed"
+          exit 1
+        fi
+      done
+    else
+      for package in percona-xtrabackup-dbg${extra_version} percona-xtrabackup-test${extra_version} percona-xtrabackup${extra_version}; do
+        if [ "$(dpkg -l | grep -c ${package})" -gt 0 ] && [ "$dpkg -l | grep ${package} | awk '{$print $3}' == ${version}-${pkg_version}.$(lsb_release -sc)" ] ; then
+          echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
+        else
+          echo "WARNING: ${package}-${version}-${pkg_version} is not installed"
+          exit 1
+        fi
+      done
+    fi
+###
   fi
 
 elif [ "${product}" = "psmdb30" -o "${product}" = "psmdb32" -o "${product}" = "psmdb34" -o "${product}" = "psmdb36" -o "${product}" = "psmdb40" ]; then
