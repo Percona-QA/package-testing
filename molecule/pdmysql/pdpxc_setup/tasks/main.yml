@@ -17,7 +17,7 @@
   when: not major_repo
 
 - name: enable the PDMYSQL repo pdpxc-{{ version }}
-  command: percona-release enable -y pdpxc-{{ version }}
+  command: percona-release enable pdpxc-{{ version }} release
   vars:
     version: "{{ '84-lts' if '8.4' in lookup('env', 'VERSION') else '8.0' if '8.0.' in lookup('env', 'VERSION') else '' }}"
   when: major_repo
