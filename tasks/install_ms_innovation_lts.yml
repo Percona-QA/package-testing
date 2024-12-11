@@ -188,11 +188,14 @@
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
       - lookup('env', 'server_to_test') == "ms-80"
 
+
+## 8.4 not supported for Focal 20.04
   - name: Install mysql deb packages using tarballs ubuntu 20.04 MS84
     command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu20.04_amd64.deb-bundle.tar
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
       - lookup('env', 'server_to_test') == "ms-84"
+
 
   - name: Install mysql deb packages using tarballs ubuntu 22.04 INNOVATION_LTS
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar
