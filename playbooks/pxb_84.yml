@@ -127,7 +127,7 @@
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
   - name: PRINT INSTALLED XTRABACKUP version DEBIAN
-    shell: apt list --installed | grep percona-xtrabackup
+    shell: apt list --installed  2>&1 | grep percona-xtrabackup
     when: 
       - ansible_os_family == "Debian"
     register: xtrabackup_version_print
