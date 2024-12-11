@@ -324,6 +324,20 @@
       - ansible_os_family == "Debian"
       - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
 
+  - name: List the installed mysql packages (DEB)
+    shell: apt list --installed | grep mysql
+    when: 
+      - ansible_os_family == "Debian"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
+    register: dpkg_list
+
+  - name: Debug - Show installed MySQL packages (DEB)
+    debug:
+      msg: "Installed MySQL packages are '{{ dpkg_list.stdout }}'"
+    when: 
+      - ansible_os_family == "Debian"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
+
   - name: Enable Innovation LTS repo for RHEL
     shell: yum-config-manager --disable mysql80-community && yum-config-manager --enable mysql-innovation-community
     when: 
