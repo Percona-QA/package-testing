@@ -92,6 +92,12 @@ class GardbNode:
             else:
                 self.repo_name = 'pxc-80 testing'
             self.image = 'percona-xtradb-cluster-garbd'
+        elif pxc_version_major == "8.4":
+            if docker_acc == 'percona':
+                self.repo_name = 'pxc-84-lts'
+            else:
+                self.repo_name = 'pxc-84-lts testing'
+            self.image = 'percona-xtradb-cluster-garbd'
         elif re.match(r'^8\.[1-9]$', pxc_version_major):
             if docker_acc == 'percona':
                 self.repo_name = 'pxc-8x-innovation'
