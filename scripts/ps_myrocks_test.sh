@@ -3,7 +3,7 @@
 LOGFILE=""
 
 # Check for RocksDB log file
-if [ -f /var/lib/mysql/.rocksdb/LOG" ]; then
+if [ -f /var/lib/mysql/.rocksdb/LOG ]; then
   LOGFILE="/var/lib/mysql/.rocksdb/LOG"
 else
   echo "Can't find RocksDB LOG file!"
