@@ -249,7 +249,30 @@
       - percona-server-shared{{ pro_suf }}-compat
       - percona-server-client{{ pro_suf }}
       - percona-mysql-router{{ pro_suf }}
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when:
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+      - ansible_architecture != "aarch64" or ansible_architecture != "arm64"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on CentOS
+    yum:
+      name: "{{ packages }}"
+      state: latest
+      allowerasing: "{{ allowerasing_value | default (false) }}"
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+      - percona-server-test{{ pro_suf }}
+      - percona-server{{ pro_suf }}-debuginfo
+      - percona-server-devel{{ pro_suf }}
+      - percona-server-rocksdb{{ pro_suf }}
+      - percona-server-shared{{ pro_suf }}
+      - percona-server-client{{ pro_suf }}
+      - percona-mysql-router{{ pro_suf }}
+    when:
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+      - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
@@ -304,7 +327,9 @@
     vars:
       packages:
       - percona-toolkit
-    when: ansible_os_family == "RedHat"
+    when:
+      -  ansible_os_family == "RedHat"
+      -  ansible_distribution_major_version != "9"
 
   - name: upgrade Percona release to new rpm packages
     yum:
