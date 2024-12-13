@@ -321,16 +321,16 @@
       - percona-xtrabackup-dbg-84
     when: ansible_os_family == "Debian"
 
-  - name: upgrade Percona Toolkit to new rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-toolkit
-    when:
-      -  ansible_os_family == "RedHat"
-      -  ansible_distribution_major_version != "9"
+#  - name: upgrade Percona Toolkit to new rpm packages
+#    yum:
+#      name: "{{ packages }}"
+#      state: latest
+#    vars:
+#      packages:
+#      - percona-toolkit
+#    when:
+#      -  ansible_os_family == "RedHat"
+#      -  ansible_distribution_major_version != "9"
 
   - name: upgrade Percona release to new rpm packages
     yum:
