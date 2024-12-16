@@ -41,7 +41,17 @@
     when: ansible_os_family == "RedHat"
 
   - name: enable main repo
-    command: percona-release enable-only original release
+    command: percona-release enable original release
+
+  - name: Enable PT MAIN repo
+    command: percona-release enable pt release
+    when:
+      - lookup('env', 'pro_test') != "yes"
+
+  - name: Enable PXB 8 Main repo
+    command: percona-release enable pxb-80 release
+    when:
+      - lookup('env', 'pro_test') != "yes"
 
   - name: clean and update yum cache
     shell: |

@@ -42,8 +42,15 @@
   - name: enable the PS-80 testing repo
     command: percona-release enable-only ps-80 testing
 
-  - name: enable the pxb-80 release repo
-    command: percona-release enable pxb-80 release
+  - name: Enable PT Testing repo
+    command: percona-release enable pt testing
+    when:
+      - lookup('env', 'pro_test') != "yes"
+
+  - name: Enable PXB 8 Main repo
+    command: percona-release enable pxb-80 testing
+    when:
+      - lookup('env', 'pro_test') != "yes"
 
   - name: Clean YUM cache
     command: yum clean all
