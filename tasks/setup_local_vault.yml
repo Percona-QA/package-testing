@@ -29,13 +29,13 @@
 
   - name: Download get_download_link.sh script
     get_url:
-      url: https://raw.githubusercontent.com/Percona-QA/percona-qa/master/get_download_link.sh
+      url: https://raw.githubusercontent.com/kaushikpuneet07/percona-qa/fix-vault/get_download_link.sh
       dest: /package-testing/scripts/get_download_link.sh
       mode: 'a+rx'
 
   - name: Download vault_test_setup.sh script
     get_url:
-      url: https://raw.githubusercontent.com/Percona-QA/percona-qa/master/vault_test_setup.sh
+      url: https://raw.githubusercontent.com/kaushikpuneet07/percona-qa/fix-vault/vault_test_setup.sh
       dest: /package-testing/scripts/vault_test_setup.sh
       mode: 'a+rx'
 
