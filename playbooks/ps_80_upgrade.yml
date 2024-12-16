@@ -79,9 +79,6 @@
     #    include_tasks: ../tasks/install_sysbench.yml
     #    when: lookup('env', 'install_repo') != "experimental"
 
-  - name: enable the Tools release repo
-    command: percona-release enable tools release
-
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
     when: lookup('env', 'install_repo') != "experimental"
@@ -264,9 +261,6 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: enable the Tools release repo
-    command: percona-release enable tools release
 
   - name: upgrade Percona Toolkit to new deb packages
     apt:
