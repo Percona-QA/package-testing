@@ -48,11 +48,6 @@
     when: 
       - lookup('env', 'pro_test') != "yes"
 
-  - name: include tasks for enabling PS 8 main repo
-    include_tasks: ../tasks/enable_ps8_main_repo.yml
-    when: 
-      - lookup('env', 'pro_test') != "yes"
-
   - name: include tasks for selecting PS 8 repos for PRO update tests
     include_tasks: ../tasks/select_repo_ps80_pro_update.yml
     when: 
