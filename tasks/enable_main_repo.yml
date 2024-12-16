@@ -1,4 +1,4 @@
-  - name: include playbook for removing Percona repo
+- name: include playbook for removing Percona repo
     include_tasks: remove_percona_repository.yml
 
   - name: disable the mysql module on RHEL/CentOS 8
@@ -41,17 +41,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: enable main repo
-    command: percona-release enable original release
-
-  - name: Enable PT MAIN repo
-    command: percona-release enable pt release
-    when:
-      - lookup('env', 'pro_test') != "yes"
-
-  - name: Enable PXB 8 Main repo
-    command: percona-release enable pxb-80 release
-    when:
-      - lookup('env', 'pro_test') != "yes"
+    command: percona-release enable-only original release
 
   - name: clean and update yum cache
     shell: |
