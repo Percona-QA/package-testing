@@ -19,8 +19,8 @@
   - name: enable the PXB release repo
     command: percona-release enable-only pxb-80 release
 
-  - name: enable the tools testing repo
-    command: percona-release enable tools release
+#  - name: enable the tools testing repo
+#    command: percona-release enable tools release
 
   - name: clean and update yum cache
     shell: |
