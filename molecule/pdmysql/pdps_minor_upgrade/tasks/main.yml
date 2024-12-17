@@ -202,7 +202,7 @@
     command: percona-release enable pdps-{{ pdmysql_version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'TO_REPO') }}"
-      pdmysql_version: "{{ lookup('env', 'TO_VERSION').split('-')[0] }}"
+      pdmysql_version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
 
 
 #  - name: install Percona Toolkit new deb packages
