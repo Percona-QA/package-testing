@@ -8,7 +8,7 @@ platforms:
     region: us-west-2
     image: ami-0ee8244746ec5d6d4
     vpc_subnet_id: subnet-03136d8c244f56036
-    instance_type: t2.micro
+    instance_type: t2.medium
     ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
@@ -18,8 +18,8 @@ provisioner:
   name: ansible
   log: True
   playbooks:
-    create: ../../playbooks/create.yml
-    destroy: ../../playbooks/destroy.yml
+    create: ../../playbooks/create_noble.yml
+    destroy: ../../playbooks/destroy_noble.yml
     prepare: ../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml

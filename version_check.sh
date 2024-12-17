@@ -90,8 +90,11 @@ elif [ "$1" = "pxb80" ]; then
 elif [ "$1" = "pxb81" ]; then
   version=${PXB81_VER}
 elif [[ $1 = "pxb84" ]]; then
-  version=${PXB82_VER}
-elif [[ $1 =~ ^pxb8([2-35-9])$ ]]; then
+  version=${PXB84_VER}
+elif [[ $1 = "pxb84" ]]; then
+  version=${PXB84_PRO_VER}
+  pkg_version=${PXB84_PRO_PKG_VER}
+elif [[ $1 =~ ^pxb9([2-35-9])$ ]]; then
   version=${PXB_INN_LTS_VER}
 elif [ "$1" = "pmm" ]; then
   version=${PMM_VER}
@@ -253,6 +256,22 @@ elif [[ "${product}" = "pxb24" ]] || [[ ${product} =~ ^pxb8[0-9]{1}$ ]]; then
             echo "${binary} version is correctly displayed as: ${version}" >> "${log}"
         fi
     done
+
+    if [ "${pro}" = 'yes' ]; then
+      if [ "$(xtrabackup --version 2>&1 | grep -c 'pro')" = 1 ]; then
+        echo "@@VERSION COMMENT is correct with Pro" >> "${log}"
+      else
+        echo "@@VERSION_COMMENT is incorrect. Pro is missing. Server comment is: $(xtrabackup --version 2>&1) ."
+        exit 1
+      fi
+      if [ "$(xtrabackup --version 2>&1 | grep -c 'pro')"  = 1 ]; then
+        echo "xtrabackup --version 2>&1 is correct with Pro" >> "${log}"
+      else
+        echo "xtrabackup --version is incorrect. Pro is missing. xtrabackup --version 2>&1: $(xtrabackup --version 2>&1) ."
+        exit 1
+      fi
+    fi
+
 
 elif [ ${product} = "proxysql" -o ${product} = "proxysql2" ]; then
   # Define binaries lists depending on product.
