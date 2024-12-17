@@ -32,8 +32,8 @@ pipeline {
                 ).trim()
                     
     
-            env.PS_VERSION = VERSION
-            env.PS_REVISION = REVISION
+            env.PS_VERSION = "${VERSION}.1-aarch64"
+            env.PS_REVISION = "${REVISION}"
 
             echo "PS_VERSION fetched: ${env.PS_VERSION}"
             echo "PS_REVISION fetched: ${env.PS_REVISION}"
@@ -69,7 +69,7 @@ pipeline {
               sudo tar zxvf trivy_\${TRIVY_VERSION}_Linux-64bit.tar.gz -C /usr/local/bin/
               wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/junit.tpl
               /usr/local/bin/trivy -q image --format template --template @junit.tpl  -o trivy-hight-junit.xml \
-              --timeout 10m0s --ignore-unfixed --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_ACC}/percona-server:${PS_VERSION}.1-aarch64
+              --timeout 10m0s --ignore-unfixed --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_ACC}/percona-server:${PS_VERSION}
             """
          } //end steps
          post {
