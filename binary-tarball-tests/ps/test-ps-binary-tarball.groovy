@@ -1,13 +1,64 @@
+
 pipeline {
     agent {
         label 'docker'
     }
+    environment {
+        PRODUCT_TO_TEST = "${params.PRODUCT_TO_TEST}"
+    }
     parameters {
-        string(name: 'PS_VERSION', defaultValue: '8.0.37-29', description: 'PS full version')
-        string(name: 'PS_REVISION', defaultValue: 'e3b0a41f', description: 'PS revision')
-        booleanParam(defaultValue: false, name: 'BUILD_TYPE_MINIMAL')
+        choice(
+            choices: ['PS80', 'PS84', 'PS_INN_LTS'],
+            description: 'Choose the product version to test',
+            name: 'PRODUCT_TO_TEST'
+        )
+        booleanParam(
+            defaultValue: false, 
+            name: 'BUILD_TYPE_MINIMAL'
+        )
     }
     stages {
+        stage('SET PS_VERSION and PS_REVISION') {
+            steps {
+                script {
+                    sh '''
+                        rm -rf /package-testing
+                        rm -f master.zip
+                        wget https://github.com/Percona-QA/package-testing/archive/master.zip
+                        unzip master.zip
+                        rm -f master.zip
+                        mv "package-testing-master" package-testing
+                    '''
+                    
+                    def VERSION = sh(
+                        script: '''grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
+                        returnStdout: true
+                        ).trim()
+
+                    def REVISION = sh(
+                        script: ''' grep ${PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
+                        returnStdout: true
+                        ).trim()
+                    
+    
+                    env.PS_VERSION = VERSION
+                    env.PS_REVISION = REVISION
+
+                    echo "PS_VERSION fetched: ${env.PS_VERSION}"
+                    echo "PS_REVISION fetched: ${env.PS_REVISION}"
+
+                }
+            }
+        }
+        stage('Set environmental variable'){
+            steps{
+                 script {
+                    // Now, you can access these global environment variables
+                    echo "Using PS_VERSION: ${env.PS_VERSION}"
+                    echo "Using PS_REVISION: ${env.PS_REVISION}"
+                }
+            }
+        }
         stage('Binary tarball test') {
             parallel {
                 stage('Ubuntu Noble') {

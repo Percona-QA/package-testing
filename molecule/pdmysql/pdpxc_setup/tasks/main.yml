@@ -16,8 +16,9 @@
     version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
   when: not major_repo
 
+#Till setup command is fixed  
 - name: enable the PDMYSQL repo pdpxc-{{ version }}
-  command: percona-release setup -y pdpxc-{{ version }}
+  command: percona-release enable pdpxc-{{ version }} release
   vars:
     version: "{{ '84-lts' if '8.4' in lookup('env', 'VERSION') else '8.0' if '8.0.' in lookup('env', 'VERSION') else '' }}"
   when: major_repo
@@ -145,8 +146,10 @@
   vars:
     version: "{{ lookup('env', 'VERSION').split('.')[0] + lookup('env', 'VERSION').split('.')[1] }}"
 
-- name: install Percona Toolkit new deb packages
+- name: install Percona Toolkit packages
   include_tasks: ../../../tasks/install_pt.yml
+  when:
+  - lookup('env', 'VERSION').split('.')[0:2] | join('.') == '8.0'
 
 - name: install proxysql new deb packages
   apt:
