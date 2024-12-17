@@ -138,10 +138,10 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip "https://github.com/Percona-QA/package-testing/archive/pdps-84-lts-mods-1.zip"
+    - wget --no-check-certificate -O master.zip "https://github.com/Percona-QA/package-testing/archive/master.zip"
     - unzip master.zip
     - rm -f master.zip
-    - mv "package-testing-pdps-84-lts-mods-1" /package-testing
+    - mv "package-testing-master" /package-testing
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
