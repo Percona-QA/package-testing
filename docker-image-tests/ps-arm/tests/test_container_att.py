@@ -7,6 +7,7 @@ from settings import *
 
 
 container_name = 'ps-docker-test-inspect' + docker_image
+container_name = container_name.replace("/", "-").replace(".", "-").replace(":", "-")
 
 @pytest.fixture(scope='module')
 def inspect_data():
