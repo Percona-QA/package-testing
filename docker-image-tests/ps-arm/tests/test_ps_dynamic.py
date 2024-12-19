@@ -6,7 +6,7 @@ import time
 from settings import *
 
 
-container_name = 'ps-docker-test-dynamic'
+container_name = 'ps-docker-test-dynamic' + docker_image
 
 @pytest.fixture(scope='module')
 def host():

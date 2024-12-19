@@ -6,7 +6,7 @@ import json
 from settings import *
 
 
-container_name = 'ps-docker-test-inspect'
+container_name = 'ps-docker-test-inspect' + docker_image
 
 @pytest.fixture(scope='module')
 def inspect_data():
