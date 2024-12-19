@@ -8,7 +8,7 @@
         - git:
             url: https://github.com/Percona-QA/package-testing.git
             branches:
-            - 'master'
+            - 'ps-pt-docker-fix'
             wipe-workspace: false
       lightweight-checkout: true
       script-path: docker-image-tests/ps-arm/Jenkinsfile-arm 
