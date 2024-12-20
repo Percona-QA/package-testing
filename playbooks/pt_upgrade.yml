@@ -1,8 +1,8 @@
 ---
 # This playbook does following:
-#   enables Percona main tools repository
+#   enables Percona main pt repository
 #   installs Percona-Toolkit
-#   enables Percona testing or experimental tools repository
+#   enables Percona testing or experimental pt repository
 #   updates Percona-Toolkit to the latest version
 
 - hosts: all
@@ -18,7 +18,7 @@
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_only_repo_for_pt.yml
     vars:
-      repo_name: tools
+      repo_name: pt
       repo_type: release
 
   - name: include tasks for pt installation
@@ -27,14 +27,14 @@
   - name: include tasks for enabling testing repo
     include_tasks: ../tasks/enable_only_repo_for_pt.yml
     vars:
-      repo_name: tools
+      repo_name: pt
       repo_type: testing
     when: lookup('env', 'install_repo') != "experimental"
 
   - name: include tasks for enabling experimental repo
     include_tasks: ../tasks/enable_only_repo_for_pt.yml
     vars:
-      repo_name: tools
+      repo_name: pt
       repo_type: experimental
     when: lookup('env', 'install_repo') == "experimental"
 
