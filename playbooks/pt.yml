@@ -22,6 +22,5 @@
       repo_name: "{{ repo }}"
     loop:
       - pt
-      - original
     loop_control:
       loop_var: repo
