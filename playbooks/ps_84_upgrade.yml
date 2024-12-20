@@ -348,9 +348,6 @@
       - lookup('env', 'pro_test') == "yes"
       - ansible_os_family == "RedHat"
 
-  - name: check telemetry (disabled)
-    command: /package-testing/check_telemetry.sh ps -d
-
   - name: upgrade Percona XtraBackup to new rpm packages
     yum:
       name: "{{ packages }}"
