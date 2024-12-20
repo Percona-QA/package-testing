@@ -1,6 +1,6 @@
 ---
 # This playbook does following:
-#   enables Percona tools, pt, original repository
+#   enables Percona pt, original repository
 #   installs latest version of Percona-Toolkit (pt)
 
 - hosts: all
@@ -16,12 +16,11 @@
     include_tasks: ../tasks/test_prep.yml
 
 # Run task in loop that installs pt from {{ repo_name }} repo and then remove pt
-  - name: include tasks to install pt from [pt,tools, original] repos
+  - name: include tasks to install pt from [pt, original] repos
     include_tasks: ../tasks/enable_pt_repos_and_install.yml
     vars:
       repo_name: "{{ repo }}"
     loop:
-      - tools
       - pt
       - original
     loop_control:
