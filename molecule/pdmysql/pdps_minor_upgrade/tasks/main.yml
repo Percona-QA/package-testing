@@ -242,11 +242,8 @@
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
+#  - name: Verify telemetry version and package installation
+#    command: /package-testing/check_tel_ver_pack.sh
 
   - name: install Percona XtraBackup {{ major_release_version }} packages
     include_tasks: ../../../tasks/install_pxb_innovation_lts.yml

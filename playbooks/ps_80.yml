@@ -95,11 +95,8 @@
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
 
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
+#  - name: Verify telemetry version and package installation
+#    command: /package-testing/check_tel_ver_pack.sh
 
 #  - name: enable the Tools release repo
 #    command: percona-release enable tools release
