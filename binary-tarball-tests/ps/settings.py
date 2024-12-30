@@ -33,7 +33,8 @@ def set_pro_fips_vars():
     """
     source_environment_file()
     pro = True if os.getenv('PRO') == "yes" else False
-    fips_supported = os.getenv('FIPS_SUPPORTED') in {"yes", "True"}
+    fips_supported = True if os.getenv('PRO') == "yes" else False    
+    #fips_supported = os.getenv('FIPS_SUPPORTED') in {"yes", "True"}
     debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
     ps_revision = os.getenv('PS_REVISION')
     ps_version = os.getenv('PS_VERSION')
