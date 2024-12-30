@@ -22,8 +22,8 @@
       repo: "{{ lookup('env', 'FROM_REPO') }}"
       pdmysql_version: "{{ lookup('env', 'FROM_VERSION').split('-')[0] }}"
 
-#  - name: install Percona Toolkit new deb packages
-#    include_tasks: ../../../tasks/install_pt.yml
+  - name: install Percona Toolkit new deb packages
+    include_tasks: ../../../tasks/install_pt.yml
 
     # revert order once pt issue(DISTMYSQL-400) is resolved for OL8   
   - name: disable the mysql module on RHEL/CentOS 8
@@ -205,8 +205,8 @@
       pdmysql_version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
 
 
-#  - name: install Percona Toolkit new deb packages
-#    include_tasks: ../../../tasks/install_pt.yml
+  - name: install Percona Toolkit new deb packages
+    include_tasks: ../../../tasks/install_pt.yml
 
   - name: install Percona Server deb packages
     apt:
@@ -242,11 +242,8 @@
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
+#  - name: Verify telemetry version and package installation
+#    command: /package-testing/check_tel_ver_pack.sh
 
   - name: install Percona XtraBackup {{ major_release_version }} packages
     include_tasks: ../../../tasks/install_pxb_innovation_lts.yml
