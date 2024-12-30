@@ -230,8 +230,8 @@
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
 
-#  - name: install plugins, import world database
-#    command: /package-testing/plugins_test_80.sh ps
+  - name: install plugins, import world database
+    command: /package-testing/plugins_test_80.sh ps
 
   - name: check the clone and data masking plugins
     command: /package-testing/scripts/ps_clone_dm_plugin_test.sh
