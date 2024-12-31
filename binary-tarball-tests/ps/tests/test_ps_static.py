@@ -23,7 +23,7 @@ def test_binaries_version(host,pro_fips_vars):
     ps_version_percona = pro_fips_vars['ps_version_percona']
     base_dir_debug = base_dir + debug
     
-    ps_revision_pro = ps_revision + '-pro'
+    ps_revision_pro = ps_revision
     
     if ps_version_major in ['5.7', '5.6']:
         # Older versions without Pro support
