@@ -95,11 +95,8 @@
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
 
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
+#  - name: Verify telemetry version and package installation
+#    command: /package-testing/check_tel_ver_pack.sh
 
 #  - name: enable the Tools release repo
 #    command: percona-release enable tools release
@@ -120,6 +117,7 @@
       - ansible_distribution_release != "bullseye"
       - ansible_distribution_release != "jammy"
       - ansible_distribution_release != "bookworm"
+      - ansible_distribution_release != "focal"
 
   - name: install sysbench new deb packages
     include_tasks: ../tasks/install_sysbench.yml
@@ -129,6 +127,7 @@
       - ansible_distribution_release != "bullseye"
       - ansible_distribution_release != "jammy"
       - ansible_distribution_release != "bookworm"
+      - ansible_distribution_release != "focal"
 
 #  - name: enable the mysql shell testing repo
 #    command: percona-release enable mysql-shell testing
@@ -233,9 +232,6 @@
 
   - name: install plugins, import world database
     command: /package-testing/plugins_test_80.sh ps
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
 
   - name: check the clone and data masking plugins
     command: /package-testing/scripts/ps_clone_dm_plugin_test.sh

@@ -11,10 +11,7 @@ container_name = 'ps-docker-test-static2'
 def host():
     docker_id = subprocess.check_output(
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e', 'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport', '-d', docker_image_upstream]).decode().strip()
-    if ps_version_major in ['5.7','5.6']:
-        subprocess.check_call(['docker','exec','--user','root',container_name,'microdnf','install','net-tools'])
-    else:
-        subprocess.check_call(['docker','exec','--user','root',container_name,'yum','-y','install','net-tools'])
+    subprocess.check_call(['docker','exec','--user','root',container_name,'microdnf','install','net-tools'])
     time.sleep(20)
     yield testinfra.get_host("docker://root@" + docker_id)
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
@@ -25,7 +22,7 @@ class TestMysqlEnvironment:
     def test_packages(self, host, pkg_name):
         assert host.package(pkg_name).is_installed
         assert host.package(pkg_name).version == ps_version_upstream
-    
+
     @pytest.mark.skipif(docker_acc == "perconalab", reason="Skipping tests in 'testing' repo")
     def test_binaries_version(self, host):
         if ps_version_major in ['5.7','5.6']:

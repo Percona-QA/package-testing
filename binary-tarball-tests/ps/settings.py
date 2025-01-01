@@ -33,7 +33,8 @@ def set_pro_fips_vars():
     """
     source_environment_file()
     pro = True if os.getenv('PRO') == "yes" else False
-    fips_supported = os.getenv('FIPS_SUPPORTED') in {"yes", "True"}
+    fips_supported = True if os.getenv('PRO') == "yes" else False    
+    #fips_supported = os.getenv('FIPS_SUPPORTED') in {"yes", "True"}
     debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
     ps_revision = os.getenv('PS_REVISION')
     ps_version = os.getenv('PS_VERSION')
@@ -107,7 +108,7 @@ ps80_components = (
 ps80_files = (
   'lib/libcoredumper.a', 
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.39' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.40' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini','lib/plugin/keyring_file.so',
@@ -115,8 +116,8 @@ ps80_files = (
   'lib/plugin/audit_log_filter.so', 'lib/plugin/component_masking_functions.so', 'lib/plugin/component_percona_telemetry.so'
 )
 ps80_symlinks = (
-  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.39'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.39'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.40'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.40'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 ps80_openssl_files = (
   'lib/libcrypto.so', 'lib/libk5crypto.so', 'lib/libssl.so', 'lib/libsasl2.so'
@@ -216,7 +217,7 @@ ps8x_components = (
 ps8x_files = (
   'lib/libcoredumper.a', 
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.2' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.3' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so',
   'lib/plugin/component_binlog_utils_udf.so',
   'lib/plugin/keyring_udf.so', 'lib/plugin/component_keyring_vault.so', 'lib/plugin/component_binlog_utils_udf.so',
@@ -224,8 +225,8 @@ ps8x_files = (
 )
 
 ps8x_symlinks = (
-  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.0.2'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.2'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.0.3'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.3'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 
 ps8x_openssl_files = (
