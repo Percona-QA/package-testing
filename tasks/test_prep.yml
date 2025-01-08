@@ -223,7 +223,7 @@
     - rm -f master.zip
     - mv "package-testing-{{ branch }}" /package-testing
     vars:
-      branch: "{{ lookup('env', 'TESTING_BRANCH') | default('master', true) }}"
+      branch: "pxb-pt-job-deb-11-ami"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
 
   - name: install latest bats from github
