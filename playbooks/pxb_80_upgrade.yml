@@ -102,6 +102,9 @@
       - lookup('env', 'server_to_test') == "ms-80"
 ##
 
+  - name: include tasks for enabling PXB 80 main repo before update
+    include_tasks: ../tasks/enable_pxb_80_main_repo.yml
+
   - name: install Percona XtraBackup 8.0 packages MAIN REPO 
     include_tasks: ../tasks/install_pxb80.yml
 
@@ -179,6 +182,8 @@
   - name: include tasks for enabling PS 8 TESTING repo UPGRADE
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
 
+  - name: include tasks for enabling PXB 80 TESTING repo UPGRADE
+    include_tasks: ../tasks/enable_pxb_80_testing_repo.yml
 #
 # Upgrade packages
 #
@@ -213,8 +218,6 @@
   - name: check that Percona XtraBackup version is correct after UPGRADE
     command: /package-testing/version_check.sh pxb80
 
-
-
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb80
 
@@ -233,7 +236,9 @@
       packages:
       - percona-server-server
       - percona-xtrabackup-80
-    when: ansible_os_family == "Debian"
+    when: 
+      - ansible_os_family == "Debian"
+      - lookup('env', 'server_to_test') == "ps-80"
 
   - name: remove Percona Server rpm packages
     yum:
@@ -243,7 +248,8 @@
       packages:
       - percona-server-server
       - percona-xtrabackup-80
-    when: ansible_os_family == "RedHat"
-
+    when:
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ps-80"
 #  - name: check if process is stopped after package removal
 #    command: /package-testing/check_running.sh mysql stopped
