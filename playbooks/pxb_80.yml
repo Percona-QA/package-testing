@@ -113,13 +113,11 @@
   - name: Enable PXB 80 repo testing
     command: percona-release enable-only pxb-80 testing
     when:
-      - lookup('env', 'server_to_test') == "ps-80"
       - lookup('env', 'install_repo') == "testing"
 
   - name: Enable PXB 80 repo main
     command: percona-release enable-only pxb-80 release
     when:
-      - lookup('env', 'server_to_test') == "ps-80"
       - lookup('env', 'install_repo') == "main"
 
   - name: install Percona XtraBackup 8.0 packages
