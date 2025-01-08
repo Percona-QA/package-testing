@@ -179,6 +179,8 @@
   - name: include tasks for enabling PS 8 TESTING repo UPGRADE
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
 
+  - name: include tasks for enabling PXB 80 TESTING repo UPGRADE
+    include_tasks: ../tasks/enable_pxb_80_testing_repo.yml
 #
 # Upgrade packages
 #
