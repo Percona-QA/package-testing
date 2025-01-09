@@ -275,8 +275,10 @@
       packages:
       - percona-server-server*
       - percona-xtrabackup-80
-    when: ansible_os_family == "Debian"
-
+    when: 
+      - ansible_os_family == "Debian"
+      - lookup('env', 'server_to_test') == "ps-80"
+      
   - name: remove Percona Server rpm packages
     yum:
       name: "{{ packages }}"
@@ -285,7 +287,9 @@
      packages:
       - percona-server-server*
       - percona-xtrabackup-80
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ps-80"
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
