@@ -27,7 +27,7 @@
 #  - name: include tasks for enabling main repo
 #    include_tasks: ../tasks/enable_main_repo.yml
 
-  - name: include tasks for enabling PS 8 main repo
+  - name: include tasks for enabling PS 8 main repo 
     include_tasks: ../tasks/enable_ps8_main_repo.yml
 
   - name: download and extract world database
@@ -58,7 +58,7 @@
 #  - name: install Percona Toolkit new deb packages
 #    include_tasks: ../tasks/install_pt.yml
 
-  - name: install Percona Server 8.0 packages
+  - name: install Percona Server 8.0 packages MAIN REPO 
     include_tasks: ../tasks/install_ps80.yml
     when:
       - lookup('env', 'server_to_test') == "ps-80"
@@ -102,28 +102,54 @@
       - lookup('env', 'server_to_test') == "ms-80"
 ##
 
-  - name: install Percona XtraBackup 8.0 packages
+  - name: include tasks for enabling PXB 80 main repo before update
+    include_tasks: ../tasks/enable_pxb_80_main_repo.yml
+
+  - name: install Percona XtraBackup 8.0 packages MAIN REPO 
     include_tasks: ../tasks/install_pxb80.yml
 
-  - name: start mysql service with service command
+  - name: Print the version of the installed Percona XtraBackup MAIN REPO before UPGRADE
+    shell: |
+      {
+        echo "XTRABACKUP VERSION is ";
+        xtrabackup --version || echo "FAILED: xtrabackup --version";
+        echo "xbstream VERSION is ";
+        xbstream --version || echo "FAILED: xbstream --version";
+        echo "xbcloud VERSION is ";
+        xbcloud --version || echo "FAILED: xbcloud --version";
+        echo "xbcrypt VERSION is ";
+        xbcrypt --version || echo "FAILED: xbcrypt --version";
+        echo "list rpm packages ";
+        rpm -qa | grep "percona" || echo "FAILED: rpm -qa | grep percona";
+        echo "list deb packages";
+        dpkg -l | grep "percona" || echo "FAILED: dpkg -l | grep percona";
+      }
+    register: version_output_pre_upgrade
+    ignore_errors: yes
+
+  - name: Display version information before UPGRADE
+    debug:
+      var: version_output_pre_upgrade.stdout_lines
+
+  - name: start mysql service with service command MAIN REPO
     command: service mysql start
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
-  - name: start mysql service with systemctl command
+  - name: start mysql service with systemctl command MAIN REPO 
     command: systemctl start mysqld
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
-  - name: set root password on centos
+  - name: set root password on centos MAIN REPO 
     command: /package-testing/setpass_57.sh
     when: ansible_os_family == "RedHat"
 
-  - name: copy .my.cnf with credentials on centos
+  - name: copy .my.cnf with credentials on centos MAIN REPO 
     template: src=../templates/my_57.j2
               dest=/root/.my.cnf
               mode=0640 owner=root group=root
     when: ansible_os_family == "RedHat"
-
-  - name: restart mysql service
+ 
+  - name: restart mysql service MAIN REPO 
     service: name=mysqld state=restarted
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
@@ -153,20 +179,19 @@
 #
 # Enable testing repository
 #
-  - name: include tasks for enabling PS 8 testing repo
+  - name: include tasks for enabling PS 8 TESTING repo UPGRADE
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
 
+  - name: include tasks for enabling PXB 80 TESTING repo UPGRADE
+    include_tasks: ../tasks/enable_pxb_80_testing_repo.yml
 #
 # Upgrade packages
 #
 
-  - name: install Percona XtraBackup 8.0 packages
+  - name: install Percona XtraBackup 8.0 packages after UPGRADE 
     include_tasks: ../tasks/install_pxb80.yml
 
-  - name: check that Percona XtraBackup version is correct
-    command: /package-testing/version_check.sh pxb80
-
-  - name: Print the version of the installed Percona XtraBackup
+  - name: Print the version of the installed Percona XtraBackup after UPGRADE
     shell: |
       {
         echo "XTRABACKUP VERSION is ";
@@ -182,12 +207,16 @@
         echo "list deb packages";
         dpkg -l | grep "percona" || echo "FAILED: dpkg -l | grep percona";
       }
-    register: version_output
+    register: version_output_post_upgrade
     ignore_errors: yes
 
-  - name: Display version information
+
+  - name: Display version information UPGRADE
     debug:
-      var: version_output.stdout_lines
+      var: version_output_post_upgrade.stdout_lines
+
+  - name: check that Percona XtraBackup version is correct after UPGRADE
+    command: /package-testing/version_check.sh pxb80
 
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb80
@@ -207,7 +236,9 @@
       packages:
       - percona-server-server
       - percona-xtrabackup-80
-    when: ansible_os_family == "Debian"
+    when: 
+      - ansible_os_family == "Debian"
+      - lookup('env', 'server_to_test') == "ps-80"
 
   - name: remove Percona Server rpm packages
     yum:
@@ -217,7 +248,8 @@
       packages:
       - percona-server-server
       - percona-xtrabackup-80
-    when: ansible_os_family == "RedHat"
-
+    when:
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ps-80"
 #  - name: check if process is stopped after package removal
 #    command: /package-testing/check_running.sh mysql stopped
