@@ -6,7 +6,7 @@ import time
 from settings import *
 
 
-container_name = 'pxc-docker-test-static'
+container_name = 'pxc-docker-test-static6'
 
 @pytest.fixture(scope='module')
 def host():
