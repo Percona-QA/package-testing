@@ -15,7 +15,7 @@ def host():
          '-e', 'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport',
          '-e', 'PERCONA_TELEMETRY_ENABLE=1',
          '-d', docker_image]).decode().strip()
-    exec_command = ['microdnf', 'install', 'net-tools']
+    exec_command = ['microdnf', 'install', '-y', 'net-tools']
     subprocess.check_call(['docker','exec','--user','root',container_name] + exec_command)
     time.sleep(80)
     yield testinfra.get_host("docker://root@" + docker_id)

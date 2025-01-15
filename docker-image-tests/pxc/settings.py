@@ -35,7 +35,7 @@ cluster_name = 'pxc-cluster1'
 # Innovation
 pxc8x_packages = [(package, pxc_version_upstream) for package in (
   'percona-xtradb-cluster-client', 'percona-xtradb-cluster-server',
-  'percona-xtradb-cluster-shared', 'percona-xtradb-cluster-shared-compat'
+  'percona-xtradb-cluster-shared'
 )]
 pxc8x_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/mysqladmin',
@@ -61,7 +61,7 @@ pxc8x_components = (
 # 8.0
 pxc80_packages = [(package, pxc_version_upstream) for package in (
   'percona-xtradb-cluster-client', 'percona-xtradb-cluster-server',
-  'percona-xtradb-cluster-shared', 'percona-xtradb-cluster-shared-compat'
+  'percona-xtradb-cluster-shared'
 )]
 pxc80_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/mysqladmin',
