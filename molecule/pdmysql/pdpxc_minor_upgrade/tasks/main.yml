@@ -141,6 +141,8 @@
 
 - name: install Percona Toolkit old packages
   include_tasks: ../../../tasks/install_pt.yml
+  when:
+  - lookup('env', 'VERSION').split('.')[0:2] | join('.') == '8.0'
 
 - name: install proxysql new deb packages
   apt:
