@@ -141,8 +141,6 @@
 
 - name: install Percona Toolkit old packages
   include_tasks: ../../../tasks/install_pt.yml
-  when:
-  - lookup('env', 'VERSION').split('.')[0:2] | join('.') == '8.0'
 
 - name: install proxysql new deb packages
   apt:
@@ -353,8 +351,6 @@
 
 - name: install Percona Toolkit new packages
   include_tasks: ../../../tasks/install_pt.yml
-  when:
-  - lookup('env', 'VERSION').split('.')[0:2] | join('.') == '8.0'
 
 - name: install proxysql new deb packages
   apt:
@@ -377,6 +373,3 @@
 
 - name: Verify telemetry version and package installation
   command: /package-testing/check_tel_ver_pack.sh
-  when:
-    - ansible_distribution != "Amazon"
-    - ansible_distribution_major_version|int != 7
