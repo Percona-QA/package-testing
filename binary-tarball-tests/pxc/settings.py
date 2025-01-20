@@ -67,9 +67,9 @@ if glibc_version == '2.35':
   )
 else:
   pxc8x_symlinks = (
-    ('lib/libgcrypt.so','lib/private/libgcrypt.so.20.3.4'),
+    ('lib/libgcrypt.so'),
     ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.3'),
-    ('lib/libplds4.so','lib/private/libplds4.so'), ('lib/libsasl2.so','lib/private/libsasl2.so.2.0.25'),
+    ('lib/libsasl2.so','lib/private/libsasl2.so.2.0.25'),
     ('lib/libtinfo.so','lib/private/libtinfo.so.6.3'),
   )
 pxc8x_components = (
