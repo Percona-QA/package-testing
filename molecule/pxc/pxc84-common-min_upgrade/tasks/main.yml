@@ -25,17 +25,39 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: include tasks for enabling test repo
+#-------------non pro
+  - name: include tasks for enabling test repo pxc84 non pro
     include_tasks: ../../../../tasks/enable_pxc84_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when:
+    - lookup('env', 'install_repo') == "testing" 
+    - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling main repo
+  - name: include tasks for enabling main repo pxc84 non pro
     include_tasks: ../../../../tasks/enable_pxc84_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+    when: 
+    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling experimental repo
+  - name: include tasks for enabling experimental repo non pro
     include_tasks: ../../../../tasks/enable_pxc84_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+    when: 
+    - lookup('env', 'install_repo') == "experimental"
+    - lookup('env', 'pro') == "no"
+#-----------------pro
+
+  - name: include tasks for enabling test repo pro pxc84
+    include_tasks: ../../../../tasks/enable_pxc84_pro_repo_testing.yml
+    when: 
+    - lookup('env', 'install_repo') == "testing" 
+    - lookup('env', 'pro') == "yes"
+
+  - name: include tasks for enabling main repo pro pxc84
+    include_tasks: ../../../../tasks/enable_pxc84_pro_repo_main.yml
+    when: 
+    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - lookup('env', 'pro') == "yes"
+
+#---------------------
 
   - name: allow all users to connect to mysql
     shell: setsebool -P mysql_connect_any 1
@@ -78,7 +100,8 @@
       - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
       - ansible_os_family == "Debian"
 
-  - name: install PXC 8 deb packages arm64 debian
+#---------------------------------------------------------non-pro
+  - name: install PXC 8 deb packages arm64 debian non pro
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -90,11 +113,11 @@
     when: 
       - ansible_os_family == "Debian"
       - ansible_architecture == "aarch64"
+      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: install PXC 8 deb packages amd64
+      
+  - name: install PXC 8 deb packages amd64 non pro
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -106,11 +129,11 @@
     when: 
       - ansible_os_family == "Debian"
       - ansible_architecture == "x86_64"
+      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: install PXC 8 rpm packages amd64
+  - name: install PXC 8 rpm packages amd64 non pro
     yum:
       name: "{{ packages }}"
       state: latest
@@ -122,11 +145,11 @@
     when: 
       - ansible_os_family == "RedHat" 
       - ansible_architecture == "x86_64"
+      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: install PXC 8 rpm packages arm OS
+  - name: install PXC 8 rpm packages arm OS non pro
     yum:
       name: "{{ packages }}"
       state: latest
@@ -137,9 +160,70 @@
     when: 
       - ansible_os_family == "RedHat"
       - ansible_architecture == "aarch64"
+      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      PERCONA_TELEMETRY_DISABLE: "1"
+#--------------------------------------------------------------------------------------------
+
+#----------------------------------pro
+  - name: install PXC 8 deb packages arm64 debian pro
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtradb-cluster-pro-full
+    when: 
+      - ansible_os_family == "Debian"
+      - ansible_architecture == "aarch64"
+      - lookup('env', 'pro') == "yes"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      
+  - name: install PXC 8 deb packages amd64 pro
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtradb-cluster-pro-full
+    when: 
+      - ansible_os_family == "Debian"
+      - ansible_architecture == "x86_64"
+      - lookup('env', 'pro') == "yes"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC 8 rpm packages amd64 pro
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-pro-full
+    when: 
+      - ansible_os_family == "RedHat" 
+      - ansible_architecture == "x86_64"
+      - lookup('env', 'pro') == "yes"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC 8 rpm packages arm OS pro
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-pro-full
+    when: 
+      - ansible_os_family == "RedHat"
+      - ansible_architecture == "aarch64"
+      - lookup('env', 'pro') == "yes"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+#--------------------------------------------------------------------------------------------
+
+
 
   - name: copy PXC config on centos 7
     template: src=../../../../templates/my_rpm_80.j2 
@@ -175,11 +259,11 @@
     debug: var=pxc_version
 
   - name: check that PXC version is correct Molecule
-    command: /package-testing/version_check.sh pxc84
+    command: /package-testing/version_check.sh pxc84pro
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: check that PXC package versions are correct Molecule
-    command: /package-testing/package_check.sh pxc84
+    command: /package-testing/package_check.sh pxc84 pro
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
 # - name: install plugins

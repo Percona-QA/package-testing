@@ -25,17 +25,38 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: include tasks for enabling test repo
+#-------------non pro
+  - name: include tasks for enabling test repo pxc 80 non pro
     include_tasks: ../../../../tasks/enable_pxc80_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when:
+    - lookup('env', 'install_repo') == "testing" 
+    - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling main repo
+  - name: include tasks for enabling main repo pxc 80 non pro
     include_tasks: ../../../../tasks/enable_pxc80_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+    when: 
+    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling experimental repo
+  - name: include tasks for enabling experimental repo pxc 80 non pro
     include_tasks: ../../../../tasks/enable_pxc80_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+    when: 
+    - lookup('env', 'install_repo') == "experimental"
+    - lookup('env', 'pro') == "no"
+#-----------------pro
+
+  - name: include tasks for enabling test repo pxc 80 pro
+    include_tasks: ../../../../tasks/enable_pxc80_pro_repo_testing.yml
+    when: 
+    - lookup('env', 'install_repo') == "testing" 
+    - lookup('env', 'pro') == "yes"
+
+  - name: include tasks for enabling main repo pxc 80 pro
+    include_tasks: ../../../../tasks/enable_pxc80_pro_repo_main.yml
+    when: 
+    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - lookup('env', 'pro') == "yes"
+#---------------------
 
   - name: allow all users to connect to mysql
     shell: setsebool -P mysql_connect_any 1

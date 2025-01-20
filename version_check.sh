@@ -73,6 +73,12 @@ elif [ "$1" = "pxc84" ]; then
   revision=${PXC84_REV}
   innodb_ver=${PXC84_INNODB}
   wsrep=${PXC84_WSREP}
+elif [ "$1" = "pxc84pro" ]; then
+  version=${PXC84PRO_VER%-*}
+  release=${PXC84PRO_VER#*-}
+  revision=${PXC84PRO_REV}
+  innodb_ver=${PXC84PRO_INNODB}
+  wsrep=${PXC84PRO_WSREP}
 elif [[ "$1" =~ ^pxc8[5-9]{1}$ ]]; then
   version=${PXC_INN_LTS_VER%-*}
   release=${PXC_INN_LTS_VER#*-}
@@ -187,7 +193,7 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
     fi
   fi
 
-elif [[ ${product} = "pxc56" || ${product} = "pxc57" ]] || [[ ${product} =~ ^pxc8[0-9]{1}$ ]]; then
+elif [[ ${product} = "pxc56" || ${product} = "pxc57" ]] || [[ ${product} =~ ^pxc8[0-9]{1}$ ]] || [[ ${product} =~ ^pxc8[0-9]{1}pro$ ]]; then
   for i in @@INNODB_VERSION @@VERSION; do
     if [ "$(mysql -e "SELECT ${i}; "| grep -c ${version}-${innodb_ver})" = 1 ]; then
       echo "${i} is correct" >> "${log}"
