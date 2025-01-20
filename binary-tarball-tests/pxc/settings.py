@@ -28,7 +28,7 @@ pxc8x_binaries = [
   'bin/pxc_extra/pxb-8.4/bin/xtrabackup', 'bin/pxc_extra/pxb-8.4/bin/xbcloud',
   'bin/pxc_extra/pxb-8.4/bin/xbcrypt', 'bin/pxc_extra/pxb-8.4/bin/xbstream',
   'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog',
-  'bin/mysqldump', 'bin/mysqlimport', 'bin/mysqlpump', 'bin/mysqlshow',
+  'bin/mysqldump', 'bin/mysqlimport', 'bin/mysqlshow',
   'bin/mysqlslap', 'bin/mysqlcheck', 'bin/mysql_config_editor',
   'bin/mysqlrouter', 'bin/mysqlrouter_passwd', 'bin/mysqlrouter_plugin_info', 'bin/mysql_secure_installation',
   'bin/mysql_tzinfo_to_sql'
@@ -67,7 +67,6 @@ if glibc_version == '2.35':
   )
 else:
   pxc8x_symlinks = (
-    ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
     ('lib/libgcrypt.so','lib/private/libgcrypt.so.11.8.2'), ('lib/libnspr4.so','lib/private/libnspr4.so'),
     ('lib/libnss3.so','lib/private/libnss3.so'), ('lib/libnssutil3.so','lib/private/libnssutil3.so'),
     ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.3'), ('lib/libplc4.so','lib/private/libplc4.so'),
