@@ -58,12 +58,14 @@ pxc8x_files = (
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/keyring_udf.so'
 )
 pxc8x_symlinks = (
-    ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.0.3'),
-    ('lib/libaio.so','lib/private/libaio.so.1.0.1'),
-    ('lib/librtmp.so', 'lib/private/librtmp.so.1')
+  ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.0.3'),
+  ('lib/libaio.so','lib/private/libaio.so.1.0.1'),
+  ('lib/librtmp.so', 'lib/private/librtmp.so.1')
 )
 pxc8x_components = (
-  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault')
+  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),
+  ('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),
+  ('file://component_audit_log_filter'),('file://component_keyring_vault')
 )
 
 # 8.0
@@ -107,13 +109,14 @@ pxc80_files = (
   'lib/plugin/keyring_udf.so', 'lib/plugin/keyring_vault.so'
 )
 pxc80_symlinks = (
-    ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.40'),
-    ('lib/libssl.so', 'lib/private/libssl.so.3'),
-    ('lib/libaio.so','lib/private/libaio.so.1.0.1'),
-    ('lib/librtmp.so', 'lib/private/librtmp.so.1')
+  ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.40'),
+  ('lib/libssl.so', 'lib/private/libssl.so.3'),
+  ('lib/libaio.so','lib/private/libaio.so.1.0.1'),
+  ('lib/librtmp.so', 'lib/private/librtmp.so.1')
 )
 pxc80_components = (
-  ('file://component_encryption_udf'), ('file://component_masking_functions'), ('file://component_keyring_kmip'), ('file://component_keyring_kms'),
+  ('file://component_encryption_udf'),('file://component_masking_functions'),('file://component_keyring_kmip'),
+  ('file://component_keyring_kms')
 )
 
 # 5.7
