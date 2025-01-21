@@ -59,8 +59,7 @@ pxc8x_files = (
 )
 pxc8x_symlinks = (
     ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.0.3'),
-    ('lib/libaio.so','lib/private/libaio.so.1.0.1'),('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
-    ('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'), ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
+    ('lib/libaio.so','lib/private/libaio.so.1.0.1')
     ('lib/librtmp.so', 'lib/private/librtmp.so.1')
 )
 pxc8x_components = (
@@ -110,8 +109,7 @@ pxc80_files = (
 pxc80_symlinks = (
     ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.40'),
     ('lib/libssl.so', 'lib/private/libssl.so.3'),
-    ('lib/libaio.so','lib/private/libaio.so.1.0.1'),('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
-    ('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'), ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
+    ('lib/libaio.so','lib/private/libaio.so.1.0.1')
     ('lib/librtmp.so', 'lib/private/librtmp.so.1')
 )
 pxc80_components = (
