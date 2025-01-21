@@ -37,8 +37,8 @@
       version: "{{ '84-lts' if '8.4' in lookup('env', 'VERSION') else '8.0' if '8.0.' in lookup('env', 'VERSION') else '8x-innovation' }}"
     when: major_repo
 
-#  - name: install Percona Toolkit
-#    include_tasks: ../../../tasks/install_pt.yml
+  - name: install Percona Toolkit
+    include_tasks: ../../../tasks/install_pt.yml
 
   - name: clean yum
     shell: |

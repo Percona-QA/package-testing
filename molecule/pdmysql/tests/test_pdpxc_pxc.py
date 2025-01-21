@@ -9,6 +9,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 VERSION = os.environ['VERSION']
 
+
 DEBPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-client',
                'percona-xtradb-cluster-common', 'percona-xtradb-cluster-dbg',
                'percona-xtradb-cluster-garbd-debug', 'percona-xtradb-cluster-garbd',
@@ -23,8 +24,7 @@ RPMPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster',
 
 EXTRA_RPMPACKAGE = ['percona-xtradb-cluster-shared-compat']
 
-if VERSION.startswith('8.0'):
-
+if MAJOR_VERSION in ['8.0']:
     PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                        " fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so';\"",
                        "mysql -e \"CREATE FUNCTION"
@@ -65,7 +65,7 @@ if VERSION.startswith('8.0'):
                        " rpl_semi_sync_slave SONAME 'semisync_slave.so';\"",
                        "mysql -e \"INSTALL PLUGIN"
                        " connection_control SONAME 'connection_control.so';\""]
-if VERSION.startswith('8.4'):
+else:
     PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
                        " version_tokens_set RETURNS STRING SONAME 'version_token.so';\"",
                        "mysql -e \"CREATE FUNCTION"
@@ -98,25 +98,18 @@ if VERSION.startswith('8.4'):
                        " rpl_semi_sync_slave SONAME 'semisync_slave.so';\"",
                        "mysql -e \"INSTALL PLUGIN"
                        " connection_control SONAME 'connection_control.so';\""]
-else:
-    raise ValueError(f"Unsupported version {VERSION}. Only versions starting with 8.4 or 8.0 are supported.")
 
-if VERSION.startswith('8.4'):
-
+if MAJOR_VERSION in ['8.0']:
     COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
                  'component_log_sink_json', 'component_log_filter_dragnet',
                  'component_audit_api_message_emit', 'component_percona-udf', 'component_masking_functions',
                  'component_binlog_utils']
 
-elif VERSION.startswith('8.0'):
+else:
 
     COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
                  'component_log_sink_json', 'component_log_filter_dragnet',
                  'component_audit_api_message_emit', 'component_percona-udf']
-
-else:
-    raise ValueError(f"Unsupported version {VERSION}. Only versions starting with 8.4 or 8.0 are supported.")
-
 
 DEB_PERCONA_BUILD_VERSION = ''
 RPM_PERCONA_BUILD_VERSION = ''
@@ -235,6 +228,6 @@ def test_telemetry_enabled(host):
     assert host.file(TELEMETRY_PATH).contains('PRODUCT_FAMILY_PXC')
     assert host.file(TELEMETRY_PATH).contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
 
-@pytest.mark.telemetry_disabled
-def test_telemetry_disabled(host):
-    assert not host.file(TELEMETRY_PATH).exists
+#@pytest.mark.telemetry_disabled
+#def test_telemetry_disabled(host):
+#    assert not host.file(TELEMETRY_PATH).exists

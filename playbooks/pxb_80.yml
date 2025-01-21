@@ -113,17 +113,22 @@
   - name: Enable PXB 80 repo testing
     command: percona-release enable-only pxb-80 testing
     when:
-      - lookup('env', 'server_to_test') == "ps-80"
       - lookup('env', 'install_repo') == "testing"
 
   - name: Enable PXB 80 repo main
     command: percona-release enable-only pxb-80 release
     when:
-      - lookup('env', 'server_to_test') == "ps-80"
       - lookup('env', 'install_repo') == "main"
 
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
+    when:
+      - lookup('env', 'REPO_TYPE') != "PRO"
+
+  - name: install Percona XtraBackup 8.0 PRO packages
+    include_tasks: ../tasks/install_pxb80_pro.yml
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: start mysql service with service command
     command: service mysql start
@@ -270,8 +275,10 @@
       packages:
       - percona-server-server*
       - percona-xtrabackup-80
-    when: ansible_os_family == "Debian"
-
+    when: 
+      - ansible_os_family == "Debian"
+      - lookup('env', 'server_to_test') == "ps-80"
+      
   - name: remove Percona Server rpm packages
     yum:
       name: "{{ packages }}"
@@ -280,7 +287,9 @@
      packages:
       - percona-server-server*
       - percona-xtrabackup-80
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ps-80"
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped

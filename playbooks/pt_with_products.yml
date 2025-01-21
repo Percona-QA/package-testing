@@ -2,15 +2,19 @@
 # This playbook does following:
 #
 #   installs latest version of Percona-Server-57 (ps57), Percona-Server-80 (ps80), Percona-XtraDB-Cluster-57 (pxc57), Percona-XtraDB-Cluster-80 (pxc80), MysqL server 57 (upstream57), MySQL server 80 (upstream80), Percona Server for MongoDB 44 (psmdb44), Percona Server for MongoDB 50 (psmdb50).
-#   enables Percona tools repository
-#   installs latest version of Percona-Toolkit (pt) and runs one of the tools (pt-mysql-summary or pt-psmdb-summary)
+#   enables Percona pt repository
+#   installs latest version of Percona-Toolkit (pt) and runs one of the pt (pt-mysql-summary or pt-psmdb-summary)
 
 - hosts: all
   become: true
   become_method: sudo
+  vars:
+    gnupg_home: /root/.gnupg
+    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
+    
   tasks:
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
@@ -52,25 +56,25 @@
     include_tasks: ../tasks/install_and_run_psmdb.yml
     when: lookup('env', 'install_with') == "psmdb60"
 
-# Enable only tools repo to install pt
-  - name: include tasks for enabling tools testing repo
+# Enable only pt repo to install pt
+  - name: include tasks for enabling pt testing repo
     include_tasks: ../tasks/enable_only_repo_for_pt.yml
     vars:
-      repo_name: tools
+      repo_name: pt
       repo_type: testing
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
-  - name: include tasks for enabling tools main repo
+  - name: include tasks for enabling pt main repo
     include_tasks: ../tasks/enable_only_repo_for_pt.yml
     vars:
-      repo_name: tools
+      repo_name: pt
       repo_type: release
     when: lookup('env', 'install_repo') == "main"
 
-  - name: include tasks for enabling  tools experimental repo
+  - name: include tasks for enabling  pt experimental repo
     include_tasks: ../tasks/enable_only_repo_for_pt.yml
     vars:
-      repo_name: tools
+      repo_name: pt
       repo_type: experimental
     when: lookup('env', 'install_repo') == "experimental"
 

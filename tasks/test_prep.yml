@@ -90,7 +90,7 @@
     - ansible_facts['distribution'] != "RedHat"
 
   - name: setup epel 9 repo package
-    yum: name=epel-release state=present
+    yum: name=epel-release state=latest
     when: 
     - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
     - ansible_facts['distribution'] != "RedHat"
