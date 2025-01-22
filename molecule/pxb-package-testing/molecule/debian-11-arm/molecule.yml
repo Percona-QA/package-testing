@@ -4,11 +4,11 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: debian11-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
+  - name: debian11-arm-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
     region: us-west-2
-    image: ami-0d0f7602aa5c2425d
+    image: ami-0058eefa46a15f8d5
     vpc_subnet_id: subnet-03136d8c244f56036
-    instance_type: t2.medium
+    instance_type: c6g.large
     ssh_user: admin
     root_device_name: /dev/xvda
     instance_tags:
@@ -24,7 +24,7 @@ provisioner:
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
 scenario:
-  name: debian-11
+  name: debian-11-arm
   destroy_sequence:
     - destroy
   clenup_sequence:
@@ -34,5 +34,6 @@ scenario:
     - create
     - prepare
     - converge
+    - verify
     - cleanup
     - destroy

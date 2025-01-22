@@ -157,8 +157,8 @@
       branch: "{{ lookup('env', 'TESTING_BRANCH') }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
 
-#  - name: Verify telemetry version and package installation
-#    command: /package-testing/check_tel_ver_pack.sh
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
