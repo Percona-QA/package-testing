@@ -54,8 +54,17 @@
       - jq # for exporter end point metric fetch
  
 - name: enable {{ test_package }} {{ test_repo }} repo
+  when: test_repo != "main"
   include_tasks: ./enable_repo.yml
   vars:
     only: yes
     package: "{{ test_package }}"
     repository: "{{ test_repo }}"
+
+- name: enable {{ test_package }} {{ test_repo }} repo
+  when: test_repo == "main"
+  include_tasks: ./enable_repo.yml
+  vars:
+    only: yes
+    package: "{{ test_package }}"
+
