@@ -112,7 +112,7 @@ pxc80_symlinks = (
   ('lib/libaio.so','lib/private/libaio.so.1.0.1'),
 )
 pxc80_components = (
-  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms')
+  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions')
 )
 
 # 5.7
