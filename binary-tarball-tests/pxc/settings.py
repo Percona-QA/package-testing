@@ -109,12 +109,10 @@ pxc80_files = (
 )
 pxc80_symlinks = (
   ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.40'),
-  ('lib/libssl.so', 'lib/private/libssl.so.3'),
   ('lib/libaio.so','lib/private/libaio.so.1.0.1'),
 )
 pxc80_components = (
-  ('file://component_encryption_udf'),('file://component_masking_functions'),('file://component_keyring_kmip'),
-  ('file://component_keyring_kms')
+  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms')
 )
 
 # 5.7
