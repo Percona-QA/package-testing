@@ -54,15 +54,13 @@ EOF
 echo "server_id=$(echo $[ $RANDOM % 40 + 10 ])" >> my$N.cnf
 
 cat <<EOF >> my$N.cnf
-        binlog_checksum=NONE
         enforce_gtid_consistency=ON
         gtid_mode=ON
         relay_log={{ ansible_hostname }}-relay-bin
         innodb_dedicated_server=ON
+        replica_preserve_commit_order=ON
+        replica_parallel_type=LOGICAL_CLOCK
         binlog_transaction_dependency_tracking=WRITESET
-        slave_preserve_commit_order=ON
-        slave_parallel_type=LOGICAL_CLOCK
-        transaction_write_set_extraction=XXHASH64
 EOF
 done
 }
@@ -71,8 +69,7 @@ start_mysql_containers(){
     for N in 1 2 3 4
       do sudo docker run -d --name=mysql$N --hostname=mysql$N --net=innodbnet \
       -v $PWD/my$N.cnf:/etc/my.cnf \
-      -e MYSQL_ROOT_PASSWORD=root $1 \
-      -e PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport
+      -e MYSQL_ROOT_PASSWORD=root $1 
     done
     sleep 60
 }
