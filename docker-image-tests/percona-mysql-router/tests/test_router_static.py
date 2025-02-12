@@ -76,26 +76,68 @@ def create_cluster():
     ], check=True)
 
 def add_slave():
-    subprocess.run([
-        'docker', 'exec', 'mysql1',
-        'mysqlsh', '-uinno', '-pinno', '--',
-        'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=incremental'
-    ], check=True)
-    time.sleep(120)
-#    subprocess.run(['docker', 'exec', mysql2 , 'service', 'mysql', 'restart'], check=True)
-#    shell.options["dba.restartWaitTimeout"] = 300
-    subprocess.run([
-        'docker', 'exec', 'mysql1',
-        'mysqlsh', '-uinno', '-pinno', '--',
-        'cluster', 'add-instance', '--uri=inno@mysql3', '--recoveryMethod=incremental'
-    ], check=True)
-    time.sleep(120)
-    subprocess.run([
-        'docker', 'exec', 'mysql1',
-        'mysqlsh', '-uinno', '-pinno', '--',
-        'cluster', 'add-instance', '--uri=inno@mysql4', '--recoveryMethod=incremental'
-    ], check=True)
-    time.sleep(120)
+    try:
+        # Try adding the first slave with 'incremental' recovery method
+        result = subprocess.run([
+            'docker', 'exec', 'mysql1',
+            'mysqlsh', '-uinno', '-pinno', '--',
+            'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=increamental'
+        ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        time.sleep(120)  # Wait for the first instance to finish
+
+        # Log the result of the first subprocess call
+        print(f"STDOUT (mysql2): {result.stdout.decode()}")
+        print(f"STDERR (mysql2): {result.stderr.decode()}")
+
+        # Check for GTID error and handle it
+        if "GTID state is not compatible" in result.stderr.decode():
+            print("GTID compatibility issue detected. Trying to clean the GTID state before adding the instance.")
+            # Here, you may want to reset GTID or handle the error.
+            # You could issue a command to reset GTID sets (only if this is acceptable in your case)
+            reset_gtid = subprocess.run([
+                'docker', 'exec', 'mysql2',
+                'mysqlsh', '-uinno', '-pinno', '--',
+                'dba', 'reset', '--gtid'
+            ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print(f"GTID reset result: {reset_gtid.stdout.decode()}")
+            print(f"GTID reset error: {reset_gtid.stderr.decode()}")
+
+            # Retry adding the instance with 'incremental' recovery method
+            result = subprocess.run([
+                'docker', 'exec', 'mysql1',
+                'mysqlsh', '-uinno', '-pinno', '--',
+                'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=increamental'
+            ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+            time.sleep(120)
+            print(f"STDOUT (mysql2 - retry): {result.stdout.decode()}")
+            print(f"STDERR (mysql2 - retry): {result.stderr.decode()}")
+
+        # Now, try adding the second instance (mysql3)
+        result = subprocess.run([
+            'docker', 'exec', 'mysql1',
+            'mysqlsh', '-uinno', '-pinno', '--',
+            'cluster', 'add-instance', '--uri=inno@mysql3', '--recoveryMethod=increamental'
+        ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        time.sleep(120)
+        print(f"STDOUT (mysql3): {result.stdout.decode()}")
+        print(f"STDERR (mysql3): {result.stderr.decode()}")
+
+        # Similarly, try adding the third instance (mysql4)
+        result = subprocess.run([
+            'docker', 'exec', 'mysql1',
+            'mysqlsh', '-uinno', '-pinno', '--',
+            'cluster', 'add-instance', '--uri=inno@mysql4', '--recoveryMethod=increamental'
+        ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        time.sleep(120)
+        print(f"STDOUT (mysql4): {result.stdout.decode()}")
+        print(f"STDERR (mysql4): {result.stderr.decode()}")
+
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred while adding instance: {e}")
+        print(f"STDOUT: {e.stdout.decode() if e.stdout else 'No output'}")
+        print(f"STDERR: {e.stderr.decode() if e.stderr else 'No error output'}")
 
 create_network()
 create_mysql_config()
