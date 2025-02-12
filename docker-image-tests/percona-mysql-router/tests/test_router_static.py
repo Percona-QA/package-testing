@@ -79,23 +79,21 @@ def add_slave():
     subprocess.run([
         'docker', 'exec', 'mysql1',
         'mysqlsh', '-uinno', '-pinno', '--',
-        'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=increamental'
-    ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=incremental'
+    ], check=True)
     time.sleep(120)
-    print(f"STDOUT: {result.stdout.decode()}")
-    print(f"STDERR: {result.stderr.decode()}")
 #    subprocess.run(['docker', 'exec', mysql2 , 'service', 'mysql', 'restart'], check=True)
 #    shell.options["dba.restartWaitTimeout"] = 300
     subprocess.run([
         'docker', 'exec', 'mysql1',
         'mysqlsh', '-uinno', '-pinno', '--',
-        'cluster', 'add-instance', '--uri=inno@mysql3', '--recoveryMethod=increamental'
+        'cluster', 'add-instance', '--uri=inno@mysql3', '--recoveryMethod=incremental'
     ], check=True)
     time.sleep(120)
     subprocess.run([
         'docker', 'exec', 'mysql1',
         'mysqlsh', '-uinno', '-pinno', '--',
-        'cluster', 'add-instance', '--uri=inno@mysql4', '--recoveryMethod=increamental'
+        'cluster', 'add-instance', '--uri=inno@mysql4', '--recoveryMethod=incremental'
     ], check=True)
     time.sleep(120)
 
