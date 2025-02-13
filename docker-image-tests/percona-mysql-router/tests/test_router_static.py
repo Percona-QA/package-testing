@@ -206,16 +206,15 @@ verify_new_user()
 docker_restart()
 create_cluster()
 add_slave()
-host()
 #test_data_add()
 
 class TestRouterEnvironment:
-    def test_mysqlrouter_version(self, test_router_bootstrap):
+    def test_mysqlrouter_version(self, host):
         command = "mysqlrouter --version"
         output = host.check_output(command)
         assert docker_tag in output
 
-    def test_mysqlsh_version(self, test_router_bootstrap):
+    def test_mysqlsh_version(self, host):
         command = "mysqlsh --version"
         output = host.check_output(command)
         assert ps_version in output
