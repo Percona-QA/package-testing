@@ -139,6 +139,65 @@ def add_slave():
         print(f"STDOUT: {e.stdout.decode() if e.stdout else 'No output'}")
         print(f"STDERR: {e.stderr.decode() if e.stderr else 'No error output'}")
 
+@pytest.fixture(scope='module')
+def host():
+    """ Simulates the `Router_Bootstrap` function """
+    # Run mysql-router container
+    docker_id = subprocess.check_output(
+        ['docker', 'run', '-d', '--name', container_name_mysql_router, '--net', network_name,
+         '-e', 'MYSQL_HOST=mysql1', '-e', 'MYSQL_PORT=3306', '-e', 'MYSQL_USER=inno',
+         '-e', 'MYSQL_PASSWORD=inno', '-e', 'MYSQL_INNODB_CLUSTER_MEMBERS=4', router_docker_image]).decode().strip()
+    subprocess.check_call(['docker','exec','--user','root',container_name_mysql_router,'microdnf','install','net-tools'])
+    time.sleep(20)
+    yield testinfra.get_host("docker://root@" + docker_id)
+    subprocess.check_call(['docker', 'rm', '-f', docker_id])
+
+
+#def test_data_add():
+#    """ Simulates the `data_add` function """
+#    # Start mysql-client container
+#    command = [
+#        'docker', 'run', '-d', '--name', 'mysql-client', '--hostname', 'mysql-client', '--net', network_name,
+#        '-e', 'MYSQL_ROOT_PASSWORD=root', percona_docker_image
+#    ]
+#    docker_run(command)
+
+    # Give time for the container to initialize
+#    time.sleep(10)
+
+    # Create sbtest user and schema
+#    command = [
+#        'docker', 'exec', '-it', 'mysql-client', 'mysql', '-h', 'mysql-router', '-P', '6446', '-uinno', '-pinno',
+#        '-e', "CREATE SCHEMA sbtest; CREATE USER sbtest@'%' IDENTIFIED with mysql_native_password by  'password';",
+#        '-e', "GRANT ALL PRIVILEGES ON sbtest.* to sbtest@'%';"
+#    ]
+#    docker_run(command)
+
+    # Verify sbtest user
+ #   command = [
+ #       'docker', 'exec', '-it', 'mysql-client', 'mysql', '-h', 'mysql-router', '-P', '6447', '-uinno', '-pinno',
+ #       '-e', "select host , user from mysql.user where user='sbtest';"
+ #   ]
+ #   docker_run(command)
+
+    # Run sysbench for data insertion
+ #   command = [
+ #       'docker', 'run', '--rm', '--net', network_name, '--name', 'sb-prepare', 'severalnines/sysbench',
+ #       'sysbench', '--db-driver=mysql', '--table-size=10000', '--tables=1', '--threads=1', '--mysql-host=mysql-router',
+ #       '--mysql-port=6446', '--mysql-user=sbtest', '--mysql-password=password', '/usr/share/sysbench/oltp_insert.lua', 'prepare'
+ #   ]
+ #   docker_run(command)
+
+    # Wait for the data to insert
+ #   time.sleep(20)
+
+    # Verify if the data has been inserted
+ #   command = [
+ #       'docker', 'exec', '-it', 'mysql-client', 'mysql', '-h', 'mysql-router', '-P', '6447', '-uinno', '-pinno',
+ #       '-e', "SELECT count(*) from sbtest.sbtest1;"
+ #   ]
+ #   docker_run(command)
+
 create_network()
 create_mysql_config()
 start_mysql_containers()
@@ -147,36 +206,38 @@ verify_new_user()
 docker_restart()
 create_cluster()
 add_slave()
+host()
+#test_data_add()
 
 class TestRouterEnvironment:
-    def test_mysqlrouter_version(self, host):
+    def test_mysqlrouter_version(self, test_router_bootstrap):
         command = "mysqlrouter --version"
         output = host.check_output(command)
         assert docker_tag in output
 
-    def test_mysqlsh_version(self, host):
+    def test_mysqlsh_version(self, test_router_bootstrap):
         command = "mysqlsh --version"
         output = host.check_output(command)
         assert ps_version in output
 
-    def test_mysqlrouter_directory_permissions(self, host):
+    def test_mysqlrouter_directory_permissions(self, test_router_bootstrap):
         assert host.file('/var/lib/mysqlrouter').user == 'mysql'
         assert host.file('/var/lib/mysqlrouter').group == 'mysql'
         assert oct(host.file('/var/lib/mysqlrouter').mode) == '0o755'
 
-    def test_mysql_user(self, host):
+    def test_mysql_user(self, test_router_bootstrap):
         mysql_user = host.user('mysql')
         print(f"Username: {mysql_user.name}, UID: {mysql_user.uid}")
         assert mysql_user.exists
         assert mysql_user.uid == 1001
 
-    def test_mysqlrouter_ports(self, host):
+    def test_mysqlrouter_ports(self, test_router_bootstrap):
         host.socket("tcp://6446").is_listening
         host.socket("tcp://6447").is_listening
         host.socket("tcp://64460").is_listening
         host.socket("tcp://64470").is_listening
 
-    def test_mysqlrouter_config(self, host):
+    def test_mysqlrouter_config(self, test_router_bootstrap):
         assert host.file("/etc/mysqlrouter/mysqlrouter.conf").exists
         assert host.file("/etc/mysqlrouter/mysqlrouter.conf").user == "root"
         assert host.file("/etc/mysqlrouter/mysqlrouter.conf").group == "root"
