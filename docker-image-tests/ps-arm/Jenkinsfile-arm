@@ -32,7 +32,7 @@ pipeline {
                 ).trim()
                     
     
-            env.PS_VERSION = "${VERSION}.1-aarch64"
+            env.PS_VERSION = "${VERSION}-arm64"
             env.PS_REVISION = "${REVISION}"
 
             echo "PS_VERSION fetched: ${env.PS_VERSION}"
