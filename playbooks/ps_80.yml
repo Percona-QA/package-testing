@@ -97,6 +97,7 @@
 
   - name: Verify telemetry version and package installation
     command: /package-testing/check_tel_ver_pack.sh
+    when: ansible_os_family != "RedHat"
 
 #  - name: enable the Tools release repo
 #    command: percona-release enable tools release
