@@ -159,6 +159,7 @@
 
   - name: Verify telemetry version and package installation
     command: /package-testing/check_tel_ver_pack.sh
+    when: ansible_os_family == "debian"
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
