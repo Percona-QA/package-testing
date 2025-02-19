@@ -32,13 +32,20 @@ def set_pro_fips_vars():
     Retrieves and returns environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
     """
     source_environment_file()
-    pro = True if os.getenv('PRO') == "yes" else False
+    pro = True if os.getenv('PRO') == True else False
     fips_supported = True if os.getenv('PRO') == "yes" else False    
     #fips_supported = os.getenv('FIPS_SUPPORTED') in {"yes", "True"}
     debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
     ps_revision = os.getenv('PS_REVISION')
     ps_version = os.getenv('PS_VERSION')
-    base_dir = '/usr/percona-server'
+
+
+    if (os.getenv('PRO')):
+      base_dir = '/usr/percona-server'
+      print(f"PRINTING THE PRO VALUE PRO: {pro}")
+    else:
+      base_dir = os.getenv('BASE_DIR')
+
     ps_version_upstream, ps_version_percona = ps_version.split('-')
     ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
 
@@ -108,7 +115,7 @@ ps80_components = (
 ps80_files = (
   'lib/libcoredumper.a', 
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.41' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.40' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini','lib/plugin/keyring_file.so',
@@ -116,8 +123,8 @@ ps80_files = (
   'lib/plugin/audit_log_filter.so', 'lib/plugin/component_masking_functions.so', 'lib/plugin/component_percona_telemetry.so'
 )
 ps80_symlinks = (
-  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.41'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.41'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.40'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.40'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 ps80_openssl_files = (
   'lib/libcrypto.so', 'lib/libk5crypto.so', 'lib/libssl.so', 'lib/libsasl2.so'

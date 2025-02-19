@@ -1,3 +1,12 @@
+def osConfigs = [
+    "min-noble-x64"     : "2.35",
+    "min-jammy-x64"     : "2.35",
+    "min-focal-x64"     : "2.31",
+    "min-bookworm-x64"  : "2.35",
+    "min-bullseye-x64"  : "2.31",
+    "min-ol-9-x64"      : "2.34",
+    "min-ol-8-x64"      : "2.28"
+]
 
 pipeline {
     agent {
@@ -24,12 +33,12 @@ pipeline {
                     sh '''
                         rm -rf /package-testing
                         rm -f master.zip
-                        wget https://github.com/Percona-QA/package-testing/archive/master.zip
+                        wget -O master.zip https://github.com/Percona-QA/package-testing/archive/refs/heads/master.zip
                         unzip master.zip
                         rm -f master.zip
                         mv "package-testing-master" package-testing
                     '''
-                    
+
                     def VERSION = sh(
                         script: '''grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
                         returnStdout: true
@@ -47,6 +56,7 @@ pipeline {
                     echo "PS_VERSION fetched: ${env.PS_VERSION}"
                     echo "PS_REVISION fetched: ${env.PS_REVISION}"
 
+                    currentBuild.displayName = "#${BUILD_NUMBER}-${env.PS_VERSION}-${env.PS_REVISION}"
                 }
             }
         }
@@ -59,249 +69,151 @@ pipeline {
                 }
             }
         }
-        stage('Binary tarball test') {
-            parallel {
-                stage('Ubuntu Noble') {
-                    agent {
-                        label "min-noble-x64"
-                    }
-                    steps {
-                        script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-                        }
-                            sh '''
-                                echo ${BUILD_TYPE_MINIMAL}
-                                MINIMAL=""
-                                if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
-                                    MINIMAL="-minimal"
-                                fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
-                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.35${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
-                                rm -rf package-testing
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/ps
-                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
-                                ./run.sh || true
-                            '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-                        }
-                    }
-                stage('Ubuntu Jammy') {
-                    agent {
-                        label "min-jammy-x64"
-                    }
-                    steps {
-                        script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-                        }
-                            sh '''
-                                echo ${BUILD_TYPE_MINIMAL}
-                                MINIMAL=""
-                                if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
-                                    MINIMAL="-minimal"
-                                fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
-                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.35${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
-                                rm -rf package-testing
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/ps
-                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
-                                ./run.sh || true
-                            '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
+
+        stage('Test on Multiple OS') {
+            steps {
+                script {
+                    PS_VERSION = env.PS_VERSION
+
+                    def parallelStages = [:]
+                    def unstabilityFlag = false  // Flag to track test failures
+
+                    osConfigs.each { label, version ->
+                        parallelStages[label] = {
+                            node(label) {
+                                stage("Test on ${label}") {
+                                    script {
+                                        echo "Starting tests on: ${label}"
+                                        
+                                        // Run the test function
+                                        runtarballtests(PS_VERSION, params.BUILD_TYPE_MINIMAL, version)
+                                        
+                                        // Check the report file existence
+                                        sh """
+                                            echo 'Checking report file existence:' 
+                                            ls -la /tmp/package-testing/binary-tarball-tests/ps/
+                                        """
+
+                                        // Rename the report file to avoid conflicts
+                                        sh "mv /tmp/package-testing/binary-tarball-tests/ps/report.xml ${WORKSPACE}/report-${label}.xml"
+
+                                        // Stash the test report
+                                        stash name: "report-${label}", includes: "report-${label}.xml"
+
+                                        // Extract failure count without additional dependencies
+                                        def failures = sh(
+                                            script: "grep -o 'failures=\"[0-9]*\"' ${WORKSPACE}/report-${label}.xml | sed 's/failures=\"//;s/\"//'",
+                                            returnStdout: true
+                                        ).trim()
+
+                                        echo "Failure count for ${label}: ${failures}"
+
+                                        // Convert to integer and check
+                                        if (failures.isInteger() && failures.toInteger() > 0) {
+                                            unstabilityFlag = true
+                                            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                                                sh "exit ${failures}"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-                stage('Ubuntu Focal') {
-                    agent {
-                        label "min-focal-x64"
+
+                    // Run all generated parallel stages
+                    parallel parallelStages
+
+                    // Mark build unstable if any test failed
+                    if (unstabilityFlag) {
+                        currentBuild.result = 'UNSTABLE'
+                        echo "Marking build as UNSTABLE due to test failures"
                     }
-                    steps {
-                        script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-                        }
-                            sh '''
-                                echo ${BUILD_TYPE_MINIMAL}
-                                MINIMAL=""
-                                if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
-                                    MINIMAL="-minimal"
-                                fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
-                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.31${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
-                                rm -rf package-testing
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/ps
-                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
-                                ./run.sh || true
-                            '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-                        }
+                }
+            }
+        }
+
+
+
+
+    }
+
+
+    post {
+        always {
+            script {
+
+                osConfigs.each { label, version ->
+                    try {
+                        unstash name: "report-${label}"
+
+                        //sh "sed -i \"s#hostname=\\\"[^\\\"]*\\\"#hostname=\\\"${label}\\\"#g\" ${env.WORKSPACE}/report-${label}.xml"
+
+                        sh "sed -i \"s#classname=\\\"\\([^\\\"]*\\)\\\"#classname=\\\"\\1-${label}\\\"#g\" ${env.WORKSPACE}/report-${label}.xml"
+
+
+                    } catch (Exception e) {
+                        echo " Warning: Stash report-${label} not found, skipping..."
                     }
-                stage('Debian Bookworm') {
-                    agent {
-                        label "min-bookworm-x64"
-                    }
-                    steps {
-                        script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-                        }
-                            sh '''
-                                echo ${BUILD_TYPE_MINIMAL}
-                                MINIMAL=""
-                                if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
-                                    MINIMAL="-minimal"
-                                fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
-                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.35${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
-                                rm -rf package-testing
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/ps
-                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
-                                ./run.sh || true
-                            '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-                        }
-                    }
-                stage('Debain Bullseye') {
-                    agent {
-                        label "min-bullseye-x64"
-                    }
-                    steps {
-                        script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-                        }
-                            sh '''
-                                echo ${BUILD_TYPE_MINIMAL}
-                                MINIMAL=""
-                                if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
-                                    MINIMAL="-minimal"
-                                fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
-                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.31${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
-                                rm -rf package-testing
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/ps
-                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
-                                ./run.sh || true
-                            '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-                        }
-                    }
-                stage('Oracle Linux 9') {
-                    agent {
-                        label "min-ol-9-x64"
-                    }
-                    steps {
-                        script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-                        }
-                            sh '''
-                                echo ${BUILD_TYPE_MINIMAL}
-                                MINIMAL=""
-                                if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
-                                    MINIMAL="-minimal"
-                                fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
-                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.34${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
-                                rm -rf package-testing
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/ps
-                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
-                                ./run.sh || true
-                            '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-                        }
-                    }
-                stage('Oracle Linux 8') {
-                    agent {
-                        label "min-ol-8-x64"
-                    }
-                    steps {
-                        script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-                        }
-                            sh '''
-                                echo ${BUILD_TYPE_MINIMAL}
-                                MINIMAL=""
-                                if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
-                                    MINIMAL="-minimal"
-                                fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
-                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.28${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
-                                rm -rf package-testing
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/ps
-                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
-                                ./run.sh || true
-                            '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-                        }
-                    }
-                stage('Centos 7') {
-                    agent {
-                        label "min-centos-7-x64"
-                    }
-                    steps {
-                        script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-                        }
-                            sh '''
-                                echo ${BUILD_TYPE_MINIMAL}
-                                MINIMAL=""
-                                if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
-                                    MINIMAL="-minimal"
-                                fi
-                                if [ -f /usr/bin/yum ]; then
-                                    sudo yum install -y git wget
-                                else
-                                    sudo apt install -y git wget
-                                fi
-                                TARBALL_NAME="Percona-Server-${PS_VERSION}-Linux.x86_64.glibc2.17${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${PS_VERSION}/"
-                                rm -rf package-testing
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/ps
-                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
-                                ./run.sh || true
-                            '''
-                            junit 'package-testing/binary-tarball-tests/ps/report.xml'
-                        }
-                    }
-               }
-          }
-     }
+                }
+            }
+            junit '**/*.xml'
+            archiveArtifacts artifacts: '**/*.xml', fingerprint: true
+        }
+    }
+
+
+}
+
+
+
+def runtarballtests(String psVersion, boolean buildMinimal, String glibcVersion) {
+    sh """
+        echo "PS_VERSION is ${psVersion}"
+        echo "BUILD_TYPE_MINIMAL=${buildMinimal}"
+        MINIMAL=""
+        if [ "\${buildMinimal}" = "true" ]; then
+            MINIMAL="-minimal"
+        fi
+
+        if [ -f /usr/bin/yum ]; then
+            sudo yum install -y git wget
+        else
+            sudo apt install -y git wget
+        fi
+
+        TARBALL_NAME="Percona-Server-${psVersion}-Linux.x86_64.glibc${glibcVersion}\${MINIMAL}.tar.gz"
+        TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${psVersion}/"
+
+        rm -rf /usr/local/package-testing
+        cd /tmp
+        git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+        cd /tmp/package-testing/binary-tarball-tests/ps
+
+        wget "\${TARBALL_LINK}\${TARBALL_NAME}"
+
+        ls -la 
+
+        echo "Checking if run.sh exists..."
+        if [ ! -f ./run.sh ]; then
+            echo "ERROR: run.sh not found!"
+            exit 1
+        fi
+
+        echo "Making run.sh executable..."
+        chmod +x ./run.sh
+        
+        echo "Running ./run.sh..."
+        ./run.sh 2>&1 | tee output.log
+        
+        if [ \$? -ne 0 ]; then
+            echo "ERROR: run.sh failed to execute!"
+            exit 1
+        fi
+        
+        echo "run.sh execution completed."
+        ls -la 
+
+        cp report.xml ${WORKSPACE}/report.xml
+    """
 }
