@@ -244,6 +244,7 @@
 
   - name: Verify telemetry version and package installation
     command: /package-testing/check_tel_ver_pack.sh
+    when: ansible_os_family == "Debian"
 
   - name: install Percona XtraBackup {{ major_release_version }} packages
     include_tasks: ../../../tasks/install_pxb_innovation_lts.yml
