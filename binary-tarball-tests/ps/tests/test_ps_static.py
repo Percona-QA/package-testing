@@ -31,9 +31,8 @@ def test_binaries_version(host,pro_fips_vars):
     
     ps_version_percona = pro_fips_vars['ps_version_percona']
     base_dir_debug = base_dir + debug
-    
-    ps_revision_pro = ps_revision + '-pro'
-    
+
+
     if ps_version_major in ['5.7', '5.6']:
         # Older versions without Pro support
         assert 'mysql  Ver 14.14 Distrib ' + ps_version + ', for Linux (x86_64)' in host.check_output(
@@ -43,16 +42,28 @@ def test_binaries_version(host,pro_fips_vars):
             base_dir + '/bin/mysqld --version'
         )
     else:
-        if (pro):
-            # Newer versions with Pro support
-            expected_mysql_output = (
-                f"{base_dir}/bin/mysql  Ver {ps_version} for Linux on x86_64 (Percona Server Pro (GPL), "
-                f"Release {ps_version_percona}, Revision {ps_revision_pro})"
-            )
-            expected_mysqld_output = (
-                f"{base_dir}/bin/mysqld  Ver {ps_version} for Linux on x86_64 (Percona Server Pro (GPL), "
-                f"Release {ps_version_percona}, Revision {ps_revision_pro})"
-            )
+        if pro:
+            if os.getenv('DEBUG') == "yes":
+                # Newer versions with Pro support
+                expected_mysql_output = (
+                    f"{base_dir}/bin/mysql  Ver {ps_version}-pro for Linux on x86_64 (Percona Server Pro (GPL), "
+                    f"Release {ps_version_percona}, Revision {ps_revision})"
+                )
+                expected_mysqld_output = (
+                    f"{base_dir}/bin/mysqld  Ver {ps_version}-pro for Linux on x86_64 (Percona Server Pro (GPL), "
+                    f"Release {ps_version_percona}, Revision {ps_revision})"
+                )
+            else:
+                ps_revision_pro = str(ps_revision) + "-pro"
+                # Newer versions with Pro support
+                expected_mysql_output = (
+                    f"{base_dir}/bin/mysql  Ver {ps_version}-pro for Linux on x86_64 (Percona Server Pro (GPL), "
+                    f"Release {ps_version_percona}, Revision {ps_revision})"
+                )
+                expected_mysqld_output = (
+                    f"{base_dir}/bin/mysqld  Ver {ps_version}-pro for Linux on x86_64 (Percona Server Pro (GPL), "
+                    f"Release {ps_version_percona}, Revision {ps_revision})"
+                )
         else: 
             # Newer versions with Pro support
             expected_mysql_output = (
