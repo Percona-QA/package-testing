@@ -101,13 +101,21 @@
     shell: setenforce 0 || true
     when: ansible_os_family == "RedHat"
 
+  - name: Create symlink for libjemalloc.so.1
+    ansible.builtin.file:
+      src: /usr/lib64/libjemalloc.so.2
+      dest: /usr/lib64/libjemalloc.so.1
+      state: link
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+
   - name: install tokudb and restart server
     command: /usr/bin/ps_tokudb_admin --enable --enable-backup
 
   - name: restart mysql service
     service: name=mysql state=restarted
 
-  - name: re-run ps_tokudb_admin to finish tokudb install
+:q!  - name: re-run ps_tokudb_admin to finish tokudb install
     command: /usr/bin/ps_tokudb_admin --enable --enable-backup
 
   - name: install plugins, import world database, test tokudb
