@@ -284,14 +284,14 @@
 
   - name: run bats tests for mysql init scripts
     command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
+    when: ansible_distribution_major_version != "9"
 
   - name: run Group Replication tests
     include_tasks: ../tasks/gr_test.yml
 
   - name: remove PS 8.0 packages
     include_tasks: ../tasks/remove_ps80.yml
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
+    when: ansible_distribution_major_version != "9"
 
   - name: Force remove Percona Server rpm packages
     ansible.builtin.dnf:
@@ -299,8 +299,15 @@
       state: absent
     loop:
       - Percona-Server-shared-57
-      - percona-server-shared-8.0
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+      - percona-server-shared
+      - percona-server-server
+      - percona-server-client
+      - percona-server-test
+      - percona-server-debuginfo
+      - percona-server-devel
+      - percona-server-tokudb
+      - percona-server-rocksdb
+    when: ansible_distribution_major_version == "9"
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
