@@ -115,7 +115,7 @@
   - name: restart mysql service
     service: name=mysql state=restarted
 
-:q!  - name: re-run ps_tokudb_admin to finish tokudb install
+  - name: re-run ps_tokudb_admin to finish tokudb install
     command: /usr/bin/ps_tokudb_admin --enable --enable-backup
 
   - name: install plugins, import world database, test tokudb
