@@ -1,10 +1,15 @@
 ---
 # tasks file for tarball tests
+
+  - name: Display OS Name
+    debug:
+      msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+
   - name: Add epel-release
     yum:
       state: present
       name: epel-release
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution_version != "2023"
 
   - name: install needed packages for running tests with apt
     apt:
@@ -18,13 +23,24 @@
       - wget
       - python3
       - python3-pip
-      - libaio1 
       - libnuma1
       - tar
       - gawk
     register: result
     until: result is not failed
     when: ansible_os_family == "Debian"
+
+  - name: install libaio1 package for running tests with apt except for Ubuntu 24.04
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - libaio1 
+    register: result
+    until: result is not failed
+    when: ansible_os_family == "Debian" and ansible_distribution_version != "24.04"
 
   - name: install needed packages for running tests with yum
     yum:
@@ -43,7 +59,24 @@
       - python3-pip
       - libtirpc
       - lsb_release
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution_version != "2023"
+
+  - name: Install required packages using dnf
+    dnf:
+      name:
+        - git
+        - unzip
+        - wget
+        - tar
+        - libaio
+        - numactl
+        - gawk
+        - python3
+        - python3-pip
+        - libtirpc
+      state: present
+    when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
+
 
 #      - openldap // this package causes issue on OL-9
 
@@ -95,12 +128,12 @@
   - name: Download regular {{ TARBALL_NAME }}
     get_url:
       url: '{{ TARBALL_LINK }}'
-      dest: /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
+      dest: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
       mode: '0644'
 
   - name: Unpack regular tarball
     unarchive:
-      src: /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
+      src: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
       dest: /
       remote_src: yes
       extra_opts:
@@ -110,12 +143,12 @@
   - name: Download minimal {{ MINIMAL_TARBALL_NAME }}
     get_url:
       url: '{{ MINIMAL_TARBALL_LINK }}'
-      dest: /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}-minimal.tar.gz
+      dest: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}-minimal.tar.gz
       mode: '0644'
 
   - name: Unpack minimal tarball
     unarchive:
-      src: /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}-minimal.tar.gz
+      src: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}-minimal.tar.gz
       dest: /
       remote_src: yes
       extra_opts:
@@ -125,12 +158,12 @@
   - name: Download debug {{ DEBUG_TARBALL_NAME }}
     get_url:
       url: '{{ DEBUG_TARBALL_LINK }}'
-      dest: /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}-debug.tar.gz
+      dest: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}-debug.tar.gz
       mode: '0644'
 
   - name: Unpack debug tarball
     unarchive:
-      src: /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}-debug.tar.gz
+      src: /usr/percona-server-{{ lookup('env', 'PS_VERSION') }}-debug.tar.gz
       dest: /
       remote_src: yes
       extra_opts:
