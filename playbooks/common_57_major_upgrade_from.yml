@@ -291,6 +291,16 @@
 
   - name: remove PS 8.0 packages
     include_tasks: ../tasks/remove_ps80.yml
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
+
+  - name: Force remove Percona Server rpm packages
+    ansible.builtin.dnf:
+      name: "{{ item }}"
+      state: absent
+    loop:
+      - Percona-Server-shared-57
+      - percona-server-shared-8.0
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
