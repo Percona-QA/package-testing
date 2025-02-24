@@ -30,8 +30,8 @@
     when:
       - ansible_os_family == "RedHat"
 
-  - name: enable the tools {{ repo }}
-    command: percona-release enable tools {{ repo }}
+  - name: enable the tools release
+    command: percona-release enable tools release
     vars:
       repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
   
