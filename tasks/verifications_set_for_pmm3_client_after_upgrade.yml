@@ -10,7 +10,7 @@
   include_tasks: ./verify_pmm3_client_files.yml
 
 - name: Verify config paths-base is correct after upgrade client
-  include_tasks: ./verify_pmm_client_config.yml
+  include_tasks: ./verify_pmm3_client_config.yml
 
 - name: Get "pmm-admin list" output
   command: "pmm-admin list {{ port_flag if port_flag is defined else '' }}"
