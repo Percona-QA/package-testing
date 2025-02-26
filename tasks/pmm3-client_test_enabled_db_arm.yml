@@ -5,16 +5,15 @@
     enabled_db: "{{ db_list|select|list }}"
   vars:
     db_list:
-      - "{{ (false) | ternary('ps-8.0','') }}"
-      - "{{ (ansible_distribution == 'Debian') | ternary('ps-8.0','') }}"
-      - "{{ (ansible_distribution == 'Ubuntu') | ternary('ps-8.0','') }}"
+      - "{{ (false) | ternary('ps-8.4','') }}"
+      - "{{ (ansible_distribution == 'Debian') | ternary('ps-8.4','') }}"
+      - "{{ (ansible_distribution == 'Ubuntu') | ternary('ps-8.4','') }}"
       - "{{ (ansible_os_family == 'RedHat') | ternary('ps-8.0','') }}"
-# No debian arm package yet.      
-#      - "{{ (ansible_distribution == 'Debian') | ternary('psmdb-70','') }}"
-      - "{{ (ansible_distribution == 'Ubuntu') | ternary('psmdb-70','') }}"
-      - "{{ (ansible_os_family == 'RedHat') | ternary('psmdb-70','') }}"
-      - "{{ (ansible_distribution == 'Debian') | ternary('pg-16','') }}"
-      - "{{ (ansible_distribution == 'Ubuntu') | ternary('pg-16','') }}"
-      - "{{ (ansible_os_family == 'RedHat') | ternary('pg-16','') }}"
+      - "{{ (ansible_distribution == 'Debian') | ternary('psmdb-80','') }}"
+      - "{{ (ansible_distribution == 'Ubuntu') | ternary('psmdb-80','') }}"
+      - "{{ (ansible_os_family == 'RedHat') | ternary('psmdb-80','') }}"
+      - "{{ (ansible_distribution == 'Debian') | ternary('pg-17','') }}"
+      - "{{ (ansible_distribution == 'Ubuntu') | ternary('pg-17','') }}"
+      - "{{ (ansible_os_family == 'RedHat') | ternary('pg-17','') }}"
       
       
