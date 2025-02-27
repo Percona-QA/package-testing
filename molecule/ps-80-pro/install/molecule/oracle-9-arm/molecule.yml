@@ -25,14 +25,14 @@ provisioner:
 scenario:
   name: oracle-9-arm
   destroy_sequence:
-    - destroy
+#    - destroy
   clenup_sequence:
     - cleanup
   test_sequence:
-    - destroy
+#    - destroy
     - create
     - prepare
     - converge
     - verify
     - cleanup
-    - destroy
+#    - destroy
