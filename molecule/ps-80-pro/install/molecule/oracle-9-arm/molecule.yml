@@ -24,8 +24,8 @@ provisioner:
     converge: ../../playbooks/playbook.yml
 scenario:
   name: oracle-9-arm
-  destroy_sequence:
-    - destroy
+#  destroy_sequence:
+#    - destroy
   clenup_sequence:
     - cleanup
   test_sequence:
