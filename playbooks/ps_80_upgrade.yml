@@ -60,8 +60,6 @@
 
   - name: Enable PXB 8 Main repo
     command: percona-release enable pxb-80 release
-    when:
-      - lookup('env', 'pro_test') != "yes"
 
   - name: include tasks for selecting PS 8 repos for PRO update tests
     include_tasks: ../tasks/select_repo_ps80_pro_update.yml
