@@ -158,7 +158,7 @@
       pgsql_socket_service_name: "pgsql_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
 
   - name: Install and start Percona Server PostgreSQL
-    when: '"pg-" in enabled_db'
+    when: '"pg-" in enabled_db | join("")'
     include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql.yml
 
   - name: Verify Postgres Exporter metric endpoint with Auth works(including service with socket)
