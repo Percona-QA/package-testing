@@ -157,13 +157,9 @@
       pgsql_service_name: "pgsql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
       pgsql_socket_service_name: "pgsql_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
 
-  - name: Install and start Percona Server PostgreSQL 13
-    when: '"pg-13" in enabled_db'
-    include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql_13.yml
-
-  - name: Install and start Percona Server PostgreSQL 16
-    when: '"pg-16" in enabled_db'
-    include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql_16.yml
+  - name: Install and start Percona Server PostgreSQL
+    when: '"pg-" in enabled_db'
+    include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql.yml
 
   - name: Verify Postgres Exporter metric endpoint with Auth works(including service with socket)
     when: '"pg-" in enabled_db | join("")'
