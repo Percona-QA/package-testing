@@ -160,6 +160,8 @@
   - name: Install and start Percona Server PostgreSQL
     when: '"pg-" in enabled_db | join("")'
     include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql.yml
+    vars:
+      pg_to_test: "{{ enabled_db | select('match', '^pg-*') | join('') }}"
 
   - name: Verify Postgres Exporter metric endpoint with Auth works(including service with socket)
     when: '"pg-" in enabled_db | join("")'
