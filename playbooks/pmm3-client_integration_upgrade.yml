@@ -32,6 +32,10 @@
     when: ansible_architecture == "aarch64"
 
   - name: Set Integrations list
+    include_tasks: ../tasks/pmm3-client_test_enabled_db_arm.yml
+    when: ansible_architecture == "aarch64"
+
+  - name: Set Integrations list
     include_tasks: ../tasks/pmm3-client_test_enabled_db.yml
     when: ansible_architecture != "aarch64"
 
