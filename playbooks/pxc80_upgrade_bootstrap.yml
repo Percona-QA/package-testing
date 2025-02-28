@@ -23,17 +23,88 @@
       yum makecache
     when: ansible_os_family == "RedHat"
 
-  - name: include tasks for enabling test repo
+#-------------non pro
+  - name: include tasks for enabling test repo pxc80 non pro
     include_tasks: ../tasks/enable_pxc80_testing_repo.yml
-    when: lookup('env', 'upgrade_repo') == "testing" or lookup('env', 'upgrade_repo') == ""
+    when:
+    - lookup('env', 'install_repo') == "testing" 
+    - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling main repo
+  - name: include tasks for enabling main repo pxc80 non pro
     include_tasks: ../tasks/enable_pxc80_main_repo.yml
-    when: lookup('env', 'upgrade_repo') == "main"
+    when: 
+    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling experimental repo
+  - name: include tasks for enabling experimental repo non pro
     include_tasks: ../tasks/enable_pxc80_experimental_repo.yml
-    when: lookup('env', 'upgrade_repo') == "experimental"
+    when: 
+    - lookup('env', 'install_repo') == "experimental"
+    - lookup('env', 'pro') == "no"
+#-----------------pro
+
+  - name: include tasks for enabling test repo pro pxc80
+    include_tasks: ../tasks/enable_pxc80_pro_repo_testing.yml
+    when: 
+    - lookup('env', 'install_repo') == "testing" 
+    - lookup('env', 'pro') == "yes"
+
+  - name: include tasks for enabling main repo pro pxc80
+    include_tasks: ../tasks/enable_pxc80_pro_repo_main.yml
+    when: 
+    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - lookup('env', 'pro') == "yes"
+
+
+#---------------------Upgrade to NON PRO
+
+  - name: upgrade PXC 8.0 to new deb packages NON PRO
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+      - percona-xtradb-cluster-test
+      - percona-xtradb-cluster-source
+      - percona-xtradb-cluster-server-debug
+      - percona-xtradb-cluster-server
+      - percona-xtradb-cluster-common
+      - percona-xtradb-cluster-dbg
+      - percona-xtradb-cluster-client
+      - percona-xtradb-cluster
+    when: 
+      - ansible_os_family == "Debian"
+      - lookup('env', 'pro') == "no"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: upgrade PXC 8.0 to new rpm packages NON PRO
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-shared
+      - percona-xtradb-cluster-garbd
+      - percona-xtradb-cluster-test
+      - percona-xtradb-cluster-devel
+      - percona-xtradb-cluster-debuginfo
+      - percona-xtradb-cluster-server
+      - percona-xtradb-cluster-full
+      - percona-xtradb-cluster-client
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'pro') == "no"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+
+#-------------------------- UPGRADE TO PRO
+
 
   - name: upgrade PXC 8.0 to new deb packages
     apt:
