@@ -130,6 +130,9 @@
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
 ### end PG
 
+  - set_fact:
+      agent_password: "{{ pmm_auth_password }}"
+
 ### verifications
   - name: Perform standard verifications set for PMM Client
     include_tasks: ../tasks/verifications_set_for_pmm3_client.yml
