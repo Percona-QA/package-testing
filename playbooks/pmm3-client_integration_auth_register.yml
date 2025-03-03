@@ -41,13 +41,6 @@
   - name: Setup environment
     include_tasks: ../tasks/pmm3_client_test_prepare.yml
 
-  - name: include tasks for test env setup
-    include_tasks: ../tasks/pmm2_client_test_prepare.yml
-
-  - name: enable pmm2-client release repo
-    when: test_repo == "release"
-    command: percona-release enable pmm2-client release
-
   - name: update apt repositories
     when: test_repo == "release" and ansible_os_family == "Debian"
     command: apt-get update -y
