@@ -309,7 +309,9 @@
     vars:
       packages:
       - percona-toolkit
-    when: ansible_os_family == "RedHat"
+    when:
+      - lookup('env', 'pro_test') != "yes"
+      - ansible_os_family == "RedHat"
 
   - name: upgrade Percona release to new rpm packages
     yum:
