@@ -90,6 +90,8 @@
 
   - name: install Percona Shell
     include_tasks: ../tasks/install_pshell.yml
+    when:
+      - lookup('env', 'pro_test') != "yes"
 
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
@@ -106,8 +108,9 @@
 
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
-    when: 
+    when:
       - lookup('env', 'install_repo') != "experimental"
+      - lookup('env', 'pro_test') != "yes"
       - ansible_distribution != "Amazon"
 
   - name: enable the sysbench repo

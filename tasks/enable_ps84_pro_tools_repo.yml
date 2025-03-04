@@ -34,6 +34,18 @@
     repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
   when:
     - ansible_os_family == "RedHat"
+    - ansible_architecture == "x86_64"
+
+- name: add pro repository on rmp aarch64
+  template: src=../templates/pro_rpm_repo_file_ps84_arm.j2
+            dest=/etc/yum.repos.d/psmysql-pro.repo
+  vars:
+    client_id: "{{ lookup('env', 'USERNAME') }}"
+    client_token: "{{ lookup('env', 'PASSWORD') }}"
+    repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
 
 - name: enable the tools repo
   command: percona-release enable-only tools

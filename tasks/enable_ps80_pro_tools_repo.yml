@@ -45,6 +45,18 @@
     releasever: "{{ release_version.stdout }}"
   when:
     - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+    - ansible_architecture == "x86_64"
+
+- name: add pro repository on rmp
+  template: src=../templates/pro_rpm_repo_file_ps80_arm.j2
+            dest=/etc/yum.repos.d/psmysql-pro.repo
+  vars:
+    client_id: "{{ lookup('env', 'USERNAME') }}"
+    client_token: "{{ lookup('env', 'PASSWORD') }}"
+    repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
+  when:
+    - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+    - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
 
 - name: Get release version for Amazon Linux
   shell: "source /etc/os-release && echo $VERSION_ID"
