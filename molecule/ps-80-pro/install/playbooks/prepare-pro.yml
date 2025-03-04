@@ -23,7 +23,7 @@
         key: "{{ lookup('file', 'public_keys') }}"
         state: present
         exclusive: False
-#      when: (ansible_distribution == "OracleLinux") or (ansible_distribution == "Amazon")
+      when: (ansible_distribution == "OracleLinux") or (ansible_distribution == "Amazon")
 
     - name: Setup SSH keys Debian
       authorized_key:
