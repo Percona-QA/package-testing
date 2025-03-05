@@ -233,16 +233,16 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 #--------------------------------------------------------------------------------------------
 
-  - name: check telemetry (enabled)
-    command: /package-testing/check_telemetry.sh pxc -e
+#  - name: check telemetry (enabled)
+#    command: /package-testing/check_telemetry.sh pxc -e
 
-  - name: get telemetry_uuid content
-    command: cat /usr/local/percona/telemetry_uuid
-    register: t_uuid_output
+#  - name: get telemetry_uuid content
+#    command: cat /usr/local/percona/telemetry_uuid
+#    register: t_uuid_output
 
-  - name: output telemetry_uuid content
-    debug:
-      var: t_uuid_output
+#  - name: output telemetry_uuid content
+#    debug:
+#      var: t_uuid_output
 
   - name: stop mysql service with service command
     command: systemctl stop mysql
