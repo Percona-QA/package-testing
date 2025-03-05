@@ -32,8 +32,8 @@ pipeline {
                 ).trim()
                     
     
-            env.PS_VERSION = VERSION
-            env.PS_REVISION = REVISION
+             env.PS_VERSION = "${VERSION}-amd64"
+            env.PS_REVISION = "${REVISION}"
 
             echo "PS_VERSION fetched: ${env.PS_VERSION}"
             echo "PS_REVISION fetched: ${env.PS_REVISION}"

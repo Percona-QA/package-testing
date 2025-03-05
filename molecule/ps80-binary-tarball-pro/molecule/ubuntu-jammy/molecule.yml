@@ -8,7 +8,7 @@ platforms:
     region: us-west-2
     image: ami-058168290d30b9c52
     vpc_subnet_id: subnet-03136d8c244f56036
-    instance_type: t2.micro
+    instance_type: t2.medium
     ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
@@ -20,7 +20,6 @@ provisioner:
   playbooks:
     create: ../../../playbooks/create-noble-arm.yml
     destroy: ../../../playbooks/destroy-noble-arm.yml
-    cleanup: ../../playbooks/cleanup.yml
     prepare: ../../playbooks/prepare-ubuntu-pro.yml
     converge: ../../playbooks/playbook.yml
 verifier:
@@ -35,13 +34,10 @@ scenario:
   name: ubuntu-jammy
   destroy_sequence:
     - destroy
-  clenup_sequence:
-    - cleanup
   test_sequence:
     - destroy
     - create
     - prepare
     - converge
     - verify
-    - cleanup
     - destroy

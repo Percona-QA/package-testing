@@ -58,15 +58,13 @@
     when:
       - lookup('env', 'pro_test') != "yes"
 
-  - name: Enable PXB 8 Main repo
-    command: percona-release enable pxb-80 release
-    when:
-      - lookup('env', 'pro_test') != "yes"
-
   - name: include tasks for selecting PS 8 repos for PRO update tests
     include_tasks: ../tasks/select_repo_ps80_pro_update.yml
     when: 
       - lookup('env', 'pro_test') == "yes"
+
+  - name: Enable PXB 8 Main repo
+    command: percona-release enable pxb-80 release
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -311,7 +309,9 @@
     vars:
       packages:
       - percona-toolkit
-    when: ansible_os_family == "RedHat"
+    when:
+      - lookup('env', 'pro_test') != "yes"
+      - ansible_os_family == "RedHat"
 
   - name: upgrade Percona release to new rpm packages
     yum:

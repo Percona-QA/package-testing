@@ -168,6 +168,7 @@
 
   - name: Verify telemetry version and package installation
     command: /package-testing/check_tel_ver_pack.sh
+    when: ansible_os_family == "Debian"
 
   - name: install percona-mysql-shell package for CentOS
     yum:

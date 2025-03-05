@@ -163,11 +163,20 @@
         - net-tools
       when: (ansible_os_family == "RedHat") and (ansible_distribution_major_version|int == 8 or ansible_distribution_major_version|int == 9)
 
-    - name: disable firewalld for OL8
+    - name: Display OS Family
+      debug:
+        msg: "OS Family: {{ ansible_os_family }}"
+
+    - name: Display Distribution Major Version
+      debug:
+        msg: "Distribution Major Version: {{ ansible_distribution_major_version }}"
+
+    - name: disable firewalld for RHEL
       service:
         name: firewalld
         state: stopped
-      when: (ansible_os_family == "OracleLinux") and (ansible_distribution_major_version|int == 8 or ansible_distribution_major_version|int == 9)
+      when: ansible_os_family == "RedHat"
+      #and (ansible_distribution_major_version|int == 8 or ansible_distribution_major_version|int == 9)
 
     - name: Setup SSH keys for RedHat
       authorized_key:

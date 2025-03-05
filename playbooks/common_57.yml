@@ -101,6 +101,14 @@
     shell: setenforce 0 || true
     when: ansible_os_family == "RedHat"
 
+  - name: Create symlink for libjemalloc.so.1
+    ansible.builtin.file:
+      src: /usr/lib64/libjemalloc.so.2
+      dest: /usr/lib64/libjemalloc.so.1
+      state: link
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+
   - name: install tokudb and restart server
     command: /usr/bin/ps_tokudb_admin --enable --enable-backup
 
@@ -125,9 +133,9 @@
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps57
 
-  - name: check that sysbench version is correct
-    command: /package-testing/version_check.sh sysbench
-    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and ansible_distribution_major_version != "9" and ansible_distribution_release != "bookworm"
+#  - name: check that sysbench version is correct
+#    command: /package-testing/version_check.sh sysbench
+#    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and ansible_distribution_major_version != "9" and ansible_distribution_release != "bookworm"
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24

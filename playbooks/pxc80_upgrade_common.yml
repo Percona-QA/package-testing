@@ -55,7 +55,6 @@
     - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
     - lookup('env', 'pro') == "yes"
 #---------------------
-
   - name: upgrade PXC 8.0 to new deb packages
     apt:
       name: "{{ packages }}"
