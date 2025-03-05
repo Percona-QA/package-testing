@@ -19,12 +19,12 @@
   when: ansible_os_family == "RedHat"
 
 - name: add pro repository on debian
-  template: src=../templates/pro_deb_repo_file_pxc80.j2
+  template: src=../templates/pro_deb_repo_file_pxc84.j2
             dest=/etc/apt/sources.list.d/psmysql-pro.list
   vars:
     client_id: "{{ lookup('env', 'USERNAME') }}"
     client_token: "{{ lookup('env', 'PASSWORD') }}"
-    repo: "testing"
+    repo: "{{ lookup('env', 'install_repo') | default('testing') }}"
   when:
     - ansible_os_family == "Debian"
 
@@ -34,7 +34,7 @@
     - ansible_os_family == "Debian"
 
 - name: add pro repository on rmp x86_64
-  template: src=../templates/pro_rpm_repo_file_pxc80.j2
+  template: src=../templates/pro_rpm_repo_file_pxc84.j2
             dest=/etc/yum.repos.d/psmysql-pro.repo
   vars:
     client_id: "{{ lookup('env', 'USERNAME') }}"
@@ -45,7 +45,7 @@
     - arch_output == "x86_64"
 
 - name: add pro repository on rmp aarch64 (ARM)
-  template: src=../templates/pro_rpm_repo_file_pxc80_arm.j2
+  template: src=../templates/pro_rpm_repo_file_pxc84_arm.j2
             dest=/etc/yum.repos.d/psmysql-pro.repo
   vars:
     client_id: "{{ lookup('env', 'USERNAME') }}"
