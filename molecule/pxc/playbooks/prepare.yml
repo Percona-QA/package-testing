@@ -171,24 +171,11 @@
       debug:
         msg: "Distribution Major Version: {{ ansible_distribution_major_version }}"
 
-    - name: Debug services to check if firewalld exists
-      debug:
-        msg: "Services available: {{ ansible_facts.services }}"
-
-    - name: Check for firewalld service
-      command: systemctl list-units --type=service | grep firewalld
-      register: firewalld_service_check
-      ignore_errors: yes
-
-    - name: Output firewalld service check result
-      debug:
-        msg: "{{ firewalld_service_check.stdout }}"
-
     - name: Install firewalld if missing
       package:
         name: firewalld
         state: present
-      when: ansible_os_family == "RedHat" and firewalld_service_check.stdout == ""
+      when: ansible_os_family == "RedHat"
 
     - name: Disable firewalld for RHEL
       service:
