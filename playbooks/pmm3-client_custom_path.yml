@@ -61,10 +61,10 @@
   - name: Start agent
     shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
 
-  - name: "Wait for 'node_exporter' is Waiting"
+  - name: "Wait for 'node_exporter' is Done"
     shell: pmm-admin list | grep 'node_exporter' | awk -F' ' '{print $2}'
     register: node_exporter_status
-    until: node_exporter_status.stdout.find('Waiting') != -1
+    until: node_exporter_status.stdout.find('Done') != -1
     delay: 5
     retries: 5
 
