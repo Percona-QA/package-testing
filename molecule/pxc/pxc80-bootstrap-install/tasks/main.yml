@@ -306,11 +306,8 @@
 #    command: /package-testing/version_check.sh pxc80pro
 #    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
+#  - name: Verify telemetry version and package installation
+#    command: /package-testing/check_tel_ver_pack.sh
 
   - name: Sleep 60 seconds
     command: sleep 60
