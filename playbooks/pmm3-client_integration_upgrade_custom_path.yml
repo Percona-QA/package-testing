@@ -86,6 +86,9 @@
     ansible.builtin.debug:
       msg: "Installing old version: '{{ pmm_client_old }}'"
 
+  - set_fact:
+      old_version: "{{ old_release.stdout if (test_repo == 'main') else latest_release.stdout }}"
+
   - name: Install PMM client old deb packages
     when: ansible_os_family == "Debian"
     apt: name={{ pmm_client_old }} update_cache=yes state=present
