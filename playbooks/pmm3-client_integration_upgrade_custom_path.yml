@@ -119,6 +119,9 @@
       --agent-password={{ agent_password }}
       {{ instance_ip }} generic node2_{{ instance_ip }}
 
+  - name: Start agent
+    shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
+
   - name: Grep pmm-admin status output
     shell: "pmm-admin status"
     register: pmm_admin_status
