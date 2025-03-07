@@ -47,7 +47,7 @@
     - lookup('env', 'pro') == "no"
 #-----------------pro
 
-  - name: include tasks for enabling test repo pro pxc80
+  - name: include tasks for enabling test repo pxc 80 pro
     include_tasks: ../../../../tasks/enable_pxc80_pro_repo_testing.yml
     when: 
     - lookup('env', 'install_repo') == "testing" 
@@ -58,8 +58,6 @@
     when: 
     - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
     - lookup('env', 'pro') == "yes"
-
-#---------------------
 
   - name: install python3-libselinux 
     yum:
