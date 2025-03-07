@@ -19,6 +19,7 @@
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
     custom_path: "/pmm-client-custom-path"
     tarball_link: "{{ lookup('env', 'tarball_link') }}"
+    agent_password: "pmm-pass"
 
   tasks:
   - name: Register Instance IP
