@@ -117,7 +117,7 @@
       --server-password={{ pmm_server_password }}
       --paths-base={{ custom_path }}/
       --agent-password={{ agent_password }}
-      {{ instance_ip }} generic node2_{{ instance_ip }}ics-mode={{ metrics_mode }} --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
+      {{ instance_ip }} generic node2_{{ instance_ip }}
 
   - name: Grep pmm-admin status output
     shell: "pmm-admin status"
