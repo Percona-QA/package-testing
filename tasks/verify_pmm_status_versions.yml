@@ -37,7 +37,7 @@
       assert:
         that:
           - "pmm_version in pmm_agent_version.stdout"
-        fail_msg: "pmm-agent version is not {{ pmm_version }}!"
+        fail_msg: "pmm-agent version is not {{ pmm_version }}, but pmm version is: ${{ pmm_agent_version.stdout }}!"
         success_msg: "pmm-agent version is {{ pmm_agent_version.stdout }}!"
   rescue:
     - name: Print pmm-admin status on fail
