@@ -313,3 +313,5 @@
   - name: Sleep 60 seconds
     command: sleep 60
 
+  - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL BOOTSTRAP
+    include_tasks: ../../../../tasks/list_installed_packages.yml

@@ -510,3 +510,6 @@
     when:
       - ansible_distribution != "Amazon"
       - ansible_distribution_major_version|int != 7
+
+  - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL COMMON
+    include_tasks: ../../../../tasks/list_installed_packages.yml
