@@ -20,6 +20,7 @@
     custom_port: 17788
     port_flag: "--pmm-agent-listen-port={{ custom_port }}"
     cmd_admin_list: "pmm-admin list {{ port_flag }}"
+    tarball_link: "{{ lookup('env', 'tarball_link') }}"
 
   tasks:
   - name: Register Instance IP
