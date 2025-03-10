@@ -92,10 +92,7 @@
     register: old_release
 
   - set_fact:
-      new_version: "{{ pmm_version }}"
-
-  - set_fact:
-      old_version: "{{ old_release.stdout if (test_repo == 'main') else latest_release.stdout }}"
+      old_version: "{{ old_release.stdout if (test_repo == 'main') else pmm_version.stdout }}"
 
 ### install PMM Client from tarball
   - name: install pmm3-client tarball to custom path
