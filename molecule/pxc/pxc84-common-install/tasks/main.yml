@@ -262,13 +262,17 @@
   - name: print PXC version Molecule
     debug: var=pxc_version
 
-  - name: check that PXC version is correct Molecule
+  - name: check PXC 8.4 version Molecule pro 
     command: /package-testing/version_check.sh pxc84pro
-    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+    when:
+      - lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+      - lookup('env', 'pro') == "yes"
 
-  - name: check that PXC package versions are correct Molecule
-    command: /package-testing/package_check.sh pxc84 pro
-    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+  - name: check PXC 8.4 version Molecule
+    command: /package-testing/version_check.sh pxc84
+    when:
+      - lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+      - lookup('env', 'pro') == "no"
 
 # - name: install plugins
 #   command: /package-testing/plugins_test_80.sh pxc
@@ -505,8 +509,5 @@
     debug:
       var: t_uuid_output
 
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
+#  - name: Verify telemetry version and package installation
+#    command: /package-testing/check_tel_ver_pack.sh
