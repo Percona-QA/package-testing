@@ -15,6 +15,7 @@
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
+    test_package: "{{ lookup('env', 'install_package') | default('pmm3-client', true)}}"
 
   tasks:
   - name: Register Instance IP
