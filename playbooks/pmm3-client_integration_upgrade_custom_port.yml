@@ -117,10 +117,6 @@
     shell: "cat /usr/local/percona/pmm/config/pmm-agent.yaml | grep -o -c '{{ custom_port }}' | grep '1'"
     become: yes
 
-  - name: Kill pmm-agent process
-    command: "pkill -f pmm-agent"
-    become: yes
-
   - name: Wait for pmm-agent to be connected to server
     shell: "{{ cmd_admin_list }} | grep pmm_agent | awk -F' ' '{print $2}'"
     register: pmm_agent_status
