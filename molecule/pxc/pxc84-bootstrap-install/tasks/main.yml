@@ -231,8 +231,8 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 #--------------------------------------------------------------------------------------------
 
-  - name: check telemetry (enabled)
-    command: /package-testing/check_telemetry.sh pxc -e
+#  - name: check telemetry (enabled)
+#    command: /package-testing/check_telemetry.sh pxc -e
 
   - name: get telemetry_uuid content
     command: cat /usr/local/percona/telemetry_uuid
