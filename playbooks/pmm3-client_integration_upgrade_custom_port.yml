@@ -113,6 +113,9 @@
       --server-username=admin --server-password={{ pmm_server_password }}
       {{ instance_ip }} generic node2_{{ instance_ip }}
 
+  - name: Start agent
+    shell: pmm-agent --config-file=/usr/local/percona/pmm/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
+
   - name: Check if the configuration generated with pmm-agent-listen-port is using the custom port
     shell: "cat /usr/local/percona/pmm/config/pmm-agent.yaml | grep -o -c '{{ custom_port }}' | grep '1'"
     become: yes
