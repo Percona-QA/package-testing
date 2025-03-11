@@ -102,10 +102,10 @@
 
 ### install PMM Client from tarball
   - name: install pmm3-client tarball to custom path
-    command: "../scripts/pmm3_client_install_tarball.sh -v {{ (tarball_link | length > 0) | ternary(tarball_link, old_version) }}
+    command: "../scripts/pmm3_client_install_tarball.sh -v {{ (tarball_link | length > 0) | ternary(tarball_link, old_version) }}"
 
 ### Setup PMM Client
-  - name: Use "pmm-agent setup" to connect pmm client to server
+  - name: Use "pmm-agent" setup to connect pmm client to server
     shell: >-
       pmm-agent setup --config-file=/usr/local/percona/pmm2/config/pmm-agent.yaml --force --server-insecure-tls
       --server-address={{ pmm_server_address }} --listen-port={{ custom_port }}
