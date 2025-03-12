@@ -26,6 +26,10 @@
     set_fact:
       instance_ip: "{{ instance_ip.stdout }}"
 
+  - name: Set Databases list
+    set_fact:
+      enabled_db: ""
+
   - name: Setup environment
     include_tasks: ../tasks/pmm3_client_test_prepare.yml
 
