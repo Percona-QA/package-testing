@@ -84,6 +84,9 @@
       --agent-password={{ agent_password }}
       {{ instance_ip }} generic node2_{{ instance_ip }}
 
+  - name: Start agent
+    shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
+
   - name: "Wait for 'node_exporter' is Running"
     shell: pmm-admin list | grep 'node_exporter' | awk -F' ' '{print $2}'
     register: node_exporter_status
@@ -92,9 +95,6 @@
     retries: 5
   - name: Check if the configuration generated with paths-base is using the custom path
     include_tasks: ../tasks/verify_pmm3_client_config.yml
-
-  - name: Start agent
-    shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
 
 ### verifications
   - name: Set correct pass for node exporter
