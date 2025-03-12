@@ -17,6 +17,7 @@
   register: list_output
 
 - name: Assert if the pmm-admin list contains MongoDB instance
+  when: '"psmdb-" in enabled_db | join("")'
   assert:
     that:
       - "'MongoDB' in list_output.stdout"
