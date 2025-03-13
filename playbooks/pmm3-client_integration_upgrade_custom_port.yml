@@ -195,20 +195,16 @@
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
 ### end PG
 
-  - name: Enable {{ test_package }} {{ test_repo }} repo
-    include_tasks: ../tasks/enable_repo.yml
-    vars:
-      only: yes
-      package: "{{ test_package }}"
-      repository: "{{ test_repo }}"
+### Upgrade PMM Client
+  - name: "Install new({{ pmm_version }}) pmm2-client tarball to custom path"
+    command: "../scripts/pmm3_client_install_tarball.sh -v {{ (tarball_link | length > 0) | ternary(tarball_link, pmm_version) }}"
 
-  - name: Upgrade PMM client to the latest deb packages
-    when: ansible_os_family == "Debian"
-    apt: name=pmm-client update_cache=yes state=latest
+  - name: Stop pmm-agent process
+    command: "pkill -f pmm-agent"
+    become: yes
 
-  - name: Upgrade PMM client to the latest rpm packages
-    when: ansible_os_family == "RedHat"
-    yum: name=pmm-client state=latest
+  - name: Start upgraded agent
+    shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
 
 ### Verifications after upgrade
   - name: Perform standard verifications set for PMM Client
