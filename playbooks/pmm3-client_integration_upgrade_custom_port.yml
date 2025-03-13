@@ -122,7 +122,7 @@
     become: yes
 
   - name: Grep pmm-admin status output
-    shell: "pmm-admin status"
+    shell: "pmm-admin status {{ port_flag }}"
     register: pmm_admin_status
   - debug: var=pmm_admin_status.stdout
 
