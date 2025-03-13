@@ -204,7 +204,7 @@
     become: yes
 
   - name: Start upgraded agent
-    shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
+    shell: pmm-agent --config-file=/usr/local/percona/pmm/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
 
 ### Verifications after upgrade
   - name: Perform standard verifications set for PMM Client
