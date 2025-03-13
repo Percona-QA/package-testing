@@ -115,8 +115,6 @@ elif version.parse(VERSION) >= version.parse("8.1.0"):
                     "mysql -e \"INSTALL PLUGIN"
                     " authentication_ldap_sasl SONAME 'authentication_ldap_sasl.so';\"",
                     "mysql -e \"INSTALL PLUGIN"
-                    " authentication_fido SONAME 'authentication_fido.so';\"",
-                    "mysql -e \"INSTALL PLUGIN"
                     " connection_control_failed_login_attempts SONAME 'connection_control.so';\""]
     COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_log_sink_json', 'component_log_filter_dragnet',
