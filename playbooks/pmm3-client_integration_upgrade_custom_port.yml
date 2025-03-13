@@ -117,8 +117,9 @@
     shell: "cat {{ install_path }}/config/pmm-agent.yaml | grep -o -c '{{ custom_port }}' | grep '1'"
     become: yes
 
-  - name: Start agent on custom port non-default port
-    shell: pmm-agent --config-file={{ install_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
+  - name: Kill pmm-agent process
+    command: "pkill -f pmm-agent"
+    become: yes
 
   - name: Grep pmm-admin status output
     shell: "pmm-admin status"
