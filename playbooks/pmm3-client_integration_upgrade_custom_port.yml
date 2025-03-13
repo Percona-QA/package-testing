@@ -51,8 +51,8 @@
     shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-client/tags -O - | jq -r .results[].name | grep -v latest | sort -V | tail -n1"
     register: latest_release
 
-### enable pmm-client release and install old version to update
-  - name: Enable pmm-client release repo
+### enable pmm3-client release and install old version to update
+  - name: Enable pmm3-client release repo
     include_tasks: ../tasks/enable_repo.yml
     vars:
       only: yes
@@ -93,39 +93,36 @@
     ansible.builtin.debug:
       msg: "Installing old version: '{{ pmm_client_old }}'"
 
-  - name: Detect and save previous release version
-    shell: "wget -q https://registry.hub.docker.com/v2/repositories/percona/pmm-client/tags -O - | jq -r .results[].name | grep -v latest | sort -V | grep -E '[[:digit:]]\\.[[:digit:]]+\\.[[:digit:]]' | tail -n2 | head -n1"
-    register: old_release
+  - name: Install PMM client old deb packages
+    when: ansible_os_family == "Debian"
+    apt: name={{ pmm_client_old }} update_cache=yes state=present
 
-  - set_fact:
-      old_version: "{{ old_release.stdout if (test_repo == 'main') else latest_release.stdout }}"
-
-### install PMM Client from tarball
-  - name: install pmm3-client tarball to custom path
-    command: "../scripts/pmm3_client_install_tarball.sh -v {{ (tarball_link | length > 0) | ternary(tarball_link, old_version) }}"
+  - name: Install PMM client old rpm packages
+    when: ansible_os_family == "RedHat"
+    yum: name={{ pmm_client_old }} state=present
 
 ### Setup PMM Client
-  - name: Use "pmm-agent" setup to connect pmm client to server
-    shell: >-
-      pmm-agent setup --config-file=/usr/local/percona/pmm/config/pmm-agent.yaml --force --server-insecure-tls
-      --server-address={{ pmm_server_address }} --listen-port={{ custom_port }}
-      --metrics-mode={{ metrics_mode }}
-      --server-username=admin --server-password={{ pmm_server_password }}
-      {{ instance_ip }} generic node2_{{ instance_ip }}
-
-  - name: Start agent
-    shell: pmm-agent --config-file=/usr/local/percona/pmm/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
+  - name: Use "pmm-admin config" to connect pmm client to server
+    shell: pmm-admin config --config-file=/usr/local/percona/pmm/config/pmm-agent.yaml --force --server-insecure-tls
+      --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} --listen-port={{ custom_port }}
+      --metrics-mode={{ metrics_mode }}  
+      {{ instance_ip }} generic node_{{ instance_ip }}
 
   - name: Check if the configuration generated with pmm-agent-listen-port is using the custom port
     shell: "cat /usr/local/percona/pmm/config/pmm-agent.yaml | grep -o -c '{{ custom_port }}' | grep '1'"
     become: yes
 
-  - name: Wait for pmm-agent to be connected to server
-    shell: "{{ cmd_admin_list }} | grep pmm_agent | awk -F' ' '{print $2}'"
-    register: pmm_agent_status
-    until: pmm_agent_status.stdout.find('Connected') != -1
-    delay: 1
-    retries: 5
+  - name: Grep pmm-admin status output
+    shell: "pmm-admin status"
+    register: pmm_admin_status
+  - debug: var=pmm_admin_status.stdout
+
+  - name: Assert pmm-agent is connected to server
+    assert:
+      that:
+        - "'Connected' in pmm_admin_status.stdout"
+      fail_msg: "pmm-agent is not connected to server!"
+      success_msg: "pmm-agent is connected to server"
 
 ### start PS
   - set_fact:
@@ -195,16 +192,21 @@
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
 ### end PG
 
-### Upgrade PMM Client
-  - name: "Install new({{ pmm_version }}) pmm2-client tarball to custom path"
-    command: "../scripts/pmm3_client_install_tarball.sh -v {{ (tarball_link | length > 0) | ternary(tarball_link, pmm_version) }}"
+### Upgrade PMM Client package
+  - name: Enable {{ test_package }} {{ test_repo }} repo
+    include_tasks: ../tasks/enable_repo.yml
+    vars:
+      only: yes
+      package: "{{ test_package }}"
+      repository: "{{ test_repo }}"
 
-  - name: Stop pmm-agent process
-    command: "pkill -f pmm-agent"
-    become: yes
+  - name: Upgrade PMM client to the latest deb packages
+    when: ansible_os_family == "Debian"
+    apt: name=pmm-client update_cache=yes state=latest
 
-  - name: Start upgraded agent
-    shell: pmm-agent --config-file=/usr/local/percona/pmm/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
+  - name: Upgrade PMM client to the latest rpm packages
+    when: ansible_os_family == "RedHat"
+    yum: name=pmm-client state=latest
 
 ### Verifications after upgrade
   - name: Perform standard verifications set for PMM Client
