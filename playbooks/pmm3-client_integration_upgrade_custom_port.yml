@@ -103,9 +103,10 @@
 
 ### Setup PMM Client
   - name: Use "pmm-admin config" to connect pmm client to server
-    shell: pmm-admin config --config-file=/usr/local/percona/pmm/config/pmm-agent.yaml --force --server-insecure-tls
-      --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} --listen-port={{ custom_port }}
+    shell: pmm-admin setup --config-file=/usr/local/percona/pmm/config/pmm-agent.yaml --force --server-insecure-tls
+      --server-address={{ pmm_server_address }} --listen-port={{ custom_port }}
       --metrics-mode={{ metrics_mode }}  
+      --server-username=admin --server-password={{ pmm_server_password }}
       {{ instance_ip }} generic node_{{ instance_ip }}
 
   - name: Check if the configuration generated with pmm-agent-listen-port is using the custom port
