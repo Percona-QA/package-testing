@@ -312,6 +312,9 @@
       - lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
       - lookup('env', 'pro') == "no"
 
+  - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL BOOTSTRAP
+    include_tasks: ../../../../tasks/list_installed_packages.yml
+
 #  - name: Verify telemetry version and package installation
 #    command: /package-testing/check_tel_ver_pack.sh
 
