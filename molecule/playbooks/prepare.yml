@@ -195,4 +195,5 @@
         key: "{{ lookup('file', 'public_keys') }}"
         state: present
         exclusive: False
-      when: (ansible_distribution == "Ubuntu") and (lookup('env', 'DESTROY_ENV') == "no")
+      when: (ansible_distribution == "Ubuntu")
+#and (lookup('env', 'DESTROY_ENV') == "no")
