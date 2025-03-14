@@ -113,6 +113,9 @@
       --server-password={{ pmm_server_password }}
       {{ instance_ip }} generic node2_{{ instance_ip }}
 
+  - name: Start agent
+    shell: pmm-agent --config-file={{ install_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
+
   - name: Verify that config generated with the custom port listening
     shell: "cat {{ install_path }}/config/pmm-agent.yaml | grep -o -c '{{ custom_port }}' | grep '1'"
     become: yes
