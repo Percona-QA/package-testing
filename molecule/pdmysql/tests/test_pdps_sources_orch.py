@@ -6,7 +6,7 @@ def test_integration(host):
     with host.sudo():
         dist = host.system_info.distribution
         if dist.lower() not in RHEL_DISTS:
-            command = "mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';\""
+            command = "mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED with caching_sha2_password BY 'root';\""
             result = host.run(command)
             assert result.rc == 0, (result.stderr, result.stdout)
         test_cmd = "cd /root/orchestrator/ && ./tests/integration/test.sh mysql"
