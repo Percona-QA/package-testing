@@ -19,7 +19,7 @@ provisioner:
   log: True
   playbooks:
     create: ../../../../playbooks/create_noble.yml
-#    destroy: ../../../../playbooks/destroy-noble-arm.yml
+    destroy: ../../../../playbooks/destroy-noble-arm.yml
     prepare: ../../../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../playbooks/playbook.yml
@@ -34,15 +34,15 @@ verifier:
     junitxml: report.xml
 scenario:
   name: debian-11
-#  destroy_sequence:
-#    - destroy
+  destroy_sequence:
+    - destroy
   clenup_sequence:
     - cleanup
   test_sequence:
-#    - destroy
+    - destroy
     - create
     - prepare
     - converge
     - verify
     - cleanup
-#    - destroy
+    - destroy
