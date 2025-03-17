@@ -124,17 +124,12 @@
     command: "pkill -f pmm-agent"
     become: yes
 
-  - name: Grep pmm-admin status output
-    shell: "pmm-admin status {{ port_flag }}"
-    register: pmm_admin_status
-  - debug: var=pmm_admin_status.stdout
-
-  - name: Assert pmm-agent is connected to server
-    assert:
-      that:
-        - "'Connected' in pmm_admin_status.stdout"
-      fail_msg: "pmm-agent is not connected to server!"
-      success_msg: "pmm-agent is connected to server"
+  - name: Wait for pmm-agent to be connected to server
+    shell: "{{ cmd_admin_list }} | grep pmm_agent | awk -F' ' '{print $2}'"
+    register: pmm_agent_status
+    until: pmm_agent_status.stdout.find('Connected') != -1
+    delay: 1
+    retries: 5
 
 ### start PS
   - set_fact:
