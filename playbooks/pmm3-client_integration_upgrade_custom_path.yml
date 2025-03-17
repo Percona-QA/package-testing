@@ -210,6 +210,13 @@
   - name: install pmm3-client tarball to custom path
     command: "../scripts/pmm3_client_install_tarball.sh -v {{ (tarball_link | length > 0) | ternary(tarball_link, pmm_version) }} -p {{ custom_path }}"
 
+  - name: Stop pmm-agent process
+    command: "pkill -f pmm-agent"
+    become: yes
+
+  - name: Start upgraded agent
+    shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
+
 ### Verifications after upgrade
   - name: Perform standard verifications set for PMM Client
     include_tasks: ../tasks/verifications_set_for_pmm3_client_after_upgrade.yml
