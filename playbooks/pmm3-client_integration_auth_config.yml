@@ -60,8 +60,6 @@
     when: lookup('env', 'metrics_mode') == "pull"
     shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --agent-password={{ pmm_auth_password }} --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
 
-# investigate adding split pmm-admin config --force --agent-password=<PASSWORD> and restart the agent
-
 ### start PS
   - set_fact:
       mysql_service_name: "mysql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
