@@ -17,6 +17,7 @@
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
+    tarball_link: "{{ lookup('env', 'tarball_link') }}"
     custom_path: "/pmm-client-custom-path"
 
   tasks:
