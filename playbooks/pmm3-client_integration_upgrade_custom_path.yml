@@ -122,6 +122,11 @@
     shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
 
   - name: Grep pmm-admin status output
+    shell: cat {{ custom_path }}/config/pmm-agent.yaml
+    register: config_content
+  - debug: var=config_content.stdout
+
+  - name: Grep pmm-admin status output
     shell: "pmm-admin status"
     register: pmm_admin_status
   - debug: var=pmm_admin_status.stdout
