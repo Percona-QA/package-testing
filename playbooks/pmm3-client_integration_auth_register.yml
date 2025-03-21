@@ -51,7 +51,7 @@
     shell: yum update -y
     become: true
 
-### install pmm2-client
+### install pmm-client
   - name: Install PMM client new deb packages
     when: ansible_os_family == "Debian"
     shell: |
