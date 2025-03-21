@@ -8,8 +8,12 @@ pxc_revision = os.getenv('PXC_REVISION')
 pxc57_pkg_version = os.getenv('PXC57_PKG_VERSION')
 wsrep_version = os.getenv('WSREP_VERSION')
 glibc_version = os.getenv('GLIBC_VERSION')
+pro = os.getenv('PRO')
 
+pxc_version_pro_percona = ".".join(pxc_version.split(".")[:-1])
 pxc_version_percona = pxc_version.split('-')[0]
+
+
 pxc_version_major = pxc_version_percona.split('.')[0] + '.' + pxc_version_percona.split('.')[1]
 if pxc_version_major == "5.7":
   print(pxc_version)
