@@ -1,25 +1,21 @@
 ---
-# Advanced package tarball test:
-#   prepare Percona Repository and software;
-#   install the latest PMM client tarball;
-#   perform correct setup;
-#   setup PS, PSMDB and PDPGSQL;
-#   verify versions, exporters still work, metrics, etc.
+# This playbook does following:
+#   enables Percona testing repository
+#   installs the latest version of PMM2 client
+#   does PMM-T1267 test
 #
 - hosts: all
   become: true
   become_method: sudo
   vars:
-    pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') | default('127.0.0.1', true)}}"
+    pmm_server_address: "{{ lookup('env', 'PMM_SERVER_IP') }}"
     pmm_server_password: "{{ lookup('env', 'ADMIN_PASSWORD') | default('admin', true) }}"
-    test_package: "{{ lookup('env', 'install_package') | default('pmm3-client', true)}}"
     test_repo: "{{ lookup('env', 'install_repo') }}"
+    test_package: "{{ lookup('env', 'install_package') | default('pmm3-client', true)}}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
-    custom_port: 17788
-    port_flag: "--pmm-agent-listen-port={{ custom_port }}"
-    tarball_link: "{{ lookup('env', 'TARBALL_LINK') }}"
-    install_path: "/usr/local/percona/pmm"
+    cmd_admin_list: "pmm-admin list"
+    pmm_auth_password: "pmm-pass"
 
   tasks:
   - name: Register Instance IP
@@ -30,6 +26,10 @@
     set_fact:
       instance_ip: "{{ instance_ip.stdout }}"
 
+  - set_fact:
+      rnd: "{{ 1000 | random }}"
+    run_once: yes
+
   - name: Set Integrations list
     include_tasks: ../tasks/pmm3-client_test_enabled_db_arm.yml
     when: ansible_architecture == "aarch64"
@@ -38,39 +38,59 @@
     include_tasks: ../tasks/pmm3-client_test_enabled_db.yml
     when: ansible_architecture != "aarch64"
 
-  - name: include tasks for test env setup
+  - name: Setup environment
     include_tasks: ../tasks/pmm3_client_test_prepare.yml
 
-### install PMM Client from tarball
-  - name: setup pmm3-client artifacts for custom path
-    command: "../scripts/pmm3_client_install_tarball.sh -l -v {{ (tarball_link | length > 0) | ternary(tarball_link, pmm_version) }}"
+  - name: update apt repositories
+    when: test_repo == "release" and ansible_os_family == "Debian"
+    command: apt-get update -y
+    become: true
+
+  - name: update repo for redhat
+    when: test_repo == "release" and ansible_os_family == "RedHat"
+    shell: yum update -y
+    become: true
+
+### install pmm-client
+  - name: Install PMM client new deb packages
+    when: ansible_os_family == "Debian"
+    shell: |
+      sudo apt-get update
+      sudo apt-get install pmm-client
+
+  - name: Install PMM client new rpm packages
+    when: ansible_os_family == "RedHat"
+    shell: |
+      sudo yum -y update
+      sudo yum -y install pmm-client
 
   - name: check that PMM client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
 
-### Setup PMM Client
-  - name: Use pmm-agent setup to configure pmm client to connect to server
-    shell: >-
-      pmm-agent setup --config-file={{ install_path }}/config/pmm-agent.yaml --force --server-insecure-tls
-      --server-address={{ pmm_server_address }}
-      --listen-port={{ custom_port }}
-      --metrics-mode={{ metrics_mode }}
-      --server-username=admin
-      --server-password={{ pmm_server_password }}
-      {{ instance_ip }} generic node2_{{ instance_ip }}
+### Setup pmm client
+  - name: configure pmm client to connect to server in push/auto Mode
+    when: lookup('env', 'metrics_mode') == "push" or lookup('env', 'metrics_mode') == ""
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=auto --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }} --agent-password={{ pmm_auth_password }}
 
-  - name: Verify that config generated with the custom port listening
-    shell: "cat {{ install_path }}/config/pmm-agent.yaml | grep -o -c '{{ custom_port }}' | grep '1'"
+  - name: configure pmm client to connect to server in pull Mode
+    when: lookup('env', 'metrics_mode') == "pull"
+    shell: pmm-admin config --force --server-insecure-tls --metrics-mode=pull --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }} --agent-password={{ pmm_auth_password }}
+
+  - name: register pmm client exporter password
+    shell: pmm-admin register --force --agent-password={{ pmm_auth_password }}
+
+  - name: restart pmm-agent
+    command: "pkill -f pmm-agent"
     become: yes
 
-  - name: Start agent on custom port non-default port
-    shell: pmm-agent --config-file={{ install_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
-
-  - name: check that PMM client version is correct
-    include_tasks: ../tasks/verify_pmm_status_versions.yml
+  - name: wait for pmm_agent status from pmm-admin list
+    shell: pmm-admin list | grep pmm_agent | awk -F' ' '{print $2}'
+    register: pmm_agent_status
+    until: pmm_agent_status.stdout.find('Connected') != -1
+    delay: 1
+    retries: 5
 
 ### start PS
-    #TODO: refactor PS setup to add both TCP and Socket services
   - set_fact:
       mysql_service_name: "mysql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
 #      mysql_service_name: "mysql_{{ rnd }}_{{ instance_ip }}"
@@ -137,6 +157,9 @@
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
 ### end PG
+
+  - set_fact:
+      agent_password: "{{ pmm_auth_password }}"
 
 ### verifications
   - name: Perform standard verifications set for PMM Client
