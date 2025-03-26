@@ -261,17 +261,13 @@
   - name: print PXC version Molecule
     debug: var=pxc_version
 
-  - name: check that PXC version is correct Molecule pro
+  - name: check that PXC version is correct Molecule
     command: /package-testing/version_check.sh pxc80pro
-    when:
-      - lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
-      - lookup('env', 'pro') == "yes"
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
-  - name: check PXC 8.0 version Molecule
-    command: /package-testing/version_check.sh pxc80
-    when:
-      - lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
-      - lookup('env', 'pro') == "no"
+  - name: check that PXC package versions are correct Molecule
+    command: /package-testing/package_check.sh pxc80 pro
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
 # - name: install plugins
 #   command: /package-testing/plugins_test_80.sh pxc
@@ -438,6 +434,7 @@
       jump: DROP
     when: 
       - lookup('env', 'upgrade_repo') == ""  
+      -  ansible_distribution != "Amazon"
 
 #-------------Blocked non PRO
 
@@ -508,8 +505,8 @@
     debug:
       var: t_uuid_output
 
-#  - name: Verify telemetry version and package installation
-#    command: /package-testing/check_tel_ver_pack.sh
-
-  - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL COMMON
-    include_tasks: ../../../../tasks/list_installed_packages.yml
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
