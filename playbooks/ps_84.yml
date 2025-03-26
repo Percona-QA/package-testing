@@ -50,11 +50,12 @@
       var: selinux_status
     when: ansible_os_family == "RedHat"
 
-  - name: include tasks for enabling PS 84 test repo
+  - name: include tasks for enabling PS 84 main repo
     include_tasks: ../tasks/enable_ps84_main_repo.yml
     when:
       - lookup('env', 'install_repo') == "main"
       - lookup('env', 'pro_test') != "yes"
+    
 
   - name: include tasks for enabling PS 84 test repo
     include_tasks: ../tasks/enable_ps84_testing_repo.yml
@@ -127,13 +128,17 @@
 
   - name: Enable PXB 84 repo
     command: percona-release enable-only pxb-84-lts testing
+    when: ansible_distribution != "Amazon"
 
   - name: install Percona XtraBackup 8.4 packages
     include_tasks: ../tasks/install_pxb84.yml
-    when: lookup('env', 'install_repo') != "experimental"
+    when: 
+      - lookup('env', 'install_repo') != "experimental"
+      - ansible_distribution != "Amazon"
 
   - name: enable the Tools release repo
     command: percona-release enable tools release
+    when: ansible_distribution != "Amazon"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -245,7 +250,7 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
