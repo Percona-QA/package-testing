@@ -83,6 +83,12 @@ client_tar=pmm-client-${version}.tar.gz
 architecture=$(uname -m)
 echo $architecture
 
+if [[ "$architecture" == "aarch64" ]]; then
+    architecture="arm64"
+elif [[ "$architecture" == "x86_64" ]]; then
+    architecture="amd64"
+fi
+
 if [[ "$architecture" == "arm64" ]]; then
     tarball_url=https://downloads.percona.com/downloads/TESTING/pmm-arm/${client_tar}
 elif [[ "$architecture" == "amd64" ]]; then
