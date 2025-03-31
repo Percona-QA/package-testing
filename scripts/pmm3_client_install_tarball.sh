@@ -80,7 +80,7 @@ if [ -z "${path}" ]; then
   path=$default_path
 fi
 client_tar=pmm-client-${version}.tar.gz
-architecture=$(dpkg --print-architecture)
+architecture=$(uname -m)
 echo $architecture
 
 if [[ "$architecture" == "arm64" ]]; then
