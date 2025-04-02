@@ -8,7 +8,7 @@
   include_tasks: ./enable_repo.yml
   vars:
     only: yes
-    package: "ps-80-pro"
+    package: "ps-80"
     repository: "release"
 
 - name: install Percona Server 8.0 packages
