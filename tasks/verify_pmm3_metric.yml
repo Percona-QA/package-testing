@@ -79,9 +79,15 @@
           debug:
             msg: "'{{ item.metric }}' is not found!"
           failed_when: true
-        - name: Get and print all metrics
-          shell: "echo $(curl -s -u 'pmm:{{ agent_password }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics')"
+
+        - name: Get all metrics from exporter on failure
+          shell: "curl -s -u 'pmm:{{ agent_password }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics'"
+          register: full_metrics_dump
           failed_when: true
+
+        - name: Print full metrics on failure
+          debug:
+            msg: "{{ full_metrics_dump.stdout | default('No output') }}"
   rescue:
     - name: Print pmm-admin list output on fail
       debug:
