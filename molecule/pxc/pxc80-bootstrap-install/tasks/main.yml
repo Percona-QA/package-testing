@@ -151,7 +151,22 @@
       - percona-toolkit
       - percona-xtrabackup-80
     when: 
-      - ansible_os_family == "RedHat" 
+      - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+      - ansible_architecture == "x86_64"
+      - lookup('env', 'pro') == "no"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC 8 amazon packages amd64 non pro
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+      - percona-toolkit
+    when: 
+      - ansible_distribution == "Amazon" 
       - ansible_architecture == "x86_64"
       - lookup('env', 'pro') == "no"
     environment:
@@ -210,7 +225,7 @@
       packages:
       - percona-xtradb-cluster-pro-full
     when: 
-      - ansible_os_family == "RedHat" 
+      - ansible_os_family == "RedHat"
       - ansible_architecture == "x86_64"
       - lookup('env', 'pro') == "yes"
     environment:
@@ -300,20 +315,15 @@
   - name: print INNODB version debug  
     debug: var=innod_version
 
-  - name: check PXC 8.0 version Molecule pro 
-    command: /package-testing/version_check.sh pxc80pro
-    when:
-      - lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
-      - lookup('env', 'pro') == "yes"
-
   - name: check PXC 8.0 version Molecule
-    command: /package-testing/version_check.sh pxc80
-    when:
-      - lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
-      - lookup('env', 'pro') == "no"
+    command: /package-testing/version_check.sh pxc80pro
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
-#  - name: Verify telemetry version and package installation
-#    command: /package-testing/check_tel_ver_pack.sh
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
 
   - name: Sleep 60 seconds
     command: sleep 60

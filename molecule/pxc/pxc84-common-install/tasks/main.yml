@@ -509,5 +509,14 @@
     debug:
       var: t_uuid_output
 
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
+      - ansible_distribution_major_version|int != 7
+
+  - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL COMMON
+    include_tasks: ../../../../tasks/list_installed_packages.yml
+
 #  - name: Verify telemetry version and package installation
 #    command: /package-testing/check_tel_ver_pack.sh

@@ -74,6 +74,9 @@ PXC_DIR_NAME=$(echo "${TARBALL_NAME}"|sed 's/.tar.gz$//'|sed 's/.deb$//'|sed 's/
 export BASE_DIR="${PWD}/${PXC_DIR_NAME}"
 cp conf/*cnf $BASE_DIR/
 
+PRO=$(echo ${PRO})
+
 echo "Running tests..."
+echo "Pro value inside run.sh is ${PRO}"
 echo "${PXC_DIR_NAME}"
 python3 -m pytest --ignore="${PXC_DIR_NAME}"/percona-xtradb-cluster-tests -v --junit-xml report.xml $@

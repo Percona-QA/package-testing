@@ -18,12 +18,18 @@ def test_mysql_version(host):
         match = re.search(rf'{re.escape(expected_version)}', output)
         assert match, f"Expected version string not found in output: {output}"
     else:
-        expected = (
-            'mysql  Ver ' + pxc_version + ' for Linux on x86_64 (Percona XtraDB Cluster binary (GPL) ' +
-            pxc_version_percona + ', Revision ' + pxc_revision + ', WSREP version ' + wsrep_version + ')'
-        )
-        assert expected in host.check_output(base_dir+'/bin/mysql --version')
-    
+        if (pro):
+            expected = (
+                'mysql  Ver ' + pxc_version_pro_percona+'-pro for Linux on x86_64 (Percona XtraDB Cluster Pro binary (GPL) ' +
+                pxc_version_percona + ', Revision ' + pxc_revision + ', WSREP version ' + wsrep_version + ')'
+            )
+            assert expected in host.check_output(base_dir+'/bin/mysql --version')
+        else:
+            expected = (
+                'mysql  Ver ' + pxc_version + ' for Linux on x86_64 (Percona XtraDB Cluster binary (GPL) ' +
+                pxc_version_percona + ', Revision ' + pxc_revision + ', WSREP version ' + wsrep_version + ')'
+            )
+            assert expected in host.check_output(base_dir+'/bin/mysql --version')
 
 def test_mysqld_version(host):
     if pxc_version_major in ['5.7','5.6']:
@@ -33,12 +39,18 @@ def test_mysqld_version(host):
         )
         assert expected in host.check_output(base_dir+'/bin/mysqld --version')
     else:
-        expected = (
-            'mysqld  Ver ' + pxc_version + ' for Linux on x86_64 (Percona XtraDB Cluster binary (GPL) ' +
-            pxc_version_percona + ', Revision ' + pxc_revision + ', WSREP version ' + wsrep_version + ')'
-        )
-        assert expected in host.check_output(base_dir+'/bin/mysqld --version')
-
+        if (pro):
+            expected = (
+                'mysqld  Ver ' + pxc_version_pro_percona+ '-pro for Linux on x86_64 (Percona XtraDB Cluster Pro binary (GPL) ' +
+                pxc_version_percona + ', Revision ' + pxc_revision + ', WSREP version ' + wsrep_version + ')'
+            )
+            assert expected in host.check_output(base_dir+'/bin/mysqld --version')
+        else:
+            expected = (
+                'mysqld  Ver ' + pxc_version + ' for Linux on x86_64 (Percona XtraDB Cluster binary (GPL) ' +
+                pxc_version_percona + ', Revision ' + pxc_revision + ', WSREP version ' + wsrep_version + ')'
+            )
+            assert expected in host.check_output(base_dir+'/bin/mysqld --version')
 
 def test_files_exist(host):
     for f in pxc_files:

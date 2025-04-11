@@ -33,26 +33,26 @@
   - name: include tasks for enabling main repo pxc84 non pro
     include_tasks: ../tasks/enable_pxc84_main_repo.yml
     when: 
-    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - lookup('env', 'upgrade_repo') == "main" or lookup('env', 'upgrade_repo') == ""
     - lookup('env', 'pro') == "no"
 
   - name: include tasks for enabling experimental repo non pro
     include_tasks: ../tasks/enable_pxc84_experimental_repo.yml
     when: 
-    - lookup('env', 'install_repo') == "experimental"
+    - lookup('env', 'upgrade_repo') == "experimental"
     - lookup('env', 'pro') == "no"
 #-----------------pro
 
   - name: include tasks for enabling test repo pro pxc84
     include_tasks: ../tasks/enable_pxc84_pro_repo_testing.yml
     when: 
-    - lookup('env', 'install_repo') == "testing" 
+    - lookup('env', 'upgrade_repo') == "testing" 
     - lookup('env', 'pro') == "yes"
 
   - name: include tasks for enabling main repo pro pxc84
     include_tasks: ../tasks/enable_pxc84_pro_repo_main.yml
     when: 
-    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - lookup('env', 'upgrade_repo') == "main" or lookup('env', 'upgrade_repo') == ""
     - lookup('env', 'pro') == "yes"
 
 
@@ -185,3 +185,6 @@
     when:
       - ansible_distribution != "Amazon"
       - ansible_distribution_major_version|int != 7
+
+  - name: PRINT THE INSTALLED PACKAGES VALUE UPGRADE
+    include_tasks: ../tasks/list_installed_packages.yml

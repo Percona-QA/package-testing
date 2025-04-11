@@ -4,12 +4,12 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: ujammy-${BUILD_NUMBER}-${JOB_NAME}
+  - name: al2023-${BUILD_NUMBER}-${JOB_NAME}-${cur_action_to_test}
     region: us-west-2
-    image: ami-0ee8244746ec5d6d4
+    image:  ami-0c7104b910fd5acb5
     vpc_subnet_id: subnet-03136d8c244f56036
-    instance_type: t2.medium
-    ssh_user: ubuntu
+    instance_type: c6g.large
+    ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-ps80-worker
@@ -20,20 +20,10 @@ provisioner:
   playbooks:
     create: ../../../../playbooks/create_noble.yml
     destroy: ../../../../playbooks/destroy-noble-arm.yml
-    prepare: ../../../../playbooks/prepare.yml
-    cleanup: ../../playbooks/cleanup.yml
+    prepare: ../../playbooks/prepare-pro.yml
     converge: ../../playbooks/playbook.yml
-verifier:
-  name: testinfra
-  directory: ../../../tests/
-  options:
-    verbose: true
-    s: true
-    k: "test_pdps_ or test_common_"
-    m: "not telemetry_disabled"
-    junitxml: report.xml
 scenario:
-  name: ubuntu-jammy
+  name: amazon-linux-2023-arm
   destroy_sequence:
     - destroy
   clenup_sequence:

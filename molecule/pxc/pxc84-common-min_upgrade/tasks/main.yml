@@ -282,3 +282,7 @@
 
   - name: Check that the PXC Cluster is up and running
     shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'
+
+
+  - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL COMMON
+    include_tasks: ../../../../tasks/list_installed_packages.yml
