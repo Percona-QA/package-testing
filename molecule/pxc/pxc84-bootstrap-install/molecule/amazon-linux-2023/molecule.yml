@@ -1,16 +1,16 @@
 ---
 scenario:
-  name: amazon-linux-2023-arm
+  name: amazon-linux-2023
 dependency:
   name: galaxy
 driver:
   name: ec2
 platforms:
-  - name: pxc1-80-bootstrap-al2023-arm-install
+  - name: pxc1-84-bootstrap-al2023-install
     region: us-west-2
-    image: ami-0bcaacde1147f42f7
+    image: ami-087f352c165340ea1
     vpc_subnet_id: subnet-03136d8c244f56036
-    instance_type: c6g.large
+    instance_type: t2.large
     ssh_user: ec2-user
     root_device_name: /dev/xvda
     instance_tags:
@@ -20,11 +20,11 @@ provisioner:
   name: ansible
   playbooks:
     create: ../../../playbooks/create_noble.yml
-   # destroy: ../../../playbooks/destroy_noble.yml
+    destroy: ../../../playbooks/destroy_noble.yml
     prepare: ../../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
-    side_effect: ../../../../../playbooks/pxc80_upgrade_bootstrap.yml
+    side_effect: ../../../../../playbooks/pxc84_upgrade_bootstrap.yml
   inventory:
     host_vars:
-      pxc1-80-bootstrap-al2023-arm-install:
+      pxc1-84-bootstrap-al2023-install:
         ip_env: "{{ ansible_host }}"
