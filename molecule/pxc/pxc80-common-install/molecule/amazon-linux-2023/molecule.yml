@@ -7,9 +7,9 @@ driver:
   name: ec2
 platforms:
   - name: pxc2-80-common-al2023-install
-    region: us-west-1
-    image: ami-094b981da55429bfc
-    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    region: us-west-2
+    image: ami-087f352c165340ea1
+    vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.large
     ssh_user: ec2-user
     root_device_name: /dev/xvda
@@ -17,9 +17,9 @@ platforms:
       iit-billing-tag: jenkins-pxc-worker
       job-name: ${JOB_NAME}
   - name: pxc3-80-common-al2023-install
-    region: us-west-1
-    image: ami-094b981da55429bfc
-    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    region: us-west-2
+    image: ami-087f352c165340ea1
+    vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.large
     ssh_user: ec2-user
     root_device_name: /dev/xvda

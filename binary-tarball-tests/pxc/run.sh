@@ -3,8 +3,20 @@ export PATH=${HOME}/.local/bin:${PATH}
 
 PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
 
+if grep -qi "Amazon Linux 2023" /etc/os-release; then
+  OS_TYPE="al2023"
+else
+  OS_TYPE="other"
+fi
+
+echo "Detected OS: ${OS_TYPE}"
+
 echo "Installing dependencies..."
-if [ -f /etc/redhat-release ]; then
+
+if [ "$OS_TYPE" = "al2023" ]; then
+  sudo dnf install -y libaio numactl openssl socat lsof libev python3 python3-pip
+  
+elif [ -f /etc/redhat-release ]; then
   sudo yum install -y libaio numactl openssl socat lsof
   # below needed for 5.6 mysql_install_db
   sudo yum install -y perl-Data-Dumper
