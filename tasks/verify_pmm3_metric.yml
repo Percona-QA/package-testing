@@ -45,9 +45,6 @@
       shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id }}' | awk '/_exporter/ {print $NF}'"
       register: exporter_port
 
-    - debug:
-        msg: "agent_password='{{ agent_password | default('UNDEFINED') }}'"
-
     - set_fact:
         agent_password: "{{ agent_id }}"
       when: agent_password | d('') | trim | length == 0
