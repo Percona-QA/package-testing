@@ -23,17 +23,18 @@
 - block:
     - name: "{{ item.service_name }}: grep Agent ID"
       when: item.service_name == 'node_exporter'
-      shell: "echo '{{ list_output.stdout }}' | grep 'node_exporter' | awk -F' ' '{print $4}'"
+      shell: "pmm-admin list | grep 'node_exporter' | awk '{print $4}'"
       register: node_exporter_agent_id
 
     - name: "{{ item.service_name }}: grep Service ID"
       when: item.service_name != 'node_exporter'
-      shell: "echo '{{ list_output.stdout }}' | grep {{ item.service_name }} | awk -F' ' '{print $4}'"
+      shell: "pmm-admin list | grep ps-single-2844 | awk -F' ' '{print $4}'"
+#      shell: "pmm-admin list | grep {{ item.service_name }} | awk -F' ' '{print $4}'"
       register: service_id
 
     - name: "{{ item.service_name }}: grep Agent ID"
       when: item.service_name != 'node_exporter'
-      shell: "echo '{{ list_output.stdout }}' | grep '{{ service_id.stdout }}' | awk '/_exporter/ {print $4}'"
+      shell: "pmm-admin list | grep '{{ service_id.stdout }}' | awk '/_exporter/ {print $4}'"
       register: service_agent_id
 
     - debug: msg="Service agent id is {{ service_agent_id }}"
@@ -42,12 +43,20 @@
         agent_id: "{{ (item.service_name == 'node_exporter') | ternary(node_exporter_agent_id.stdout, service_agent_id.stdout) }}"
 
     - name: "{{ item.service_name }}:: grep exporter port"
-      shell: "echo '{{ list_output.stdout }}' | grep '{{ agent_id }}' | awk '/_exporter/ {print $NF}'"
+      shell: "pmm-admin list | grep '{{ agent_id }}' | awk '/_exporter/ {print $NF}'"
       register: exporter_port
+
+    - name: "DEBUG: BEFORE agent_password may be overridden"
+      debug:
+        msg: "Before override: agent_password={{ agent_password }}"
 
     - set_fact:
         agent_password: "{{ agent_id }}"
-      when: agent_password | d('') | trim | length == 0
+      when: agent_password | d('') | length == 0
+
+    - name: "DEBUG: AFTER agent_password may be overridden"
+      debug:
+        msg: "After override: agent_password={{ agent_password }}"
 
     - name: "{{ item.service_name }}: curl metric with no auth"
       shell: "curl -s 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep -q '{{ item.metric }}'"
@@ -85,12 +94,3 @@
       debug:
         msg: "{{ list_output.stdout }}"
       failed_when: true
-
-    - name: Attempt to curl metrics with auth on fail
-      shell: "curl -s -u 'pmm:{{ agent_password }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics'"
-      register: full_metrics_dump
-      ignore_errors: yes
-
-    - name: Print full /metrics output
-      debug:
-        msg: "{{ full_metrics_dump.stdout | default('No output received from /metrics') }}"
