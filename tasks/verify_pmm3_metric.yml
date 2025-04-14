@@ -46,17 +46,13 @@
       shell: "pmm-admin list | grep '{{ agent_id }}' | awk '/_exporter/ {print $NF}'"
       register: exporter_port
 
-    - name: "DEBUG: BEFORE agent_password may be overridden"
-      debug:
-        msg: "Before override: agent_password={{ agent_password }}"
-
     - set_fact:
         agent_password: "{{ agent_id }}"
       when: agent_password | d('') | length == 0
 
-    - name: "DEBUG: AFTER agent_password may be overridden"
-      debug:
-        msg: "After override: agent_password={{ agent_password }}"
+#    - name: "DEBUG: AFTER agent_password may be overridden"
+#      debug:
+#        msg: "After override: agent_password={{ agent_password }}"
 
     - name: "{{ item.service_name }}: curl metric with no auth"
       shell: "curl -s 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep -q '{{ item.metric }}'"
