@@ -45,18 +45,14 @@
       shell: "pmm-admin list | grep '{{ agent_id }}' | awk '/_exporter/ {print $NF}'"
       register: exporter_port
 
-#    - set_fact:
-#        agent_password: "{{ agent_id }}"
-#      when: agent_password | d("") | length == 0
-
-    - name: Set agent_password if not already defined
-      set_fact:
+    - set_fact:
         agent_password: "{{ agent_id }}"
-      when: (vars['agent_password'] is not defined) or (vars['agent_password'] | trim | length == 0)
+      when: agent_password | d("") | length == 0
 
-#    - name: "DEBUG: AFTER agent_password may be overridden"
-#      debug:
-#        msg: "After override: agent_password={{ agent_password }}"
+#    - name: Set agent_password if not already defined
+#      set_fact:
+#        agent_password: "{{ agent_id }}"
+#      when: (vars['agent_password'] is not defined) or (vars['agent_password'] | trim | length == 0)
 
     - name: "{{ item.service_name }}: curl metric with no auth"
       shell: "curl -s 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep -q '{{ item.metric }}'"
@@ -80,9 +76,6 @@
         - name: "{{ item.service_name }}: assert metric is received"
           debug:
             msg: "{{ item.service_name }}: metric received!"
-#        - set_fact:
-#            agent_password: ""
-#          when: agent_password | length > 0 or '/agent_id/' in agent_password
       rescue:
         - name: Waiting failed
           debug:
