@@ -46,9 +46,11 @@
       shell: "pmm-admin list | grep '{{ agent_id }}' | awk '/_exporter/ {print $NF}'"
       register: exporter_port
 
-    - set_fact:
-        agent_password: "{{ agent_password | d(agent_id) }}"
-      when: agent_password | d('') | length == 0
+    - name: Set agent_password if not already defined
+      set_fact:
+        agent_password: "{{ agent_id }}"
+      when: agent_password is not defined or agent_password | trim | length == 0
+
 
 #    - name: "DEBUG: AFTER agent_password may be overridden"
 #      debug:
