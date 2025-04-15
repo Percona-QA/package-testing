@@ -19,12 +19,12 @@
 - name: Run install_setup_psmdb.yml
   include_tasks: /tmp/install_setup_psmdb.yml
 
-- name: add mongodb metrics to monitoring
+- name: add mongodb metrics to monitoring with agent_pass {{ agent_password }}
   command: >-
     pmm-admin add mongodb {{ port_flag if port_flag is defined else '' }} --service-name={{ mongo_service_name }}
     {{ '' if agent_password is not defined or '/agent_id/' in agent_password else '--agent-password=%s' | format(agent_password) }}
 
-- name: add mongodb metrics to monitoring using socket
+- name: add mongodb metrics to monitoring using socket with agent_pass {{ agent_password }}
   command: >-
     pmm-admin add mongodb {{ port_flag if port_flag is defined else '' }} --socket=/tmp/mongodb-27017.sock
     --service-name={{ mongo_socket_service_name }}
