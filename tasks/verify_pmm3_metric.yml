@@ -28,8 +28,7 @@
 
     - name: "{{ item.service_name }}: grep Service ID"
       when: item.service_name != 'node_exporter'
-      shell: "pmm-admin list | grep ps-single-2844 | awk -F' ' '{print $4}'"
-#      shell: "pmm-admin list | grep {{ item.service_name }} | awk -F' ' '{print $4}'"
+      shell: "pmm-admin list | grep {{ item.service_name }} | awk -F' ' '{print $4}'"
       register: service_id
 
     - name: "{{ item.service_name }}: grep Agent ID"
