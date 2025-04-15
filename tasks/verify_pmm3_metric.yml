@@ -49,11 +49,6 @@
         agent_password: "{{ agent_id }}"
       when: agent_password | d("") | length == 0
 
-#    - name: Set agent_password if not already defined
-#      set_fact:
-#        agent_password: "{{ agent_id }}"
-#      when: (vars['agent_password'] is not defined) or (vars['agent_password'] | trim | length == 0)
-
     - name: "{{ item.service_name }}: curl metric with no auth"
       shell: "curl -s 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep -q '{{ item.metric }}'"
       register: metric_without_auth
