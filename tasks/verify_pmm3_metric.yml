@@ -45,9 +45,15 @@
       shell: "pmm-admin list | grep '{{ agent_id }}' | awk '/_exporter/ {print $NF}'"
       register: exporter_port
 
+    - name: "agent pass is {{ agent_password }}"
+      shell: "echo 1"
+
     - set_fact:
         agent_password: "{{ agent_id }}"
       when: agent_password | d("") | length == 0
+
+    - name: "agent pass is {{ agent_password }}"
+      shell: "echo 2"
 
     - name: "{{ item.service_name }}: curl metric with no auth"
       shell: "curl -s 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep -q '{{ item.metric }}'"
@@ -61,13 +67,17 @@
         fail_msg: "Authentication for exporter Broken, metrics fetched without basic auth!"
         success_msg: "{{ item.service_name }}: metrics are not accessible without auth"
 
+    - name: "agent pass is {{ agent_password }}"
+      shell: "echo 3"
     - block:
-        - name: "{{ item.service_name }}: curl metric with auth token"
+        - name: "{{ item.service_name }}: curl metric with auth token pmm:{{ agent_password }}"
           shell: "curl -s -u 'pmm:{{ agent_password }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
           register: metric_with_auth
           until: metric_with_auth.stdout | regex_search(item.metric)
           delay: "{{ delay | default(10, true) }}"
           retries: "{{ retries | default(10, true) }}"
+        - name: "agent pass is {{ agent_password }}"
+          shell: "echo 4"
         - name: "{{ item.service_name }}: assert metric is received"
           debug:
             msg: "{{ item.service_name }}: metric received!"
