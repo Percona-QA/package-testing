@@ -16,6 +16,9 @@
   set_fact:
     port_flag: ""
 
+- set_fact:
+    agent_password: "{{ item.agent_password | default(agent_password | default('')) }}"
+
 - name: Set pmm-admin list output
   shell: "pmm-admin list {{ port_flag }}"
   register: list_output
