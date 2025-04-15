@@ -112,13 +112,13 @@
     set_fact:
       agent_password: "pmm-pass"
 
-- name: Verify MongoDB Exporter metric endpoint with Auth (including service with socket)
-  include_tasks: ../tasks/verify_pmm3_metric.yml
-  loop:
-    - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up.* 1', agent_password: "{{ agent_password }}" }
-    - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up.* 1', agent_password: "{{ agent_password }}" }
-  loop_control:
-    label: "{{ item.service_name }}"
+  - name: Verify MongoDB Exporter metric endpoint with Auth (including service with socket)
+    include_tasks: ../tasks/verify_pmm3_metric.yml
+    loop:
+      - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up.* 1', agent_password: "{{ agent_password }}" }
+      - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up.* 1', agent_password: "{{ agent_password }}" }
+    loop_control:
+      label: "{{ item.service_name }}"
 
 
 #  - name: Verify MongoDB Exporter metric endpoint with Auth(including service with socket)
