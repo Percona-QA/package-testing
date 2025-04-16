@@ -26,17 +26,17 @@
 - block:
     - name: "{{ item.service_name }}: grep Agent ID"
       when: item.service_name == 'node_exporter'
-      shell: "pmm-admin list | grep 'node_exporter' | awk '{print $4}'"
+      shell: "pmm-admin list {{ port_flag }} | grep 'node_exporter' | awk '{print $4}'"
       register: node_exporter_agent_id
 
     - name: "{{ item.service_name }}: grep Service ID"
       when: item.service_name != 'node_exporter'
-      shell: "pmm-admin list | grep {{ item.service_name }} | awk -F' ' '{print $4}'"
+      shell: "pmm-admin list {{ port_flag }} | grep {{ item.service_name }} | awk -F' ' '{print $4}'"
       register: service_id
 
     - name: "{{ item.service_name }}: grep Agent ID"
       when: item.service_name != 'node_exporter'
-      shell: "pmm-admin list | grep '{{ service_id.stdout }}' | awk '/_exporter/ {print $4}'"
+      shell: "pmm-admin list {{ port_flag }} | grep '{{ service_id.stdout }}' | awk '/_exporter/ {print $4}'"
       register: service_agent_id
 
     - debug: msg="Service agent id is {{ service_agent_id }}"
@@ -45,7 +45,7 @@
         agent_id: "{{ (item.service_name == 'node_exporter') | ternary(node_exporter_agent_id.stdout, service_agent_id.stdout) }}"
 
     - name: "{{ item.service_name }}:: grep exporter port"
-      shell: "pmm-admin list | grep '{{ agent_id }}' | awk '/_exporter/ {print $NF}'"
+      shell: "pmm-admin list {{ port_flag }} | grep '{{ agent_id }}' | awk '/_exporter/ {print $NF}'"
       register: exporter_port
 
     - name: "agent pass is {{ agent_password }}"
