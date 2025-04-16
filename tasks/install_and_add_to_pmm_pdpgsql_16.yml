@@ -6,7 +6,7 @@
 #
 - name: Download install_ppg16.yml
   get_url:
-    url: https://raw.githubusercontent.com/Percona-QA/ppg-testing/master/tasks/install_ppg16.yml
+    url: https://raw.githubusercontent.com/Percona-QA/ppg-testing/main/tasks/install_ppg16.yml
     dest: /tmp
     mode: 0777
 

@@ -19,9 +19,6 @@
 - name: Run install_setup_psmdb.yml
   include_tasks: /tmp/install_setup_psmdb.yml
 
-- name: write agent pass
-  command: echo {{ '' if vars['agent_password'] is not defined or '/agent_id/' in vars['agent_password'] else '--agent-password=%s' | format(vars['agent_password']) }} >> /tmp/ag_pass.txt
-
 - name: add mongodb metrics to monitoring with agent_pass
   command: >-
     pmm-admin add mongodb {{ port_flag if port_flag is defined else '' }} --service-name={{ mongo_service_name }}
