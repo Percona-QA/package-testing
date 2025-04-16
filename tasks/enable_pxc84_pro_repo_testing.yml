@@ -35,7 +35,7 @@
   changed_when: false
   when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
 
-- name: add pro repository on rmp
+- name: add pro repository on rhel AMD
   template: src=../templates/pro_rpm_repo_file_pxc84.j2
             dest=/etc/yum.repos.d/psmysql-pro.repo
   vars:
@@ -47,13 +47,14 @@
     - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
     - ansible_architecture == "x86_64"
 
-- name: add pro repository on rmp
-  template: src=../templates/pro_rpm_repo_file_ps84_arm.j2
+- name: add pro repository on rhel ARM non Amazon
+  template: src=../templates/pro_rpm_repo_file_pxc84_arm.j2
             dest=/etc/yum.repos.d/psmysql-pro.repo
   vars:
     client_id: "{{ lookup('env', 'USERNAME') }}"
     client_token: "{{ lookup('env', 'PASSWORD') }}"
     repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
+    releasever: "{{ release_version.stdout }}"
   when:
     - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
     - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
@@ -81,7 +82,7 @@
   changed_when: false
   when: ansible_distribution == "Amazon"
 
-- name: add pro repository on rmp aarch64
+- name: add pro repository on rmp aarch64 Amazon linux
   template: src=../templates/pro_rpm_repo_file_pxc84_arm.j2
             dest=/etc/yum.repos.d/psmysql-pro.repo
   vars:
