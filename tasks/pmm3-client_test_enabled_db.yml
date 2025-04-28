@@ -14,6 +14,6 @@
       - "{{ (ansible_os_family == 'RedHat') | ternary('psmdb-70','') }}"
       - "{{ (ansible_distribution == 'Debian') | ternary('pg-16','') }}"
       - "{{ (ansible_distribution == 'Ubuntu') | ternary('pg-16','') }}"
-      - "{{ (ansible_os_family == 'RedHat' and ansible_distribution != 'Amazon') | ternary('pg-16','') }}"
+      - "{{ (ansible_os_family == 'RedHat') | ternary('pg-16','') }}"
       
       
