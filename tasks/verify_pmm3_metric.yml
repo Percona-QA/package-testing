@@ -16,6 +16,9 @@
   set_fact:
     port_flag: ""
 
+- set_fact:
+    agent_password: "{{ item.agent_password | default(agent_password | default('')) }}"
+
 - name: Set pmm-admin list output
   shell: "pmm-admin list {{ port_flag }}"
   register: list_output
@@ -62,12 +65,12 @@
         success_msg: "{{ item.service_name }}: metrics are not accessible without auth"
 
     - block:
-        - name: "{{ item.service_name }}: curl metric with auth token"
+        - name: "{{ item.service_name }}: curl metric with auth token pmm:{{ agent_password }}"
           shell: "curl -s -u 'pmm:{{ agent_password }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
           register: metric_with_auth
           until: metric_with_auth.stdout | regex_search(item.metric)
           delay: "{{ delay | default(10, true) }}"
-          retries: "{{ retries | default(5, true) }}"
+          retries: "{{ retries | default(10, true) }}"
         - name: "{{ item.service_name }}: assert metric is received"
           debug:
             msg: "{{ item.service_name }}: metric received!"
@@ -79,6 +82,7 @@
           debug:
             msg: "'{{ item.metric }}' is not found!"
           failed_when: true
+
   rescue:
     - name: Print pmm-admin list output on fail
       debug:
