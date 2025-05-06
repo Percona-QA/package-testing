@@ -16,8 +16,12 @@
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') | regex_search('\\S(.*\\S)?') }}"
+    linux_distribution: "{{ lookup('env', 'LINUX_DISTRIBUTION') | default('noble', true) }}"
 
   tasks:
+  - name: Register correct docker container
+    include_tasks: ../tasks/pmm_parse_linux_docker.yml
+
   - name: Register Instance IP
     shell: echo $(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
     register: instance_ip
