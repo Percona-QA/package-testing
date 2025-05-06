@@ -2,4 +2,4 @@
 
 - name: Select Ubuntu 24.04 Noble Numbat
   set_fact: docker_container = "ubuntu:24.04"
-  when: "{{ linux_distribution }} == noble"
+  when: linux_distribution == "noble"
