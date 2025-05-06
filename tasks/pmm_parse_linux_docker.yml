@@ -1,7 +1,8 @@
 # This task contains all supported names of docker containers for package tests then maps selected distribution to the docker container
 
 - name: Select Ubuntu 24.04 Noble Numbat
-  set_fact: docker_container = "ubuntu:24.04"
+  set_fact:
+    docker_container: "ubuntu:24.04"
   when: linux_distribution == "noble"
 
 - name: Remove old percona server containers
