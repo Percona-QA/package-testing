@@ -131,7 +131,7 @@
 #-- PRO REPO FOR PXB
 
   - name: include tasks for enabling pro repo for pxb
-    include_tasks: ../tasks/enable_pxb84_pro_repo.yml
+    include_tasks: ../tasks/enable_pxb80_pro_repo.yml
     when: 
       - lookup('env', 'REPO_TYPE') == "PRO"
 
