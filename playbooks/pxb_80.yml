@@ -21,19 +21,23 @@
 
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+    when: 
+      - lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling PS 8 main repo
     include_tasks: ../tasks/enable_ps8_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+    when: 
+      - lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling PS 8 test repo
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when: 
+      - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling PS 8 experimental repo
     include_tasks: ../tasks/enable_ps8_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+    when: 
+      - lookup('env', 'install_repo') == "experimental"
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -110,15 +114,28 @@
     when:
       - lookup('env', 'server_to_test') == "ms-80"
 
-  - name: Enable PXB 80 repo testing
+#----- ENABLE PXB REPOS
+
+  - name: Enable PXB 80 repo testing non pro
     command: percona-release enable-only pxb-80 testing
     when:
       - lookup('env', 'install_repo') == "testing"
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
-  - name: Enable PXB 80 repo main
+  - name: Enable PXB 80 repo main non pro
     command: percona-release enable-only pxb-80 release
     when:
       - lookup('env', 'install_repo') == "main"
+      - lookup('env', 'REPO_TYPE') !="PRO"
+
+#-- PRO REPO FOR PXB
+
+  - name: include tasks for enabling pro repo for pxb
+    include_tasks: ../tasks/enable_pxb84_pro_repo.yml
+    when: 
+      - lookup('env', 'REPO_TYPE') == "PRO"
+
+# INSTALL PXB
 
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
