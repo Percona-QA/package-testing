@@ -48,7 +48,7 @@
     - name: Fail if non-local Nomad node is not found
       fail:
         msg: "No non-local Nomad node (Address != 127.0.0.1) was found."
-      when: non_local_node is not defined or non_local_node is none
+      when: non_local_node is not defined or non_local_node is none or non_local_node | length == 0
 
     - name: Grep PMM Admin version from pmm-admin status output
       shell: "echo \"{{ pmm_admin_status.stdout }}\" | grep pmm-admin | awk -F' ' '{print $3}'"
