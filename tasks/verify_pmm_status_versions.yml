@@ -37,9 +37,13 @@
       debug:
         msg: "{{ nomad_endpoint }}"
 
+    - name: Find non-local Nomad node
+      set_fact:
+        non_local_node: "{{ nomad_endpoint | selectattr('Address', 'ne', '127.0.0.1') | list | first }}"
+
     - name: Print nomad endpoint response
       debug:
-        msg: "{{ nomad_endpoint | to_nice_json }}"
+        msg: "{{ non_local_node }}"
 
     - name: Grep PMM Admin version from pmm-admin status output
       shell: "echo \"{{ pmm_admin_status.stdout }}\" | grep pmm-admin | awk -F' ' '{print $3}'"
