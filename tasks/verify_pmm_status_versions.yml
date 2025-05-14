@@ -39,7 +39,7 @@
 
     - name: Find non-local Nomad node
       set_fact:
-        non_local_node: "{{ nomad_endpoint | selectattr('Address', 'ne', '127.0.0.1') | list | first }}"
+        non_local_node: "{{ nomad_endpoint | selectattr('Address', 'e', '127.0.0.11') | list | first }}"
 
     - name: Print nomad endpoint response
       debug:
