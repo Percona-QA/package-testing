@@ -18,7 +18,7 @@
         fail_msg: "pmm-agent is not connected to server!"
         success_msg: "pmm-agent is connected to server"
 
-    - name: "Wait for 'postgres_exporter' is Running"
+    - name: "Wait for 'nomad_agent' is Running"
       include_tasks: ./wait_exporter_is_running.yml
       vars:
         process_name: "nomad_agent"
