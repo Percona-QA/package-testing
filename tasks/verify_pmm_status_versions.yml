@@ -35,6 +35,10 @@
 
     - name: Print nomad endpoint response
       debug:
+        msg: "{{ nomad_endpoint }}"
+
+    - name: Print nomad endpoint response
+      debug:
         msg: "{{ nomad_endpoint | to_nice_json }}"
 
     - name: Grep PMM Admin version from pmm-admin status output
