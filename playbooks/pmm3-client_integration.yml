@@ -37,17 +37,17 @@
   - name: Setup environment
     include_tasks: ../tasks/pmm3_client_test_prepare.yml
 
-  - name: Install PMM client new deb packages
-    when: ansible_os_family == "Debian"
-    shell: |
-      sudo apt-get update
-      sudo apt-get install pmm-client
-
-  - name: Install PMM client new rpm packages
-    when: ansible_os_family == "RedHat"
-    shell: |
-      sudo yum -y update
-      sudo yum -y install pmm-client
+#  - name: Install PMM client new deb packages
+#    when: ansible_os_family == "Debian"
+#    shell: |
+#      sudo apt-get update
+#      sudo apt-get install pmm-client
+#
+#  - name: Install PMM client new rpm packages
+#    when: ansible_os_family == "RedHat"
+#    shell: |
+#      sudo yum -y update
+#      sudo yum -y install pmm-client
 
   - name: Check that PMM Client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
