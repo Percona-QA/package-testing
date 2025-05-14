@@ -223,7 +223,7 @@
     - rm -f master.zip
     - mv "package-testing-{{ branch }}" /package-testing
     vars:
-      branch: "pxb-tarball-job-addition"
+      branch: "pxb-package-testing-job-mods"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
 
   - name: install latest bats from github
