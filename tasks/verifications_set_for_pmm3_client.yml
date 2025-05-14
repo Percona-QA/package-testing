@@ -33,6 +33,11 @@
   vars:
     process_name: "postgres_exporter"
 
+- name: "Wait for 'postgres_exporter' is Running"
+  include_tasks: ./wait_exporter_is_running.yml
+  vars:
+    process_name: "nomad_agent"
+
 ### PMM-6592 verifications
 - name: Parse and set PMM minor version
   shell: "pmm-admin --version | grep ^Version | awk -F. '{print $2}'"
