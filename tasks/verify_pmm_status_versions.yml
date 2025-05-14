@@ -31,11 +31,11 @@
       register: nomad_endpoint
 
     - set_fact:
-        nomad_endpoint: "{{ nomad_endpoint.stdout }}"
+        nomad_endpoint: "{{ nomad_endpoint.stdout | from_json }}"
 
     - name: Print nomad endpoint response
       debug:
-        msg: nomad_endpoint
+        msg: "{{ nomad_endpoint | to_nice_json }}"
 
     - name: Grep PMM Admin version from pmm-admin status output
       shell: "echo \"{{ pmm_admin_status.stdout }}\" | grep pmm-admin | awk -F' ' '{print $3}'"
