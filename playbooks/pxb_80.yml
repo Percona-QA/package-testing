@@ -225,12 +225,29 @@
     debug:
       var: version_output.stdout_lines
 
+##
 
-  - name: check that Percona XtraBackup version is correct
+  - name: check that Percona XtraBackup version is correct NON PRO
     command: /package-testing/version_check.sh pxb80
+    when:
+      - lookup('env', 'REPO_TYPE') != "PRO"
 
-  - name: check that Percona XtraBackup package versions are correct
+  - name: check that Percona XtraBackup package versions are correct NON PRO
     command: /package-testing/package_check.sh pxb80
+    when:
+      - lookup('env', 'REPO_TYPE') != "PRO"
+
+##
+
+  - name: check that Percona XtraBackup version is correct PRO
+    command: /package-testing/version_check.sh pxb80pro
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+
+  - name: check that Percona XtraBackup package versions are correct PRO
+    command: /package-testing/package_check.sh pxb80 pro
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: run backup
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
