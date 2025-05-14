@@ -30,9 +30,12 @@
           --user admin:{{ pmm_server_password }}
       register: nomad_endpoint
 
+    - set_fact:
+        nomad_endpoint: "{{ nomad_endpoint.stdout }}"
+
     - name: Print nomad endpoint response
       debug:
-        msg: nomad_endpoint.stdout
+        msg: nomad_endpoint
 
     - name: Grep PMM Admin version from pmm-admin status output
       shell: "echo \"{{ pmm_admin_status.stdout }}\" | grep pmm-admin | awk -F' ' '{print $3}'"
