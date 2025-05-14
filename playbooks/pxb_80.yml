@@ -15,6 +15,8 @@
     gnupg_home: /root/.gnupg
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
   tasks:
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
@@ -329,3 +331,6 @@
     command: /package-testing/check_running.sh mysql stopped
     when:
       - lookup('env', 'server_to_test') != "ms-80"
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
