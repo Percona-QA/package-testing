@@ -25,7 +25,7 @@
 
     - name: "Verify PMM Server nomad endpoint"
       shell: |
-        curl --location --request GET "https://{{ pmm_server_address }}/nomad/v1/nodes" \
+        curl --insecure --location --request GET "https://{{ pmm_server_address }}/nomad/v1/nodes" \
           --header 'Content-Type: application/json' \
           --user admin:{{ pmm_server_password }}
       register: nomad_endpoint
