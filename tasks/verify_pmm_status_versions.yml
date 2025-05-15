@@ -33,17 +33,9 @@
     - set_fact:
         nomad_endpoint: "{{ nomad_endpoint.stdout | from_json }}"
 
-    - name: Print nomad endpoint response
-      debug:
-        msg: "{{ nomad_endpoint }}"
-
     - name: Find non-local Nomad nodes
       set_fact:
         non_local_node: "{{ nomad_endpoint | selectattr('Address', 'ne', '127.0.0.1') | list }}"
-
-    - name: Print nomad endpoint response
-      debug:
-        msg: "{{ non_local_node }}"
 
     - name: Fail if non-local Nomad node is not found
       fail:
