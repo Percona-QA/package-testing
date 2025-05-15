@@ -18,6 +18,9 @@
     gnupg_home: /root/.gnupg
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
   tasks:
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
@@ -58,8 +61,12 @@
 #  - name: install Percona Toolkit new deb packages
 #    include_tasks: ../tasks/install_pt.yml
 
-  - name: install Percona Server 8.0 packages MAIN REPO 
-    include_tasks: ../tasks/install_ps80.yml
+  - name: install Percona Server 8.0 packages
+    include_tasks:
+      file: ../tasks/install_ps80.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
     when:
       - lookup('env', 'server_to_test') == "ps-80"
 
@@ -106,7 +113,11 @@
     include_tasks: ../tasks/enable_pxb_80_main_repo.yml
 
   - name: install Percona XtraBackup 8.0 packages MAIN REPO 
-    include_tasks: ../tasks/install_pxb80.yml
+    include_tasks:
+      file: ../tasks/install_pxb80.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: Print the version of the installed Percona XtraBackup MAIN REPO before UPGRADE
     shell: |
@@ -188,8 +199,12 @@
 # Upgrade packages
 #
 
-  - name: install Percona XtraBackup 8.0 packages after UPGRADE 
-    include_tasks: ../tasks/install_pxb80.yml
+  - name: include tasks for enabling PXB 80 TESTING repo UPGRADE
+    include_tasks:
+      file: ../tasks/install_pxb80.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: Print the version of the installed Percona XtraBackup after UPGRADE
     shell: |
@@ -214,6 +229,9 @@
   - name: Display version information UPGRADE
     debug:
       var: version_output_post_upgrade.stdout_lines
+
+  - name: check telemetry (disabled)
+    command: /package-testing/check_telemetry.sh pxb -d
 
   - name: check that Percona XtraBackup version is correct after UPGRADE
     command: /package-testing/version_check.sh pxb80
@@ -251,5 +269,38 @@
     when:
       - ansible_os_family == "RedHat"
       - lookup('env', 'server_to_test') == "ps-80"
-#  - name: check if process is stopped after package removal
-#    command: /package-testing/check_running.sh mysql stopped
+
+## Changes done for telemetry: add iptables rule for Telemetry Server - install only pxb package.
+## Expected resuld - telemetry_uuid file has only instanceID
+
+  - name: Install iptables on RHEL 
+    yum:
+      name:
+        - iptables
+        - iptables-services
+      state: present
+    when: ansible_facts['distribution'] == "RedHat"
+
+  - name: Enable and start iptables service
+    systemd:
+      name: iptables
+      state: started
+      enabled: true
+    when: ansible_facts['distribution'] == "RedHat"
+
+  - name: Block pmm.check-dev.percona.com IP for non REDHAT
+    iptables:
+      chain: OUTPUT
+      destination: check-dev.percona.com
+      jump: DROP
+    when: 
+      - lookup('env', 'upgrade_repo') == ""  
+
+  - name: install PXB packages for telemetry
+    include_tasks: ../tasks/install_pxb80.yml
+
+  - name: check telemetry (disabled)
+    command: /package-testing/check_telemetry.sh pxb -u
+
+  - name: install PXB packages for telemetry
+    include_tasks: ../tasks/remove_pxb80.yml
