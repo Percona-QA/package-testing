@@ -300,7 +300,7 @@
     include_tasks: ../tasks/install_pxb80.yml
 
   - name: check telemetry (disabled)
-    command: /package-testing/check_telemetry.sh ps -u
+    command: /package-testing/check_telemetry.sh pxb -u
 
   - name: install PXB packages for telemetry
     include_tasks: ../tasks/remove_pxb80.yml
