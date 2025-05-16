@@ -1,10 +1,44 @@
 ---
-  - name: Setup SSH keys for Oracle Linux or Amazon
-    authorized_key:
-      user: ec2-user
-      key: "{{ lookup('file', 'public_keys') }}"
+  - name: Ensure 'tar' is installed
+    ansible.builtin.package:
+      name: tar
       state: present
-      exclusive: False
+
+  - name: Ensure 'gtar' symlink exists (some distros require it)
+    ansible.builtin.file:
+      src: /usr/bin/tar
+      dest: /usr/bin/gtar
+      state: link
+    when: ansible_facts['os_family'] == "RedHat"
+
+  - name: Get OS ID
+    command: awk -F= '/^ID=/{print $2}' /etc/os-release
+    register: os_id_raw
+
+  - name: Get OS VERSION_CODENAME or VERSION_ID
+    shell: |
+      source /etc/os-release
+      echo "${VERSION_CODENAME:-$VERSION_ID}"
+    args:
+      executable: /bin/bash
+    register: os_codename_raw
+
+  - name: Normalize os_version key
+    set_fact:
+      os_version: "{{ os_id_raw.stdout | regex_replace('\"', '') }}:{{ os_codename_raw.stdout | regex_replace('\"', '') }}"
+
+#  - name: Remove the decimal value from the os_version
+#    shell: |
+#      echo "{{ os_version_full }}" | grep -oE '\b\w+:[0-9]+'
+#    register: os_version
+
+  - name: Set glibc version based on os_version
+    set_fact:
+      glibc_version: "{{ glibc_versions_map.get(os_version, 'Unknown OS version') }}"
+
+  - name: Show detected values
+    debug:
+      msg: "Detected OS: {{ os_version }}, glibc version: {{ glibc_version }}"
 
   - name: SET PXB_VERSION VAR
     set_fact:
@@ -12,13 +46,13 @@
 
   - name: Set Tarball and Folder name for REGULAR
     set_fact:
-      TARBALL_NAME_REGULAR: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc2.28.tar.gz"
-      TARBALL_NAME_REGULAR_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc2.28"
+      TARBALL_NAME_REGULAR: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}.tar.gz"
+      TARBALL_NAME_REGULAR_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}"
 
   - name: Set Tarball and Folder name for MINIMAL
     set_fact:
-      TARBALL_NAME_MINIMAL: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc2.28-minimal.tar.gz"
-      TARBALL_NAME_MINIMAL_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc2.28-minimal"
+      TARBALL_NAME_MINIMAL: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal.tar.gz"
+      TARBALL_NAME_MINIMAL_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal"
 
   - name: Extract major version
     set_fact:
@@ -44,21 +78,11 @@
       - libev
     when: ansible_os_family == "RedHat"
 
-  - name: include playbook for removing Percona repo
-    include_tasks: ../../../tasks/remove_percona_repository.yml
+  - name: Enable Percona Server 8.0 main repository
+    include_tasks: ../../../tasks/enable_ps8_main_repo.yml
 
-  - name: disable the mysql module on RHEL/CentOS 8
-    command: /usr/bin/dnf module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
-  - name: Add the Percona Release yum repo without GPG check
-    yum:
-      name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-      disable_gpg_check: yes
-    when: ansible_os_family == "RedHat"
-
-  - name: Enable PDPS-{{ major_version }}
-    command: percona-release enable pdps-{{ major_version }} release
+  - name: include playbook for Install Percona Server 8.0
+    include_tasks: ../../../tasks/install_ps80.yml
 
   - name: clean and update yum cache
     shell: |
@@ -76,7 +100,7 @@
 
   - name: Download {{ TARBALL_NAME_REGULAR }} REGULAR
     ansible.builtin.get_url:
-      url: https://downloads.percona.com/downloads/TESTING/issue-PKG56/{{ TARBALL_NAME_REGULAR }}
+      url: https://downloads.percona.com/downloads/TESTING/pxb-{{ PXB_VERSION }}/{{ TARBALL_NAME_REGULAR }}
       dest: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR }}
       mode: '0644'
 
@@ -96,14 +120,26 @@
   - name: install plugins, import world database
     command: /package-testing/plugins_test.sh
 
+
+# RHEL
   - name: run backup for Redhat/Centos
     command: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian
+    command: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
+    when: ansible_os_family == "Debian"
 
   - name: prepare backup
     command: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --prepare --target-dir=/tmp/backups/
 
   - name: run backup for Redhat/Centos with streaming and encryption enabled
     shell: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian with streaming and encryption enabled
+    shell: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "Debian"
 
   - name: extract and decrypt backup
     shell: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream
@@ -116,7 +152,7 @@
 
   - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL
     ansible.builtin.get_url:
-      url: https://downloads.percona.com/downloads/TESTING/issue-PKG56/{{ TARBALL_NAME_MINIMAL }}
+      url: https://downloads.percona.com/downloads/TESTING/pxb-{{ PXB_VERSION }}/{{ TARBALL_NAME_MINIMAL }}
       dest: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_MINIMAL }}
       mode: '0644'
 
@@ -126,14 +162,24 @@
       dest: /package-testing/molecule/pxb-rhel-binary-tarball/
       remote_src: yes
 
-  - name: run backup for Redhat/Centos
+  - name: run backup for Redhat/Centos minimal
     command: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian minimal
+    command: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup  --backup --user=root --target-dir=/tmp/backups/
+    when: ansible_os_family == "Debian"
 
   - name: prepare backup
     command: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup --prepare --target-dir=/tmp/backups/
 
   - name: run backup for Redhat/Centos with streaming and encryption enabled
     shell: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian with streaming and encryption enabled
+    shell: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "Debian"
 
   - name: extract and decrypt backup
     shell: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream
@@ -141,27 +187,4 @@
   - name: prepare backup
     command: /package-testing/molecule/pxb-rhel-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup --prepare --target-dir=backups/
 
-  - name: Copy logs of the output of the yum list --installed to /log/yum-list-output.log
-    shell: cat /etc/os-release > /var/log/yum-list-output.log && yum list --installed >> /var/log/yum-list-output.log
 
-  - name: Set the primary IPv4 address
-    set_fact:
-      ipv4_address: "{{ ansible_facts.all_ipv4_addresses[0] }}"
-
-  - name: Set the primary IPv4 address path
-    set_fact:
-      ipv4_address_path: "/tmp/{{ ipv4_address }}.tar.gz"
-
-  - name: Create a tar.gz archive of the logs using command
-    command: tar -czf {{ ipv4_address_path }} /var/log/yum-list-output.log
-    register: archive_command_result
-
-  - name: Debug the tar command result
-    debug:
-      var: archive_command_result
-
-  - name: Fetch the tar.gz file from the remote host
-    ansible.builtin.fetch:
-      src: "{{ ipv4_address_path }}"
-      dest: "{{ lookup('env', 'WORKSPACE') }}/{{ ipv4_address }}.tar.gz"
-      flat: yes
