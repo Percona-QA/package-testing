@@ -156,6 +156,7 @@
       packages:
       - rsyslog-mysql
     when: ansible_os_family == "RedHat"
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: start my.cnf change test
     command: /package-testing/check_mycnf_pre.sh
@@ -294,7 +295,6 @@
       packages:
       - percona-toolkit
     when: ansible_os_family == "Debian"
-    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: upgrade Percona Toolkit to new rpm packages
     yum:
@@ -306,6 +306,7 @@
     when:
       - lookup('env', 'pro_test') != "yes"
       - ansible_os_family == "RedHat"
+      - ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: install Percona xtrabackup 8.0 packages
     include_tasks:
