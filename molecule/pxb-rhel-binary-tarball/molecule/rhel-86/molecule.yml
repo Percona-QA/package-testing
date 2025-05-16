@@ -4,7 +4,7 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: rhel-86-${BUILD_NUMBER}-${JOB_NAME}
+  - name: rhel-86-${BUILD_NUMBER}-${BUILD_NUMBER}-${JOB_NAME}-pxb-tarball
     region: us-west-1
     image: ami-0f84cc7147ca51116
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
