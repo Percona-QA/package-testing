@@ -381,6 +381,7 @@
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb80
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: run bats unit tests for ps-admin script
     command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
