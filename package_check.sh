@@ -92,8 +92,13 @@ elif [ $1 = "pxb24" ]; then
   version=${PXB24_VER}
   pkg_version=${PXB24_PKG_VER}
 elif [ $1 = "pxb80" ]; then
-  version=${PXB80_VER}
-  pkg_version=${PXB80_PKG_VER}
+  if [ "$2" = "pro" ]; then
+    version=${PXB80_PRO_VER}
+    pkg_version=${PXB80_PRO_PKG_VER}
+  else
+    version=${PXB80_VER}
+    pkg_version=${PXB80_PKG_VER}
+  fi
 elif [ $1 = "pxb84" ]; then
   version=${PXB84_VER}
   pkg_version=${PXB84_PKG_VER}
