@@ -65,6 +65,7 @@
 
   - name: Enable PXB 8 Main repo
     command: percona-release enable pxb-80 release
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -93,6 +94,7 @@
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -171,7 +173,7 @@
     when:
       - lookup('env', 'pro_test') != "yes"
 
-  - name: Enable PXB 8 Main repo
+  - name: Enable PXB 8 testing repo
     command: percona-release enable pxb-80 testing
     when:
       - lookup('env', 'pro_test') != "yes"
@@ -292,6 +294,7 @@
       packages:
       - percona-toolkit
     when: ansible_os_family == "Debian"
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: upgrade Percona Toolkit to new rpm packages
     yum:
@@ -310,6 +313,7 @@
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: upgrade Percona release to new rpm packages
     yum:
@@ -319,6 +323,7 @@
       packages:
       - percona-release
     when: ansible_os_family == "RedHat"
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
