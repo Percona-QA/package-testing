@@ -40,11 +40,11 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/pxc
+                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
                         }
                     }
                 }
@@ -72,11 +72,11 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/pxc
+                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
                         }
                     }
                 }
@@ -104,11 +104,11 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/pxc
+                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
                         }
                     }
                 }
@@ -136,11 +136,11 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/pxc
+                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
                         }
                     }
                 }
@@ -168,11 +168,11 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/pxc
+                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
                         }
                     }
                 }
@@ -200,11 +200,11 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/pxc
+                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
                         }
                     }
                 }
@@ -232,11 +232,11 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/pxc
+                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
                         }
                     }
                 }
@@ -264,11 +264,11 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/pxc
+                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+                            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
                         }
                     }
                 }
@@ -296,11 +296,11 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/pxc
+                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
                             '''
-                            junit 'package-testing/binary-tarball-tests/pxc/report.xml' 
+                            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml' 
                         }
                     }
                 }
