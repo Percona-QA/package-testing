@@ -1,0 +1,44 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: ubuntu-noble-${BUILD_NUMBER}-${JOB_NAME}
+    region: us-west-1
+    image: ami-04f7a54071e74f488
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    instance_type: t2.medium
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: ${JOB_NAME}
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    create: ../../../playbooks/create-noble-arm.yml
+    destroy: ../../../playbooks/destroy-noble-arm.yml
+    prepare: ../../playbooks/prepare-pro.yml
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../tests/
+  options:
+    verbose: true
+    s: true
+  env:
+    FIPS_SUPPORTED: "no"
+scenario:
+  name: ubuntu-noble
+  destroy_sequence:
+    - destroy
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy
+

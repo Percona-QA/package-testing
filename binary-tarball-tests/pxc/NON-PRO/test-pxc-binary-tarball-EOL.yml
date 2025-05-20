@@ -1,5 +1,5 @@
 - job:
-    name: test-pxc-binary-tarball
+    name: test-pxc-binary-tarball-EOL
     project-type: pipeline
     description: |
         Do not edit this job through the web!
@@ -15,20 +15,25 @@
     parameters:
     - string:
         name: PXC_VERSION
-        default: "8.0.30-22.1"
+        default: "5.7.44.2"
         description: PXC full version
     - string:
         name: PXC_REVISION
-        default: "167c5ac"
+        default: "38d2944"
         description: PXC revision
     - string:
         name: WSREP_VERSION
-        default: "26.4.3"
+        default: "31.65"
         description: WSREP version
     - string:
         name: PXC57_PKG_VERSION
-        default: "5.7.31-rel34-43.2"
+        default: "5.7.44-rel49-65.2"
         description: PXC-5.7 package version
+    - choice:
+        name: REPO
+        choices:
+          - main
+          - testing
     - bool:
         default: false
         description: Test minimal tarball
@@ -41,4 +46,4 @@
             - 'master'
             wipe-workspace: false
       lightweight-checkout: true
-      script-path: binary-tarball-tests/pxc/test-pxc-binary-tarball.groovy
+      script-path: binary-tarball-tests/pxc/NON-PRO/test-pxc-binary-tarball-EOL.groovy

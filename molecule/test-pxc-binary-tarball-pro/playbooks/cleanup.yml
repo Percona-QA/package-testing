@@ -1,0 +1,19 @@
+---
+- name: Cleanup
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: remove Tarball directories
+      file:
+        path: "{{ paths }}"
+        state: absent
+      vars:
+        paths:
+        - /tmp/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}.tar.gz
+        - /tmp/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-minimal.tar.gz
+        - /tmp/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-debug.tar.gz
+        - /usr/Percona-XtraDB-Cluster-Pro
+        - /tmp/Percona-XtraDB-Cluster-Pro-minimal
+        - /tmp/Percona-XtraDB-Cluster-Pro-debug
+
