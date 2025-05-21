@@ -431,14 +431,14 @@
         - iptables
         - iptables-services
       state: present
-    when: ansible_facts['distribution'] == "RedHat"
+    when: ansible_facts['distribution'] in ["RedHat", "Amazon"]
 
   - name: Enable and start iptables service
     systemd:
       name: iptables
       state: started
       enabled: true
-    when: ansible_facts['distribution'] == "RedHat"
+    when: ansible_facts['distribution'] in ["RedHat", "Amazon"]
 
   - name: Block pmm.check-dev.percona.com IP for non REDHAT
     iptables:
