@@ -38,12 +38,12 @@ m:pipeline {
                 rm -rf package-testing
                 sudo apt install -y git wget
                 git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
-                cd package-testing/binary-tarball-tests/pxc
+                cd package-testing/binary-tarball-tests/pxc/NON-PRO/NON-PRO
                 wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
                 ./run.sh || true
               '''
             }
-            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
           } //End steps
         } //End stage Ubuntu Xenial
         stage('Ubuntu Bionic') {
@@ -71,12 +71,12 @@ m:pipeline {
                 rm -rf package-testing
                 sudo apt install -y git wget
                 git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
-                cd package-testing/binary-tarball-tests/pxc
+                cd package-testing/binary-tarball-tests/pxc/NON-PRO/NON-PRO
                 wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
                 ./run.sh || true
               '''
             }
-            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
           } //End steps
         } //End stage Ubuntu Bionic
         stage('Ubuntu Focal') {
@@ -109,7 +109,7 @@ m:pipeline {
                 ./run.sh || true
               '''
             }
-            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
           } //End steps
         } //End stage Ubuntu Xenial
         stage('Debian Stretch') {
@@ -142,7 +142,7 @@ m:pipeline {
                 ./run.sh || true
               '''
             }
-            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
           } //End steps
         } //End stage Debian Stretch
         stage('Debian Buster') {
@@ -175,7 +175,7 @@ m:pipeline {
                 ./run.sh || true
               '''
             }
-            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
           } //End steps
         } //End stage Debian Buster
         stage('Centos8') {
@@ -203,12 +203,12 @@ m:pipeline {
                 rm -rf package-testing
                 sudo yum install -y git wget
                 git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
-                cd package-testing/binary-tarball-tests/pxc
+                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                 wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
                 ./run.sh || true
               '''
             }
-            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
           } //End steps
         } //End stage CentOS8
         stage('Centos7') {
@@ -236,12 +236,12 @@ m:pipeline {
                 rm -rf package-testing
                 sudo yum install -y git wget
                 git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
-                cd package-testing/binary-tarball-tests/pxc
+                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                 wget -q --auth-no-challenge --http-user=${JENKINS_API_USER} --http-password=${JENKINS_API_PWD} ${JENKINS_JOB}${TARBALL_NAME}
                 ./run.sh || true
               '''
             }
-            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
           } //End steps
         } //End stage CentOS7
         stage('Centos6') {
@@ -266,11 +266,11 @@ m:pipeline {
                 rm -rf package-testing
                 sudo yum install -y git wget
                 git clone https://github.com/Percona-QA/package-testing.git --branch PXC-3447-PXC-package-testing-job --depth 1
-                cd package-testing/binary-tarball-tests/pxc
+                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                 ./run.sh || true
               '''
             }
-            junit 'package-testing/binary-tarball-tests/pxc/report.xml'
+            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
           } //End steps
         } //End stage CentOS6
        } //End parallel

@@ -1,0 +1,45 @@
+---
+dependency:
+
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: debian12-${BUILD_NUMBER}-${JOB_NAME}
+    region: us-west-1
+    image: ami-071175b60c818694f
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    instance_type: t2.large
+    ssh_user: admin
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: ${JOB_NAME}
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    create: ../../../playbooks/create-noble-arm.yml
+    destroy: ../../../playbooks/destroy-noble-arm.yml
+    prepare: ../../playbooks/prepare-pro.yml
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../tests/
+  options:
+    verbose: true
+    s: true
+  env:
+    FIPS_SUPPORTED: "no"
+scenario:
+  name: debian-12
+  destroy_sequence:
+    - destroy
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy
+

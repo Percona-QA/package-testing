@@ -8,6 +8,8 @@ from settings import *
 
 @pytest.fixture(scope='module')
 def mysql_server(request):
+    vars = set_pro_vars()
+    base_dir = vars['base_dir']
     mysql_server = mysql.MySQL(base_dir)
     mysql_server.start()
     yield mysql_server
