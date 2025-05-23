@@ -20,7 +20,6 @@
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
   tasks:
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
@@ -269,6 +268,9 @@
     when:
       - ansible_os_family == "RedHat"
       - lookup('env', 'server_to_test') == "ps-80"
+      
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
 
 ## Changes done for telemetry: add iptables rule for Telemetry Server - install only pxb package.
 ## Expected resuld - telemetry_uuid file has only instanceID
