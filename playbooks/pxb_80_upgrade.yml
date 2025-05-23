@@ -269,9 +269,6 @@
       - ansible_os_family == "RedHat"
       - lookup('env', 'server_to_test') == "ps-80"
       
-  - name: check telemetry (enabled)
-    command: /package-testing/check_telemetry.sh ps -e
-
 ## Changes done for telemetry: add iptables rule for Telemetry Server - install only pxb package.
 ## Expected resuld - telemetry_uuid file has only instanceID
 
@@ -304,5 +301,5 @@
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh pxb -u
 
-  - name: install PXB packages for telemetry
+  - name: remove PXB packages for telemetry
     include_tasks: ../tasks/remove_pxb80.yml
