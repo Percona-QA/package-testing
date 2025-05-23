@@ -41,12 +41,13 @@
       disable_gpg_check: yes
     when: ansible_os_family == "RedHat"
 
-  - name: enable the PS-80 main repo
+  - name: enable the PS-80 main repo 
     command: percona-release setup ps-80 -y
+    when:
+      - ansible_distribution_major_version != "2023"
 
   - name: enable the pxb-80 release repo
     command: percona-release enable pxb-80 release
-    when: ansible_distribution_release == "noble"
 
 # - name: enable the tools main repo
 #   command: percona-release enable tools release

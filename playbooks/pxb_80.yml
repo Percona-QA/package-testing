@@ -260,7 +260,8 @@
     debug:
       var: version_output.stdout_lines
 
-##
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh pxb -e
 
   - name: check that Percona XtraBackup version is correct NON PRO
     command: /package-testing/version_check.sh pxb80

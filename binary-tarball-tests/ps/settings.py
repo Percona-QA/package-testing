@@ -235,7 +235,7 @@ ps8x_components = (
 ps8x_files = (
   'lib/libcoredumper.a', 
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.4' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.5' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so',
   'lib/plugin/component_binlog_utils_udf.so',
   'lib/plugin/keyring_udf.so', 'lib/plugin/component_keyring_vault.so', 'lib/plugin/component_binlog_utils_udf.so',
@@ -243,8 +243,8 @@ ps8x_files = (
 )
 
 ps8x_symlinks = (
-  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.0.4'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.4'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.0.5'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.5'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 
 ps8x_openssl_files = (
