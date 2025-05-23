@@ -123,8 +123,6 @@
       state: present
     when: os_version == "amzn:2023"
 
-#
-
   - name: Enable Percona Server 8.0 main repository PXB80
     include_tasks: ../../../tasks/enable_ps8_main_repo.yml
     when:
@@ -144,8 +142,6 @@
       - lookup('env', 'PXB_RELEASE') == "80"
       - lookup('env', 'REPO_TYPE') == "PRO"
 
-#
-
   - name: Enable Percona Server 8.4 main repository PXB84
     include_tasks: ../../../tasks/enable_ps84_main_repo.yml
     when:
@@ -164,8 +160,6 @@
       - ansible_distribution_major_version == "2023"
       - lookup('env', 'PXB_RELEASE') == "84"
       - lookup('env', 'REPO_TYPE') == "PRO"
-
-#
 
   - name: Install libgflags-dev for rhel9 aarm64
     yum:
@@ -211,7 +205,6 @@
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-##
   - name: clean and update yum cache
     shell: |
       yum clean all
@@ -235,8 +228,6 @@
       - ansible_distribution_major_version != "2023"
       - lookup('env', 'PXB_RELEASE') == "84"
 
-#
-
   - name: Download {{ TARBALL_NAME_REGULAR }} REGULAR MAIN REPO PS80 PXB 80
     ansible.builtin.get_url:
       url: https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-{{ PXB_VERSION }}/binary/tarball/{{ TARBALL_NAME_REGULAR }}
@@ -257,8 +248,6 @@
       - lookup('env', 'TESTING_REPO') == "main"
       - lookup('env', 'PXB_RELEASE') == "80"
 
-#
-
   - name: Download {{ TARBALL_NAME_REGULAR }} REGULAR MAIN REPO PS84 PXB 84
     ansible.builtin.get_url:
       url: https://downloads.percona.com/downloads/Percona-XtraBackup-8.4/Percona-XtraBackup-{{ PXB_VERSION }}/binary/tarball/{{ TARBALL_NAME_REGULAR }}
@@ -278,8 +267,6 @@
       - lookup('env', 'REPO_TYPE') == "PRO"
       - lookup('env', 'TESTING_REPO') == "main"
       - lookup('env', 'PXB_RELEASE') == "84"
-
-#
 
   - name: Download {{ TARBALL_NAME_REGULAR }} REGULAR TESTING REPO
     ansible.builtin.get_url:
@@ -351,8 +338,6 @@
   - name: remove backup files
     command: rm -r /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }} backups /tmp/backups
 
-#
-
   - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL MAIN REPO 80 PXB80
     ansible.builtin.get_url:
       url: https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-{{ PXB_VERSION }}/binary/tarball/{{ TARBALL_NAME_MINIMAL }}
@@ -373,8 +358,6 @@
       - lookup('env', 'TESTING_REPO') == "main"
       - lookup('env', 'PXB_RELEASE') == "80"
 
-#
-
   - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL MAIN REPO PXB84
     ansible.builtin.get_url:
       url: https://downloads.percona.com/downloads/Percona-XtraBackup-8.4/Percona-XtraBackup-{{ PXB_VERSION }}/binary/tarball/{{ TARBALL_NAME_MINIMAL }}
@@ -394,8 +377,6 @@
       - lookup('env', 'REPO_TYPE') == "PRO"
       - lookup('env', 'TESTING_REPO') == "main"
       - lookup('env', 'PXB_RELEASE') == "84"
-
-#
 
   - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL TESTING REPO
     ansible.builtin.get_url:

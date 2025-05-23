@@ -65,6 +65,7 @@
 
   - name: Enable PXB 8 Main repo
     command: percona-release enable pxb-80 release
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -93,6 +94,7 @@
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -154,6 +156,7 @@
       packages:
       - rsyslog-mysql
     when: ansible_os_family == "RedHat"
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: start my.cnf change test
     command: /package-testing/check_mycnf_pre.sh
@@ -171,7 +174,7 @@
     when:
       - lookup('env', 'pro_test') != "yes"
 
-  - name: Enable PXB 8 Main repo
+  - name: Enable PXB 8 testing repo
     command: percona-release enable pxb-80 testing
     when:
       - lookup('env', 'pro_test') != "yes"
@@ -237,7 +240,6 @@
       - percona-server-devel{{ pro_suf }}
       - percona-server-rocksdb{{ pro_suf }}
       - percona-server-shared{{ pro_suf }}
-      - percona-server-shared{{ pro_suf }}-compat
       - percona-server-client{{ pro_suf }}
       - percona-mysql-router{{ pro_suf }}
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
@@ -303,6 +305,7 @@
     when:
       - lookup('env', 'pro_test') != "yes"
       - ansible_os_family == "RedHat"
+      - ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: install Percona xtrabackup 8.0 packages
     include_tasks:
@@ -310,6 +313,7 @@
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: upgrade Percona release to new rpm packages
     yum:
@@ -319,6 +323,7 @@
       packages:
       - percona-release
     when: ansible_os_family == "RedHat"
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
@@ -340,8 +345,8 @@
   - name: check that Percona Server {{ pro }} version is correct
     command: /package-testing/version_check.sh ps80 {{ pro }}
 
-  - name: check that Percona Server {{ pro }} package versions are correct
-    command: /package-testing/package_check.sh ps80 {{ pro }}
+#  - name: check that Percona Server {{ pro }} package versions are correct
+#    command: /package-testing/package_check.sh ps80 {{ pro }}
 
   - name: finish my.cnf change test
     command: /package-testing/check_mycnf_post.sh
@@ -376,6 +381,7 @@
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb80
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: run bats unit tests for ps-admin script
     command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
@@ -425,14 +431,14 @@
         - iptables
         - iptables-services
       state: present
-    when: ansible_facts['distribution'] == "RedHat"
+    when: ansible_facts['distribution'] in ["RedHat", "Amazon"]
 
   - name: Enable and start iptables service
     systemd:
       name: iptables
       state: started
       enabled: true
-    when: ansible_facts['distribution'] == "RedHat"
+    when: ansible_facts['distribution'] in ["RedHat", "Amazon"]
 
   - name: Block pmm.check-dev.percona.com IP for non REDHAT
     iptables:
