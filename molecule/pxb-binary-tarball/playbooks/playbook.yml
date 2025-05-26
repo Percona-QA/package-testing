@@ -6,7 +6,7 @@
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
   roles:
-    - role: pxb-rhel-binary-tarball
+    - role: pxb-binary-tarball
   vars:
     install_repo: "{{ lookup('env', 'install_repo') }}"
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
@@ -17,6 +17,7 @@
       "rhel:8.7": "2.28"
       "rhel:8.8": "2.28"
       "rhel:8.9": "2.28"
+      "amzn:2023" : "2.34"
       "centos:8": "2.28"
       "ol:8.5": "2.28"
       "ol:9.0": "2.34"
