@@ -17,6 +17,9 @@
     gnupg_home: /root/.gnupg
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
   tasks:
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
@@ -34,7 +37,11 @@
       - lookup('env', 'server_to_test') == "ps-84"
 
   - name: install Percona Server 8.4 packages
-    include_tasks: ../tasks/install_ps84.yml
+    include_tasks:
+      file: ../tasks/install_ps84.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
     when:
       - lookup('env', 'server_to_test') == "ps-84"
 
@@ -88,10 +95,12 @@
 #    when: 
 #      - lookup('env', 'REPO_TYPE') != "PRO"
 
-  - name: install Percona XtraBackup 8.4 packages
-    include_tasks: ../tasks/install_pxb84.yml
-#    when: 
-#      - lookup('env', 'REPO_TYPE') != "PRO"
+  - name: install Percona XtraBackup 8.4 packages MAIN REPO
+    include_tasks:
+      file: ../tasks/install_pxb84.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
 
 ## PRO PACKAGES
 
@@ -179,6 +188,8 @@
     when: ansible_os_family == "RedHat"
 
 ##
+  - name: check telemetry (disabled)
+    command: /package-testing/check_telemetry.sh pxb -d
 
   - name: remove Percona Server rpm packages BEFORE UPGRADE
     include_tasks: ../tasks/remove_pxb84.yml
@@ -194,14 +205,21 @@
   - name: ENABLE PRO REPO FOR PXB 84
     include_tasks: ../tasks/enable_pxb84_pro_repo.yml
     when: lookup('env', 'REPO_TYPE') == "PRO"
-    
-  - name: install Percona XtraBackup 8.4 packages
-    include_tasks: ../tasks/install_pxb84.yml
+
+  - name: include tasks for enabling PXB 84 TESTING repo UPGRADE
+    include_tasks:
+      file: ../tasks/install_pxb84.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
     when: lookup('env', 'REPO_TYPE') != "PRO"
 
   - name: install Percona XtraBackup 8.4 PRO packages
     include_tasks: ../tasks/install_pxb84_pro.yml
     when: lookup('env', 'REPO_TYPE') == "PRO"
+
+  - name: check telemetry (disabled)
+    command: /package-testing/check_telemetry.sh pxb -d
 
 ##
 ## VERSION CHECK
@@ -280,3 +298,36 @@
 
 #  - name: check if process is stopped after package removal
 #    command: /package-testing/check_running.sh mysql stopped
+
+
+  - name: Install iptables on RHEL
+    yum:
+      name:
+        - iptables
+        - iptables-services
+      state: present
+    when: ansible_facts['distribution'] == "RedHat"
+
+  - name: Enable and start iptables service
+    systemd:
+      name: iptables
+      state: started
+      enabled: true
+    when: ansible_facts['distribution'] == "RedHat"
+
+  - name: Block pmm.check-dev.percona.com IP for non REDHAT
+    iptables:
+      chain: OUTPUT
+      destination: check-dev.percona.com
+      jump: DROP
+    when:
+      - lookup('env', 'upgrade_repo') == ""
+
+  - name: install PXB packages for telemetry
+    include_tasks: ../tasks/install_pxb84.yml
+
+  - name: check telemetry (disabled)
+    command: /package-testing/check_telemetry.sh pxb -u
+
+  - name: remove PXB packages for telemetry
+    include_tasks: ../tasks/remove_pxb84.yml
