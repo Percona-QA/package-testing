@@ -7,8 +7,8 @@ platforms:
   - name: al-2023-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
     region: us-west-2
     image: ami-01634322a170b5fd0
-    vpc_subnet_id: subnet-04a8ad1b1d4da874c
-    instance_type: t2.large
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: t2.medium
     ssh_user: ec2-user
     root_device_name: /dev/xvda
     instance_tags:
