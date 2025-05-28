@@ -36,4 +36,3 @@ scenario:
     - converge
     - cleanup
     - destroy
-
