@@ -1,0 +1,24 @@
+# This task removes Percona XtraBackup 8.0 on CentOS and Debian/Ubuntu
+#
+  - name: remove Percona XtraBackup new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: absent
+    vars:
+      packages:
+      - percona-xtrabackup-pro-84
+      - percona-xtrabackup-pro-test-84
+      - percona-xtrabackup-pro-dbg-84
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona XtraBackup new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-xtrabackup-pro-84
+      - percona-xtrabackup-test-pro-84
+      - percona-xtrabackup-pro-84-debuginfo
+    when: ansible_os_family == "RedHat"

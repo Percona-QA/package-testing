@@ -104,17 +104,19 @@
 
 ## PRO PACKAGES
 
-#  - name: Enable PXB 84 repo PRO REPO
-#    include_tasks: ../tasks/enable_pxb84_pro_repo.yml
-#    vars:
-#      repo: "main"
-#    when: lookup('env', 'REPO_TYPE') == "PRO"
-#
-#  - name: install Percona XtraBackup 8.4 PRO packages
-#    include_tasks: ../tasks/install_pxb84_pro.yml
-#    vars:
-#      repo: "main"
-#    when: lookup('env', 'REPO_TYPE') == "PRO"
+  - name: Enable PXB 84 repo PRO REPO
+    include_tasks: ../tasks/enable_pxb84_pro_repo.yml
+    vars:
+      repo: "main"
+    when: lookup('env', 'REPO_TYPE') == "PRO"
+
+  - name: install Percona XtraBackup 8.4 packages MAIN REPO
+    include_tasks:
+      file: ../tasks/install_pxb84_pro.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
+    when: lookup('env', 'REPO_TYPE') == "PRO"
 
 ## CHECK VERSIONS BEFORE UPGRADE
   - name: Print the version of the installed Percona XtraBackup BEFORE UPGRADE
@@ -193,8 +195,15 @@
 
   - name: remove Percona Server rpm packages BEFORE UPGRADE
     include_tasks: ../tasks/remove_pxb84.yml
-    when: 
+    when:
       - ansible_os_family == "RedHat"
+      - lookup('env', 'REPO_TYPE') != "PRO"
+
+  - name: remove Percona Server rpm packages BEFORE UPGRADE
+    include_tasks: ../tasks/remove_pxb84_pro.yml
+    when:
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'REPO_TYPE') == "PRO"
 
 ## ENABLE PXB REPOS NORMAL / PRO
 
@@ -202,8 +211,10 @@
     command: percona-release enable-only pxb-84-lts testing
     when: lookup('env', 'REPO_TYPE') != "PRO"
 
-  - name: ENABLE PRO REPO FOR PXB 84
+  - name: Enable PXB 84 repo PRO REPO testing
     include_tasks: ../tasks/enable_pxb84_pro_repo.yml
+    vars:
+      repo: "testing"
     when: lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: include tasks for enabling PXB 84 TESTING repo UPGRADE
@@ -214,8 +225,12 @@
           PERCONA_TELEMETRY_DISABLE: "1"
     when: lookup('env', 'REPO_TYPE') != "PRO"
 
-  - name: install Percona XtraBackup 8.4 PRO packages
-    include_tasks: ../tasks/install_pxb84_pro.yml
+  - name: include tasks for enabling PXB 84 PRO TESTING repo UPGRADE
+    include_tasks:
+      file: ../tasks/install_pxb84_pro.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
     when: lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: check telemetry (disabled)
@@ -282,8 +297,9 @@
       packages:
       - percona-server-server
       - percona-xtrabackup-84
-    when: 
+    when:
       - ansible_os_family == "Debian"
+      - lookup('env', 'REPO_TYPE') != "PRO"
 
   - name: remove Percona Server rpm packages
     yum:
@@ -293,8 +309,34 @@
       packages:
       - percona-server-server
       - percona-xtrabackup-84
-    when: 
+    when:
     - ansible_os_family == "RedHat"
+    - lookup('env', 'REPO_TYPE') != "PRO"
+
+  - name: remove Percona Server PRO deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server-server-pro
+      - percona-xtrabackup-pro-84
+    when:
+      - ansible_os_family == "Debian"
+      - lookup('env', 'REPO_TYPE') == "PRO"
+
+  - name: remove Percona Server PRO rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-server-server-pro
+      - percona-xtrabackup-pro-84
+    when:
+    - ansible_os_family == "RedHat"
+    - lookup('env', 'REPO_TYPE') == "PRO"
 
 #  - name: check if process is stopped after package removal
 #    command: /package-testing/check_running.sh mysql stopped
@@ -325,9 +367,23 @@
 
   - name: install PXB packages for telemetry
     include_tasks: ../tasks/install_pxb84.yml
+    when:
+    - lookup('env', 'REPO_TYPE') != "PRO"
+
+  - name: install PXB packages for telemetry
+    include_tasks: ../tasks/install_pxb84_pro.yml
+    when:
+    - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh pxb -u
 
   - name: remove PXB packages for telemetry
     include_tasks: ../tasks/remove_pxb84.yml
+    when:
+    - lookup('env', 'REPO_TYPE') != "PRO"
+
+  - name: remove PXB PRO packages for telemetry
+    include_tasks: ../tasks/remove_pxb84_pro.yml
+    when:
+    - lookup('env', 'REPO_TYPE') == "PRO"
