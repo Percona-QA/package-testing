@@ -18,10 +18,10 @@ provisioner:
   name: ansible
   log: True
   playbooks:
-    create: ../../../../playbooks/create_noble.yml
-    destroy: ../../../../playbooks/destroy_noble.yml
-    prepare: ../../../../playbooks/prepare.yml
+    create: ../../playbooks/create_noble.yml
+    destroy: ../../playbooks/destroy_noble.yml
     cleanup: ../../playbooks/cleanup.yml
+    prepare: ../../playbooks/prepare.yml
     converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
 scenario:
   name: al-2023
