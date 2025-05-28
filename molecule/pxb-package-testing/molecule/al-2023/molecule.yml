@@ -18,9 +18,9 @@ provisioner:
   name: ansible
   log: True
   playbooks:
-    create: ../../../../playbooks/create_noble.yml
-    destroy: ../../../../playbooks/destroy_noble.yml
-    prepare: ../../../../playbooks/prepare.yml
+    create: ../../playbooks/create_noble.yml
+    destroy: ../../playbooks/destroy_noble.yml
+    prepare: ../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
 scenario:
@@ -34,5 +34,6 @@ scenario:
     - create
     - prepare
     - converge
+    - verify
     - cleanup
     - destroy
