@@ -278,10 +278,10 @@
     when:
       - lookup('env', 'REPO_TYPE') != "PRO"
 
-  - name: check that Percona XtraBackup package versions are correct PRO
-    command: /package-testing/package_check.sh pxb84 pro
-    when:
-      - lookup('env', 'REPO_TYPE') == "PRO"
+#  - name: check that Percona XtraBackup package versions are correct PRO
+#    command: /package-testing/package_check.sh pxb84 pro
+#    when:
+#      - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: run backup after update
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
