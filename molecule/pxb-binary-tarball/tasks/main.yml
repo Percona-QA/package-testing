@@ -90,7 +90,7 @@
   - name: Extract major version
     set_fact:
       major_version: "{{ PXB_VERSION.split('-')[0] }}"
-    
+
   - name: Extract minor version
     set_fact:
       minor_version: "{{ PXB_VERSION.split('-')[1] }}"
@@ -155,7 +155,7 @@
       - lookup('env', 'PXB_RELEASE') == "84"
 
   - name: Enable Percona Server 8.4 PRO main repository PXB84
-    include_tasks: ../../../tasks/enable_ps84_main_repo.yml
+    include_tasks: ../../../tasks/enable_ps84_pro_tools_repo.yml
     when:
       - ansible_distribution_major_version == "2023"
       - lookup('env', 'PXB_RELEASE') == "84"
@@ -200,7 +200,6 @@
       - percona-server-rocksdb-pro
     when:
       - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
-      - lookup('env', 'PXB_RELEASE') == "80"
       - lookup('env', 'REPO_TYPE') == "PRO"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
