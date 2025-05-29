@@ -107,7 +107,7 @@
   - name: Enable PXB 84 repo PRO REPO
     include_tasks: ../tasks/enable_pxb84_pro_repo.yml
     vars:
-      repo: "main"
+      repo: "release"
     when: lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: install Percona XtraBackup 8.4 packages MAIN REPO
