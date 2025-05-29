@@ -130,3 +130,4 @@
       }
     body_format: json
     return_content: yes
+    validate_certs: no
