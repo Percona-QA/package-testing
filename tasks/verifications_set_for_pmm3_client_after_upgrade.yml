@@ -109,3 +109,24 @@
       - "{{ ('ps-' in enabled_db | join('')) | ternary('mysqld_exporter','') }}"
       - "{{ ('psmdb-' in enabled_db | join('')) | ternary('mongodb_exporter','') }}"
       - "{{ ('pg-' in enabled_db | join('')) | ternary('postgres_exporter','') }}"
+
+- name: "Wait for 'nomad_agent' is Running"
+  include_tasks: ./wait_exporter_is_running.yml
+  vars:
+    process_name: "nomad_agent"
+
+- name: Remove public ip from PMM Server to disable nomad.
+  uri:
+    url: "https://{{ pmm_server_address }}/v1/server/settings"
+    method: POST
+    url_username: admin
+    url_password: "{{ pmm_server_password }}"
+    force_basic_auth: yes
+    headers:
+      Content-Type: "application/json"
+    body: |
+      {
+        "pmm_public_address": "{{ pmm_server_address }}"
+      }
+    body_format: json
+    return_content: yes
