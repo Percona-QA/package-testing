@@ -118,7 +118,7 @@
 - name: Remove public ip from PMM Server to disable nomad.
   uri:
     url: "https://{{ pmm_server_address }}/v1/server/settings"
-    method: POST
+    method: PUT
     url_username: admin
     url_password: "{{ pmm_server_password }}"
     force_basic_auth: yes
