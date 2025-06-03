@@ -75,9 +75,7 @@
     headers:
       Content-Type: "application/json"
     body: |
-      {
-        "pmm_public_address": "{{ pmm_server_address }}"
-      }
+      { "pmm_public_address": "" }
     body_format: json
     return_content: yes
     validate_certs: no
