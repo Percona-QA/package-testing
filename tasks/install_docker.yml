@@ -1,0 +1,334 @@
+---
+# Official Docker Installation Tasks
+# Based on Docker's official documentation and best practices
+# Supports Ubuntu, Debian, CentOS, RHEL, Fedora, Rocky Linux, AlmaLinux
+
+# =============================================================================
+# DEBIAN/UBUNTU FAMILY INSTALLATION
+# =============================================================================
+
+- name: Remove conflicting Docker packages (Ubuntu)
+  package:
+    name:
+      - docker.io
+      - docker-doc
+      - docker-compose
+      - docker-compose-v2
+      - podman-docker
+      - containerd
+      - runc
+    state: absent
+  ignore_errors: true
+  when: ansible_distribution == "Ubuntu"
+
+- name: Remove conflicting Docker packages (Debian)
+  package:
+    name:
+      - docker.io
+      - docker-doc
+      - docker-compose
+      - podman-docker
+      - containerd
+      - runc
+    state: absent
+  ignore_errors: true
+  when: ansible_distribution == "Debian"
+
+- name: Install required packages for Docker repository (Debian/Ubuntu)
+  package:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+      - apt-transport-https
+      - software-properties-common
+    state: present
+    update_cache: true
+  when: ansible_os_family == "Debian"
+
+- name: Create directory for Docker GPG key
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  when: ansible_os_family == "Debian"
+
+- name: Download and add Docker GPG key (Ubuntu)
+  shell: |
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | 
+    gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  args:
+    creates: /etc/apt/keyrings/docker.gpg
+  when: ansible_distribution == "Ubuntu"
+
+- name: Download and add Docker GPG key (Debian)
+  shell: |
+    curl -fsSL https://download.docker.com/linux/debian/gpg | 
+    gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  args:
+    creates: /etc/apt/keyrings/docker.gpg
+  when: ansible_distribution == "Debian"
+
+- name: Set correct permissions on Docker GPG key
+  file:
+    path: /etc/apt/keyrings/docker.gpg
+    mode: '0644'
+  when: ansible_os_family == "Debian"
+
+- name: Add Docker repository (Ubuntu)
+  apt_repository:
+    repo: "deb [arch={{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    state: present
+    filename: docker
+  when: ansible_distribution == "Ubuntu"
+
+- name: Add Docker repository (Debian)
+  apt_repository:
+    repo: "deb [arch={{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+    state: present
+    filename: docker
+  when: ansible_distribution == "Debian"
+
+- name: Update apt package cache after adding Docker repository
+  apt:
+    update_cache: true
+  when: ansible_os_family == "Debian"
+
+- name: Install Docker CE packages (Debian/Ubuntu)
+  package:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+  when: ansible_os_family == "Debian"
+
+# =============================================================================
+# RED HAT FAMILY INSTALLATION  
+# =============================================================================
+
+- name: Remove conflicting Docker packages (CentOS/Rocky/AlmaLinux)
+  package:
+    name:
+      - docker
+      - docker-client
+      - docker-client-latest
+      - docker-common
+      - docker-latest
+      - docker-latest-logrotate
+      - docker-logrotate
+      - docker-engine
+      - podman
+      - runc
+    state: absent
+  ignore_errors: true
+  when: ansible_distribution in ['CentOS', 'Rocky', 'AlmaLinux']
+
+- name: Remove conflicting Docker packages (RHEL)
+  package:
+    name:
+      - docker
+      - docker-client
+      - docker-client-latest
+      - docker-common
+      - docker-latest
+      - docker-latest-logrotate
+      - docker-logrotate
+      - docker-engine
+      - podman
+      - runc
+      - docker-selinux
+      - docker-engine-selinux
+    state: absent
+  ignore_errors: true
+  when: ansible_distribution == "RedHat"
+
+- name: Remove conflicting Docker packages (Fedora)
+  package:
+    name:
+      - docker
+      - docker-client
+      - docker-client-latest
+      - docker-common
+      - docker-latest
+      - docker-latest-logrotate
+      - docker-logrotate
+      - docker-engine
+      - docker-selinux
+      - docker-engine-selinux
+    state: absent
+  ignore_errors: true
+  when: ansible_distribution == "Fedora"
+
+- name: Install dnf-plugins-core (Red Hat family)
+  package:
+    name: dnf-plugins-core
+    state: present
+  when: ansible_os_family == "RedHat" and ansible_pkg_mgr == "dnf"
+
+- name: Install yum-utils (Red Hat family with yum)
+  package:
+    name: yum-utils
+    state: present
+  when: ansible_os_family == "RedHat" and ansible_pkg_mgr == "yum"
+
+- name: Add Docker CE repository (CentOS/Rocky/AlmaLinux)
+  shell: |
+    {{ ansible_pkg_mgr }} config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  args:
+    creates: /etc/yum.repos.d/docker-ce.repo
+  when: ansible_distribution in ['CentOS', 'Rocky', 'AlmaLinux']
+
+- name: Add Docker CE repository (RHEL)
+  shell: |
+    {{ ansible_pkg_mgr }} config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+  args:
+    creates: /etc/yum.repos.d/docker-ce.repo
+  when: ansible_distribution == "RedHat"
+
+- name: Add Docker CE repository (Fedora)
+  shell: |
+    {{ ansible_pkg_mgr }} config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+  args:
+    creates: /etc/yum.repos.d/docker-ce.repo
+  when: ansible_distribution == "Fedora"
+
+- name: Install Docker CE packages (Red Hat family)
+  package:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+  when: ansible_os_family == "RedHat"
+
+# =============================================================================
+# COMMON POST-INSTALLATION TASKS
+# =============================================================================
+
+- name: Start and enable Docker service (CRITICAL for Red Hat family)
+  systemd:
+    name: docker
+    state: started
+    enabled: true
+    daemon_reload: true
+  when: ansible_os_family == "RedHat"
+
+- name: Ensure Docker service is running (Debian/Ubuntu auto-starts)
+  systemd:
+    name: docker
+    state: started
+    enabled: true
+  when: ansible_os_family == "Debian"
+
+- name: Wait for Docker socket to be ready
+  wait_for:
+    path: /var/run/docker.sock
+    timeout: 30
+
+- name: Check Docker socket permissions
+  file:
+    path: /var/run/docker.sock
+    owner: root
+    group: docker
+    mode: '0660'
+
+- name: Add users to docker group (grants root-level privileges)
+  user:
+    name: "{{ item }}"
+    groups: docker
+    append: true
+  loop: "{{ docker_users | default([]) }}"
+  when: docker_users is defined and docker_users | length > 0
+
+# =============================================================================
+# VERIFICATION AND TESTING
+# =============================================================================
+
+- name: Verify Docker installation
+  command: docker --version
+  register: docker_version_check
+  changed_when: false
+
+- name: Display Docker version
+  debug:
+    msg: "Docker installed successfully: {{ docker_version_check.stdout }}"
+
+- name: Verify Docker Compose plugin
+  command: docker compose version
+  register: docker_compose_check
+  changed_when: false
+  failed_when: false
+
+- name: Display Docker Compose version
+  debug:
+    msg: "{{ docker_compose_check.stdout if docker_compose_check.rc == 0 else 'Docker Compose plugin not available' }}"
+
+- name: Test Docker functionality with hello-world
+  command: docker run --rm hello-world
+  register: docker_hello_test
+  changed_when: false
+  retries: 3
+  delay: 5
+  until: docker_hello_test.rc == 0
+
+- name: Display Docker test result
+  debug:
+    msg: "Docker is working correctly! Hello-world container ran successfully."
+  when: docker_hello_test.rc == 0
+
+- name: Show Docker system info
+  command: docker system info
+  register: docker_info
+  changed_when: false
+  failed_when: false
+
+- name: Display critical Docker info
+  debug:
+    msg: |
+      Docker Installation Summary:
+      - Version: {{ docker_version_check.stdout }}
+      - Service Status: {{ 'Running' if docker_info.rc == 0 else 'Failed' }}
+      - Socket Path: /var/run/docker.sock
+      - Users in docker group: {{ docker_users | default(['none']) | join(', ') }}
+
+# =============================================================================
+# ERROR HANDLING AND TROUBLESHOOTING
+# =============================================================================
+
+- name: Check Docker service status if hello-world failed
+  command: systemctl status docker
+  register: docker_service_status
+  when: docker_hello_test.rc != 0
+  failed_when: false
+
+- name: Display troubleshooting information
+  debug:
+    msg: |
+      Docker installation may have issues:
+      - Check service status: systemctl status docker
+      - Check logs: journalctl -u docker.service
+      - Verify user is in docker group: groups $USER
+      - Try: sudo docker run hello-world
+      Service Status: {{ docker_service_status.stdout_lines if docker_service_status is defined else 'Not checked' }}
+  when: docker_hello_test.rc != 0
+
+# =============================================================================
+# SECURITY NOTES
+# =============================================================================
+
+- name: Display important security warnings
+  debug:
+    msg: |
+      SECURITY WARNINGS:
+      1. Users in 'docker' group have root-level privileges
+      2. Docker bypasses firewall rules (ufw/firewalld) for container ports
+      3. Use iptables DOCKER-USER chain for custom firewall rules
+      4. Consider enabling SELinux/AppArmor for production
+      5. Configure user namespaces in /etc/docker/daemon.json for production
+  run_once: true
