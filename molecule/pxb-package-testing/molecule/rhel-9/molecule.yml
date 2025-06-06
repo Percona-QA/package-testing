@@ -27,13 +27,13 @@ scenario:
   name: rhel-9
   destroy_sequence:
     - destroy
-  clenup_sequence:
+  cleanup_sequence:
     - cleanup
   test_sequence:
     - destroy
     - create
     - prepare
     - converge
-    #- verify
+    - verify
     - cleanup
     - destroy
