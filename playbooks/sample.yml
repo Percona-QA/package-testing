@@ -1,0 +1,21 @@
+---
+# This playbook does following:
+#   enables Percona testing repository
+#   installs latest version of PS 8.0, PXB 8.0 tarball
+#   then runs some tests
+
+- hosts: localhost
+  #become: true
+  #become_method: sudo
+  tasks:
+  - name: echo "Hello, World!"
+    shell: docker ps | exit 0
+    register: hello_output
+
+  - name: debug
+    debug:
+      msg: "hello_output.stdout: {{ hello_output.stdout }}"
+
+  - name: debug status
+    debug:
+      msg: "hello_output.rc: {{ hello_output.rc }}"

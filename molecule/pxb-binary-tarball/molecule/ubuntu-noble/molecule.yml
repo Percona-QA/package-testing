@@ -20,7 +20,7 @@ provisioner:
   log: True
   playbooks:
     create: ../../playbooks/create.yml
-    destroy: ../../playbooks/destroy.yml
+    #destroy: ../../playbooks/destroy.yml
     prepare: ../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../playbooks/playbook.yml
