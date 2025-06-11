@@ -24,7 +24,7 @@ if pxc_version_major == '5.7':
 docker_image = docker_acc + "/" + docker_product + ":" + docker_tag
 docker_image_major = docker_acc + "/" + docker_product + ":" + pxc_version_major
 docker_image_latest = docker_acc + "/" + docker_product + ":" + "latest"
-docker_image_debug = docker_acc + "/" + docker_product + ":" + docker_tag + "-debug"
+docker_image_debug = docker_acc + "/" + docker_product + ":" + docker_tag + "-debug-amd64"
 docker_image_upstream = docker_acc + "/" + docker_product + ":" + pxc_version_upstream
 
 docker_network = 'pxc-network'
