@@ -1,6 +1,6 @@
 ---
 # Docker Installation for AMD64 and ARM64 systems
-# Supports Red Hat Enterprise Linux, Oracle Linux, and Debian
+# Supports Red Hat Enterprise Linux, Oracle Linux, Debian, and Ubuntu
 # Architectures: x86_64 (amd64) and aarch64 (arm64)
 
 # =============================================================================
@@ -33,9 +33,9 @@
 
 - name: Verify distribution is supported
   fail:
-    msg: "Unsupported distribution: {{ ansible_distribution }}. This playbook supports only Red Hat Enterprise Linux, Oracle Linux, and Debian."
+    msg: "Unsupported distribution: {{ ansible_distribution }}. This playbook supports only Red Hat Enterprise Linux, Oracle Linux, Debian, and Ubuntu."
   when: >
-    not (ansible_distribution == 'Debian' or 
+    not (ansible_distribution in ['Debian', 'Ubuntu'] or 
          ansible_distribution in ['RedHat', 'RHEL'] or 
          ansible_distribution == 'OracleLinux' or
          ansible_distribution | regex_search('Red Hat|RHEL|Oracle'))
@@ -52,10 +52,10 @@
   tags: debug
 
 # =============================================================================
-# DEBIAN INSTALLATION
+# DEBIAN/UBUNTU FAMILY INSTALLATION
 # =============================================================================
 
-- name: Remove conflicting Docker packages (Debian)
+- name: Remove conflicting Docker packages (Debian/Ubuntu)
   package:
     name:
       - docker.io
@@ -67,9 +67,9 @@
       - runc
     state: absent
   ignore_errors: true
-  when: ansible_distribution == "Debian"
+  when: ansible_distribution in ["Debian", "Ubuntu"]
 
-- name: Install required packages for Docker repository (Debian)
+- name: Install required packages for Docker repository (Debian/Ubuntu)
   package:
     name:
       - ca-certificates
@@ -80,14 +80,22 @@
       - software-properties-common
     state: present
     update_cache: true
-  when: ansible_distribution == "Debian"
+  when: ansible_distribution in ["Debian", "Ubuntu"]
 
-- name: Create directory for Docker GPG key (Debian)
+- name: Create directory for Docker GPG key (Debian/Ubuntu)
   file:
     path: /etc/apt/keyrings
     state: directory
     mode: '0755'
-  when: ansible_distribution == "Debian"
+  when: ansible_distribution in ["Debian", "Ubuntu"]
+
+- name: Download and add Docker GPG key (Ubuntu)
+  shell: |
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | 
+    gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  args:
+    creates: /etc/apt/keyrings/docker.gpg
+  when: ansible_distribution == "Ubuntu"
 
 - name: Download and add Docker GPG key (Debian)
   shell: |
@@ -97,11 +105,18 @@
     creates: /etc/apt/keyrings/docker.gpg
   when: ansible_distribution == "Debian"
 
-- name: Set correct permissions on Docker GPG key (Debian)
+- name: Set correct permissions on Docker GPG key (Debian/Ubuntu)
   file:
     path: /etc/apt/keyrings/docker.gpg
     mode: '0644'
-  when: ansible_distribution == "Debian"
+  when: ansible_distribution in ["Debian", "Ubuntu"]
+
+- name: Add Docker repository (Ubuntu)
+  apt_repository:
+    repo: "deb [arch={{ docker_arch }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    state: present
+    filename: docker
+  when: ansible_distribution == "Ubuntu"
 
 - name: Add Docker repository (Debian)
   apt_repository:
@@ -110,12 +125,12 @@
     filename: docker
   when: ansible_distribution == "Debian"
 
-- name: Update apt package cache after adding Docker repository (Debian)
+- name: Update apt package cache after adding Docker repository (Debian/Ubuntu)
   apt:
     update_cache: true
-  when: ansible_distribution == "Debian"
+  when: ansible_distribution in ["Debian", "Ubuntu"]
 
-- name: Install Docker CE packages (Debian)
+- name: Install Docker CE packages (Debian/Ubuntu)
   package:
     name:
       - docker-ce
@@ -124,7 +139,7 @@
       - docker-buildx-plugin
       - docker-compose-plugin
     state: present
-  when: ansible_distribution == "Debian"
+  when: ansible_distribution in ["Debian", "Ubuntu"]
 
 # =============================================================================
 # RED HAT ENTERPRISE LINUX INSTALLATION
@@ -375,6 +390,15 @@
   when: >
     ansible_distribution in ['RedHat', 'RHEL', 'OracleLinux'] or 
     ansible_distribution | regex_search('Red Hat|RHEL|Oracle')
+
+- name: Display Debian/Ubuntu specific information
+  debug:
+    msg:
+      - "Distribution: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+      - "Architecture: {{ docker_arch }}"
+      - "Release: {{ ansible_distribution_release }}"
+      - "Package Manager: {{ ansible_pkg_mgr }}"
+  when: ansible_distribution in ["Debian", "Ubuntu"]
 
 - name: Test Docker functionality with hello-world
   command: docker run --rm hello-world
