@@ -302,6 +302,16 @@
   - name: import world database
     command: /package-testing/plugins_test.sh
 
+  - name: Enable PXB 80 repo testing
+    command: percona-release enable-only pxb-80 testing
+    when:
+      - lookup('env', 'install_repo') == "testing"
+
+  - name: Enable PXB 80 repo main
+    command: percona-release enable-only pxb-80 release
+    when:
+      - lookup('env', 'install_repo') == "main"
+
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
 

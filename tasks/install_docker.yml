@@ -1,6 +1,6 @@
 ---
 # Docker Installation for AMD64 and ARM64 systems
-# Supports Ubuntu, Debian, CentOS, RHEL, Fedora, Rocky Linux, AlmaLinux
+# Supports Red Hat Enterprise Linux, Oracle Linux, and Debian
 # Architectures: x86_64 (amd64) and aarch64 (arm64)
 
 # =============================================================================
@@ -31,6 +31,15 @@
     msg: "Unsupported architecture: {{ ansible_architecture }}. This playbook supports only x86_64 (AMD64) and aarch64 (ARM64)."
   when: docker_arch == 'unsupported'
 
+- name: Verify distribution is supported
+  fail:
+    msg: "Unsupported distribution: {{ ansible_distribution }}. This playbook supports only Red Hat Enterprise Linux, Oracle Linux, and Debian."
+  when: >
+    not (ansible_distribution == 'Debian' or 
+         ansible_distribution in ['RedHat', 'RHEL'] or 
+         ansible_distribution == 'OracleLinux' or
+         ansible_distribution | regex_search('Red Hat|RHEL|Oracle'))
+
 - name: Display system information
   debug:
     msg:
@@ -43,10 +52,10 @@
   tags: debug
 
 # =============================================================================
-# DEBIAN/UBUNTU FAMILY INSTALLATION
+# DEBIAN INSTALLATION
 # =============================================================================
 
-- name: Remove conflicting Docker packages (Debian/Ubuntu)
+- name: Remove conflicting Docker packages (Debian)
   package:
     name:
       - docker.io
@@ -58,9 +67,9 @@
       - runc
     state: absent
   ignore_errors: true
-  when: ansible_os_family == "Debian"
+  when: ansible_distribution == "Debian"
 
-- name: Install required packages for Docker repository (Debian/Ubuntu)
+- name: Install required packages for Docker repository (Debian)
   package:
     name:
       - ca-certificates
@@ -71,22 +80,14 @@
       - software-properties-common
     state: present
     update_cache: true
-  when: ansible_os_family == "Debian"
+  when: ansible_distribution == "Debian"
 
-- name: Create directory for Docker GPG key
+- name: Create directory for Docker GPG key (Debian)
   file:
     path: /etc/apt/keyrings
     state: directory
     mode: '0755'
-  when: ansible_os_family == "Debian"
-
-- name: Download and add Docker GPG key (Ubuntu)
-  shell: |
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | 
-    gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-  args:
-    creates: /etc/apt/keyrings/docker.gpg
-  when: ansible_distribution == "Ubuntu"
+  when: ansible_distribution == "Debian"
 
 - name: Download and add Docker GPG key (Debian)
   shell: |
@@ -96,18 +97,11 @@
     creates: /etc/apt/keyrings/docker.gpg
   when: ansible_distribution == "Debian"
 
-- name: Set correct permissions on Docker GPG key
+- name: Set correct permissions on Docker GPG key (Debian)
   file:
     path: /etc/apt/keyrings/docker.gpg
     mode: '0644'
-  when: ansible_os_family == "Debian"
-
-- name: Add Docker repository (Ubuntu)
-  apt_repository:
-    repo: "deb [arch={{ docker_arch }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
-    state: present
-    filename: docker
-  when: ansible_distribution == "Ubuntu"
+  when: ansible_distribution == "Debian"
 
 - name: Add Docker repository (Debian)
   apt_repository:
@@ -116,12 +110,12 @@
     filename: docker
   when: ansible_distribution == "Debian"
 
-- name: Update apt package cache after adding Docker repository
+- name: Update apt package cache after adding Docker repository (Debian)
   apt:
     update_cache: true
-  when: ansible_os_family == "Debian"
+  when: ansible_distribution == "Debian"
 
-- name: Install Docker CE packages (Debian/Ubuntu)
+- name: Install Docker CE packages (Debian)
   package:
     name:
       - docker-ce
@@ -130,13 +124,13 @@
       - docker-buildx-plugin
       - docker-compose-plugin
     state: present
-  when: ansible_os_family == "Debian"
+  when: ansible_distribution == "Debian"
 
 # =============================================================================
-# RED HAT FAMILY INSTALLATION
+# RED HAT ENTERPRISE LINUX INSTALLATION
 # =============================================================================
 
-- name: Remove conflicting Docker packages (Red Hat family)
+- name: Remove conflicting Docker packages (RHEL)
   package:
     name:
       - docker
@@ -151,22 +145,17 @@
       - runc
     state: absent
   ignore_errors: true
-  when: ansible_os_family == "RedHat"
+  when: >
+    ansible_distribution in ['RedHat', 'RHEL'] or 
+    ansible_distribution | regex_search('Red Hat|RHEL')
 
-- name: Install dnf-plugins-core or yum-utils (Red Hat family)
+- name: Install dnf-plugins-core or yum-utils (RHEL)
   package:
     name: "{{ 'dnf-plugins-core' if ansible_pkg_mgr == 'dnf' else 'yum-utils' }}"
     state: present
-  when: ansible_os_family == "RedHat"
-
-- name: Add Docker CE repository (CentOS/Rocky/AlmaLinux)
-  shell: |
-    {{ ansible_pkg_mgr }} config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-  args:
-    creates: /etc/yum.repos.d/docker-ce.repo
   when: >
-    ansible_distribution in ['CentOS', 'Rocky', 'AlmaLinux'] or 
-    ansible_distribution | regex_search('CentOS|Rocky|AlmaLinux')
+    ansible_distribution in ['RedHat', 'RHEL'] or 
+    ansible_distribution | regex_search('Red Hat|RHEL')
 
 - name: Add Docker CE repository (RHEL)
   shell: |
@@ -177,14 +166,7 @@
     ansible_distribution in ['RedHat', 'RHEL'] or 
     ansible_distribution | regex_search('Red Hat|RHEL')
 
-- name: Add Docker CE repository (Fedora)
-  shell: |
-    {{ ansible_pkg_mgr }} config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
-  args:
-    creates: /etc/yum.repos.d/docker-ce.repo
-  when: ansible_distribution == "Fedora"
-
-- name: Install Docker CE packages (Red Hat family)
+- name: Install Docker CE packages (RHEL)
   package:
     name:
       - docker-ce
@@ -193,7 +175,80 @@
       - docker-buildx-plugin
       - docker-compose-plugin
     state: present
-  when: ansible_os_family == "RedHat"
+  when: >
+    ansible_distribution in ['RedHat', 'RHEL'] or 
+    ansible_distribution | regex_search('Red Hat|RHEL')
+
+# =============================================================================
+# ORACLE LINUX INSTALLATION
+# =============================================================================
+
+- name: Remove conflicting Docker packages (Oracle Linux)
+  package:
+    name:
+      - docker
+      - docker-client
+      - docker-client-latest
+      - docker-common
+      - docker-latest
+      - docker-latest-logrotate
+      - docker-logrotate
+      - docker-engine
+      - podman
+      - runc
+    state: absent
+  ignore_errors: true
+  when: >
+    ansible_distribution == 'OracleLinux' or
+    ansible_distribution | regex_search('Oracle')
+
+- name: Install dnf-plugins-core or yum-utils (Oracle Linux)
+  package:
+    name: "{{ 'dnf-plugins-core' if ansible_pkg_mgr == 'dnf' else 'yum-utils' }}"
+    state: present
+  when: >
+    ansible_distribution == 'OracleLinux' or
+    ansible_distribution | regex_search('Oracle')
+
+- name: Add Docker CE repository (Oracle Linux - uses CentOS repo)
+  shell: |
+    {{ ansible_pkg_mgr }} config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  args:
+    creates: /etc/yum.repos.d/docker-ce.repo
+  when: >
+    ansible_distribution == 'OracleLinux' or
+    ansible_distribution | regex_search('Oracle')
+
+- name: Install EPEL repository for Oracle Linux 8 (if needed)
+  package:
+    name: oracle-epel-release-el8
+    state: present
+  ignore_errors: true
+  when: >
+    (ansible_distribution == 'OracleLinux' or ansible_distribution | regex_search('Oracle')) and 
+    ansible_distribution_major_version == '8'
+
+- name: Install EPEL repository for Oracle Linux 9 (if needed)
+  package:
+    name: oracle-epel-release-el9
+    state: present
+  ignore_errors: true
+  when: >
+    (ansible_distribution == 'OracleLinux' or ansible_distribution | regex_search('Oracle')) and 
+    ansible_distribution_major_version == '9'
+
+- name: Install Docker CE packages (Oracle Linux)
+  package:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+  when: >
+    ansible_distribution == 'OracleLinux' or
+    ansible_distribution | regex_search('Oracle')
 
 # =============================================================================
 # ARCHITECTURE-SPECIFIC OPTIMIZATIONS
@@ -275,6 +330,29 @@
   when: docker_users is defined and docker_users | length > 0
 
 # =============================================================================
+# ENTERPRISE LINUX SPECIFIC CONFIGURATIONS
+# =============================================================================
+
+- name: Configure SELinux for Docker (RHEL/Oracle Linux with SELinux)
+  seboolean:
+    name: container_manage_cgroup
+    state: true
+    persistent: true
+  ignore_errors: true
+  when: >
+    (ansible_distribution in ['RedHat', 'RHEL', 'OracleLinux'] or 
+     ansible_distribution | regex_search('Red Hat|RHEL|Oracle')) and
+    ansible_selinux.status == "enabled"
+
+- name: Set SELinux context for Docker socket (RHEL/Oracle Linux with SELinux)
+  command: restorecon -R /var/run/docker.sock
+  ignore_errors: true
+  when: >
+    (ansible_distribution in ['RedHat', 'RHEL', 'OracleLinux'] or 
+     ansible_distribution | regex_search('Red Hat|RHEL|Oracle')) and
+    ansible_selinux.status == "enabled"
+
+# =============================================================================
 # VERIFICATION AND TESTING
 # =============================================================================
 
@@ -287,6 +365,17 @@
   debug:
     msg: "✅ Docker installed successfully: {{ docker_version_check.stdout }}"
 
+- name: Display enterprise Linux specific information
+  debug:
+    msg:
+      - "Distribution: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+      - "Architecture: {{ docker_arch }}"
+      - "SELinux Status: {{ ansible_selinux.status | default('Not available') }}"
+      - "Package Manager: {{ ansible_pkg_mgr }}"
+  when: >
+    ansible_distribution in ['RedHat', 'RHEL', 'OracleLinux'] or 
+    ansible_distribution | regex_search('Red Hat|RHEL|Oracle')
+
 - name: Test Docker functionality with hello-world
   command: docker run --rm hello-world
   register: docker_hello_test
@@ -297,5 +386,14 @@
 
 - name: Display Docker test result
   debug:
-    msg: "✅ Docker is working correctly on {{ docker_arch }}! Hello-world container ran successfully."
+    msg: "✅ Docker is working correctly on {{ ansible_distribution }} {{ docker_arch }}! Hello-world container ran successfully."
   when: docker_hello_test.rc == 0
+
+- name: Display final installation summary
+  debug:
+    msg:
+      - "🎉 Docker Installation Complete!"
+      - "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+      - "Architecture: {{ docker_arch }}"
+      - "Docker Version: {{ docker_version_check.stdout }}"
+      - "Users in docker group: {{ docker_users | default(['none specified']) | join(', ') }}"
