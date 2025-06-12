@@ -7,7 +7,7 @@
 
 - name: set password for mysql
   set_fact:
-    mysql_password: "U?fY)9s7|3gxUm!@#$%^&()*"
+    mysql_password: "UfY9s73Gx`~!?@#$%^&*(){}[]<>|/:;,.-_+="
 
 - name: enable ps-57 release repo
   include_tasks: ./enable_repo.yml
