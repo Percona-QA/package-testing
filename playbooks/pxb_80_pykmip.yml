@@ -322,18 +322,18 @@
     command: /package-testing/package_check.sh pxb80
 
   - name: run backup
-    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ &> /var/log/xb_run_backup.log
+    shell: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ > /var/log/xb_run_backup.log 2>&1
 
   - name: prepare backup on Redhat/CentOS
-    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --component-keyring-config=/usr/lib64/mysql/plugin/component_keyring_kmip.cnf &> /var/log/xb_prepare_backup.log
+    shell: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --xtrabackup-plugin-dir=/usr/lib64/mysql/plugin --component-keyring-config=/usr/lib64/mysql/plugin/component_keyring_kmip.cnf > /var/log/xb_prepare_backup.log 2>&1
     when: ansible_os_family == "RedHat"
 
   - name: prepare backup on Debian/Ubuntu
-    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --component-keyring-config=/usr/lib/mysql/plugin/component_keyring_kmip.cnf &> xb_/var/log/xb_prepare_backup.log
+    shell: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --xtrabackup-plugin-dir=/usr/lib/mysql/plugin --component-keyring-config=/usr/lib/mysql/plugin/component_keyring_kmip.cnf > /var/log/xb_prepare_backup.log 2>&1
     when: ansible_os_family == "Debian"
 
   - name: save contents of xb_run_backup.log
-    command: cat /var/log/xb_run_backup.log
+    shell: cat /var/log/xb_run_backup.log
     register: xb_run_backup_log
 
   - name: debug xb_run_backup_log
@@ -341,7 +341,7 @@
       msg: "{{ xb_run_backup_log.stdout_lines }}"
 
   - name: save contents of xb_prepare_backup.log
-    command: cat /var/log/xb_prepare_backup.log
+    shell: cat /var/log/xb_prepare_backup.log
     register: xb_prepare_backup_log
 
   - name: debug xb_prepare_backup_log
