@@ -7,7 +7,7 @@
 
 - name: set password for mysql
   set_fact:
-    mysql_password: "UfY9s73Gx`~!?@#$%^&*(){}[]<>|/:;,.-_+="
+    mysql_password: "UfY9s73Gx~!?@#$%^&*(){}[]<>|/:;,.-_+="
 
 - name: enable ps-80 release repo
   include_tasks: ./enable_repo.yml
