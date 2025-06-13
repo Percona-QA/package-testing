@@ -4,6 +4,11 @@
 #             var "port_flag"      :  to access agent with custom port
 #                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
 #
+
+- name: set password for mysql
+  set_fact:
+    mysql_password: "UfY9s73Gx~!?@#$%^&*(){}[]<>|/:;,.-_+="
+
 - name: enable ps-80 release repo
   include_tasks: ./enable_repo.yml
   vars:
@@ -29,7 +34,7 @@
   when: ansible_os_family == "RedHat"
   shell: |
     init_pass=$(grep "temporary password" /var/log/mysqld.log | awk '{print $NF}' | tail -1)
-    mysql --connect-expired-password -uroot --password="$init_pass" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'U?fY)9s7|3gxUm';"
+    mysql --connect-expired-password -uroot --password="$init_pass" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ mysql_password }}';"
     cp ../templates/my_57.j2 /root/.my.cnf
 
 - name: copy .my.cnf with credentials on centos
@@ -42,7 +47,7 @@
   when: ansible_os_family == "RedHat"
   command: >-
     pmm-admin add mysql {{ port_flag if port_flag is defined else '' }}
-    --password='U?fY)9s7|3gxUm' --service-name={{ mysql_service_name }} --query-source=perfschema 
+    --password={{ mysql_password }} --service-name={{ mysql_service_name }} --query-source=perfschema 
     {{ '' if agent_password is not defined or '/agent_id/' in agent_password else '--agent-password=%s' | format(agent_password) }}
 
 - name: add mysql instance for monitoring via socket
