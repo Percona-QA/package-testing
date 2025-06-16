@@ -149,7 +149,8 @@ if glibc_version == '2.35':
     #  ('lib/libssl.so', 'lib/private/libssl.so.3'),
       ('lib/libtinfo.so', 'lib/private/libtinfo.so.6.3'),
       ('lib/libaio.so','lib/private/libaio.so.1.0.1'),('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
-      ('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'), ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
+      ('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'),
+      ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
       # ('lib/librtmp.so', 'lib/private/librtmp.so.1'),
     )
 else:
@@ -159,8 +160,9 @@ else:
     #  ('lib/libssl.so', 'lib/private/libssl.so.3'),
     #  ('lib/libtinfo.so', 'lib/private/libtinfo.so.6.2'),
       ('lib/libaio.so','lib/private/libaio.so.1.0.1'),#('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
-      ('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'), ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
-      #('lib/librtmp.so', 'lib/private/librtmp.so.1'), 
+      #('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'),
+      ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
+      #('lib/librtmp.so', 'lib/private/librtmp.so.1'),
      # ('lib/libtirpc.so', 'lib/private/libtirpc.so.3.0.0')
      # ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'), ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
 
