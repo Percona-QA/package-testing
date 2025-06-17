@@ -20,7 +20,7 @@ provisioner:
   name: ansible
   playbooks:
     create: ../../../playbooks/create_noble.yml
-#    destroy: ../../../playbooks/destroy_noble.yml
+    destroy: ../../../playbooks/destroy_noble.yml
     prepare: ../../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
     side_effect: ../../../../../playbooks/pxc80_upgrade_bootstrap.yml
