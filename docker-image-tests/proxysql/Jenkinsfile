@@ -22,19 +22,13 @@ pipeline {
             '''
                     
             def VERSION = sh(
-                script: '''grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
+                script: '''grep ${DOCKER_PRODUCT}_VERSION VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
                 returnStdout: true
                 ).trim()
 
-            def REVISION = sh(
-                script: ''' grep ${PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
-                returnStdout: true
-                ).trim()
-                    
-    
              env.PROXYSQL_VERSION = "${VERSION}"
 
-            echo "PROXYSQL_VERSION fetched: ${env.PROXYSQL_VERSION}"
+             echo "PROXYSQL_VERSION fetched: ${env.PROXYSQL_VERSION}"
 
           }
        }
