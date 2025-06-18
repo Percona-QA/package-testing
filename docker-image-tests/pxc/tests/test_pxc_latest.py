@@ -12,7 +12,7 @@ container_name = 'pxc-docker-test-static2'
 def host():
     docker_id = subprocess.check_output(
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd, '-e', 'PERCONA_TELEMETRY_DISABLE=1', '-d', docker_image_latest]).decode().strip()
-    exec_command = ['microdnf', 'install', 'net-tools']
+    exec_command = ['microdnf', 'install', '-y', 'net-tools']
     subprocess.check_call(['docker','exec','--user','root',container_name] + exec_command)
     time.sleep(80)
     yield testinfra.get_host("docker://root@" + docker_id)
