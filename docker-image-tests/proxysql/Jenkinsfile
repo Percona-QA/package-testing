@@ -5,7 +5,7 @@ pipeline {
     choice(
             choices: ['proxysql2', 'proxysql3'],
             description: 'Choose the product version to test',
-            name: 'docker_product'
+            name: 'DOCKER_PRODUCT'
         )
   }
   stages {
