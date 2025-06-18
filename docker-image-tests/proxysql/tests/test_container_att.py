@@ -11,7 +11,7 @@ container_name = 'proxy-docker-test-inspect'
 @pytest.fixture(scope='module')
 def inspect_data():
     docker_id = subprocess.check_output(
-        ['docker', 'run', '-p', '16034:6032', '-p', '16035:6033', '-p', '16072:6070', '--name', container_name, '-d', docker_image]).decode().strip()
+        ['docker', 'run', '-p', '16034:6032', '-p', '16035:6033', '-p', '16072:6070', '--name', container_name, '-d', percona/proxysql2:2.7.3-1.1]).decode().strip()
     inspect_data = json.loads(subprocess.check_output(['docker','inspect',container_name]))
     yield inspect_data[0]
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
