@@ -16,9 +16,9 @@ pipeline {
               rm -rf /package-testing
               rm -f master.zip
               wget https://github.com/kaushikpuneet07/package-testing/archive/fix-docker.zip
-              unzip master.zip
-              rm -f master.zip
-              mv "package-testing-master" package-testing
+              unzip fix-docker.zip
+              rm -f fix-docker.zip
+              mv "package-testing-fix-docker" package-testing
             '''
                     
             def VERSION = sh(
