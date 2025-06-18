@@ -8,8 +8,8 @@
 - name: set password for pgsql
   set_fact:
 # workaround to pass pg_version_to_install check in install_ppg.yml
-    pgsql_password: "UfY9s73Gx#="
-#    pgsql_password: "UfY9s73Gx~!?@#$%^&*(){}[]<>|/:;,.-_+="
+#    pgsql_password: "UfY9s73Gx#="
+    pgsql_password: "UfY9s73Gx~!?@#$%^&*(){}[]<>|/:;,.-_+="
 
 - name: Download install_ppg16.yml
   get_url:
