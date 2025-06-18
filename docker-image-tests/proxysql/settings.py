@@ -15,4 +15,3 @@ docker_image_latest = docker_acc + "/" + docker_product + ":" + "latest"
 docker_image_upstream = docker_acc + "/" + docker_product + ":" + proxysql_version_upstream
 docker_image_major = docker_acc + "/" + docker_product + ":" + proxysql_version_major
 
-print(f"Using Docker Image: {docker_image}")
