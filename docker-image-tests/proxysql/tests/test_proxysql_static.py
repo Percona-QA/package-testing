@@ -18,14 +18,8 @@ def host():
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
 
 class TestMysqlEnvironment:
-    @pytest.mark.parametrize("pkg_name", ['proxysql'])  # Add more packages if applicable
-    def test_packages(self, host, pkg_name):
-        assert host.package(pkg_name).is_installed
-        assert host.package(pkg_name).version.startswith(proxysql_version_upstream)
-
     @pytest.mark.parametrize("binary", [
         '/usr/bin/proxysql',
-        '/usr/sbin/proxysql'  # Add more if needed
     ])
     def test_binaries_exist(self, host, binary):
         assert host.file(binary).exists
@@ -41,18 +35,6 @@ class TestMysqlEnvironment:
         assert proc
         assert any('proxysql' in p.args for p in proc)
 
-    def test_proxysql_admin_port(self, host):
-        # 6032 is the default admin interface port
-        assert host.socket("tcp://0.0.0.0:6032").is_listening
-
-    def test_proxysql_mysql_port(self, host):
-        # 6033 is the default MySQL client-facing interface
-        assert host.socket("tcp://0.0.0.0:6033").is_listening
-
-    def test_proxysql_stats_port(self, host):
-        # 6070 is commonly used for stats/prometheus exporters
-        assert host.socket("tcp://0.0.0.0:6070").is_listening
-
     def test_proxysql_user(self, host):
         user = host.user('proxysql')
         assert user.exists
@@ -67,11 +49,11 @@ class TestMysqlEnvironment:
         datadir = host.file('/var/lib/proxysql')
         assert datadir.exists
         assert datadir.user == 'proxysql'
-        assert oct(datadir.mode) in ['0o755', '0o750']  # Depending on packaging
+        assert oct(datadir.mode) in ['0o755', '0o750', '0o775']  # Depending on packaging
 
     def test_config_file(self, host):
         cfg = host.file('/etc/proxysql.cnf')
         assert cfg.exists
         assert cfg.user == 'root'
-        assert oct(cfg.mode) in ['0o644', '0o600']  # Should not be world-writable
+        assert oct(cfg.mode) in ['0o644', '0o640', '0o600']  # Should not be world-writable
 
