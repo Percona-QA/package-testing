@@ -12,7 +12,7 @@ container_name = 'proxy-docker-test-inspect1'
 def host():
     docker_id = subprocess.check_output(
         ['docker', 'run', '-p', '16034:6032', '-p', '16035:6033', '-p', '16072:6070', '--name', container_name, '-d', docker_image]).decode().strip()
-    subprocess.check_call(['docker','exec', '-it', container_name,'yum','-y','install','net-tools'])
+    subprocess.check_call(['docker','exec', container_name, 'yum', '-y', 'install', 'net-tools'])
     time.sleep(20)
     yield testinfra.get_host("docker://root@" + docker_id)
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
