@@ -6,7 +6,6 @@
 #
 - set_fact:
     pg_version: "{{ pg_to_test.split('-')[1] }}"
-#    pgsql_password: "UfY9s73Gx#="
     pgsql_password: "UfY9s73Gx~!?@#$%^&*(){}[]<>|/:;,.-_+="
 
 - name: Download install_ppg.yml
