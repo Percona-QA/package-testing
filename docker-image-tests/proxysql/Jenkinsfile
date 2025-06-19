@@ -10,38 +10,6 @@ pipeline {
     string(name: 'PROXYSQL_VERSION', defaultValue: '2.7.3-1.1', description: 'Full proxysql version')
   }
   stages {
-#    stage('SET PROXYSQL_VERSION') {
-#        steps {
-#          script {
-#            sh '''
-#              rm -rf /package-testing
-#              rm -f master.zip
-#              wget https://github.com/kaushikpuneet07/package-testing/archive/fix-docker.zip
-#              unzip fix-docker.zip
-#              rm -f fix-docker.zip
- #             mv "package-testing-fix-docker" package-testing
- #           '''
-                    
-#            def VERSION = sh(
-#                script: '''grep ${DOCKER_PRODUCT}_VERSION VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
-#                returnStdout: true
-#                ).trim()
-
-#             env.PROXYSQL_VERSION = "${VERSION}"
-
-#             echo "PROXYSQL_VERSION fetched: ${env.PROXYSQL_VERSION}"
-
-#          }
-#       }
-#     }
-#    stage('Set environmental variable'){
-#      steps{
-#        script {
-#                    // Now, you can access these global environment variables
-#          echo "Using PROXYSQL_VERSION: ${env.PROXYSQL_VERSION}"
-#                }
-#            }
-##        }
     stage('Prepare') {
       steps {
           script {
