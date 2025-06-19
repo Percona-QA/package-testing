@@ -9,7 +9,7 @@ pipeline {
         )
     string(name: 'PROXYSQL_VERSION', defaultValue: '2.7.3-1.1', description: 'Full proxysql version')
   }
-#  stages {
+  stages {
 #    stage('SET PROXYSQL_VERSION') {
 #        steps {
 #          script {
