@@ -9,12 +9,47 @@ from settings import *
 container_name = 'proxy-docker-test-inspect1'
 
 @pytest.fixture(scope='module')
+#def host():
+#    docker_id = subprocess.check_output(
+#        ['docker', 'run', '-p', '16034:6032', '-p', '16035:6033', '-p', '16072:6070', '--name', container_name, '-d', docker_image]).decode().strip()
+#    subprocess.check_call(['docker','exec', container_name, 'yum', '-y', 'install', 'net-tools'])
+#    time.sleep(20)
+#    yield testinfra.get_host("docker://root@" + docker_id)
+#    subprocess.check_call(['docker', 'rm', '-f', docker_id])
+
 def host():
     docker_id = subprocess.check_output(
-        ['docker', 'run', '-p', '16034:6032', '-p', '16035:6033', '-p', '16072:6070', '--name', container_name, '-d', docker_image]).decode().strip()
-    subprocess.check_call(['docker','exec', container_name, 'yum', '-y', 'install', 'net-tools'])
-    time.sleep(20)
+        [
+            'docker', 'run',
+            '-p', '16034:6032',
+            '-p', '16035:6033',
+            '-p', '16072:6070',
+            '--name', container_name,
+            '-d', docker_image
+        ]
+    ).decode().strip()
+
+    # Optional wait loop to ensure the container is up
+    for _ in range(10):
+        try:
+            subprocess.check_call(['docker', 'exec', container_name, 'true'])
+            break
+        except subprocess.CalledProcessError:
+            time.sleep(2)
+
+    # Install net-tools using microdnf (RHEL 9.5)
+    try:
+        subprocess.check_call([
+            'docker', 'exec', container_name,
+            'microdnf', 'install', '-y', 'net-tools'
+        ])
+    except subprocess.CalledProcessError as e:
+        print("⚠️ Failed to install net-tools:", e)
+
+    time.sleep(10)
+
     yield testinfra.get_host("docker://root@" + docker_id)
+
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
 
 
