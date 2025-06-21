@@ -7,7 +7,7 @@ pipeline {
             description: 'Choose the product version to test',
             name: 'DOCKER_PRODUCT'
         )
-    string(name: 'PROXYSQL_VERSION', defaultValue: '2.7.3-1.1', description: 'Full proxysql version')
+    string(name: 'PROXYSQL_VERSION', defaultValue: '2.7.3-percona-1.1', description: 'Full proxysql version')
   }
   stages {
     stage('Prepare') {
@@ -29,7 +29,7 @@ pipeline {
               sudo tar zxvf trivy_\${TRIVY_VERSION}_Linux-64bit.tar.gz -C /usr/local/bin/
               wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/junit.tpl
               /usr/local/bin/trivy -q image --format template --template @junit.tpl  -o trivy-hight-junit.xml \
-              --timeout 10m0s --ignore-unfixed --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_ACC}/${DOCKER_PRODUCT}:${PROXYSQL_VERSION}
+              --timeout 10m0s --ignore-unfixed --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_ACC}/${DOCKER_PRODUCT}:${PROXYSQL_VERSION_LONG}
             """
          } //end steps
          post {

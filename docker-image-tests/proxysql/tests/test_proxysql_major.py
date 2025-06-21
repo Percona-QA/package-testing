@@ -7,12 +7,12 @@ import time
 from settings import *
 
 
-container_name = 'proxy-docker-test-inspect2'
+container_name = 'proxy-docker-test-inspect3'
 
 @pytest.fixture(scope='module')
 def host():
     docker_id = subprocess.check_output(
-        ['docker', 'run', '-p', '16038:6032', '-p', '16039:6033', '-p', '16074:6070', '--name', container_name, '-d', docker_image_upstream]).decode().strip()
+        ['docker', 'run', '-p', '16040:6032', '-p', '16041:6033', '-p', '16075:6070', '--name', container_name, '-d', docker_image_major]).decode().strip()
     time.sleep(20)
     yield testinfra.get_host("docker://" + docker_id)
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
