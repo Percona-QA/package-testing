@@ -27,7 +27,7 @@ class TestMysqlEnvironment:
 
     def test_proxysql_version(self, host):
         output = host.check_output('proxysql --version')
-        expected = f'proxysql version {proxysql_version_upstream}'
+        expected = f'proxysql version {proxysql_version}'
         assert expected in output
 
     def test_process_running(self, host):
