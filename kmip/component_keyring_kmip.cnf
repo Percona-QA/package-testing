@@ -1,1 +1,7 @@
-{ "path": "/package-testing/kmip/keyring_kmip", "server_addr": "0.0.0.0", "server_port": "5696", "client_ca": "/package-testing/kmip/client_certificate_john_smith.pem", "client_key": "/package-testing/kmip/client_key_john_smith.pem", "server_ca": "/package-testing/kmip/server_certificate.pem" }
+{
+  "server_addr": "127.0.0.1",
+  "server_port": "5696",
+  "client_ca": "/tmp/certs/mysql-client-cert.pem",
+  "client_key": "/tmp/certs/mysql-client-key.pem",
+  "server_ca": "/tmp/certs/vault-kmip-ca.pem"
+}
