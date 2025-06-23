@@ -28,15 +28,11 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
   - name: disable the mysql module on RHEL/CentOS 8
-    command: yum module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
-  - name: disable the mariadb module on RHEL/CentOS 8
-    command: yum module disable mariadb -y
+    command: dnf module disable mysql mariadb -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: install Percona Server 5.7 rpm packages
-    yum:
+    package:
       name:
         - Percona-Server-server-57
         - Percona-Server-test-57
@@ -54,7 +50,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install Percona-Server-shared-compat-57 rpm package
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:

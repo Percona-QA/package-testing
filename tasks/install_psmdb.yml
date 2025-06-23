@@ -22,7 +22,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int < 8
 
   - name: install Percona Server for MongoDB rpm packages on Centos8 and greater
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:

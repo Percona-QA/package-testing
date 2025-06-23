@@ -83,7 +83,7 @@
       PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install PXC 8 rpm packages amd64
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -99,7 +99,7 @@
       PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: install PXC 8 rpm packages arm OS
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:

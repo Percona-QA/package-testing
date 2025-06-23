@@ -13,8 +13,9 @@
   - name: enable tools testing repo
     command: percona-release enable tools experimental
 
-  - name: clean and update yum cache
+  - name: Clean and update package cache
     shell: |
-      yum clean all
-      yum makecache
-    when: ansible_os_family == "RedHat"
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]

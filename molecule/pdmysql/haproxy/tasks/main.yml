@@ -24,19 +24,18 @@
     repo: "{{ lookup('env', 'REPO') }}"
     version: "{{ lookup('env', 'VERSION') }}"
 
-- name: clean and update yum cache
+- name: clean and update cache
   shell: |
-    yum clean all
-    yum makecache
+    {{ ansible_pkg_mgr }} clean all
+    {{ ansible_pkg_mgr }} makecache
   when: ansible_os_family == "RedHat"
 
-- name: disable the mysql module on RHEL/CentOS 8
-  command: yum module disable mysql -y
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
-
-- name: disable the mariadb module on RHEL/CentOS 8
-  command: yum module disable mariadb -y
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+- name: disable mysql and mariadb modules on RHEL/CentOS 8+
+  command: dnf module disable mysql mariadb -y
+  when: 
+    - ansible_os_family == "RedHat" 
+    - ansible_facts['distribution_major_version'] | int >= 8 
+  ignore_errors: true
 
 - name: install PXC 8 deb packages
   apt:

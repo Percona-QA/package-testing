@@ -30,11 +30,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: disable the mysql module on RHEL/CentOS 8
-  command: yum module disable mysql -y
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
-- name: disable the mariadb module on RHEL/CentOS 8
-  command: yum module disable mariadb -y
+  command: dnf module disable mysql mariadb -y
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
 - name: install PXC 8 deb packages
@@ -58,7 +54,7 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
 - name: install PXC rpm packages before OL9
-  yum:
+  package:
     name: "{{ packages }}"
     state: latest
   vars:
@@ -78,7 +74,7 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
 - name: install PXC rpm packages on OL9
-  yum:
+  package:
     name: "{{ packages }}"
     state: latest
   vars:
@@ -97,7 +93,7 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
 - name: install percona-replication-manager RHEL Packages
-  yum:
+  package:
     name: "{{ packages }}"
     state: latest
   vars:
@@ -116,7 +112,7 @@
   when: ansible_os_family == "Debian"
 
 - name: install HA Proxy RHEL Packages
-  yum:
+  package:
     name: "{{ packages }}"
     state: latest
   vars:
@@ -160,7 +156,7 @@
   when: ansible_os_family == "Debian"
 
 - name: install proxysql new rpm packages
-  yum:
+  package:
     name: "{{ packages }}"
     state: latest
   vars:
@@ -170,7 +166,7 @@
 
 #install initscripts-service manually on OL9 till DISTMYSQL-300 is fixed
 - name: install init scripts for OL9
-  yum:
+  package:
     name: "{{ packages }}"
   vars:
     packages:

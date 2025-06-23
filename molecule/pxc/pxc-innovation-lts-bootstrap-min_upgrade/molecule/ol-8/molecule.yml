@@ -6,7 +6,7 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: pxc1-innovation-lts-bootstrap-ol-8-min_upgrade
+  - name: ${BUILD_NUMBER}-pxc1-innovation-lts-bootstrap-ol-8-min_upgrade-${test_type}
     region: us-west-1
     image: ami-06339041e422fab06
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
@@ -16,6 +16,7 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   playbooks:
@@ -26,5 +27,5 @@ provisioner:
     side_effect: ../../../../../playbooks/pxc_innovation_lts_upgrade_bootstrap.yml
   inventory:
     host_vars:
-      pxc1-innovation-lts-bootstrap-ol-8-min_upgrade:
+      ${BUILD_NUMBER}-pxc1-innovation-lts-bootstrap-ol-8-min_upgrade-${test_type}:
         ip_env: "{{ ansible_host }}"
