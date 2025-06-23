@@ -5,35 +5,36 @@
   - name: Execute Bash command if the system is Red Hat-based
     shell: |
       echo "This is a Red Hat-based system"
-      # Add your Bash command here
     when: ansible_facts['distribution'] == "RedHat"
 
   - name: Execute Bash command if the system is Oracle Linux-based
     shell: |
       echo "This is an Oracle Linux-based system"
-      # Add your Bash command here
     when: ansible_facts['distribution'] == "OracleLinux"
 
   - name: Execute Bash command if the system is not Red Hat-based nor Oracle Linux-based
     shell: |
       echo "This is not a Red Hat-based or Oracle Linux-based system"
-      # Add your Bash command here
     when: ansible_facts['distribution'] != "RedHat" and ansible_facts['distribution'] != "OracleLinux"
 
-  - name: Install wget to download RPM packages
+  - name: Install wget to download RPM packages yum
     yum:
       name: wget
       state: present
     when:
-    - ansible_facts['distribution'] == "RedHat"
+    - (ansible_facts['distribution'] == "RedHat" and ansible_distribution_major_version == "7") or (ansible_facts['distribution'] == "Amazon" and ansible_distribution_major_version == "2")
 
-  - name: setup epel release centos 7
-    yum: name=https://dl.fedoraproject.org/pub/archive/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+  - name: Install wget to download RPM packages dnf rhel 8 and 9
+    dnf:
+      name: wget
+      state: present
+    when:
+    - (ansible_os_family == "RedHat" and ansible_distribution_major_version == "8") or (ansible_os_family == "RedHat" and ansible_distribution_major_version == "9")
 
-  - name: setup epel 7 repo for Amazon Linux 2
+  - name: setup epel release centos 7 yum
     yum: name=https://dl.fedoraproject.org/pub/archive/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm state=present
-    when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2"
+    when:
+    - (ansible_facts['distribution'] == "RedHat" and ansible_distribution_major_version == "7") or (ansible_facts['distribution'] == "Amazon" and ansible_distribution_major_version == "2")
 
   - name: install GPG key for epel 8
     rpm_key:
@@ -60,7 +61,7 @@
     when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "8"
 
   - name: update YUM cache for CentOS 8
-    yum:
+    dnf:
       update_cache: yes
       state: present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
@@ -77,7 +78,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: setup epel 8 repo
-    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
+    dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
     when: 
     - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
@@ -90,13 +91,13 @@
     - ansible_facts['distribution'] != "RedHat"
 
   - name: setup epel 9 repo package
-    yum: name=epel-release state=latest
+    dnf: name=epel-release state=latest
     when: 
     - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
     - ansible_facts['distribution'] != "RedHat"
 
   - name: setup epel 9 repo
-    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
+    dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
     when: 
     - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
     - ansible_facts['distribution'] != "RedHat"
@@ -147,7 +148,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
 
   - name: install needed packages for running tests with yum on RHEL 8
-    yum:
+    dnf:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -174,15 +175,6 @@
       - name: Log DNF failure and switch to yum
         debug:
           msg: "DNF installation failed. Attempting installation with yum."
-
-      - name: Install packages using yum as fallback
-        yum:
-          name:
-            - unzip
-            - wget
-            - jq
-          state: latest
-        when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 9
 
   - name: register SLES for updates with suse_register
     command: suse_register -a email="@@SLES_REG_EMAIL@@" -a regcode-sles=@@SLES_REG_CODE@@
