@@ -55,10 +55,9 @@
 # - name: enable the tools main repo
 #   command: percona-release enable tools release
 
-  - name: Clean YUM cache
-    command: yum clean all
-    when: ansible_os_family == "RedHat"
-
-  - name: Update YUM cache
-    command: yum makecache
-    when: ansible_os_family == "RedHat"
+  - name: Clean and update package cache
+    shell: |
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]

@@ -11,7 +11,7 @@
   when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
 
 - name: Install percona release Amazon
-  command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/prel/yum/testing/2023/RPMS/noarch/percona-release-1.0-30.noarch.rpm
+  command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/prel/yum/testing/2023/RPMS/noarch/percona-release-1.0-31.noarch.rpm
   when: ansible_os_family == "RedHat" and ansible_distribution == "Amazon"
 
 - name: add pro repository on debian
@@ -99,8 +99,9 @@
   when:
      - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
 
-- name: clean and update yum cache
+- name: Clean and update package cache
   shell: |
-    yum clean all
-    yum makecache
-  when: ansible_os_family == "RedHat"
+    {{ ansible_pkg_mgr }} clean all
+    {{ ansible_pkg_mgr }} makecache
+  when:
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]

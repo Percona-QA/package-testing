@@ -19,20 +19,19 @@
   command: percona-release enable{{ suffix_only }} {{ package }} {{ repository }}
   become: true
 
-- name: clean and update yum cache
+- name: Clean and update package cache
   shell: |
-    yum clean all
-    yum makecache
-  when: clear_cache and ansible_os_family == "RedHat"
+    {{ ansible_pkg_mgr }} clean all
+    {{ ansible_pkg_mgr }} makecache
+  when:
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
 
 - name: Update apt repo
   when: ansible_os_family == "Debian"
   shell: apt-get update -y
 
 - name: Update yum repo Centos 7
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 7
   shell: yum update -y --skip-broken
-
-- name: Update yum repo (not 7)
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int != 7
-  shell: yum update -y
+  when:
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+    - ansible_facts['distribution_major_version'] | int <= 7

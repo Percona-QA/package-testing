@@ -28,7 +28,7 @@
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
     - name: setup epel 8 repo
-      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
+      dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
     - name: install GPG key for epel 9
@@ -38,22 +38,44 @@
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
     - name: setup epel 9 repo
-      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
+      dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
-    - name: setup ca-certificates release
+    - name: setup ca-certificates release yum
       yum:
         name: ca-certificates
         update_cache: yes
         state: present
-      when: ansible_os_family == "RedHat"
+      when: 
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution_major_version'] | int <= 7
 
-    - name: setup epel release centos 7
+    - name: setup ca-certificates release dnf
+      dnf:
+        name: ca-certificates
+        update_cache: yes
+        state: present
+      when: 
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution_major_version'] | int >= 8
+
+    - name: setup epel release centos 7 yum
       yum:
         name: epel-release
         update_cache: yes
         state: present
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+      when: 
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution_major_version'] | int <= 7
+
+    - name: setup epel release centos 7 dnf
+      dnf:
+        name: epel-release
+        update_cache: yes
+        state: present
+      when: 
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution_major_version'] | int >= 8
 
     - name: buster workaround
       shell: |
@@ -101,35 +123,44 @@
           - unzip
           - wget
           - rsync
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
+      when: 
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution_major_version'] | int <= 7
 
-    - name: install needed packages for running tests with yum on RHEL8
-      yum:
+    - name: install needed packages for running tests on RHEL8 dnf
+      dnf:
         name: "{{ packages }}"
         state: latest
       vars:
         packages:
         - unzip
         - wget
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
+      when: 
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution_major_version'] | int >= 8
 
     - name: flush iptables
       iptables:
         flush: yes
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+      when: 
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution_major_version'] | int <= 7
 
-    - name: disable firewalld for OL8 and OL9
+    - name: disable firewalld 
       service:
         name: firewalld
         state: stopped
-      when: ansible_distribution == "OracleLinux" and (ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9") 
+      when: 
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution_major_version'] | int >= 8
+        - ansible_facts['services']['firewalld.service'] is defined
 
     - name: update cache
       command: apt-get update
       when: ansible_os_family == "debian"
 
-    - name: update cache
-      command: yum makecache
+    - name: update cache 
+      shell: "{{ ansible_pkg_mgr }} makecache"
       when: ansible_os_family == "RedHat" 
 
     - name: Setup SSH keys for Oracle Linux or Amazon

@@ -6,7 +6,7 @@
       msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
 
   - name: Add epel-release
-    yum:
+    package:
       state: present
       name: epel-release
     when: ansible_os_family == "RedHat" and ansible_distribution_version != "2023"
@@ -44,7 +44,7 @@
     when: ansible_os_family == "Debian" and  ansible_distribution_version not in ["24.04"] 
 
   - name: install needed packages for running tests with yum
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:

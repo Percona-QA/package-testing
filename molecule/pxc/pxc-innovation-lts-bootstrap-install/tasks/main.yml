@@ -54,7 +54,7 @@
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: install python3-libselinux 
-    yum:
+    dnf:
       name: "{{ packages }}"
       state: present
     vars:

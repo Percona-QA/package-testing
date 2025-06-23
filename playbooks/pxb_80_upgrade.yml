@@ -38,7 +38,7 @@
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
   - name: Install libgflags-dev for rhel9 aarm64
-    yum:
+    package:
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/aarch64/Packages/g/gflags-2.2.2-9.el9.aarch64.rpm
       state: present
       disable_gpg_check: yes
@@ -48,7 +48,7 @@
       - ansible_architecture == "aarch64"
 
   - name: Install libgflags-dev for rhel9 amd64
-    yum:
+    package:
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
       state: present
       disable_gpg_check: yes
@@ -184,7 +184,19 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install 3rd party packages with dnf
+    dnf:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
 #
 # Enable testing repository
@@ -266,7 +278,21 @@
       - percona-server-server
       - percona-xtrabackup-80
     when:
-      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+      - lookup('env', 'server_to_test') == "ps-80"
+
+  - name: remove Percona Server rpm packages
+    dnf:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-server-server
+      - percona-xtrabackup-80
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
       - lookup('env', 'server_to_test') == "ps-80"
       
 ## Changes done for telemetry: add iptables rule for Telemetry Server - install only pxb package.
@@ -278,7 +304,19 @@
         - iptables
         - iptables-services
       state: present
-    when: ansible_facts['distribution'] == "RedHat"
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: Install iptables on RHEL 
+    dnf:
+      name:
+        - iptables
+        - iptables-services
+      state: present
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: Enable and start iptables service
     systemd:

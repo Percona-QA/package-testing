@@ -58,13 +58,13 @@
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Install MySQL RHEL 8 yum repository package
-    yum: name=https://repo.mysql.com/mysql80-community-release-el8.rpm state=present
+    dnf: name=https://repo.mysql.com/mysql80-community-release-el8.rpm state=present
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Install MySQL RHEL 9 yum repository package
-    yum: name=https://repo.mysql.com/mysql80-community-release-el9.rpm state=present
+    dnf: name=https://repo.mysql.com/mysql80-community-release-el9.rpm state=present
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
@@ -76,7 +76,7 @@
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: setup epel 8 repo
-    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
+    dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
@@ -376,7 +376,7 @@
   - name: YUM List available packages
     shell: yum list available | grep mysql-community-server
     when: 
-      - ansible_os_family == "RedHat"
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
     register: yum_list
 
@@ -388,7 +388,7 @@
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install packages in rhel/centos 8
-    yum:
+    dnf:
       name: "{{ packages }}"
       state: present
     vars:
@@ -400,7 +400,7 @@
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install packages in rhel/centos 9
-    yum:
+    dnf:
       name: "{{ packages }}"
       state: present
     vars:

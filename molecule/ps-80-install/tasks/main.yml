@@ -69,13 +69,15 @@
   - name: re-run ps-admin to finish tokudb install
     command: /usr/bin/ps-admin --enable-tokudb
 
-  - name: install percona-mysql-shell package for CentOS
+  - name: install percona-mysql-shell package using yum
     yum:
       name: "{{ packages }}"
     vars:
       packages:
       - percona-mysql-shell
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: install percona-mysql-shell package for Debian/Ubuntu
     apt:
@@ -136,7 +138,19 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install 3rd party packages with dnf
+    dnf:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: run bats tests for mysql init scripts
     command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
