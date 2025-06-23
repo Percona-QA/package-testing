@@ -402,6 +402,11 @@
       dest: /package-testing/molecule/pxb-binary-tarball/
       remote_src: yes
 
+  - name: ERROR if TARBALL_NAME_MINIMAL_FOLDER is not set
+    fail:
+      msg: "TARBALL_NAME_MINIMAL_FOLDER is not set. Please check the environment variable REPO_TYPE."
+    when: TARBALL_NAME_MINIMAL_FOLDER is not defined
+
   - name: run backup for Redhat/Centos minimal
     command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
     when: ansible_os_family == "RedHat"
