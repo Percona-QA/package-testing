@@ -25,5 +25,5 @@
         failed_when: true
   rescue:
     - name: Generate PMM summary on failure
-      command: "pmm-admin summary --filename /pmm/package-testing/pmm-summary.zip {{ port_flag }}"
+      command: "pmm-admin summary --filename /pmm/package-testing/pmm-summary.zip"
       ignore_errors: yes
