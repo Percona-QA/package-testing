@@ -29,7 +29,7 @@ class PxcNode:
                 self.docker_id = subprocess.check_output(
                 ['docker', 'run', '--name', node_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd,
                 '-e', 'CLUSTER_NAME='+cluster_name, '-e', 'CLUSTER_JOIN='+base_node_name+'1',
-                '--net='+docker_network,'-v', test_pwd+'/config/custom_lz4.cnf:/etc/percona-xtradb-cluster.conf.d',
+                '--net='+docker_network,'-v', test_pwd+'/config/custom_lz4.cnf:/etc/percona-xtradb-cluster.conf.d/custom.cnf',
                 '-v', test_pwd+'/cert:/cert', '-d', docker_image]).decode().strip()
             else:
                 self.docker_id = subprocess.check_output(
