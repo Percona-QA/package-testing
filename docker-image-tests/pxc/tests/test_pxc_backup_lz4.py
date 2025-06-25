@@ -6,6 +6,7 @@ import time
 import shlex
 from settings import *
 
+node_name = 'nodeX'
 
 class PxcNode:
     def __init__(self, node_name, bootstrap_node=False):
