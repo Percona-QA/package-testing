@@ -61,7 +61,7 @@
       - libtirpc
       - lsb_release
     when: ansible_os_family == "RedHat" and ansible_distribution_version != "2023"
-
+    
   - name: Install required packages using dnf
     dnf:
       name:
@@ -109,13 +109,18 @@
   # #   set_fact:
   # #     TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/ps-80-pro/tarballs/Percona-Server-{{ lookup('env', 'PS_VERSION') }}/"
 
+  - name: set base path based on repo type
+    set_fact:
+      base_repo_path: "{{ 'qa-test/pxc-gated-' + PXC_VERSION_NAME if lookup('env', 'REPO') == 'testing' else 'pxc-' + PXC_VERSION_MAJOR + '-pro/tarballs/Percona-XtraDB-Cluster-' + PXC_VERSION_NAME }}"
+
+
   - name: get testing repo TARBALL_LINK
     set_fact:
-      TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/pxc-gated-{{ PXC_VERSION_NAME }}/{{ TARBALL_NAME }}"
+      TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/{{ base_repo_path }}/{{ TARBALL_NAME }}"
 
   - name: get testing repo MINIMAL_TARBALL_LINK
     set_fact:
-      MINIMAL_TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/pxc-gated-{{ PXC_VERSION_NAME }}/{{ MINIMAL_TARBALL_NAME }}"
+      MINIMAL_TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/{{ base_repo_path }}/{{ MINIMAL_TARBALL_NAME }}"
 
   - name: download package-testing repo branch with wget
     command: "{{ item }}"
