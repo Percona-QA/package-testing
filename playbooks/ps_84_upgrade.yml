@@ -22,6 +22,10 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
+  - name: Display distribution info
+    debug:
+      msg: "Distribution: {{ ansible_facts['distribution'] }}"
+
   - set_fact:
       pro_suf: "{{ '-pro' if ('yes' in lookup('env', 'pro_test') and lookup('env', 'cur_action_to_test') != 'not_pro_to_pro') else '' }}"
       allowerasing_value: "{{ true if 'yes' in lookup('env', 'pro_test') else false }}"
@@ -157,7 +161,7 @@
       packages:
       - rsyslog-mysql
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: install 3rd party packages with dnf
@@ -167,7 +171,7 @@
       packages:
       - rsyslog-mysql
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 7
 
   - name: start my.cnf change test
@@ -242,7 +246,7 @@
       - percona-server-client{{ pro_suf }}
       - percona-mysql-router{{ pro_suf }}
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int <= 7
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
@@ -354,7 +358,7 @@
       packages:
       - percona-release
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: upgrade Percona release to new rpm packages using dnf
@@ -365,7 +369,7 @@
       packages:
       - percona-release
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 7
 
   - name: start mysql service with systemctl command
@@ -385,7 +389,7 @@
       - percona-xtrabackup-test-84
       - percona-xtrabackup-84-debuginfo
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: upgrade Percona XtraBackup to new rpm packages using dnf
@@ -398,7 +402,7 @@
       - percona-xtrabackup-test-84
       - percona-xtrabackup-84-debuginfo
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: enable the Tools release repo
@@ -484,7 +488,7 @@
   - name: remove Percona Server{{ pro_suf }} rpm packages using yum
     command: yum remove -y percona-server-server{{ pro_suf }}
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: remove Percona Server{{ pro_suf }} rpm packages using dnf
@@ -492,7 +496,7 @@
       name: percona-server-server{{ pro_suf }}
       state: absent
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: check if process is stopped after package removal
@@ -517,7 +521,7 @@
         - iptables-services
       state: present
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: Install iptables on RHEL using dnf
@@ -527,7 +531,7 @@
         - iptables-services
       state: present
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 7
 
   - name: Enable and start iptables service
@@ -563,7 +567,7 @@
       packages:
       - percona-server-server{{ pro_suf }}
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: install Percona Server{{ pro_suf }} rpm RHEL8+ package for telemetry using dnf
@@ -575,7 +579,7 @@
       packages:
       - percona-server-server{{ pro_suf }}
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: check telemetry (disabled)
@@ -599,7 +603,7 @@
       packages:
       - percona-server-server{{ pro_suf }}
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: remove Percona Server{{ pro_suf }} rpm packages using dnf
@@ -610,5 +614,5 @@
       packages:
       - percona-server-server{{ pro_suf }}
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 8
