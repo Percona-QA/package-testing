@@ -17,7 +17,7 @@
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
     custom_path: "/pmm-client-custom-path"
-    tarball_link: "{{ lookup('env', 'tarball_link') }}"
+    tarball_link: "{{ lookup('env', 'TARBALL_LINK') }}"
     agent_password: "pmm-pass"
 
   tasks:
