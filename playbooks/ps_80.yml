@@ -279,8 +279,8 @@
       - rsyslog-mysql
     when: ansible_os_family == "Debian"
 
-  - name: install 3rd party packages with yum
-    yum:
+  - name: install 3rd party packages with dnf
+    dnf:
       name: "{{ packages }}"
     vars:
       packages:
@@ -324,7 +324,7 @@
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server rpm packages
-    yum:
+    dnf:
       name: "{{ packages }}"
       state: absent
     vars:
