@@ -172,7 +172,7 @@
       - rsyslog-mysql
     when: 
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 7
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start my.cnf change test
     command: /package-testing/check_mycnf_pre.sh
@@ -370,7 +370,7 @@
       - percona-release
     when: 
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 7
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
@@ -532,7 +532,7 @@
       state: present
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 7
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: Enable and start iptables service
     systemd:

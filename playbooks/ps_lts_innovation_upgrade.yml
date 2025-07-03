@@ -120,7 +120,19 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install 3rd party packages with dnf
+    dnf:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start my.cnf change test
     command: /package-testing/check_mycnf_pre.sh
@@ -174,16 +186,29 @@
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: upgrade Percona release to new rpm packages
+  - name: upgrade Percona release to new rpm packages yum
     yum:
       name: "{{ packages }}"
       state: latest
     vars:
       packages:
       - percona-release
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
 
-  - name: upgrade Percona Server to new rpm packages on CentOS
+  - name: upgrade Percona release to new rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-release
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: upgrade Percona Server to new rpm packages on RHEL yum
     yum:
       name: "{{ packages }}"
       state: latest
@@ -197,11 +222,33 @@
       - percona-server-shared
       - percona-server-shared-compat
       - percona-server-client
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: upgrade Percona Server to new rpm packages on Oracle Linux 9
+  - name: upgrade Percona Server to new rpm packages on RHEL dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-server-server
+      - percona-server-test
+      - percona-server-debuginfo
+      - percona-server-devel
+      - percona-server-rocksdb
+      - percona-server-shared
+      - percona-server-shared-compat
+      - percona-server-client
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: upgrade Percona Server to new rpm packages using yum
     yum:
       name: "{{ packages }}"
       state: latest
@@ -214,11 +261,32 @@
       - percona-server-rocksdb
       - percona-server-shared
       - percona-server-client
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: upgrade Percona XtraBackup to new rpm packages
+  - name: upgrade Percona Server to new rpm packages using dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-server-server
+      - percona-server-test
+      - percona-server-debuginfo
+      - percona-server-devel
+      - percona-server-rocksdb
+      - percona-server-shared
+      - percona-server-client
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: upgrade Percona XtraBackup to new rpm packages yum
     yum:
       name: "{{ packages }}"
       state: latest
@@ -227,7 +295,24 @@
       - percona-xtrabackup-{{ major_release_version }}
       - percona-xtrabackup-test-{{ major_release_version }}
       - percona-xtrabackup-{{ major_release_version }}-debuginfo
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: upgrade Percona XtraBackup to new rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup-{{ major_release_version }}
+      - percona-xtrabackup-test-{{ major_release_version }}
+      - percona-xtrabackup-{{ major_release_version }}-debuginfo
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
@@ -288,14 +373,27 @@
       - percona-server*
     when: ansible_os_family == "Debian"
 
-  - name: remove Percona Server rpm packages
+  - name: remove Percona Server rpm packages yum
     yum:
       name: "{{ packages }}"
       state: absent
     vars:
       packages:
       - percona-server*
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: remove Percona Server rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-server*
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped

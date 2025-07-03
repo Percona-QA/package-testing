@@ -331,7 +331,7 @@
     when:
       - lookup('env', 'pro_test') != "yes"
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 7
+      - ansible_facts['distribution_major_version'] | int >= 8
       - ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: install Percona xtrabackup 8.0 packages
