@@ -25,7 +25,7 @@ provisioner:
     converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
 scenario:
   name: ubuntu-noble
-  destroy_sequence:
+#  destroy_sequence:
 #    - destroy
   clenup_sequence:
     - cleanup
