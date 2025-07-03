@@ -56,8 +56,8 @@
   - name: stop mysql service
     service: name=mysql state=stopped
 
-  - name: remove mysql data directory
-    command: rm -r /var/lib/mysql
+#  - name: remove mysql data directory
+#    command: rm -r /var/lib/mysql
 
   - name: install python3-pip on RedHat/CentOS
     yum:
