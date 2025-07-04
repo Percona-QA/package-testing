@@ -81,7 +81,7 @@
   - name: install pykmip
     command: "{{ item }}"
     with_items:
-        - python3 -m pip install -U --break-system-packages pip
+#        - python3 -m pip install -U --break-system-packages pip
         - python3 -m pip install -U --break-system-packages setuptools
         - python3 -m pip install -U --break-system-packages pykmip
     when: ansible_distribution_release in ["bookworm", "noble"]
@@ -129,12 +129,12 @@
         remote_src: yes
     when: ansible_os_family == "Debian"
 
-  - name: copy the encryption config file on Debian/Ubuntu
-    copy:
-        src: /package-testing/kmip/encryption.j2
-        dest: /etc/mysql/conf.d/encryption.cnf
-        remote_src: yes
-    when: ansible_os_family == "Debian"
+#  - name: copy the encryption config file on Debian/Ubuntu
+#    copy:
+#        src: /package-testing/kmip/encryption.j2
+#        dest: /etc/mysql/conf.d/encryption.cnf
+#        remote_src: yes
+#    when: ansible_os_family == "Debian"
 
   - name: append include for RedHat
     lineinfile:
@@ -142,12 +142,12 @@
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
 
-  - name: copy the encryption config file on RHEL/CentOS/Amazon
-    copy:
-        src: /package-testing/kmip/encryption.j2
-        dest: /etc/my.cnf.d/encryption.cnf
-        remote_src: yes
-    when: ansible_os_family == "RedHat"
+#  - name: copy the encryption config file on RHEL/CentOS/Amazon
+#    copy:
+#        src: /package-testing/kmip/encryption.j2
+#        dest: /etc/my.cnf.d/encryption.cnf
+#        remote_src: yes
+#    when: ansible_os_family == "RedHat"
 
   - name: start mysql service
     service: name=mysql state=started
