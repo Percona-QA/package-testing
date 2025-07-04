@@ -78,13 +78,33 @@
         - ansible_distribution_release != "bookworm"
         - ansible_distribution_release != "noble"
 
-  - name: install pykmip
-    command: "{{ item }}"
-    with_items:
+#  - name: install pykmip
+#    command: "{{ item }}"
+#    with_items:
 #        - python3 -m pip install -U --break-system-packages pip
-        - python3 -m pip install -U --break-system-packages setuptools
-        - python3 -m pip install -U --break-system-packages pykmip
-    when: ansible_distribution_release in ["bookworm", "noble"]
+#        - python3 -m pip install -U --break-system-packages setuptools
+#        - python3 -m pip install -U --break-system-packages pykmip
+#    when: ansible_distribution_release in ["bookworm", "noble"]
+
+  - name: Ensure ~/.local/bin is in PATH for current user
+    lineinfile:
+      path: /home/{{ ansible_user }}/.bashrc
+      line: 'export PATH=$HOME/.local/bin:$PATH'
+      insertafter: EOF
+    when:
+      - ansible_distribution_release in ['bookworm', 'noble']
+
+  - name: install pykmip on bookworm/noble using user site
+    pip:
+      name:
+        - setuptools
+        - pykmip
+      extra_args: --user
+      executable: pip3
+    environment:
+      PYTHONUSERBASE: "/home/{{ ansible_user }}/.local"
+    when:
+      - ansible_distribution_release in ['bookworm', 'noble']
 
   - name: downgrade SQLAlchemy as new version doesn't work with pykmip
     command: pip3 install SQLAlchemy==1.4.46
@@ -95,6 +115,13 @@
   - name: downgrade SQLAlchemy as new version doesn't work with pykmip
     command: pip3 install --break-system-packages SQLAlchemy==1.4.46
     when: ansible_distribution_release in ["bookworm", "noble"]
+
+  - name: Check PyKMIP is importable
+    command: python3 -c "import pykmip; print(pykmip.__version__)"
+    register: pykmip_check
+    failed_when: "'No module named' in pykmip_check.stderr"
+    when:
+      - ansible_distribution_release in ['bookworm', 'noble']
 
   - name: start pykmip server
     shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
