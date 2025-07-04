@@ -1,14 +1,6 @@
 - name: include playbook for removing Percona repo
   include_tasks: remove_percona_repository.yml
-
-- name: Get the arch value from /etc/os-release
-  shell: uname -m 
-  register: arch_output
-
-- name: Replace spaces with dashes in arch_output
-  set_fact:
-    arch_output: "{{ arch_output.stdout | trim }}"
-
+  
 - name: Install percona release Debian
   apt:
     deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
@@ -16,7 +8,11 @@
 
 - name: Install percona release RHEL
   command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-  when: ansible_os_family == "RedHat"
+  when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+
+- name: Install percona release Amazon
+  command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/prel/yum/testing/2023/RPMS/noarch/percona-release-1.0-30.noarch.rpm
+  when: ansible_os_family == "RedHat" and ansible_distribution == "Amazon"
 
 - name: add pro repository on debian
   template: src=../templates/pro_deb_repo_file_pxc84.j2
@@ -33,30 +29,75 @@
   when:
     - ansible_os_family == "Debian"
 
-- name: add pro repository on rmp x86_64
+- name: Get release version for RedHat-based systems
+  shell: "rpm --eval '%{rhel}'"
+  register: release_version
+  changed_when: false
+  when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+
+- name: add pro repository on rhel AMD
   template: src=../templates/pro_rpm_repo_file_pxc84.j2
             dest=/etc/yum.repos.d/psmysql-pro.repo
   vars:
     client_id: "{{ lookup('env', 'USERNAME') }}"
     client_token: "{{ lookup('env', 'PASSWORD') }}"
-    repo: "testing"
+    repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
+    releasever: "{{ release_version.stdout }}"
   when:
-    - ansible_os_family == "RedHat"
-    - arch_output == "x86_64"
+    - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+    - ansible_architecture == "x86_64"
 
-- name: add pro repository on rmp aarch64 (ARM)
+- name: add pro repository on rhel ARM non Amazon
   template: src=../templates/pro_rpm_repo_file_pxc84_arm.j2
             dest=/etc/yum.repos.d/psmysql-pro.repo
   vars:
     client_id: "{{ lookup('env', 'USERNAME') }}"
     client_token: "{{ lookup('env', 'PASSWORD') }}"
-    repo: "testing"
+    repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
+    releasever: "{{ release_version.stdout }}"
   when:
-    - ansible_os_family == "RedHat"
-    - arch_output == "aarch64"
+    - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+    - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
 
-#- name: enable the tools repo
-#  command: percona-release enable-only tools
+- name: Get release version for Amazon Linux
+  shell: "source /etc/os-release && echo $VERSION_ID"
+  register: release_version
+  changed_when: false
+  when: ansible_distribution == "Amazon"
+
+- name: Add Pro Repository on Amazon Linux 2023
+  template: 
+    src: ../templates/pro_rpm_repo_file_pxc84.j2
+    dest: /etc/yum.repos.d/psmysql-pro.repo
+  vars:
+    client_id: "{{ lookup('env', 'USERNAME') }}"
+    client_token: "{{ lookup('env', 'PASSWORD') }}"
+    repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
+    releasever: "{{ release_version.stdout }}"  # Use extracted release version
+  when: ansible_distribution == "Amazon"
+
+- name: Get release version for Amazon Linux ARCH
+  shell: "source /etc/os-release && echo $VERSION_ID"
+  register: release_version
+  changed_when: false
+  when: ansible_distribution == "Amazon"
+
+- name: add pro repository on rmp aarch64 Amazon linux
+  template: src=../templates/pro_rpm_repo_file_pxc84_arm.j2
+            dest=/etc/yum.repos.d/psmysql-pro.repo
+  vars:
+    client_id: "{{ lookup('env', 'USERNAME') }}"
+    client_token: "{{ lookup('env', 'PASSWORD') }}"
+    repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
+    releasever: "{{ release_version.stdout }}"
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution == "Amazon"
+    - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+   
+- name: enable the tools repo
+  command: percona-release enable-only tools
+  when:
+     - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
 
 - name: clean and update yum cache
   shell: |

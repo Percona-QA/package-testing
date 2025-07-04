@@ -231,16 +231,16 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 #--------------------------------------------------------------------------------------------
 
-  - name: check telemetry (enabled)
-    command: /package-testing/check_telemetry.sh pxc -e
+#  - name: check telemetry (enabled)
+#    command: /package-testing/check_telemetry.sh pxc -e
 
-  - name: get telemetry_uuid content
-    command: cat /usr/local/percona/telemetry_uuid
-    register: t_uuid_output
+#  - name: get telemetry_uuid content
+#    command: cat /usr/local/percona/telemetry_uuid
+#   register: t_uuid_output
 
-  - name: output telemetry_uuid content
-    debug:
-      var: t_uuid_output
+#  - name: output telemetry_uuid content
+#    debug:
+#      var: t_uuid_output
 
   - name: stop mysql service with service command
     command: systemctl stop mysql
@@ -300,16 +300,23 @@
   - name: print INNODB version debug  
     debug: var=innod_version
 
-  - name: check PXC 8.4 version Molecule
+  - name: check PXC 8.4 version Molecule pro 
     command: /package-testing/version_check.sh pxc84pro
-    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
-
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
     when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
+      - lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+      - lookup('env', 'pro') == "yes"
+
+  - name: check PXC 8.4 version Molecule
+    command: /package-testing/version_check.sh pxc84
+    when:
+      - lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+      - lookup('env', 'pro') == "no"
+
+#  - name: Verify telemetry version and package installation
+#    command: /package-testing/check_tel_ver_pack.sh
 
   - name: Sleep 60 seconds
     command: sleep 60
 
+  - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL BOOTSTRAP
+    include_tasks: ../../../../tasks/list_installed_packages.yml

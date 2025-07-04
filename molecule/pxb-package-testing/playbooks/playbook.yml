@@ -9,3 +9,4 @@
     - role: pxb-package-testing
   vars:
     install_repo: "{{ lookup('env', 'install_repo') }}"
+    REPO_TYPE: "{{ lookup('env', 'REPO_TYPE') }}"

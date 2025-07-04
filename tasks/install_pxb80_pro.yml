@@ -9,7 +9,7 @@
       packages:
       - percona-xtrabackup-pro-80
       - percona-xtrabackup-test-pro-80
-      - percona-xtrabackup-dbg-pro-80
+      - percona-xtrabackup-pro-dbg-80
     when: ansible_os_family == "Debian"
 
   - name: install Percona XtraBackup new rpm packages
