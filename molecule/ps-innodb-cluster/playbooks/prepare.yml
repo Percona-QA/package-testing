@@ -146,13 +146,14 @@
         - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
         - ansible_facts['distribution_major_version'] | int <= 7
 
-    - name: disable firewalld for OL8 and OL9
+    - name: disable firewalld 
       service:
         name: firewalld
         state: stopped
       when: 
         - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
         - ansible_facts['distribution_major_version'] | int >= 8
+        - ansible_facts['services']['firewalld.service'] is defined
 
     - name: update cache
       command: apt-get update
