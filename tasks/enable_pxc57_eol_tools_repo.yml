@@ -58,7 +58,6 @@
     when:
       - ansible_os_family == "RedHat"
       - lookup('env', 'install_repo_eol') == "main" 
-      
 
   - name: Mandatory step for PXC 57 EOL (Disable all old repos)
     command: percona-release disable all
@@ -79,13 +78,9 @@
     when:
       - ansible_os_family == "Debian"
 
-#  - name: clean and update yum cache
-#    shell: |
-#      yum clean all
-#      yum makecache
-#    when: ansible_os_family == "RedHat"
-
-#  - name: update cache rpm
-#    yum:
-#      update_cache: yes
-#    when: ansible_os_family == "RedHat"
+  - name: Clean and update package cache
+    shell: |
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]

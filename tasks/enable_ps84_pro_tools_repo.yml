@@ -29,7 +29,6 @@
   when:
     - ansible_os_family == "Debian"
 
-
 - name: Get release version for RedHat-based systems
   shell: "rpm --eval '%{rhel}'"
   register: release_version
@@ -94,15 +93,15 @@
   when:
     - ansible_os_family == "RedHat" and ansible_distribution == "Amazon"
     - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
-   
 
 - name: enable the tools repo
   command: percona-release enable-only tools
   when:
      - ansible_distribution != "Amazon"
 
-- name: clean and update yum cache
+- name: Clean and update package cache
   shell: |
-    yum clean all
-    yum makecache
-  when: ansible_os_family == "RedHat"
+    {{ ansible_pkg_mgr }} clean all
+    {{ ansible_pkg_mgr }} makecache
+  when:
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]

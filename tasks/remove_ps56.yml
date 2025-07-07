@@ -16,7 +16,7 @@
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Server 5.6 rpm packages
-    yum:
+    package:
       name: "{{ packages }}"
       state: absent
     vars:

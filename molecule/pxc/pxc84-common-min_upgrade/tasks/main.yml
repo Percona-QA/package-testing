@@ -134,7 +134,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages amd64 non pro
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -150,7 +150,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages arm OS non pro
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -195,7 +195,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages amd64 pro
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -209,7 +209,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages arm OS pro
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:

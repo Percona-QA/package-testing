@@ -30,7 +30,7 @@
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
       
     - name: setup epel 8 repo
-      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
+      dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
     - name: install GPG key for epel 9
@@ -40,15 +40,26 @@
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
     - name: setup epel 9 repo
-      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
+      dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
-    - name: setup ca-certificates release
+    - name: setup ca-certificates release yum
       yum:
         name: ca-certificates
         update_cache: yes
         state: present
-      when: ansible_os_family == "RedHat"
+      when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+    - name: setup ca-certificates release dnf
+      dnf:
+        name: ca-certificates
+        update_cache: yes
+        state: present
+      when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
     - name: setup epel release centos 7
       yum: name=https://dl.fedoraproject.org/pub/archive/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm state=present
@@ -143,7 +154,7 @@
         - systemd-sysv
       when: ansible_os_family == "Debian" and ansible_distribution_release != "trusty"
 
-    - name: install needed packages for running tests with yum
+    - name: install needed packages for running tests yum
       yum:
         name: "{{ packages }}"
         state: latest
@@ -154,10 +165,12 @@
           - unzip
           - wget
           - rsync
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
+      when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
 
-    - name: install needed packages for running tests with yum on RHEL8
-      yum:
+    - name: install needed packages for running tests with yum on RHEL8 dnf
+      dnf:
         name: "{{ packages }}"
         state: latest
       vars:
@@ -165,7 +178,9 @@
         - unzip
         - wget
         - net-tools
-      when: (ansible_os_family == "RedHat") and (ansible_distribution_major_version|int == 8 or ansible_distribution_major_version|int == 9)
+      when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
     - name: Display OS Family
       debug:

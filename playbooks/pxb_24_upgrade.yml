@@ -176,7 +176,7 @@
     when: ansible_os_family == "Debian"
 
   - name: remove Percona Toolkit rpm packages on rhel/centos8
-    yum:
+    package:
       name: "{{ packages }}"
       state: absent
     vars:
@@ -195,7 +195,7 @@
 
     # Fix for PS-6087
   - name: remove Percona Server rpm packages on rhel/centos8/centos9
-    yum:
+    package:
       name: "{{ packages }}"
       state: absent
     vars:

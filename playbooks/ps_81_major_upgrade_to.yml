@@ -186,7 +186,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: upgrade Percona Server to new rpm packages on CentOS
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -202,7 +202,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
 
   - name: upgrade Percona Server to new rpm packages on Oracle Linux 9
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -217,7 +217,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: upgrade Percona XtraBackup to new rpm packages
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:

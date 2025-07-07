@@ -159,8 +159,8 @@
       command: apt-get update
       when: ansible_os_family == "debian"
 
-    - name: update cache
-      command: yum makecache
+    - name: update cache 
+      shell: "{{ ansible_pkg_mgr }} makecache"
       when: ansible_os_family == "RedHat" 
 
     - name: Setup SSH keys for Oracle Linux or Amazon

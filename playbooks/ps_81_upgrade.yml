@@ -167,7 +167,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: upgrade Percona Server to new rpm packages on CentOS
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -185,7 +185,7 @@
       PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: upgrade Percona Server to new rpm packages on Oracle Linux 9
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:

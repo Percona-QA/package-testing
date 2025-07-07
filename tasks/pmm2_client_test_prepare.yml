@@ -32,7 +32,6 @@
   until: result is not failed
 
 - name: Install needed packages for RHEL 7
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
   yum:
     name: "{{ packages }}"
     state: latest
@@ -41,10 +40,10 @@
       - libselinux-python
       - wget
       - jq # for exporter end point metric fetch
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
 
 - name: Install needed packages for RHEL 8+
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
-  yum:
+  package:
     name: "{{ packages }}"
     state: latest
   vars:
@@ -52,6 +51,7 @@
       - unzip
       - wget
       - jq # for exporter end point metric fetch
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
 
 - name: enable {{ test_package }} {{ test_repo }} repo
   include_tasks: ./enable_repo.yml

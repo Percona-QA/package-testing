@@ -72,7 +72,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: install Percona Server new rpm packages
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:

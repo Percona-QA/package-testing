@@ -349,7 +349,7 @@
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install packages in rhel/centos 8
-    yum:
+    package:
       name: "{{ packages }}"
       state: present
     vars:
@@ -361,7 +361,7 @@
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install packages in rhel/centos 9
-    yum:
+    package:
       name: "{{ packages }}"
       state: present
     vars:

@@ -84,7 +84,19 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install 3rd party packages with dnf
+    dnf:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start my.cnf change test
     command: /package-testing/check_mycnf_pre.sh
@@ -136,16 +148,29 @@
       - percona-xtrabackup-dbg-80
     when: ansible_os_family == "Debian"
 
-  - name: upgrade Percona Toolkit to new rpm packages
+  - name: upgrade Percona Toolkit to new rpm packages yum
     yum:
       name: "{{ packages }}"
       state: latest
     vars:
       packages:
       - percona-toolkit
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
 
-  - name: upgrade Percona Server to new rpm packages on CentOS
+  - name: upgrade Percona Toolkit to new rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: upgrade Percona Server to new rpm packages yum
     yum:
       name: "{{ packages }}"
       state: latest
@@ -160,9 +185,30 @@
       - percona-server-shared
       - percona-server-shared-compat
       - percona-server-client
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
 
-  - name: upgrade Percona XtraBackup to new rpm packages
+  - name: upgrade Percona Server to new rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-server-server
+      - percona-server-test
+      - percona-server-debuginfo
+      - percona-server-devel
+      - percona-server-tokudb
+      - percona-server-rocksdb
+      - percona-server-shared
+      - percona-server-shared-compat
+      - percona-server-client
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: upgrade Percona XtraBackup to new rpm packages yum
     yum:
       name: "{{ packages }}"
       state: latest
@@ -171,7 +217,22 @@
       - percona-xtrabackup-80
       - percona-xtrabackup-test-80
       - percona-xtrabackup-80-debuginfo
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: upgrade Percona XtraBackup to new rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup-80
+      - percona-xtrabackup-test-80
+      - percona-xtrabackup-80-debuginfo
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps80

@@ -13,7 +13,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: disable the mariadb module on RHEL/CentOS 8
-    command: yum module disable mariadb -y
+    command: dnf module disable mariadb -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - set_fact:
@@ -37,7 +37,7 @@
 
 # revert order once pt issue(DISTMYSQL-400) is resolved for OL8    
   - name: disable the mysql module on RHEL/CentOS 8
-    command: yum module disable mysql -y
+    command: dnf module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: clean yum
@@ -104,7 +104,7 @@
 
   #install initscripts-service manually on OL9 till DISTMYSQL-300 is fixed
   - name: install init scripts for OL9
-    yum:
+    dnf:
       name: "{{ packages }}"
     vars:
       packages:

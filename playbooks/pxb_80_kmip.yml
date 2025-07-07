@@ -40,7 +40,7 @@
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
   - name: Install libgflags-dev for rhel9 aarm64
-    yum:
+    package:
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/aarch64/Packages/g/gflags-2.2.2-9.el9.aarch64.rpm
       state: present
       disable_gpg_check: yes
@@ -50,7 +50,7 @@
       - ansible_architecture == "aarch64"
 
   - name: Install libgflags-dev for rhel9 amd64
-    yum:
+    package:
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
       state: present
       disable_gpg_check: yes

@@ -134,7 +134,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages amd64 non pro
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -150,7 +150,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages arm OS non pro
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -196,7 +196,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages amd64 pro
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -210,7 +210,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages arm OS pro
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -328,7 +328,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages amd64 non pro
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -344,7 +344,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages arm OS non pro
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -389,7 +389,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages amd64 pro
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -403,7 +403,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages arm OS pro
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -418,7 +418,7 @@
 #--------------------------------------------------------------------------------------------
 
   - name: Install iptables on RHEL 9
-    yum:
+    package:
       name:
         - iptables
         - iptables-services
@@ -456,7 +456,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages with blocked Telemetry Server NON PRO
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -484,7 +484,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install PXC 8 rpm packages with blocked Telemetry Server PRO
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:

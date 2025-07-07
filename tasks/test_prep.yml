@@ -22,14 +22,16 @@
       name: wget
       state: present
     when:
-    - (ansible_facts['distribution'] == "RedHat" and ansible_distribution_major_version == "7") or (ansible_facts['distribution'] == "Amazon" and ansible_distribution_major_version == "2")
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: Install wget to download RPM packages dnf rhel 8 and 9
     dnf:
       name: wget
       state: present
     when:
-    - (ansible_os_family == "RedHat" and ansible_distribution_major_version == "8") or (ansible_os_family == "RedHat" and ansible_distribution_major_version == "9")
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: setup epel release centos 7 yum
     yum: name=https://dl.fedoraproject.org/pub/archive/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm state=present
@@ -74,7 +76,7 @@
     - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: Yum update for epel 8
-    command: yum update -y
+    command: dnf update -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: setup epel 8 repo
@@ -125,13 +127,12 @@
     until: result is not failed
     when: ansible_os_family == "Debian"
 
-  - name: Clean yum cache
-    command: yum clean all
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
-
-  - name: update cache
-    command: yum update -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
+  - name: Clean and update package cache
+    shell: |
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
 
   - name: install needed packages for running tests with yum
     yum:
