@@ -47,7 +47,7 @@
   - name: include tasks for enabling test repo pxc 80 pro
     include_tasks: ../tasks/enable_pxc80_pro_repo_testing.yml
     when: 
-    - lookup('env', 'install_repo') == "testing" 
+    - lookup('env', 'upgrade_repo') == "testing" 
     - lookup('env', 'pro') == "yes"
 
   - name: include tasks for enabling main repo pxc 80 pro

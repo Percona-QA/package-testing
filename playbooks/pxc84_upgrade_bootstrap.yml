@@ -28,7 +28,7 @@
   - name: include tasks for enabling test repo pxc84 non pro
     include_tasks: ../tasks/enable_pxc84_testing_repo.yml
     when:
-    - lookup('env', 'install_repo') == "testing" 
+    - lookup('env', 'upgrade_repo') == "testing" 
     - lookup('env', 'pro') == "no"
 
   - name: include tasks for enabling main repo pxc84 non pro
