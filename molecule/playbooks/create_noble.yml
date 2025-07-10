@@ -40,19 +40,10 @@
       with_items: "{{ molecule_yml.platforms }}"
       register: subnet_facts
 
-
     - name: Populate subnet vpc
       set_fact:
         subnet_dict: "{{ subnet_dict|default({}) | combine({ item.subnets[0].id: item.subnets[0].vpc_id }) }}"
-      loop: "{{ subnet_facts.results }}"
-      when:
-        - item.subnets is defined
-        - item.subnets | length > 0
-
-#    - name: Populate subnet vpc
-#      set_fact:
-#        subnet_dict: "{{ subnet_dict|default({}) | combine({ item.subnets[0].id: item.subnets[0].vpc_id }) }}"
-#      with_items: "{{ subnet_facts.results }}"
+      with_items: "{{ subnet_facts.results }}"
 
     - name: Create security group
       ec2_group:
