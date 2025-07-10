@@ -16,6 +16,7 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
   - name: ${BUILD_NUMBER}-pxc3-84-common-ol-9-min_upgrade-${test_type}
     region: us-west-1
     image: ami-0d1958c85fb6a7b3e
@@ -26,6 +27,7 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   playbooks:
