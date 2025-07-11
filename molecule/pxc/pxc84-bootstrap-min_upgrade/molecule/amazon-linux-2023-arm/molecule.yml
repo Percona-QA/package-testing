@@ -27,5 +27,5 @@ provisioner:
     side_effect: ../../../../../playbooks/pxc84_upgrade_bootstrap.yml
   inventory:
     host_vars:
-      pxc1-84-bootstrap-al2023-arm-min_upgrade-${test_type}:
+      ${BUILD_NUMBER}-pxc1-84-bootstrap-al2023-arm-min_upgrade-${test_type}:
         ip_env: "{{ ansible_host }}"

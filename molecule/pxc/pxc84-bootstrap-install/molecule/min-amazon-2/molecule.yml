@@ -27,5 +27,5 @@ provisioner:
     side_effect: ../../../../../playbooks/pxc84_upgrade_bootstrap.yml
   inventory:
     host_vars:
-      pxc1-84-bootstrap-min-amazon-2-install-${INSTALLTYPE}:
+      ${BUILD_NUMBER}-pxc1-84-bootstrap-min-amazon-2-install-${INSTALLTYPE}:
         ip_env: "{{ ansible_host }}"

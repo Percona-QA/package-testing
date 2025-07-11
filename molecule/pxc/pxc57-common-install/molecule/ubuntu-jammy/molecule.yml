@@ -16,6 +16,7 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
   - name: pxc3-57-common-ubuntu-jammy-install-${INSTALLTYPE}
     region: us-west-1
     image: ami-0dc5e9ff792ec08e3
@@ -26,6 +27,7 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   playbooks:

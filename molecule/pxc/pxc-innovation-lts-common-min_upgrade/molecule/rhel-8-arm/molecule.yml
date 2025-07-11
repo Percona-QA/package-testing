@@ -16,6 +16,7 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
   - name: pxc3-innovation-lts-common-rhel-8-arm-min_upgrade-${test_type}
     region: us-west-1
     image: ami-01be8515d27094d60
@@ -26,6 +27,7 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   playbooks:

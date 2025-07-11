@@ -16,6 +16,7 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
   - name: pxc3-57-common-centos-7-maj_upgrade
     region: us-west-1
     image: ami-0bcd12d19d926f8e9
@@ -26,6 +27,7 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   playbooks:
