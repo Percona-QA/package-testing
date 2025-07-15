@@ -30,37 +30,6 @@
       state: latest
     vars:
       packages:
-      - proxysql
-    when: ansible_os_family == "Debian"
-
-  - name: install proxysql new rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - proxysql
-    when: ansible_os_family == "RedHat"
-
-  - name: check that proxysql version is correct
-    command: /package-testing/version_check.sh proxysql
-
-  - name: start proxysql service
-    service: name=proxysql state=started
-
-  - name: stop proxysql service
-    service: name=proxysql state=stopped
-
-# - name: start proxysql service
-#   service: name=proxysql state=started
-
-  - name: install proxysql new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
       - proxysql2
     when: ansible_os_family == "Debian"
 
@@ -82,6 +51,37 @@
   - name: stop proxysql service
     service: name=proxysql state=stopped
 
+# - name: start proxysql service
+#   service: name=proxysql state=started
+
+  - name: install proxysql new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - proxysql3
+    when: ansible_os_family == "Debian"
+
+  - name: install proxysql new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - proxysql3
+    when: ansible_os_family == "RedHat"
+
+  - name: check that proxysql version is correct
+    command: /package-testing/version_check.sh proxysql3
+
+  - name: start proxysql service
+    service: name=proxysql state=started
+
+  - name: stop proxysql service
+    service: name=proxysql state=stopped
+
   - name: start proxysql service
     service: name=proxysql state=started
 
@@ -91,7 +91,7 @@
       state: absent
     vars:
       packages:
-      - proxysql2
+      - proxysql3
     when: ansible_os_family == "Debian"
 
   - name: remove proxysql rpm packages
@@ -100,7 +100,7 @@
       state: absent
     vars:
       packages:
-      - proxysql2
+      - proxysql3
     when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal
