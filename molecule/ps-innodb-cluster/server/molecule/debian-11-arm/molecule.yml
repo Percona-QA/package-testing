@@ -16,6 +16,7 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
   - name: ps-node2-debian-11-arm
     region: us-west-2
     image: ami-07238559d15dfb99a
@@ -26,6 +27,7 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
   - name: ps-node3-debian-11-arm
     region: us-west-2
     image: ami-07238559d15dfb99a
@@ -36,6 +38,7 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   lint:
