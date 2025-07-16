@@ -16,14 +16,14 @@
     include_tasks: ../tasks/test_prep.yml
 
   - name: include tasks for enabling test repo
-    include_tasks: ../tasks/enable_testing_repo.yml
+    include_tasks: ../tasks/enable_proxysql2_testing.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_main_repo.yml
+    include_tasks: ../tasks/enable_proxysql2_main.yml
     when: lookup('env', 'install_repo') == "main"
 
-  - name: install proxysql new deb packages
+  - name: install proxysql2 deb packages
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -33,7 +33,7 @@
       - proxysql2
     when: ansible_os_family == "Debian"
 
-  - name: install proxysql new rpm packages
+  - name: install proxysql2 rpm packages
     yum:
       name: "{{ packages }}"
       state: latest
@@ -42,7 +42,7 @@
       - proxysql2
     when: ansible_os_family == "RedHat"
 
-  - name: check that proxysql version is correct
+  - name: check that proxysql2 version is correct
     command: /package-testing/version_check.sh proxysql2
 
   - name: start proxysql service
@@ -54,7 +54,7 @@
 # - name: start proxysql service
 #   service: name=proxysql state=started
 
-  - name: install proxysql new deb packages
+  - name: install proxysql3 new deb packages
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -64,7 +64,7 @@
       - proxysql3
     when: ansible_os_family == "Debian"
 
-  - name: install proxysql new rpm packages
+  - name: install proxysql3 new rpm packages
     yum:
       name: "{{ packages }}"
       state: latest
@@ -73,7 +73,7 @@
       - proxysql3
     when: ansible_os_family == "RedHat"
 
-  - name: check that proxysql version is correct
+  - name: check that proxysql3 version is correct
     command: /package-testing/version_check.sh proxysql3
 
   - name: start proxysql service
