@@ -1,0 +1,38 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: rhel9-arm-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
+    region: us-west-2
+    image:  ami-0d8185e750f8dfbd0
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: c6g.large
+    ssh_user: ec2-user
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: proxysql-package-testing
+      job-name: ${JOB_NAME}
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    create: ../../playbooks/create.yml
+    destroy: ../../playbooks/destroy.yml
+    prepare: ../../playbooks/prepare.yml
+    cleanup: ../../playbooks/cleanup.yml
+    converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
+scenario:
+  name: rhel-9-arm
+  destroy_sequence:
+    - destroy
+  clenup_sequence:
+    - cleanup
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - cleanup
+    - destroy
