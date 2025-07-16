@@ -207,7 +207,19 @@
       packages:
       - rsyslog-mysql
     when: 
-      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+  - name: install 3rd party packages with dnf
+    dnf:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
       - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
 
