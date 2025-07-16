@@ -34,7 +34,7 @@
       - percona-server-client-5.7
     when: (ansible_os_family == "Debian") and (lookup('env', 'client_to_test') == "ps57")
 
-  - name: install packages in centos
+  - name: install packages in rhel yum 
     yum:
       name: "{{ packages }}"
       state: present
@@ -42,7 +42,23 @@
       packages:
       - pv
       - Percona-Server-client-57
-    when: (ansible_os_family == "RedHat") and (lookup('env', 'client_to_test') == "ps57")
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+      - lookup('env', 'client_to_test') == "ps57"
+
+  - name: install packages in rhel dnf
+    dnf:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - pv
+      - Percona-Server-client-57
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+      - lookup('env', 'client_to_test') == "ps57"
 
   - name: install deb packages
     apt:
@@ -55,10 +71,10 @@
       - percona-mysql-router
       - percona-mysql-shell
     when: 
-      - (ansible_os_family == "Debian") and (lookup('env', 'client_to_test') == "ps80") 
-      - (ansible_os_family == "Debian") and (lookup('env', 'client_to_test') == "innovation-lts") 
+      - ansible_os_family == "Debian"
+      - lookup('env', 'client_to_test') in ["ps80", "innovation-lts"]
 
-  - name: install packages in centos
+  - name: install packages in rhel yum
     yum:
       name: "{{ packages }}"
       state: present
@@ -69,8 +85,24 @@
       - percona-mysql-router
       - percona-mysql-shell
     when:
-      - (ansible_os_family == "Debian") and (lookup('env', 'client_to_test') == "ps80") 
-      - (ansible_os_family == "Debian") and (lookup('env', 'client_to_test') == "innovation-lts")
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+      - lookup('env', 'client_to_test') in ["ps80", "innovation-lts"]
+
+  - name: install packages in rhel dnf
+    dnf:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - pv
+      - percona-server-client
+      - percona-mysql-router
+      - percona-mysql-shell
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+      - lookup('env', 'client_to_test') in ["ps80", "innovation-lts"]
 
   - name: include tasks for enabling PS 8 test repo
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
