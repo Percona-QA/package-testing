@@ -65,13 +65,13 @@
     include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
     when: lookup('env', 'install_repo') == "main"
 
-#  - name: include tasks for enabling PS {{ major_release_version }} test repo
-#    include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
-#    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-#
-#  - name: include tasks for enabling PS {{ major_release_version }} experimental repo
-#    include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
-#    when: lookup('env', 'install_repo') == "experimental"
+  - name: include tasks for enabling PS {{ major_release_version }} test repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling PS {{ major_release_version }} experimental repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
+    when: lookup('env', 'install_repo') == "experimental"
 
 ### UPSTREAM 
 
@@ -412,10 +412,10 @@
 ### PS END
 
 
-  - name: install Percona XtraBackup {{ major_release_version }} packages
+  - name: install Percona XtraBackup {{ major_release_version }} packages 
     include_tasks: ../tasks/install_pxb_innovation_lts.yml
-    when: 
-      - lookup('env', 'install_repo') != "experimental"
+#    when: 
+#      - lookup('env', 'install_repo') != "experimental"
 
 ### PS START
   - name: start mysql service with service command
