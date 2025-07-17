@@ -52,13 +52,18 @@
     set_fact:
       major_release_version: "{{ major_release_version.stdout }}"
 
-  - name: Extract values using shell command for repo name used for innovation/lts release
+  - name: Extract values using shell command for repo name used for innovation/lts release PXB
+    shell: grep 'PXB_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: pxb_inn_lts_repo_name
+
+  - name: Extract values using shell command for repo name used for innovation/lts release PS
     shell: grep 'PS_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
     register: ps_inn_lts_repo_name
 
   - name: Set ps_inn_lts_repo_name variable
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
+      pxb_inn_lts_repo_name: "{{ pxb_inn_lts_repo_name.stdout }}"
 
   - name: include tasks for enabling PS {{ major_release_version }} main repo
     include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
@@ -89,6 +94,10 @@
 
   - name: install sysbench new deb packages
     include_tasks: ../tasks/install_sysbench.yml
+    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: enable Percona XtraBackup repo {{ pxb_inn_lts_repo_name }} for {{ major_release_version }}
+    command: percona-release enable {{ pxb_inn_lts_repo_name }} release
     when: lookup('env', 'install_repo') != "experimental"
 
   - name: install Percona XtraBackup {{ major_release_version }} packages
