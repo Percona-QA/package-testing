@@ -56,6 +56,7 @@
       --listen-port={{ custom_port }}
       --metrics-mode={{ metrics_mode }}
       --server-username=admin
+      --log-level=debug
       --server-password={{ pmm_server_password }}
       {{ instance_ip }} generic node2_{{ instance_ip }}
 
