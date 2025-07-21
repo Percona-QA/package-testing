@@ -25,7 +25,6 @@
   dnf:
     name:
       - krb5-workstation
-      - krb5
       - krb5-server
       - krb5-pkinit
     state: present
