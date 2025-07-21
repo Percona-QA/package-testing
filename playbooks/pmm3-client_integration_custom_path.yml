@@ -19,6 +19,7 @@
     custom_path: "/pmm-client-custom-path"
     tarball_link: "{{ lookup('env', 'TARBALL_LINK') }}"
     agent_password: "pmm-pass"
+    connection_type: "{{ lookup('env', 'CONNECTION_TYPE') }}"
 
   tasks:
   - name: Register Instance IP
@@ -96,8 +97,14 @@
 #      mongo_service_name: "mongodb_{{ rnd }}_{{ instance_ip }}"
 
   - name: Install and start Percona Server MongoDB
-    when: '"psmdb-" in enabled_db | join("")'
+    when: '"psmdb-" in enabled_db | join("") and connection_type != "gssapi"'
     include_tasks: ../tasks/install_and_add_to_pmm_psmdb.yml
+    vars:
+      psmdb_to_test:  "{{ enabled_db | select('match', '^psmdb-*') | join('') }}"
+
+  - name: Install and start Percona Server MongoDB
+    when: '"psmdb-" in enabled_db | join("") and connection_type == "gssapi"'
+    include_tasks: ../tasks/install_and_add_to_pmm_psmdb_60_gssapi.yml
     vars:
       psmdb_to_test:  "{{ enabled_db | select('match', '^psmdb-*') | join('') }}"
 
