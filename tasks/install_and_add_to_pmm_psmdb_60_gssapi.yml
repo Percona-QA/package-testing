@@ -23,7 +23,11 @@
 
 - name: Install Kerberos
   dnf:
-    name: krb5-workstation krb5 krb5-server krb5-pkinit
+    name:
+      - krb5-workstation
+      - krb5
+      - krb5-server
+      - krb5-pkinit
     state: present
   when: ansible_os_family == "RedHat"
 
