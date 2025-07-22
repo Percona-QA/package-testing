@@ -51,6 +51,9 @@
 - name: Restart mongodb to use new config
   shell: |
     systemctl restart mongod
+    systemctl status mongod.service
+    journalctl -xeu mongod.service
+  ignore_errors: yes
 
 - name: Setup kerberos
   shell: |
