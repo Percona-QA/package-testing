@@ -47,7 +47,9 @@
     kadmin.local -q "addprinc -pw password1 pmm-test"
     kadmin.local -q "ktadd -k /keytabs/mongodb.keytab mongodb/psmdb-server@PERCONATEST.COM"
     krb5kdc -n
-    #Generate certificates for tests
+
+- name: Generate certificates for tests
+  shell: |
     rm -rf easy-rsa pki certs && mkdir certs
     git clone https://github.com/OpenVPN/easy-rsa.git
     ./easy-rsa/easyrsa3/easyrsa init-pki
