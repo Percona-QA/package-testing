@@ -39,6 +39,19 @@
     mode: '0644'
     backup: yes
 
+- name: Setup mongodb with gssapi
+  template:
+    src: ../support-files/mongod.conf.j2.j2
+    dest: /etc/mongod.conf
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+
+- name: Restart mongodb to use new config
+  shell: |
+    systemctl restart mongod
+
 - name: Setup kerberos
   shell: |
     kdb5_util -P password create -s
