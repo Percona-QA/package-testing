@@ -38,6 +38,7 @@
     group: root
     mode: '0644'
     backup: yes
+
 - name: Setup kerberos
   shell: |
     kdb5_util -P password create -s
