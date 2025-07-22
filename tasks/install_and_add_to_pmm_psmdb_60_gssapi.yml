@@ -41,7 +41,7 @@
 
 - name: Setup mongodb with gssapi
   template:
-    src: ../support-files/mongod.conf.j2.j2
+    src: ../support-files/mongod.conf.j2
     dest: /etc/mongod.conf
     owner: root
     group: root
