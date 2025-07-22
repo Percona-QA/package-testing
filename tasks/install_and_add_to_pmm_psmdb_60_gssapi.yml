@@ -46,7 +46,8 @@
     kadmin.local -q "addprinc -pw mongodb mongodb/psmdb-server"
     kadmin.local -q "addprinc -pw password1 pmm-test"
     kadmin.local -q "ktadd -k /keytabs/mongodb.keytab mongodb/psmdb-server@PERCONATEST.COM"
-    krb5kdc -n
+    systemctl start krb5kdc
+    systemctl enable krb5kdc
 
 - name: Read kerberos config file
   shell: cat /etc/krb5.conf
