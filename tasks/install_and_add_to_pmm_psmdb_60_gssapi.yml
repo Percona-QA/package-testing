@@ -81,6 +81,7 @@
     cat pki/private/psmdb-server.key pki/issued/psmdb-server.crt > certs/psmdb-server.pem
     cat pki/private/pmm-test.key pki/issued/pmm-test.crt > certs/client.pem
     find certs -type f -exec chmod 644 {} \;
+    mkdir -p /mongodb_certs
     cp -r ./certs/* /mongodb_certs/
 
 - name: Setup MongoDB for kerberos
