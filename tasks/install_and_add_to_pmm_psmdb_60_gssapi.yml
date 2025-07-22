@@ -48,23 +48,6 @@
     mode: '0644'
     backup: yes
 
-- name: Restart mongodb to use new config
-  shell: |
-    systemctl restart mongod
-    systemctl status mongod.service
-    journalctl -xeu mongod.service
-  ignore_errors: yes
-
-- name: Setup kerberos
-  shell: |
-    kdb5_util -P password create -s
-    kadmin.local -q "addprinc -pw password root/admin"
-    kadmin.local -q "addprinc -pw mongodb mongodb/psmdb-server"
-    kadmin.local -q "addprinc -pw password1 pmm-test"
-    kadmin.local -q "ktadd -k /keytabs/mongodb.keytab mongodb/psmdb-server@PERCONATEST.COM"
-    systemctl enable krb5kdc
-    systemctl start krb5kdc
-
 - name: Generate certificates for tests
   shell: |
     rm -rf easy-rsa pki certs && mkdir certs
@@ -83,6 +66,23 @@
     find certs -type f -exec chmod 644 {} \;
     mkdir -p /mongodb_certs
     cp -r ./certs/* /mongodb_certs/
+
+- name: Restart mongodb to use new config
+  shell: |
+    systemctl restart mongod
+    systemctl status mongod.service
+    journalctl -xeu mongod.service
+  ignore_errors: yes
+
+- name: Setup kerberos
+  shell: |
+    kdb5_util -P password create -s
+    kadmin.local -q "addprinc -pw password root/admin"
+    kadmin.local -q "addprinc -pw mongodb mongodb/psmdb-server"
+    kadmin.local -q "addprinc -pw password1 pmm-test"
+    kadmin.local -q "ktadd -k /keytabs/mongodb.keytab mongodb/psmdb-server@PERCONATEST.COM"
+    systemctl enable krb5kdc
+    systemctl start krb5kdc
 
 - name: Setup MongoDB for kerberos
   shell: |
