@@ -62,11 +62,14 @@
     cp pki/ca.crt certs/ca-certs.pem
     cp pki/private/pmm-server.key certs/certificate.key
     cp pki/issued/pmm-server.crt certs/certificate.crt
-#    cat pki/private/psmdb-server.key pki/issued/psmdb-server.crt > certs/psmdb-server.pem
-#    cat pki/private/pmm-test.key pki/issued/pmm-test.crt > certs/client.pem
-#    find certs -type f -exec chmod 644 {} \;
-#    mongo --eval 'db.getSiblingDB("admin").createUser({ user: "root", pwd: "root", roles: [ "root", "userAdminAnyDatabase", "clusterAdmin" ] })'
-#    mongo --quiet "mongodb://root:root@localhost/?replicaSet=rs0" < ../support-files/setup_psmdb.js
+    cat pki/private/psmdb-server.key pki/issued/psmdb-server.crt > certs/psmdb-server.pem
+    cat pki/private/pmm-test.key pki/issued/pmm-test.crt > certs/client.pem
+    find certs -type f -exec chmod 644 {} \;
+
+- name: Setup MongoDB for kerberos
+  shell: |
+    mongo --eval 'db.getSiblingDB("admin").createUser({ user: "root", pwd: "root", roles: [ "root", "userAdminAnyDatabase", "clusterAdmin" ] })'
+    mongo --quiet "mongodb://root:root@localhost/?replicaSet=rs0" < ../support-files/setup_psmdb.js
 
 - name: Read kerberos config file
   shell: cat /etc/krb5.conf
