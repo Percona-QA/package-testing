@@ -90,9 +90,11 @@
     kadmin.local -q "addprinc -pw mongodb mongodb/$(hostname -f)"
     kadmin.local -q "addprinc -pw password1 pmm-test"
     kadmin.local -q "ktadd -k /etc/krb5.keytab mongodb/$(hostname -f)@PERCONATEST.COM"
-    echo "password1" | kinit pmm-test@PERCONATEST.COM
+    chown mongod:mongod /etc/krb5.keytab
+    chmod 600 /etc/krb5.keytab
     systemctl enable krb5kdc
     systemctl start krb5kdc
+    echo "password1" | kinit pmm-test@PERCONATEST.COM
 
 - name: Setup MongoDB for kerberos
   shell: |
