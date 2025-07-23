@@ -90,6 +90,10 @@
   shell: |
     systemctl restart mongod
     systemctl status mongod.service
+  ignore_errors: yes
+
+- name: Restart mongodb to use new config
+  shell: |
     journalctl -xeu mongod.service
   ignore_errors: yes
 
