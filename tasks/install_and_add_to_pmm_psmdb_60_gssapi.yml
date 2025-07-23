@@ -13,13 +13,13 @@
 - name: enable psmdb repo
   include_tasks: ./enable_repo.yml
   vars:
-    package: "psmdb-60"
+    package: "psmdb-80"
     repository: "release"
 
 - name: Run install_setup_psmdb.yml
   include_tasks: /tmp/install_setup_psmdb.yml
   vars:
-    psmdb_to_test: "psmdb-60"
+    psmdb_to_test: "psmdb-80"
 
 - name: Install Kerberos
   dnf:
@@ -95,6 +95,7 @@
   shell: |
     mongo --eval 'db.getSiblingDB("admin").createUser({ user: "root", pwd: "root", roles: [ "root", "userAdminAnyDatabase", "clusterAdmin" ] })'
     mongo ../support-files/setup_psmdb.js
+    chown -R mongod:mongod /var/lib/mongo
 
 - name: Read kerberos config file
   shell: cat /etc/krb5.conf
