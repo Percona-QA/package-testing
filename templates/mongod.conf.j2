@@ -21,11 +21,11 @@ security:
   authorization: enabled
   ldap:
     validateLDAPServerConfig: false
-    transportSecurity: tls  # Encrypt LDAP traffic
+    transportSecurity: none
     servers: 127.0.0.1:1389
-    userToDNMapping: '[{match: "^([^@]+)@PERCONATEST.COM$", substitution: "cn={0},ou=users,dc=example,dc=org"}]'
+    userToDNMapping: '[{"match": "^(.+)@PERCONATEST.COM$","substitution": "cn={0},ou=users,dc=perconatest,dc=com"}]'
     authz:
-      queryTemplate: 'dc=example,dc=org??sub?(&(objectClass=groupOfNames)(member={USER}))'
+      queryTemplate: "{USER}?memberOf?base"
 
 setParameter:
   authenticationMechanisms: SCRAM-SHA-1,PLAIN,MONGODB-X509,MONGODB-AWS,GSSAPI
