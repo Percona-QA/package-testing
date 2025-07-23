@@ -51,16 +51,17 @@
 - name: Setup ldap-server
   shell: |
     docker run -d \
-    --name ldap-server \
-    --hostname ldap-server \
-    -e LDAP_ADMIN_USERNAME=admin \
-    -e LDAP_ADMIN_PASSWORD=adminpassword \
-    -e LDAP_USERS="pmm-test,${AWS_USERNAME:-awsuser}" \
-    -e LDAP_PASSWORDS="password1,${AWS_USERNAME:-awspass}" \
-    -p 1389:1389 \
-    -p 1636:1636 \
-    -v openldap-data:/bitnami/openldap \
-    bitnami/openldap
+      --name ldap-server \
+      --hostname ldap-server \
+      -e LDAP_ROOT="dc=perconatest,dc=com" \
+      -e LDAP_ADMIN_USERNAME=admin \
+      -e LDAP_ADMIN_PASSWORD=adminpassword \
+      -e LDAP_USERS="pmm-test" \
+      -e LDAP_PASSWORDS="password1" \
+      -p 1389:1389 \
+      -p 1636:1636 \
+      -v openldap-data:/bitnami/openldap \
+      bitnami/openldap
 
 - name: Generate certificates for tests
   shell: |
