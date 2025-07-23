@@ -20,7 +20,6 @@ net:
    certificateKeyFile: /mongodb_certs/psmdb-server.pem
 
 security:
-  keyFile: /etc/keyfile
   authorization: enabled
   ldap:
     validateLDAPServerConfig: false
@@ -31,9 +30,6 @@ security:
        queryTemplate: 'dc=example,dc=org??sub?(&(objectClass=groupOfNames)(member={USER}))'
 setParameter:
   authenticationMechanisms: SCRAM-SHA-1,PLAIN,MONGODB-X509,MONGODB-AWS,GSSAPI
-
-replication:
-  replSetName: rs0
 
 operationProfiling:
   mode: all
