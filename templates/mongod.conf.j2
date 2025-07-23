@@ -22,7 +22,7 @@ security:
   ldap:
     validateLDAPServerConfig: false
     transportSecurity: tls  # Encrypt LDAP traffic
-    servers: ldap-server:1389
+    servers: 127.0.0.1:1389
     userToDNMapping: '[{match: "arn:aws:iam::(.+):user/(.+)|CN=(.+)|([^@]+)@PERCONATEST.COM", substitution: "cn={1}{2}{3},ou=users,dc=example,dc=org"}]'
     authz:
       queryTemplate: 'dc=example,dc=org??sub?(&(objectClass=groupOfNames)(member={USER}))'
@@ -31,5 +31,5 @@ setParameter:
   authenticationMechanisms: SCRAM-SHA-1,PLAIN,MONGODB-X509,MONGODB-AWS,GSSAPI
 
 operationProfiling:
-  mode: all
+  mode: slowOp
   slowOpThresholdMs: 100  # More reasonable threshold
