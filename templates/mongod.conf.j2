@@ -23,7 +23,7 @@ security:
     validateLDAPServerConfig: false
     transportSecurity: tls  # Encrypt LDAP traffic
     servers: 127.0.0.1:1389
-    userToDNMapping: '[{match: "^([^@]+)@PERCONATEST.COM$", substitution: "cn={1}{2}{3},ou=users,dc=example,dc=org"}]'
+    userToDNMapping: '[{match: "^([^@]+)@PERCONATEST.COM$", substitution: "cn={0},ou=users,dc=example,dc=org"}]'
     authz:
       queryTemplate: 'dc=example,dc=org??sub?(&(objectClass=groupOfNames)(member={USER}))'
 
