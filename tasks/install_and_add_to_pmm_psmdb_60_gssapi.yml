@@ -83,11 +83,14 @@
 
 - name: Setup kerberos
   shell: |
+    mkdir -p /keytabs
+    chmod 700 /keytabs
     kdb5_util -P password create -s
     kadmin.local -q "addprinc -pw password root/admin"
     kadmin.local -q "addprinc -pw mongodb mongodb/$(hostname -f)"
     kadmin.local -q "addprinc -pw password1 pmm-test"
-    kadmin.local -q "ktadd -k /keytabs/mongodb.keytab mongodb/$(hostname -f)@PERCONATEST.COM"
+    kadmin.local -q "ktadd -k /etc/krb5.keytab mongodb/$(hostname -f)@PERCONATEST.COM"
+    echo "password1" | kinit pmm-test@PERCONATEST.COM
     systemctl enable krb5kdc
     systemctl start krb5kdc
 
