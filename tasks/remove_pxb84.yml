@@ -12,7 +12,7 @@
       - percona-xtrabackup-dbg-84
     when: ansible_os_family == "Debian"
 
-  - name: remove Percona XtraBackup new rpm packages
+  - name: remove Percona XtraBackup new rpm packages yum
     yum:
       name: "{{ packages }}"
       state: absent
@@ -21,4 +21,19 @@
       - percona-xtrabackup-84
       - percona-xtrabackup-test-84
       - percona-xtrabackup-84-debuginfo
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: remove Percona XtraBackup new rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-xtrabackup-84
+      - percona-xtrabackup-test-84
+      - percona-xtrabackup-84-debuginfo
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8

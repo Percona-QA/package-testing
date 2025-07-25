@@ -106,12 +106,12 @@
 #    command: percona-release enable mysql-shell testing
 #    when: install_mysql_shell == "yes" or install_mysql_shell == ""
 
-  - name: install Percona XtraBackup 8.0 packages
-    include_tasks: ../tasks/install_pxb80.yml
-    when:
-      - lookup('env', 'install_repo') != "experimental"
-      - lookup('env', 'pro_test') != "yes"
-      - ansible_distribution != "Amazon"
+# - name: install Percona XtraBackup 8.0 packages
+#   include_tasks: ../tasks/install_pxb80.yml
+#   when:
+#     - lookup('env', 'install_repo') != "experimental"
+#     - lookup('env', 'pro_test') != "yes"
+#     - ansible_distribution != "Amazon"
 
   - name: enable the sysbench repo
     command: percona-release enable sysbench testing
@@ -187,7 +187,6 @@
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
-    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7)
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
@@ -285,7 +284,19 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install 3rd party packages with dnf
+    dnf:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -323,14 +334,27 @@
       - percona-server*
     when: ansible_os_family == "Debian"
 
-  - name: remove Percona Server rpm packages
+  - name: remove Percona Server rpm packages yum
     yum:
       name: "{{ packages }}"
       state: absent
     vars:
      packages:
       - percona-server*
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: remove Percona Server rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+     packages:
+      - percona-server*
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped

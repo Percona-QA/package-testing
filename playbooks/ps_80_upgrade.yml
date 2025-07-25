@@ -155,8 +155,19 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: ansible_os_family == "RedHat"
-    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install 3rd party packages with dnf
+    dnf:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start my.cnf change test
     command: /package-testing/check_mycnf_pre.sh
@@ -228,7 +239,7 @@
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on RHEL7
+  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on RHEL7 using yum
     yum:
       name: "{{ packages }}"
       state: latest
@@ -242,12 +253,14 @@
       - percona-server-shared{{ pro_suf }}
       - percona-server-client{{ pro_suf }}
       - percona-mysql-router{{ pro_suf }}
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on CentOS
-    yum:
+  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on OL8 using dnf
+    dnf:
       name: "{{ packages }}"
       state: latest
       allowerasing: "{{ allowerasing_value | default (false) }}"
@@ -267,7 +280,7 @@
       PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on Oracle Linux 9
-    yum:
+    dnf:
       name: "{{ packages }}"
       state: latest
       allowerasing: "{{ allowerasing_value | default (false) }}"
@@ -295,7 +308,7 @@
       - percona-toolkit
     when: ansible_os_family == "Debian"
 
-  - name: upgrade Percona Toolkit to new rpm packages
+  - name: upgrade Percona Toolkit to new rpm packages using yum
     yum:
       name: "{{ packages }}"
       state: latest
@@ -304,7 +317,21 @@
       - percona-toolkit
     when:
       - lookup('env', 'pro_test') != "yes"
-      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+      - ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
+
+  - name: upgrade Percona Toolkit to new rpm packages using dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
+    when:
+      - lookup('env', 'pro_test') != "yes"
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
       - ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: install Percona xtrabackup 8.0 packages
@@ -315,15 +342,27 @@
           PERCONA_TELEMETRY_DISABLE: "1"
     when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
-  - name: upgrade Percona release to new rpm packages
+  - name: upgrade Percona release to new rpm packages using yum
     yum:
       name: "{{ packages }}"
       state: latest
     vars:
       packages:
       - percona-release
-    when: ansible_os_family == "RedHat"
-    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: upgrade Percona release to new rpm packages using dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-release
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
@@ -425,13 +464,25 @@
 ## Changes done for telemetry: add iptables rule for Telemetry Server - install only ps package.
 ## Expected resuld - telemetry_uuid file has only instanceID
 
-  - name: Install iptables on RHEL 
+  - name: Install iptables on RHEL using dnf
+    dnf:
+      name:
+        - iptables
+        - iptables-services
+      state: present
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: Install iptables on RHEL using yum 
     yum:
       name:
         - iptables
         - iptables-services
       state: present
-    when: ansible_facts['distribution'] in ["RedHat", "Amazon"]
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: Enable and start iptables service
     systemd:
@@ -458,43 +509,30 @@
       - percona-server-server{{ pro_suf }}
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Server{{ pro_suf }} rpm RHEL7 package for telemetry
+  - name: install Percona Server{{ pro_suf }} rpm RHEL7 package for telemetry yum
     yum:
       name: "{{ packages }}"
       state: latest
     vars:
       packages:
       - percona-server-server{{ pro_suf }}
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
 
-  - name: install Percona Server{{ pro_suf }} rpm RHEL8+ package for telemetry
-    yum:
+  - name: install Percona Server{{ pro_suf }} rpm RHEL8+ package for telemetry dnf
+    dnf:
       name: "{{ packages }}"
       state: latest
       allowerasing: "{{ allowerasing_value | default (false) }}"
     vars:
       packages:
       - percona-server-server{{ pro_suf }}
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
 
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh ps -u
 
-  - name: remove Percona Server{{ pro_suf }} deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: absent
-    vars:
-      packages:
-      - percona-server-server{{ pro_suf }}
-    when: ansible_os_family == "Debian"
-
-  - name: remove Percona Server{{ pro_suf }} rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: absent
-    vars:
-      packages:
-      - percona-server-server{{ pro_suf }}
-    when: ansible_os_family == "RedHat"

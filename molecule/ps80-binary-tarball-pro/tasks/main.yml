@@ -6,7 +6,7 @@
       msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
 
   - name: Add epel-release
-    yum:
+    package:
       state: present
       name: epel-release
     when: ansible_os_family == "RedHat" and ansible_distribution_version != "2023"
@@ -59,7 +59,9 @@
       - python3-pip
       - libtirpc
       - lsb_release
-    when: ansible_os_family == "RedHat" and ansible_distribution_version != "2023"
+    when: 
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+    - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: Install required packages using dnf
     dnf:
@@ -75,8 +77,9 @@
         - python3-pip
         - libtirpc
       state: present
-    when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
-
+      when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
 #      - openldap // this package causes issue on OL-9
 

@@ -60,11 +60,10 @@
       update_cache: yes
     when: ansible_os_family == "Debian"
 
-  - name: update rpm cache redhat
-    yum:
+  - name: update rpm cache redhat yum and dnf
+    package:
       update_cache: yes
     when: ansible_os_family == "RedHat" 
-##
 
   - name: install PXC 5.7 deb packages
     apt:
@@ -105,8 +104,8 @@
       - python3-pymysql
     when: (ansible_os_family == "Debian") and (ansible_distribution_release == "buster")
 
-  - name: install PXC 5.7 rpm packages
-    yum:
+  - name: install PXC 5.7 rpm packages yum and dnf
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -137,8 +136,8 @@
       - MySQL-python
     when: ansible_os_family == "RedHat" and (ansible_distribution_major_version != "8" and ansible_distribution_major_version != "9")
 
-  - name: install python mysql rpm packages for CentOS 8
-    yum:
+  - name: install python mysql rpm packages for rhel 8 dnf
+    dnf:
       name: "{{ packages }}"
       state: latest
     vars:

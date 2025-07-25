@@ -30,15 +30,11 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
   - name: disable the mysql module on RHEL/CentOS 8
-    command: yum module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
-  - name: disable the mariadb module on RHEL/CentOS 8
-    command: yum module disable mariadb -y
+    command: dnf module disable mysql mariadb -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: install Percona Server rpm packages
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
       disablerepo: "epel"

@@ -59,7 +59,7 @@
 #---------------------
 
   - name: install python3-libselinux 
-    yum:
+    package:
       name: "{{ packages }}"
       state: present
     vars:
