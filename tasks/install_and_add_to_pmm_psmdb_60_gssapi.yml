@@ -88,9 +88,9 @@
     chmod 700 /keytabs
     kdb5_util -P password create -s
     kadmin.local -q "addprinc -pw password root/admin"
-    kadmin.local -q "addprinc -pw mongodb mongodb/$(hostname -f)"
+    kadmin.local -q "addprinc -pw mongodb mongodb/127.0.0.1"
     kadmin.local -q "addprinc -pw password1 pmm-test"
-    kadmin.local -q "ktadd -k /etc/krb5.keytab mongodb/$(hostname -f)@PERCONATEST.COM"
+    kadmin.local -q "ktadd -k /etc/krb5.keytab mongodb/127.0.0.1@PERCONATEST.COM"
     chown mongod:mongod /etc/krb5.keytab
     chmod 600 /etc/krb5.keytab
     systemctl enable krb5kdc
