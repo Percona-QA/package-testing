@@ -54,7 +54,6 @@
       --metrics-mode={{ metrics_mode }}
       --server-username=admin
       --server-password={{ pmm_server_password }}
-      --agent-password={{ agent_password }}
       {{ instance_ip }} generic node2_{{ instance_ip }}
 
   - name: Check if the configuration generated with paths-base is using the custom path
