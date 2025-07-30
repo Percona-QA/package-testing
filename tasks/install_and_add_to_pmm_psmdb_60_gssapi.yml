@@ -97,18 +97,17 @@
     systemctl start krb5kdc
     echo "password1" | kinit pmm-test@PERCONATEST.COM
 
-- name: Setup MongoDB for kerberos
+- name: Creata root user for MongoDB
   shell: |
     mongo --eval 'db.getSiblingDB("admin").createUser({ user: "root", pwd: "root", roles: [ "root", "userAdminAnyDatabase", "clusterAdmin" ] })'
-    mongo -u root -p 'root' ../support-files/setup_psmdb.js
-    chown -R mongod:mongod /var/lib/mongo
 
-- name: Read kerberos config file
-  shell: cat /etc/krb5.conf
-  register: result
+- name: Setup MongoDB config file
+  shell: |
+    mongo -u root -p 'root' ../support-files/setup_psmdb.js
 
 - name: Restart mongodb to use new config
   shell: |
+    chown -R mongod:mongod /var/lib/mongo
     systemctl restart mongod
     systemctl status mongod.service
   ignore_errors: yes
