@@ -100,7 +100,7 @@
 - name: Setup MongoDB for kerberos
   shell: |
     mongo --eval 'db.getSiblingDB("admin").createUser({ user: "root", pwd: "root", roles: [ "root", "userAdminAnyDatabase", "clusterAdmin" ] })'
-    mongo ../support-files/setup_psmdb.js
+    mongo -u root -p 'root' ../support-files/setup_psmdb.js
     chown -R mongod:mongod /var/lib/mongo
 
 - name: Read kerberos config file
