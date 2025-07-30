@@ -86,13 +86,13 @@
       mongo_socket_service_name: "mongodb_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
 
   - name: Install and start Percona Server MongoDB
-    when: '"psmdb-" in enabled_db | join("") and connection_type != "gssapi"'
+    when: '"psmdb-" in enabled_db | join("") and mongodb_connection_type != "gssapi"'
     include_tasks: ../tasks/install_and_add_to_pmm_psmdb.yml
     vars:
       psmdb_to_test:  "{{ enabled_db | select('match', '^psmdb-*') | join('') }}"
 
   - name: Install and start Percona Server MongoDB
-    when: '"psmdb-" in enabled_db | join("") and connection_type == "gssapi"'
+    when: '"psmdb-" in enabled_db | join("") and mongodb_connection_type == "gssapi"'
     include_tasks: ../tasks/install_and_add_to_pmm_psmdb_60_gssapi.yml
     vars:
       psmdb_to_test:  "{{ enabled_db | select('match', '^psmdb-*') | join('') }}"
