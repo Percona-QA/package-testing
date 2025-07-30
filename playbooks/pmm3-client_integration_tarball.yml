@@ -17,6 +17,7 @@
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') | regex_search('\\S(.*\\S)?') }}"
     mongodb_connection_type: "{{ lookup('env', 'MONGODB_CONNECTION_TYPE') }}"
+    tarball_link: "{{ lookup('env', 'TARBALL_LINK') }}"
 
   tasks:
   - name: Register Instance IP
