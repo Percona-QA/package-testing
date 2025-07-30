@@ -26,7 +26,7 @@ db.getSiblingDB("admin").createRole({
     roles:[]
 });
 db.getSiblingDB("admin").createRole({
-     role: "cn=readers,ou=groups,dc=example,dc=org",
+     role: "cn=readers,ou=groups,dc=perconatest,dc=com",
      privileges: [],
      roles: [
        { role: "explainRole", db: "admin" },
