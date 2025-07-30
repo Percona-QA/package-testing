@@ -1,35 +1,35 @@
-storage:
-  dbPath: /var/lib/mongo
-  journal:
-    enabled: true
-  wiredTiger:
-    engineConfig:
-      cacheSizeGB: 1
-
-systemLog:
-  destination: syslog
-
-net:
-  port: 27017
-  bindIp: 0.0.0.0
-  tls:
-    mode: allowTLS
-    CAFile: /mongodb_certs/ca-certs.pem
-    certificateKeyFile: /mongodb_certs/psmdb-server.pem
-
 security:
   authorization: enabled
+
   ldap:
-    validateLDAPServerConfig: false
+    validateLDAPServerConfig: true
     transportSecurity: none
-    servers: 127.0.0.1:1389
-    userToDNMapping: '[{"match": "^(.+)@PERCONATEST.COM$","substitution": "cn={0},ou=users,dc=perconatest,dc=com"}]'
+    servers: ["127.0.0.1:1389"]
+
+    bind:
+      method: simple
+      dn: "cn=admin,dc=perconatest,dc=com"
+      password: "adminpassword"
+
+    userToDNMapping:
+      - match: "^(.+)@PERCONATEST\\.COM$"
+        substitution: "cn={0},ou=users,dc=perconatest,dc=com"
+
+    # 3) How to look up group entries that list your user
+    #    and map each matching group DN to a MongoDB role of the same name
     authz:
-      queryTemplate: "{USER}?memberOf?base"
+      # Option A: a simple filter against all of ou=groups
+      queryTemplate: "(member={USERDN})"
+      # (You can also supply a full LDAP URI, e.g.
+      #  "ldap://127.0.0.1:1389/ou=groups,dc=perconatest,dc=com?dn?sub?(member={USERDN})"
+      #   if you need to scope the base DN or control the search scope.)
 
+# And don’t forget your Kerberos keytab settings if you’re also doing GSSAPI:
+security:
+  kerberos:
+    service: mongodb
+    keytab: /etc/security/keytabs/mongodb.service.keytab
+
+# plus your setParameter block to enable GSSAPI…
 setParameter:
-  authenticationMechanisms: SCRAM-SHA-1,PLAIN,MONGODB-X509,MONGODB-AWS,GSSAPI
-
-operationProfiling:
-  mode: slowOp
-  slowOpThresholdMs: 100  # More reasonable threshold
+  authenticationMechanisms: GSSAPI,SCRAM-SHA-1,PLAIN,MONGODB-X509
