@@ -26,7 +26,7 @@ db.getSiblingDB("admin").createRole({
     roles:[]
 });
 db.getSiblingDB("admin").createRole({
-     role: "cn=readers,ou=groups,dc=PERCONATEST,dc=COM",
+     role: "cn=readers,ou=groups,dc=perconatest,dc=com",
      privileges: [],
      roles: [
        { role: "explainRole", db: "admin" },
@@ -59,19 +59,3 @@ db.getSiblingDB("admin").createUser({
         { "db" : "admin", "role" : "pbmAnyAction" }
     ]
 });
-
-db.getSiblingDB("$external").createUser({
-  user: "pmm-test@PERCONATEST.COM",
-  roles: [
-    { role: "explainRole", db: "admin" },
-    { role: "clusterAdmin", db: "admin" },
-    { role: "userAdminAnyDatabase", db: "admin" },
-    { role: "dbAdminAnyDatabase", db: "admin" },
-    { role: "readWriteAnyDatabase", db: "admin" },
-    { role: "read", db: "admin" },
-    { role: "userAdminAnyDatabase", db: "admin" }]
-})
-
-
-
-
