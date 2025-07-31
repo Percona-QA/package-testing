@@ -17,6 +17,10 @@
     set_fact:
       port_flag: ""
 
+  - debug: msg="Item agent password is {{ item.agent_password }}"
+
+  - debug: msg="Agent password is {{ agent_password }}"
+
   - set_fact:
       agent_password: "{{ item.agent_password | default(agent_password | default('')) }}"
 
