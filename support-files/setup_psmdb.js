@@ -72,19 +72,6 @@ db.getSiblingDB("$external").createUser({
     { role: "userAdminAnyDatabase", db: "admin" }]
 })
 
-db.getSiblingDB("admin").createUser({
-  user: "pmm-test@PERCONATEST.COM",
-  roles: [
-    { role: "explainRole", db: "admin" },
-    { role: "clusterAdmin", db: "admin" },
-    { role: "userAdminAnyDatabase", db: "admin" },
-    { role: "dbAdminAnyDatabase", db: "admin" },
-    { role: "readWriteAnyDatabase", db: "admin" },
-    { role: "read", db: "admin" },
-    { role: "userAdminAnyDatabase", db: "admin" }]
-})
-
-
 
 
 
