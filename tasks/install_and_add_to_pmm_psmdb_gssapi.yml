@@ -13,13 +13,13 @@
 - name: enable psmdb repo
   include_tasks: ./enable_repo.yml
   vars:
-    package: "psmdb-80"
+    package: "{{ psmdb_to_test }}"
     repository: "release"
 
 - name: Run install_setup_psmdb.yml
   include_tasks: /tmp/install_setup_psmdb.yml
   vars:
-    psmdb_to_test: "psmdb-80"
+    psmdb_to_test: "{{ psmdb_to_test }}"
 
 - name: Install Kerberos
   dnf:

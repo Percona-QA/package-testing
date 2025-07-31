@@ -101,7 +101,7 @@
 
   - name: Install and start Percona Server MongoDB
     when: '"psmdb-" in enabled_db | join("") and mongodb_connection_type == "gssapi"'
-    include_tasks: ../tasks/install_and_add_to_pmm_psmdb_60_gssapi.yml
+    include_tasks: ../tasks/install_and_add_to_pmm_psmdb_gssapi.yml
     vars:
       psmdb_to_test:  "{{ enabled_db | select('match', '^psmdb-*') | join('') }}"
 
@@ -149,5 +149,5 @@
 ### end PG
 
 #### verifications
-#  - name: Perform standard verifications set for PMM Client
-#    include_tasks: ../tasks/verifications_set_for_pmm3_client.yml
+  - name: Perform standard verifications set for PMM Client
+    include_tasks: ../tasks/verifications_set_for_pmm3_client.yml
