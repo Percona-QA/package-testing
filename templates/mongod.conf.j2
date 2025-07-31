@@ -23,9 +23,9 @@ security:
     validateLDAPServerConfig: true
     transportSecurity: none
     servers: 127.0.0.1:1389
-    userToDNMapping: '[{"match": "^(.+)@PERCONATEST.COM$","substitution": "cn={0},ou=users,dc=perconatest,dc=com"}]'
+    userToDNMapping: '[{match: "arn:aws:iam::(.+):user/(.+)|CN=(.+)|([^@]+)@PERCONATEST.COM", substitution: "cn={1}{2}{3},ou=users,dc=example,dc=org"}]'
     authz:
-      queryTemplate: "{USER}?memberOf?base"
+      queryTemplate: 'dc=example,dc=org??sub?(&(objectClass=groupOfNames)(member={USER}))'
 
 setParameter:
   authenticationMechanisms: SCRAM-SHA-1,PLAIN,MONGODB-X509,MONGODB-AWS,GSSAPI
