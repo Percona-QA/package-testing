@@ -18,8 +18,10 @@
       port_flag: ""
 
   - debug: msg="Item agent password is {{ item.agent_password }}"
+    ignore_errors: yes
 
   - debug: msg="Agent password is {{ agent_password }}"
+    ignore_errors: yes
 
   - set_fact:
       agent_password: "{{ item.agent_password | default(agent_password | default('')) }}"
