@@ -70,82 +70,72 @@
     include_tasks: ../tasks/verify_pmm_status_versions.yml
 
 ### start PS
-    #TODO: refactor PS setup to add both TCP and Socket services
-#  - set_fact:
-#      mysql_service_name: "mysql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
-#      mysql_service_name: "mysql_{{ rnd }}_{{ instance_ip }}"
+  - set_fact:
+      mysql_service_name: "mysql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
 
-#  - name: Install and start Percona Server 5.7
-#    when: '"ps-5.7" in enabled_db'
-#    include_tasks: ../tasks/install_and_add_to_pmm_ps_57.yml
-#
-#  - name: Install and start Percona Server 8.0
-#    when: '"ps-8.0" in enabled_db'
-#    include_tasks: ../tasks/install_and_add_to_pmm_ps_80.yml
-#
-#  - name: Verify if Metric Endpoint with Auth works for Mysqld Exporter
-#    when: '"ps-" in enabled_db | join("")'
-#    include_tasks: ../tasks/verify_pmm3_metric.yml
-#    loop:
-#      - { service_name: '{{ mysql_service_name }}', metric: 'mysql_up 1' }
+  - name: Install and start Percona Server 5.7
+    when: '"ps-5.7" in enabled_db'
+    include_tasks: ../tasks/install_and_add_to_pmm_ps_57.yml
+
+  - name: Install and start Percona Server 8.0
+    when: '"ps-8.0" in enabled_db'
+    include_tasks: ../tasks/install_and_add_to_pmm_ps_80.yml
+
+  - name: Verify if Metric Endpoint with Auth works for Mysqld Exporter
+    when: '"ps-" in enabled_db | join("")'
+    include_tasks: ../tasks/verify_pmm3_service_metric.yml
+    loop:
+      - { service_name: '{{ mysql_service_name }}', metric: 'mysql_up 1' }
 ## end PS
 
 ### start PSMDB
   - set_fact:
       mongo_service_name: "mongodb_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
       mongo_socket_service_name: "mongodb_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
-#      mongo_service_name: "mongodb_{{ rnd }}_{{ instance_ip }}"
 
   - name: Install and start Percona Server MongoDB
-    when: '"psmdb-" in enabled_db | join("") and connection_type != "gssapi"'
+    when: '"psmdb-" in enabled_db | join("")'
     include_tasks: ../tasks/install_and_add_to_pmm_psmdb.yml
     vars:
       psmdb_to_test:  "{{ enabled_db | select('match', '^psmdb-*') | join('') }}"
 
-  - name: Install and start Percona Server MongoDB
-    when: '"psmdb-" in enabled_db | join("") and connection_type == "gssapi"'
-    include_tasks: ../tasks/install_and_add_to_pmm_psmdb_60_gssapi.yml
-    vars:
-      psmdb_to_test:  "{{ enabled_db | select('match', '^psmdb-*') | join('') }}"
-
-#  - name: Verify MongoDB Exporter metric endpoint with Auth (including service with socket)
-#    when: '"psmdb-" in enabled_db | join("")'
-#    include_tasks: ../tasks/verify_pmm3_metric.yml
-#    loop:
-#      - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up.* 1', agent_password: "{{ agent_password }}" }
-#      - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up.* 1', agent_password: "{{ agent_password }}" }
-#    loop_control:
-#      label: "{{ item.service_name }}"
-
+  - name: Verify MongoDB Exporter metric endpoint with Auth (including service with socket)
+    when: '"psmdb-" in enabled_db | join("")'
+    include_tasks: ../tasks/verify_pmm3_metric.yml
+    loop:
+      - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up.* 1', agent_password: "{{ agent_password }}" }
+      - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up.* 1', agent_password: "{{ agent_password }}" }
+    loop_control:
+      label: "{{ item.service_name }}"
 ### end PSMDB
 
 ### start PDPGSQL
-#  - set_fact:
-#      pgsql_service_name: "pgsql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
-#      pgsql_socket_service_name: "pgsql_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
-#
-#  - name: Install and start Percona Server PostgreSQL
-#    when: '"pg-" in enabled_db | join("")'
-#    include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql.yml
-#    vars:
-#      pg_to_test: "{{ enabled_db | select('match', '^pg-*') | join('') }}"
-#
-#  - name: Verify Postgres Exporter metric endpoint with Auth works
-#    when: '"pg-" in enabled_db | join("")'
-#    include_tasks: ../tasks/verify_pmm3_metric.yml
-#    vars:
-#      retries: 3
-#      delay: 10
-#    loop:
-#      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.hr"} 1' }
-#      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.lr"} 1' }
-#      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
-#      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
-#      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.hr"} 1' }
-#      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.lr"} 1' }
-#      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
-#      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
-# end PG
+  - set_fact:
+      pgsql_service_name: "pgsql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+      pgsql_socket_service_name: "pgsql_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+
+  - name: Install and start Percona Server PostgreSQL
+    when: '"pg-" in enabled_db | join("")'
+    include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql.yml
+    vars:
+      pg_to_test: "{{ enabled_db | select('match', '^pg-*') | join('') }}"
+
+  - name: Verify Postgres Exporter metric endpoint with Auth works
+    when: '"pg-" in enabled_db | join("")'
+    include_tasks: ../tasks/verify_pmm3_metric.yml
+    vars:
+      retries: 3
+      delay: 10
+    loop:
+      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.hr"} 1' }
+      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.lr"} 1' }
+      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
+      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
+      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.hr"} 1' }
+      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.lr"} 1' }
+      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
+      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
+# end PDPGSQL
 
 #  - name: Set correct pass for node exporter
 #    set_fact:
