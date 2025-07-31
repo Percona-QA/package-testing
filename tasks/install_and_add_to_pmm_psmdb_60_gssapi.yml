@@ -61,6 +61,7 @@
       -p 1636:1636 \
       -v openldap-data:/bitnami/openldap \
       bitnami/openldap
+  retries: "{{ retries | default(3, true) }}"
 
 - name: Generate certificates for tests
   shell: |
@@ -113,3 +114,7 @@
 
 - name: Add mongodb metrics to monitoring
   command: pmm-admin add mongodb {{ port_flag if port_flag is defined else '' }} --service-name={{ mongo_service_name }} --username="pmm-test@PERCONATEST.COM" --password=password1 --authentication-mechanism=GSSAPI --authentication-database='$external'
+
+- name: Add mongodb metrics to monitoring using socket
+  command: pmm-admin add mongodb {{ port_flag if port_flag is defined else '' }} --socket=/tmp/mongodb-27017.sock --service-name={{ mongo_socket_service_name }} {{ '' if vars['agent_password'] is not defined or '/agent_id/' in vars['agent_password'] else '--agent-password=%s' | format(vars['agent_password']) }}
+
