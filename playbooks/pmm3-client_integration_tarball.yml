@@ -40,6 +40,10 @@
     include_tasks: ../tasks/pmm3_client_test_prepare.yml
 
 ### Install PMM Client from tarball
+  - name: Print out URL of PMM Client tarball
+    debug:
+      var: tarball_link
+
   - name: install pmm3-client tarball
     command: "../scripts/pmm3_client_install_tarball.sh -v {{ (tarball_link | length > 0) | ternary(tarball_link, pmm_version) }}"
 
