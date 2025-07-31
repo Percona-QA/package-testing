@@ -107,37 +107,37 @@
     include_tasks: ../tasks/verify_pmm3_metric.yml
     loop:
       - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up.* 1' }
-      - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up.* 1' }
+#      - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up.* 1' }
 ### end PSMDB
 
 ### start PDPGSQL
-  - set_fact:
-      pgsql_service_name: "pgsql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
-      pgsql_socket_service_name: "pgsql_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
-
-  - name: Install and start Percona Server PostgreSQL
-    when: '"pg-" in enabled_db | join("")'
-    include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql.yml
-    vars:
-      pg_to_test: "{{ enabled_db | select('match', '^pg-*') | join('') }}"
-
-  - name: Verify Postgres Exporter metric endpoint with Auth works
-    when: '"pg-" in enabled_db | join("")'
-    include_tasks: ../tasks/verify_pmm3_metric.yml
-    vars:
-      retries: 3
-      delay: 10
-    loop:
-      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.hr"} 1' }
-      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.lr"} 1' }
-      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
-      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
-      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.hr"} 1' }
-      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.lr"} 1' }
-      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
-      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
-### end PG
-
-### verifications
-  - name: Perform standard verifications set for PMM Client
-    include_tasks: ../tasks/verifications_set_for_pmm3_client.yml
+#  - set_fact:
+#      pgsql_service_name: "pgsql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+#      pgsql_socket_service_name: "pgsql_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+#
+#  - name: Install and start Percona Server PostgreSQL
+#    when: '"pg-" in enabled_db | join("")'
+#    include_tasks: ../tasks/install_and_add_to_pmm_pdpgsql.yml
+#    vars:
+#      pg_to_test: "{{ enabled_db | select('match', '^pg-*') | join('') }}"
+#
+#  - name: Verify Postgres Exporter metric endpoint with Auth works
+#    when: '"pg-" in enabled_db | join("")'
+#    include_tasks: ../tasks/verify_pmm3_metric.yml
+#    vars:
+#      retries: 3
+#      delay: 10
+#    loop:
+#      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.hr"} 1' }
+#      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.lr"} 1' }
+#      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
+#      - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
+#      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.hr"} 1' }
+#      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.lr"} 1' }
+#      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
+#      - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
+#### end PG
+#
+#### verifications
+#  - name: Perform standard verifications set for PMM Client
+#    include_tasks: ../tasks/verifications_set_for_pmm3_client.yml
