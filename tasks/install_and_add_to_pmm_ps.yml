@@ -7,13 +7,14 @@
 
 - name: set password for mysql
   set_fact:
+    ps_version: "{{ ps_to_test.split('-')[1] }}"
     mysql_password: "UfY9s73Gx~!?@#$%^&*(){}[]<>|/:;,.-_+="
 
 - name: enable Percona Server release repo
   include_tasks: ./enable_repo.yml
   vars:
     only: yes
-    package: "{{ ps_to_test }}"
+    package: "ps-{{ ps_version }}"
     repository: "release"
 
 - name: install Percona Server packages
