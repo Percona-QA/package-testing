@@ -79,7 +79,7 @@
 
   - name: Show the contents of my_var
     debug:
-      var: ansible_distribution
+      var: "{{ enabled_db | select('match', '^ps-*') | join('') }}"
 
   - name: Install and start Percona Server
     when: '"ps-" in enabled_db | join("")'
