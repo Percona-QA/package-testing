@@ -6,7 +6,7 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: ${BUILD_NUMBER}-pxc1-innovation-lts-bootstrap-ubuntu-jammy-install
+  - name: pxc1-innovation-lts-bootstrap-ubuntu-jammy-install
     region: us-west-1
     image: ami-0dc5e9ff792ec08e3
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
@@ -16,7 +16,6 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
       job-name: ${JOB_NAME}
-      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   log: true
@@ -33,5 +32,5 @@ provisioner:
     side_effect: ../../../../../playbooks/pxc_innovation_lts_upgrade_bootstrap.yml
   inventory:
     host_vars:
-      ${BUILD_NUMBER}-pxc1-innovation-lts-bootstrap-ubuntu-jammy-install:
+      pxc1-innovation-lts-bootstrap-ubuntu-jammy-install:
         ip_env: "{{ ansible_host }}"
