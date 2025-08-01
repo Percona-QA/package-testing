@@ -4,6 +4,10 @@
 #             var "port_flag"      :  to access agent with custom port
 #                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
 #
+
+- debug:
+    msg: "PSMDB to test is: {{ psmdb_to_test }}"
+
 - name: Download install_setup_psmdb.yml
   get_url:
     url: https://raw.githubusercontent.com/Percona-QA/psmdb-testing/main/pbm/tasks/install_setup_psmdb.yml
