@@ -77,7 +77,7 @@
     when: '"ps-" in enabled_db | join("")'
     include_tasks: ../tasks/install_and_add_to_pmm_ps.yml
     vars:
-      ps_to_test:  "{{ (enabled_db | select('match', '^ps\-[0-9]{2}$') | list)[0] }}"
+      ps_to_test: "{{ (enabled_db | select('match', '^ps-[0-9]{2}$') | list)[0] }}"
 
 #  - name: Verify if Metric Endpoint with Auth works for Mysqld Exporter
 #    when: '"ps-" in enabled_db | join("")'
