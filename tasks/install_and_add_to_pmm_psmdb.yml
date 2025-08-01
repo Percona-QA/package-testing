@@ -16,6 +16,10 @@
     package: "{{ psmdb_to_test }}"
     repository: "release"
 
+- name: Print PBM debian package name
+  debug:
+    msg: "PSMDB to test is: {{ psmdb_to_test }}"
+
 - name: Run install_setup_psmdb.yml
   include_tasks: /tmp/install_setup_psmdb.yml
 
