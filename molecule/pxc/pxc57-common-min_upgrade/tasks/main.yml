@@ -82,7 +82,7 @@
     when: (ansible_os_family == "Debian") and (ansible_distribution_release != "buster")
 
   - name: install PXC 5.7 new rpm packages
-    yum:
+    package:
       name: "{{ packages }}"
       state: latest
     vars:

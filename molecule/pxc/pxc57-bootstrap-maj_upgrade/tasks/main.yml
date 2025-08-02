@@ -95,8 +95,8 @@
       - python3-pymysql
     when: (ansible_os_family == "Debian") and (ansible_distribution_release == "buster")
 
-  - name: install PXC 5.7 previous rpm packages
-    yum:
+  - name: install PXC 5.7 previous rpm packages yum and dnf
+    package:
       name: "{{ packages }}"
       state: latest
     vars:
@@ -108,23 +108,27 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: install python mysql rpm packages
+  - name: install python mysql rpm packages yum
     yum:
       name: "{{ packages }}"
       state: latest
     vars:
       packages:
       - MySQL-python
-    when: ansible_os_family == "RedHat" and (ansible_distribution_major_version != "8" and ansible_distribution_major_version != "9")
+    when: 
+      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution_major_version'] | int <= 7
 
-  - name: install python mysql rpm packages for OL8 and OL9
-    yum:
+  - name: install python mysql rpm packages for OL8 and OL9 dnf
+    dnf:
       name: "{{ packages }}"
       state: latest
     vars:
       packages:
       - python3-PyMySQL
-    when: ansible_os_family == "RedHat" and (ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9")
+    when: 
+      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: stop mysql service
     command: systemctl stop mysql

@@ -13,7 +13,7 @@
       - percona-xtrabackup-pro-dbg-84
     when: ansible_os_family == "Debian"
 
-  - name: install Percona XtraBackup new rpm packages
+  - name: install Percona XtraBackup new rpm packages yum
     yum:
       name: "{{ packages }}"
       state: latest
@@ -23,4 +23,20 @@
       - percona-xtrabackup-pro-84
       - percona-xtrabackup-test-pro-84
       - percona-xtrabackup-pro-84-debuginfo
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install Percona XtraBackup new rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtrabackup-pro-84
+      - percona-xtrabackup-test-pro-84
+      - percona-xtrabackup-pro-84-debuginfo
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8

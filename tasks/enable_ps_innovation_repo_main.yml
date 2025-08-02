@@ -26,15 +26,78 @@
   - name: enable the PS-{{ major_release_version }} {{ ps_inn_lts_repo_name }} release repo
     command: percona-release enable-only {{ ps_inn_lts_repo_name }} release
 
-  - name: enable the tools testing repo
-    command: percona-release enable tools testing
+#  - name: enable the tools testing repo
+#    command: percona-release enable tools testing
 
-  - name: clean and update yum cache
+  - name: Print detected package manager
+    debug:
+      msg: "Detected package manager: {{ ansible_pkg_mgr }}"
+    when: ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+
+  - name: Clean and update package cache
     shell: |
-      yum clean all
-      yum makecache
-    when: ansible_os_family == "RedHat"
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+
+  - name: Update apt cache
+    apt:
+      update_cache: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Show enabled Percona repositories
+    command: percona-release show
+    register: percona_repos
+
+  - name: Display enabled Percona repositories
+    debug:
+      var: percona_repos.stdout_lines
 
   - name: Add ARM support into percona-release
     shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
     when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+
+  - name: List available packages with percona in them
+    shell: "apt list | grep -i percona"
+    register: percona_packages
+    when: 
+      - ansible_os_family == "Debian"  
+  - name: List available packages with percona in them (RHEL/CentOS 7)
+    shell: "yum list available | grep -i percona"
+    register: percona_packages_yum
+    when: 
+      - ansible_os_family == "RedHat"
+      - ansible_distribution_major_version == "7"
+    ignore_errors: yes
+
+  - name: List available packages with percona in them (RHEL/CentOS 8+)
+    shell: "dnf list available | grep -i percona"
+    register: percona_packages_dnf
+    when: 
+      - ansible_os_family == "RedHat"
+      - ansible_distribution_major_version >= "8"
+    ignore_errors: yes
+
+  - name: Display available Percona packages (Debian/Ubuntu)
+    debug:
+      var: percona_packages.stdout_lines
+    when: 
+      - ansible_os_family == "Debian"
+      - percona_packages.stdout_lines is defined
+
+  - name: Display available Percona packages (RHEL/CentOS 7)
+    debug:
+      var: percona_packages_yum.stdout_lines
+    when: 
+      - ansible_os_family == "RedHat"
+      - ansible_distribution_major_version == "7"
+      - percona_packages_yum.stdout_lines is defined
+
+  - name: Display available Percona packages (RHEL/CentOS 8+)
+    debug:
+      var: percona_packages_dnf.stdout_lines
+    when: 
+      - ansible_os_family == "RedHat"
+      - ansible_distribution_major_version >= "8"
+      - percona_packages_dnf.stdout_lines is defined

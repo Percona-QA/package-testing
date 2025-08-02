@@ -102,14 +102,16 @@
   - name: include tasks for test env setup
     include_tasks: ../../../tasks/test_prep.yml
 
-  - name: install libev rpm package
-    yum:
+  - name: install libev rpm package dnf
+    dnf:
       name: "{{ packages }}"
       state: latest
     vars:
       packages:
       - libev
-    when: ansible_os_family == "RedHat"
+    when:
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+    - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: Remove gnupg2-minimal (AL2023 only)
     package:
@@ -162,7 +164,7 @@
       - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: Install libgflags-dev for rhel9 aarm64
-    yum:
+    dnf:
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/aarch64/Packages/g/gflags-2.2.2-9.el9.aarch64.rpm
       state: present
       disable_gpg_check: yes
@@ -173,7 +175,7 @@
       - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: Install libgflags-dev for rhel9
-    yum:
+    dnf:
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
       state: present
       disable_gpg_check: yes
@@ -184,7 +186,7 @@
       - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: install Percona Server rpm packages Amazon PRO PXB80
-    yum:
+    dnf:
       name: "{{ packages }}"
       state: latest
       disablerepo: "epel"
@@ -205,10 +207,10 @@
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: clean and update yum cache
+  - name: clean and update cache {{ ansible_pkg_mgr }} using package manager
     shell: |
-      yum clean all
-      yum makecache
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
     when: ansible_os_family == "RedHat"
 
   - name: download and extract world database
