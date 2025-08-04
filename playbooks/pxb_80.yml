@@ -36,6 +36,7 @@
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
     when: 
       - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+      - lookup('env', 'scenerio_to_test') !="ms-80"
 
   - name: include tasks for enabling PS 8 experimental repo
     include_tasks: ../tasks/enable_ps8_experimental_repo.yml
@@ -58,7 +59,7 @@
       disable_gpg_check: yes
     when: 
       - ansible_os_family == "RedHat" 
-      - ansible_distribution_major_version == "9"
+      - ansible_distribution_major_version >= "9"
       - ansible_architecture == "aarch64"
 
   - name: Install libgflags-dev for rhel9 amd64
@@ -68,7 +69,7 @@
       disable_gpg_check: yes
     when: 
       - ansible_os_family == "RedHat" 
-      - ansible_distribution_major_version == "9"
+      - ansible_distribution_major_version >= "9"
       - ansible_architecture != "aarch64"
 
 ## INSTALL PS
@@ -368,3 +369,5 @@
 
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
+    when:
+      - lookup('env', 'server_to_test') != "ms-80"
