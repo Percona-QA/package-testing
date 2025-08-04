@@ -415,19 +415,7 @@
       - python3-libselinux
       - mysql-community-server-"{{ pxb_version_major_minor }}"-1.el9
     when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
-
-  - name: install packages in rhel/centos 10
-    dnf:
-      name: "{{ packages }}"
-      state: present
-    vars:
-      packages:
-      - python3-libselinux
-      - mysql-community-server-"{{ pxb_version_major_minor }}"-1.el10
-    when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "9"
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
 ## INSTALL MS .rpm packages RHEL/OL 8 & 9
@@ -474,14 +462,7 @@
   - name: extract mysql RPM packages for OL9
     command: tar -xvf mysql-"{{ pxb_version_major_minor }}"-1.el9.x86_64.rpm-bundle.tar -C /tmp
     when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
-      - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
-      - pxb_version_major != "8.3"
-
-  - name: extract mysql RPM packages for OL10
-    command: tar -xvf mysql-"{{ pxb_version_major_minor }}"-1.el10.x86_64.rpm-bundle.tar -C /tmp
-    when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "9"
       - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
       - pxb_version_major != "8.3"
 
