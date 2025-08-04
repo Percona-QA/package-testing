@@ -22,8 +22,6 @@
 
 - name: Run install_setup_psmdb.yml
   include_tasks: /tmp/install_setup_psmdb.yml
-  vars:
-    psmdb_to_test: "{{ psmdb_to_test }}"
 
 - name: Install Kerberos
   dnf:
