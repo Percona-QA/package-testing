@@ -17,6 +17,7 @@
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') }}"
+    mongodb_connection_type: "{{ lookup('env', 'MONGODB_CONNECTION_TYPE') }}"
     tarball_link: "{{ lookup('env', 'TARBALL_LINK') }}"
     old_tarball_link: "{{ lookup('env', 'OLD_TARBALL_LINK') }}"
     old_version: "{{ lookup('env', 'TARBALL_LINK') }}"
