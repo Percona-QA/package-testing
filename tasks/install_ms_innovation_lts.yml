@@ -415,7 +415,7 @@
       - python3-libselinux
       - mysql-community-server-"{{ pxb_version_major_minor }}"-1.el9
     when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "9"
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
 ## INSTALL MS .rpm packages RHEL/OL 8 & 9
@@ -437,7 +437,7 @@
   - name: Install mysql RPM packages using tarballs OL9
     command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-"{{ pxb_version_major_minor }}"-1.el9.x86_64.rpm-bundle.tar 
     when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "9"
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
       - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
       - pxb_version_major != "8.3"
 
@@ -462,7 +462,7 @@
   - name: extract mysql RPM packages for OL9
     command: tar -xvf mysql-"{{ pxb_version_major_minor }}"-1.el9.x86_64.rpm-bundle.tar -C /tmp
     when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "9"
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
       - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
       - pxb_version_major != "8.3"
 
@@ -472,6 +472,40 @@
       - ansible_os_family == "RedHat"
       - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
       - pxb_version_major != "8.3"
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: Download MySQL 8.0 Community repo RPM
+    ansible.builtin.get_url:
+      url: https://repo.mysql.com/mysql80-community-release-el9-1.noarch.rpm
+      dest: /tmp/mysql80-community-release-el9-1.noarch.rpm
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+      - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
+
+  - name: Install MySQL repo RPM
+    ansible.builtin.yum:
+      name: /tmp/mysql80-community-release-el9-1.noarch.rpm
+      state: present
+   when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+      - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
+
+  - name: Import MySQL GPG key (2023)
+    ansible.builtin.rpm_key:
+      state: present
+      key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+      - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
+
+  - name: Install MySQL 8.0 Community Server
+    ansible.builtin.yum:
+      name: mysql-community-server
+      state: present
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+      - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
 
   - name: start mysql service with service command
     command: service mysql start
