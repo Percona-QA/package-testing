@@ -487,7 +487,7 @@
     ansible.builtin.yum:
       name: /tmp/mysql80-community-release-el9-1.noarch.rpm
       state: present
-   when: 
+    when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
       - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
 
