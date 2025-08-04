@@ -170,7 +170,7 @@
           state: latest
         register: dnf_result
         failed_when: dnf_result is failed
-        when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 9
+        when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 9
 
     rescue:
       - name: Log DNF failure and switch to yum
