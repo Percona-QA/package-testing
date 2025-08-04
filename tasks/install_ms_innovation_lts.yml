@@ -449,14 +449,7 @@
   - name: Install mysql RPM packages using tarballs OL9
     command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-"{{ pxb_version_major_minor }}"-1.el9.x86_64.rpm-bundle.tar 
     when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
-      - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
-      - pxb_version_major != "8.3"
-
-  - name: Install mysql RPM packages using tarballs OL10
-    command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-"{{ pxb_version_major_minor }}"-1.el10.x86_64.rpm-bundle.tar
-    when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "9"
       - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
       - pxb_version_major != "8.3"
 
