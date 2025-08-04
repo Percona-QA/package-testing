@@ -475,6 +475,14 @@
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
+  - name: Import MySQL GPG key (2023)
+    ansible.builtin.rpm_key:
+      state: present
+      key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+      - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
+
   - name: Download MySQL 8.0 Community repo RPM
     ansible.builtin.get_url:
       url: https://repo.mysql.com/mysql80-community-release-el9-1.noarch.rpm
@@ -487,14 +495,6 @@
     ansible.builtin.yum:
       name: /tmp/mysql80-community-release-el9-1.noarch.rpm
       state: present
-    when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
-      - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
-
-  - name: Import MySQL GPG key (2023)
-    ansible.builtin.rpm_key:
-      state: present
-      key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
       - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
