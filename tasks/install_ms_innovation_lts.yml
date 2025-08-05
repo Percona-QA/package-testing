@@ -473,8 +473,7 @@
       - ansible_os_family == "RedHat"
       - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
       - pxb_version_major != "8.3"
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+      - ansible_distribution_major_version in ["8", "9"]
 
   - name: Import MySQL GPG key (2023)
     ansible.builtin.rpm_key:
