@@ -108,6 +108,20 @@
     command: apt-get update -y --allow-releaseinfo-change
     when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
 
+  - name: Remove broken backports entry (if exists)
+    lineinfile:
+      path: /etc/apt/sources.list
+      regexp: 'bullseye-backports'
+      state: absent
+    when: ansible_os_family == "Debian" and ansible_distribution_release == "bullseye"
+
+  - name: Update apt cache
+    apt:
+      update_cache: yes
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+    when: ansible_os_family == "Debian" and ansible_distribution_release == "bullseye"
+
   - name: install needed packages for running tests with apt
     apt:
       name: "{{ packages }}"
@@ -121,8 +135,6 @@
       - rsync
       - jq # for exporter end point metric fetch
       - acl
-    environment:
-      DEBIAN_FRONTEND: noninteractive
     retries: 60
     delay: 10
     register: result
