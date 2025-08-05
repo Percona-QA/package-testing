@@ -121,6 +121,8 @@
       - rsync
       - jq # for exporter end point metric fetch
       - acl
+    environment:
+      DEBIAN_FRONTEND: noninteractive
     retries: 60
     delay: 10
     register: result
