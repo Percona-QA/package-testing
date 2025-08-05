@@ -54,7 +54,8 @@
       state: present
       key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
     when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+      - ansible_os_family == "RedHat" 
+      - ansible_distribution_major_version | int >= 8
       - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
 
   - name: Install MySQL RHEL 8 yum repository package
