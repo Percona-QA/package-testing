@@ -10,33 +10,12 @@
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
     when: ansible_os_family == "Debian"
 
-  - name: Download and save GPG key 1 (Amazon Linux)
-    shell: |
-      curl -s https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x{{ percona_key1 }} | gpg --dearmor > {{ percona_key1_file }}
-    args:
-      creates: "{{ percona_key1_file }}"
-    when:
-      - ansible_os_family == "RedHat"
-
-#  - name: Receive GPG key 1
-#    command: "gpg --batch --keyserver keyserver.ubuntu.com --recv-keys {{ percona_key1 }}"
-#    environment:
-#      GNUPGHOME: "{{ gnupg_home }}"
-#   when: ansible_os_family == "RedHat"
-
-#  - name: Export GPG key 1
-#    command: "gpg --batch --export --armor {{ percona_key1 }}"
-#    register: gpg_key1
-#   environment:
-#      GNUPGHOME: "{{ gnupg_home }}"
-#    when: ansible_os_family == "RedHat"
-
-#  - name: Save GPG key 1 to file
-#    copy:
-#      content: "{{ gpg_key1.stdout }}"
-#     dest: "{{ percona_key1_file }}"
-#      mode: '0644'
-#    when: ansible_os_family == "RedHat"
+  - name: Download Percona GPG key from Percona's repo (Amazon Linux)
+    get_url:
+      url: https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
+      dest: "{{ percona_key1_file }}"
+      mode: '0644'
+    when: ansible_os_family == "RedHat"
 
   - name: Import GPG keys with rpmkeys
     command: "rpmkeys --import {{ percona_key1_file }}"
