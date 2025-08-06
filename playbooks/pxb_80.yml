@@ -78,7 +78,7 @@
     include_tasks: ../tasks/install_ps80.yml
     when:
       - lookup('env', 'server_to_test') == "ps-80"
-
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
 # Check for the installed packages using apt list 
 
