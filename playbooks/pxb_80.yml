@@ -78,7 +78,24 @@
     include_tasks: ../tasks/install_ps80.yml
     when:
       - lookup('env', 'server_to_test') == "ps-80"
-      - lookup('env', 'REPO_TYPE') !="PRO"
+      - ansible_distribution_major_version != "2023"
+
+
+#### FOR AL2023 ######
+  - name: include tasks for enabling PS 80 pro repo
+    include_tasks: ../tasks/enable_ps80_pro_tools_repo.yml
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - ansible_distribution_major_version == "2023"
+
+  - name: install Percona Server{{ pro_suf }} 8.0 packages
+    include_tasks: ../tasks/install_ps80.yml
+    vars:
+      pro_suf: "{{ '-pro' if lookup('env', 'REPO_TYPE') == 'PRO' else '' }}"
+    when:
+      - lookup('env', 'REPO_TYPE') == 'PRO'
+      - ansible_distribution_major_version == "2023"
+##########
 
 # Check for the installed packages using apt list 
 
