@@ -10,6 +10,14 @@
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
     when: ansible_os_family == "Debian"
 
+  - name: Ensure gnupg home exists (Amazon Linux)
+    file:
+      path: "{{ gnupg_home }}"
+      state: directory
+      mode: '0700'
+    when:
+      - ansible_distribution == "Amazon"
+
   - name: Download Percona GPG key from Percona's repo (Amazon Linux)
     get_url:
       url: https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
