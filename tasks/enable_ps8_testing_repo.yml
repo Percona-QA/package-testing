@@ -16,7 +16,7 @@
       state: directory
       mode: '0700'
     when:
-      - ansible_distribution == "Amazon"
+      - ansible_distribution == "RedHat"
 
   - name: Download Percona GPG key from Percona's repo (Amazon Linux)
     get_url:
