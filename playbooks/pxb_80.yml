@@ -59,7 +59,7 @@
       disable_gpg_check: yes
     when: 
       - ansible_os_family == "RedHat" 
-      - ansible_distribution_major_version >= "9"
+      - ansible_distribution_major_version == "9"
       - ansible_architecture == "aarch64"
 
   - name: Install libgflags-dev for rhel9 amd64
@@ -69,7 +69,7 @@
       disable_gpg_check: yes
     when: 
       - ansible_os_family == "RedHat" 
-      - ansible_distribution_major_version >= "9"
+      - ansible_distribution_major_version == "9"
       - ansible_architecture != "aarch64"
 
 ## INSTALL PS
@@ -124,41 +124,6 @@
   - name: DEBUG  PXB version number
     debug:
       msg: "PXB version number is {{ pxb_version_major_reg }} {{ pxb_version_major_minor_reg }}"
-
-###
-  - name: Receive GPG key 1
-    command: "gpg --batch --keyserver keyserver.ubuntu.com --recv-keys {{ percona_key1 }}"
-    environment:
-      GNUPGHOME: "{{ gnupg_home }}"
-    when: ansible_os_family == "RedHat"
-
-  - name: Export GPG key 1
-    command: "gpg --batch --export --armor {{ percona_key1 }}"
-    register: gpg_key1
-    environment:
-      GNUPGHOME: "{{ gnupg_home }}"
-    when: ansible_os_family == "RedHat"
-
-  - name: Save GPG key 1 to file
-    copy:
-      content: "{{ gpg_key1.stdout }}"
-      dest: "{{ percona_key1_file }}"
-      mode: '0644'
-    when: ansible_os_family == "RedHat"
-
-  - name: Import GPG keys with rpmkeys
-    command: "rpmkeys --import {{ percona_key1_file }}"
-    when: ansible_os_family == "RedHat"
-
-  - name: Install percona repository package
-    apt:
-      deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
-    when: ansible_os_family == "Debian"
-
-  - name: Install percona repository package
-    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-    when: ansible_os_family == "RedHat"
-
 
   - name: install MYSQL MS Server {{ pxb_version_major_reg }} packages
     include_tasks: ../tasks/install_ms_innovation_lts.yml
