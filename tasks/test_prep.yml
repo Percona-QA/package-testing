@@ -177,6 +177,15 @@
         debug:
           msg: "DNF installation failed. Attempting installation with yum."
 
+  - name: Install required packages on RHEL 10
+    yum:
+      name:
+        - unzip
+        - wget
+        - jq
+      state: latest
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 10
+
   - name: register SLES for updates with suse_register
     command: suse_register -a email="@@SLES_REG_EMAIL@@" -a regcode-sles=@@SLES_REG_CODE@@
     when: ansible_os_family == "Suse" and ansible_distribution_major_version == "11"
