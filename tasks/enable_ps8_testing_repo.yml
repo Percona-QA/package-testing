@@ -11,6 +11,12 @@
 #     deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-21.generic_all.deb
     when: ansible_os_family == "Debian"
 
+  - name: Install dirmngr on Amazon Linux 2
+    yum:
+      name: dirmngr
+      state: present
+    when: ansible_distribution == "Amazon"
+
   - name: Receive GPG key 1
     command: "gpg --batch --keyserver keyserver.ubuntu.com --recv-keys {{ percona_key1 }}"
     environment:
