@@ -23,25 +23,25 @@
 
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_main_repo.yml
-    when: 
+    when:
       - lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling PS 8 main repo
     include_tasks: ../tasks/enable_ps8_main_repo.yml
-    when: 
+    when:
       - lookup('env', 'install_repo') == "main"
 #      - lookup('env', 'REPO_TYPE') !="PRO"
       - ansible_distribution_major_version != "2023"
 
   - name: include tasks for enabling PS 8 test repo
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
-    when: 
+    when:
       - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
       - ansible_distribution_major_version != "2023"
 
   - name: include tasks for enabling PS 8 experimental repo
     include_tasks: ../tasks/enable_ps8_experimental_repo.yml
-    when: 
+    when:
       - lookup('env', 'install_repo') == "experimental"
 
   - name: download and extract world database
@@ -58,8 +58,8 @@
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/aarch64/Packages/g/gflags-2.2.2-9.el9.aarch64.rpm
       state: present
       disable_gpg_check: yes
-    when: 
-      - ansible_os_family == "RedHat" 
+    when:
+      - ansible_os_family == "RedHat"
       - ansible_distribution_major_version == "9"
       - ansible_architecture == "aarch64"
 
@@ -68,8 +68,8 @@
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
       state: present
       disable_gpg_check: yes
-    when: 
-      - ansible_os_family == "RedHat" 
+    when:
+      - ansible_os_family == "RedHat"
       - ansible_distribution_major_version == "9"
       - ansible_architecture != "aarch64"
 
@@ -166,14 +166,11 @@
       - lookup('env', 'REPO_TYPE') !="PRO"
 
 #-- PRO REPO FOR PXB
-  - name: disable old repos
-    command: percona-release disable all
 
   - name: include tasks for enabling pro repo for pxb
     include_tasks: ../tasks/enable_pxb80_pro_repo.yml
-    when: 
+    when:
       - lookup('env', 'REPO_TYPE') == "PRO"
-
 
   - name: Check for the installed packages using apt list HERE 1!!!!!!!!
     shell: apt list | grep percona
