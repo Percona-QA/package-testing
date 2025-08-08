@@ -147,7 +147,7 @@
   - name: include tasks for enabling PXB pro repo for MAin
     include_tasks: ../tasks/enable_pxb80_pro_repo.yml
     vars:
-      repo: "release"
+      repo: "main"
     when:
       - lookup('env', 'REPO_TYPE') == "PRO"
       - lookup('env', 'server_to_test') == "ps-80"
@@ -216,25 +216,15 @@
       - rsyslog-mysql
     when: ansible_os_family == "Debian"
 
-  - name: install 3rd party packages with yum
-    yum:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - rsyslog-mysql
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-
-  - name: install 3rd party packages with dnf
-    dnf:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - rsyslog-mysql
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-
+#  - name: install 3rd party packages with dnf
+#    dnf:
+#      name: "{{ packages }}"
+#    vars:
+#      packages:
+#      - rsyslog-mysql
+#    when:
+#      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+#      - ansible_facts['distribution_major_version'] | int >= 7
 #
 # Enable testing repository
 #
