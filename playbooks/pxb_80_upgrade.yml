@@ -31,6 +31,9 @@
 
   - name: include tasks for enabling PS 8 main repo
     include_tasks: ../tasks/enable_ps8_main_repo.yml
+    when:
+      - ansible_distribution_major_version != "2023"
+
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -68,6 +71,24 @@
           PERCONA_TELEMETRY_DISABLE: "1"
     when:
       - lookup('env', 'server_to_test') == "ps-80"
+      - ansible_distribution_major_version != "2023"
+
+
+   #### FOR AL2023 ######
+  - name: include tasks for enabling PS 80 pro repo
+    include_tasks: ../tasks/enable_ps80_pro_tools_repo.yml
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - ansible_distribution_major_version == "2023"
+
+  - name: install Percona Server{{ pro_suf }} 8.0 packages on AL2023
+    include_tasks: ../tasks/install_ps80.yml
+    vars:
+      pro_suf: "{{ '-pro' if lookup('env', 'REPO_TYPE') == 'PRO' else '' }}"
+    when:
+      - lookup('env', 'REPO_TYPE') == 'PRO'
+      - ansible_distribution_major_version == "2023"
+##########
 
 # INSTALL MS 
 
@@ -110,6 +131,8 @@
 
   - name: include tasks for enabling PXB 80 main repo before update
     include_tasks: ../tasks/enable_pxb_80_main_repo.yml
+    when:
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: install Percona XtraBackup 8.0 packages MAIN REPO
     include_tasks:
@@ -117,6 +140,25 @@
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
+    when:
+      - lookup('env', 'REPO_TYPE') !="PRO"
+
+#####Enable and install PXB 80 PRO ###########
+  - name: include tasks for enabling PXB pro repo for MAin
+    include_tasks: ../tasks/enable_pxb80_pro_repo.yml
+    vars:
+      repo: "release"
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'server_to_test') == "ps-80"
+
+  - name: install Percona XtraBackup 8.0 PRO packages MAIN
+    include_tasks: ../tasks/install_pxb80_pro.yml
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'server_to_test') == "ps-80"
+##############################################
+
 
   - name: Print the version of the installed Percona XtraBackup MAIN REPO before UPGRADE
     shell: |
@@ -198,12 +240,34 @@
 #
   - name: include tasks for enabling PS 8 TESTING repo UPGRADE
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
+    when:
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: include tasks for enabling PXB 80 TESTING repo UPGRADE
     include_tasks: ../tasks/enable_pxb_80_testing_repo.yml
-#
+    when:
+      - lookup('env', 'REPO_TYPE') !="PRO"
+
 # Upgrade packages
 #
+
+#####Enable and install PXB 80 PRO Testing ###########
+  - name: include tasks for enabling PXB pro repo for Testing
+    include_tasks: ../tasks/enable_pxb80_pro_repo.yml
+    vars:
+      repo: "testing"
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'server_to_test') == "ps-80"
+
+  - name: install Percona XtraBackup 8.0 PRO packages testing
+    include_tasks: ../tasks/install_pxb80_pro.yml
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'server_to_test') == "ps-80"
+##############################################
+
+
 
   - name: include tasks for enabling PXB 80 TESTING repo UPGRADE
     include_tasks:
@@ -211,6 +275,8 @@
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
+    when:
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: Print the version of the installed Percona XtraBackup after UPGRADE
     shell: |
@@ -238,12 +304,21 @@
 
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh pxb -d
+    when:
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: check that Percona XtraBackup version is correct after UPGRADE
     command: /package-testing/version_check.sh pxb80
 
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb80
+    when:
+      - lookup('env', 'REPO_TYPE') !="PRO"
+
+  - name: check that Percona XtraBackup package versions are correct
+    command: /package-testing/package_check.sh pxb80 pro
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: run backup
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
@@ -263,6 +338,7 @@
     when:
       - ansible_os_family == "Debian"
       - lookup('env', 'server_to_test') == "ps-80"
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: remove Percona Server rpm packages
     yum:
@@ -275,6 +351,7 @@
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - lookup('env', 'server_to_test') == "ps-80"
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
 ## Changes done for telemetry: add iptables rule for Telemetry Server - install only pxb package.
 ## Expected resuld - telemetry_uuid file has only instanceID
@@ -305,11 +382,14 @@
 
   - name: install PXB packages for telemetry
     include_tasks: ../tasks/install_pxb80.yml
+    when:
+       - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh pxb -u
     when:
       - lookup('env', 'server_to_test') != "ms-80"
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: remove PXB packages for telemetry
     include_tasks: ../tasks/remove_pxb80.yml
