@@ -325,7 +325,7 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" -o $
     extra_version=""
   fi
   if [ -f /etc/redhat-release ] || [ -f /etc/system-release ] ; then
-    if [ "$(rpm -qa | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" -ge "3" ]; then
+    if [ "$(rpm -qa | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" -ge 3 ]; then
       echo "all packages are installed"
     else
       echo "all packages are not installed"
@@ -352,7 +352,7 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" -o $
     fi
 ###
   else
-    if [ "$(dpkg -l | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" -ge "3" ]; then
+    if [ $(dpkg -l | grep percona-xtrabackup | grep -c ${version}-${pkg_version}) -ge 3 ]; then
       echo "all packages are installed"
     else
       echo "all packages are not installed"
