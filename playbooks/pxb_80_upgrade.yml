@@ -29,7 +29,7 @@
 #  - name: include tasks for enabling main repo
 #    include_tasks: ../tasks/enable_main_repo.yml
 
-  - name: include tasks for enabling PS 8 main repo 
+  - name: include tasks for enabling PS 8 main repo
     include_tasks: ../tasks/enable_ps8_main_repo.yml
 
   - name: download and extract world database
@@ -42,8 +42,8 @@
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/aarch64/Packages/g/gflags-2.2.2-9.el9.aarch64.rpm
       state: present
       disable_gpg_check: yes
-    when: 
-      - ansible_os_family == "RedHat" 
+    when:
+      - ansible_os_family == "RedHat"
       - ansible_distribution_major_version == "9"
       - ansible_architecture == "aarch64"
 
@@ -52,8 +52,8 @@
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
       state: present
       disable_gpg_check: yes
-    when: 
-      - ansible_os_family == "RedHat" 
+    when:
+      - ansible_os_family == "RedHat"
       - ansible_distribution_major_version == "9"
       - ansible_architecture != "aarch64"
 # Disable Percona Toolkit installation till its supported in OL9 and Jammy
@@ -98,7 +98,7 @@
   - name: DEBUG  PXB version number
     debug:
       msg: "PXB version number is {{ pxb_version_major_reg }} {{ pxb_version_major_minor_reg }}"
-      
+
   - name: install MYSQL MS Server {{ pxb_version_major_reg }} packages
     include_tasks: ../tasks/install_ms_innovation_lts.yml
     vars:
@@ -111,7 +111,7 @@
   - name: include tasks for enabling PXB 80 main repo before update
     include_tasks: ../tasks/enable_pxb_80_main_repo.yml
 
-  - name: install Percona XtraBackup 8.0 packages MAIN REPO 
+  - name: install Percona XtraBackup 8.0 packages MAIN REPO
     include_tasks:
       file: ../tasks/install_pxb80.yml
       apply:
@@ -141,27 +141,23 @@
     debug:
       var: version_output_pre_upgrade.stdout_lines
 
-  - name: start mysql service with service command MAIN REPO
-    command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
-  - name: start mysql service with systemctl command MAIN REPO 
+  - name: start mysql service with systemctl command MAIN REPO
     command: systemctl start mysqld
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when: ansible_os_family == "RedHat"
 
-  - name: set root password on centos MAIN REPO 
+  - name: set root password on centos MAIN REPO
     command: /package-testing/setpass_57.sh
     when: ansible_os_family == "RedHat"
 
-  - name: copy .my.cnf with credentials on centos MAIN REPO 
+  - name: copy .my.cnf with credentials on centos MAIN REPO
     template: src=../templates/my_57.j2
               dest=/root/.my.cnf
               mode=0640 owner=root group=root
     when: ansible_os_family == "RedHat"
- 
-  - name: restart mysql service MAIN REPO 
+
+  - name: restart mysql service MAIN REPO
     service: name=mysqld state=restarted
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when: ansible_os_family == "RedHat"
 
   - name: restart mysql service debian
     service: name=mysql state=restarted
@@ -184,7 +180,7 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: 
+    when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
@@ -194,9 +190,8 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: 
+    when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
 
 #
 # Enable testing repository
@@ -265,7 +260,7 @@
       packages:
       - percona-server-server
       - percona-xtrabackup-80
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - lookup('env', 'server_to_test') == "ps-80"
 
@@ -279,36 +274,12 @@
       - percona-xtrabackup-80
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
       - lookup('env', 'server_to_test') == "ps-80"
 
-  - name: remove Percona Server rpm packages
-    dnf:
-      name: "{{ packages }}"
-      state: absent
-    vars:
-      packages:
-      - percona-server-server
-      - percona-xtrabackup-80
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
-      - lookup('env', 'server_to_test') == "ps-80"
-      
 ## Changes done for telemetry: add iptables rule for Telemetry Server - install only pxb package.
 ## Expected resuld - telemetry_uuid file has only instanceID
 
-  - name: Install iptables on RHEL 
-    yum:
-      name:
-        - iptables
-        - iptables-services
-      state: present
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-
-  - name: Install iptables on RHEL 
+  - name: Install iptables on RHEL
     dnf:
       name:
         - iptables
@@ -316,7 +287,6 @@
       state: present
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: Enable and start iptables service
     systemd:
