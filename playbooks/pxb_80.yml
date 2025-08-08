@@ -75,7 +75,11 @@
 
 ## INSTALL PS
   - name: install Percona Server 8.0 packages
-    include_tasks: ../tasks/install_ps80.yml
+    include_tasks:
+      file: ../tasks/install_ps84.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
     when:
       - lookup('env', 'server_to_test') == "ps-80"
       - ansible_distribution_major_version != "2023"
@@ -202,18 +206,14 @@
     command: service mysql start
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
-#  - name: start mysql service with systemctl command
-#    command: systemctl start mysqld
-#    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
-
   - name: start mysql service with service module RHEL PXB80
     ansible.builtin.systemd:
       name: mysqld
       enabled: yes
       state: started
     become: yes
-    when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when:
+      - ansible_os_family == "RedHat"
 
   - name: start mysql service with service module DEBIAN PXB80
     ansible.builtin.systemd:
@@ -221,32 +221,32 @@
       enabled: yes
       state: started
     become: yes
-    when: 
+    when:
       - ansible_os_family == "Debian"
 
   - name: PRINT INSTALLED XTRABACKUP version rhel
     shell: rpm -qa | grep percona-xtrabackup
-    when: 
+    when:
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
     register: xtrabackup_version_print
 
   - name: DEBUG xtrabackup_version_print rhel
     debug:
       msg: "Xtrabackup version is {{ xtrabackup_version_print.stdout }}"
-    when: 
+    when:
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
 ##
   - name: PRINT INSTALLED XTRABACKUP version DEBIAN
     shell: apt list --installed | grep percona-xtrabackup
-    when: 
+    when:
       - ansible_os_family == "Debian"
     register: xtrabackup_version_print
 
   - name: DEBUG xtrabackup_version_print DEBIAN
     debug:
       msg: "Xtrabackup version is {{ xtrabackup_version_print.stdout }}"
-    when: 
+    when:
       - ansible_os_family == "Debian"
 
 ##
@@ -323,16 +323,7 @@
       packages:
       - lz4
       - zstd
-    when: ansible_os_family == "Debian" and ansible_distribution_release != "bionic"
-
-  - name: install lz4 and zstd packages on Bionic 
-    apt:
-      name: "{{ packages }}"
-    vars: 
-      packages:
-      - liblz4-tool
-      - zstd
-    when: ansible_os_family == "Debian" and ansible_distribution_release == "bionic"
+    when: ansible_os_family == "Debian"
 
   - name: run backup with lz4 compression
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_l/ --compress=lz4 --compress-threads=10
@@ -351,7 +342,7 @@
 
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_z/
-    
+
   - name: remove Percona Server deb packages
     apt:
       name: "{{ packages }}"
@@ -361,10 +352,10 @@
       packages:
       - percona-server-server*
       - percona-xtrabackup-80
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - lookup('env', 'server_to_test') == "ps-80"
-      
+
   - name: remove Percona Server rpm packages
     yum:
       name: "{{ packages }}"
@@ -373,7 +364,7 @@
      packages:
       - percona-server-server*
       - percona-xtrabackup-80
-    when: 
+    when:
       - ansible_os_family == "RedHat"
       - lookup('env', 'server_to_test') == "ps-80"
 
