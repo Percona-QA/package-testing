@@ -75,11 +75,7 @@
 
 ## INSTALL PS
   - name: install Percona Server 8.0 packages
-    include_tasks:
-      file: ../tasks/install_ps84.yml
-      apply:
-        environment:
-          PERCONA_TELEMETRY_DISABLE: "1"
+    include_tasks: ../tasks/install_ps80.yml
     when:
       - lookup('env', 'server_to_test') == "ps-80"
       - ansible_distribution_major_version != "2023"
