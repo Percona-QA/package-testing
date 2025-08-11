@@ -216,18 +216,6 @@
       - rsyslog-mysql
     when: ansible_os_family == "Debian"
 
-#  - name: install 3rd party packages with dnf
-#    dnf:
-#      name: "{{ packages }}"
-#    vars:
-#      packages:
-#      - rsyslog-mysql
-#    when:
-#      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-#      - ansible_facts['distribution_major_version'] | int >= 7
-#
-# Enable testing repository
-#
   - name: include tasks for enabling PS 8 TESTING repo UPGRADE
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
     when:
