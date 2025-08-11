@@ -19,7 +19,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: add pro repository on debian
-  template: src=../templates/pro_deb_repo_file_pxb80.j2
+  template: src=../templates/pro_deb_repo_file_pxb84.j2
             dest=/etc/apt/sources.list.d/psmysql-pro.list
   vars:
     client_id: "{{ lookup('env', 'USERNAME') }}"
