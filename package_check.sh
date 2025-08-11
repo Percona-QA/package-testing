@@ -359,7 +359,7 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" -o $
     fi
 ###
     if [ "$2" = "pro" ]; then
-      for package in percona-xtrabackup-pro-dbg${extra_version} percona-xtrabackup-pro-test${extra_version} percona-xtrabackup-pro${extra_version}; do
+      for package in percona-xtrabackup-pro-dbg${extra_version} percona-xtrabackup-test-pro${extra_version} percona-xtrabackup-pro${extra_version}; do
         if [ "$(dpkg -l | grep -c ${package})" -gt 0 ] && [ "$dpkg -l | grep ${package} | awk '{$print $3}' == ${version}-${pkg_version}.$(lsb_release -sc)" ] ; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
         else
