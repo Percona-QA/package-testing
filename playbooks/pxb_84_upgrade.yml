@@ -248,7 +248,8 @@
 
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh pxb -d
-
+    when:
+      - lookup('env', 'REPO_TYPE') !="PRO"
 ##
 ## VERSION CHECK
 
