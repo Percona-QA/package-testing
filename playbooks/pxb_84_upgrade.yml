@@ -209,6 +209,7 @@
 ##
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh pxb -d
+    when: lookup('env', 'REPO_TYPE') != "PRO"
 
   - name: remove Percona Server rpm packages BEFORE UPGRADE
     include_tasks: ../tasks/remove_pxb84.yml
