@@ -147,10 +147,20 @@
   - name: include tasks for enabling PXB pro repo for MAin
     include_tasks: ../tasks/enable_pxb80_pro_repo.yml
     vars:
+      repo: "release"
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'server_to_test') == "ps-80"
+      - ansible_os_family == "RedHat"
+
+  - name: include tasks for enabling PXB pro repo for MAin
+    include_tasks: ../tasks/enable_pxb80_pro_repo.yml
+    vars:
       repo: "main"
     when:
       - lookup('env', 'REPO_TYPE') == "PRO"
       - lookup('env', 'server_to_test') == "ps-80"
+      - ansible_os_family == "Debian"
 
   - name: install Percona XtraBackup 8.0 PRO packages MAIN
     include_tasks: ../tasks/install_pxb80_pro.yml
