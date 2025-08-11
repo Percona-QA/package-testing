@@ -15,12 +15,9 @@
       name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
       disable_gpg_check: yes
     when: ansible_os_family == "RedHat"
-    
-  - name: enable the PXB release repo
-    command: percona-release enable-only pxb-80 release
 
-#  - name: enable the tools testing repo
-#    command: percona-release enable tools release
+  - name: enable the PXB release repo
+    command: percona-release enable pxb-80 release
 
   - name: Clean and update package cache
     shell: |

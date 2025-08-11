@@ -6,7 +6,7 @@ driver:
 platforms:
   - name: al-2023-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
     region: us-west-2
-    image: ami-04e08e36e17a21b56
+    image: ami-01634322a170b5fd0
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.medium
     ssh_user: ec2-user
@@ -20,21 +20,21 @@ provisioner:
   log: True
   playbooks:
     create: ../../playbooks/create_noble.yml
-#    destroy: ../../playbooks/destroy_noble.yml
+    destroy: ../../playbooks/destroy_noble.yml
     cleanup: ../../playbooks/cleanup.yml
     prepare: ../../playbooks/prepare.yml
     converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
 scenario:
   name: al-2023
-#  destroy_sequence:
-#    - destroy
+  destroy_sequence:
+    - destroy
   clenup_sequence:
     - cleanup
   test_sequence:
-#    - destroy
+    - destroy
     - create
     - prepare
     - converge
     - verify
     - cleanup
-#    - destroy
+    - destroy
