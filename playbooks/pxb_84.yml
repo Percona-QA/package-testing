@@ -151,25 +151,21 @@
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh pxb -e
 
-  - name: start mysql service with service command
-    command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
   - name: start mysql service with systemctl command
     command: systemctl start mysqld
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when: ansible_os_family == "RedHat"
 
   - name: PRINT INSTALLED XTRABACKUP version rhel
     shell: rpm -qa | grep percona-xtrabackup
     when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+      - ansible_os_family == "RedHat"
     register: xtrabackup_version_print
 
   - name: DEBUG xtrabackup_version_print rhel
     debug:
       msg: "Xtrabackup version is {{ xtrabackup_version_print.stdout }}"
     when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+      - ansible_os_family == "RedHat"
 
   - name: PRINT INSTALLED XTRABACKUP version DEBIAN
     shell: apt list --installed  2>&1 | grep percona-xtrabackup
