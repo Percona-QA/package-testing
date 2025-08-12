@@ -35,7 +35,7 @@
     include_tasks: ../tasks/enable_ps84_testing_repo.yml
     when:
       - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-      - ansible_distribution_major_version != "2023"
+      - ansible_distribution_major_version != "amazon"
 
   - name: include tasks for enabling PS 84 experimental repo
     include_tasks: ../tasks/enable_ps84_experimental_repo.yml
