@@ -30,13 +30,13 @@
     include_tasks: ../tasks/enable_ps8_main_repo.yml
     when:
       - lookup('env', 'install_repo') == "main"
-      - ansible_distribution_major_version != "amazon"
+      - ansible_distribution_major_version != "2023"
 
   - name: include tasks for enabling PS 8 test repo
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
     when:
       - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-      - ansible_distribution_major_version != "amazon"
+      - ansible_distribution_major_version != "2023"
 
   - name: include tasks for enabling PS 8 experimental repo
     include_tasks: ../tasks/enable_ps8_experimental_repo.yml
@@ -77,7 +77,7 @@
     include_tasks: ../tasks/install_ps80.yml
     when:
       - lookup('env', 'server_to_test') == "ps-80"
-      - ansible_distribution_major_version != "amazon"
+      - ansible_distribution_major_version != "2023"
 
 
 #### FOR AL2023 ######
@@ -85,7 +85,7 @@
     include_tasks: ../tasks/enable_ps80_pro_tools_repo.yml
     when:
       - lookup('env', 'REPO_TYPE') == "PRO"
-      - ansible_distribution_major_version == "amazon"
+      - ansible_distribution_major_version == "2023"
 
   - name: install Percona Server{{ pro_suf }} 8.0 packages on AL2023
     include_tasks: ../tasks/install_ps80.yml
@@ -93,7 +93,7 @@
       pro_suf: "{{ '-pro' if lookup('env', 'REPO_TYPE') == 'PRO' else '' }}"
     when:
       - lookup('env', 'REPO_TYPE') == 'PRO'
-      - ansible_distribution_major_version == "amazon"
+      - ansible_distribution_major_version == "2023"
 ##########
 
 # Check for the installed packages using apt list 
