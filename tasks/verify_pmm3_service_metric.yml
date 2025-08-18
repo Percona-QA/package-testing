@@ -89,4 +89,4 @@
   rescue:
   - name: Generate PMM summary on failure
     command: "pmm-admin summary --filename /pmm/package-testing/pmm-summary.zip {{ port_flag }}"
-    ignore_errors: yes
+    failed_when: true
