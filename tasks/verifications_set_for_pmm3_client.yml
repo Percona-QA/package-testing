@@ -45,7 +45,7 @@
 
   #TODO: improve verify_exporter_port_output.yml to work without socket service removal
 - name: Remove MongoDB Socket service to verify Port output in pmm-admin list commands
-  when: '"psmdb-" in enabled_db | join("")'
+  when: '"psmdb-" in enabled_db | join("") and mongodb_connection_type != "gssapi"'
   command: pmm-admin remove mongodb {{ mongo_socket_service_name }} {{ port_flag if port_flag is defined else '' }}
 
   #TODO: improve verify_exporter_port_output.yml to work without socket service removal

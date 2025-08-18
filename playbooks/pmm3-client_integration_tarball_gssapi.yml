@@ -1,7 +1,7 @@
 ---
 # Advanced package test:
 #   prepare Percona Repository and software
-#   install PMM client deb/rpm
+#   install PMM client tarball with gssapi
 #   perform correct setup
 #   setup PS, PSMDB and PDPGSQL;
 #   verify versions, metrics, exporters, etc.
@@ -16,6 +16,8 @@
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') | regex_search('\\S(.*\\S)?') }}"
+    tarball_link: "{{ lookup('env', 'TARBALL_LINK') }}"
+    mongodb_connection_type: "gssapi"
 
   tasks:
   - name: Register Instance IP
@@ -37,69 +39,70 @@
   - name: Setup environment
     include_tasks: ../tasks/pmm3_client_test_prepare.yml
 
-  - name: Install PMM client new deb packages
-    when: ansible_os_family == "Debian"
-    shell: |
-      sudo apt-get update
-      sudo apt-get install pmm-client
+### Install PMM Client from tarball
+  - name: Print out URL of PMM Client tarball
+    debug:
+      var: tarball_link
 
-  - name: Install PMM client new rpm packages
-    when: ansible_os_family == "RedHat"
-    shell: |
-      sudo yum -y update
-      sudo yum -y install pmm-client
+  - name: install pmm3-client tarball
+    command: "../scripts/pmm3_client_install_tarball.sh -v {{ (tarball_link | length > 0) | ternary(tarball_link, pmm_version) }}"
 
-  - name: Check that PMM Client version is correct
+  - name: check that PMM client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
 
 ### Setup PMM Client
-  - name: Use "pmm-admin config" to connect pmm client to server
-    shell: pmm-admin config --force --debug --server-insecure-tls --metrics-mode={{ metrics_mode }} --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
+  - name: Use pmm-agent setup to configure pmm client to connect to server
+    shell: >-
+      pmm-agent setup --config-file=/usr/local/percona/pmm/config/pmm-agent.yaml --force --server-insecure-tls
+      --server-address={{ pmm_server_address }}
+      --metrics-mode={{ metrics_mode }}
+      --server-username=admin
+      --server-password={{ pmm_server_password }}
+      {{ instance_ip }} generic node2_{{ instance_ip }}
+  - name: Check if the configuration generated with paths-base is using the custom path
+    include_tasks: ../tasks/verify_pmm3_client_config.yml
 
-  - name: Check that PMM client version is correct
+  - name: Start agent
+    shell: pmm-agent --debug --config-file=/usr/local/percona/pmm/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
+
+  - name: "Verify PMM client version is {{ pmm_version }}"
     include_tasks: ../tasks/verify_pmm_status_versions.yml
 
-### start PS
+# start PS
   - set_fact:
       mysql_service_name: "mysql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
-#      mysql_service_name: "mysql_{{ rnd }}_{{ instance_ip }}"
 
-  - name: Install and start Percona Server 5.7
-    when: '"ps-5.7" in enabled_db'
-    include_tasks: ../tasks/install_and_add_to_pmm_ps_57.yml
-
-  - name: Install and start Percona Server 8.0
-    when: '"ps-8.0" in enabled_db'
-    include_tasks: ../tasks/install_and_add_to_pmm_ps_80.yml
+  - name: Install and start Percona Server
+    when: '"ps-" in enabled_db | join("")'
+    include_tasks: ../tasks/install_and_add_to_pmm_ps.yml
+    vars:
+      ps_to_test: "{{ (enabled_db | map('replace', '.', '') | select('match', '^ps-[0-9]{2}$') | list)[0] }}"
 
   - name: Verify if Metric Endpoint with Auth works for Mysqld Exporter
     when: '"ps-" in enabled_db | join("")'
     include_tasks: ../tasks/verify_pmm3_service_metric.yml
     loop:
       - { service_name: '{{ mysql_service_name }}', metric: 'mysql_up 1' }
-## end PS
+# end PS
 
-### start PSMDB
+# start PSMDB
   - set_fact:
       mongo_service_name: "mongodb_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
-      mongo_socket_service_name: "mongodb_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
-#      mongo_service_name: "mongodb_{{ rnd }}_{{ instance_ip }}"
 
-  - name: Install and start Percona Server MongoDB
+  - name: Install and start Percona Server MongoDB with GSSAPI
     when: '"psmdb-" in enabled_db | join("")'
-    include_tasks: ../tasks/install_and_add_to_pmm_psmdb.yml
+    include_tasks: ../tasks/install_and_add_to_pmm_psmdb_gssapi.yml
     vars:
       psmdb_to_test:  "{{ enabled_db | select('match', '^psmdb-*') | join('') }}"
 
-  - name: Verify MongoDB Exporter metric endpoint with Auth(including service with socket)
+  - name: Verify MongoDB Exporter metric endpoint with Auth
     when: '"psmdb-" in enabled_db | join("")'
     include_tasks: ../tasks/verify_pmm3_service_metric.yml
     loop:
       - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up.* 1' }
-      - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up.* 1' }
-### end PSMDB
+# end PSMDB
 
-### start PDPGSQL
+# start PDPGSQL
   - set_fact:
       pgsql_service_name: "pgsql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
       pgsql_socket_service_name: "pgsql_socket_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
@@ -113,6 +116,9 @@
   - name: Verify Postgres Exporter metric endpoint with Auth works
     when: '"pg-" in enabled_db | join("")'
     include_tasks: ../tasks/verify_pmm3_service_metric.yml
+    vars:
+      retries: 3
+      delay: 10
     loop:
       - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.hr"} 1' }
       - { service_name: '{{ pgsql_service_name }}', metric: 'pg_up{collector="custom_query.lr"} 1' }
@@ -122,8 +128,8 @@
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.lr"} 1' }
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="custom_query.mr"} 1' }
       - { service_name: '{{ pgsql_socket_service_name }}', metric: 'pg_up{collector="exporter"} 1' }
-### end PG
+# end PG
 
-### verifications
+# verifications
   - name: Perform standard verifications set for PMM Client
     include_tasks: ../tasks/verifications_set_for_pmm3_client.yml
