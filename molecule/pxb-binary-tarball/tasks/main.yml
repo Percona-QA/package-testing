@@ -339,6 +339,13 @@
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
+    when:
+      - ansible_distribution_major_version != "10"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysqld
+    when:
+      - ansible_distribution_major_version == "10"
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
