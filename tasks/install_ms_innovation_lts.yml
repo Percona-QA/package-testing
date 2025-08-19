@@ -475,7 +475,7 @@
   - name: Download MySQL 8.4 Community repo RPM
     ansible.builtin.get_url:
       url: https://repo.mysql.com/mysql84-community-release-el9-1.noarch.rpm
-      dest: /tmp/mysql80-community-release-el9-1.noarch.rpm
+      dest: /tmp/mysql84-community-release-el9-1.noarch.rpm
     when:
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
       - lookup('env', 'server_to_test') == "ms-84"
