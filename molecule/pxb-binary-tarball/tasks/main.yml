@@ -130,14 +130,14 @@
     when:
       - ansible_distribution_major_version != "2023"
       - lookup('env', 'PXB_RELEASE') == "80"
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version != "10"
+      - ansible_distribution_major_version != "10"
 
   - name: include playbook for Install Percona Server 8.0 PXB80
     include_tasks: ../../../tasks/install_ps80.yml
     when:
       - ansible_distribution_major_version != "2023"
       - lookup('env', 'PXB_RELEASE') == "80"
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version != "10"
+      - ansible_distribution_major_version != "10"
 
   - name: Enable Percona Server 8.0 PRO main repository PXB80
     include_tasks: ../../../tasks/enable_ps80_pro_tools_repo.yml
@@ -151,14 +151,14 @@
     when:
       - ansible_distribution_major_version != "2023"
       - lookup('env', 'PXB_RELEASE') == "84"
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version != "10"
+      - ansible_distribution_major_version != "10"
 
   - name: include playbook for Install Percona Server 8.4 PXB84
     include_tasks: ../../../tasks/install_ps84.yml
     when:
       - ansible_distribution_major_version != "2023"
       - lookup('env', 'PXB_RELEASE') == "84"
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version != "10"
+      - ansible_distribution_major_version != "10"
 
   - name: Enable Percona Server 8.4 PRO main repository PXB84
     include_tasks: ../../../tasks/enable_ps84_pro_tools_repo.yml
@@ -196,26 +196,29 @@
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
 
-  - name: Download MySQL 8.0 Community repo RPM
+  - name: Download MySQL 8.4 Community repo RPM
     ansible.builtin.get_url:
-      url: https://repo.mysql.com/mysql80-community-release-el9-1.noarch.rpm
-      dest: /tmp/mysql80-community-release-el9-1.noarch.rpm
+      url: https://repo.mysql.com/mysql84-community-release-el9-1.noarch.rpm
+      dest: /tmp/mysql84-community-release-el9-1.noarch.rpm
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+      - lookup('env', 'PXB_RELEASE') == "84"
 
   - name: Install MySQL repo RPM
     ansible.builtin.yum:
-      name: /tmp/mysql80-community-release-el9-1.noarch.rpm
+      name: /tmp/mysql84-community-release-el9-1.noarch.rpm
       state: present
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+      - lookup('env', 'PXB_RELEASE') == "84"
 
-  - name: Install MySQL 8.0 Community Server
+  - name: Install MySQL 8.4 Community Server
     ansible.builtin.yum:
       name: mysql-community-server
       state: present
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+      - lookup('env', 'PXB_RELEASE') == "84"
 
   - name: install Percona Server rpm packages Amazon PRO PXB80
     dnf:
@@ -234,7 +237,6 @@
       - percona-server-rocksdb-pro
     when:
       - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
-      - lookup('env', 'PXB_RELEASE') == "80"
       - lookup('env', 'REPO_TYPE') == "PRO"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
