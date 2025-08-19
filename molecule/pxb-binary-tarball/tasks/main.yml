@@ -263,6 +263,7 @@
     when:
       - ansible_distribution_major_version != "2023"
       - lookup('env', 'PXB_RELEASE') == "84"
+      - ansible_distribution_major_version != "10"
 
   - name: Download {{ TARBALL_NAME_REGULAR }} REGULAR MAIN REPO PS80 PXB 80
     ansible.builtin.get_url:
