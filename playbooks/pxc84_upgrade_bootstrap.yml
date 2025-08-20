@@ -17,11 +17,12 @@
     when:
       - ansible_os_family == "Debian"
 
-  - name: clean and update yum cache
+  - name: Clean and update package cache
     shell: |
-      yum clean all
-      yum makecache
-    when: ansible_os_family == "RedHat"
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
 
 #-------------non pro
   - name: include tasks for enabling test repo pxc84 non pro
@@ -33,26 +34,26 @@
   - name: include tasks for enabling main repo pxc84 non pro
     include_tasks: ../tasks/enable_pxc84_main_repo.yml
     when: 
-    - lookup('env', 'upgrade_repo') == "main" or lookup('env', 'upgrade_repo') == ""
+    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
     - lookup('env', 'pro') == "no"
 
   - name: include tasks for enabling experimental repo non pro
     include_tasks: ../tasks/enable_pxc84_experimental_repo.yml
     when: 
-    - lookup('env', 'upgrade_repo') == "experimental"
+    - lookup('env', 'install_repo') == "experimental"
     - lookup('env', 'pro') == "no"
 #-----------------pro
 
   - name: include tasks for enabling test repo pro pxc84
     include_tasks: ../tasks/enable_pxc84_pro_repo_testing.yml
     when: 
-    - lookup('env', 'upgrade_repo') == "testing" 
+    - lookup('env', 'install_repo') == "testing" 
     - lookup('env', 'pro') == "yes"
 
   - name: include tasks for enabling main repo pro pxc84
     include_tasks: ../tasks/enable_pxc84_pro_repo_main.yml
     when: 
-    - lookup('env', 'upgrade_repo') == "main" or lookup('env', 'upgrade_repo') == ""
+    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
     - lookup('env', 'pro') == "yes"
 
 

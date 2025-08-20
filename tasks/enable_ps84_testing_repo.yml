@@ -50,13 +50,12 @@
     command: percona-release enable pxb-84-lts release
     when: ansible_distribution_release == "noble"
 
-  - name: Clean YUM cache
-    command: yum clean all
-    when: ansible_os_family == "RedHat"
-
-  - name: Update YUM cache
-    command: yum makecache
-    when: ansible_os_family == "RedHat"
+  - name: Clean and update package cache
+    shell: |
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
 
   - name: Update APT cache
     apt:

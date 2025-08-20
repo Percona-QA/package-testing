@@ -85,7 +85,7 @@ elif [ "$1" = "pxc84pro" ]; then
   revision=${PXC84PRO_REV}
   innodb_ver=${PXC84PRO_INNODB}
   wsrep=${PXC84PRO_WSREP}
-elif [[ "$1" =~ ^pxc8[5-9]{1}$ ]]; then
+elif [[ "$1" =~ ^pxc9[0-9]{1}$ ]]; then
   version=${PXC_INN_LTS_VER%-*}
   release=${PXC_INN_LTS_VER#*-}
   revision=${PXC_INN_LTS_REV}
@@ -121,6 +121,8 @@ elif [ "$1" = "proxysql" ]; then
   version=${PROXYSQL_VER}
 elif [ "$1" = "proxysql2" ]; then
   version=${PROXYSQL2_VER}
+elif [ "$1" = "proxysql3" ]; then
+  version=${PROXYSQL3_VER}
 elif [ "$1" = "sysbench" ]; then
   version=${SYSBENCH_VER}
 elif [ "$1" = "pbm" ]; then
@@ -288,7 +290,7 @@ elif [[ "${product}" = "pxb24" ]] || [[ ${product} =~ ^pxb8[0-9]{1}$ ]]; then
     fi
 
 
-elif [ ${product} = "proxysql" -o ${product} = "proxysql2" ]; then
+elif [ ${product} = "proxysql" -o ${product} = "proxysql2" -o ${product} = "proxysql3" ]; then
   # Define binaries lists depending on product.
   # proxysql 1.X.X packages contain 'proxysql' and 'proxysql-admin' binaries.
   # proxysql 2.X.X packages contain 'proxysql', 'proxysql-admin', 'percona-scheduler-admin' and 'pxc_scheduler_handler' binaries.

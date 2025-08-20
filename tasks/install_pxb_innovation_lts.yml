@@ -12,7 +12,7 @@
       - percona-xtrabackup-dbg-{{ major_release_version }}
     when: ansible_os_family == "Debian"
 
-  - name: install Percona XtraBackup new rpm packages for pxb-{{ major_release_version }}
+  - name: install Percona XtraBackup new rpm packages for pxb-{{ major_release_version }} yum
     yum:
       name: "{{ packages }}"
       state: latest
@@ -22,4 +22,20 @@
       - percona-xtrabackup-{{ major_release_version }}
       - percona-xtrabackup-test-{{ major_release_version }}
       - percona-xtrabackup-{{ major_release_version }}-debuginfo
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install Percona XtraBackup new rpm packages for pxb-{{ major_release_version }} dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtrabackup-{{ major_release_version }}
+      - percona-xtrabackup-test-{{ major_release_version }}
+      - percona-xtrabackup-{{ major_release_version }}-debuginfo
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8

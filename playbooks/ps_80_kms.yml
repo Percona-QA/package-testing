@@ -7,12 +7,12 @@
   become: true
   become_method: sudo
   vars:
-    key_id: "{{ lookup('env', 'KMS_KEY_ID') }}"
-    access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
-    secret_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
-    gnupg_home: /root/.gnupg
-    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
-    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+      gnupg_home: /root/.gnupg
+      key_id: "{{ lookup('env', 'KMS_KEY_ID') }}"
+      access_key: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+      secret_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+      percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+      percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
   tasks:

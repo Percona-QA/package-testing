@@ -1,0 +1,45 @@
+---
+scenario:
+  name: amazon-linux-2023-arm
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: ${BUILD_NUMBER}-pxc2-84-common-al2023-min_upgrade-${test_type}
+    region: us-west-1
+    image: ami-03a1b0d298ba6b328
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    instance_type: c6g.large
+    ssh_user: ec2-user
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
+  - name: ${BUILD_NUMBER}-pxc3-84-common-al2023-min_upgrade-${test_type}
+    region: us-west-1
+    image: ami-03a1b0d298ba6b328
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    instance_type: c6g.large
+    ssh_user: ec2-user
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../../../playbooks/create_noble.yml
+    destroy: ../../../playbooks/destroy_noble.yml
+    prepare: ../../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+    side_effect: ../../../../../playbooks/pxc84_upgrade_common.yml
+  inventory:
+    host_vars:
+      pxc2-84-common-al2023-min_upgrade-${test_type}:
+        ip_env: "{{ ansible_host }}"
+      pxc3-84-common-al2023-min_upgrade-${test_type}:
+        ip_env: "{{ ansible_host }}"
+        sleep_before_tests: 40
