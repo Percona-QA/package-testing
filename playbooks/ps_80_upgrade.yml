@@ -149,24 +149,14 @@
       - rsyslog-mysql
     when: ansible_os_family == "Debian"
 
-  - name: install 3rd party packages with yum
-    yum:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - rsyslog-mysql
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-
   - name: install 3rd party packages with dnf
     dnf:
       name: "{{ packages }}"
     vars:
       packages:
       - rsyslog-mysql
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start my.cnf change test
