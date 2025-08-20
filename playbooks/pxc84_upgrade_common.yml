@@ -178,9 +178,9 @@
     command: /package-testing/version_check.sh pxc84
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
-#  - name: check that PXC package versions are correct Side Effect
-#    command: /package-testing/package_check.sh pxc84
-#    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+  - name: check that PXC package versions are correct Side Effect
+    command: /package-testing/package_check.sh pxc84
+    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: Sleep 10 mins
     shell: sleep 600
