@@ -125,3 +125,7 @@
       - vmagent
       - node_exporter
       - "{{ ('psmdb-' in enabled_db | join('')) | ternary('mongodb_exporter','') }}"
+
+- name: PMM Agent minor version
+  ansible.builtin.debug:
+    msg: Node Exporter Status is {{ pmm_agent_minor_version.stdout | trim }}
