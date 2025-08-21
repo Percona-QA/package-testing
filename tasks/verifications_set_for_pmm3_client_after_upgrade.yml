@@ -104,8 +104,8 @@
   shell: "pmm-admin --version {{ port_flag if port_flag is defined else '' }} 2>&1| grep ^Version | awk -F. '{print $2}'"
   register: pmm_agent_minor_version
 
-- name: Include Exporters Port in output checks for 2.29.0+
-  when: ((pmm_agent_minor_version.stdout | trim | int) >= 29) and (mongodb_connection_type != "gssapi")
+- name: Include Exporters Port in output checks
+  when: mongodb_connection_type != "gssapi"
   include_tasks: ../tasks/verify_exporter_port_output.yml
   loop: "{{ ex_list|select|list }}"
   vars:
@@ -116,8 +116,8 @@
       - "{{ ('psmdb-' in enabled_db | join('')) | ternary('mongodb_exporter','') }}"
       - "{{ ('pg-' in enabled_db | join('')) | ternary('postgres_exporter','') }}"
 
-- name: Include Exporters Port in output checks for 2.29.0+
-  when: ((pmm_agent_minor_version.stdout | trim | int) >= 29) and (mongodb_connection_type == "gssapi")
+- name: Include Exporters Port in output checks
+  when: mongodb_connection_type == "gssapi"
   include_tasks: ../tasks/verify_exporter_port_output.yml
   loop: "{{ ex_list|select|list }}"
   vars:
@@ -126,6 +126,3 @@
       - node_exporter
       - "{{ ('psmdb-' in enabled_db | join('')) | ternary('mongodb_exporter','') }}"
 
-- name: PMM Agent minor version
-  ansible.builtin.debug:
-    msg: Node Exporter Status is {{ pmm_agent_minor_version.stdout | trim }}
