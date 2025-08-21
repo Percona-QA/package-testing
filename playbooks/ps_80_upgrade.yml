@@ -229,26 +229,6 @@
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on RHEL7 using yum
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-server-server{{ pro_suf }}
-      - percona-server-test{{ pro_suf }}
-      - percona-server{{ pro_suf }}-debuginfo
-      - percona-server-devel{{ pro_suf }}
-      - percona-server-rocksdb{{ pro_suf }}
-      - percona-server-shared{{ pro_suf }}
-      - percona-server-client{{ pro_suf }}
-      - percona-mysql-router{{ pro_suf }}
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
   - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on OL8 using dnf
     dnf:
       name: "{{ packages }}"
@@ -284,7 +264,9 @@
       - percona-server-shared{{ pro_suf }}
       - percona-server-client{{ pro_suf }}
       - percona-mysql-router{{ pro_suf }}
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 9
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
