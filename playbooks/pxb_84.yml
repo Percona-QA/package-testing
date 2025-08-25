@@ -21,17 +21,21 @@
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
-  - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+#  - name: include tasks for enabling main repo
+#    include_tasks: ../tasks/enable_main_repo.yml
+#    when: lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling PS 84 main repo
     include_tasks: ../tasks/enable_ps84_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+    when:
+      - lookup('env', 'install_repo') == "main"
+      - ansible_distribution_major_version != "2023"
 
   - name: include tasks for enabling PS 84 test repo
     include_tasks: ../tasks/enable_ps84_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when:
+      - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+      - ansible_distribution_major_version != "2023"
 
   - name: include tasks for enabling PS 84 experimental repo
     include_tasks: ../tasks/enable_ps84_experimental_repo.yml
@@ -56,6 +60,24 @@
           PERCONA_TELEMETRY_DISABLE: "1"
     when:
       - lookup('env', 'server_to_test') == "ps-84"
+      - ansible_distribution_major_version != "2023"
+
+  #### FOR AL2023 ######
+  - name: include tasks for enabling PS 84 pro repo
+    include_tasks: ../tasks/enable_ps84_pro_tools_repo.yml
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - ansible_distribution_major_version == "2023"
+
+  - name: install Percona Server{{ pro_suf }} 8.4 packages on AL2023
+    include_tasks: ../tasks/install_ps84.yml
+    vars:
+      pro_suf: "{{ '-pro' if lookup('env', 'REPO_TYPE') == 'PRO' else '' }}"
+    when:
+      - lookup('env', 'REPO_TYPE') == 'PRO'
+      - ansible_distribution_major_version == "2023"
+##########
+
 
 # INSTALL MS 
 
@@ -88,7 +110,7 @@
       msg: "PXB version number is {{ pxb_version_major_reg }} {{ pxb_version_major_minor_reg }}"
 
 ###
-      
+
   - name: install MYSQL MS Server {{ pxb_version_major_reg }} packages
     include_tasks: ../tasks/install_ms_innovation_lts.yml
     vars:
@@ -97,14 +119,27 @@
     when:
       - lookup('env', 'server_to_test') == "ms-84"
 
-  - name: Enable PXB 84 testing repo
-    command: percona-release enable-only pxb-84-lts testing
-    when: lookup('env', 'REPO_TYPE') != "PRO"
+  #----- ENABLE PXB REPOS
 
-  - name: ENABLE PRO REPO FOR PXB 84
+  - name: Enable PXB 84 repo testing non pro
+    command: percona-release enable-only pxb-84-lts testing
+    when:
+      - lookup('env', 'install_repo') == "testing"
+      - lookup('env', 'REPO_TYPE') !="PRO"
+
+  - name: Enable PXB 84 repo main non pro
+    command: percona-release enable-only pxb-84-lts release
+    when:
+      - lookup('env', 'install_repo') == "main"
+      - lookup('env', 'REPO_TYPE') !="PRO"
+
+#-- PRO REPO FOR PXB
+
+  - name: include tasks for enabling pro repo for pxb
     include_tasks: ../tasks/enable_pxb84_pro_repo.yml
-    when: lookup('env', 'REPO_TYPE') == "PRO"
-    
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+
   - name: install Percona XtraBackup 8.4 packages
     include_tasks: ../tasks/install_pxb84.yml
     when: lookup('env', 'REPO_TYPE') != "PRO"
@@ -116,25 +151,21 @@
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh pxb -e
 
-  - name: start mysql service with service command
-    command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
   - name: start mysql service with systemctl command
     command: systemctl start mysqld
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when: ansible_os_family == "RedHat"
 
   - name: PRINT INSTALLED XTRABACKUP version rhel
     shell: rpm -qa | grep percona-xtrabackup
     when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+      - ansible_os_family == "RedHat"
     register: xtrabackup_version_print
 
   - name: DEBUG xtrabackup_version_print rhel
     debug:
       msg: "Xtrabackup version is {{ xtrabackup_version_print.stdout }}"
     when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+      - ansible_os_family == "RedHat"
 
   - name: PRINT INSTALLED XTRABACKUP version DEBIAN
     shell: apt list --installed  2>&1 | grep percona-xtrabackup
@@ -160,7 +191,7 @@
 
   - name: restart mysql service
     service: name=mysqld state=restarted
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when: ansible_os_family == "RedHat"
 
   - name: restart mysql service debian
     service: name=mysql state=restarted
@@ -230,16 +261,7 @@
       packages:
       - lz4
       - zstd
-    when: ansible_os_family == "Debian" and ansible_distribution_release != "bionic"
-
-  - name: install lz4 and zstd packages on Bionic 
-    apt:
-      name: "{{ packages }}"
-    vars: 
-      packages:
-      - liblz4-tool
-      - zstd
-    when: ansible_os_family == "Debian" and ansible_distribution_release == "bionic"
+    when: ansible_os_family == "Debian"
 
   - name: run backup with lz4 compression
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_l/ --compress=lz4 --compress-threads=10
@@ -258,7 +280,7 @@
 
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_z/
-    
+
   - name: remove Percona Server deb packages
     apt:
       name: "{{ packages }}"
@@ -268,7 +290,7 @@
       packages:
       - percona-server-server*
       - percona-xtrabackup-80
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - lookup('env', 'server_to_test') != "ms-80"
       - lookup('env', 'server_to_test') != "ms-84"
@@ -281,7 +303,7 @@
      packages:
       - percona-server-server*
       - percona-xtrabackup-80
-    when: 
+    when:
       - ansible_os_family == "RedHat"
       - lookup('env', 'server_to_test') != "ms-80"
       - lookup('env', 'server_to_test') != "ms-84"

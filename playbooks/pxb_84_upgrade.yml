@@ -34,7 +34,7 @@
   - name: include tasks for enabling PS 84 main repo
     include_tasks: ../tasks/enable_ps84_main_repo.yml
     when:
-      - lookup('env', 'server_to_test') == "ps-84"
+      - ansible_distribution_major_version != "2023"
 
   - name: install Percona Server 8.4 packages
     include_tasks:
@@ -44,6 +44,7 @@
           PERCONA_TELEMETRY_DISABLE: "1"
     when:
       - lookup('env', 'server_to_test') == "ps-84"
+      - ansible_distribution_major_version != "2023"
 
   - name: Install percona release if ms-84 is selected
     include_tasks: ../tasks/install_percona-release.yml
@@ -88,12 +89,26 @@
     when:
       - lookup('env', 'server_to_test') == "ms-84"
 
-## Install PXB 84 packages (main)
-# CURRENTLY PRO > PRO IS NOT ENABLED SO commenting when for following 2 tasks
+  #### FOR AL2023 ######
+  - name: include tasks for enabling PS 84 pro repo
+    include_tasks: ../tasks/enable_ps84_pro_tools_repo.yml
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - ansible_distribution_major_version == "2023"
+
+  - name: install Percona Server{{ pro_suf }} 8.4 packages on AL2023
+    include_tasks: ../tasks/install_ps84.yml
+    vars:
+      pro_suf: "{{ '-pro' if lookup('env', 'REPO_TYPE') == 'PRO' else '' }}"
+    when:
+      - lookup('env', 'REPO_TYPE') == 'PRO'
+      - ansible_distribution_major_version == "2023"
+##########
+
   - name: Enable PXB 84 repo RELEASE REPO
     command: percona-release enable-only pxb-84-lts release
-#    when: 
-#      - lookup('env', 'REPO_TYPE') != "PRO"
+    when:
+      - lookup('env', 'REPO_TYPE') != "PRO"
 
   - name: install Percona XtraBackup 8.4 packages MAIN REPO
     include_tasks:
@@ -101,20 +116,35 @@
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
+    when:
+      - lookup('env', 'REPO_TYPE') != "PRO"
 
-## PRO PACKAGES
+  #####Enable and install PXB 80 PRO ###########
+  - name: include tasks for enabling PXB pro repo for MAin
+    include_tasks: ../tasks/enable_pxb84_pro_repo.yml
+    vars:
+      repo: "release"
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'server_to_test') == "ps-84"
+      - ansible_os_family == "RedHat"
 
-#  - name: Enable PXB 84 repo PRO REPO
-#    include_tasks: ../tasks/enable_pxb84_pro_repo.yml
-#    vars:
-#      repo: "main"
-#    when: lookup('env', 'REPO_TYPE') == "PRO"
-#
-#  - name: install Percona XtraBackup 8.4 PRO packages
-#    include_tasks: ../tasks/install_pxb84_pro.yml
-#    vars:
-#      repo: "main"
-#    when: lookup('env', 'REPO_TYPE') == "PRO"
+  - name: include tasks for enabling PXB pro repo for MAin
+    include_tasks: ../tasks/enable_pxb84_pro_repo.yml
+    vars:
+      repo: "main"
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'server_to_test') == "ps-84"
+      - ansible_os_family == "Debian"
+
+  - name: install Percona XtraBackup 8.4 PRO packages MAIN
+    include_tasks: ../tasks/install_pxb84_pro.yml
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'server_to_test') == "ps-84"
+##############################################
+
 
 ## CHECK VERSIONS BEFORE UPGRADE
   - name: Print the version of the installed Percona XtraBackup BEFORE UPGRADE
@@ -142,13 +172,9 @@
 
 ## Start mysql services
 
-  - name: start mysql service with service command
-    command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
   - name: start mysql service with systemctl command
     command: systemctl start mysqld
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when: ansible_os_family == "RedHat"
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
@@ -162,7 +188,7 @@
 
   - name: restart mysql service
     service: name=mysqld state=restarted
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when: ansible_os_family == "RedHat"
 
   - name: restart mysql service debian
     service: name=mysql state=restarted
@@ -179,29 +205,10 @@
       - rsyslog-mysql
     when: ansible_os_family == "Debian"
 
-  - name: install 3rd party packages with yum
-    yum:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - rsyslog-mysql
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-
-  - name: install 3rd party packages with dnf
-    dnf:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - rsyslog-mysql
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
-
 ##
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh pxb -d
+    when: lookup('env', 'REPO_TYPE') != "PRO"
 
   - name: remove Percona Server rpm packages BEFORE UPGRADE
     include_tasks: ../tasks/remove_pxb84.yml
@@ -214,10 +221,6 @@
     command: percona-release enable-only pxb-84-lts testing
     when: lookup('env', 'REPO_TYPE') != "PRO"
 
-  - name: ENABLE PRO REPO FOR PXB 84
-    include_tasks: ../tasks/enable_pxb84_pro_repo.yml
-    when: lookup('env', 'REPO_TYPE') == "PRO"
-
   - name: include tasks for enabling PXB 84 TESTING repo UPGRADE
     include_tasks:
       file: ../tasks/install_pxb84.yml
@@ -226,13 +229,26 @@
           PERCONA_TELEMETRY_DISABLE: "1"
     when: lookup('env', 'REPO_TYPE') != "PRO"
 
-  - name: install Percona XtraBackup 8.4 PRO packages
+  #####Enable and install PXB 80 PRO Testing ###########
+  - name: include tasks for enabling PXB pro repo for Testing
+    include_tasks: ../tasks/enable_pxb84_pro_repo.yml
+    vars:
+      repo: "testing"
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'server_to_test') == "ps-84"
+
+  - name: install Percona XtraBackup 8.4 PRO packages testing
     include_tasks: ../tasks/install_pxb84_pro.yml
-    when: lookup('env', 'REPO_TYPE') == "PRO"
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'server_to_test') == "ps-84"
+##############################################
 
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh pxb -d
-
+    when:
+      - lookup('env', 'REPO_TYPE') !="PRO"
 ##
 ## VERSION CHECK
 
@@ -296,18 +312,7 @@
       - percona-xtrabackup-84
     when: 
       - ansible_os_family == "Debian"
-
-  - name: remove Percona Server rpm packages
-    yum:
-      name: "{{ packages }}"
-      state: absent
-    vars:
-      packages:
-      - percona-server-server
-      - percona-xtrabackup-84
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: remove Percona Server rpm packages
     dnf:
@@ -317,23 +322,9 @@
       packages:
       - percona-server-server
       - percona-xtrabackup-84
-    when: 
+    when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
-
-#  - name: check if process is stopped after package removal
-#    command: /package-testing/check_running.sh mysql stopped
-
-
-  - name: Install iptables on RHEL
-    yum:
-      name:
-        - iptables
-        - iptables-services
-      state: present
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: Install iptables on RHEL
     dnf:
@@ -341,16 +332,18 @@
         - iptables
         - iptables-services
       state: present
-    when: 
+    when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: Enable and start iptables service
     systemd:
       name: iptables
       state: started
       enabled: true
-    when: ansible_facts['distribution'] == "RedHat"
+    when:
+      - ansible_facts['distribution'] == "RedHat"
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: Block pmm.check-dev.percona.com IP for non REDHAT
     iptables:
@@ -359,12 +352,19 @@
       jump: DROP
     when:
       - lookup('env', 'upgrade_repo') == ""
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: install PXB packages for telemetry
     include_tasks: ../tasks/install_pxb84.yml
+    when:
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh pxb -u
+    when:
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: remove PXB packages for telemetry
     include_tasks: ../tasks/remove_pxb84.yml
+    when:
+      - lookup('env', 'REPO_TYPE') !="PRO"
