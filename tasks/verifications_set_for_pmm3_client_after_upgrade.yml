@@ -23,7 +23,7 @@
       - "'MongoDB' in list_output.stdout"
 
 - name: Assert if the pmm-admin list contains MySQL
-  when: '"ps-" in enabled_db | join("")'
+  when: '"ps-" in enabled_db | join("") and mongodb_connection_type != "gssapi"'
   assert:
     that:
       - "'MySQL' in list_output.stdout"
@@ -39,13 +39,13 @@
     process_name: "vmagent"
 
 - name: "Validate 'postgresql_pgstatements_agent' is Running"
-  when: '"pg-" in enabled_db | join("")'
+  when: '"pg-" in enabled_db | join("") and mongodb_connection_type != "gssapi"'
   include_tasks: ../tasks/verify_exporter_status.yml
   vars:
     process_name: "postgresql_pgstatements_agent"
 
 - name: "Wait for 'postgres_exporter' is Running"
-  when: '"pg-" in enabled_db | join("")'
+  when: '"pg-" in enabled_db | join("") and mongodb_connection_type != "gssapi"'
   include_tasks: ../tasks/wait_exporter_is_running.yml
   vars:
     process_name: "postgres_exporter"
@@ -56,21 +56,27 @@
     - { service_name: 'node_exporter', metric: 'node_textfile_scrape_error 0' }
 
 - name: Verify MongoDB Exporter metric endpoint with Auth(including service with socket)
-  when: '"psmdb-" in enabled_db | join("")'
-  include_tasks: ../tasks/verify_pmm3_metric.yml
+  when: '"psmdb-" in enabled_db | join("") and mongodb_connection_type != "gssapi"'
+  include_tasks: ../tasks/verify_pmm3_service_metric.yml
   loop:
     - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up.* 1' }
     - { service_name: '{{ mongo_socket_service_name }}', metric: 'mongodb_up.* 1' }
 
+- name: Verify MongoDB Exporter metric endpoint with Auth(including service with socket)
+  when: '"psmdb-" in enabled_db | join("") and mongodb_connection_type == "gssapi"'
+  include_tasks: ../tasks/verify_pmm3_service_metric.yml
+  loop:
+    - { service_name: '{{ mongo_service_name }}', metric: 'mongodb_up.* 1' }
+
 - name: Verify if Metric Endpoint with Auth works for MysqlD Exporter
-  when: '"ps-" in enabled_db | join("")'
+  when: '"ps-" in enabled_db | join("") and mongodb_connection_type != "gssapi"'
   include_tasks: ../tasks/verify_pmm3_metric.yml
   loop:
     - { service_name: '{{ mysql_service_name }}', metric: 'mysql_up 1' }
 
 - name: Verify Postgres Exporter metric endpoint with Auth works
-  when: '"pg-" in enabled_db | join("")'
-  include_tasks: ../tasks/verify_pmm3_metric.yml
+  when: '"pg-" in enabled_db | join("") and mongodb_connection_type != "gssapi"'
+  include_tasks: ../tasks/verify_pmm3_service_metric.yml
   vars:
     retries: 3
     delay: 10
@@ -86,12 +92,12 @@
 
   #TODO: improve verify_exporter_port_output.yml to work without socket service removal
 - name: Remove MongoDB Socket service to verify Port output in pmm-admin list commands
-  when: '"psmdb-" in enabled_db | join("")'
+  when: '"psmdb-" in enabled_db | join("") and mongodb_connection_type != "gssapi"'
   command: pmm-admin remove mongodb {{ mongo_socket_service_name }} {{ port_flag if port_flag is defined else '' }}
 
   #TODO: improve verify_exporter_port_output.yml to work without socket service removal
 - name: Remove PostgreSQL Socket service to verify Port output in pmm-admin list commands
-  when: '"pg-" in enabled_db | join("")'
+  when: '"pg-" in enabled_db | join("") and mongodb_connection_type != "gssapi"'
   command: pmm-admin remove postgresql {{ pgsql_socket_service_name }} {{ port_flag if port_flag is defined else '' }}
 
 - name: Parse and set PMM minor version
@@ -99,7 +105,7 @@
   register: pmm_agent_minor_version
 
 - name: Include Exporters Port in output checks for 2.29.0+
-  when: pmm_agent_minor_version.stdout | int >= 29
+  when: pmm_agent_minor_version.stdout | int >= 29 and mongodb_connection_type = "gssapi"
   include_tasks: ../tasks/verify_exporter_port_output.yml
   loop: "{{ ex_list|select|list }}"
   vars:
@@ -109,3 +115,13 @@
       - "{{ ('ps-' in enabled_db | join('')) | ternary('mysqld_exporter','') }}"
       - "{{ ('psmdb-' in enabled_db | join('')) | ternary('mongodb_exporter','') }}"
       - "{{ ('pg-' in enabled_db | join('')) | ternary('postgres_exporter','') }}"
+
+- name: Include Exporters Port in output checks for 2.29.0+
+  when: pmm_agent_minor_version.stdout | int >= 29 and mongodb_connection_type == "gssapi"
+  include_tasks: ../tasks/verify_exporter_port_output.yml
+  loop: "{{ ex_list|select|list }}"
+  vars:
+    ex_list:
+      - vmagent
+      - node_exporter
+      - "{{ ('psmdb-' in enabled_db | join('')) | ternary('mongodb_exporter','') }}"
