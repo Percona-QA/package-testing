@@ -29,7 +29,6 @@
     include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
     when: lookup('env', 'install_repo') == "experimental"
 
-
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
