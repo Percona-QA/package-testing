@@ -22,7 +22,7 @@
     process_name: "vmagent"
 
 - name: "Validate 'postgresql_pgstatements_agent' is Running"
-  when: '"pg-" in enabled_db | join("") and mongodb_connection_type != "gssapi"'
+  when: '"pg-" in enabled_db | join("") and (mongodb_connection_type | default('')) != "gssapi"'
   include_tasks: ./verify_exporter_status.yml
   vars:
     process_name: "postgresql_pgstatements_agent"
