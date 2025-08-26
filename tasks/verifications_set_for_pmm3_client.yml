@@ -22,13 +22,13 @@
     process_name: "vmagent"
 
 - name: "Validate 'postgresql_pgstatements_agent' is Running"
-  when: '"pg-" in enabled_db | join("") and (mongodb_connection_type | default('')) != "gssapi"'
+  when: '"pg-" in enabled_db | join("") and (mongodb_connection_type | default("")) != "gssapi"'
   include_tasks: ./verify_exporter_status.yml
   vars:
     process_name: "postgresql_pgstatements_agent"
 
 - name: "Wait for 'postgres_exporter' is Running"
-  when: '"pg-" in enabled_db | join("") and mongodb_connection_type != "gssapi"'
+  when: '"pg-" in enabled_db | join("") and (mongodb_connection_type | default("")) != "gssapi"'
   include_tasks: ./wait_exporter_is_running.yml
   vars:
     process_name: "postgres_exporter"
@@ -45,17 +45,17 @@
 
   #TODO: improve verify_exporter_port_output.yml to work without socket service removal
 - name: Remove MongoDB Socket service to verify Port output in pmm-admin list commands
-  when: '"psmdb-" in enabled_db | join("") and mongodb_connection_type != "gssapi"'
+  when: '"psmdb-" in enabled_db | join("") and (mongodb_connection_type | default("")) != "gssapi"'
   command: pmm-admin remove mongodb {{ mongo_socket_service_name }} {{ port_flag if port_flag is defined else '' }}
 
   #TODO: improve verify_exporter_port_output.yml to work without socket service removal
 - name: Remove PostgreSQL Socket service to verify Port output in pmm-admin list commands
-  when: '"pg-" in enabled_db | join("") and mongodb_connection_type != "gssapi"'
+  when: '"pg-" in enabled_db | join("") and (mongodb_connection_type | default("")) != "gssapi"'
   command: pmm-admin remove postgresql {{ pgsql_socket_service_name }} {{ port_flag if port_flag is defined else '' }}
 
 - name: Validate Exporters Port in output for 2.29.0+
   include_tasks: ./verify_exporter_port_output.yml
-  when: 'mongodb_connection_type != "gssapi"'
+  when: '(mongodb_connection_type | default("")) != "gssapi"'
   loop: "{{ ex_list|select|list }}"
   vars:
     ex_list:
@@ -67,7 +67,7 @@
 
 - name: Validate Exporters Port in output for 2.29.0+
   include_tasks: ./verify_exporter_port_output.yml
-  when: 'mongodb_connection_type == "gssapi"'
+  when: '(mongodb_connection_type | default("")) != "gssapi"'
   loop: "{{ ex_list|select|list }}"
   vars:
     ex_list:
