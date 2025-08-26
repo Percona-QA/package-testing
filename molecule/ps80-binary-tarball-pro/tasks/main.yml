@@ -77,7 +77,7 @@
         - python3-pip
         - libtirpc
       state: present
-      when:
+    when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
