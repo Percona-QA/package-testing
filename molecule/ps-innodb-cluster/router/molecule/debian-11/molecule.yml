@@ -8,7 +8,7 @@ driver:
 platforms:
   - name: mysql-router-debian-11
     region: us-west-2
-    image: ami-05f9dcaa9ddb9a15e
+    image: ami-01ce1f232a5e4adc2
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.micro
     ssh_user: admin
