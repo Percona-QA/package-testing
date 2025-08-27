@@ -6,9 +6,9 @@ driver:
 platforms:
   - name: unoble-${BUILD_NUMBER}-${JOB_NAME}-${cur_action_to_test}
     region: us-west-2
-    image: "${MOLECULE_UNOBLE_PRO_AMI:-ami-08c47e4b2806964ce}"
-    vpc_subnet_id: subnet-03136d8c244f56036
-    instance_type: t3.large
+    image: ami-08c47e4b2806964ce
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t2.micro
     ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
@@ -20,20 +20,20 @@ provisioner:
   log: True
   playbooks:
     create: ../../../../playbooks/create_noble.yml
-#    destroy: ../../../../playbooks/destroy-noble-arm.yml
+    destroy: ../../../../playbooks/destroy-noble-arm.yml
     prepare: ../../playbooks/prepare-ubuntu-pro.yml
     converge: ../../playbooks/playbook.yml
 scenario:
   name: ubuntu-noble
-#  destroy_sequence:
-#    - destroy
+  destroy_sequence:
+    - destroy
   clenup_sequence:
     - cleanup
   test_sequence:
-#    - destroy
+    - destroy
     - create
     - prepare
     - converge
     - verify
     - cleanup
-#    - destroy
+    - destroy
