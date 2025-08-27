@@ -8,7 +8,7 @@ driver:
 platforms:
   - name: ps-node1-debian-11-arm
     region: us-west-2
-    image: ami-07238559d15dfb99a
+    image: ami-0a4fc89e459b5c142
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: c6g.large
     ssh_user: admin
@@ -19,7 +19,7 @@ platforms:
       build-number: ${BUILD_NUMBER}
   - name: ps-node2-debian-11-arm
     region: us-west-2
-    image: ami-07238559d15dfb99a
+    image: ami-0a4fc89e459b5c142
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: c6g.large
     ssh_user: admin
@@ -30,7 +30,7 @@ platforms:
       build-number: ${BUILD_NUMBER}
   - name: ps-node3-debian-11-arm
     region: us-west-2
-    image: ami-07238559d15dfb99a
+    image: ami-0a4fc89e459b5c142
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: c6g.large
     ssh_user: admin
