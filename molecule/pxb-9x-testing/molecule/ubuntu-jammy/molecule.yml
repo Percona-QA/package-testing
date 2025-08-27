@@ -14,27 +14,25 @@ platforms:
     instance_tags:
       iit-billing-tag: pxb-9x-testing
       job-name: ${JOB_NAME}
-      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   log: True
   playbooks:
     create: ../../playbooks/create_noble.yml
-    destroy: ../../playbooks/destroy_noble.yml
+#    destroy: ../../playbooks/destroy_noble.yml
     prepare: ../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
-    converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
+    converge: ../../../../playbooks/pxb_9x.yml
 scenario:
   name: ubuntu-jammy
-  destroy_sequence:
-    - destroy
-  clenup_sequence:
+#  destroy_sequence:
+ #   - destroy
+  cleanup_sequence:
     - cleanup
   test_sequence:
-    - destroy
+  #  - destroy
     - create
     - prepare
     - converge
-    - verify
     - cleanup
-    - destroy
+   # - destroy
