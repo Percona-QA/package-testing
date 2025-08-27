@@ -14,13 +14,6 @@
   command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/prel/yum/testing/2023/RPMS/noarch/percona-release-1.0-30.noarch.rpm
   when: ansible_os_family == "RedHat" and ansible_distribution == "Amazon"
 
-- name: Add Percona Pro repo GPG key (Debian/Ubuntu)
-  ansible.builtin.get_url:
-    url: https://repo.percona.com/apt/percona-keyring.gpg
-    dest: /usr/share/keyrings/percona.gpg
-    mode: '0644'
-  when: ansible_os_family == "Debian"
-
 - name: add pro repository on debian
   template: src=../templates/pro_deb_repo_file_ps80.j2
             dest=/etc/apt/sources.list.d/psmysql-pro.list

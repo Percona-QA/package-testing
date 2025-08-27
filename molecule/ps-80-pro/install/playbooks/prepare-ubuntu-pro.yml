@@ -5,17 +5,6 @@
   become_method: sudo
   gather_facts: true
   tasks:
-    - name: Ensure ubuntu-pro-client is latest
-      apt:
-        name: ubuntu-pro-client
-        state: latest
-        update_cache: yes
-
-    - name: Check if fips-updates is available
-      command: pro status --format json
-      register: pro_status
-      changed_when: false
-
     - name: Subscribe for fips-updates
       command: pro enable fips-updates --assume-yes
 
