@@ -44,12 +44,12 @@
 
   - name: install Percona Server 8.4 packages
     include_tasks:
-      file: ../tasks/install_ps84.yml
+      file: ../tasks/install_ps_innovation_lts.yml
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
     when:
-      - lookup('env', 'server_to_test') == "ps-84"
+      - lookup('env', 'server_to_test') == "ps-9x-innovation"
 
 # INSTALL MS 
 
