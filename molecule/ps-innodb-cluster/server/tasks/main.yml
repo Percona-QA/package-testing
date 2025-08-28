@@ -209,3 +209,19 @@
     service:
       name: mysql
       state: restarted
+
+  - name: Stop firewalld service
+    systemd:
+      name: firewalld
+      state: stopped
+    when:
+      - ansible_facts['distribution'] in ["OracleLinux"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: Disable firewalld service permanently
+    systemd:
+      name: firewalld
+      enabled: no
+    when:
+      - ansible_facts['distribution'] in ["OracleLinux"]
+      - ansible_facts['distribution_major_version'] | int >= 8
