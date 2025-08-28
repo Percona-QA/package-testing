@@ -107,7 +107,7 @@
     shell: mysqlsh --uri=root@ps-node1 --password=Test1234# -- cluster add-instance root@ps-node3:3306 --recoveryMethod=clone
 
   - name: bootstrap router
-    shell: echo "Test1234#" | sudo mysqlrouter --bootstrap root@ps-node1 --user=mysqlrouter
+    shell: echo "Test1234#" | sudo mysqlrouter --bootstrap root@ps-node1:3306 --user=mysqlrouter
 
   - name: restart mysqlrouter service
     service:
