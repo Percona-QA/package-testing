@@ -67,7 +67,7 @@
 
 - name: Validate Exporters Port in output for 2.29.0+
   include_tasks: ./verify_exporter_port_output.yml
-  when: '(mongodb_connection_type | default("")) != "gssapi"'
+  when: '(mongodb_connection_type | default("")) == "gssapi"'
   loop: "{{ ex_list|select|list }}"
   vars:
     ex_list:
