@@ -1,0 +1,393 @@
+---
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    gnupg_home: /root/.gnupg
+    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  tasks:
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: Extract values using shell command for repo name used for innovation/lts release
+    shell: grep 'PS_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: ps_inn_lts_repo_name
+    
+  - name: Set major_release_version variable
+    set_fact:
+      ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
+  
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling PS INNOVATION main repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling PS INNOVATION test repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
+    when: lookup('env', 'install_repo') == "testing" 
+
+  - name: include tasks for enabling PS INNOVATION experimental repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: install Percona Server 8.4 packages
+    include_tasks:
+      file: ../tasks/install_ps_innovation_lts.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
+    when:
+      - lookup('env', 'server_to_test') == "ps-9x-innovation"
+
+# INSTALL MS 
+
+  - name: Extract PXB major and minor version number using shell commands
+    shell: cat /package-testing/VERSIONS | grep 'PXB_INN_LTS_MAJ_VER' | cut -d'=' -f2 | sed 's/"//g'
+    register: pxb_version_major_minor
+
+  - name: Extract PXB major version number using shell commands
+    shell: cat /package-testing/VERSIONS | grep 'PXB_INN_LTS_MAJ_VER' | awk -F'[=".]' '{print $3"."$4}'
+    register:  pxb_version_major
+
+  - name: Extract version number using shell commands
+    shell: cat /package-testing/VERSIONS | grep -oP 'PXB_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    register: major_release_version
+
+  - name: Set major_release_version variable
+    set_fact:
+      major_release_version: "{{ major_release_version.stdout }}"
+
+  - name: Set pxb_version_major variable
+    set_fact:
+      pxb_version_major_reg: "{{ pxb_version_major.stdout }}"
+
+  - name: Set pxb_version_major_minor variable
+    set_fact:
+      pxb_version_major_minor_reg: "{{ pxb_version_major_minor.stdout }}"
+
+  - name: DEBUG  PXB version number
+    debug:
+      msg: "PXB version number is {{ pxb_version_major.stdout }} {{ pxb_version_major_minor.stdout }}"
+
+###
+      
+  - name: install MYSQL MS Server {{ pxb_version_major_reg }} packages
+    include_tasks: ../tasks/install_ms_innovation_lts.yml
+    vars:
+      pxb_version_major: "{{ pxb_version_major_reg }}"
+      pxb_version_major_minor: "{{ pxb_version_major_minor_reg }}"
+    when:
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+  - name: Download percona-release for Ubuntu
+    get_url:
+      url: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+      dest: /tmp/percona-release.deb
+    when: ansible_os_family == "Debian"
+
+  - name: Install percona-release for Ubuntu
+    apt:
+      deb: /tmp/percona-release.deb
+      state: present
+    when: ansible_os_family == "Debian" 
+
+  - name: Enable PXB LTS testing repo
+    command: percona-release enable-only pxb-9x-innovation experimental
+    when: lookup('env', 'REPO_TYPE') != "PRO"
+    
+  - name: install Percona XtraBackup innovation packages
+    include_tasks: ../tasks/install_pxb_innovation_lts.yml
+    when: lookup('env', 'REPO_TYPE') != "PRO"
+
+  #- name: check telemetry (enabled)
+   # command: /package-testing/check_telemetry.sh pxb -e
+
+
+  - name: PRINT INSTALLED XTRABACKUP version DEBIAN
+    shell: apt list --installed  2>&1 | grep percona-xtrabackup
+    when: 
+      - ansible_os_family == "Debian"
+    register: xtrabackup_version_print
+
+  - name: DEBUG xtrabackup_version_print DEBIAN
+    debug:
+      msg: "Xtrabackup version is {{ xtrabackup_version_print.stdout }}"
+    when: 
+      - ansible_os_family == "Debian"
+  
+  - name: Gather fresh service facts after MySQL install
+    service_facts:
+
+  - name: Debug all discovered services (optional, for troubleshooting)
+    debug:
+      var: ansible_facts.services
+
+  - name: Detect MySQL service name dynamically
+    set_fact:
+      mysql_service_name: >-
+        {% set services = ansible_facts.services.keys() %}
+        {% if 'mysql.service' in services %}
+          mysql.service
+        {% elif 'mysqld.service' in services %}
+          mysqld.service
+        {% else %}
+          ""
+        {% endif %}
+
+  - name: Strip whitespace from mysql_service_name
+    set_fact:
+      mysql_service_name: "{{ mysql_service_name | trim }}"
+
+  - name: Debug selected mysql_service_name
+    debug:
+      var: mysql_service_name
+
+  - name: Start the MySQL service dynamically
+    service:
+      name: "{{ mysql_service_name }}"
+      state: started
+    when:
+      - mysql_service_name is defined
+      - mysql_service_name in ansible_facts.services
+
+  - name: install plugins, import world database
+    command: /package-testing/plugins_test.sh
+
+  - name: Print the version of the installed Percona XtraBackup
+    shell: |
+      {
+        echo " xtrabackup --version is ";
+        xtrabackup --version || echo "FAILED: xtrabackup --version";
+        echo "xbstream --version  is ";
+        xbstream --version || echo "FAILED: xbstream --version";
+        echo "xbcloud --version  is ";
+        xbcloud --version || echo "FAILED: xbcloud --version";
+        echo "xbcrypt --version  is ";
+        xbcrypt --version || echo "FAILED: xbcrypt --version";
+      }
+    register: version_output
+    ignore_errors: yes
+
+  - name: Display version information
+    debug:
+      var: version_output.stdout_lines
+
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb91
+    when:
+      - lookup('env', 'REPO_TYPE') != "PRO"
+
+  - name: check that Percona XtraBackup package versions are correct
+    command: /package-testing/package_check.sh pxb91
+    when:
+      - lookup('env', 'REPO_TYPE') != "PRO"
+
+
+  - name: Ensure /tmp/backups directory exists
+    file:
+      path: /tmp/backups
+      state: directory
+      mode: '0755'
+
+
+  - name: run backup
+    shell: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ > /tmp/backups/xtrabackup.log 2>&1
+
+  - name: Show xtrabackup log after regular backup
+    shell: cat /tmp/backups/xtrabackup.log
+    register: xtrabackup_regular_log
+    ignore_errors: yes
+
+  - name: xtrabackup regular backup log
+    debug:
+      msg: "{{ xtrabackup_regular_log.stdout_lines }}"
+
+
+  - name: Check xtrabackup log for actual errors (regular backup)
+    shell: |
+      grep -i 'ERROR' /tmp/backups/xtrabackup.log | grep -v 'performance_schema/error_' || echo "No real error found"
+    register: backup_log_check
+    failed_when: >
+      ('ERROR' in backup_log_check.stdout) and ('No real error found' not in backup_log_check.stdout)
+
+  - name: prepare backup
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
+
+  - name: install lz4 and zstd packages on Redhat/CentOS
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - lz4
+      - zstd
+    when: ansible_os_family == "RedHat"
+
+  - name: install lz4 and zstd packages on Ubuntu/Debian
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - lz4
+      - zstd
+    when: ansible_os_family == "Debian" and ansible_distribution_release != "bionic"
+
+  - name: install lz4 and zstd packages on Bionic 
+    apt:
+      name: "{{ packages }}"
+    vars: 
+      packages:
+      - liblz4-tool
+      - zstd
+    when: ansible_os_family == "Debian" and ansible_distribution_release == "bionic"
+
+  - name: run backup with lz4 compression
+    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_l/ --compress=lz4 --compress-threads=10
+
+  - name: decompress backup
+    command: /usr/bin/xtrabackup --decompress --user=root --target-dir=/tmp/backup_l/
+
+  - name: prepare backup
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_l/
+
+  - name: run backup with zstd compression
+    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_z/ --compress=zstd --compress-threads=10
+
+  - name: decompress backup
+    command: /usr/bin/xtrabackup --decompress --user=root --target-dir=/tmp/backup_z/
+
+  - name: prepare backup
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_z/
+
+
+  - name: Restore LZ4 backup using rsync method
+    block:
+      - name: Stop MySQL before LZ4 restore
+        service:
+          name: "{{ mysql_service_name }}"
+          state: stopped
+
+      - name: Move datadir for LZ4 rsync restore
+        command: mv /var/lib/mysql /var/lib/mysql.lz4.rsync.bak
+        ignore_errors: yes
+
+      - name: Create new datadir for LZ4 rsync restore
+        file:
+          path: /var/lib/mysql
+          state: directory
+          owner: mysql
+          group: mysql
+          mode: '0755'
+
+      - name: Rsync LZ4 backup to datadir
+        command: rsync -av /tmp/backup_l/ /var/lib/mysql/
+
+      - name: Set ownership for datadir after LZ4 rsync restore
+        file:
+          path: /var/lib/mysql
+          state: directory
+          recurse: yes
+          owner: mysql
+          group: mysql
+
+      - name: Start MySQL after LZ4 rsync restore
+        service:
+          name: "{{ mysql_service_name }}"
+          state: started
+
+      - name: Wait for MySQL to come up after LZ4 rsync restore
+        shell: mysqladmin ping -u root
+        register: mysql_status_lz4_rsync
+        retries: 5
+        delay: 3
+        until: "'mysqld is alive' in mysql_status_lz4_rsync.stdout"
+
+      - name: Confirm LZ4 rsync restore success
+        debug:
+          msg: "LZ4 rsync restore successful. MySQL is alive."
+
+  - name: Restore ZSTD backup using --copy-back method
+    block:
+      - name: Stop MySQL before ZSTD restore
+        service:
+          name: "{{ mysql_service_name }}"
+          state: stopped
+
+      - name: Move datadir for ZSTD copy-back restore
+        command: mv /var/lib/mysql /var/lib/mysql.zstd.copyback.bak
+        ignore_errors: yes
+
+      - name: Create new datadir for ZSTD copy-back restore
+        file:
+          path: /var/lib/mysql
+          state: directory
+          owner: mysql
+          group: mysql
+          mode: '0755'
+
+      - name: Restore ZSTD backup using --copy-back
+        command: /usr/bin/xtrabackup --copy-back --target-dir=/tmp/backup_z/
+
+      - name: Set ownership for datadir after copy-back
+        file:
+          path: /var/lib/mysql
+          state: directory
+          recurse: yes
+          owner: mysql
+          group: mysql
+
+      - name: Start MySQL after ZSTD copy-back restore
+        service:
+          name: "{{ mysql_service_name }}"
+          state: started
+
+      - name: Wait for MySQL to come up after ZSTD restore
+        shell: mysqladmin ping -u root
+        register: mysql_status_zstd_copyback
+        retries: 5
+        delay: 3
+        until: "'mysqld is alive' in mysql_status_zstd_copyback.stdout"
+
+      - name: Confirm ZSTD copy-back restore success
+        debug:
+          msg: "ZSTD copy-back restore successful. MySQL is alive."
+
+    ### OPTIONAL CLEANUP: Revert to original datadir (if needed)
+  - name: Stop MySQL before restoring original data
+    service:
+      name: "{{ mysql_service_name }}"
+      state: stopped
+
+  - name: Remove restored datadir
+    file:
+      path: /var/lib/mysql
+      state: absent
+
+  - name: Restore original datadir
+    command: mv /var/lib/mysql.bak /var/lib/mysql
+    ignore_errors: yes
+
+  - name: Start MySQL again with original data
+    service:
+      name: "{{ mysql_service_name }}"
+      state: started
+
+  - name: Print original data restored
+    debug:
+      msg: "Original datadir restored and MySQL restarted."
+     
+
+  - name: restart mysql service debian
+    service: name=mysql state=restarted
+    when: ansible_os_family == "Debian"
