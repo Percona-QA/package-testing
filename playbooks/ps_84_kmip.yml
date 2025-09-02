@@ -199,7 +199,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: check that Percona Server package versions are correct
-    command: /package-testing/package_check.sh ps80
+    command: /package-testing/package_check.sh ps84
 
   - name: import world database
     command: /package-testing/plugins_test.sh
