@@ -41,15 +41,6 @@
   - name: install Percona Server 8.4 packages
     include_tasks: ../tasks/install_ps84.yml
 
-  - name: enable the Tools Release repo
-    command: percona-release enable tools release
-
-  - name: install sysbench new deb packages
-    include_tasks: ../tasks/install_sysbench.yml
-    when:
-       - lookup('env', 'install_repo') != "experimental"
-       - ansible_distribution_release != "noble"
-
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
@@ -58,16 +49,6 @@
 
   - name: remove mysql data directory
     command: rm -r /var/lib/mysql
-
-  - name: install python3-pip on RedHat/CentOS yum
-    yum:
-      name:
-      - python3-pip
-      state: latest
-      update_cache: yes
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: install python3-pip on RedHat/CentOS dnf
     dnf:
@@ -147,12 +128,12 @@
         remote_src: yes
     when: ansible_os_family == "Debian"
 
-  - name: copy the encryption config file on Debian/Ubuntu
-    copy:
-        src: /package-testing/kmip/encryption.j2
-        dest: /etc/mysql/conf.d/encryption.cnf
-        remote_src: yes
-    when: ansible_os_family == "Debian"
+#  - name: copy the encryption config file on Debian/Ubuntu
+#    copy:
+#        src: /package-testing/kmip/encryption.j2
+#        dest: /etc/mysql/conf.d/encryption.cnf
+#        remote_src: yes
+#    when: ansible_os_family == "Debian"
 
   - name: append include for RedHat
     lineinfile:
@@ -160,12 +141,12 @@
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
 
-  - name: copy the encryption config file on RHEL/CentOS/Amazon
-    copy:
-        src: /package-testing/kmip/encryption.j2
-        dest: /etc/my.cnf.d/encryption.cnf
-        remote_src: yes
-    when: ansible_os_family == "RedHat"
+#  - name: copy the encryption config file on RHEL/CentOS/Amazon
+#    copy:
+#        src: /package-testing/kmip/encryption.j2
+#       dest: /etc/my.cnf.d/encryption.cnf
+#        remote_src: yes
+#    when: ansible_os_family == "RedHat"
 
   - name: start mysql service
     service: name=mysql state=started
