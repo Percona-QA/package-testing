@@ -1,0 +1,112 @@
+---
+# This playbook does following:
+#   enables Percona testing repository
+#   installs latest version of proxysql
+#   does some tests
+#- import_playbook: test_prep.yml
+
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+#      client: "{{ lookup('env', 'install_repo') }}"
+      client: "{{ lookup('env', 'client_to_test') }}"
+      gnupg_home: /root/.gnupg
+      percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+      percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+
+  tasks:
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: include tasks for enabling test repo
+    include_tasks: ../tasks/enable_proxysql2_testing.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_proxysql2_main.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: install proxysql2 deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - proxysql2
+    when: ansible_os_family == "Debian"
+
+  - name: install proxysql2 rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - proxysql2
+    when: ansible_os_family == "RedHat"
+
+  - name: start proxysql service
+    service: name=proxysql state=started
+
+  - name: stop proxysql service
+    service: name=proxysql state=stopped
+
+# - name: start proxysql service
+#   service: name=proxysql state=started
+
+  - name: install proxysql3 new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - proxysql3
+    when: ansible_os_family == "Debian"
+
+  - name: install proxysql3 new rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - proxysql3
+    when: ansible_os_family == "RedHat"
+
+  - name: run client_check tasks
+    include_tasks: ../tasks/client_check.yml
+
+  - name: check that proxysql3 version is correct
+    command: /package-testing/version_check.sh proxysql3
+
+  - name: start proxysql service
+    service: name=proxysql state=started
+
+  - name: stop proxysql service
+    service: name=proxysql state=stopped
+
+  - name: start proxysql service
+    service: name=proxysql state=started
+
+  - name: remove proxysql deb packages
+    apt:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - proxysql3
+    when: ansible_os_family == "Debian"
+
+  - name: remove proxysql rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - proxysql3
+    when: ansible_os_family == "RedHat"
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh proxysql stopped
+

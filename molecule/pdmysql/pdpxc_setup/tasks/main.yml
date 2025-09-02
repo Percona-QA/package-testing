@@ -16,8 +16,9 @@
     version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
   when: not major_repo
 
+#Till setup command is fixed  
 - name: enable the PDMYSQL repo pdpxc-{{ version }}
-  command: percona-release setup -y pdpxc-{{ version }}
+  command: percona-release enable pdpxc-{{ version }} release
   vars:
     version: "{{ '84-lts' if '8.4' in lookup('env', 'VERSION') else '8.0' if '8.0.' in lookup('env', 'VERSION') else '' }}"
   when: major_repo
@@ -26,15 +27,21 @@
   shell: |
     yum clean all
     yum makecache
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int < 8
 
-- name: disable the mysql module on RHEL/CentOS 8
-  command: yum module disable mysql -y
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+- name: clean and update dnf cache
+  shell: |
+    dnf clean all
+    dnf makecache
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
 
-- name: disable the mariadb module on RHEL/CentOS 8
-  command: yum module disable mariadb -y
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+- name: disable the mysql module on RHEL/CentOS 8+
+  command: dnf module disable mysql -y
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
+
+- name: disable the mariadb module on RHEL/CentOS 8+
+  command: dnf module disable mariadb -y
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
 
 - name: install PXC 8 deb packages
   apt:
@@ -56,7 +63,7 @@
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-- name: install PXC rpm packages before OL9
+- name: install PXC rpm packages with yum
   yum:
     name: "{{ packages }}"
     state: latest
@@ -72,12 +79,32 @@
     - percona-xtradb-cluster-shared
     - percona-xtradb-cluster-shared-compat
     - percona-xtradb-cluster-test
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "8"
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int < 8
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-- name: install PXC rpm packages on OL9
-  yum:
+- name: install PXC rpm packages with dnf for RHEL 8
+  dnf:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+    - percona-xtradb-cluster-full
+    - percona-xtradb-cluster
+    - percona-xtradb-cluster-client
+    - percona-xtradb-cluster-debuginfo
+    - percona-xtradb-cluster-devel
+    - percona-xtradb-cluster-garbd
+    - percona-xtradb-cluster-server
+    - percona-xtradb-cluster-shared
+    - percona-xtradb-cluster-shared-compat
+    - percona-xtradb-cluster-test
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int == 8
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+- name: install PXC rpm packages with dnf for RHEL 9+
+  dnf:
     name: "{{ packages }}"
     state: latest
   vars:
@@ -91,18 +118,27 @@
     - percona-xtradb-cluster-server
     - percona-xtradb-cluster-shared
     - percona-xtradb-cluster-test
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 9
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-- name: install percona-replication-manager RHEL Packages
+- name: install percona-replication-manager RHEL Packages with yum
   yum:
     name: "{{ packages }}"
     state: latest
   vars:
     packages:
     - percona-replication-manager
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int < 8
+
+- name: install percona-replication-manager RHEL Packages with dnf
+  dnf:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+    - percona-replication-manager
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
 
 - name: install percona-replication-manager deb packages
   apt:
@@ -114,7 +150,7 @@
     - percona-replication-manager
   when: ansible_os_family == "Debian"
 
-- name: install HA Proxy RHEL Packages
+- name: install HA Proxy RHEL Packages with yum
   yum:
     name: "{{ packages }}"
     state: latest
@@ -122,7 +158,17 @@
     packages:
     - percona-haproxy
     - percona-haproxy-debuginfo
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int < 8
+
+- name: install HA Proxy RHEL Packages with dnf
+  dnf:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+    - percona-haproxy
+    - percona-haproxy-debuginfo
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
 
 - name: install HA Proxy 8 deb packages
   apt:
@@ -138,15 +184,15 @@
 - name: clean dnf cache
   shell: |
     dnf clean all
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
 
 - name: install Percona XtraBackup-{{ version }}  packages
   include_tasks: ../../../tasks/install_pxb{{ version }}.yml
   vars:
     version: "{{ lookup('env', 'VERSION').split('.')[0] + lookup('env', 'VERSION').split('.')[1] }}"
 
-#- name: install Percona Toolkit new deb packages
-#  include_tasks: ../../../tasks/install_pt.yml
+- name: install Percona Toolkit packages
+  include_tasks: ../../../tasks/install_pt.yml
 
 - name: install proxysql new deb packages
   apt:
@@ -158,23 +204,32 @@
       - proxysql2
   when: ansible_os_family == "Debian"
 
-- name: install proxysql new rpm packages
+- name: install proxysql new rpm packages with yum
   yum:
     name: "{{ packages }}"
     state: latest
   vars:
     packages:
       - proxysql2
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int < 8
+
+- name: install proxysql new rpm packages with dnf
+  dnf:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+      - proxysql2
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
 
 #install initscripts-service manually on OL9 till DISTMYSQL-300 is fixed
 - name: install init scripts for OL9
-  yum:
+  dnf:
     name: "{{ packages }}"
   vars:
     packages:
     - initscripts-service
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+  when: ansible_facts['distribution'] in ['OracleLinux'] and ansible_facts['distribution_major_version'] | int == 9
 
 - name: start proxysql service
   command: service proxysql start
@@ -231,6 +286,3 @@
 
 - name: Verify telemetry version and package installation
   command: /package-testing/check_tel_ver_pack.sh
-  when:
-    - ansible_distribution != "Amazon"
-    - ansible_distribution_major_version|int != 7

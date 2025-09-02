@@ -33,15 +33,17 @@
   - name: remove PS 5.7 packages
     include_tasks: ../../../tasks/remove_ps57.yml
 
-  - name: remove mysql package on centos 8
-    yum:
+  - name: remove mysql package using dnf
+    dnf:
       name: "{{ packages }}"
       state: absent
     vars:
       packages:
       - mysql
       - mysql-common
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped

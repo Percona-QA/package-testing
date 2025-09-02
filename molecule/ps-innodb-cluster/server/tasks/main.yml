@@ -64,7 +64,7 @@
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Server rpm packages
+  - name: install Percona Server rpm packages yum
     yum:
       name: "{{ packages }}"
       state: latest
@@ -75,7 +75,24 @@
       - percona-server-test
       - percona-server-devel
       - percona-server-rocksdb
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install Percona Server rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-server-server
+      - percona-server-client
+      - percona-server-test
+      - percona-server-devel
+      - percona-server-rocksdb
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start mysql service
     service:
@@ -192,3 +209,19 @@
     service:
       name: mysql
       state: restarted
+
+  - name: Stop firewalld service
+    systemd:
+      name: firewalld
+      state: stopped
+    when:
+      - ansible_facts['distribution'] in ["OracleLinux"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: Disable firewalld service permanently
+    systemd:
+      name: firewalld
+      enabled: no
+    when:
+      - ansible_facts['distribution'] in ["OracleLinux"]
+      - ansible_facts['distribution_major_version'] | int >= 8

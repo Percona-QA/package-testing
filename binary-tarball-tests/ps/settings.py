@@ -1,6 +1,87 @@
 #!/usr/bin/env python3
 import os
 import re
+import pytest
+
+def source_environment_file(filepath="/etc/environment"):
+    """
+    Loads environment variables from a given file into os.environ.
+
+    :param filepath: Path to the environment file (default is /etc/environment).
+    """
+    try:
+        with open(filepath, 'r') as file:
+            for line in file:
+                # Remove leading/trailing whitespace and skip comments or empty lines
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    # Split the line into key and value
+                    key, value = line.split('=', 1)
+                    # Remove any surrounding quotes from the value
+                    value = value.strip('\'"')
+                    # Add to os.environ
+                    os.environ[key] = value
+                    print(f'{line}')
+    except FileNotFoundError:
+        print(f"Error: File '{filepath}' not found.")
+    except Exception as e:
+        print(f"Error while sourcing environment file: {e}")
+
+def set_pro_fips_vars():
+    """
+    Retrieves and returns environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
+    """
+    source_environment_file()
+
+    value = os.getenv('PRO', '').strip().lower()  # Normalize the input
+    pro = value in {"yes", "true", "1"}
+
+    print(pro)  # True if value is "yes", "true", or "1", otherwise False
+
+    fips_supported = True if os.getenv('PRO') == "yes" else False
+    #fips_supported = os.getenv('FIPS_SUPPORTED') in {"yes", "True"}
+    debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
+    ps_revision = os.getenv('PS_REVISION')
+    ps_version = os.getenv('PS_VERSION')
+
+
+    if (os.getenv('PRO')):
+      base_dir = '/usr/percona-server'
+      print(f"PRINTING THE PRO VALUE PRO: {pro}")
+    else:
+      base_dir = os.getenv('BASE_DIR')
+
+
+    if pro:
+      print(f"TRUE PRO VAR WORKING")
+    else:
+      print(f"FALSE PRO VAR NOT WORKING")
+
+    ps_version_upstream, ps_version_percona = ps_version.split('-')
+    ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
+
+    return {
+        'pro': pro,
+        'debug': debug,
+        'fips_supported': fips_supported,
+        'ps_revision': ps_revision,
+        'ps_version': ps_version,
+        'base_dir': base_dir,
+        'ps_version_upstream': ps_version_upstream,
+        'ps_version_major': ps_version_major,
+        'ps_version_percona': ps_version_percona
+    }
+
+@pytest.fixture(scope="module")
+def pro_fips_vars():
+    """
+    Fixture that provides environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
+    """
+    return set_pro_fips_vars()
+
+
+source_environment_file()
+
 
 base_dir = os.getenv('BASE_DIR')
 ps_version = os.getenv('PS_VERSION')
@@ -9,20 +90,7 @@ ps_revision = os.getenv('PS_REVISION')
 ps_version_upstream, ps_version_percona = ps_version.split('-')
 ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
 
-if os.getenv('PRO') == "yes":
-  pro='Pro '
-else:
-  pro=''
-
-if os.getenv('DEBUG') == "yes":
-  debug='-debug'
-else:
-  debug=''
-
-if os.getenv('FIPS_SUPPORTED') == "yes":
-  fips_supported=True
-else:
-  fips_supported=False
+print("Before variable prints")  # Debugging statement
 
 # 8.0
 ps80_binaries = [
@@ -56,9 +124,9 @@ ps80_components = (
   'component_masking_functions', 'component_encryption_udf', 'component_keyring_kmip', 'component_keyring_kms',
 )
 ps80_files = (
-  'lib/libcoredumper.a', 
+  'lib/libcoredumper.a',
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.39' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.43' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini','lib/plugin/keyring_file.so',
@@ -66,8 +134,8 @@ ps80_files = (
   'lib/plugin/audit_log_filter.so', 'lib/plugin/component_masking_functions.so', 'lib/plugin/component_percona_telemetry.so'
 )
 ps80_symlinks = (
-  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.39'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.39'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.43'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.43'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 ps80_openssl_files = (
   'lib/libcrypto.so', 'lib/libk5crypto.so', 'lib/libssl.so', 'lib/libsasl2.so'
@@ -167,7 +235,7 @@ ps8x_components = (
 ps8x_files = (
   'lib/libcoredumper.a', 
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.0' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.5' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so',
   'lib/plugin/component_binlog_utils_udf.so',
   'lib/plugin/keyring_udf.so', 'lib/plugin/component_keyring_vault.so', 'lib/plugin/component_binlog_utils_udf.so',
@@ -175,8 +243,8 @@ ps8x_files = (
 )
 
 ps8x_symlinks = (
-  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.0.0'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.0'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.0.5'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.5'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 
 ps8x_openssl_files = (

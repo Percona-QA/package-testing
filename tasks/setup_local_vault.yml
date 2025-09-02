@@ -11,7 +11,7 @@
     when: ansible_os_family == "Debian"
 
   - name: Install needed rpm packages for setting up vault
-    yum:
+    package:
       state: latest
       name:
        - unzip
@@ -20,7 +20,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 8
 
   - name: Install needed rpm packages for setting up vault rhel 9
-    yum:
+    package:
       state: latest
       name:
        - unzip

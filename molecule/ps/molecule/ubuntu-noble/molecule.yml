@@ -14,10 +14,7 @@ platforms:
     instance_tags:
       iit-billing-tag: ps-package-testing
       job-name: ${JOB_NAME}
-    groups:
-      - ubuntu-noble
-    network:
-      assign_public_ip: true
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   log: True

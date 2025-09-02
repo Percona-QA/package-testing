@@ -10,32 +10,35 @@ platforms:
     region: us-west-2
     image: ami-0d8cea2b786fccd0c
     vpc_subnet_id: subnet-0430e63d7cdbcd237
-    instance_type: t4g.nano
+    instance_type: c6g.large
     ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
   - name: ps-node2-ubuntu-focal-arm
     region: us-west-2
     image: ami-0d8cea2b786fccd0c
     vpc_subnet_id: subnet-0430e63d7cdbcd237
-    instance_type: t4g.nano
+    instance_type: c6g.large
     ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
   - name: ps-node3-ubuntu-focal-arm
     region: us-west-2
     image: ami-0d8cea2b786fccd0c
     vpc_subnet_id: subnet-0430e63d7cdbcd237
-    instance_type: t4g.nano
+    instance_type: c6g.large
     ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   lint:

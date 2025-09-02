@@ -8,12 +8,13 @@ platforms:
     region: us-west-2
     image: ami-0ee8244746ec5d6d4
     vpc_subnet_id: subnet-03136d8c244f56036
-    instance_type: t2.micro
+    instance_type: t2.medium
     ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: ps-package-testing
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   log: True

@@ -40,6 +40,10 @@ elif [ "$1" = "ps80" ]; then
     version=${PS84_PRO_VER}
     release=${PS84_PRO_VER#*-}
     revision=${PS84_PRO_REV}
+  else
+    version=${PS84_VER}
+    release=${PS84_VER#*-}
+    revision=${PS84_REV}
   fi
 elif [[ $1 =~ ^ps9[0-9]{1}$ ]]; then
   version=${PS_INN_LTS_VER}
@@ -69,7 +73,19 @@ elif [ "$1" = "pxc84" ]; then
   revision=${PXC84_REV}
   innodb_ver=${PXC84_INNODB}
   wsrep=${PXC84_WSREP}
-elif [[ "$1" =~ ^pxc8[5-9]{1}$ ]]; then
+elif [ "$1" = "pxc80pro" ]; then
+  version=${PXC80PRO_VER%-*}
+  release=${PXC80PRO_VER#*-}
+  revision=${PXC80PRO_REV}
+  innodb_ver=${PXC80PRO_INNODB}
+  wsrep=${PXC80PRO_WSREP}
+elif [ "$1" = "pxc84pro" ]; then
+  version=${PXC84PRO_VER%-*}
+  release=${PXC84PRO_VER#*-}
+  revision=${PXC84PRO_REV}
+  innodb_ver=${PXC84PRO_INNODB}
+  wsrep=${PXC84PRO_WSREP}
+elif [[ "$1" =~ ^pxc9[0-9]{1}$ ]]; then
   version=${PXC_INN_LTS_VER%-*}
   release=${PXC_INN_LTS_VER#*-}
   revision=${PXC_INN_LTS_REV}
@@ -85,9 +101,15 @@ elif [ "$1" = "pxb80" ]; then
   version=${PXB80_VER}
 elif [ "$1" = "pxb81" ]; then
   version=${PXB81_VER}
+elif [[ $1 = "pxb80pro" ]]; then
+  version=${PXB80_PRO_VER}
+  pkg_version=${PXB80_PRO_PKG_VER}
 elif [[ $1 = "pxb84" ]]; then
-  version=${PXB82_VER}
-elif [[ $1 =~ ^pxb8([2-35-9])$ ]]; then
+  version=${PXB84_VER}
+elif [[ $1 = "pxb84pro" ]]; then
+  version=${PXB84_PRO_VER}
+  pkg_version=${PXB84_PRO_PKG_VER}
+elif [[ $1 =~ ^pxb9([2-35-9])$ ]]; then
   version=${PXB_INN_LTS_VER}
 elif [ "$1" = "pmm" ]; then
   version=${PMM_VER}
@@ -99,6 +121,8 @@ elif [ "$1" = "proxysql" ]; then
   version=${PROXYSQL_VER}
 elif [ "$1" = "proxysql2" ]; then
   version=${PROXYSQL2_VER}
+elif [ "$1" = "proxysql3" ]; then
+  version=${PROXYSQL3_VER}
 elif [ "$1" = "sysbench" ]; then
   version=${SYSBENCH_VER}
 elif [ "$1" = "pbm" ]; then
@@ -180,7 +204,7 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
     fi
   fi
 
-elif [[ ${product} = "pxc56" || ${product} = "pxc57" ]] || [[ ${product} =~ ^pxc8[0-9]{1}$ ]]; then
+elif [[ ${product} = "pxc56" || ${product} = "pxc57" ]] || [[ ${product} =~ ^pxc8[0-9]{1}$ ]] || [[ ${product} =~ ^pxc8[0-9]{1}pro$ ]]; then
   for i in @@INNODB_VERSION @@VERSION; do
     if [ "$(mysql -e "SELECT ${i}; "| grep -c ${version}-${innodb_ver})" = 1 ]; then
       echo "${i} is correct" >> "${log}"
@@ -250,7 +274,23 @@ elif [[ "${product}" = "pxb24" ]] || [[ ${product} =~ ^pxb8[0-9]{1}$ ]]; then
         fi
     done
 
-elif [ ${product} = "proxysql" -o ${product} = "proxysql2" ]; then
+    if [ "${pro}" = 'yes' ]; then
+      if [ "$(xtrabackup --version 2>&1 | grep -c 'pro')" = 1 ]; then
+        echo "@@VERSION COMMENT is correct with Pro" >> "${log}"
+      else
+        echo "@@VERSION_COMMENT is incorrect. Pro is missing. Server comment is: $(xtrabackup --version 2>&1) ."
+        exit 1
+      fi
+      if [ "$(xtrabackup --version 2>&1 | grep -c 'pro')"  = 1 ]; then
+        echo "xtrabackup --version 2>&1 is correct with Pro" >> "${log}"
+      else
+        echo "xtrabackup --version is incorrect. Pro is missing. xtrabackup --version 2>&1: $(xtrabackup --version 2>&1) ."
+        exit 1
+      fi
+    fi
+
+
+elif [ ${product} = "proxysql" -o ${product} = "proxysql2" -o ${product} = "proxysql3" ]; then
   # Define binaries lists depending on product.
   # proxysql 1.X.X packages contain 'proxysql' and 'proxysql-admin' binaries.
   # proxysql 2.X.X packages contain 'proxysql', 'proxysql-admin', 'percona-scheduler-admin' and 'pxc_scheduler_handler' binaries.

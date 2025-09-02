@@ -6,7 +6,7 @@ import time
 from settings import *
 
 
-container_name = 'pxc-docker-test-static'
+container_name = 'pxc-docker-test-static-10'
 
 @pytest.fixture(scope='module')
 def host():
@@ -14,7 +14,7 @@ def host():
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd,
          '-e', 'PERCONA_TELEMETRY_DISABLE=1',
          '-d', docker_image]).decode().strip()
-    exec_command = ['microdnf', 'install', 'net-tools']
+    exec_command = ['microdnf', 'install', '-y', 'net-tools']
     subprocess.check_call(['docker','exec','--user','root',container_name] + exec_command)
     time.sleep(80)
     yield testinfra.get_host("docker://root@" + docker_id)
@@ -33,7 +33,7 @@ class TestMysqlEnvironment:
         assert oct(host.file(binary).mode) == '0o755'
 
     def test_mysql_version(self, host):
-        assert host.check_output('mysql --version') == 'mysql  Ver 14.14 Distrib '+upstream_version+'-'+ps_version+', for Linux (x86_64) using  7.0'
+        assert host.check_output('mysql --version') == 'mysql  Ver 14.14 Distrib '+upstream_version+'-'+ps_version+', for Linux (x86_64) using  8.1'
 
     def test_mysqld_version(self, host):
         assert host.check_output('mysqld --version') == 'mysqld  Ver '+pxc57_server_version_norel+' for Linux on x86_64 (Percona XtraDB Cluster (GPL), Release rel'+ps_version+', Revision '+pxc_revision+', WSREP version '+ pxc_wsrep_version +', wsrep_'+ pxc_wsrep_version +')'

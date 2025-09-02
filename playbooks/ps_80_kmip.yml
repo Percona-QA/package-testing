@@ -41,15 +41,6 @@
   - name: install Percona Server 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
 
-  - name: enable the Tools Release repo
-    command: percona-release enable tools release
-
-  - name: install sysbench new deb packages
-    include_tasks: ../tasks/install_sysbench.yml
-    when:
-       - lookup('env', 'install_repo') != "experimental"
-       - ansible_distribution_release != "noble"
-
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
@@ -65,7 +56,19 @@
       - python3-pip
       state: latest
       update_cache: yes
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install python3-pip on RedHat/CentOS dnf
+    dnf:
+      name:
+      - python3-pip
+      state: latest
+      update_cache: yes
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: install python3-pip on Debian/Ubuntu
     apt:
@@ -87,15 +90,33 @@
         - ansible_distribution_release != "bookworm"
         - ansible_distribution_release != "noble"
 
-  - name: install pykmip
-    command: "{{ item }}"
-    with_items:
-        - python3 -m pip install -U --break-system-packages pip
-        - python3 -m pip install -U --break-system-packages setuptools
-        - python3 -m pip install -U --break-system-packages pykmip
+#  - name: install pykmip
+#    command: "{{ item }}"
+#    with_items:
+#        - python3 -m pip install -U --break-system-packages pip
+#        - python3 -m pip install -U --break-system-packages setuptools
+#        - python3 -m pip install -U --break-system-packages pykmip
+#    when: ansible_distribution_release in ["bookworm", "noble"]
+
+  - name: Ensure ~/.local/bin is in PATH for current user
+    lineinfile:
+      path: /home/{{ ansible_user }}/.bashrc
+      line: 'export PATH=$HOME/.local/bin:$PATH'
+      insertafter: EOF
     when:
-        - ansible_distribution_release == "bookworm"
-        - ansible_distribution_release == "noble"
+      - ansible_distribution_release in ['bookworm', 'noble']
+
+  - name: install pykmip on bookworm/noble using user site
+    pip:
+      name:
+        - setuptools
+        - pykmip
+      extra_args: --user
+      executable: pip3
+    environment:
+      PYTHONUSERBASE: "/home/{{ ansible_user }}/.local"
+    when:
+      - ansible_distribution_release in ['bookworm', 'noble']
 
   - name: downgrade SQLAlchemy as new version doesn't work with pykmip
     command: pip3 install SQLAlchemy==1.4.46
@@ -105,12 +126,24 @@
 
   - name: downgrade SQLAlchemy as new version doesn't work with pykmip
     command: pip3 install --break-system-packages SQLAlchemy==1.4.46
+    when: ansible_distribution_release in ["bookworm", "noble"]
+
+  - name: Check PyKMIP is importable
+    command: python3 -c "import pykmip; print(pykmip.__version__)"
+    register: pykmip_check
+    failed_when: "'No module named' in pykmip_check.stderr"
     when:
-        - ansible_distribution_release == "bookworm"
-        - ansible_distribution_release == "noble"
+      - ansible_distribution_release in ['bookworm', 'noble']
 
   - name: start pykmip server
     shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
+    when:
+        - ansible_distribution_release != "bookworm"
+        - ansible_distribution_release != "noble"
+
+  - name: start pykmip server
+    shell: nohup ~/.local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
+    when: ansible_distribution_release in ["bookworm", "noble"]
 
   - name: Check if kmip-server is running
     shell: ps -ef | grep kmip-server | grep -v grep
@@ -135,12 +168,12 @@
         remote_src: yes
     when: ansible_os_family == "Debian"
 
-  - name: copy the encryption config file on Debian/Ubuntu
-    copy:
-        src: /package-testing/kmip/encryption.j2
-        dest: /etc/mysql/conf.d/encryption.cnf
-        remote_src: yes
-    when: ansible_os_family == "Debian"
+#  - name: copy the encryption config file on Debian/Ubuntu
+#    copy:
+#        src: /package-testing/kmip/encryption.j2
+#        dest: /etc/mysql/conf.d/encryption.cnf
+#        remote_src: yes
+#    when: ansible_os_family == "Debian"
 
   - name: append include for RedHat
     lineinfile:
@@ -148,12 +181,12 @@
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
 
-  - name: copy the encryption config file on RHEL/CentOS/Amazon
-    copy:
-        src: /package-testing/kmip/encryption.j2
-        dest: /etc/my.cnf.d/encryption.cnf
-        remote_src: yes
-    when: ansible_os_family == "RedHat"
+#  - name: copy the encryption config file on RHEL/CentOS/Amazon
+#    copy:
+#        src: /package-testing/kmip/encryption.j2
+#        dest: /etc/my.cnf.d/encryption.cnf
+#        remote_src: yes
+#    when: ansible_os_family == "RedHat"
 
   - name: start mysql service
     service: name=mysql state=started

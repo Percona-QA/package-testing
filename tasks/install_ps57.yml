@@ -46,8 +46,7 @@
         - Percona-Server-rocksdb-57
         - Percona-Server-shared-57
         - Percona-Server-client-57
-      state: present
-      exclude: "*.i686"
+      state: latest
     ignore_errors: yes
     when: ansible_os_family == "RedHat"
     register: install_percona_server

@@ -1,0 +1,197 @@
+---
+# tasks file for tarball tests
+
+  - name: Display OS Name
+    debug:
+      msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+  - name: Add epel-release
+    package:
+      state: present
+      name: epel-release
+    when: ansible_os_family == "RedHat" and ansible_distribution_version != "2023"
+
+  - name: install needed packages for running tests with apt
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - git
+      - unzip
+      - wget
+      - python3
+      - python3-pip
+      - libnuma1
+      - tar
+      - gawk
+      - libtirpc3
+    register: result
+    until: result is not failed
+    when: ansible_os_family == "Debian"
+
+  - name: install libaio1 package for running tests with apt except for Ubuntu 24.04
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - libaio1 
+    register: result
+    until: result is not failed
+    when: ansible_os_family == "Debian" and  ansible_distribution_version not in ["24.04"] 
+
+  - name: install needed packages for running tests with yum
+    package:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - git
+      - unzip
+      - wget
+      - tar
+      - libaio
+      - numactl
+      - gawk
+      - python3
+      - python3-pip
+      - libtirpc
+      - lsb_release
+    when: ansible_os_family == "RedHat" and ansible_distribution_version != "2023"
+    
+  - name: Install required packages using dnf
+    dnf:
+      name:
+        - git
+        - unzip
+        - wget
+        - tar
+        - libaio
+        - numactl
+        - gawk
+        - python3
+        - python3-pip
+        - libtirpc
+      state: present
+    when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
+
+
+#      - openldap // this package causes issue on OL-9
+
+  - name: get GLIBC_VERSION
+    set_fact:
+      GLIBC_VERSION: "{{ '2.35' if ansible_os_family == 'Debian' else '2.34' }}"
+
+  - name: get TARBALL_NAME
+    set_fact:
+      TARBALL_NAME: "Percona-XtraDB-Cluster-Pro_{{ lookup('env', 'PXC_VERSION') }}_Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
+
+  - name: Set PXC_VERSION and PXC_VERSION_NAME
+    set_fact:
+      PXC_VERSION: "{{ lookup('env', 'PXC_VERSION') }}"
+      PXC_VERSION_NAME: "{{ lookup('env', 'PXC_VERSION').split('-')[0] }}"
+      PXC_VERSION_MAJOR: "{{ (lookup('env', 'PXC_VERSION').split('-')[0].split('.')[0] ~ lookup('env', 'PXC_VERSION').split('-')[0].split('.')[1]) }}"
+      PXC_MAJOR_VERSION: "{{ lookup('env', 'PXC_VERSION').split('-')[0].split('.')[0:2] | join('.') }}"
+      WSREP_VERSION: "{{ lookup('env', 'WSREP_VERSION')}}"
+
+  - name: get MINIMAL_TARBALL_NAME
+    set_fact:
+      MINIMAL_TARBALL_NAME: "Percona-XtraDB-Cluster-Pro_{{ lookup('env', 'PXC_VERSION') }}_Linux.x86_64.glibc{{ GLIBC_VERSION }}-minimal.tar.gz"
+
+ # - name: get DEBUG_TARBALL_NAME
+  #  set_fact:
+  #    DEBUG_TARBALL_NAME: "Percona-XtraDB-Cluster-Pro_{{ lookup('env', 'PXC_VERSION') }}.1_Linux.x86_64.glibc{{ GLIBC_VERSION }}-debug.tar.gz"
+
+  # # - name: get main repo TARBALL_LINK
+  # #   set_fact:
+  # #     TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/ps-80-pro/tarballs/Percona-Server-{{ lookup('env', 'PS_VERSION') }}/"
+
+  - name: set base path based on repo type
+    set_fact:
+      base_repo_path: "{{ 'qa-test/pxc-gated-' + PXC_VERSION_NAME if lookup('env', 'REPO') == 'testing' else 'pxc-' + PXC_VERSION_MAJOR + '-pro/tarballs/Percona-XtraDB-Cluster-' + PXC_VERSION_NAME }}"
+
+
+  - name: get testing repo TARBALL_LINK
+    set_fact:
+      TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/{{ base_repo_path }}/{{ TARBALL_NAME }}"
+
+  - name: get testing repo MINIMAL_TARBALL_LINK
+    set_fact:
+      MINIMAL_TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/{{ base_repo_path }}/{{ MINIMAL_TARBALL_NAME }}"
+
+  - name: download package-testing repo branch with wget
+    command: "{{ item }}"
+    with_items:
+    - rm -rf package-testing
+    - rm -f master.zip
+    - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
+    - unzip master.zip
+    - rm -f master.zip
+    - mv "package-testing-{{ branch }}" package-testing
+    vars:
+      branch: "{{ lookup('env', 'TESTING_BRANCH') | default('PXC-FINAL') }}"
+      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Grishma123-Eng', true) }}"
+
+  - name: Download regular {{ TARBALL_NAME }}
+    get_url:
+      url: '{{ TARBALL_LINK }}'
+      dest: "package-testing/binary-tarball-tests/pxc/PRO/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}.tar.gz"
+      mode: '0644'
+
+  - name: Unpack regular tarball
+    unarchive:
+      src: "package-testing/binary-tarball-tests/pxc/PRO/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}.tar.gz"
+      dest: /
+      remote_src: yes
+      extra_opts:
+      - --transform
+      - 's,^/*[^/]*,/package-testing/binary-tarball-tests/pxc/PRO/Percona-XtraDB-Cluster-Pro,S'
+
+  - name: Download minimal {{ MINIMAL_TARBALL_NAME }}
+    get_url:
+      url: '{{ MINIMAL_TARBALL_LINK }}'
+      dest: "package-testing/binary-tarball-tests/pxc/PRO/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-minimal.tar.gz"
+      mode: '0644'
+
+  - name: Unpack minimal tarball
+    unarchive:
+      src: "package-testing/binary-tarball-tests/pxc/PRO/Percona-XtraDB-Cluster-Pro-{{ lookup('env', 'PXC_VERSION') }}-minimal.tar.gz"
+      dest: /
+      remote_src: yes
+      extra_opts:
+      - --transform
+      - 's,^/*[^/]*,/package-testing/binary-tarball-tests/pxc/PRO/Percona-XtraDB-Cluster-Pro-minimal,S'
+
+  - name: Default FIPS_SUPPORTED fact to "no"
+    set_fact:
+      FIPS_SUPPORTED: "no"
+
+  - name: Set FIPS_SUPPORTED fact for Debian 12 (Bookworm)
+    set_fact:
+      FIPS_SUPPORTED: "no"
+    when: ansible_distribution == "Debian" and ansible_distribution_release == "bookworm"
+
+  - name: Set FIPS_SUPPORTED fact for Ubuntu 22.04 (Jammy)
+    set_fact:
+      FIPS_SUPPORTED: "yes"
+    when: ansible_distribution == "Ubuntu" and ansible_distribution_release == "jammy"
+
+  - name: Append values to /etc/environment file
+    lineinfile:
+      path: /etc/environment
+      line: "{{ item }}"
+      state: present
+    with_items:
+    - "PXC_REVISION={{ lookup('env', 'PXC_REVISION') }}"
+    - "PXC_VERSION={{ lookup('env', 'PXC_VERSION') }}"
+    - "PRO={{ lookup('env', 'PRO') }}"
+    - "FIPS_SUPPORTED={{ FIPS_SUPPORTED }}"
+    - "PXC_VERSION_NAME={{ PXC_VERSION_NAME }}"
+    - "PXC_VERSION_MAJOR={{ PXC_VERSION_MAJOR }}"
+    - "PXC_MAJOR_VERSION={{ PXC_MAJOR_VERSION }}"
+    - "GLIBC_VERSION={{ GLIBC_VERSION }}"
+    - "WSREP_VERSION={{ WSREP_VERSION }}"
+    - "TARBALL_NAME={{ TARBALL_NAME }}"

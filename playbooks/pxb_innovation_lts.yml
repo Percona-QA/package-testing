@@ -63,15 +63,21 @@
 
   - name: include tasks for enabling PS {{ major_release_version }} main repo
     include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
-    when: lookup('env', 'install_repo') == "main"
+    when: 
+      - lookup('env', 'install_repo') == "main"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: include tasks for enabling PS {{ major_release_version }} test repo
     include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when: 
+      - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: include tasks for enabling PS {{ major_release_version }} experimental repo
     include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
-    when: lookup('env', 'install_repo') == "experimental"
+    when: 
+      - lookup('env', 'install_repo') == "experimental"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
 ### UPSTREAM 
 
@@ -349,7 +355,7 @@
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install packages in rhel/centos 8
-    yum:
+    package:
       name: "{{ packages }}"
       state: present
     vars:
@@ -361,7 +367,7 @@
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install packages in rhel/centos 9
-    yum:
+    package:
       name: "{{ packages }}"
       state: present
     vars:
@@ -412,10 +418,10 @@
 ### PS END
 
 
-  - name: install Percona XtraBackup {{ major_release_version }} packages
+  - name: install Percona XtraBackup {{ major_release_version }} packages 
     include_tasks: ../tasks/install_pxb_innovation_lts.yml
-    when: 
-      - lookup('env', 'install_repo') != "experimental"
+#    when: 
+#      - lookup('env', 'install_repo') != "experimental"
 
 ### PS START
   - name: start mysql service with service command

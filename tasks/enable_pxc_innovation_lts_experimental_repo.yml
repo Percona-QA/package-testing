@@ -14,8 +14,8 @@
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
 
-  - name: change the default repo to experimental {{ pxc_inn_lts_repo_name }}
-    command: percona-release enable-only {{ pxc_inn_lts_repo_name }} experimental
+  - name: change the default repo to experimental pxc-9x-innovation
+    command: percona-release enable-only pxc-9x-innovation experimental
 
   - name: add the experimental tools repo
     command: percona-release enable tools experimental

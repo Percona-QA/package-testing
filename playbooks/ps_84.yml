@@ -50,11 +50,12 @@
       var: selinux_status
     when: ansible_os_family == "RedHat"
 
-  - name: include tasks for enabling PS 84 test repo
+  - name: include tasks for enabling PS 84 main repo
     include_tasks: ../tasks/enable_ps84_main_repo.yml
     when:
       - lookup('env', 'install_repo') == "main"
       - lookup('env', 'pro_test') != "yes"
+    
 
   - name: include tasks for enabling PS 84 test repo
     include_tasks: ../tasks/enable_ps84_testing_repo.yml
@@ -123,23 +124,21 @@
     command: /package-testing/check_tel_ver_pack.sh
     when:
       - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
+      - ansible_distribution != "focal"
 
   - name: Enable PXB 84 repo
     command: percona-release enable-only pxb-84-lts testing
+    when: ansible_distribution != "Amazon"
 
   - name: install Percona XtraBackup 8.4 packages
     include_tasks: ../tasks/install_pxb84.yml
-    when: lookup('env', 'install_repo') != "experimental"
+    when: 
+      - lookup('env', 'install_repo') != "experimental"
+      - ansible_distribution != "Amazon"
 
   - name: enable the Tools release repo
     command: percona-release enable tools release
-
-  - name: install sysbench new deb packages
-    include_tasks: ../tasks/install_sysbench.yml
-    when:
-      - lookup('env', 'install_repo') != "experimental"
-      - ansible_distribution_release != "noble"
+    when: ansible_distribution != "Amazon"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -167,7 +166,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: Handle check that Percona Server version is correct
-    block: 
+    block:
       - name: Run the version_check.sh script {{ pro }}
         shell: /package-testing/version_check.sh ps84 {{ pro }} > version-check.log 2>&1
 
@@ -212,9 +211,6 @@
 
   - name: install plugins, import world database
     command: /package-testing/plugins_test_84.sh ps
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
 
   - name: check the clone and data masking plugins
     command: /package-testing/scripts/ps_clone_plugin_test_84.sh
@@ -254,7 +250,19 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install 3rd party packages with dnf
+    dnf:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -264,9 +272,6 @@
 
   - name: start mysql service
     service: name=mysql state=started
-
-    #  - name: check that mysqladmin shutdown works correctly
-    #    command: /package-testing/madmin_check.sh
 
   - name: disable all percona repos
     command: percona-release disable all
@@ -292,14 +297,27 @@
       - percona-server*
     when: ansible_os_family == "Debian"
 
-  - name: remove Percona Server rpm packages
+  - name: remove Percona Server rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+     packages:
+      - percona-server*
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: remove Percona Server rpm packages yum
     yum:
       name: "{{ packages }}"
       state: absent
     vars:
      packages:
       - percona-server*
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
@@ -313,5 +331,3 @@
       msg: "Path exists and is a directory and is not empty"
     when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
 
-# - name: check apt/yum logs for errors
-#   command: /package-testing/scripts/log-check.sh

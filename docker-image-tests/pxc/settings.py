@@ -24,7 +24,7 @@ if pxc_version_major == '5.7':
 docker_image = docker_acc + "/" + docker_product + ":" + docker_tag
 docker_image_major = docker_acc + "/" + docker_product + ":" + pxc_version_major
 docker_image_latest = docker_acc + "/" + docker_product + ":" + "latest"
-docker_image_debug = docker_acc + "/" + docker_product + ":" + docker_tag + "-debug"
+docker_image_debug = docker_acc + "/" + docker_product + ":" + docker_tag + "-debug-amd64"
 docker_image_upstream = docker_acc + "/" + docker_product + ":" + pxc_version_upstream
 
 docker_network = 'pxc-network'
@@ -35,20 +35,19 @@ cluster_name = 'pxc-cluster1'
 # Innovation
 pxc8x_packages = [(package, pxc_version_upstream) for package in (
   'percona-xtradb-cluster-client', 'percona-xtradb-cluster-server',
-  'percona-xtradb-cluster-shared', 'percona-xtradb-cluster-shared-compat'
+  'percona-xtradb-cluster-shared'
 )]
 pxc8x_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/mysqladmin',
   '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow',
-  '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade',
+  '/usr/bin/mysql_secure_installation', '/usr/bin/mysqlbinlog',
   '/usr/bin/mysql_tzinfo_to_sql','/usr/bin/mysql_keyring_encryption_test','/usr/bin/mysql_migrate_keyring',
-  '/usr/bin/mysqld_multi','/usr/bin/mysqld_safe','/usr/bin/mysql-systemd',
-  '/usr/bin/mysqlbinlog'
+  '/usr/bin/mysqld_multi','/usr/bin/mysqld_safe','/usr/bin/mysql-systemd'
 )
 pxc8x_plugins = (
   ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
-  ('group_replication','group_replication.so'),('clone','mysql_clone.so')
+  ('clone','mysql_clone.so')
 )
 pxc8x_functions = (
   ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
@@ -57,12 +56,12 @@ pxc8x_functions = (
 )
 pxc8x_components = (
   ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault')
-)  
+)
 
 # 8.0
 pxc80_packages = [(package, pxc_version_upstream) for package in (
   'percona-xtradb-cluster-client', 'percona-xtradb-cluster-server',
-  'percona-xtradb-cluster-shared', 'percona-xtradb-cluster-shared-compat'
+  'percona-xtradb-cluster-shared'
 )]
 pxc80_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/mysqladmin',
@@ -75,7 +74,7 @@ pxc80_binaries = (
 pxc80_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
-  ('group_replication','group_replication.so'),('clone','mysql_clone.so'),('binlog_utils_udf','binlog_utils_udf.so')
+  ('clone','mysql_clone.so'),('binlog_utils_udf','binlog_utils_udf.so')
 )
 pxc80_functions = (
   ('fnv1a_64', 'libfnv1a_udf.so', 'INTEGER'),('fnv_64', 'libfnv_udf.so', 'INTEGER'),('murmur_hash', 'libmurmur_udf.so', 'INTEGER'),

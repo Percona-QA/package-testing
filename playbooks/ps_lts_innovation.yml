@@ -52,13 +52,18 @@
     set_fact:
       major_release_version: "{{ major_release_version.stdout }}"
 
-  - name: Extract values using shell command for repo name used for innovation/lts release
+  - name: Extract values using shell command for repo name used for innovation/lts release PXB
+    shell: grep 'PXB_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: pxb_inn_lts_repo_name
+
+  - name: Extract values using shell command for repo name used for innovation/lts release PS
     shell: grep 'PS_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
     register: ps_inn_lts_repo_name
 
   - name: Set ps_inn_lts_repo_name variable
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
+      pxb_inn_lts_repo_name: "{{ pxb_inn_lts_repo_name.stdout }}"
 
   - name: include tasks for enabling PS {{ major_release_version }} main repo
     include_tasks: ../tasks/enable_ps_9x_inn_lts_main_repo.yml
@@ -83,8 +88,16 @@
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e  
 
+  - name: Enable sysbench repo percona 
+    command: percona-release enable sysbench testing
+    when: lookup('env', 'install_repo') != "experimental"
+
   - name: install sysbench new deb packages
     include_tasks: ../tasks/install_sysbench.yml
+    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: enable Percona XtraBackup repo {{ pxb_inn_lts_repo_name }} for {{ major_release_version }}
+    command: percona-release enable {{ pxb_inn_lts_repo_name }} release
     when: lookup('env', 'install_repo') != "experimental"
 
   - name: install Percona XtraBackup {{ major_release_version }} packages
@@ -118,6 +131,10 @@
         path: /etc/my.cnf
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
+
+  - name: Enable Percona MySQL Shell testing repo
+    command: percona-release enable mysql-shell testing
+    when: install_mysql_shell == "yes" or install_mysql_shell == ""
 
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
@@ -195,7 +212,19 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install 3rd party packages with dnf
+    dnf:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -233,14 +262,27 @@
       - percona-server*
     when: ansible_os_family == "Debian"
 
-  - name: remove Percona Server rpm packages
+  - name: remove Percona Server rpm packages yum
     yum:
       name: "{{ packages }}"
       state: absent
     vars:
      packages:
       - percona-server*
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: remove Percona Server rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+     packages:
+      - percona-server*
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped

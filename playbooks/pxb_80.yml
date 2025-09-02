@@ -15,25 +15,33 @@
     gnupg_home: /root/.gnupg
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
   tasks:
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
-  - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+#  - name: include tasks for enabling main repo
+#    include_tasks: ../tasks/enable_main_repo.yml
+#    when:
+#      - lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling PS 8 main repo
     include_tasks: ../tasks/enable_ps8_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+    when:
+      - lookup('env', 'install_repo') == "main"
+      - ansible_distribution_major_version != "2023"
 
   - name: include tasks for enabling PS 8 test repo
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when:
+      - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+      - ansible_distribution_major_version != "2023"
 
   - name: include tasks for enabling PS 8 experimental repo
     include_tasks: ../tasks/enable_ps8_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+    when:
+      - lookup('env', 'install_repo') == "experimental"
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -45,22 +53,22 @@
 #    include_tasks: ../tasks/install_pt.yml
 
   - name: Install libgflags-dev for rhel9 aarm64
-    yum:
+    package:
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/aarch64/Packages/g/gflags-2.2.2-9.el9.aarch64.rpm
       state: present
       disable_gpg_check: yes
-    when: 
-      - ansible_os_family == "RedHat" 
+    when:
+      - ansible_os_family == "RedHat"
       - ansible_distribution_major_version == "9"
       - ansible_architecture == "aarch64"
 
   - name: Install libgflags-dev for rhel9 amd64
-    yum:
+    package:
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
       state: present
       disable_gpg_check: yes
-    when: 
-      - ansible_os_family == "RedHat" 
+    when:
+      - ansible_os_family == "RedHat"
       - ansible_distribution_major_version == "9"
       - ansible_architecture != "aarch64"
 
@@ -69,6 +77,40 @@
     include_tasks: ../tasks/install_ps80.yml
     when:
       - lookup('env', 'server_to_test') == "ps-80"
+      - ansible_distribution_major_version != "2023"
+
+
+#### FOR AL2023 ######
+  - name: include tasks for enabling PS 80 pro repo
+    include_tasks: ../tasks/enable_ps80_pro_tools_repo.yml
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - ansible_distribution_major_version == "2023"
+
+  - name: install Percona Server{{ pro_suf }} 8.0 packages on AL2023
+    include_tasks: ../tasks/install_ps80.yml
+    vars:
+      pro_suf: "{{ '-pro' if lookup('env', 'REPO_TYPE') == 'PRO' else '' }}"
+    when:
+      - lookup('env', 'REPO_TYPE') == 'PRO'
+      - ansible_distribution_major_version == "2023"
+##########
+
+# Check for the installed packages using apt list 
+
+  - name: Check for the installed packages using apt list HERE!!!!!!!!
+    shell: apt list | grep percona
+    register: installed_packages
+    when:
+      - lookup('env', 'server_to_test') == "ps-80"
+      - ansible_os_family == "Debian"
+
+  - name: Print the installed packages
+    debug:
+      var: installed_packages.stdout_lines
+    when:
+      - lookup('env', 'server_to_test') == "ps-80"
+      - ansible_os_family == "Debian"
 
 # INSTALL MS 
 
@@ -100,8 +142,6 @@
     debug:
       msg: "PXB version number is {{ pxb_version_major_reg }} {{ pxb_version_major_minor_reg }}"
 
-###
-      
   - name: install MYSQL MS Server {{ pxb_version_major_reg }} packages
     include_tasks: ../tasks/install_ms_innovation_lts.yml
     vars:
@@ -110,28 +150,52 @@
     when:
       - lookup('env', 'server_to_test') == "ms-80"
 
-  - name: Enable PXB 80 repo testing
+#----- ENABLE PXB REPOS
+
+  - name: Enable PXB 80 repo testing non pro
     command: percona-release enable-only pxb-80 testing
     when:
-      - lookup('env', 'server_to_test') == "ps-80"
       - lookup('env', 'install_repo') == "testing"
+      - lookup('env', 'REPO_TYPE') !="PRO"
 
-  - name: Enable PXB 80 repo main
+  - name: Enable PXB 80 repo main non pro
     command: percona-release enable-only pxb-80 release
     when:
-      - lookup('env', 'server_to_test') == "ps-80"
       - lookup('env', 'install_repo') == "main"
+      - lookup('env', 'REPO_TYPE') !="PRO"
+
+#-- PRO REPO FOR PXB
+
+  - name: include tasks for enabling pro repo for pxb
+    include_tasks: ../tasks/enable_pxb80_pro_repo.yml
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+
+  - name: Check for the installed packages using apt list HERE 1!!!!!!!!
+    shell: apt list | grep percona
+    register: installed_packages1
+    when:
+      - lookup('env', 'server_to_test') == "ps-80"
+      - ansible_os_family == "Debian"
+
+  - name: Print the installed packages
+    debug:
+      var: installed_packages1.stdout_lines
+    when:
+      - lookup('env', 'server_to_test') == "ps-80"
+      - ansible_os_family == "Debian"
+
+# INSTALL PXB
 
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
+    when:
+      - lookup('env', 'REPO_TYPE') != "PRO"
 
-  - name: start mysql service with service command
-    command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
-#  - name: start mysql service with systemctl command
-#    command: systemctl start mysqld
-#    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+  - name: install Percona XtraBackup 8.0 PRO packages
+    include_tasks: ../tasks/install_pxb80_pro.yml
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: start mysql service with service module RHEL PXB80
     ansible.builtin.systemd:
@@ -139,8 +203,8 @@
       enabled: yes
       state: started
     become: yes
-    when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when:
+      - ansible_os_family == "RedHat"
 
   - name: start mysql service with service module DEBIAN PXB80
     ansible.builtin.systemd:
@@ -148,32 +212,32 @@
       enabled: yes
       state: started
     become: yes
-    when: 
+    when:
       - ansible_os_family == "Debian"
 
   - name: PRINT INSTALLED XTRABACKUP version rhel
     shell: rpm -qa | grep percona-xtrabackup
-    when: 
+    when:
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
     register: xtrabackup_version_print
 
   - name: DEBUG xtrabackup_version_print rhel
     debug:
       msg: "Xtrabackup version is {{ xtrabackup_version_print.stdout }}"
-    when: 
+    when:
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
 ##
   - name: PRINT INSTALLED XTRABACKUP version DEBIAN
     shell: apt list --installed | grep percona-xtrabackup
-    when: 
+    when:
       - ansible_os_family == "Debian"
     register: xtrabackup_version_print
 
   - name: DEBUG xtrabackup_version_print DEBIAN
     debug:
       msg: "Xtrabackup version is {{ xtrabackup_version_print.stdout }}"
-    when: 
+    when:
       - ansible_os_family == "Debian"
 
 ##
@@ -203,12 +267,30 @@
     debug:
       var: version_output.stdout_lines
 
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh pxb -e
 
-  - name: check that Percona XtraBackup version is correct
+  - name: check that Percona XtraBackup version is correct NON PRO
     command: /package-testing/version_check.sh pxb80
+    when:
+      - lookup('env', 'REPO_TYPE') != "PRO"
 
-  - name: check that Percona XtraBackup package versions are correct
+  - name: check that Percona XtraBackup package versions are correct NON PRO
     command: /package-testing/package_check.sh pxb80
+    when:
+      - lookup('env', 'REPO_TYPE') != "PRO"
+
+##
+
+  - name: check that Percona XtraBackup version is correct PRO
+    command: /package-testing/version_check.sh pxb80pro
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+
+  - name: check that Percona XtraBackup package versions are correct PRO
+    command: /package-testing/package_check.sh pxb80 pro
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: run backup
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
@@ -232,16 +314,7 @@
       packages:
       - lz4
       - zstd
-    when: ansible_os_family == "Debian" and ansible_distribution_release != "bionic"
-
-  - name: install lz4 and zstd packages on Bionic 
-    apt:
-      name: "{{ packages }}"
-    vars: 
-      packages:
-      - liblz4-tool
-      - zstd
-    when: ansible_os_family == "Debian" and ansible_distribution_release == "bionic"
+    when: ansible_os_family == "Debian"
 
   - name: run backup with lz4 compression
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_l/ --compress=lz4 --compress-threads=10
@@ -260,7 +333,7 @@
 
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_z/
-    
+
   - name: remove Percona Server deb packages
     apt:
       name: "{{ packages }}"
@@ -270,7 +343,9 @@
       packages:
       - percona-server-server*
       - percona-xtrabackup-80
-    when: ansible_os_family == "Debian"
+    when:
+      - ansible_os_family == "Debian"
+      - lookup('env', 'server_to_test') == "ps-80"
 
   - name: remove Percona Server rpm packages
     yum:
@@ -280,9 +355,16 @@
      packages:
       - percona-server-server*
       - percona-xtrabackup-80
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ps-80"
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
+    when:
+      - lookup('env', 'server_to_test') != "ms-80"
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
     when:
       - lookup('env', 'server_to_test') != "ms-80"

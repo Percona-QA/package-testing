@@ -1,4 +1,4 @@
-# Enable only tools repo to install pt
+# Enable only pt repo to install pt
   - name: include tasks for enabling "{{ repo_name }}" test repo
     include_tasks: ../tasks/enable_only_repo_for_pt.yml
     vars:

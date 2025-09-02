@@ -12,7 +12,7 @@ BASE_DIR='/usr/percona-server'
 @pytest.fixture(scope='module')
 def test_load_env_vars_define_in_test(host):
     with host.sudo():
-        vars={'BASE_DIR':BASE_DIR,'PS_VERSION':os.getenv('PS_VERSION'),'PS_REVISION':os.getenv('PS_REVISION'),'PRO':os.getenv('PRO'),'FIPS_SUPPORTED':os.getenv('FIPS_SUPPORTED')}
+        vars={'BASE_DIR':BASE_DIR}
         for var, value in vars.items():
             cmd=f"echo {var}={value} >> /etc/environment"
             host.run(cmd)

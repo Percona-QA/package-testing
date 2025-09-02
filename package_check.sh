@@ -37,13 +37,17 @@ elif [ $1 = "ps80" ]; then
     release=${PS80_VER#*-}
     revision=${PS80_REV}
   fi
-  elif [ "$1" = "ps84" ]; then
+elif [ $1 = "ps84" ]; then
   if [ "$2" = "pro" ]; then
     version=${PS84_PRO_VER}
     release=${PS84_PRO_VER#*-}
     revision=${PS84_PRO_REV}
+  else
+    version=${PS84_VER}
+    release=${PS84_VER#*-}
+    revision=${PS84_REV}
   fi
-elif [[ $1 =~ ^ps9[0-9]{1}$ ]]; then
+elif [[ $1 =~ ^ps9[1-9]{1}$ ]]; then
   version=${PS_INN_LTS_VER}
   release=${PS_INN_LTS_VER#*-}
   revision=${PS_INN_LTS_REV}  
@@ -56,10 +60,26 @@ elif [ $1 = "pxc57" ]; then
   release=${PXC57_VER#*-}
   revision=${PXC57_REV}
 elif [ $1 = "pxc80" ]; then
-  version=${PXC80_VER}
-  release=${PXC80_VER#*-}
-  revision=${PXC80_REV}
-elif [[ "$1" =~ ^pxc8[1-9]{1}$ ]]; then
+  if [ "$2" = "pro" ]; then
+    version=${PXC80PRO_VER}
+    release=${PXC80PRO_VER#*-}
+    revision=${PXC80PRO_REV}
+  else
+    version=${PXC80_VER}
+    release=${PXC80_VER#*-}
+    revision=${PXC80_REV}
+  fi
+elif [ $1 = "pxc84" ]; then
+  if [ "$2" = "pro" ]; then
+    version=${PXC84PRO_VER}
+    release=${PXC84PRO_VER#*-}
+    revision=${PXC84PRO_REV}
+  else
+    version=${PXC84_VER}
+    release=${PXC84_VER#*-}
+    revision=${PXC84_REV}
+  fi
+elif [[ "$1" =~ ^pxc9[0-9]{1}$ ]]; then
   version=${PXC_INN_LTS_VER}
   release=${PXC_INN_LTS_VER#*-}
   revision=${PXC_INN_LTS_REV}
@@ -72,9 +92,20 @@ elif [ $1 = "pxb24" ]; then
   version=${PXB24_VER}
   pkg_version=${PXB24_PKG_VER}
 elif [ $1 = "pxb80" ]; then
-  version=${PXB80_VER}
-  pkg_version=${PXB80_PKG_VER}
-elif [[ $1 =~ ^pxb8[1-9]{1}$ ]]; then
+  if [ "$2" = "pro" ]; then
+    version=${PXB80_PRO_VER}
+    pkg_version=${PXB80_PRO_PKG_VER}
+  else
+    version=${PXB80_VER}
+    pkg_version=${PXB80_PKG_VER}
+  fi
+elif [ $1 = "pxb84" ]; then
+  version=${PXB84_VER}
+  pkg_version=${PXB84_PKG_VER}
+elif [ $1 = "pxb84" ] && [ "$2" = "pro" ]; then
+  version=${PXB84_PRO_VER}
+  pkg_version=${PXB84_PRO_PKG_VER}
+elif [[ $1 =~ ^pxb9[1-9]{1}$ ]]; then
   version=${PXB_INN_LTS_VER}
   pkg_version=${PXB_INN_LTS_PKG_VER}
 elif [ $1 = "psmdb30" ]; then
@@ -217,7 +248,7 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
     if [ ${product} = "pxc56" ]; then
       rpm_opt_package=""
       rpm_num_pkgs="11"
-	  garbd_maj_version=3
+      garbd_maj_version=3
     elif [ ${product} = "pxc57" ]; then
       if [ ${centos_maj_version} == "7" ]; then
         rpm_num_pkgs="10"
@@ -226,7 +257,7 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
         rpm_num_pkgs="9"
         rpm_opt_package=""
       fi      
-	  garbd_maj_version=$(echo ${product} | sed 's/^[a-z]*//')
+      garbd_maj_version=$(echo ${product} | sed 's/^[a-z]*//')
     echo "RPM Num Packages: $rpm_num_pkgs and $rpm_opt_package"
     fi
 
@@ -271,10 +302,10 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
     fi
   fi
 
-elif [[ ${product} =~ ^pxc8[1-9]{1}$ ]]; then
+elif [[ ${product} =~ ^pxc8[0-9]{1}$ ]]; then
   echo "Package check for PXC-8x is not implemented!"
   exit 0
-
+  
 elif [ ${product} = "pt" ]; then
   echo "Package check for PT is not implemented!"
   exit 1
@@ -283,17 +314,32 @@ elif [ ${product} = "pmm" ]; then
   echo "Package check for PMM is not implemented!"
   exit 1
 
-elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; then
+elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" -o ${product} = "pxb84" ]; then
   if [ ${product} = "pxb24" ]; then
     extra_version="-24"
   elif [ ${product} = "pxb80" ]; then
     extra_version="-80"
+  elif [ ${product} = "pxb84" ]; then
+    extra_version="-84"
   else
     extra_version=""
   fi
   if [ -f /etc/redhat-release ] || [ -f /etc/system-release ] ; then
-    if [ "$(rpm -qa | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" == "3" ]; then
+    if [ "$(rpm -qa | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" -ge "3" ]; then
       echo "all packages are installed"
+    else
+      echo "all packages are not installed"
+    fi
+###
+    if [ "$2" = "pro" ]; then
+      for package in percona-xtrabackup-pro${extra_version} percona-xtrabackup-test-pro${extra_version} percona-xtrabackup-pro${extra_version}-debuginfo; do
+        if [ "$(rpm -qa | grep -c ${package}-${version}-${pkg_version})" -gt 0 ]; then
+          echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
+        else
+          echo "WARNING: ${package}-${version}-${pkg_version} is not installed"
+          exit 1
+        fi
+      done
     else
       for package in percona-xtrabackup${extra_version} percona-xtrabackup-test${extra_version} percona-xtrabackup${extra_version}-debuginfo; do
         if [ "$(rpm -qa | grep -c ${package}-${version}-${pkg_version})" -gt 0 ]; then
@@ -304,9 +350,23 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; t
         fi
       done
     fi
+###
   else
-    if [ "$(dpkg -l | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" == "3" ]; then
+    if [ "$(dpkg -l | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" -ge "3" ]; then
       echo "all packages are installed"
+    else
+      echo "all packages are not installed"
+    fi
+###
+    if [ "$2" = "pro" ]; then
+      for package in percona-xtrabackup-pro-dbg${extra_version} percona-xtrabackup-test-pro${extra_version} percona-xtrabackup-pro${extra_version}; do
+        if [ "$(dpkg -l | grep -c ${package})" -gt 0 ] && [ "$dpkg -l | grep ${package} | awk '{$print $3}' == ${version}-${pkg_version}.$(lsb_release -sc)" ] ; then
+          echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
+        else
+          echo "WARNING: ${package}-${version}-${pkg_version} is not installed"
+          exit 1
+        fi
+      done
     else
       for package in percona-xtrabackup-dbg${extra_version} percona-xtrabackup-test${extra_version} percona-xtrabackup${extra_version}; do
         if [ "$(dpkg -l | grep -c ${package})" -gt 0 ] && [ "$dpkg -l | grep ${package} | awk '{$print $3}' == ${version}-${pkg_version}.$(lsb_release -sc)" ] ; then
@@ -317,6 +377,7 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; t
         fi
       done
     fi
+###
   fi
 
 elif [ "${product}" = "psmdb30" -o "${product}" = "psmdb32" -o "${product}" = "psmdb34" -o "${product}" = "psmdb36" -o "${product}" = "psmdb40" ]; then
