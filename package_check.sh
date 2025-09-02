@@ -15,6 +15,7 @@ elif [ "$#" -ne 1 ]; then
   exit 1
 fi
 
+
 SCRIPT_PWD=$(cd `dirname $0` && pwd)
 
 source ${SCRIPT_PWD}/VERSIONS
