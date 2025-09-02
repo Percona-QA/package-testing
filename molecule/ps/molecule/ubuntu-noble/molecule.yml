@@ -14,9 +14,17 @@ platforms:
     instance_tags:
       iit-billing-tag: ps-package-testing
       job-name: ${JOB_NAME}
+    groups:
+      - ubuntu-noble
+    network:
+      assign_public_ip: true
 provisioner:
   name: ansible
   log: True
+  inventory:
+    host_vars:
+      unoble-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}:
+        ansible_host: "{{ item.public_ip_address }}" 
   playbooks:
     create: ../../playbooks/create.yml
   #  destroy: ../../playbooks/destroy.yml
