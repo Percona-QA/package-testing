@@ -21,10 +21,6 @@ platforms:
 provisioner:
   name: ansible
   log: True
-  inventory:
-    host_vars:
-      unoble-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}:
-        ansible_host: "{{ item.public_ip_address }}"   # ✅ use instance IP
   playbooks:
     create: ../../playbooks/create.yml
   #  destroy: ../../playbooks/destroy.yml
@@ -35,7 +31,7 @@ scenario:
   name: ubuntu-noble
 #  destroy_sequence:
  #   - destroy
-  clenup_sequence:
+  cleanup_sequence:
     - cleanup
   test_sequence:
   #  - destroy
