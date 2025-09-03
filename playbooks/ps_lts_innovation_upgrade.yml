@@ -49,8 +49,9 @@
 
 # Install from main repository
 
-  - name: include tasks for enabling PS {{ major_release_version }} main repo
-    include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
+  - name: include tasks for enabling PS {{ major_release_version }} testing repo
+    include_tasks: ../tasks/enable_ps84_main_repo.yml
+  
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -59,7 +60,7 @@
 
   - name: install Percona Server {{ major_release_version }} packages
     include_tasks:
-      file: ../tasks/install_ps_innovation_lts.yml
+      file: ../tasks/install_ps84.yml
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
@@ -140,8 +141,8 @@
 #
 # Enable main repository
 #
-  - name: include tasks for enabling PS {{ major_release_version }} testing repo
-    include_tasks: ../tasks/enable_ps84_main_repo.yml
+  - name: include tasks for enabling PS {{ major_release_version }} main repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
 
 # Upgrade packages
 #
