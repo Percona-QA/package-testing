@@ -66,15 +66,15 @@
       pxb_inn_lts_repo_name: "{{ pxb_inn_lts_repo_name.stdout }}"
 
   - name: include tasks for enabling PS {{ major_release_version }} main repo
-    include_tasks: ../tasks/enable_ps_9x_inn_lts_main_repo.yml
+    include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
     when: lookup('env', 'install_repo') == "main"
 
   - name: include tasks for enabling PS {{ major_release_version }} test repo
-    include_tasks: ../tasks/enable_ps_9x_inn_repo_testing_repo.yml
+    include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: include tasks for enabling PS {{ major_release_version }} experimental repo
-    include_tasks: ../tasks/enable_ps_9x_inn_lts_experimental_repo.yml
+    include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: download and extract world database
