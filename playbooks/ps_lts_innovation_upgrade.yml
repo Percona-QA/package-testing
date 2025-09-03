@@ -49,8 +49,9 @@
 
 # Install from main repository
 
-  - name: include tasks for enabling PS {{ major_release_version }} main repo
-    include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
+  - name: include tasks for enabling PS {{ major_release_version }} testing repo
+    include_tasks: ../tasks/enable_ps84_main_repo.yml
+  
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -59,7 +60,7 @@
 
   - name: install Percona Server {{ major_release_version }} packages
     include_tasks:
-      file: ../tasks/install_ps_innovation_lts.yml
+      file: ../tasks/install_ps84.yml
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
@@ -120,28 +121,16 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-
-  - name: install 3rd party packages with dnf
-    dnf:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - rsyslog-mysql
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
+    when: ansible_os_family == "RedHat"
 
   - name: start my.cnf change test
     command: /package-testing/check_mycnf_pre.sh
 
 #
-# Enable testing repository
+# Enable main repository
 #
-  - name: include tasks for enabling PS {{ major_release_version }} testing repo
-    include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
+  - name: include tasks for enabling PS {{ major_release_version }} main repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
 
 # Upgrade packages
 #
@@ -172,150 +161,6 @@
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
-  - name: upgrade Percona XtraBackup to new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-{{ major_release_version }}
-      - percona-xtrabackup-test-{{ major_release_version }}
-      - percona-xtrabackup-dbg-{{ major_release_version }}
-    when: ansible_os_family == "Debian"
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona release to new rpm packages yum
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-release
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-
-  - name: upgrade Percona release to new rpm packages dnf
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-release
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
-
-  - name: upgrade Percona Server to new rpm packages on RHEL yum
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-server-server
-      - percona-server-test
-      - percona-server-debuginfo
-      - percona-server-devel
-      - percona-server-rocksdb
-      - percona-server-shared
-      - percona-server-shared-compat
-      - percona-server-client
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona Server to new rpm packages on RHEL dnf
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-server-server
-      - percona-server-test
-      - percona-server-debuginfo
-      - percona-server-devel
-      - percona-server-rocksdb
-      - percona-server-shared
-      - percona-server-shared-compat
-      - percona-server-client
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona Server to new rpm packages using yum
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-server-server
-      - percona-server-test
-      - percona-server-debuginfo
-      - percona-server-devel
-      - percona-server-rocksdb
-      - percona-server-shared
-      - percona-server-client
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona Server to new rpm packages using dnf
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-server-server
-      - percona-server-test
-      - percona-server-debuginfo
-      - percona-server-devel
-      - percona-server-rocksdb
-      - percona-server-shared
-      - percona-server-client
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona XtraBackup to new rpm packages yum
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-{{ major_release_version }}
-      - percona-xtrabackup-test-{{ major_release_version }}
-      - percona-xtrabackup-{{ major_release_version }}-debuginfo
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona XtraBackup to new rpm packages dnf
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-{{ major_release_version }}
-      - percona-xtrabackup-test-{{ major_release_version }}
-      - percona-xtrabackup-{{ major_release_version }}-debuginfo
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
     when: install_mysql_shell == "yes" or install_mysql_shell == ""
@@ -335,31 +180,6 @@
   - name: check the data masking component
     command: /package-testing/scripts/ps_dm_component.sh
 
-  - name: check the audit log v2 plugin
-    command: /package-testing/scripts/ps_audit_log_v2_component.sh
-
-  - name: finish my.cnf change test
-    command: /package-testing/check_mycnf_post.sh
-
-  - name: run some MyRocks tests
-    command: /package-testing/scripts/ps_myrocks_test.sh
-
-  - name: keyring Vault Component and plugins test
-    include_tasks: ../tasks/ps_keyring_vault_component_test.yml
-
-  - name: check that Percona XtraBackup version is correct
-    command: /package-testing/version_check.sh pxb{{ major_release_version }}
-
-  - name: run bats unit tests for ps-admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
-
-  - name: run bats integration tests for ps-admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
-
-  - name: run bats tests for mysql init scripts
-    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
-
   - name: start mysql service
     service: name=mysql state=started
 
@@ -373,27 +193,14 @@
       - percona-server*
     when: ansible_os_family == "Debian"
 
-  - name: remove Percona Server rpm packages yum
+  - name: remove Percona Server rpm packages
     yum:
       name: "{{ packages }}"
       state: absent
     vars:
       packages:
       - percona-server*
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-
-  - name: remove Percona Server rpm packages dnf
-    dnf:
-      name: "{{ packages }}"
-      state: absent
-    vars:
-      packages:
-      - percona-server*
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
+    when: ansible_os_family == "RedHat"
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
@@ -406,3 +213,4 @@
     fail:
       msg: "Path exists and is a directory and is not empty"
     when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
+

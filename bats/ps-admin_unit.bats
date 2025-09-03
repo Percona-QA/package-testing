@@ -10,7 +10,7 @@ PS_ADMIN_BIN=${PS_ADMIN_BIN:-/usr/bin/ps-admin}
 }
 
 @test "display ps-admin help screen" {
-if [[ "${MYSQL_VERSION}" =~ ^8.[0-9]{1}$ ]]; then
+if [[ "${MYSQL_VERSION}" =~ ^9.[0-9]{1}$ ]] || [[ "${MYSQL_VERSION}" =~ ^8.[0-9]{1}$ ]]; then
   run ${PS_ADMIN_BIN} --help
   [ "${lines[1]}" = "Valid options are:" ]
 else
@@ -72,7 +72,7 @@ fi
 }
 
 @test "test message for installing TokuDB if user is not root" {
- if [ ${MYSQL_VERSION} != "8.0" ]; then
+ if [ ${MYSQL_VERSION} != "9.0" ] || [ ${MYSQL_VERSION} != "8.0" ]; then
    if [ $(id -u) -ne 0 ]; then
      run ${PS_ADMIN_BIN} --enable-tokudb
      [ "${lines[0]}" = "ERROR: For TokuDB install/uninstall this script must be run as root!" ]
@@ -80,7 +80,6 @@ fi
      skip "This test requires that the current user is not root!"
    fi
  else
-   skip "This test requires PS 8.0 below"
+   skip "This test requires PS 9.0 below"
  fi
 }
-
