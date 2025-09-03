@@ -360,19 +360,6 @@
       - lookup('env', 'pro_test') == "yes"
       - ansible_os_family == "RedHat"
 
-  - name: upgrade Percona XtraBackup to new rpm packages using dnf
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-84
-      - percona-xtrabackup-test-84
-      - percona-xtrabackup-84-debuginfo
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
-
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
     when: install_mysql_shell == "yes" or install_mysql_shell == ""
