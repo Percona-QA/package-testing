@@ -50,7 +50,7 @@
 # Install from main repository
 
   - name: include tasks for enabling PS {{ major_release_version }} main repo
-    include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
+    include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -138,10 +138,10 @@
     command: /package-testing/check_mycnf_pre.sh
 
 #
-# Enable testing repository
+# Enable main repository
 #
   - name: include tasks for enabling PS {{ major_release_version }} testing repo
-    include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
+    include_tasks: ../tasks/enable_ps84_main_repo.yml
 
 # Upgrade packages
 #
@@ -183,136 +183,6 @@
       - percona-xtrabackup-test-{{ major_release_version }}
       - percona-xtrabackup-dbg-{{ major_release_version }}
     when: ansible_os_family == "Debian"
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona release to new rpm packages yum
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-release
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-
-  - name: upgrade Percona release to new rpm packages dnf
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-release
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
-
-  - name: upgrade Percona Server to new rpm packages on RHEL yum
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-server-server
-      - percona-server-test
-      - percona-server-debuginfo
-      - percona-server-devel
-      - percona-server-rocksdb
-      - percona-server-shared
-      - percona-server-shared-compat
-      - percona-server-client
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona Server to new rpm packages on RHEL dnf
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-server-server
-      - percona-server-test
-      - percona-server-debuginfo
-      - percona-server-devel
-      - percona-server-rocksdb
-      - percona-server-shared
-      - percona-server-shared-compat
-      - percona-server-client
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona Server to new rpm packages using yum
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-server-server
-      - percona-server-test
-      - percona-server-debuginfo
-      - percona-server-devel
-      - percona-server-rocksdb
-      - percona-server-shared
-      - percona-server-client
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona Server to new rpm packages using dnf
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-server-server
-      - percona-server-test
-      - percona-server-debuginfo
-      - percona-server-devel
-      - percona-server-rocksdb
-      - percona-server-shared
-      - percona-server-client
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona XtraBackup to new rpm packages yum
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-{{ major_release_version }}
-      - percona-xtrabackup-test-{{ major_release_version }}
-      - percona-xtrabackup-{{ major_release_version }}-debuginfo
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona XtraBackup to new rpm packages dnf
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-{{ major_release_version }}
-      - percona-xtrabackup-test-{{ major_release_version }}
-      - percona-xtrabackup-{{ major_release_version }}-debuginfo
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
 
