@@ -13,7 +13,7 @@
   include_tasks: ./enable_repo.yml
   vars:
     only: yes
-    package: "ps-84"
+    package: "ps-84-lts"
     repository: "release"
 
 - name: install Percona Server 8.4 packages
