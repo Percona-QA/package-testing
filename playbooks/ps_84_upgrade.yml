@@ -447,7 +447,9 @@
 
   - name: remove Percona Server{{ pro_suf }} rpm packages using dnf
     dnf:
-      name: percona-server-server{{ pro_suf }}
+      name:
+        - percona-server-server{{ pro_suf }}
+        - mariadb-connector-c-config
       state: absent
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
