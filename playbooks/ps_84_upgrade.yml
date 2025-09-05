@@ -455,6 +455,15 @@
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
+  - name: remove mariadb-connector-c-config package
+    yum:
+      name:
+        - mariadb-connector-c-config
+      state: absent
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "OracleLinux"]
+      - ansible_facts['distribution_major_version'] | int == 9
+
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
 
