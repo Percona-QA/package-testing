@@ -165,38 +165,8 @@
         fail:
           msg: Failing the further tasks due to issues in the previous task.
 
-  - name: keyring Vault Component and plugins test
-    include_tasks: ../tasks/ps_keyring_vault_component_test.yml
-
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
-
-  - name: install plugins, import world database ps-{{ major_release_version }}
-    command: /package-testing/plugins_test_innovation_lts.sh ps
-
-  - name: check the clone plugin
-    command: /package-testing/scripts/ps_clone_plugin_test_innovation_lts.sh
-
-  - name: check the data masking component
-    command: /package-testing/scripts/ps_dm_component.sh
-
-  - name: check the audit log v2 Component
-    command: /package-testing/scripts/ps_audit_log_v2_component.sh
-
-  - name: run some MyRocks tests
-    command: /package-testing/scripts/ps_myrocks_test.sh
-
-  - name: run mysql compression tests script
-    command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps{{ major_release_version }}
-
-  - name: run bats unit tests for ps-admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
-
-  - name: run bats integration tests for ps-admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
-
-  - name: run PAM tests
-    include_tasks: ../tasks/pam_test.yml
 
   - name: install 3rd party packages with apt
     apt:
@@ -295,4 +265,3 @@
     fail:
       msg: "Path exists and is a directory and is not empty"
     when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
-

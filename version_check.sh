@@ -8,7 +8,7 @@ if [ "$#" = 2 ]; then
     exit 1
   fi
 elif [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps56, ps57, ps80, ps81 !"
+  echo "This script requires product parameter: ps56, ps57, ps80, ps81,ps90 !"
   echo "Usage: ./version_check.sh <prod> [pro]"
   exit 1
 fi
@@ -35,7 +35,7 @@ elif [ "$1" = "ps80" ]; then
     release=${PS80_VER#*-}
     revision=${PS80_REV}
   fi
-elif [ "$1" = "ps84" ]; then
+  elif [ "$1" = "ps84" ]; then
   if [ "$2" = "pro" ]; then
     version=${PS84_PRO_VER}
     release=${PS84_PRO_VER#*-}
@@ -45,10 +45,10 @@ elif [ "$1" = "ps84" ]; then
     release=${PS84_VER#*-}
     revision=${PS84_REV}
   fi
-elif [[ $1 =~ ^ps8[1-9]{1}$ ]]; then
+elif [[ $1 =~ ^ps9[0-9]{1}$ ]]; then
   version=${PS_INN_LTS_VER}
   release=${PS_INN_LTS_VER#*-}
-  revision=${PS_INN_LTS_REV}
+  revision=${PS_INN_LTS_REV}  
 elif [ "$1" = "pxc56" ]; then
   version=${PXC56_VER%-*}
   release=${PXC56_VER#*-}
@@ -150,7 +150,7 @@ product=$1
 log="/tmp/${product}_version_check.log"
 echo -n > "${log}"
 
-if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9]{1}$ ]]; then
+if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
   for i in @@INNODB_VERSION @@VERSION; do
     if [ "$(mysql -e "SELECT ${i}; "| grep -c "${version}")" = 1 ]; then
       echo "${i} is correct" >> "${log}"
@@ -189,7 +189,7 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
     fi
   fi
 
-  if [[ ${product} =~ ^ps8[0-9]{1}$ ]]; then
+  if [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
     if [ -z ${install_mysql_shell} ] || [ ${install_mysql_shell} = "yes" ] ; then
       if [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
         echo "mysql-shell version is correct" >> "${log}"

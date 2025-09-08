@@ -93,13 +93,15 @@
 
   - name: Enable PXB 84 repo
     command: percona-release enable-only pxb-84-lts testing
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
-  - name: install Percona XtraBackup 8.4 packages
-    include_tasks: ../tasks/install_pxb84.yml
-    when: lookup('env', 'install_repo') != "experimental"
-
-  - name: enable the Tools release repo
-    command: percona-release enable tools release
+  - name: install Percona xtrabackup 8.4 packages
+    include_tasks:
+      file: ../tasks/install_pxb84.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -138,10 +140,6 @@
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
 
-
-#  - name: install plugins, import world database
-#    command: /package-testing/plugins_test_84.sh ps
-
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
     when: install_mysql_shell == "yes" or install_mysql_shell == ""
@@ -154,24 +152,14 @@
       - rsyslog-mysql
     when: ansible_os_family == "Debian"
 
-  - name: install 3rd party packages with yum
-    yum:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - rsyslog-mysql
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-
   - name: install 3rd party packages with dnf
     dnf:
       name: "{{ packages }}"
     vars:
       packages:
       - rsyslog-mysql
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start my.cnf change test
@@ -310,12 +298,11 @@
       - percona-server-shared{{ pro_suf }}
       - percona-server-client{{ pro_suf }}
       - percona-mysql-router{{ pro_suf }}
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 9
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: enable the Tools release repo
-    command: percona-release enable tools release
 
   - name: upgrade Percona Toolkit to new deb packages
     apt:
@@ -327,17 +314,13 @@
       - percona-toolkit
     when: ansible_os_family == "Debian"
 
-  - name: upgrade Percona XtraBackup to new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-84
-      - percona-xtrabackup-test-84
-      - percona-xtrabackup-dbg-84
-    when: ansible_os_family == "Debian"
+  - name: install Percona xtrabackup 8.4 packages
+    include_tasks:
+      file: ../tasks/install_pxb84.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
 #  - name: upgrade Percona Toolkit to new rpm packages
 #    yum:
@@ -378,36 +361,6 @@
       - lookup('env', 'cur_action_to_test') == "not_pro_to_pro" or lookup('env', 'cur_action_to_test') == "downgrade"
       - lookup('env', 'pro_test') == "yes"
       - ansible_os_family == "RedHat"
-
-  - name: upgrade Percona XtraBackup to new rpm packages using yum
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-84
-      - percona-xtrabackup-test-84
-      - percona-xtrabackup-84-debuginfo
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-
-  - name: upgrade Percona XtraBackup to new rpm packages using dnf
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtrabackup-84
-      - percona-xtrabackup-test-84
-      - percona-xtrabackup-84-debuginfo
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
-
-  - name: enable the Tools release repo
-    command: percona-release enable tools release
-    when: install_mysql_shell == "yes" or install_mysql_shell == ""
 
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
@@ -461,6 +414,7 @@
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb84
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: run bats unit tests for ps-admin script
     command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
@@ -493,11 +447,22 @@
 
   - name: remove Percona Server{{ pro_suf }} rpm packages using dnf
     dnf:
-      name: percona-server-server{{ pro_suf }}
+      name:
+        - percona-server-server{{ pro_suf }}
+        - mariadb-connector-c-config
       state: absent
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: remove mariadb-connector-c-config package
+    yum:
+      name:
+        - mariadb-connector-c-config
+      state: absent
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "OracleLinux"]
+      - ansible_facts['distribution_major_version'] | int == 9
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
@@ -616,3 +581,4 @@
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 8
+

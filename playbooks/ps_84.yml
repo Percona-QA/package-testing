@@ -55,7 +55,6 @@
     when:
       - lookup('env', 'install_repo') == "main"
       - lookup('env', 'pro_test') != "yes"
-    
 
   - name: include tasks for enabling PS 84 test repo
     include_tasks: ../tasks/enable_ps84_testing_repo.yml
@@ -124,7 +123,7 @@
     command: /package-testing/check_tel_ver_pack.sh
     when:
       - ansible_distribution != "Amazon"
-      - ansible_distribution != "focal"
+      - ansible_distribution_release != "focal"
 
   - name: Enable PXB 84 repo
     command: percona-release enable-only pxb-84-lts testing
