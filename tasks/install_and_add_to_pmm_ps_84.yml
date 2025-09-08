@@ -14,7 +14,7 @@
   vars:
     only: yes
     package: "ps-84-lts"
-    repository: "release"
+    repository: "{{ ps_repository | default('release') }}"
 
 - name: install Percona Server 8.4 packages
   include_tasks: ./install_ps80.yml

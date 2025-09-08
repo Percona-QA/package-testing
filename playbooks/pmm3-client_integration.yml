@@ -16,6 +16,7 @@
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') | regex_search('\\S(.*\\S)?') }}"
+    ps_repository: "{{ lookup('env', 'PS_REPOSITORY') | default('release', true)}}"
 
   tasks:
   - name: Register Instance IP
@@ -75,6 +76,8 @@
   - name: Install and start Percona Server 8.4
     when: '"ps-8.4" in enabled_db'
     include_tasks: ../tasks/install_and_add_to_pmm_ps_84.yml
+    vars:
+      ps_repository: "{{ ps_repository }}"
 
   - name: Verify if Metric Endpoint with Auth works for Mysqld Exporter
     when: '"ps-" in enabled_db | join("")'
