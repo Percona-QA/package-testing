@@ -44,8 +44,8 @@ provisioner:
   lint:
     name: ansible-lint
   playbooks:
-    create: ../../../playbooks/create.yml
-    destroy: ../../../playbooks/destroy.yml
+    create: ../../../playbooks/create_noble.yml
+    destroy: ../../../playbooks/destroy-noble-arm.yml
     prepare: ../../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
 verifier:
