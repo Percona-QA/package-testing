@@ -9,7 +9,7 @@
       - "{{ (ansible_distribution == 'Debian') | ternary('ps-8.4','') }}"
       - "{{ (ansible_distribution == 'Ubuntu') | ternary('ps-8.4','') }}"
       - "{{ (ansible_os_family == 'RedHat' and ansible_distribution != 'Amazon' and ansible_distribution_major_version != '10') | ternary('ps-8.4','') }}"
-      - "{{ (ansible_distribution == 'Debian') | ternary('psmdb-80','') }}"
+      - "{{ (ansible_distribution == 'Debian') | ternary('psmdb-70','') }}"
       - "{{ (ansible_distribution == 'Ubuntu') | ternary('psmdb-80','') }}"
       - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version|int != 10) | ternary('psmdb-80','') }}"
       - "{{ (ansible_distribution == 'Debian') | ternary('pg-17','') }}"
