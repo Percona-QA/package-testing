@@ -29,8 +29,8 @@
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_experimental_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "experimental"
 
-#  - name: enable tools main repo
-#    command: percona-release enable tools release
+  - name: enable sysbench main repo
+    command: percona-release enable sysbench release
 
   - name: setup hosts file
     copy:
