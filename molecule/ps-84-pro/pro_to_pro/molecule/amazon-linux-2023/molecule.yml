@@ -27,15 +27,15 @@ scenario:
   name: amazon-linux-2023
   destroy_sequence:
     - destroy
-  #clenup_sequence:
-   # - cleanup
+  clenup_sequence:
+    - cleanup
   test_sequence:
     - destroy
     - create
     - prepare
     - converge
     - verify
-   # - cleanup
+    - cleanup
     - destroy
 
 

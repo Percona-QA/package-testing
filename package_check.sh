@@ -144,7 +144,7 @@ echo -n > $log
 if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
   if [ -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
     if [ -f /etc/system-release -a $(grep -c Amazon /etc/system-release) -eq 1 ]; then
-      centos_maj_version="7"
+      centos_maj_version="9"
     else
       centos_maj_version=$(cat /etc/redhat-release | grep -oE '[0-9]+' | head -n 1)
     fi
