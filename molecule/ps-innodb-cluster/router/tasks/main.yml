@@ -62,7 +62,7 @@
       packages:
       - percona-mysql-router
       - percona-mysql-shell
- #     - sysbench
+      - sysbench
       - jq
     when: ansible_os_family == "Debian"
 
@@ -88,7 +88,7 @@
       packages:
       - percona-mysql-router
       - percona-mysql-shell
-      - sysbench
+ #     - sysbench
       - jq
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
