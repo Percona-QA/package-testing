@@ -17,7 +17,7 @@
     repository: "{{ ps_repository | default('release') }}"
 
 - name: install Percona Server 8.4 packages
-  include_tasks: ./install_ps80.yml
+  include_tasks: ./install_ps84.yml
 
 - name: start mysql service
   service: name=mysql state=started
