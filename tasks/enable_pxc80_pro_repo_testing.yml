@@ -54,7 +54,7 @@
     - ansible_architecture == "x86_64"
 
 - name: add pro repository on rmp
-  template: src=../templates/pro_rpm_repo_file_ps80_arm.j2
+  template: src=../templates/pro_rpm_repo_file_pxc80_arm.j2
             dest=/etc/yum.repos.d/psmysql-pro.repo
   vars:
     client_id: "{{ lookup('env', 'USERNAME') }}"
