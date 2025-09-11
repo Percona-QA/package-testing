@@ -1,4 +1,4 @@
-# This task installs and starts Percona Server 5.7 on CentOS and Debian/Ubuntu
+# This task installs and starts Percona Server 8.4 on CentOS and Debian/Ubuntu
 #
 # Task adjustments are handled by parent playbook vars:
 #             var "port_flag"      :  to access agent with custom port
