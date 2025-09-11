@@ -60,6 +60,7 @@
     client_id: "{{ lookup('env', 'USERNAME') }}"
     client_token: "{{ lookup('env', 'PASSWORD') }}"
     repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
+    releasever: "{{ release_version.stdout }}"
   when:
     - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
     - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
