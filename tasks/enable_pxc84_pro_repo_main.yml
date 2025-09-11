@@ -1,6 +1,6 @@
 - name: include playbook for removing Percona repo
   include_tasks: remove_percona_repository.yml
-  
+
 - name: Install percona release Debian
   apt:
     deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
@@ -23,6 +23,12 @@
     repo: "{{ 'main' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
   when:
     - ansible_os_family == "Debian"
+
+- name: add an apt signing key to enable repo
+  apt_key:
+    url: https://percona.com/downloads/deb-percona-keyring.gpg
+    state: present
+  when: ansible_os_family == "Debian"
 
 - name: update deb cache
   command: apt update
@@ -66,7 +72,7 @@
   when: ansible_distribution == "Amazon"
 
 - name: Add Pro Repository on Amazon Linux 2023
-  template: 
+  template:
     src: ../templates/pro_rpm_repo_file_pxc84.j2
     dest: /etc/yum.repos.d/psmysql-pro.repo
   vars:
@@ -93,7 +99,7 @@
   when:
     - ansible_os_family == "RedHat" and ansible_distribution == "Amazon"
     - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
-   
+
 - name: enable the tools repo
   command: percona-release enable-only tools
   when:
