@@ -60,7 +60,7 @@
       --server-insecure-tls 
       --metrics-mode={{ metrics_mode }} 
       --server-username=admin 
-      --server-password={{ pmm_server_password }} 
+      --server-password={{ pmm_server_password }}:8443
       node_{{ instance_ip }}
 
   - name: Check that PMM client version is correct
