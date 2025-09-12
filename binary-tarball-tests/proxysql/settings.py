@@ -76,7 +76,7 @@ proxysql2x_binaries = ['usr/bin/proxysql-admin', 'usr/bin/proxysql', 'usr/bin/pe
 def get_artifact_sets():
     vars = set_proxysql_vars()
     proxysql_major_version = vars['proxysql_major_version']
-    if proxysql_major_version.startswith('2.7', '3.0.1'):
+    if proxysql_major_version.startswith("2.7", "3.0.1"):
         return  proxysql2x_binaries, proxysql2x_files
     else:
         raise ValueError(f"Unsupported proxysql version: {proxysql_major_version}")
