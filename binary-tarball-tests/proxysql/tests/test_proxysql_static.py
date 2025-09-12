@@ -8,7 +8,7 @@ from settings import *
 proxysql2x_binaries, proxysql2x_files = get_artifact_sets()
 
 def test_proxysql_version(host):
-    if proxysql_major_version in ['2.7' ,'3.0' ]:
+    if proxysql_major_version in ['2.7' ,'3.0.1' ]:
         expected_version = 'ProxySQL version' + proxysql_version + '-percona-1.2'
         output = host.check_output(base_dir + '/usr/bin/proxysql --version')
 
@@ -17,7 +17,7 @@ def test_proxysql_version(host):
         assert match, f"Expected version string not found in output: {output}"
 
 def test_proxysql_admin_version(host):
-    if proxysql_major_version in ['2.7','3.0']:
+    if proxysql_major_version in ['2.7','3.0.1']:
         expected_version = 'proxysql-admin version' + proxysql_version 
         output = host.check_output(base_dir + '/usr/bin/proxysql-admin --version')
 
@@ -26,7 +26,7 @@ def test_proxysql_admin_version(host):
         assert match, f"Expected version string not found in output: {output}"
 
 def test_proxysql_scheduler_admin_version(host):
-    if proxysql_major_version in ['2.7','3.0']:
+    if proxysql_major_version in ['2.7','3.0.1']:
         expected_version = 'percona-scheduler-admin Version:' + proxysql_version 
         output = host.check_output(base_dir + '/usr/bin//percona-scheduler-admin --version')
 
