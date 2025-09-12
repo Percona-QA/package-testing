@@ -55,12 +55,11 @@
 ### Setup PMM Client
   - name: Use "pmm-admin config" to connect pmm client to server
     shell: >
-      pmm-agent setup --config-file=/usr/local/percona/pmm/config/pmm-agent.yaml 
-      --server-address={{ pmm_server_address }}:8443
-      --server-insecure-tls 
+      pmm-admin config --debug --server-insecure-tls 
       --metrics-mode={{ metrics_mode }} 
-      --server-username=admin 
-      --server-password={{ pmm_server_password }}
+      --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} 
+      {{ instance_ip }} 
+      generic 
       node_{{ instance_ip }}
 
   - name: Check that PMM client version is correct
