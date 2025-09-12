@@ -40,7 +40,7 @@ def test_load_env_vars_define_in_test(host, base_dir):
 
 # ✅ Final test: runs the tarball test script
 def test_proxysql_tarball(host, test_load_env_vars_define_in_test):
-    cmd = "cd package-testing/binary-tarball-tests/proxysql && ./run.sh"
+    cmd = "cd package-testing/binary-tarball-tests/proxysql && chmod +x run.sh && ./run.sh"
     result = host.run(cmd)
     print(result.stdout)
     print(result.stderr)
