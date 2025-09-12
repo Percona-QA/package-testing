@@ -21,6 +21,7 @@
 
 - name: start mysql service
   service: name=mysql state=started
+  when: is_docker|default(false) == false
 
 - name: start mysql service with service command
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
