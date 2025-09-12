@@ -37,19 +37,15 @@
     state: present
   when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
 
-
-- name: Get glibc version
+- name: Get glibc version actions
   set_fact:
     GLIBC_VERSION: >-
-      {% if ansible_os_family == 'Debian' %}
-        2.31
-      {% elif ansible_os_family == 'RedHat' and ansible_distribution_major_version | int == 10 %}
-        2.39
-      {% elif ansible_os_family == 'RedHat' %}
-        2.28
-      {% else %}
-        2.31
-      {% endif %}
+      {{
+        '2.31' if ansible_os_family == 'Debian' else
+        '2.39' if ansible_os_family == 'RedHat' and (ansible_distribution_major_version | int == 10) else
+        '2.28' if ansible_os_family == 'RedHat' else
+        '2.31'
+      }}
 
 - name: Set ProxySQL version and tarball variables
   set_fact:
