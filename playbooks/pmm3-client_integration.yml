@@ -62,6 +62,9 @@
       generic 
       node_{{ instance_ip }}
 
+  - name: Start PMM Client
+    shell: nohup pmm-agent --config-file=/usr/local/percona/pmm/config/pmm-agent.yaml > /var/log/pmm-agent.log 2>&1 &
+
   - name: Check that PMM client version is correct
     include_tasks: ../tasks/verify_pmm_status_versions.yml
 
