@@ -38,7 +38,7 @@
   when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
 
 
-- name: Get glibc version actions
+- name: Get glibc version
   set_fact:
     GLIBC_VERSION: >-
       {% if ansible_os_family == 'Debian' %}
@@ -63,6 +63,14 @@
 - name: Set tarball url
   set_fact:
     TARBALL_URL: "https://downloads.percona.com/downloads/TESTING/proxysql-{{ PROXYSQL_MAJOR_VERSION }}/{{ TARBALL_NAME }}"
+
+- name: Show ProxySQL variables
+  debug:
+    msg:
+      - "PROXYSQL_FULL_VERSION = {{ PROXYSQL_FULL_VERSION }}"
+      - "PROXYSQL_MAJOR_VERSION = {{ PROXYSQL_MAJOR_VERSION }}"
+      - "TARBALL_NAME          = {{ TARBALL_NAME }}"
+      - "TARBALL_URL           = {{ TARBALL_URL }}"
 
 - name: Set base dir
   set_fact:
