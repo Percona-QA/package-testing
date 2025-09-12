@@ -36,8 +36,12 @@
   command: service mysql start
 
 - name: start mysql service with systemctl command
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7" and is_docker|default(false) == false
   command: systemctl start mysql
+
+- name: start mysql service within docker image
+  when: is_docker|default(false) == true
+  shell: mysqld --user=mysql
 
 - name: set root password on centos
   when: ansible_os_family == "RedHat"
