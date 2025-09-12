@@ -60,6 +60,7 @@
   command: psql -c "ALTER USER postgres PASSWORD '{{ pgsql_password }}';"
   become: yes
   become_user: postgres
+  become_method: su
 
 - name: setup postgresql pg_stat_statements for Debian based Systems
   shell: "{{item}}"
