@@ -108,6 +108,7 @@
   command: psql -c "create extension pg_stat_statements;"
   become: yes
   become_user: postgres
+  become_method: su
 
 - name: add postgresql metrics to monitoring
   command: >-
