@@ -63,20 +63,21 @@ proxysql_version_upstream = vars['proxysql_version_upstream']
 
 
 if glibc_version == '2.35':
-  proxysql2x_files = [
+  proxysql3x_files = [
     'lib/private/libnettle.so.7.0', 'lib/private/libidn2.so.0.3.6','etc/proxysql-admin.cnf', 'etc/proxysql.cnf'
 ]
 else:
-  proxysql2x_files = [
+  proxysql3x_files = [
   'lib/private/libidn2.so.0.3.6','etc/proxysql-admin.cnf', 'etc/proxysql.cnf'
 ]
-proxysql2x_binaries = ['usr/bin/proxysql-admin', 'usr/bin/proxysql', 'usr/bin/percona-scheduler-admin']
-proxysql2x_binaries = ['usr/bin/proxysql-admin', 'usr/bin/proxysql', 'usr/bin/percona-scheduler-admin']
+proxysql3x_binaries = ['usr/bin/proxysql-admin', 'usr/bin/proxysql', 'usr/bin/percona-scheduler-admin']
+proxysql3x_binaries = ['usr/bin/proxysql-admin', 'usr/bin/proxysql', 'usr/bin/percona-scheduler-admin']
 # 8.X
 def get_artifact_sets():
     vars = set_proxysql_vars()
-    proxysql_major_version = vars['proxysql_major_version']
-    if proxysql_major_version.startswith("2.7", "3.0.1"):
-        return  proxysql2x_binaries, proxysql2x_files
+    if proxysql_major_version.startswith("2.7"):
+        return binaries_27, files_27
+    elif proxysql_major_version.startswith("3.0.1"):
+        return binaries_301, files_301
     else:
-        raise ValueError(f"Unsupported proxysql version: {proxysql_major_version}")
+        raise ValueError(f"Unsupported proxysql version: {proxysql_major_version: {proxysql_major_version}")
