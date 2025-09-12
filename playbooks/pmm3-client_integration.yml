@@ -16,6 +16,7 @@
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') | regex_search('\\S(.*\\S)?') }}"
+    is_docker: "{{ lookup('env', 'IS_DOCKER') | default('false') | lower }}"
 
   tasks:
   - name: Register Instance IP
@@ -60,7 +61,7 @@
     shell: >
       pmm-admin config --debug --server-insecure-tls 
       --metrics-mode={{ metrics_mode }} 
-      --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} 
+      --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }}:{{ '8443' if is_docker == 'true' else '443' }}
       {{ instance_ip }} 
       generic 
       node_{{ instance_ip }}
