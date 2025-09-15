@@ -44,3 +44,8 @@ elif proxysql_version_major.startswith("3."):
     proxysql_binaries = proxysql_common_binaries
     proxysql_executables = proxysql_common_executables
     proxysql_files = proxysql_common_files
+
+else:
+    proxysql_binaries = []
+    proxysql_executables = []
+    proxysql_files = []
