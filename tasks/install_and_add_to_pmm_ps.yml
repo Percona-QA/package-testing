@@ -40,7 +40,9 @@
   command: systemctl start mysql
 
 - name: Clear mysql folder
-  shell: rm -fr /var/lib/mysql/
+  shell: |
+    rm -rf /var/lib/mysql/*
+    mysqld --initialize --user=mysql --datadir=/var/lib/mysql
 
 #- name: start mysql service within docker image
 #  when: is_docker|default(false) == true
