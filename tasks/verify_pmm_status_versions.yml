@@ -26,7 +26,7 @@
 
     - name: "Verify PMM Server nomad endpoint"
       shell: |
-        curl --insecure --location --request GET "https://{{ pmm_server_address }}:{{ '8443' if (is_docker | default('false')) == 'true' else '443' }}/nomad/v1/nodes" \
+        curl --insecure --location --request GET "https://{{ pmm_server_address }}:{{ '8443' if (is_docker | default(false)) == true else '443' }}/nomad/v1/nodes" \
           --header 'Content-Type: application/json' \
           --user admin:{{ pmm_server_password }}
       register: nomad_endpoint
