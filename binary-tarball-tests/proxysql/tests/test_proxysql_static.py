@@ -10,7 +10,7 @@ proxysql2x_binaries, proxysql2x_files = get_artifact_sets()
 
 def test_proxysql_version(host):
     if proxysql_major_version.startswith(("2.7", "3.")):
-        expected_version = f"ProxySQL version {Proxysql_version}-percona-1.1"
+        expected_version = f"ProxySQL version {proxysql_version}-percona-1.1"
         output = host.check_output(f"{base_dir}/usr/bin/proxysql --version")
 
         assert re.search(re.escape(expected_version), output), \
@@ -18,7 +18,7 @@ def test_proxysql_version(host):
 
 def test_proxysql_admin_version(host):
     if proxysql_major_version.startswith(("2.7", "3.")):
-        expected_version = f"proxysql-admin version {Proxysql_version}"
+        expected_version = f"proxysql-admin version {proxysql_version}"
         output = host.check_output(f"{base_dir}/usr/bin/proxysql-admin --version")
 
         assert re.search(re.escape(expected_version), output), \
@@ -26,7 +26,7 @@ def test_proxysql_admin_version(host):
 
 def test_proxysql_scheduler_admin_version(host):
     if proxysql_major_version.startswith(("2.7", "3.")):
-        expected_version = f"percona-scheduler-admin Version: {Proxysql_version}"
+        expected_version = f"percona-scheduler-admin Version: {proxysql_version}"
         output = host.check_output(f"{base_dir}/usr/bin/percona-scheduler-admin --version")
 
         assert re.search(re.escape(expected_version), output), \

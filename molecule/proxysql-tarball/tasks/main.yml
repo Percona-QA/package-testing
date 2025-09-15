@@ -7,16 +7,44 @@
 
 - name: install needed packages for running tests with apt
   apt:
-    name: [git, unzip, wget, python3, python3-pip, tar, gawk, libev4, socat, lsof, libnuma1, default-mysql-client]
+    name: [git, unzip, wget, python3, python3-pip, tar, gawk, libev4, socat, lsof, libnuma1, default-mysql-client, libunistring-dev]
     update_cache: yes
     state: latest
   register: result
   until: result is not failed
   when: ansible_os_family == "Debian"
 
+- name: Import MySQL GPG key (2023)
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+
+- name: Download MySQL 8.4 Community repo RPM
+  ansible.builtin.get_url:
+    url: https://repo.mysql.com/mysql84-community-release-el9-1.noarch.rpm
+    dest: /tmp/mysql84-community-release-el9-1.noarch.rpm
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+
+- name: Install MySQL repo RPM
+  ansible.builtin.yum:
+    name: /tmp/mysql84-community-release-el9-1.noarch.rpm
+    state: present
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+
+- name: Install MySQL 8.4 Community Server
+  ansible.builtin.yum:
+    name: mysql-community-server
+    state: present
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+
 - name: install needed packages for running tests with yum
   yum:
-    name: [git, unzip, wget, tar, numactl, gawk, python3, python3-pip, libev, socat, lsof,default-mysql-client]
+    name: [git, unzip, wget, tar, numactl, gawk, python3, python3-pip, libev, socat, lsof, mysql]
     state: latest
   when: ansible_os_family == "RedHat"
 
