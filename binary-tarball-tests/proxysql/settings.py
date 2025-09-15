@@ -67,7 +67,7 @@ if glibc_version == "2.31":
     ]
 else:
     proxysql2x_files = [
-        "lib/private/libidn2.so.0.3.6",
+        "lib/private/libidn2.so.0.4.0",
         "etc/proxysql-admin.cnf",
         "etc/proxysql.cnf",
     ]
