@@ -5,9 +5,6 @@ import testinfra
 
 from settings import *
 
-# Load expected artifacts for current version
-proxysql2x_binaries, proxysql2x_files = get_artifact_sets()
-
 def test_proxysql_version(host):
     if proxysql_major_version.startswith(("2.7", "3.")):
         expected_version = f"ProxySQL version {proxysql_version}-percona-1.1"
@@ -33,7 +30,8 @@ def test_proxysql_scheduler_admin_version(host):
             f"Expected version string not found in output: {output}"
 
 def test_files_exist(host):
-    for f in proxysql2x_files:
+    for f in proxysql_files:
         file_path = f"{base_dir}/{f}"
-        assert host.file(file_path).exists, f"{file_path} does not exist"
-        assert host.file(file_path).size > 0, f"{file_path} is empty"
+        file = host.file(file_path)
+        assert file.exists, f"{file_path} does not exist"
+        assert file.size > 0, f"{file_path} is empty"

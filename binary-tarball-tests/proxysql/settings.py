@@ -7,9 +7,7 @@ import re
 # -----------------------------
 base_dir = os.getenv("BASE_DIR")
 proxysql_version = os.getenv("PROXYSQL_VERSION")
-proxysql_major_version = os.getenv("PROXYSQL_MAJOR_VERSION")
-tarball_name = os.getenv("TARBALL_NAME")
-
+proxysql_major_version = proxysql_version.split('-')[0]
 proxysql_version_major = proxysql_version.split('-')[0]
 # -----------------------------
 # File sets
