@@ -77,8 +77,8 @@
 
 - name: Set ProxySQL version and tarball variables
   set_fact:
-    PROXYSQL_FULL_VERSION: "{{ lookup('env', 'Proxysql_version') }}"
-    PROXYSQL_MAJOR_VERSION: "{{ lookup('env', 'Proxysql_version').split('-')[0] }}"
+    PROXYSQL_FULL_VERSION: "{{ lookup('env', 'PROXYSQL_VERSION') }}"
+    PROXYSQL_MAJOR_VERSION: "{{ lookup('env', 'PROXYSQL_VERSION').split('-')[0] }}"
 
 - name: Set tarball name
   set_fact:
