@@ -24,7 +24,7 @@ def set_proxysql_vars():
     Retrieves and returns environment-based settings for ProxySQL tarball tests.
     """
     source_environment_file()
-    proxysql_version = os.getenv("PROXYSQL_VERSION")
+    proxysql_version = os.getenv("Proxysql_version")
     base_dir = os.getenv("BASE_DIR")
     glibc_version = os.getenv("GLIBC_VERSION")
     tarball_name = os.getenv("TARBALL_NAME")
