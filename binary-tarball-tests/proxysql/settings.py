@@ -10,7 +10,7 @@ proxysql_version = os.getenv("PROXYSQL_VERSION")
 proxysql_major_version = os.getenv("PROXYSQL_MAJOR_VERSION")
 tarball_name = os.getenv("TARBALL_NAME")
 
-
+proxysql_version_major = proxysql_version.split('-')[0]
 # -----------------------------
 # File sets
 # -----------------------------
