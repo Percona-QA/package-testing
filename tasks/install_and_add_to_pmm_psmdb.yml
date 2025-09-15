@@ -14,7 +14,7 @@
   include_tasks: ./enable_repo.yml
   vars:
     package: "{{ psmdb_to_test }}"
-    repository: "release"
+    repository: "{{ psmdb_repository | default('release') }}"
 
 - name: Run install_setup_psmdb.yml
   include_tasks: /tmp/install_setup_psmdb.yml
