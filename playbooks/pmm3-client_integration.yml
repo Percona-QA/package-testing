@@ -16,7 +16,7 @@
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') | regex_search('\\S(.*\\S)?') }}"
-    is_docker: "{{ lookup('env', 'IS_DOCKER') | default('false') | lower }}"
+    is_docker: "{{ lookup('env', 'IS_DOCKER') | default(false)  | lower | bool }}"
 
   tasks:
   - name: Register Instance IP
