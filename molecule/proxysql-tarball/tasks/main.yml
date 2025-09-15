@@ -16,7 +16,7 @@
 
 - name: install needed packages for running tests with yum
   yum:
-    name: [git, unzip, wget, tar, numactl, gawk, python3, python3-pip, libev, socat, lsof]
+    name: [git, unzip, wget, tar, numactl, gawk, python3, python3-pip, libev, socat, lsof, mysql]
     state: latest
   when: ansible_os_family == "RedHat"
 
