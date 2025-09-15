@@ -46,12 +46,12 @@
     vars:
       packages:
       - percona-server-server
-      - percona-mysql-router
-      - percona-server-client
-      - percona-server-test
-      - percona-server-debuginfo
-      - percona-server-devel
-      - percona-server-rocksdb
+#      - percona-mysql-router
+#      - percona-server-client
+#      - percona-server-test
+#      - percona-server-debuginfo
+#      - percona-server-devel
+#      - percona-server-rocksdb
     when: ansible_os_family == "RedHat"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
