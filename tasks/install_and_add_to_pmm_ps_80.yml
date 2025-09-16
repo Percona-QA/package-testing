@@ -19,8 +19,8 @@
 - name: install Percona Server 8.0 packages
   include_tasks: ./install_ps80.yml
 
-- name: start mysql service
-  service: name=mysql state=started
+#- name: start mysql service
+#  service: name=mysql state=started
 
 - name: start mysql service with service command
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
