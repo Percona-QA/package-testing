@@ -35,7 +35,7 @@
 
 - name: Verify MySQL status
   shell: |
-    cat /var/log/mysqld.log | grep 'temporary password'
+    cat /var/log/mysqld.log
 
 - name: set root password on centos
   when: ansible_os_family == "RedHat"
