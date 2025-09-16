@@ -17,7 +17,7 @@ def test_check_deb_package(host, package):
     dist = host.system_info.distribution
     if dist.lower() in RHEL_DISTS:
         pytest.skip("This test only for Debian based platforms")
-    if os.getenv("ansible_distribution_release") == "focal":
+    if dist == "ubuntu" and release.startswith("20.04"):
         pytest.skip("Skipping on Ubuntu Focal (20.04)")
     pkg = host.package(package)
     assert pkg.is_installed
