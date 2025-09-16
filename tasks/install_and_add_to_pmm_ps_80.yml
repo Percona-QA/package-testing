@@ -23,7 +23,7 @@
 #  service: name=mysql state=started
 
 - name: start mysql service with service command
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+#  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
   command: service mysql start
 
 #- name: start mysql service with systemctl command
