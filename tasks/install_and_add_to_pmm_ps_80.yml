@@ -39,6 +39,10 @@
     cat /var/log/mysqld.log
     mysql -uroot
 
+- name: Verify MySQL status
+  debug:
+    var: ansible_os_family
+
 - name: set root password on centos
   when: ansible_os_family == "RedHat"
   shell: |
