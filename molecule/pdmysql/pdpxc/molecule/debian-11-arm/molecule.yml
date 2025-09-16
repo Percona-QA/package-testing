@@ -6,7 +6,7 @@ driver:
 platforms:
   - name: debian11-arm-${BUILD_NUMBER}-${JOB_NAME}
     region: eu-central-1
-    image: ami-0ba46829ac8ce7e0d
+    image: ami-07384dc87c79b6d8b
     vpc_subnet_id: subnet-0fad4db6fdd8025b6
     instance_type: c6g.large
     ssh_user: admin
