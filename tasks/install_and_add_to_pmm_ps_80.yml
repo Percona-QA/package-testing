@@ -34,8 +34,7 @@
   command: systemctl status mysql
 
 - name: Verify MySQL status
-  shell: |
-    cat /var/log/mysqld.log
+  command: cat /var/log/mysqld.log
 
 - name: set root password on centos
   when: ansible_os_family == "RedHat"
