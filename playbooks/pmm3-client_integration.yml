@@ -54,18 +54,19 @@
     include_tasks: ../tasks/verify_pmm_client_version.yml
 
 ### Setup PMM Client
-  - name: Start PMM Client
-    shell: nohup pmm-agent --config-file=/usr/local/percona/pmm/config/pmm-agent.yaml > /var/log/pmm-agent.log 2>&1 &
+#  - name: Start PMM Client
+#    shell: nohup pmm-agent --config-file=/usr/local/percona/pmm/config/pmm-agent.yaml > /var/log/pmm-agent.log 2>&1 &
 
   - name: Use "pmm-admin config" to connect pmm client to server
     shell: >
-      pmm-admin config 
-        --debug
-        --server-insecure-tls 
-        --metrics-mode={{ metrics_mode }}
-        --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }}:{{ '8443' if (is_docker | default(false)) == true else '443' }}
-        {{ instance_ip }}
-        generic node_{{ instance_ip }}
+      pmm-admin config
+      --debug
+      --server-insecure-tls
+      --metrics-mode={{ metrics_mode }}
+      --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }}:{{ '8443' if (is_docker | default(false)) == true else '443' }}
+      {{ instance_ip }}
+      generic
+      node_{{ instance_ip }}
 #    shell: >
 #      pmm-admin config --debug --server-insecure-tls
 #      --metrics-mode={{ metrics_mode }}
