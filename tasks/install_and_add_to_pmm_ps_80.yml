@@ -33,6 +33,10 @@
 - name: Verify MySQL status
   command: systemctl status mysql
 
+- name: Verify MySQL status
+  shell: |
+    init_pass=$(grep "temporary password" /var/log/mysqld.log | awk '{print $NF}' | tail -1)
+
 - name: set root password on centos
   when: ansible_os_family == "RedHat"
   shell: |
