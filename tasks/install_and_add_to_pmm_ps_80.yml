@@ -19,29 +19,16 @@
 - name: install Percona Server 8.0 packages
   include_tasks: ./install_ps80.yml
 
-- name: Print is docker condition
-  debug:
-    msg: "{{ is_docker }}"
-
-- name: Print is docker condition
-  debug:
-    msg: "{{ is_docker|default(false) == false }}"
-
-- name: start mysql service
-  service: name=mysql state=started
-  when: is_docker|default(false) == false
-
-- name: start mysql service with service command
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-  command: service mysql start
-
-- name: start mysql service with systemctl command
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
-  command: systemctl start mysql
-
-#- name: start mysql service within docker image
-#  when: is_docker|default(false) == true
-#  shell: mysqld --user=mysql
+#- name: start mysql service
+#  service: name=mysql state=started
+#
+#- name: start mysql service with service command
+#  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+#  command: service mysql start
+#
+#- name: start mysql service with systemctl command
+#  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+#  command: systemctl start mysql
 
 - name: set root password on centos
   when: ansible_os_family == "RedHat"
