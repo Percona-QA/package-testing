@@ -5,55 +5,33 @@ import testinfra
 
 from settings import *
 
-proxysql2x_binaries, proxysql2x_files = get_artifact_sets()
-
 def test_proxysql_version(host):
-    if proxysql_major_version in ['2.7','1.4']:
-        expected_version = 'ProxySQL version' + proxysql_version + '-percona-1.2'
-        output = host.check_output(base_dir + '/usr/bin/proxysql --version')
+    if proxysql_major_version.startswith(("2.7", "3.")):
+        expected_version = f"ProxySQL version {proxysql_version}-percona-1.1"
+        output = host.check_output(f"{base_dir}/usr/bin/proxysql --version")
 
-        # Use regex to check if the expected version is in the output
-        match = re.search(rf'{re.escape(expected_version)}', output)
-        assert match, f"Expected version string not found in output: {output}"
+        assert re.search(re.escape(expected_version), output), \
+            f"Expected version string not found in output: {output}"
 
 def test_proxysql_admin_version(host):
-    if proxysql_major_version in ['2.7','1.4']:
-        expected_version = 'proxysql-admin version' + proxysql_version 
-        output = host.check_output(base_dir + '/usr/bin/proxysql-admin --version')
+    if proxysql_major_version.startswith(("2.7", "3.")):
+        expected_version = f"proxysql-admin version {proxysql_version}"
+        output = host.check_output(f"{base_dir}/usr/bin/proxysql-admin --version")
 
-        # Use regex to check if the expected version is in the output
-        match = re.search(rf'{re.escape(expected_version)}', output)
-        assert match, f"Expected version string not found in output: {output}"
+        assert re.search(re.escape(expected_version), output), \
+            f"Expected version string not found in output: {output}"
 
 def test_proxysql_scheduler_admin_version(host):
-    if proxysql_major_version in ['2.7','1.4']:
-        expected_version = 'percona-scheduler-admin Version:' + proxysql_version 
-        output = host.check_output(base_dir + '/usr/bin//percona-scheduler-admin --version')
+    if proxysql_major_version.startswith(("2.7", "3.")):
+        expected_version = f"percona-scheduler-admin Version: {proxysql_version}"
+        output = host.check_output(f"{base_dir}/usr/bin/percona-scheduler-admin --version")
 
-        # Use regex to check if the expected version is in the output
-        match = re.search(rf'{re.escape(expected_version)}', output)
-        assert match, f"Expected version string not found in output: {output}"
+        assert re.search(re.escape(expected_version), output), \
+            f"Expected version string not found in output: {output}"
 
 def test_files_exist(host):
-    for f in proxysql2x_files:
+    for f in proxysql_files:
         file_path = f"{base_dir}/{f}"
-        assert host.file(file_path).exists, f"{file_path} does not exist"
-        assert host.file(file_path).size > 0, f"{file_path} is empty"
-
-
-#def test_mysql_version(host):
- #   if proxysql_version_major in ['5.7', '5.6']:
-  #      expected_version = 'mysql  Ver 14.14 Distrib ' + proxysql57_client_version
-   #     output = host.check_output(base_dir + '/bin/mysql --version')
-
-        # Use regex to check if the expected version is in the output
-     #   match = re.search(rf'{re.escape(expected_version)}', output)
-    #    assert match, f"Expected version string not found in output: {output}"
-
-#def test_mysqld_version(host):
- #   if proxysql_version_major in ['5.7','5.6']:
-  #      expected = (
-   #         'mysqld  Ver ' + proxysql57_server_version_norel + ' for Linux on x86_64 (Percona XtraDB Cluster binary (GPL) ' +
-    #        proxysql57_server_version + ', Revision ' + proxysql_revision + ', wsrep_' + wsrep_version + ')'
-     #   )
-      #  assert expected in host.check_output(base_dir+'/bin/mysqld --version')
+        file = host.file(file_path)
+        assert file.exists, f"{file_path} does not exist"
+        assert file.size > 0, f"{file_path} is empty"

@@ -7,12 +7,40 @@
 
 - name: install needed packages for running tests with apt
   apt:
-    name: [git, unzip, wget, python3, python3-pip, tar, gawk, libev4, socat, lsof, libnuma1, default-mysql-client]
+    name: [git, unzip, wget, python3, python3-pip, tar, gawk, libev4, socat, lsof, libnuma1, default-mysql-client, libunistring-dev]
     update_cache: yes
     state: latest
   register: result
   until: result is not failed
   when: ansible_os_family == "Debian"
+
+- name: Import MySQL GPG key (2023)
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+
+- name: Download MySQL 8.4 Community repo RPM
+  ansible.builtin.get_url:
+    url: https://repo.mysql.com/mysql84-community-release-el9-1.noarch.rpm
+    dest: /tmp/mysql84-community-release-el9-1.noarch.rpm
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+
+- name: Install MySQL repo RPM
+  ansible.builtin.yum:
+    name: /tmp/mysql84-community-release-el9-1.noarch.rpm
+    state: present
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+
+- name: Install MySQL 8.4 Community Server
+  ansible.builtin.yum:
+    name: mysql-community-server
+    state: present
+  when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
 
 - name: install needed packages for running tests with yum
   yum:
@@ -37,25 +65,39 @@
     state: present
   when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
 
-
-- name: get glibc version actions
+- name: Get glibc version actions
   set_fact:
-    GLIBC_VERSION: "{{ '2.31' if ansible_os_family == 'Debian' else '2.28' }}"
+    GLIBC_VERSION: >-
+      {{
+        '2.35' if ansible_os_family == 'Debian' else
+        '2.39' if ansible_os_family == 'RedHat' and (ansible_distribution_major_version | int == 10) else
+        '2.34' if ansible_os_family == 'RedHat' else
+        '2.35'
+      }}
 
 - name: Set ProxySQL version and tarball variables
   set_fact:
+    PROXYSQL_FULL_VERSION: "{{ lookup('env', 'PROXYSQL_VERSION') }}"
     PROXYSQL_MAJOR_VERSION: "{{ lookup('env', 'PROXYSQL_VERSION').split('-')[0] }}"
-   
-- name: Set tarball name 
+
+- name: Set tarball name
   set_fact:
     TARBALL_NAME: "proxysql-{{ PROXYSQL_MAJOR_VERSION }}-Linux-x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
 
 - name: Set tarball url
-  set_fact:  
+  set_fact:
     TARBALL_URL: "https://downloads.percona.com/downloads/TESTING/proxysql-{{ PROXYSQL_MAJOR_VERSION }}/{{ TARBALL_NAME }}"
 
+- name: Show ProxySQL variables
+  debug:
+    msg:
+      - "PROXYSQL_FULL_VERSION = {{ PROXYSQL_FULL_VERSION }}"
+      - "PROXYSQL_MAJOR_VERSION = {{ PROXYSQL_MAJOR_VERSION }}"
+      - "TARBALL_NAME          = {{ TARBALL_NAME }}"
+      - "TARBALL_URL           = {{ TARBALL_URL }}"
+
 - name: Set base dir
-  set_fact:     
+  set_fact:
     BASE_DIR: "/package-testing/binary-tarball-tests/proxysql/proxysql-{{ PROXYSQL_MAJOR_VERSION }}-Linux-x86_64.glibc{{ GLIBC_VERSION }}"
 
 - name: Debug BASE_DIR
