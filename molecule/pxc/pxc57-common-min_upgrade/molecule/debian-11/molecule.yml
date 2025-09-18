@@ -8,7 +8,7 @@ driver:
 platforms:
   - name: ${BUILD_NUMBER}-pxc2-57-common-debian-11-min_upgrade-${test_type}
     region: us-west-1
-    image: ami-09b4378b1d3387f81
+    image: ami-02dda1c84e46dbe0a
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: t2.large
     ssh_user: admin
@@ -19,7 +19,7 @@ platforms:
       build-number: ${BUILD_NUMBER}
   - name: ${BUILD_NUMBER}-pxc3-57-common-debian-11-min_upgrade-${test_type}
     region: us-west-1
-    image: ami-09b4378b1d3387f81
+    image: ami-02dda1c84e46dbe0a
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: t2.large
     ssh_user: admin
