@@ -8,7 +8,7 @@ driver:
 platforms:
   - name: ${BUILD_NUMBER}-pxc2-84-common-debian-11-arm-install-${INSTALLTYPE}
     region: us-west-1
-    image: ami-0db4831f759c31c7b
+    image: ami-0f887c9b8838fb051
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: c6g.large
     ssh_user: admin
@@ -19,7 +19,7 @@ platforms:
       build-number: ${BUILD_NUMBER}
   - name: ${BUILD_NUMBER}-pxc3-84-common-debian-11-arm-install-${INSTALLTYPE}
     region: us-west-1
-    image: ami-0db4831f759c31c7b
+    image: ami-0f887c9b8838fb051
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: c6g.large
     ssh_user: admin
