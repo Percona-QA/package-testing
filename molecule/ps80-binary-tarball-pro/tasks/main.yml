@@ -98,6 +98,10 @@
           2.34
         {% endif %}
 
+  - name: sanitize GLIBC_VERSION
+    set_fact:
+      GLIBC_VERSION: "{{ GLIBC_VERSION | trim }}"
+
   - name: get TARBALL_NAME
     set_fact:
       TARBALL_NAME: "Percona-Server-Pro-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
