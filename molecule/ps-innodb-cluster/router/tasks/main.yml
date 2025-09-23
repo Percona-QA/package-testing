@@ -94,10 +94,14 @@
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
-  - name: create cluster modified with system libs
+  - name: remove conflicting bundled libssh
+    file:
+      path: /usr/lib/mysqlsh/libssh.so.4
+      state: absent
+
+
+  - name: create cluster
     command: mysqlsh --uri=root@ps-node1 --password=Test1234# -- dba create-cluster testCluster
-    environment:
-      LD_LIBRARY_PATH: "/lib64:{{ ansible_env.LD_LIBRARY_PATH | default('') }}"
 
   - pause:
       seconds: 10
