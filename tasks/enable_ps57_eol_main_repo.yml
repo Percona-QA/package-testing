@@ -10,6 +10,12 @@
     command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
 
+  - name: add an apt signing key to enable repo
+    apt_key:
+      url: https://percona.com/downloads/deb-percona-keyring.gpg
+      state: present
+    when: ansible_os_family == "Debian"
+
   - name: add pro repository on debian
     template: src=../templates/eol_deb_repo_file_ps57.j2
               dest=/etc/apt/sources.list.d/post-eol.list
