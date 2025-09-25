@@ -134,17 +134,13 @@
   set_fact:
     new_pid_pmm_agent: "{{ new_pid_pmm_agent.stdout }}"
 
-- name: Print PBM debian package name
-  debug:
-    msg: new_pid_pmm_agent
-
 - name: Print old pid of pmm agent
   debug:
-    msg: {{ old_pid_pmm_agent }}
+    msg: "{{ old_pid_pmm_agent }}"
 
 - name: Print new pid of pmm agent
   debug:
-    msg: {{ new_pid_pmm_agent }}
+    msg: "{{ new_pid_pmm_agent }}"
 
 - name: Fail if pmm agent is not restarted.
   fail:
