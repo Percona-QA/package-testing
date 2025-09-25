@@ -4,15 +4,15 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: centos7-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
+  - name: debian10-${BUILD_NUMBER}-${JOB_NAME}
     region: us-west-2
-    image: ami-04f798ca92cc13f74
+    image: ami-05be179483264959d
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.micro
-    ssh_user: centos
-    root_device_name: /dev/sda1
+    ssh_user: admin
+    root_device_name: /dev/xvda
     instance_tags:
-      iit-billing-tag: ps-package-testing
+      iit-billing-tag: jenkins-pg-worker
       job-name: ${JOB_NAME}
       build-number: ${BUILD_NUMBER}
 provisioner:
@@ -24,8 +24,15 @@ provisioner:
     prepare: ../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
+verifier:
+  name: testinfra
+  directory: ../../../tests/
+  options:
+    verbose: true
+    s: true
+    junitxml: report.xml
 scenario:
-  name: centos-7
+  name: debian-10
   destroy_sequence:
     - destroy
   clenup_sequence:
@@ -35,5 +42,6 @@ scenario:
     - create
     - prepare
     - converge
+    - verify
     - cleanup
     - destroy
