@@ -177,6 +177,10 @@
 ### end PG
 
 ### Upgrade PMM Client package
+  - name: Store old PID of PMM Agent
+    shell: "ps -C pmm-agent -o pid="
+    register: old_pid_pmm_agent
+
   - name: Enable {{ test_package }} {{ test_repo }} repo
     include_tasks: ../tasks/enable_repo.yml
     vars:

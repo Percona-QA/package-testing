@@ -125,3 +125,12 @@
       - vmagent
       - node_exporter
       - "{{ ('psmdb-' in enabled_db | join('')) | ternary('mongodb_exporter','') }}"
+
+- name: Store new PID of PMM Agent
+  shell: "ps -C pmm-agent -o pid="
+  register: new_pid_pmm_agent
+
+- name: Fail if pmm agent is not restarted.
+  fail:
+    msg: "PMM Agent was not restarted. Old PID is: {{ old_pid_pmm_agent }} New PID is: {{ new_pid_pmm_agent }}"
+  when: old_pid_pmm_agent == new_pid_pmm_agent
