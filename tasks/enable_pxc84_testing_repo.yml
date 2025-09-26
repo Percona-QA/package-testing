@@ -21,8 +21,8 @@
   - name: change the default repo to testing
     command: percona-release enable-only pxc-84-lts testing
 
-  - name: add the testing tools repo
-    command: percona-release enable tools release
+#  - name: add the testing tools repo
+#    command: percona-release enable tools release
 
   - name: enable pxb 84 repo
     command: percona-release enable pxb-84-lts testing
