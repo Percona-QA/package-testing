@@ -168,6 +168,14 @@
 ### end PG
 
 ### Upgrade PMM Client package
+  - name: Store old PID of PMM Agent
+    shell: "ps -C pmm-agent -o pid="
+    register: old_pid_pmm_agent
+
+  - name: Store new PID of PMM Agent
+    set_fact:
+      old_pid_pmm_agent: "{{ old_pid_pmm_agent.stdout }}"
+
   - name: install pmm3-client tarball to custom path
     command: "../scripts/pmm3_client_install_tarball.sh -v {{ (tarball_link | length > 0) | ternary(tarball_link, pmm_version) }} -p {{ custom_path }} -u"
 

@@ -100,6 +100,14 @@
       success_msg: "pmm-agent is connected to server"
 
 ### Upgrade PMM Client package
+  - name: Store old PID of PMM Agent
+    shell: "ps -C pmm-agent -o pid="
+    register: old_pid_pmm_agent
+
+  - name: Store new PID of PMM Agent
+    set_fact:
+      old_pid_pmm_agent: "{{ old_pid_pmm_agent.stdout }}"
+
   - name: Enable {{ test_package }} {{ test_repo }} repo
     include_tasks: ../tasks/enable_repo.yml
     vars:
