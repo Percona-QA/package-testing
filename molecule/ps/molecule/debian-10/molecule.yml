@@ -13,6 +13,8 @@ platforms:
     root_device_name: xvda
     instance_tags:
       iit-billing-tag: jenkins-pg-worker
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   log: True
