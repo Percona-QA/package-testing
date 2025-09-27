@@ -5,7 +5,8 @@ def osConfigs = [
     "min-bookworm-x64"  : "2.35",
     "min-bullseye-x64"  : "2.31",
     "min-ol-9-x64"      : "2.34",
-    "min-ol-8-x64"      : "2.28"
+    "min-ol-8-x64"      : "2.28",
+    "min-rhel-10-x64"   : "2.35",
 ]
 
 pipeline {
@@ -33,10 +34,10 @@ pipeline {
                     sh '''
                         rm -rf /package-testing
                         rm -f master.zip
-                        wget -O master.zip https://github.com/Percona-QA/package-testing/archive/refs/heads/master.zip
+                        wget -O master.zip https://github.com/kaushikpuneet07/package-testing/archive/refs/heads/rhel10-ps.zip
                         unzip master.zip
                         rm -f master.zip
-                        mv "package-testing-master" package-testing
+                        mv "package-testing-rhel10-ps" package-testing
                     '''
 
                     def VERSION = sh(
@@ -187,7 +188,7 @@ def runtarballtests(String psVersion, boolean buildMinimal, String glibcVersion)
 
         rm -rf /usr/local/package-testing
         cd /tmp
-        git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+        git clone https://github.com/kaushikpuneet07/package-testing.git --branch rhel10-ps --depth 1
         cd /tmp/package-testing/binary-tarball-tests/ps
 
         wget "\${TARBALL_LINK}\${TARBALL_NAME}"
