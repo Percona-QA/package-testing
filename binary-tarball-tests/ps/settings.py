@@ -219,7 +219,7 @@ ps8x_executables = ps8x_binaries + [
 ps8x_plugins = (
   ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
-  ('group_replication','group_replication.so'),('clone','mysql_clone.so'),
+  ('clone','mysql_clone.so'),
   ('procfs', 'procfs.so')
 )
 ps8x_functions = (
