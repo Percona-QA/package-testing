@@ -83,9 +83,24 @@
 
 #      - openldap // this package causes issue on OL-9
 
+#  - name: get GLIBC_VERSION
+#    set_fact:
+#      GLIBC_VERSION: "{{ '2.35' if ansible_os_family == 'Debian' else '2.34' }}"
+
   - name: get GLIBC_VERSION
     set_fact:
-      GLIBC_VERSION: "{{ '2.35' if ansible_os_family == 'Debian' else '2.34' }}"
+      GLIBC_VERSION: >-
+        {% if ansible_distribution == 'RedHat' and ansible_distribution_major_version == '10' %}
+          2.39
+        {% elif ansible_os_family == 'Debian' %}
+          2.35
+        {% else %}
+          2.34
+        {% endif %}
+
+  - name: sanitize GLIBC_VERSION
+    set_fact:
+      GLIBC_VERSION: "{{ GLIBC_VERSION | trim }}"
 
   - name: get TARBALL_NAME
     set_fact:

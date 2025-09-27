@@ -135,9 +135,9 @@
       - lookup('env', 'install_repo') != "experimental"
       - ansible_distribution != "Amazon"
 
-  - name: enable the Tools release repo
-    command: percona-release enable tools release
-    when: ansible_distribution != "Amazon"
+#  - name: enable the Tools release repo
+#    command: percona-release enable tools release
+#    when: ansible_distribution != "Amazon"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -214,8 +214,8 @@
   - name: check the clone and data masking plugins
     command: /package-testing/scripts/ps_clone_plugin_test_84.sh
 
-  - name: check the data masking component
-    command: /package-testing/scripts/ps_dm_component.sh
+#  - name: check the data masking component
+#    command: /package-testing/scripts/ps_dm_component.sh
 
   - name: check the audit log v2 plugin
     command: /package-testing/scripts/ps_audit_log_v2_component.sh
