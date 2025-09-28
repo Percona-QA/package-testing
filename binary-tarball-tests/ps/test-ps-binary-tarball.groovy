@@ -34,10 +34,10 @@ pipeline {
                     sh '''
                         rm -rf /package-testing
                         rm -f master.zip
-                        wget -O master.zip https://github.com/kaushikpuneet07/package-testing/archive/refs/heads/rhel10-ps.zip
+                        wget -O master.zip https://github.com/Percona-QA/package-testing/archive/refs/heads/master.zip
                         unzip master.zip
                         rm -f master.zip
-                        mv "package-testing-rhel10-ps" package-testing
+                        mv "package-testing-master" package-testing
                     '''
 
                     def VERSION = sh(
@@ -188,7 +188,7 @@ def runtarballtests(String psVersion, boolean buildMinimal, String glibcVersion)
 
         rm -rf /usr/local/package-testing
         cd /tmp
-        git clone https://github.com/kaushikpuneet07/package-testing.git --branch rhel10-ps --depth 1
+        git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
         cd /tmp/package-testing/binary-tarball-tests/ps
 
         wget "\${TARBALL_LINK}\${TARBALL_NAME}"

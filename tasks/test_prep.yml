@@ -220,10 +220,10 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip "https://github.com/kaushikpuneet07/package-testing/archive/rhel10-ps.zip"
+    - wget --no-check-certificate -O master.zip "https://github.com/Percona-QA/package-testing/archive/master.zip"
     - unzip master.zip
     - rm -f master.zip
-    - mv "package-testing-rhel10-ps" /package-testing
+    - mv "package-testing-master" /package-testing
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('master', true) }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
