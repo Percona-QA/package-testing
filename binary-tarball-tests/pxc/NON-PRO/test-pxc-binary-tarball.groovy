@@ -219,7 +219,7 @@ pipeline {
                         script {
                             currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
                         }
-                        withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', user>
+                        withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
                             sh '''
                                 echo "${BUILD_TYPE_MINIMAL}"
                                 MINIMAL=""
