@@ -54,11 +54,11 @@ else
     sudo apt-get install -y percona-xtrabackup-24
   fi
 fi
-if [[ $(lsb_release -sc) == 'bookworm' ]]; then
+if [[ $(lsb_release -sc) == 'bookworm' or $(lsb_release -sc) == 'noble' ]]; then
   pip3 install --user --break-system-packages pytest-testinfra pytest
 else
   pip3 install --user pytest-testinfra pytest
-fi  
+fi
 
 TARBALL_NAME=$(basename "$(find . -maxdepth 1 -name '*.tar.gz'|head -n1)")
 if [ -z "${TARBALL_NAME}" ]; then
