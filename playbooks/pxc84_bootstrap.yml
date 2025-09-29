@@ -100,7 +100,7 @@
       packages:
       - percona-xtradb-cluster-full
       - percona-xtrabackup-84
-      - percona-toolkit
+#      - percona-toolkit
     when: ansible_os_family == "RedHat"
 
   - name: stop mysql service with service command
