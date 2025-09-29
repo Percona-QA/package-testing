@@ -1,0 +1,58 @@
+# This task installs Percona Server 8.0 on CentOS and Debian/Ubuntu
+#
+
+  - name: install Percona Server deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf | default('') }}
+      - percona-server-test{{ pro_suf | default('') }}
+      - percona-server{{ pro_suf | default('') }}-dbg
+      - percona-server{{ pro_suf | default('') }}-source
+      - percona-server-client{{ pro_suf | default('') }}
+      - percona-server-rocksdb{{ pro_suf | default('') }}
+      - percona-mysql-router{{ pro_suf | default('') }}
+    when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: get list of enabled dnf modules on centos 8
+    command: dnf module list --enabled
+    register: enabled_dnf_modules
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
+
+  - name: list enabled dnf modules on centos 8
+    debug:
+      var: enabled_dnf_modules
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
+
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: yum module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: disable the mariadb module on RHEL/CentOS 8
+    command: yum module disable mariadb -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: install Percona Server rpm packages
+    yum:
+      allowerasing: "{{ allowerasing_value | default (false) }}"
+      name: "{{ packages }}"
+      state: latest
+      disablerepo: "epel"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf | default('') }}
+      - percona-mysql-router{{ pro_suf | default('') }}
+      - percona-server-client{{ pro_suf | default('') }}
+      - percona-server-test{{ pro_suf | default('') }}
+      - percona-server{{ pro_suf | default('') }}-debuginfo
+      - percona-server-devel{{ pro_suf | default('') }}
+      - percona-server-rocksdb{{ pro_suf | default('') }}
+    when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
