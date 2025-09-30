@@ -131,6 +131,14 @@
     delay: 1
     retries: 5
 
+  - name: Store old PID of PMM Agent
+    shell: "ps -C pmm-agent -o pid="
+    register: old_pid_pmm_agent
+
+  - name: Store new PID of PMM Agent
+    set_fact:
+      old_pid_pmm_agent: "{{ old_pid_pmm_agent.stdout | trim }}"
+
 ### start PS
   - set_fact:
       mysql_service_name: "mysql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
@@ -204,6 +212,14 @@
 ### end PG
 
 ### Upgrade PMM Client package
+  - name: Store old PID of PMM Agent
+    shell: "ps -C pmm-agent -o pid="
+    register: old_pid_pmm_agent
+
+  - name: Store new PID of PMM Agent
+    set_fact:
+      old_pid_pmm_agent: "{{ old_pid_pmm_agent.stdout | trim }}"
+
   - name: Enable {{ test_package }} {{ test_repo }} repo
     include_tasks: ../tasks/enable_repo.yml
     vars:
