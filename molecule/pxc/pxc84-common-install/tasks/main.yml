@@ -425,12 +425,12 @@
       state: present
     when: ansible_facts['distribution'] == "RedHat"
 
-  - name: Enable and start iptables service
-    systemd:
-      name: iptables
-      state: started
-      enabled: true
-    when: ansible_facts['distribution'] == "RedHat"
+#  - name: Enable and start iptables service
+#    systemd:
+#      name: iptables
+#      state: started
+#      enabled: true
+#    when: ansible_facts['distribution'] == "RedHat"
 
   - name: Block pmm.check-dev.percona.com IP for non REDHAT 
     iptables:
