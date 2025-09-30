@@ -303,7 +303,7 @@
       packages:
       - percona-xtradb-cluster-full
       - percona-xtrabackup-84
-      - percona-toolkit
+#      - percona-toolkit
     when: 
       - ansible_os_family == "Debian"
       - ansible_architecture == "aarch64"
@@ -319,7 +319,7 @@
       packages:
       - percona-xtradb-cluster-full
       - percona-xtrabackup-84
-      - percona-toolkit
+#      - percona-toolkit
     when: 
       - ansible_os_family == "Debian"
       - ansible_architecture == "x86_64"
@@ -334,7 +334,7 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - percona-toolkit
+#      - percona-toolkit
       - percona-xtrabackup-84
     when: 
       - ansible_os_family == "RedHat" 
@@ -518,5 +518,5 @@
   - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL COMMON
     include_tasks: ../../../../tasks/list_installed_packages.yml
 
-#  - name: Verify telemetry version and package installation
-#    command: /package-testing/check_tel_ver_pack.sh
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
