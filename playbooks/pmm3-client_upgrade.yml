@@ -106,7 +106,7 @@
 
   - name: Store new PID of PMM Agent
     set_fact:
-      old_pid_pmm_agent: "{{ old_pid_pmm_agent.stdout }}"
+      old_pid_pmm_agent: "{{ old_pid_pmm_agent.stdout | trim }}"
 
   - name: Enable {{ test_package }} {{ test_repo }} repo
     include_tasks: ../tasks/enable_repo.yml

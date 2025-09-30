@@ -132,7 +132,7 @@
 
 - name: Store new PID of PMM Agent
   set_fact:
-    new_pid_pmm_agent: "{{ new_pid_pmm_agent.stdout }}"
+    new_pid_pmm_agent: "{{ new_pid_pmm_agent.stdout | trim }}"
 
 - name: Log old PID of PMM Agent
   debug:

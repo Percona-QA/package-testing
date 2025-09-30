@@ -74,7 +74,7 @@
 
   - name: Store new PID of PMM Agent
     set_fact:
-      old_pid_pmm_agent: "{{ old_pid_pmm_agent.stdout }}"
+      old_pid_pmm_agent: "{{ old_pid_pmm_agent.stdout | trim }}"
 
 # start PSMDB
   - set_fact:
