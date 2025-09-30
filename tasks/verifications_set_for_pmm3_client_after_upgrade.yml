@@ -134,6 +134,10 @@
   set_fact:
     new_pid_pmm_agent: "{{ new_pid_pmm_agent.stdout }}"
 
+- name: Log old PID of PMM Agent
+  debug:
+    var: "{{ old_pid_pmm_agent }}"
+
 - name: Fail if pmm agent is not restarted.
   fail:
     msg: "PMM Agent was not restarted. Old PID is: {{ old_pid_pmm_agent }} New PID is: {{ new_pid_pmm_agent }}"
