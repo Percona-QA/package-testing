@@ -13,7 +13,14 @@
   shell: |
     dnf config-manager --set-enabled ol8_codeready_builder
     dnf install perl-IPC-Run -y
-  when: ansible_os_family == "RedHat"
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+  ignore_errors: yes
+
+- name: Install Perl (IPC::RUN) on RedHat linux 9
+  shell: |
+    dnf config-manager --set-enabled ol9_codeready_builder
+    dnf install perl-IPC-Run -y
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
   ignore_errors: yes
 
 - name: Download install_ppg.yml
