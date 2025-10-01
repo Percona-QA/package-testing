@@ -161,3 +161,18 @@
 ### verifications
   - name: Perform standard verifications set for PMM Client
     include_tasks: ../tasks/verifications_set_for_pmm3_client.yml
+
+  - name: Output Percona Server version
+    debug:
+      var: "{{ ps_version }}"
+    when: ps_version is defined
+
+  - name: Output PSMDB version
+    debug:
+      var: "{{ psmdb_version }}"
+    when: psmdb_version is defined
+
+  - name: Output PG version
+    debug:
+      var: "{{ pg_version }}"
+    when: pg_version is defined

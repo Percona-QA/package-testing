@@ -147,5 +147,15 @@
 
   - name: Output Percona Server version
     debug:
-      var: "{{ percona_server_version }}"
-    when: percona_server_version is defined
+      var: "{{ ps_version }}"
+    when: ps_version is defined
+
+  - name: Output PSMDB version
+    debug:
+      var: "{{ psmdb_version }}"
+    when: psmdb_version is defined
+
+  - name: Output PG version
+    debug:
+      var: "{{ pg_version }}"
+    when: pg_version is defined
