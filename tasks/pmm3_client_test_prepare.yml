@@ -64,3 +64,4 @@
     only: yes
     package: "{{ test_package }}"
     repository: "{{ test_repo }}"
+    clear_cache: "false"
