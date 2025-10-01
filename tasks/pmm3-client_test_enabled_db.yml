@@ -29,3 +29,11 @@
   when:
     - ansible_distribution == "Debian"
     - ansible_distribution_version is version('12', '==')
+
+- name: Debug Distribution name
+  debug:
+    msg: "{{ ansible_distribution }}"
+
+- name: Debug Distribution version
+  debug:
+    msg: "{{ ansible_distribution_version }}"
