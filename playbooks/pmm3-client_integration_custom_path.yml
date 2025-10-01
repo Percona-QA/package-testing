@@ -88,6 +88,10 @@
 
   - name: Debug os Version
     debug:
+      msg: "{{ ansible_distribution == 'Debian' and ansible_distribution_version.split('.')[0]|int < 13 }}"
+
+  - name: Debug os Version
+    debug:
       msg: "{{ enabled_db }}"
 
   - name: Install and start Percona Server 8.0
