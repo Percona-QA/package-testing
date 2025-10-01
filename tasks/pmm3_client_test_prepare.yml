@@ -27,7 +27,7 @@
       - jq # for exporter endpoint metric fetch
       - acl
   retries: 5
-  delay: 10
+  delay: 1
   register: result
   until: result is not failed
 
