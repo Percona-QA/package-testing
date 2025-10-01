@@ -26,7 +26,7 @@
       - gnupg
       - jq # for exporter endpoint metric fetch
       - acl
-  retries: 60
+  retries: 5
   delay: 10
   register: result
   until: result is not failed
