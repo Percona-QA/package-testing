@@ -21,14 +21,14 @@
     percona_server_version: "ps-8.4"
   when:
     - ansible_distribution == "Debian"
-    - ansible_distribution_version is version('11', '==')
+    - ansible_distribution_version.split('.')[0] == "11"
 
 - name: Set Percona Server for Debian 12 Bookworm
   set_fact:
     percona_server_version: "ps-8.4"
   when:
     - ansible_distribution == "Debian"
-    - ansible_distribution_version is version('12', '==')
+    - ansible_distribution_version.split('.')[0] == "12"
 
 - name: Debug Distribution name
   debug:
