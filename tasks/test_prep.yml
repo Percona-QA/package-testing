@@ -1,6 +1,14 @@
-  - name: DEBUG
+  - name: DEBUG distribution
     debug:
       var: ansible_facts['distribution']
+
+  - name: DEBUG distribution version
+    debug:
+      var: ansible_facts['distribution_version']
+
+  - name: DEBUG distribution major version
+    debug:
+      var: ansible_facts['distribution_major_version']
 
   - name: Execute Bash command if the system is Red Hat-based
     shell: |
@@ -17,7 +25,19 @@
       echo "This is not a Red Hat-based or Oracle Linux-based system"
     when: ansible_facts['distribution'] != "RedHat" and ansible_facts['distribution'] != "OracleLinux"
 
-  - name: Install wget to download RPM packages yum
+  - name: Disable mirrorlist in CentOS repos using sed
+    shell: find /etc/yum.repos.d -name "CentOS-*.repo" -exec sed -i 's/^mirrorlist=/#mirrorlist=/' {} \;
+    when:
+      - ansible_facts['distribution'] == "CentOS"
+      - ansible_facts['distribution_major_version'] | int == 7
+
+  - name: Enable baseurl with vault.centos.org using sed
+    shell: find /etc/yum.repos.d -name "CentOS-*.repo" -exec sed -i 's/^#baseurl=http:\/\/mirror\.centos\.org/baseurl=http:\/\/vault.centos.org/' {} \;
+    when:
+      - ansible_facts['distribution'] == "CentOS"
+      - ansible_facts['distribution_major_version'] | int == 7
+
+  - name: Install wget
     yum:
       name: wget
       state: present
@@ -36,7 +56,8 @@
   - name: setup epel release centos 7 yum
     yum: name=https://dl.fedoraproject.org/pub/archive/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm state=present
     when:
-    - (ansible_facts['distribution'] == "RedHat" and ansible_distribution_major_version == "7") or (ansible_facts['distribution'] == "Amazon" and ansible_distribution_major_version == "2")
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: install GPG key for epel 8
     rpm_key:
@@ -104,8 +125,13 @@
     - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
     - ansible_facts['distribution'] != "RedHat"
 
+  - name: Fix Debian Buster EOL repositories
+    shell: sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g; s|http://cdn-aws.deb.debian.org/debian|http://archive.debian.org/debian|g; s|http://security.debian.org/debian-security|http://archive.debian.org/debian-security|g; /buster-updates/d' /etc/apt/sources.list
+    become: yes
+    when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
+
   - name: allow release-info to change for apt repositories
-    command: apt-get update -y --allow-releaseinfo-change
+    command: apt-get update -y
     when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
 
   - name: install needed packages for running tests with apt
