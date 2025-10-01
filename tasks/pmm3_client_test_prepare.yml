@@ -14,9 +14,12 @@
 - name: Install percona-release package
   include_tasks: install_percona-release.yml
 
-- name: Install needed packages for Debian/Ubuntu
-  shell: |
-    apt-get install -y wget gnupg jq acl
+- name: Install needed packages for Debian/Ubuntu (with retry)
+  shell: apt-get install -y wget gnupg jq acl
+  register: install_result
+  until: install_result.rc == 0
+  retries: 5
+  delay: 10
   when: ansible_os_family == "Debian"
 
 #- name: Install needed packages for Debian/Ubuntu
