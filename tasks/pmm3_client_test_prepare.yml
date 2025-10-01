@@ -14,22 +14,22 @@
 - name: Install percona-release package
   include_tasks: install_percona-release.yml
 
-#- name: Install needed packages for Debian/Ubuntu
-#  when: ansible_os_family == "Debian"
-#  apt:
-#    name: "{{ packages }}"
-#    update_cache: yes
-#    state: latest
-#  vars:
-#    packages:
-#      - wget
-#      - gnupg
-#      - jq # for exporter endpoint metric fetch
-#      - acl
-#  retries: 5
-#  delay: 1
-#  register: result
-#  until: result is not failed
+- name: Install needed packages for Debian/Ubuntu
+  when: ansible_os_family == "Debian"
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+    state: latest
+  vars:
+    packages:
+      - wget
+      - gnupg
+      - jq # for exporter endpoint metric fetch
+      - acl
+  retries: 5
+  delay: 1
+  register: result
+  until: result is not failed
 
 - name: Install needed packages for RHEL 7
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
