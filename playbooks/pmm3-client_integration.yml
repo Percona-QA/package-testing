@@ -140,4 +140,4 @@
 
   - name: Print out connected services
     debug:
-      msg: "{{ list_output.stdout }}"
+      var: list_output.stdout
