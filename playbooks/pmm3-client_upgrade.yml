@@ -126,3 +126,11 @@
 ### Verifications after upgrade
   - name: Perform standard verifications set for PMM Client
     include_tasks: ../tasks/verifications_set_for_pmm3_client_after_upgrade.yml
+
+  - name: Perform pmm-admin list
+    shell: "pmm-admin list"
+    register: list_output
+
+  - name: Print out connected services
+    debug:
+      var: list_output.stdout
