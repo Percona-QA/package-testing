@@ -184,7 +184,7 @@ class TestGardb:
 #        output = cluster[0].run_query('SHOW STATUS LIKE "wsrep_cluster_size";')
 #        assert output.split('\t')[1].strip() == "4"
     @pytest.mark.parametrize("timeout", [60, 360])
-    def test_cluster_size_with_garbd(cluster, pxc_version_major, timeout):
+    def test_cluster_size_with_garbd(cluster, timeout):
         """
         Verify that cluster size is correct with garbd present:
         - In 8.0, garbd is counted as a node -> expect 4
