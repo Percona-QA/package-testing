@@ -1,42 +1,17 @@
-- name: Set Databases on Debian 11-12
+# Encapsulates "enabled_db" variable initialization
+
+- name: Set Databases list
   set_fact:
-    ps_version: "ps-8.4"
-    psmdb_version: "psmdb-80"
-    pg_version: "pg-17"
-  when:
-    - ansible_distribution == "Debian"
-    - ansible_distribution_version.split('.')[0]|int < 13
-
-- name: Set Databases on Ubuntu
-  set_fact:
-    ps_version: "ps-8.4"
-    psmdb_version: "psmdb-80"
-    pg_version: "pg-17"
-  when:
-    - ansible_distribution == "Ubuntu"
-
-- name: Set Percona Server for MySQL on RHEL 8-9 but not Amazon Linux
-  set_fact:
-    ps_version: "ps-8.4"
-    psmdb_version: "psmdb-80"
-    pg_version: "pg-17"
-  when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution != 'Amazon'
-    - ansible_distribution_major_version|int < 10
-
-- name: Set Percona Server for MySQL on RHEL 10 but not Amazon Linux
-  set_fact:
-    ps_version: "ps-8.4"
-  when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution != 'Amazon'
-    - ansible_distribution_major_version|int == 10
-
-- name: Debug Distribution name
-  debug:
-    msg: "{{ ansible_distribution }}"
-
-- name: Debug Distribution version
-  debug:
-    msg: "{{ ansible_distribution_version }}"
+    enabled_db: "{{ db_list|select|list }}"
+  vars:
+    db_list:
+      - "{{ (ansible_distribution != 'Amazon') | ternary('ps-8.4','') }}"
+      - "{{ (ansible_distribution == 'Debian' and ansible_distribution_version.split('.')[0]|int < 13) | ternary('ps-8.4','') }}"
+      - "{{ (ansible_distribution == 'Ubuntu') | ternary('ps-8.4','') }}"
+      - "{{ (ansible_os_family == 'RedHat' and ansible_distribution != 'Amazon') | ternary('ps-8.4','') }}"
+      - "{{ (ansible_distribution == 'Debian' and ansible_distribution_version.split('.')[0]|int < 13) | ternary('psmdb-70','') }}"
+      - "{{ (ansible_distribution == 'Ubuntu') | ternary('psmdb-80','') }}"
+      - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version|int != 10) | ternary('psmdb-80','') }}"
+      - "{{ (ansible_distribution == 'Debian' and ansible_distribution_version.split('.')[0]|int < 13) | ternary('pg-17','') }}"
+      - "{{ (ansible_distribution == 'Ubuntu') | ternary('pg-17','') }}"
+      - "{{ (ansible_os_family == 'RedHat' and ansible_distribution != 'Amazon' and ansible_distribution_major_version|int != 10) | ternary('pg-17','') }}"
