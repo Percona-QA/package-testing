@@ -9,7 +9,7 @@
 
 - name: Set Databases on Ubuntu
   set_fact:
-    percona_server_version: "ps-8.4"
+    ps_version: "ps-8.4"
     psmdb_version: "psmdb-80"
     pg_version: "pg-17"
   when:
@@ -17,7 +17,7 @@
 
 - name: Set Percona Server for MySQL on RHEL 8-9 but not Amazon Linux
   set_fact:
-    percona_server_version: "ps-8.4"
+    ps_version: "ps-8.4"
     psmdb_version: "psmdb-80"
     pg_version: "pg-17"
   when:
@@ -27,7 +27,7 @@
 
 - name: Set Percona Server for MySQL on RHEL 10 but not Amazon Linux
   set_fact:
-    percona_server_version: "ps-8.4"
+    ps_version: "ps-8.4"
   when:
     - ansible_os_family == "RedHat"
     - ansible_distribution != 'Amazon'
