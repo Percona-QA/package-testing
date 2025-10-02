@@ -104,6 +104,7 @@
   command: percona-release enable-only tools
   when:
      - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+     - ansible_os_family == "RedHat" and ansible_major_distribution != "10"
 
 - name: Clean and update package cache
   shell: |
