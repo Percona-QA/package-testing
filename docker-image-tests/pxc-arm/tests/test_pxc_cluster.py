@@ -120,9 +120,9 @@ class GardbNode:
 def garbd():
     garbd = GardbNode()
     garbd.install_garbd()
-    time.sleep(5)
-    garbd.connect_pxc()
     time.sleep(30)
+    garbd.connect_pxc()
+    time.sleep(120)
     yield garbd
     garbd.destroy()
 
@@ -175,32 +175,11 @@ class TestCluster:
             assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
 
 class TestGardb:
-#    def test_cluster_size_at_startup(self, cluster, garbd):
-#        output = cluster[0].run_query('SHOW STATUS LIKE "wsrep_cluster_size";')
-#        assert output.split('\t')[1].strip() == "4"
-
-#    def test_cluster_size_after_timeout(self, cluster, garbd):
-#        time.sleep(360)
-#        output = cluster[0].run_query('SHOW STATUS LIKE "wsrep_cluster_size";')
-#        assert output.split('\t')[1].strip() == "4"
-    @pytest.mark.parametrize("timeout", [60, 360])
-    def test_cluster_size_with_garbd(cluster, timeout):
-        """
-        Verify that cluster size is correct with garbd present:
-        - In 8.0, garbd is counted as a node -> expect 4
-        - In 8.4, garbd is NOT counted -> expect 3, but status must remain Primary
-        """
-    # wait for timeout period to simulate garbd stability
-        time.sleep(timeout)
-
-    # query wsrep_cluster_size
+    def test_cluster_size_at_startup(self, cluster, garbd):
         output = cluster[0].run_query('SHOW STATUS LIKE "wsrep_cluster_size";')
-        size = output.split('\t')[1].strip()
+        assert output.split('\t')[1].strip() == "4"
 
-        if pxc_version_major.startswith("8.0"):
-            assert size == "4", f"Expected 4 nodes (3 + garbd) in PXC 8.0, got {size}"
-        elif pxc_version_major.startswith("8.4"):
-            assert size == "3", f"Expected 3 DB nodes in PXC 8.4, got {size}"
-        # confirm quorum is healthy
-            status = cluster[0].run_query('SHOW STATUS LIKE "wsrep_cluster_status";')
-            assert status.split('\t')[1].strip() == "Primary", "Cluster lost Primary status"
+    def test_cluster_size_after_timeout(self, cluster, garbd):
+        time.sleep(360)
+        output = cluster[0].run_query('SHOW STATUS LIKE "wsrep_cluster_size";')
+        assert output.split('\t')[1].strip() == "4"
