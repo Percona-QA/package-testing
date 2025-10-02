@@ -26,15 +26,14 @@
 
   - name: include tasks for enabling test repo
     include_tasks: ../tasks/enable_pxc_innovation_lts_testing_repo.yml
-    when: lookup('env', 'upgrade_repo') == "testing" or lookup('env', 'upgrade_repo') == ""
+    when: lookup('env', 'test_repo') == "testing" or lookup('env', 'test_repo') == ""
 
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_pxc_innovation_lts_main_repo.yml
-    when: lookup('env', 'upgrade_repo') == "main"
+    when: lookup('env', 'test_repo') == "main"
 
   - name: include tasks for enabling experimental repo
-    include_tasks: ../tasks/enable_pxc_innovation_lts_experimental_repo.yml
-    when: lookup('env', 'upgrade_repo') == "experimental"
+    command: percona-release enable pxc-9x-innovation experimental
 
   - name: upgrade PXC {{ pxc_inn_lts_repo_name }} to new deb packages
     apt:
@@ -44,8 +43,7 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - percona-xtradb-cluster-test
-      - percona-xtradb-cluster-source
+      - percona-toolkit
       - percona-xtradb-cluster-server-debug
       - percona-xtradb-cluster-server
       - percona-xtradb-cluster-common
@@ -92,9 +90,6 @@
 
   - name: print PXC version Side Effect
     debug: var=pxc_version
-
-  - name: install plugins
-    command: /package-testing/plugins_test_innovation_lts.sh pxc
 
   - name: register PXC version Side Effect
     shell: mysqld --version

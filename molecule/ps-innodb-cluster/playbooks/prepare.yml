@@ -41,6 +41,16 @@
       dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
+    - name: install GPG key for epel 10
+      rpm_key:
+        state: present
+        key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-10
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+
+    - name: setup epel 10 repo
+      dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm state=present
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+
     - name: setup ca-certificates release yum
       yum:
         name: ca-certificates
@@ -68,7 +78,7 @@
         - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
         - ansible_facts['distribution_major_version'] | int <= 7
 
-    - name: setup epel release centos 7 dnf
+    - name: setup epel release centos dnf
       dnf:
         name: epel-release
         update_cache: yes

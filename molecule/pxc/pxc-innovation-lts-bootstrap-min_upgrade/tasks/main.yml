@@ -41,17 +41,17 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: include tasks for enabling test repo pxc 84
-    include_tasks: ../../../../tasks/enable_pxc84_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" 
+ # - name: include tasks for enabling test repo pxc 84
+  #  include_tasks: ../../../../tasks/enable_pxc84_testing_repo.yml
+   # when: lookup('env', 'install_repo') == "testing" 
 
   - name: include tasks for enabling main repo pxc 84
     include_tasks: ../../../../tasks/enable_pxc84_main_repo.yml
-    when: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+  #  when: lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
 
-  - name: include tasks for enabling experimental repo pxc 84
-    include_tasks: ../../../../tasks/enable_pxc84_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+ # - name: include tasks for enabling experimental repo pxc 84
+  #  include_tasks: ../../../../tasks/enable_pxc84_experimental_repo.yml
+   # when: lookup('env', 'install_repo') == "experimental"
 
   - name: install python3-libselinux dnf
     dnf:
@@ -109,11 +109,32 @@
       src: ../../../../support-files/certs/
       dest: /etc/mysql/certs/
 
+  - name: include tasks for enabling experimental repo
+    command: percona-release enable-only pxc-9x-innovation experimental
+    when: lookup('env', 'test_repo') == "experimental"
+
+  - name: add the experimental tools repo
+    command: percona-release enable tools experimental
+
+  - name: upgrade PXC {{ major_release_version}} deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+      - percona-toolkit
+    when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
+
   - name: configure PXC on debian/ubuntu
     template: src=../../../../templates/my_8.j2
               dest=/etc/mysql/my.cnf
               mode=0640 owner=mysql group=root
     when: ansible_os_family == "Debian"
+
 
   # bootstrap the cluster
   - name: bootstrap cluster on CentOS
@@ -136,4 +157,3 @@
       
   - name: Sleep 60 seconds
     command: sleep 60
-

@@ -100,10 +100,10 @@
     - ansible_os_family == "RedHat" and ansible_distribution == "Amazon"
     - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
 
-- name: enable the tools repo
-  command: percona-release enable-only tools
-  when:
-     - ansible_distribution != "Amazon"
+#- name: enable the tools repo
+#  command: percona-release enable-only tools
+#  when:
+#     - ansible_distribution != "Amazon"
 
 - name: Clean and update package cache
   shell: |

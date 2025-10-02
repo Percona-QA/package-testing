@@ -43,3 +43,4 @@ provisioner:
       pxc3-84-common-rhel-10-arm-install-${INSTALLTYPE}:
         ip_env: "{{ ansible_host }}"
         sleep_before_tests: 40
+
