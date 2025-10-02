@@ -15,7 +15,7 @@ echo "Installing dependencies..."
 
 if [ "$OS_TYPE" = "al2023" ]; then
   sudo dnf install -y libaio numactl openssl socat lsof libev python3 python3-pip
-  
+
 elif [ -f /etc/redhat-release ]; then
   sudo yum install -y libaio numactl openssl socat lsof
   # below needed for 5.6 mysql_install_db
@@ -28,6 +28,9 @@ elif [ -f /etc/redhat-release ]; then
     sudo yum install -y python3 python3-pip
   fi
   sudo yum install -y libev
+  pip3 install --user pytest pytest-testinfra
+  export PATH=$PATH:$HOME/.local/bin
+
   if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     sudo yum install -y https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     sudo percona-release enable pxb-24 testing
