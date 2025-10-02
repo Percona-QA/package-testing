@@ -45,7 +45,7 @@ else
   else
     sudo apt install -y python3 python3-pip
   fi
-  sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof curl libev4
+  sudo apt install -y python3 python3-pip libnuma1 socat lsof curl libev4
   if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     wget -q https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb
     sudo dpkg -i percona-release_latest.$(lsb_release -sc)_all.deb
@@ -55,9 +55,9 @@ else
   fi
 fi
 if [[ $(lsb_release -sc) == "bookworm" || $(lsb_release -sc) == "noble" ]]; then
-  pip3 install --user --break-system-packages pytest-testinfra pytest
+  pip3 install --user --break-system-packages pytest-testinfra pytest libaio1
 else
-  pip3 install --user pytest-testinfra pytest
+  pip3 install --user pytest-testinfra pytest libaio1
 fi
 
 TARBALL_NAME=$(basename "$(find . -maxdepth 1 -name '*.tar.gz'|head -n1)")
