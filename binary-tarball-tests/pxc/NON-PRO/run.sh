@@ -15,7 +15,7 @@ echo "Installing dependencies..."
 
 if [ "$OS_TYPE" = "al2023" ]; then
   sudo dnf install -y libaio numactl openssl socat lsof libev python3 python3-pip
-  
+
 elif [ -f /etc/redhat-release ]; then
   sudo yum install -y libaio numactl openssl socat lsof
   # below needed for 5.6 mysql_install_db
@@ -28,6 +28,9 @@ elif [ -f /etc/redhat-release ]; then
     sudo yum install -y python3 python3-pip
   fi
   sudo yum install -y libev
+  pip3 install --user pytest pytest-testinfra
+  export PATH=$PATH:$HOME/.local/bin
+
   if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     sudo yum install -y https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     sudo percona-release enable pxb-24 testing
@@ -45,7 +48,16 @@ else
   else
     sudo apt install -y python3 python3-pip
   fi
-  sudo apt install -y python3 python3-pip libaio1 libnuma1 socat lsof curl libev4
+  sudo apt update
+  if [[ $(lsb_release -sc) == "bookworm" || $(lsb_release -sc) == "noble" ]]; then
+    sudo apt install -y python3 python3-pip libnuma1 socat lsof curl libev4 libaio-dev
+    pip3 install --user --break-system-packages pytest pytest-testinfra
+    export PATH=$PATH:$HOME/.local/bin
+  else
+    sudo apt install -y python3 python3-pip libnuma1 socat lsof curl libev4 libaio1
+    pip3 install --user pytest pytest-testinfra
+  fi
+
   if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     wget -q https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb
     sudo dpkg -i percona-release_latest.$(lsb_release -sc)_all.deb
@@ -54,11 +66,6 @@ else
     sudo apt-get install -y percona-xtrabackup-24
   fi
 fi
-if [[ $(lsb_release -sc) == 'bookworm' ]]; then
-  pip3 install --user --break-system-packages pytest-testinfra pytest
-else
-  pip3 install --user pytest-testinfra pytest
-fi  
 
 TARBALL_NAME=$(basename "$(find . -maxdepth 1 -name '*.tar.gz'|head -n1)")
 if [ -z "${TARBALL_NAME}" ]; then
