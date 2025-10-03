@@ -150,8 +150,13 @@ def test_check_shared_package(host, package):
     release = host.system_info.release
     if dist.lower() in DEB_DISTS:
         pytest.skip("This test only for RHEL based platforms")
-    if dist.lower() in RHEL_DISTS and release == '9.0':
-        pytest.skip("This test is for RHEL based platforms except RHEL 9")
+    if dist.lower() in RHEL_DISTS:
+        major_release = int(release.split('.')[0])
+        if major_release != 8:
+            pytest.skip(f"This test only runs on RHEL 8, skipping RHEL {major_release}")
+
+    else:
+        pytest.skip("Not a RHEL based distribution")
     pkg = host.package(package)
     assert pkg.is_installed
     if RPM_PERCONA_BUILD_VERSION:
