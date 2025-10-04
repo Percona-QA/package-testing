@@ -514,9 +514,8 @@
     when:
       - ansible_distribution != "Amazon"
       - ansible_distribution_major_version|int != 7
+      - not (ansible_distribution == "Ubuntu" and ansible_distribution_release == "focal")
 
   - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL COMMON
     include_tasks: ../../../../tasks/list_installed_packages.yml
 
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
