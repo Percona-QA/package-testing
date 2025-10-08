@@ -1,27 +1,27 @@
 ---
 scenario:
-  name: rhel-10-arm
+  name: rhel-10
 dependency:
   name: galaxy
 driver:
   name: ec2
 platforms:
-  - name: ${BUILD_NUMBER}-pxc2-84-common-rhel-10-arm-install-${INSTALLTYPE}
+  - name: ${BUILD_NUMBER}-pxc2-84-common-rhel-10-install-${INSTALLTYPE}
     region: us-west-1
-    image: ami-02fd5035c09f46e15
+    image: ami-0f7153f6999a5ef60
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
-    instance_type: c6g.large
+    instance_type: t2.large
     ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
       job-name: ${JOB_NAME}
       build-number: ${BUILD_NUMBER}
-  - name: ${BUILD_NUMBER}-pxc3-84-common-rhel-10-arm-install-${INSTALLTYPE}
+  - name: ${BUILD_NUMBER}-pxc3-84-common-rhel-10-install-${INSTALLTYPE}
     region: us-west-1
-    image: ami-0ced1ebfd814dbc27
+    image: ami-0f7153f6999a5ef60
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
-    instance_type: c6g.large
+    instance_type: t2.large
     ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
@@ -38,8 +38,8 @@ provisioner:
     side_effect: ../../../../../playbooks/pxc84_upgrade_common.yml
   inventory:
     host_vars:
-      pxc2-84-common-rhel-10-arm-install-${INSTALLTYPE}:
+      pxc2-84-common-rhel-10-install-${INSTALLTYPE}:
         ip_env: "{{ ansible_host }}"
-      pxc3-84-common-rhel-10-arm-install-${INSTALLTYPE}:
+      pxc3-84-common-rhel-10-install-${INSTALLTYPE}:
         ip_env: "{{ ansible_host }}"
         sleep_before_tests: 40
