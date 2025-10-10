@@ -23,6 +23,23 @@
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
   ignore_errors: yes
 
+- name: Install Perl (IPC::RUN) on Rocky linux 8
+  shell: |
+    sudo dnf install dnf-plugins-core
+    sudo dnf module enable llvm-toolset
+    sudo dnf config-manager --set-enabled powertools
+  when: ansible_distribution == "Rocky" and ansible_distribution_major_version == "8"
+  ignore_errors: yes
+
+- name: Install Perl (IPC::RUN) on Rocky linux 9
+  shell: |
+    dnf install dnf-plugins-core
+    dnf module enable llvm-toolset
+    dnf config-manager --set-enabled crb
+    dnf install perl-IPC-Run -y
+  when: ansible_distribution == "Rocky" and ansible_distribution_major_version == "9"
+  ignore_errors: yes
+
 - name: "Print distribution name"
   debug:
     msg: "{{ ansible_distribution }} is linux distribution"
