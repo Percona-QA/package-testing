@@ -165,6 +165,10 @@
       agent_password: "pmm-pass"
 
 ### verifications
+  - name: Print out connected services
+    debug:
+      var: custom_path
+
   - name: Perform standard verifications set for PMM Client
     include_tasks: ../tasks/verifications_set_for_pmm3_client.yml
 
