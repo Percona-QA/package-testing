@@ -22,6 +22,7 @@
       - "mongodb_exporter: {{ path_base }}/exporters/mongodb_exporter"
       - "postgres_exporter: {{ path_base }}/exporters/postgres_exporter"
       - "proxysql_exporter: {{ path_base }}/exporters/proxysql_exporter"
+      - "valkey_exporter: {{ path_base }}/exporters/valkey_exporter"
       - "rds_exporter: {{ path_base }}/exporters/rds_exporter"
       - "azure_exporter: {{ path_base }}/exporters/azure_exporter"
       - "vmagent: {{ path_base }}/exporters/vmagent"
