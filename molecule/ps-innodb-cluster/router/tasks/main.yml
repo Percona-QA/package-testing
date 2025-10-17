@@ -95,7 +95,7 @@
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: list installed packages
-    include_tasks: ../tasks/list_installed_packages.yml
+    include_tasks: ../../../../tasks/list_installed_packages.yml
 
   - name: create cluster
     command: mysqlsh --uri=root@ps-node1 --password=Test1234# -- dba create-cluster testCluster
