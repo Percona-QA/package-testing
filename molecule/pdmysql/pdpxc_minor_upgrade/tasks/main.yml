@@ -27,11 +27,17 @@
 
 - name: disable the mysql module on RHEL/CentOS 8+
   command: dnf module disable mysql -y
-  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
+  when:
+    - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
+    - ansible_facts['distribution_major_version'] | int >= 8
+    - ansible_facts['distribution_major_version'] | int <= 9
 
 - name: disable the mariadb module on RHEL/CentOS 8+
   command: dnf module disable mariadb -y
-  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
+  when:
+    - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
+    - ansible_facts['distribution_major_version'] | int >= 8
+    - ansible_facts['distribution_major_version'] | int <= 9
 
 - name: install PXC 8 deb packages
   apt:

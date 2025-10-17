@@ -73,6 +73,12 @@
     vars:
       repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
 
+  - name: add an apt signing key to enable repo
+    apt_key:
+      url: https://percona.com/downloads/deb-percona-keyring.gpg
+      state: present
+    when: ansible_os_family == "Debian"
+
   - name: update deb cache
     apt:
       update_cache: yes

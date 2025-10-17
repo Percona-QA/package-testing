@@ -94,10 +94,10 @@ class GardbNode:
             self.image = 'percona-xtradb-cluster-garbd'
         elif re.match(r'^8\.[1-9]$', pxc_version_major):
             if docker_acc == 'percona':
-                self.repo_name = 'pxc-8x-innovation'
+                self.repo_name = 'pxc-84-lts'
             else:
-                self.repo_name = 'pxc-8x-innovation testing'
-            self.image = 'percona-xtradb-cluster-garbd'    
+                self.repo_name = 'pxc-84-lts testing'
+            self.image = 'percona-xtradb-cluster-garbd'
         subprocess.check_call(['docker', 'exec', self.docker_name, 'yum', 'install', '-y', 'https://repo.percona.com/yum/percona-release-latest.noarch.rpm'])
         subprocess.check_call(['docker', 'exec', self.docker_name, 'percona-release', 'enable', self.repo_name])
         subprocess.check_call(['docker', 'exec', self.docker_name, 'rpm', '--import', 'https://repo.percona.com/yum/RPM-GPG-KEY-Percona'])
@@ -120,9 +120,9 @@ class GardbNode:
 def garbd():
     garbd = GardbNode()
     garbd.install_garbd()
-    time.sleep(5)
-    garbd.connect_pxc()
     time.sleep(30)
+    garbd.connect_pxc()
+    time.sleep(120)
     yield garbd
     garbd.destroy()
 
