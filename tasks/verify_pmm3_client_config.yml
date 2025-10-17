@@ -14,25 +14,30 @@
 - set_fact:
     expected_params: "{{ params_list|select|list }}"
   vars:
-    params_list:
-      - "paths_base: {{ path_base }}"
-      - "exporters_base: {{ path_base }}/exporters"
-      - "node_exporter: {{ path_base }}/exporters/node_exporter"
-      - "mysqld_exporter: {{ path_base }}/exporters/mysqld_exporter"
-      - "mongodb_exporter: {{ path_base }}/exporters/mongodb_exporter"
-      - "postgres_exporter: {{ path_base }}/exporters/postgres_exporter"
-      - "proxysql_exporter: {{ path_base }}/exporters/proxysql_exporter"
-      - "valkey_exporter: {{ path_base }}/exporters/valkey_exporter"
-      - "rds_exporter: {{ path_base }}/exporters/rds_exporter"
-      - "azure_exporter: {{ path_base }}/exporters/azure_exporter"
-      - "vmagent: {{ path_base }}/exporters/vmagent"
-      - "tempdir: {{ path_base }}/tmp"
-      - "pt_summary: {{ path_base }}/tools/pt-summary"
-      - "pt_pg_summary: {{ path_base }}/tools/pt-pg-summary"
-      - "pt_mysql_summary: {{ path_base }}/tools/pt-mysql-summary"
-      - "pt_mongodb_summary: {{ path_base }}/tools/pt-mongodb-summary"
-      - "nomad: {{ path_base }}/tools/nomad"
-      - "nomad_data_dir: {{ path_base }}/data/nomad"
+    params_list: >-
+      {{
+        [
+          "paths_base: {{ path_base }}",
+          "exporters_base: {{ path_base }}/exporters",
+          "node_exporter: {{ path_base }}/exporters/node_exporter",
+          "mysqld_exporter: {{ path_base }}/exporters/mysqld_exporter",
+          "mongodb_exporter: {{ path_base }}/exporters/mongodb_exporter",
+          "postgres_exporter: {{ path_base }}/exporters/postgres_exporter",
+          "proxysql_exporter: {{ path_base }}/exporters/proxysql_exporter",
+          "valkey_exporter: {{ path_base }}/exporters/valkey_exporter",
+          "rds_exporter: {{ path_base }}/exporters/rds_exporter",
+          "azure_exporter: {{ path_base }}/exporters/azure_exporter",
+          "vmagent: {{ path_base }}/exporters/vmagent",
+          "tempdir: {{ path_base }}/tmp",
+          "pt_summary: {{ path_base }}/tools/pt-summary",
+          "pt_pg_summary: {{ path_base }}/tools/pt-pg-summary",
+          "pt_mysql_summary: {{ path_base }}/tools/pt-mysql-summary",
+          "pt_mongodb_summary: {{ path_base }}/tools/pt-mongodb-summary",
+          "nomad: {{ path_base }}/tools/nomad",
+          "nomad_data_dir: {{ path_base }}/data/nomad"
+        ]
+        | reject('search', 'valkey_exporter') if minor_version|int < 5 else _
+      }}
 
 - name: Check if the configuration generated with paths-base is using the custom path
   shell: cat {{path_base}}/config/pmm-agent.yaml | grep "{{path_base}}"
