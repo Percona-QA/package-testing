@@ -22,28 +22,30 @@ fi
 # Grant permissions for JS routines
 echo "==== Granting CREATE_JS_ROUTINE privilege ===="
 $MYSQL "GRANT CREATE_JS_ROUTINE ON *.* TO 'root'@'localhost';"
+$MYSQL "create database test;"
 
 # Create factorial function
 echo "==== Creating JS factorial function ===="
-$MYSQL "DROP FUNCTION IF EXISTS fact;
+$MYSQL "USE test;
+DROP FUNCTION IF EXISTS fact;
 CREATE FUNCTION fact(n INT)
 RETURNS INT
 DETERMINISTIC
 NO SQL
 LANGUAGE JS
-AS $$
+AS \$\$
   let result = 1;
   while (n > 1) {
     result *= n;
     n--;
   }
   return result;
-$$;"
+\$\$;"
 
 # Validate function definition in INFORMATION_SCHEMA
 echo "==== Verifying function metadata in INFORMATION_SCHEMA ===="
-ROUTINE_INFO=$($MYSQL "SELECT routine_schema, routine_name, external_language 
-                       FROM INFORMATION_SCHEMA.ROUTINES 
+ROUTINE_INFO=$($MYSQL "SELECT routine_schema, routine_name, external_language
+                       FROM INFORMATION_SCHEMA.ROUTINES
                        WHERE routine_name='fact';")
 
 if echo "$ROUTINE_INFO" | grep -q "JS"; then
