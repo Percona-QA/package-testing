@@ -57,7 +57,7 @@ fi
 
 # Test the function output
 echo "==== Testing factorial function ===="
-FACTORIAL_RESULT=$($MYSQL "SELECT fact(5);")
+FACTORIAL_RESULT=$($MYSQL "use test; SELECT fact(5);")
 if [[ "$FACTORIAL_RESULT" -eq 120 ]]; then
     echo "✅ fact(5) returned expected result: $FACTORIAL_RESULT"
 else
@@ -68,7 +68,7 @@ fi
 # Test multiple values
 for i in 0 1 3 7; do
     expected=$(python3 -c "import math; print(math.factorial($i))")
-    result=$($MYSQL "SELECT fact($i);")
+    result=$($MYSQL "use test; SELECT fact($i);")
     if [[ "$result" -eq "$expected" ]]; then
         echo "✅ fact($i) = $result (as expected)"
     else
@@ -79,7 +79,7 @@ done
 
 # Drop the function
 echo "==== Dropping factorial function ===="
-$MYSQL "DROP FUNCTION IF EXISTS fact;"
+$MYSQL "use test; DROP FUNCTION IF EXISTS fact;"
 
 # Verify removal from INFORMATION_SCHEMA
 echo "==== Verifying function removal ===="
