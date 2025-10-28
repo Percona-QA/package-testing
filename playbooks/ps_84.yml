@@ -164,7 +164,7 @@
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
 
-  - name: check the clone and data masking plugins
+  - name: Test JS component
     command: /package-testing/scripts/js_component.sh
 
   - name: Handle check that Percona Server version is correct
