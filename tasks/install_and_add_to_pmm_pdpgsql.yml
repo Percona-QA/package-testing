@@ -40,10 +40,6 @@
   when: ansible_distribution == "Rocky" and ansible_distribution_major_version == "9"
   ignore_errors: yes
 
-- name: "Print distribution name"
-  debug:
-    msg: "{{ ansible_distribution }} is linux distribution"
-
 - name: Download install_ppg.yml
   get_url:
     url: "https://raw.githubusercontent.com/Percona-QA/ppg-testing/main/tasks/install_ppg{{ pg_version }}.yml"
