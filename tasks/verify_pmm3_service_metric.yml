@@ -61,6 +61,10 @@
         fail_msg: "Authentication for exporter Broken, metrics fetched without basic auth!"
         success_msg: "{{ item.service_name }}: metrics are not accessible without auth"
 
+    - name: Curl command is
+      debug:
+        msg: "curl -s -u 'pmm:{{ agent_password }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
+
     - block:
         - name: "{{ item.service_name }}: curl metric with auth token pmm:{{ agent_password }}"
           shell: "curl -s -u 'pmm:{{ agent_password }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
