@@ -81,7 +81,7 @@
 
         - name: Metrics response was
           debug:
-            msg: "{{ metric_with_auth.stdout }}"
+            msg: "{{ metric_with_auth }}"
           failed_when: true
 
     rescue:
