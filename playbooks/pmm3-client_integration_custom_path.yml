@@ -78,22 +78,6 @@
     when: '"ps-5.7" in enabled_db'
     include_tasks: ../tasks/install_and_add_to_pmm_ps_57.yml
 
-  - name: Debug os Version
-    debug:
-      msg: "{{ ansible_distribution_version.split('.')[0]|int }}"
-
-  - name: Debug os Version
-    debug:
-      msg: "{{ ansible_distribution_version.split('.')[0]|int < 13 }}"
-
-  - name: Debug os Version
-    debug:
-      msg: "{{ ansible_distribution == 'Debian' and ansible_distribution_version.split('.')[0]|int < 13 }}"
-
-  - name: Debug os Version
-    debug:
-      msg: "{{ enabled_db }}"
-
   - name: Install and start Percona Server 8.0
     when: '"ps-8.0" in enabled_db'
     include_tasks: ../tasks/install_and_add_to_pmm_ps_80.yml
@@ -165,10 +149,6 @@
       agent_password: "pmm-pass"
 
 ### verifications
-  - name: Print out connected services
-    debug:
-      var: custom_path
-
   - name: Perform standard verifications set for PMM Client
     include_tasks: ../tasks/verifications_set_for_pmm3_client.yml
 

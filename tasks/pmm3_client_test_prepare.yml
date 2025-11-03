@@ -7,11 +7,11 @@
   when: ansible_os_family == "RedHat"
   include_tasks: ./install_epel.yml
 
-#- name: Install GPG key on Debian
-#  shell: |
-#    gpg --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
-#    gpg --export 93C4A3FD7BB9C367 | tee /etc/apt/trusted.gpg.d/ansible.gpg
-#  when: ansible_os_family == "Debian"
+- name: Install GPG key on Debian
+  shell: |
+    gpg --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+    gpg --export 93C4A3FD7BB9C367 | tee /etc/apt/trusted.gpg.d/ansible.gpg
+  when: ansible_os_family == "Debian"
 
 - name: Allow release-info to change for apt repositories
   when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"

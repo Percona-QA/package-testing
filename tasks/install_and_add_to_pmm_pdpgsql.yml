@@ -46,7 +46,7 @@
 
 - name: Download install_ppg.yml
   get_url:
-    url: "https://raw.githubusercontent.com/Percona-QA/ppg-testing/main/tasks/install_ppg{{ pg_version.split('.')[0] }}.yml"
+    url: "https://raw.githubusercontent.com/Percona-QA/ppg-testing/main/tasks/install_ppg{{ pg_version }}.yml"
     dest: /tmp
     mode: 0777
 
@@ -54,7 +54,7 @@
   command: "percona-release setup -y ppg-{{ pg_version }}"
 
 - name: Run install_ppg.yml
-  include_tasks: /tmp/install_ppg{{ pg_version.split('.')[0] }}.yml
+  include_tasks: /tmp/install_ppg{{ pg_version }}.yml
   vars:
     # workaround to pass pg_version_to_install check in install_ppg.yml
     pg_version_to_install: "{{ pg_version }}.5"
