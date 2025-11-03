@@ -78,6 +78,10 @@
         - name: Waiting failed
           debug:
             msg: "'{{ item.metric }}' is not found!"
+
+        - name: Metrics response was
+          debug:
+            msg: "{{ metric_with_auth.stdout }}"
           failed_when: true
 
     rescue:
