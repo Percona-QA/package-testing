@@ -69,7 +69,7 @@
         var: metric_with_auth_test
 
     - debug:
-        var: metric_with_auth.stdout | regex_search(item.metric)
+        var: metric_with_auth_test.stdout | regex_search(item.metric)
 
     - block:
         - name: "{{ item.service_name }}: curl metric with auth token pmm:{{ agent_password }}"
