@@ -101,3 +101,6 @@ class TestMysqlEnvironment:
             pytest.skip('telemetry was added in 8.0')
         else:
             assert not host.file('/usr/local/percona/telemetry_uuid').exists
+
+    def test_cyrus_package_installed(self, host):
+        assert host.package('cyrus-sasl-scram').is_installed
