@@ -103,4 +103,4 @@ class TestMysqlEnvironment:
             assert not host.file('/usr/local/percona/telemetry_uuid').exists
 
     def test_cyrus_package_installed(self, host):
-        assert host.package('cyrus-sasl-scran').is_installed
+        assert host.package('cyrus-sasl-scram').is_installed
