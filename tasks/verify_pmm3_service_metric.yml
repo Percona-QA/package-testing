@@ -62,7 +62,7 @@
         success_msg: "{{ item.service_name }}: metrics are not accessible without auth"
 
     - name: Curl command is
-      shell: "curl -s -u 'pmm:{{ agent_password }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
+      shell: "curl -s -u 'pmm:{{ agent_password }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}2'"
       register: metric_with_auth_test
 
     - debug:
@@ -88,11 +88,6 @@
         - name: Waiting failed
           debug:
             msg: "'{{ item.metric }}' is not found!"
-
-        - name: Metrics response was
-          debug:
-            msg: "{{ metric_with_auth }}"
-          failed_when: true
 
     rescue:
       - name: Print pmm-admin list output on fail
