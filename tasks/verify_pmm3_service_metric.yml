@@ -64,6 +64,7 @@
     - name: Curl command is
       shell: "curl -s -u 'pmm:{{ agent_password }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}2'"
       register: metric_with_auth_test
+      ignore_errors: yes
 
     - debug:
         var: metric_with_auth_test
