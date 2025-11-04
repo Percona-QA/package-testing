@@ -32,6 +32,7 @@
       - "pt_mongodb_summary: {{ path_base }}/tools/pt-mongodb-summary"
       - "nomad: {{ path_base }}/tools/nomad"
       - "nomad_data_dir: {{ path_base }}/data/nomad"
+      - "valkey_exporter: {{ path_base }}/exporters/valkey_exporter"
 
 - name: Check if the configuration generated with paths-base is using the custom path
   shell: cat {{path_base}}/config/pmm-agent.yaml | grep "{{path_base}}"

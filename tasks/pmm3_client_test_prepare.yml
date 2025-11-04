@@ -7,6 +7,12 @@
   when: ansible_os_family == "RedHat"
   include_tasks: ./install_epel.yml
 
+- name: Install GPG key on Debian
+  shell: |
+    gpg --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+    gpg --export 93C4A3FD7BB9C367 | tee /etc/apt/trusted.gpg.d/ansible.gpg
+  when: ansible_distribution == "Debian"
+
 - name: Allow release-info to change for apt repositories
   when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
   command: apt-get update -y --allow-releaseinfo-change
@@ -14,22 +20,13 @@
 - name: Install percona-release package
   include_tasks: install_percona-release.yml
 
-- name: Install needed packages for Debian/Ubuntu
-  when: ansible_os_family == "Debian"
-  apt:
-    name: "{{ packages }}"
-    update_cache: yes
-    state: latest
-  vars:
-    packages:
-      - wget
-      - gnupg
-      - jq # for exporter endpoint metric fetch
-      - acl
-  retries: 60
+- name: Install needed packages for Debian/Ubuntu (with retry)
+  shell: apt-get install -y wget gnupg jq acl
+  register: install_result
+  until: install_result.rc == 0
+  retries: 5
   delay: 10
-  register: result
-  until: result is not failed
+  when: ansible_os_family == "Debian"
 
 - name: Install needed packages for RHEL 7
   when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
