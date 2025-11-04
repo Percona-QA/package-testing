@@ -62,7 +62,7 @@
         success_msg: "{{ item.service_name }}: metrics are not accessible without auth"
 
     - name: Curl command is
-      shell: : "curl -s -u 'pmm:{{ agent_password }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
+      shell: "curl -s -u 'pmm:{{ agent_password }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
       register: metric_with_auth
 
     - debug:
