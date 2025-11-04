@@ -78,6 +78,7 @@
         - name: Waiting failed
           debug:
             msg: "'{{ item.metric }}' is not found!"
+          failed_when: true
 
     rescue:
       - name: Print pmm-admin list output on fail
