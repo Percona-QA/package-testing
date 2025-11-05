@@ -9,7 +9,7 @@
 - name: Enable Valkey repository
   shell: percona-release enable valkey release
 
-- name: Install Valkey on Debian based Systems
+- name: Install Valkey on Debian based systems
   shell: "{{item}}"
   with_items:
     - apt update
@@ -17,7 +17,7 @@
   become: yes
   when: ansible_os_family == "Debian"
 
-- name: Install Valkey on Debian based Systems
+- name: Install Valkey on Red Hat based systems
   shell: dnf install valkey
   become: yes
   when: ansible_os_family == "RedHat"
