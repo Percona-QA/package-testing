@@ -18,7 +18,10 @@
   when: ansible_os_family == "Debian"
 
 - name: Install Valkey on Red Hat based systems
-  shell: dnf install -y valkey
+  shell: "{{item}}"
+  with_items:
+    - dnf install -y valkey
+    - systemctl start valkey
   become: yes
   when: ansible_os_family == "RedHat"
 
