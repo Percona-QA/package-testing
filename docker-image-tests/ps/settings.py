@@ -22,7 +22,7 @@ docker_image_major = docker_acc + "/" + docker_product + ":" + ps_version_major
 # 8.X
 ps8x_packages = (
   'percona-server-client', 'percona-server-rocksdb', 'percona-server-server',
-  'percona-server-shared', 'percona-mysql-shell'
+  'percona-server-shared'
 )
 ps8x_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/ps-admin', '/usr/bin/mysqladmin', '/usr/bin/mysqlbinlog',
@@ -51,7 +51,7 @@ ps8x_functions = (
 # 8.0
 ps80_packages = (
   'percona-server-client', 'percona-server-rocksdb', 'percona-server-server',
-  'percona-server-shared', 'percona-mysql-shell'
+  'percona-server-shared'
 )
 ps80_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/ps-admin', '/usr/bin/mysqladmin', '/usr/bin/mysqlbinlog',
