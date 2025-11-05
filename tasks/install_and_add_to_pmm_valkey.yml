@@ -2,6 +2,10 @@
   debug:
     var: valkey_to_test
 
+- name: Set password for valkey
+  set_fact:
+    valkey_password: "UfY9s73Gx~!?@#$%^&*(){}[]<>|/:;,.-_+="
+
 - name: Install Valkey on Debian based Systems
   shell: "{{item}}"
   with_items:
@@ -9,6 +13,7 @@
     - apt update
     - apt install -y valkey
     - valkey-cli ping
+    - valkey-cli CONFIG SET requirepass '{{ valkey_password }}'
   become: yes
   when: ansible_os_family == "Debian"
 
