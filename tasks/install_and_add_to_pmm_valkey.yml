@@ -7,7 +7,7 @@
   with_items:
     - percona-release enable valkey release
     - apt update
-    - apt install valkey
+    - apt install -y valkey
     - valkey-cli ping
   become: yes
   when: ansible_os_family == "Debian"
