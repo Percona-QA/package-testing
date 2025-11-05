@@ -10,7 +10,10 @@
     pmm_client_version: "{{ (pmm_client_version is defined) | ternary(pmm_client_version, lookup('env', 'PMM_VERSION')) }}"
 
 - set_fact:
-    pmm_client_version: "{{ pmm_client_version.split('-')[0] }}"
+    pmm_client_version: "{{ pmm_client_version.stdout.split('-')[0] }}"
+  when:
+    - pmm_client_version is defined
+    - pmm_client_version is mapping
 
 # TODO: remove it in favor of inline string destruct, eg.: pmm_version.split('.')[1]
 - name: Parse and set PMM minor version
