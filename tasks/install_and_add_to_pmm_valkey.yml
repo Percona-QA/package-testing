@@ -5,7 +5,10 @@
 - name: Install Valkey on Debian based Systems
   shell: "{{item}}"
   with_items:
-    - wget -O valkey.tar.gz https://github.com/valkey-io/valkey/archive/refs/tags/9.0.0.tar.gz
+    - percona-release enable valkey release
+    - apt update
+    - apt install valkey
+    - valkey-cli ping
   become: yes
   when: ansible_os_family == "Debian"
 
