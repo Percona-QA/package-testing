@@ -6,27 +6,25 @@
   set_fact:
     valkey_password: "UfY9s73Gx~!?@#$%^&*(){}[]<>|/:;,.-_+="
 
+- name: Enable Valkey repository
+  shell: percona-release enable valkey release
+
 - name: Install Valkey on Debian based Systems
   shell: "{{item}}"
   with_items:
-    - percona-release enable valkey release
     - apt update
     - apt install -y valkey
   become: yes
   when: ansible_os_family == "Debian"
 
+- name: Install Valkey on Debian based Systems
+  shell: dnf install valkey
+  become: yes
+  when: ansible_os_family == "RedHat"
+
 - name: Set password for valkey
   shell: valkey-cli CONFIG SET requirepass '{{ valkey_password }}'
   become: yes
-
-#https://github.com/valkey-io/valkey/archive/refs/tags/9.0.0.tar.gz
-#- name: Install Valkey on Debian based Systems
-#  shell: "{{item}}"
-#  with_items:
-#    - sudo dnf install valkey
-#  become: yes
-#  when: ansible_os_family == "RedHat"
-#
 
 - name: Add valkey instance for monitoring
   command: >-
