@@ -201,6 +201,11 @@
     shell: pmm-agent --config-file={{ custom_path }}/config/pmm-agent.yaml > pmm-agent.log 2>&1 &
 
 ### Verifications after upgrade
+  - name: Check if the configuration generated with paths-base is using the custom path
+    include_tasks: ../tasks/verify_pmm3_client_config.yml
+    vars:
+      pmm_version: "{{ pmm_version }}"
+
   - name: Perform standard verifications set for PMM Client
     include_tasks: ../tasks/verifications_set_for_pmm3_client_after_upgrade.yml
 
