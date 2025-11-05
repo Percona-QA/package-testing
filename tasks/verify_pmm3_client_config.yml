@@ -35,12 +35,12 @@
       - "pt_mongodb_summary: {{ path_base }}/tools/pt-mongodb-summary"
       - "nomad: {{ path_base }}/tools/nomad"
       - "nomad_data_dir: {{ path_base }}/data/nomad"
-      - "{{ 'valkey_exporter: ' ~ path_base ~ '/exporters/valkey_exporter' if pmm_version is version('3.5.0', '>=', version_type='semver') else None }}"
+      - "{{ 'valkey_exporter: ' ~ path_base ~ '/exporters/valkey_exporter' if pmm_client_version is version('3.5.0', '>=', version_type='semver') else None }}"
 
 - name: Run only if version < 3.5.0
   debug:
     msg: "Running step for versions below 3.5.0"
-  when: pmm_version is version('3.5.0', '<')
+  when: pmm_client_version is version('3.5.0', '<')
 
 - name: Check if the configuration generated with paths-base is using the custom path
   shell: cat {{path_base}}/config/pmm-agent.yaml | grep "{{path_base}}"
