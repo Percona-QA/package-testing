@@ -6,6 +6,9 @@
 - set_fact:
     path_base: "{{ (custom_path is defined) | ternary(custom_path, '/usr/local/percona/pmm') }}"
 
+- set_fact:
+    pmm_client_version: "{{ (pmm_version is defined) | ternary(pmm_version, lookup('env', 'PMM_VERSION') }}"
+
 # TODO: remove it in favor of inline string destruct, eg.: pmm_version.split('.')[1]
 - name: Parse and set PMM minor version
   shell: "pmm-admin --version | grep ^Version | awk -F. '{print $2}'"
