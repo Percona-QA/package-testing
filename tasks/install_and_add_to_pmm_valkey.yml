@@ -1,0 +1,25 @@
+- name: Debug selected Valkey version
+  debug:
+    var: valkey_to_test
+
+- name: Install Valkey on Debian based Systems
+  shell: "{{item}}"
+  with_items:
+    - wget -O valkey.tar.gz https://github.com/valkey-io/valkey/archive/refs/tags/9.0.0.tar.gz
+  become: yes
+  when: ansible_os_family == "Debian"
+
+#https://github.com/valkey-io/valkey/archive/refs/tags/9.0.0.tar.gz
+#- name: Install Valkey on Debian based Systems
+#  shell: "{{item}}"
+#  with_items:
+#    - sudo dnf install valkey
+#  become: yes
+#  when: ansible_os_family == "RedHat"
+#
+#- name: Add valkey instance for monitoring
+#  when: ansible_os_family == "RedHat"
+#  command: >-
+#    pmm-admin add valkey
+#    --password={{ mysql_password }} --service-name={{ mysql_service_name }} --query-source=perfschema
+#    {{ '' if agent_password is not defined or '/agent_id/' in agent_password else '--agent-password=%s' | format(agent_password) }}
