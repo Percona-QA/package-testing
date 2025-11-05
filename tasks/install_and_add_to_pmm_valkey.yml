@@ -27,8 +27,8 @@
 #  become: yes
 #  when: ansible_os_family == "RedHat"
 #
+
 - name: Add valkey instance for monitoring
-  when: ansible_os_family == "RedHat"
   command: >-
     pmm-admin add valkey --username=default --password="{{ valkey_password }}"
     {{ '' if agent_password is not defined or '/agent_id/' in agent_password else '--agent-password=%s' | format(agent_password) }}
