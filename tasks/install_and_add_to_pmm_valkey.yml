@@ -30,5 +30,5 @@
 
 - name: Add valkey instance for monitoring
   command: >-
-    pmm-admin add valkey --username=default --password="{{ valkey_password }}"
+    pmm-admin add valkey --username=default --password="{{ valkey_password }}" --service-name={{ valkey_service_name }}
     {{ '' if agent_password is not defined or '/agent_id/' in agent_password else '--agent-password=%s' | format(agent_password) }}
