@@ -7,7 +7,7 @@
     valkey_password: "UfY9s73Gx~!?@#$%^&*(){}[]<>|/:;,.-_+="
 
 - name: Enable Valkey repository
-  shell: percona-release enable valkey testing
+  shell: percona-release enable valkey experimental
 
 - name: Install Valkey on Debian based systems
   shell: "{{item}}"
