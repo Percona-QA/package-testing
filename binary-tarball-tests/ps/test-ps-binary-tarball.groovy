@@ -161,6 +161,40 @@ pipeline {
             junit '**/*.xml'
             archiveArtifacts artifacts: '**/*.xml', fingerprint: true
         }
+
+        success {
+            script {
+                
+                if (params.PRODUCT_TO_TEST == "PS80") {
+                    product_to_test = "ps_80"
+                } else if (params.PRODUCT_TO_TEST == "PS84") {
+                    product_to_test = "ps_84"
+                } else if (params.PRODUCT_TO_TEST == "PS_INN_LTS") {
+                    product_to_test = "ps_lts_innovation"
+                } else if (params.PRODUCT_TO_TEST == "PS57") {
+                    product_to_test = "ps_57"
+                }
+
+                def eol_param = (product_to_test == "ps_57") ? "yes" : "no"
+
+                build job: 'ps-package-testing-molecule-parallel', propagate: false, wait: false, parameters: [
+                    string(name: 'product_to_test', value: "${product_to_test}"),
+                    string(name: 'install_repo', value: "testing"),
+                    string(name: 'EOL', value: "${eol_param}"),
+                    string(name: 'git_repo', value: "https://github.com/Percona-QA/package-testing.git"),
+                    string(name: 'git_branch', value: "master"),
+                    string(name: 'check_warnings', value: "yes"),
+                    string(name: 'install_mysql_shell', value: "yes")
+                ]
+
+            }
+        }
+        failure {
+            error "Binary tarball tests failed. Skipping PT integration tests"
+        }
+
+
+
     }
 
 

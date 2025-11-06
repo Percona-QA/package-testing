@@ -155,6 +155,7 @@ pipeline {
                         }
                     }
                 }
+
                 stage('Oracle Linux 8') {
                     agent {
                         label "min-ol-8-x64"
@@ -183,6 +184,7 @@ pipeline {
                         }
                     } 
                 }
+
                 stage('Oracle Linux 9') {
                     agent {
                         label "min-ol-9-x64"
@@ -245,6 +247,33 @@ pipeline {
     post {
         always {
             cleanWs()
+        }
+        success {
+            script {
+                PXC_PRODUCT = PXC_VERSION_MAJOR.split('\\.')[0..1].join('')
+                product_to_test = "pxc${PXC_PRODUCT}"
+                
+                build job: 'pxc-package-testing-parallel', propagate: false, wait: false, parameters: [
+                    string(name: 'product_to_test', value: "${product_to_test}"),
+                    string(name: 'test_repo', value: "testing"),
+                    string(name: 'test_type', value: "install"),
+                    string(name: 'pro_repo', value: "no"),
+                    string(name: 'git_repo', value: "Percona-QA/package-testing"),
+                    string(name: 'BRANCH', value: "master")
+                ]
+                
+                build job: 'pxc-package-testing-parallel', propagate: false, wait: false, parameters: [
+                    string(name: 'product_to_test', value: "${product_to_test}"),
+                    string(name: 'test_repo', value: "testing"),
+                    string(name: 'test_type', value: "min_upgrade_pxc_${PXC_PRODUCT}"),
+                    string(name: 'pro_repo', value: "no"),
+                    string(name: 'git_repo', value: "Percona-QA/package-testing"),
+                    string(name: 'BRANCH', value: "master")
+                ]
+            }
+        }
+        failure {
+            error "Binary tarball tests failed. Skipping PT integration tests"
         }
     }
 }
