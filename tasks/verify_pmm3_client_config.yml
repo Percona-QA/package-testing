@@ -41,7 +41,7 @@
       - "pt_mongodb_summary: {{ path_base }}/tools/pt-mongodb-summary"
       - "nomad: {{ path_base }}/tools/nomad"
       - "nomad_data_dir: {{ path_base }}/data/nomad"
-      - "{{ 'valkey_exporter: ' ~ path_base ~ '/exporters/valkey_exporter' if pmm_client_version is version('3.5.0', '>=', version_type='semver') else None }}"
+      - "{{ 'valkey_exporter: ' ~ path_base ~ '/exporters/valkey_exporter' if pmm_client_version is version('3.5.0', '>=') else None }}"
 
 - name: Run only if version < 3.5.0
   debug:
