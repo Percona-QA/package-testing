@@ -49,11 +49,3 @@
 
   - name: Check pmm3-client files
     include_tasks: ../tasks/verify_pmm3_client_files.yml
-
-  - name: Perform pmm-admin list
-    shell: "pmm-admin list"
-    register: list_output
-
-  - name: Print out connected services
-    debug:
-      var: list_output.stdout
