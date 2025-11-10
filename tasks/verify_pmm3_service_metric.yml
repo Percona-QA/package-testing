@@ -65,8 +65,8 @@
       shell: "curl -s -u 'pmm:{{ agent_password }}' 'http://127.0.0.1:{{ exporter_port.stdout }}/metrics' | grep '{{ item.metric }}'"
       register: metrics_debug
 
-  - debug:
-      var: metrics_debug
+    - debug:
+        var: metrics_debug
 
     - block:
         - name: "{{ item.service_name }}: curl metric with auth token pmm:{{ agent_password }}"
