@@ -31,7 +31,7 @@
 
 - name: Add valkey instance for monitoring
   command: >-
-    pmm-admin add valkey --username=default --password="{{ valkey_password }}" --service-name={{ valkey_service_name }}
+    pmm-admin add valkey {{ port_flag if port_flag is defined else '' }} --username=default --password="{{ valkey_password }}" --service-name={{ valkey_service_name }}
     {{ '' if agent_password is not defined or '/agent_id/' in agent_password else '--agent-password=%s' | format(agent_password) }}
 
 - name: "Validate pmm-admin list output contains 'MySQL'"
