@@ -38,6 +38,11 @@
   vars:
     process_name: "vmagent"
 
+- name: "Wait for 'nomad_agent' is Running"
+  include_tasks: ./wait_exporter_is_running.yml
+  vars:
+    process_name: "nomad_agent"
+
 - name: "Validate 'postgresql_pgstatements_agent' is Running"
   when: '"pg-" in enabled_db | join("") and (mongodb_connection_type | default("")) != "gssapi"'
   include_tasks: ../tasks/verify_exporter_status.yml
