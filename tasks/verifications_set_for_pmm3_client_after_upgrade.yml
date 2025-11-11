@@ -127,9 +127,6 @@
       - "{{ ('psmdb-' in enabled_db | join('')) | ternary('mongodb_exporter','') }}"
 
 - name: Get new PID of PMM Agent
-  shell: "ps -C pmm-agent"
-
-- name: Get new PID of PMM Agent
   shell: "ps -C pmm-agent -o pid="
   register: new_pid_pmm_agent
 

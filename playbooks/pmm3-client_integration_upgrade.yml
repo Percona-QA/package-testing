@@ -130,7 +130,7 @@
     include_tasks: ../tasks/verify_pmm3_metric.yml
     loop:
       - { service_name: '{{ mysql_service_name }}', metric: 'mysql_up 1' }
-## end PS
+### end PS
 
 ### start PSMDB
   - set_fact:
