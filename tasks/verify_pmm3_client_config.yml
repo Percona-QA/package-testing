@@ -6,6 +6,15 @@
 - set_fact:
     path_base: "{{ (custom_path is defined) | ternary(custom_path, '/usr/local/percona/pmm') }}"
 
+- set_fact:
+    pmm_client_version: "{{ (pmm_client_version is defined) | ternary(pmm_client_version, lookup('env', 'PMM_VERSION')) }}"
+
+- set_fact:
+    pmm_client_version: "{{ pmm_client_version.stdout.split('-')[0] }}"
+  when:
+    - pmm_client_version is defined
+    - pmm_client_version is mapping
+
 # TODO: remove it in favor of inline string destruct, eg.: pmm_version.split('.')[1]
 - name: Parse and set PMM minor version
   shell: "pmm-admin --version | grep ^Version | awk -F. '{print $2}'"
@@ -32,7 +41,7 @@
       - "pt_mongodb_summary: {{ path_base }}/tools/pt-mongodb-summary"
       - "nomad: {{ path_base }}/tools/nomad"
       - "nomad_data_dir: {{ path_base }}/data/nomad"
-      - "valkey_exporter: {{ path_base }}/exporters/valkey_exporter"
+      - "{{ 'valkey_exporter: ' ~ path_base ~ '/exporters/valkey_exporter' if pmm_client_version is version('3.5.0', '>=') else None }}"
 
 - name: Check if the configuration generated with paths-base is using the custom path
   shell: cat {{path_base}}/config/pmm-agent.yaml | grep "{{path_base}}"
