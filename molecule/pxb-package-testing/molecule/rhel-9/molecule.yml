@@ -20,21 +20,21 @@ provisioner:
   log: True
   playbooks:
     create: ../../playbooks/create_noble.yml
-    destroy: ../../playbooks/destroy_noble.yml
+#    destroy: ../../playbooks/destroy_noble.yml
     prepare: ../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
 scenario:
   name: rhel-9
-  destroy_sequence:
-    - destroy
+#  destroy_sequence:
+#    - destroy
   cleanup_sequence:
     - cleanup
   test_sequence:
-    - destroy
+ #   - destroy
     - create
     - prepare
     - converge
     - verify
     - cleanup
-    - destroy
+ #   - destroy
