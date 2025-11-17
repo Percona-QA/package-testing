@@ -112,10 +112,16 @@
     when: 
     - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
-  - name: setup epel 9 repo package
-    dnf: name=epel-release state=latest
-    when: 
-    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+  - name: setup epel 9 repo
+    dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int == 9
+
+#  - name: setup epel 9 repo package
+#    dnf: name=epel-release state=latest
+#    when: 
+#    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: install GPG key for epel 10
     rpm_key:
@@ -127,12 +133,6 @@
   - name: Yum update for epel 10
     command: dnf update -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
-
-  - name: setup epel 9 repo
-    dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int == 9
 
   - name: Fix Debian Buster EOL repositories
     shell: sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g; s|http://cdn-aws.deb.debian.org/debian|http://archive.debian.org/debian|g; s|http://security.debian.org/debian-security|http://archive.debian.org/debian-security|g; /buster-updates/d' /etc/apt/sources.list
