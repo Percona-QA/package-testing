@@ -57,3 +57,7 @@
 
     - name: Reboot machine to apply fips mode
       reboot:
+        reboot_timeout: 600
+        msg: "Rebooting to apply FIPS mode"
+      become: yes
+
