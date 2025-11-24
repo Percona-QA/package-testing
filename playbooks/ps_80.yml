@@ -99,8 +99,7 @@
   - name: Verify telemetry version and package installation
     command: /package-testing/check_tel_ver_pack.sh
     when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution != "focal"
+      - ansible_distribution_release not in ["focal", "amazon"]
 
 #  - name: enable the Tools release repo
 #    command: percona-release enable tools release
@@ -234,7 +233,7 @@
   - name: include tasks for checking FIPS mode
     include_tasks: ../tasks/check_ps80_fips.yml
     when:
-      - ansible_distribution_release != "bookworm"
+      - ansible_distribution_release not in ["bookworm", "bullseye"]
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
