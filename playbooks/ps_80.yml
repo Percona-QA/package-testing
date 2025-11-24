@@ -234,7 +234,6 @@
   - name: include tasks for checking FIPS mode
     include_tasks: ../tasks/check_ps80_fips.yml
     when:
-      - lookup('env', 'pro_test') == "yes"
       - ansible_distribution_release != "bookworm"
 
   - name: keyring plugins test
