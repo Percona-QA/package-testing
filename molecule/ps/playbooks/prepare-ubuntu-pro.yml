@@ -5,14 +5,14 @@
   become_method: sudo
   gather_facts: true
   tasks:
+    - name: Subscribe for fips-updates
+      command: pro enable fips-updates --assume-yes
+
     - name: Reboot first time
       reboot:
         reboot_timeout: 60
         msg: "Rebooting to apply FIPS mode"
       become: yes
-
-    - name: Subscribe for fips-updates
-      command: pro enable fips-updates --assume-yes
 
     - name: install needed packages for running tests with apt
       apt:
