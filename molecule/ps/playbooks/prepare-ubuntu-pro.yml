@@ -8,12 +8,6 @@
     - name: Subscribe for fips-updates
       command: pro enable fips-updates --assume-yes
 
-    - name: Reboot first time
-      reboot:
-        reboot_timeout: 60
-        msg: "Rebooting to apply FIPS mode"
-      become: yes
-
     - name: install needed packages for running tests with apt
       apt:
         name: "{{ packages }}"
@@ -61,9 +55,22 @@
         exclusive: False
       when: (ansible_distribution == "Ubuntu")
 
-    - name: Reboot machine to apply fips mode
-      reboot:
-        reboot_timeout: 600
-        msg: "Rebooting to apply FIPS mode"
-      become: yes
+    - block:
+      - name: Reboot machine to apply FIPS mode
+        reboot:
+          reboot_timeout: 600
+          msg: "Rebooting to apply FIPS mode"
 
+      - name: Check if machine is alive after reboot
+        wait_for_connection:
+          timeout: 300
+
+      - name: Print kernel after reboot
+        command: uname -a
+        register: kernel_after
+      - debug:
+          var: kernel_after.stdout
+
+    rescue:
+      - debug:
+          msg: "Host failed to reboot properly. SSH not reachable.
