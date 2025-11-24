@@ -233,7 +233,7 @@
   - name: include tasks for checking FIPS mode
     include_tasks: ../tasks/check_ps80_fips.yml
     when:
-      - ansible_distribution_release not in ["bookworm", "bullseye"]
+      - ansible_distribution_release not in ["bookworm", "bullseye", "focal"]
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
