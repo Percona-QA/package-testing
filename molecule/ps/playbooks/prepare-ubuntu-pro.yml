@@ -55,6 +55,13 @@
         exclusive: False
       when: (ansible_distribution == "Ubuntu")
 
+    - name: Ensure cloud-init does not reset networking
+      copy:
+        dest: /etc/cloud/cloud.cfg.d/99-disable-network-renew.cfg
+        content: |
+          network:
+            config: disabled
+
     - block:
         - name: Print message before reboot
           debug:
