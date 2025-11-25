@@ -216,7 +216,7 @@
     command: /package-testing/check_mycnf_post.sh
 
   - name: check the clone and data masking plugins
-    command: /package-testing/scripts/ps_clone_dm_plugin_test.sh
+    command: /package-testing/scripts/ps_clone_plugin_test_84.sh
 
   - name: check the data masking component
     command: /package-testing/scripts/ps_dm_component.sh
@@ -228,7 +228,7 @@
     command: /package-testing/scripts/ps_myrocks_test.sh
 
   - name: keyring plugins test
-    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
+    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps84
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb84
