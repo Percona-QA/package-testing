@@ -206,11 +206,11 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: check that Percona Server {{ pro }} version is correct
-    command: /package-testing/version_check.sh ps84 {{ pro }}
+  - name: check that Percona Server version is correct
+    command: /package-testing/version_check.sh ps84
 
-  - name: check that Percona Server {{ pro }} package versions are correct
-    command: /package-testing/package_check.sh ps80 {{ pro }}
+  - name: check that Percona Server package versions are correct
+    command: /package-testing/package_check.sh ps84
 
   - name: finish my.cnf change test
     command: /package-testing/check_mycnf_post.sh
