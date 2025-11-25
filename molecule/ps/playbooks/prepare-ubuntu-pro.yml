@@ -55,5 +55,5 @@
         exclusive: False
       when: (ansible_distribution == "Ubuntu")
 
-    - name: Reboot machine to apply fips mode
-      reboot:
+#    - name: Reboot machine to apply fips mode
+#      reboot:
