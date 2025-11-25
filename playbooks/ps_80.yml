@@ -108,12 +108,11 @@
 #    command: percona-release enable mysql-shell testing
 #    when: install_mysql_shell == "yes" or install_mysql_shell == ""
 
-# - name: install Percona XtraBackup 8.0 packages
-#   include_tasks: ../tasks/install_pxb80.yml
-#   when:
-#     - lookup('env', 'install_repo') != "experimental"
-#     - lookup('env', 'pro_test') != "yes"
-#     - ansible_distribution != "Amazon"
+  - name: install Percona XtraBackup 8.0 packages
+    include_tasks: ../tasks/install_pxb80.yml
+    when:
+      - lookup('env', 'install_repo') != "experimental"
+      - ansible_distribution != "Amazon"
 
   - name: enable the sysbench repo
     command: percona-release enable sysbench testing
