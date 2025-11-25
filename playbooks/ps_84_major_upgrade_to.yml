@@ -196,9 +196,6 @@
       - lookup('env', 'pro_test') == "yes"
       - ansible_os_family == "RedHat"
 
-  - name: check telemetry (disabled)
-    command: /package-testing/check_telemetry.sh ps -d
-
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
     when: install_mysql_shell == "yes" or install_mysql_shell == ""
