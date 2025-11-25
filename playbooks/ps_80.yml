@@ -92,6 +92,7 @@
     include_tasks: ../tasks/install_pshell.yml
     when:
       - lookup('env', 'pro_test') != "yes"
+      - ansible_distribution != "Amazon"
 
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e

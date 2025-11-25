@@ -5,12 +5,6 @@
   become_method: sudo
   gather_facts: true
   tasks:
-    - name: Rebooting machine
-      reboot:
-
-    - name: Ending the play now
-      ansible.builtin.meta: end_play
-
     - name: Subscribe for fips-updates
       command: pro enable fips-updates --assume-yes
 
@@ -61,29 +55,5 @@
         exclusive: False
       when: (ansible_distribution == "Ubuntu")
 
-    - name: Ensure cloud-init does not reset networking
-      copy:
-        dest: /etc/cloud/cloud.cfg.d/99-disable-network-renew.cfg
-        content: |
-          network:
-            config: disabled
-
-    - block:
-        - name: Print message before reboot
-          debug:
-            msg: "About to reboot machine to apply FIPS mode"
-
-        - name: Reboot machine to apply FIPS mode
-          reboot:
-            msg: "Rebooting to apply FIPS mode"
-            reboot_timeout: 600
-
-      rescue:
-        - name: Capture reboot failure in Jenkins
-          debug:
-            msg: "ERROR: Reboot failed! Host may be unreachable or FIPS broke SSH. Manual login might be needed."
-
-      always:
-        - name: Always print system uptime after reboot attempt
-          command: uptime
-          ignore_errors: yes
+    - name: Reboot machine to apply fips mode
+      reboot:
