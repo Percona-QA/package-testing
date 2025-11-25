@@ -186,6 +186,9 @@
   - name: Enable PXB 84 repo
     command: percona-release enable-only pxb-84-lts testing
 
+  - name: remove PXB 8.0 packages
+    include_tasks: ../tasks/remove_pxb80.yml
+
   - name: install PXB 8.4 packages
     include_tasks: ../tasks/install_pxb84.yml
 
