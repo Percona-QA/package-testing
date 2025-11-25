@@ -5,6 +5,12 @@
   become_method: sudo
   gather_facts: true
   tasks:
+    - name: Rebooting machine
+      reboot:
+
+    - name: Ending the play now
+      ansible.builtin.meta: end_play
+
     - name: Subscribe for fips-updates
       command: pro enable fips-updates --assume-yes
 
