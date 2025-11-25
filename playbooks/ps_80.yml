@@ -100,7 +100,8 @@
   - name: Verify telemetry version and package installation
     command: /package-testing/check_tel_ver_pack.sh
     when:
-      - ansible_distribution_release not in ["focal", "2023"]
+      - ansible_distribution_release not in ["focal"]
+      - ansible_distribution != "Amazon"
 
 #  - name: enable the Tools release repo
 #    command: percona-release enable tools release
