@@ -55,6 +55,8 @@
 
   - name: enable the pxb-80 release repo
     command: percona-release enable pxb-80 release
+    when:
+      - ansible_distribution != "Amazon"
 
 # - name: enable the tools main repo
 #   command: percona-release enable tools release
