@@ -40,12 +40,6 @@
   when: ansible_distribution == "Rocky" and ansible_distribution_major_version == "9"
   ignore_errors: yes
 
-- name: Download install_ppg.yml
-  get_url:
-    url: "https://raw.githubusercontent.com/Percona-QA/ppg-testing/main/tasks/install_ppg{{ pg_version }}.yml"
-    dest: /tmp
-    mode: 0777
-
 - name: Enable postgresql repository
   command: "percona-release setup -y ppg-{{ pg_version }}"
 
