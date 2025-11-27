@@ -35,17 +35,8 @@
       disable_gpg_check: yes
     when: ansible_os_family == "RedHat"
 
-  - name: enable the PS-80 main repo (setup for older versions)
-    command: percona-release setup ps-80 -y
-    when:
-      - ansible_distribution_major_version != "2023"
-      - not (ansible_facts['distribution'] in ["RedHat", "OracleLinux"] and ansible_distribution_major_version|int >= 8)
-
-  - name: enable the PS-80 main repo (enable for RHEL/OL 8+)
+  - name: enable the PS-80 testing repo
     command: percona-release enable ps-80 release
-    when:
-      - ansible_distribution_major_version != "2023"
-      - ansible_facts['distribution'] in ["RedHat", "OracleLinux"] and ansible_distribution_major_version|int >= 8
 
   - name: enable the pxb-80 release repo
     command: percona-release enable pxb-80 release
