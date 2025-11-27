@@ -38,6 +38,8 @@
 
   - name: enable the pxb-80 testing repo
     command: percona-release enable pxb-80 testing
+    when:
+      - ansible_distribution != "Amazon"
 
   - name: Clean and update package cache
     shell: |

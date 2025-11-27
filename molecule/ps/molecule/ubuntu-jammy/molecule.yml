@@ -6,7 +6,7 @@ driver:
 platforms:
   - name: ujammy-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
     region: us-west-2
-    image: ami-0ee8244746ec5d6d4
+    image: ami-058168290d30b9c52
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.medium
     ssh_user: ubuntu
@@ -21,7 +21,7 @@ provisioner:
   playbooks:
     create: ../../playbooks/create.yml
     destroy: ../../playbooks/destroy.yml
-    prepare: ../../playbooks/prepare.yml
+    prepare: ../../playbooks/prepare-ubuntu-pro.yml
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
 scenario:
