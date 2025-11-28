@@ -15,7 +15,7 @@
       - "{{ (ansible_distribution == 'Debian') | ternary('pg-17','') }}"
       - "{{ (ansible_distribution == 'Ubuntu') | ternary('pg-17','') }}"
       - "{{ (ansible_os_family == 'RedHat' and ansible_distribution != 'Amazon' and ansible_distribution_major_version|int != 10) | ternary('pg-17','') }}"
-      - "{{ (ansible_os_family == 'RedHat' and ansible_distribution != 'Amazon' and ansible_distribution_major_version|int == 10) | ternary('pg-18','') }}"
+      - "{{ (ansible_os_family == 'RedHat' and ansible_distribution != 'Amazon' and ansible_distribution_major_version|int == 10) | ternary('pg-17','') }}"
       - "{{ (ansible_distribution == 'Debian') | ternary('valkey-8','') }}"
       - "{{ (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int < 24) | ternary('valkey-8','') }}"
       - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version|int != 10) | ternary('valkey-8','') }}"
