@@ -45,7 +45,8 @@
 
 - name: Install Percona Distribution for PostgreSQL
   shell: |
-    dnf install percona-postgresql{{ pg_version }}-server
+    dnf install -y percona-postgresql{{ pg_version }}-server
+    dnf install -y percona-pg-stat-monitor{{ pg_version }}
 
 - name: Initialize Postgres RHEL
   command: /usr/pgsql-{{ pg_version }}/bin/postgresql-{{ pg_version }}-setup initdb
