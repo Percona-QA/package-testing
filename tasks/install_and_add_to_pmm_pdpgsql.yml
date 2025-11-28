@@ -41,13 +41,11 @@
   ignore_errors: yes
 
 - name: Enable postgresql repository
-  command: "percona-release setup -y ppg-{{ pg_version }}"
+  shell: percona-release enable ppg-{{ pg_version }} release
 
-- name: Run install_ppg.yml
-  include_tasks: /tmp/install_ppg{{ pg_version }}.yml
-  vars:
-    # workaround to pass pg_version_to_install check in install_ppg.yml
-    pg_version_to_install: "{{ pg_version }}.5"
+- name: Install Percona Distribution for PostgreSQL
+  shell: |
+    dnf install percona-postgresql{{ pg_version }}-server
 
 - name: Initialize Postgres RHEL
   command: /usr/pgsql-{{ pg_version }}/bin/postgresql-{{ pg_version }}-setup initdb
