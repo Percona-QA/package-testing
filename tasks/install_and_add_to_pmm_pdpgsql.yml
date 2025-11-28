@@ -40,13 +40,19 @@
   when: ansible_distribution == "Rocky" and ansible_distribution_major_version == "9"
   ignore_errors: yes
 
-- name: Enable postgresql repository
-  shell: percona-release enable ppg-{{ pg_version }} release
+- name: Download install_ppg.yml
+  get_url:
+    url: "https://raw.githubusercontent.com/Percona-QA/ppg-testing/main/tasks/install_ppg{{ pg_version }}.yml"
+    dest: /tmp
+    mode: 0777
 
-- name: Install Percona Distribution for PostgreSQL
-  shell: |
-    dnf install -y percona-postgresql{{ pg_version }}-server
-    dnf install -y percona-pg-stat-monitor{{ pg_version }}
+- name: Enable postgresql repository
+  command: "percona-release setup -y ppg-{{ pg_version }}"
+
+- name: Run install_ppg.yml
+  include_tasks: /tmp/install_ppg{{ pg_version }}.yml
+  vars:
+    pg_version_to_install: "{{ pg_version }}"
 
 - name: Initialize Postgres RHEL
   command: /usr/pgsql-{{ pg_version }}/bin/postgresql-{{ pg_version }}-setup initdb
