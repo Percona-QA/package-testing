@@ -15,7 +15,6 @@
       - percona-server-client{{ pro_suf | default('') }}
       - percona-server-rocksdb{{ pro_suf | default('') }}
       - percona-mysql-router{{ pro_suf | default('') }}
-      - percona-server-js{{ pro_suf | default('') }}
     when: ansible_os_family == "Debian"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -23,41 +22,24 @@
   - name: get list of enabled dnf modules on centos 8
     command: dnf module list --enabled
     register: enabled_dnf_modules
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
 
   - name: list enabled dnf modules on centos 8
     debug:
       var: enabled_dnf_modules
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
 
   - name: disable the mysql module on RHEL/CentOS 8
-    command: dnf module disable mysql mariadb -y
+    command: yum module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: install Percona Server rpm packages Amazon using dnf
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-      disablerepo: "epel"
-      update_cache: yes
-    vars:
-      packages:
-      - percona-server-server{{ pro_suf | default('') }}
-      - percona-server-js{{ pro_suf | default('') }}
-      - percona-mysql-router{{ pro_suf | default('') }}
-      - percona-server-client{{ pro_suf | default('') }}
-      - percona-server-test{{ pro_suf | default('') }}
-      - percona-server{{ pro_suf | default('') }}-debuginfo
-      - percona-server-devel{{ pro_suf | default('') }}
-      - percona-server-rocksdb{{ pro_suf | default('') }}
-    when:
-        - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+  - name: disable the mariadb module on RHEL/CentOS 8
+    command: yum module disable mariadb -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-
-  - name: install Percona Server rpm packages RHEL7 using yum
+  - name: install Percona Server rpm packages
     yum:
+      allowerasing: "{{ allowerasing_value | default (false) }}"
       name: "{{ packages }}"
       state: latest
       disablerepo: "epel"
@@ -71,30 +53,6 @@
       - percona-server{{ pro_suf | default('') }}-debuginfo
       - percona-server-devel{{ pro_suf | default('') }}
       - percona-server-rocksdb{{ pro_suf | default('') }}
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
-  - name: install Percona Server rpm packages RHEL8+ using dnf
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-      disablerepo: "epel"
-      update_cache: yes
-    vars:
-      packages:
-      - percona-server-server{{ pro_suf | default('') }}
-      - percona-server-js{{ pro_suf | default('') }}
-      - percona-mysql-router{{ pro_suf | default('') }}
-      - percona-server-client{{ pro_suf | default('') }}
-      - percona-server-test{{ pro_suf | default('') }}
-      - percona-server{{ pro_suf | default('') }}-debuginfo
-      - percona-server-devel{{ pro_suf | default('') }}
-      - percona-server-rocksdb{{ pro_suf | default('') }}
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
+    when: ansible_os_family == "RedHat"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"

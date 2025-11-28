@@ -1,4 +1,4 @@
-# This task installs and starts Percona Server 5.7 on CentOS and Debian/Ubuntu
+# This task installs and starts Percona Server on CentOS and Debian/Ubuntu
 #
 # Task adjustments are handled by parent playbook vars:
 #             var "port_flag"      :  to access agent with custom port
@@ -9,15 +9,15 @@
   set_fact:
     mysql_password: "UfY9s73Gx~!?@#$%^&*(){}[]<>|/:;,.-_+="
 
-- name: enable ps-57 release repo
+- name: enable Percona Server release repo
   include_tasks: ./enable_repo.yml
   vars:
     only: yes
-    package: "ps-57"
+    package: "{{ ps_to_test }}"
     repository: "release"
 
-- name: install Percona Server 5.7 packages
-  include_tasks: ./install_ps57.yml
+- name: install Percona Server packages
+  include_tasks: ./install_ps80.yml
 
 - name: start mysql service
   service: name=mysql state=started
@@ -36,7 +36,6 @@
     init_pass=$(grep "temporary password" /var/log/mysqld.log | awk '{print $NF}' | tail -1)
     mysql --connect-expired-password -uroot --password="$init_pass" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ mysql_password }}';"
     cp ../templates/my_57.j2 /root/.my.cnf
-
 - name: copy .my.cnf with credentials on centos
   when: ansible_os_family == "RedHat"
   template: src=../templates/my_57.j2
@@ -49,14 +48,12 @@
     pmm-admin add mysql {{ port_flag if port_flag is defined else '' }}
     --password={{ mysql_password }} --service-name={{ mysql_service_name }} --query-source=perfschema 
     {{ '' if agent_password is not defined or '/agent_id/' in agent_password else '--agent-password=%s' | format(agent_password) }}
-
 - name: add mysql instance for monitoring via socket
   when: ansible_os_family != "RedHat"
   command: >-
     pmm-admin add mysql {{ port_flag if port_flag is defined else '' }}
     --socket=/var/run/mysqld/mysqld.sock --service-name={{ mysql_service_name }} --query-source=perfschema
     {{ '' if agent_password is not defined or '/agent_id/' in agent_password else '--agent-password=%s' | format(agent_password) }}
-
 - name: "Validate pmm-admin list output contains 'MySQL'"
   include_tasks: ./verify_pmm-admin_list_contains.yml
   vars:

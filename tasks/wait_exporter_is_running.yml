@@ -6,19 +6,24 @@
 #                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
 #           TODO: add arguments doc and make task loop compatible
 #
-- name: Validate {{ process_name }} status
-  block:
-    - name: Wait for {{ process_name }} to have Running Status.
-      shell: "pmm-admin list {{ port_flag if port_flag is defined else '' }} | grep '{{ process_name }}' | awk -F' ' '{print $2}'"
-      register: last_status
-      until: last_status.stdout.find('Running') != -1
-      delay: "{{ delay if delay is defined else 5 }}"
-      retries: "{{ retries if retries is defined else 5 }}"
-    - name: Waiting successful
-      debug:
-        msg: "{{ process_name }} is 'Running'"
+- block:
+  - name: Validate {{ process_name }} status
+    block:
+      - name: Wait for {{ process_name }} to have Running Status.
+        shell: "pmm-admin list {{ port_flag if port_flag is defined else '' }} | grep '{{ process_name }}' | awk -F' ' '{print $2}'"
+        register: last_status
+        until: last_status.stdout.find('Running') != -1
+        delay: "{{ delay if delay is defined else 5 }}"
+        retries: "{{ retries if retries is defined else 5 }}"
+      - name: Waiting successful
+        debug:
+          msg: "{{ process_name }} is 'Running'"
+    rescue:
+      - name: Waiting failed
+        debug:
+          msg: "{{ process_name }} status is '{{ last_status.stdout }}'!"
+        failed_when: true
   rescue:
-    - name: Waiting failed
-      debug:
-        msg: "{{ process_name }} status is '{{ last_status.stdout }}'!"
-      failed_when: true
+    - name: Generate PMM summary on failure
+      command: "pmm-admin summary --filename /pmm/package-testing/pmm-summary.zip {{ port_flag if port_flag is defined else '' }}"
+      ignore_errors: yes

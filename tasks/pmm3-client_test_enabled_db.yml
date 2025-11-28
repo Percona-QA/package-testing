@@ -1,0 +1,22 @@
+# Encapsulates "enabled_db" variable initialization
+
+- name: Set Databases list
+  set_fact:
+    enabled_db: "{{ db_list|select|list }}"
+  vars:
+    db_list:
+      - "{{ (ansible_distribution != 'Amazon') | ternary('ps-8.4','') }}"
+      - "{{ (ansible_distribution == 'Debian') | ternary('ps-8.4','') }}"
+      - "{{ (ansible_distribution == 'Ubuntu') | ternary('ps-8.4','') }}"
+      - "{{ (ansible_os_family == 'RedHat' and ansible_distribution != 'Amazon') | ternary('ps-8.4','') }}"
+      - "{{ (ansible_distribution == 'Debian') | ternary('psmdb-70','') }}"
+      - "{{ (ansible_distribution == 'Ubuntu') | ternary('psmdb-80','') }}"
+      - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version|int != 10) | ternary('psmdb-80','') }}"
+      - "{{ (ansible_distribution == 'Debian') | ternary('pg-17','') }}"
+      - "{{ (ansible_distribution == 'Ubuntu') | ternary('pg-17','') }}"
+      - "{{ (ansible_os_family == 'RedHat' and ansible_distribution != 'Amazon' and ansible_distribution_major_version|int != 10) | ternary('pg-17','') }}"
+      - "{{ (ansible_distribution == 'Debian') | ternary('valkey-8','') }}"
+      - "{{ (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int < 24) | ternary('valkey-8','') }}"
+      - "{{ (ansible_os_family == 'RedHat' and ansible_distribution_major_version|int != 10) | ternary('valkey-8','') }}"
+
+
