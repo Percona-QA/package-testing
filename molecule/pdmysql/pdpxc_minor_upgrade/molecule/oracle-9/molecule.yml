@@ -7,7 +7,7 @@ platforms:
   - name: ol9-${BUILD_NUMBER}-${JOB_NAME}
     region: eu-central-1
     image: ami-0387d68a9c60ce485
-    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    vpc_subnet_id: subnet-0fad4db6fdd8025b6
     instance_type: t2.small
     ssh_user: ec2-user
     root_device_name: /dev/sda1
@@ -18,8 +18,8 @@ provisioner:
   name: ansible
   log: True
   playbooks:
-    create: ../../../../playbooks/create.yml
-    destroy: ../../../../playbooks/destroy.yml
+    create: ../../../../playbooks/create_noble.yml
+    destroy: ../../../../playbooks/destroy-noble-arm.yml
     prepare: ../../../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../playbooks/playbook.yml

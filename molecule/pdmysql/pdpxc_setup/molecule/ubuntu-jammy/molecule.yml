@@ -7,8 +7,8 @@ platforms:
   - name: ujammy-${BUILD_NUMBER}-${JOB_NAME}
     region: eu-central-1
     image: ami-0aed9a9324a8fe110
-    vpc_subnet_id: subnet-085deaca8c1c59a4f
-    instance_type: t2.micro
+    vpc_subnet_id: subnet-0fad4db6fdd8025b6
+    instance_type: t2.medium
     ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
@@ -18,8 +18,8 @@ provisioner:
   name: ansible
   log: True
   playbooks:
-    create: ../../../../playbooks/create.yml
-    destroy: ../../../../playbooks/destroy.yml
+    create: ../../../../playbooks/create_noble.yml
+    destroy: ../../../../playbooks/destroy-noble-arm.yml
     prepare: ../../../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../playbooks/playbook.yml

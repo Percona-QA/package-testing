@@ -5,6 +5,25 @@
   become_method: sudo
   gather_facts: true
   tasks:
+    - name: update apt cache
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: update yum cache
+      yum:
+        update_cache: yes
+      when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+    - name: update dnf cache
+      dnf:
+        update_cache: yes
+      when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
     - name: Setup SSH keys CentOS
       authorized_key:
         user: centos

@@ -10,6 +10,8 @@
 - hosts: all
   become: true
   become_method: sudo
+  environment:
+    chdir: "{{ playbook_dir }}"
 
   tasks:
   - name: Echo server_to_test variable
@@ -20,15 +22,15 @@
     include_tasks: ../tasks/test_prep.yml
 
   - name: Extract PXB major and minor version number using shell commands
-    shell: cat ../VERSIONS | grep 'PXB_INN_LTS_MAJ_VER' | cut -d'=' -f2 | sed 's/"//g'
+    shell: cat /package-testing/VERSIONS | grep 'PXB_INN_LTS_MAJ_VER' | cut -d'=' -f2 | sed 's/"//g'
     register: pxb_version_major_minor
 
   - name: Extract PXB major version number using shell commands
-    shell: cat ../VERSIONS | grep PXB_INN_LTS_MAJ_VER | awk -F'[=".]' '{print $3"."$4}'
+    shell: cat /package-testing/VERSIONS | grep PXB_INN_LTS_MAJ_VER | awk -F'[=".]' '{print $3"."$4}'
     register: pxb_version_major
 
   - name: Extract version number using shell commands
-    shell: cat ../VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    shell: cat /package-testing/VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
     register: major_release_version
 
   - name: Set major_release_version variable
@@ -43,26 +45,39 @@
     set_fact:
       pxb_version_major_minor: "{{ pxb_version_major_minor.stdout }}"
 
-  - name: Extract values using shell command for repo name used for innovation/lts release
-    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
-    register: ps_inn_lts_repo_name
+  - name: Print the Versions PS
+    debug:
+      msg: "PS version is {{ major_release_version }}"
 
+  - name: Print the versions PXB
+    debug:
+      msg: "PXB version is {{ pxb_version_major }}.{{ pxb_version_major_minor }}"
+
+  - name: Extract values using shell command for repo name used for innovation/lts release
+    shell: grep 'PS_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: ps_inn_lts_repo_name
+    
   - name: Set pxb_inn_lts_repo_name variable
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
 
   - name: include tasks for enabling PS {{ major_release_version }} main repo
     include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
-    when: lookup('env', 'install_repo') == "main"
+    when: 
+      - lookup('env', 'install_repo') == "main"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: include tasks for enabling PS {{ major_release_version }} test repo
     include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when: 
+      - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: include tasks for enabling PS {{ major_release_version }} experimental repo
     include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
-    when: lookup('env', 'install_repo') == "experimental"
-
+    when: 
+      - lookup('env', 'install_repo') == "experimental"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
 ### UPSTREAM 
 
@@ -177,6 +192,13 @@
 
 # NEW URL 8.3 https://cdn.mysql.com//Downloads/MySQL-8.3/mysql-server_8.3.0-1ubuntu23.10_amd64.deb-bundle.tar
 
+  - name: Install mysql deb packages using tarballs ubuntu 20.04
+    command: wget https://cdn.mysql.com/archives/mysql-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu20.04_amd64.deb-bundle.tar
+    when: 
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - pxb_version_major != "8.3"
+
   - name: Install mysql deb packages using tarballs ubuntu 22.04
     command: wget https://cdn.mysql.com/archives/mysql-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar
     when: 
@@ -202,6 +224,13 @@
     command: wget https://cdn.mysql.com/archives/mysql-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1debian12_amd64.deb-bundle.tar
     when: 
       - ansible_distribution == 'Debian' and ansible_distribution_version == '12.0'
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - pxb_version_major != "8.3"
+
+  - name: extract mysql deb packages for ubuntu 20.04
+    command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu20.04_amd64.deb-bundle.tar -C /tmp
+    when: 
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - pxb_version_major != "8.3"
 
@@ -236,6 +265,12 @@
 ##
 # NEW URL 8.3 https://cdn.mysql.com//Downloads/MySQL-8.3/mysql-server_8.3.0-1ubuntu23.10_amd64.deb-bundle.tar
 
+  - name: Install mysql deb packages using tarballs ubuntu 20.04
+    command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu20.04_amd64.deb-bundle.tar
+    when: 
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
   - name: Install mysql deb packages using tarballs ubuntu 22.04
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar
     when: 
@@ -258,6 +293,12 @@
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1debian12_amd64.deb-bundle.tar
     when: 
       - ansible_distribution == 'Debian' and ansible_distribution_version == '12.0'
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+  - name: extract mysql deb packages for ubuntu 20.04
+    command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu20.04_amd64.deb-bundle.tar -C /tmp
+    when: 
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: extract mysql deb packages for ubuntu 22.04
@@ -314,7 +355,7 @@
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install packages in rhel/centos 8
-    yum:
+    package:
       name: "{{ packages }}"
       state: present
     vars:
@@ -326,7 +367,7 @@
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install packages in rhel/centos 9
-    yum:
+    package:
       name: "{{ packages }}"
       state: present
     vars:
@@ -377,10 +418,10 @@
 ### PS END
 
 
-  - name: install Percona XtraBackup {{ major_release_version }} packages
+  - name: install Percona XtraBackup {{ major_release_version }} packages 
     include_tasks: ../tasks/install_pxb_innovation_lts.yml
-    when: 
-      - lookup('env', 'install_repo') != "experimental"
+#    when: 
+#      - lookup('env', 'install_repo') != "experimental"
 
 ### PS START
   - name: start mysql service with service command

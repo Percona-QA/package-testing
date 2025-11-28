@@ -16,8 +16,8 @@
     when: ansible_os_family == "Debian" and lookup('env', 'cur_action_to_test') == "not_pro_to_pro"
     ignore_errors: true
 
-  - name: install Percona repository package on centos
-    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+  - name: Install percona release RHEL
+    command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat" and lookup('env', 'cur_action_to_test') == "not_pro_to_pro"
     ignore_errors: true
 

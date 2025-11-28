@@ -6,21 +6,19 @@ import time
 from settings import *
 
 docker_acc = os.getenv('DOCKER_ACC')
-container_name = 'pxc-docker-test-static2'
+container_name = 'pxc-docker-test-static3'
 
 @pytest.fixture(scope='module')
 def host():
     docker_id = subprocess.check_output(
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd, '-e', 'PERCONA_TELEMETRY_DISABLE=1', '-d', docker_image_latest]).decode().strip()
-    if pxc_version_major in ['8.0','5.7','5.6']:
-        exec_command = ['microdnf', 'install', 'net-tools']
-    else:
-         exec_command = ['yum', 'install', '-y', 'net-tools']
+    exec_command = ['microdnf', 'install', '-y', 'net-tools']
     subprocess.check_call(['docker','exec','--user','root',container_name] + exec_command)
     time.sleep(80)
     yield testinfra.get_host("docker://root@" + docker_id)
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
 
+@pytest.mark.skipif(pxc_version_major == "8.4", reason="Skipping tests for PXC 84")
 @pytest.mark.skipif(pxc_version_major == "5.7", reason="Skipping tests for 5.7")
 @pytest.mark.skipif(docker_acc == "perconalab", reason="Skipping tests in 'testing' repo")
 class TestMysqlEnvironment:

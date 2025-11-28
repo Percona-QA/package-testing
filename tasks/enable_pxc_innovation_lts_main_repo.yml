@@ -10,18 +10,20 @@
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
     when: ansible_os_family == "Debian"
 
-  - name: add the Percona yum repos for CentOS
-    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+  - name: add the Percona yum repos for RHEL
+    yum: 
+      name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
 
-  - name: enable main repo {{ pxc_inn_lts_repo_name }}
-    command: percona-release enable-only {{ pxc_inn_lts_repo_name }} release
+  - name: enable main repo pxc-84-lts 
+    command: percona-release enable-only pxc-84-lts release
 
   - name: add the main tools repo
     command: percona-release enable tools release
 
-  - name: clean and update yum cache
+  - name: Clean and update package cache
     shell: |
-      yum clean all
-      yum makecache
-    when: ansible_os_family == "RedHat"
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]

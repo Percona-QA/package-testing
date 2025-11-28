@@ -1,18 +1,33 @@
 # Installs Percona Release Tool
-#
+
+- name: Install percona-release package Debian Noble
+  shell: |
+    wget https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+    apt install ./percona-release_latest.generic_all.deb
+    apt update
+  when: ansible_os_family == "Debian" and ansible_distribution_release == "noble"
+
 - name: Install percona-release package Debian
-  when: ansible_os_family == "Debian"
   apt:
     deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+  when: ansible_os_family == "Debian" and ansible_distribution_release != "noble"
 
-- name: Install percona-release package RedHat
-  when: ansible_os_family == "RedHat"
-  command: yum -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-#  args:
-#    warn: no
+- name: Install percona-release package RedHat using yum
+  yum:
+    name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    state: present
+  when:
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+    - ansible_facts['distribution_major_version'] | int <= 7
 
-- name: clean and update yum cache
+- name: Install percona-release package RedHat using dnf
+  dnf:
+    name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    state: present
+  when:
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+    - ansible_facts['distribution_major_version'] | int >= 8
+
+- name: Clean package manager cache dynamic using ansible_pkg_mgr
+  shell: "{{ ansible_pkg_mgr }} clean all"
   when: ansible_os_family == "RedHat"
-  shell: |
-    yum clean all
-  #   yum makecache

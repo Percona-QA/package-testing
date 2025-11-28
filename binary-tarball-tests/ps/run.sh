@@ -1,5 +1,10 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
+
+set -x
+
 export PATH=${HOME}/.local/bin:${PATH}
+echo "FETCHING from /etc/environment"
+source /etc/environment 
 
 echo "Installing dependencies..."
 if [ -f /etc/redhat-release ]; then
@@ -25,10 +30,10 @@ else
     sudo apt install -y python3 python3-pip
   fi
   sudo apt-get update -y
-  sudo apt install -y libaio1 libnuma1 libldap-2.4-2
+  sudo apt install -y libaio1 libnuma1 libldap-2.4-2 libaio-dev
 fi
 
-if [[ $(lsb_release -sc) == 'bookworm' ]]; then
+if [[ $(lsb_release -sc) == 'bookworm' || $(lsb_release -sc) == 'noble' ]]; then
   pip3 install --user --break-system-packages pytest-testinfra pytest
 else
   pip3 install --user pytest-testinfra pytest
@@ -45,7 +50,9 @@ if [ -z "${PS_REVISION}" ]; then
 fi
 
 # PRO tarballs are downloaded, extracted and BASE_DIR is set by Jenkins job.
-if [ "$PRO" != 'yes' ]; then
+echo "non pro base dir setting.."
+if [[ "$PRO" != "true" ]]; then
+  echo "PRO IS NOT TRUE HERE!!!"
   TARBALL_NAME=$(basename "$(find . -maxdepth 1 -name '*.tar.gz'|head -n1)")
   if [ -z "${TARBALL_NAME}" ]; then
     echo "Please put PS tarball into this directory!"
@@ -54,7 +61,14 @@ if [ "$PRO" != 'yes' ]; then
   tar xf "${TARBALL_NAME}"
   PS_DIR_NAME=$(echo "${TARBALL_NAME}"|sed 's/.tar.gz$//'|sed 's/.deb$//'|sed 's/.rpm$//')
   export BASE_DIR="${PWD}/${PS_DIR_NAME}"
+  echo "BASE_DIR is for non PRO $BASE_DIR"
+else
+  echo "PRO is TRUE HERE !!! base dir setting.."
+  export BASE_DIR="/usr/percona-server"
+  echo "BASE_DIR is for PRO $BASE_DIR"
 fi
+
+
 
 if [ -z "${BASE_DIR}" ]; then
   echo "BASE_DIR environment variable needs to be set!"

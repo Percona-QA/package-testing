@@ -8,17 +8,39 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
-  - name: include tasks for enabling test repo
-    include_tasks: ../tasks/enable_pxc80_testing_repo.yml
-    when: lookup('env', 'upgrade_repo') == "testing" or lookup('env', 'upgrade_repo') == ""
+#-------------non pro
+  - name: include tasks for enabling test repo pxc 80 non pro
+    include_tasks: ../../../../tasks/enable_pxc80_testing_repo.yml
+    when:
+    - lookup('env', 'install_repo') == "testing" 
+    - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_pxc80_main_repo.yml
-    when: lookup('env', 'upgrade_repo') == "main"
+  - name: include tasks for enabling main repo pxc 80 non pro
+    include_tasks: ../../../../tasks/enable_pxc80_main_repo.yml
+    when: 
+    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling experimental repo
-    include_tasks: ../tasks/enable_pxc80_experimental_repo.yml
-    when: lookup('env', 'upgrade_repo') == "experimental"
+  - name: include tasks for enabling experimental repo pxc 80 non pro
+    include_tasks: ../../../../tasks/enable_pxc80_experimental_repo.yml
+    when: 
+    - lookup('env', 'install_repo') == "experimental"
+    - lookup('env', 'pro') == "no"
+#-----------------pro
+
+  - name: include tasks for enabling test repo pxc 80 pro
+    include_tasks: ../../../../tasks/enable_pxc80_pro_repo_testing.yml
+    when: 
+    - lookup('env', 'install_repo') == "testing" 
+    - lookup('env', 'pro') == "yes"
+
+  - name: include tasks for enabling main repo pxc 80 pro
+    include_tasks: ../../../../tasks/enable_pxc80_pro_repo_main.yml
+    when: 
+    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - lookup('env', 'pro') == "yes"
+#---------------------
+
 
   - name: upgrade PXC 8.0 to new deb packages
     apt:
@@ -63,8 +85,8 @@
        - percona-xtradb-cluster-shared-compat
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: install plugins
-    command: /package-testing/plugins_test_80.sh pxc
+#  - name: install plugins
+#    command: /package-testing/plugins_test_80.sh pxc
 
   - name: check that PXC version is correct
     command: /package-testing/version_check.sh pxc80

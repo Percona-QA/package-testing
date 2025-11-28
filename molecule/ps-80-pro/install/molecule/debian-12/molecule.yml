@@ -6,7 +6,7 @@ driver:
 platforms:
   - name: debian12-${BUILD_NUMBER}-${JOB_NAME}-${cur_action_to_test}
     region: us-west-2
-    image: ami-0544719b13af6edc3
+    image: ami-0dbd0b6509fe8f301
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.micro
     ssh_user: admin
@@ -14,12 +14,13 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-ps80-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   log: True
   playbooks:
-    create: ../../../../playbooks/create.yml
-    destroy: ../../../../playbooks/destroy.yml
+    create: ../../../../playbooks/create_noble.yml
+    destroy: ../../../../playbooks/destroy-noble-arm.yml
     prepare: ../../playbooks/prepare-pro.yml
     converge: ../../playbooks/playbook.yml
 scenario:

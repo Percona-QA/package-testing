@@ -26,17 +26,17 @@ ps8x_packages = (
 )
 ps8x_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/ps-admin', '/usr/bin/mysqladmin', '/usr/bin/mysqlbinlog',
-  '/usr/sbin/mysqld-debug', '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow', '/usr/bin/mysqlimport', '/usr/bin/mysqlpump',
+  '/usr/sbin/mysqld-debug', '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow', '/usr/bin/mysqlimport',
   '/usr/bin/mysqlshow', '/usr/bin/mysqlslap', '/usr/bin/mysqlcheck', '/usr/bin/mysql_config_editor', '/usr/bin/mysql_config',
-  '/usr/bin/mysql_config-64', '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade',
-  '/usr/bin/hostname', '/usr/bin/gunzip', '/usr/bin/my_print_defaults', '/usr/bin/cat', '/usr/bin/mysql_tzinfo_to_sql',
-  '/usr/bin/grep', '/usr/bin/cut', '/usr/bin/tail', '/usr/bin/sed', '/usr/bin/find', '/usr/bin/kill', '/usr/bin/gawk', '/usr/bin/mysqlsh'
+  '/usr/bin/mysql_config-64', '/usr/bin/mysql_secure_installation', '/usr/bin/find', '/usr/bin/kill',
+  '/usr/bin/hostname', '/usr/bin/gunzip', '/usr/bin/my_print_defaults', '/usr/bin/mysql_tzinfo_to_sql',
+  '/usr/bin/grep', '/usr/bin/sed', '/usr/bin/gawk', '/usr/bin/mysqlsh'
 )
 ps8x_plugins = (
   ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
   ('group_replication','group_replication.so'),('clone','mysql_clone.so'),
-  ('authentication_ldap_sasl','authentication_ldap_sasl.so'),('authentication_fido','authentication_fido.so')
+  ('authentication_ldap_sasl','authentication_ldap_sasl.so')
 )
 ps8x_components = (
   ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault')
@@ -58,8 +58,8 @@ ps80_binaries = (
   '/usr/sbin/mysqld-debug', '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow', '/usr/bin/mysqlimport', '/usr/bin/mysqlpump',
   '/usr/bin/mysqlshow', '/usr/bin/mysqlslap', '/usr/bin/mysqlcheck', '/usr/bin/mysql_config_editor', '/usr/bin/mysql_config',
   '/usr/bin/mysql_config-64', '/usr/bin/mysql_secure_installation', '/usr/bin/mysql_ssl_rsa_setup', '/usr/bin/mysql_upgrade',
-  '/usr/bin/hostname', '/usr/bin/gunzip', '/usr/bin/my_print_defaults', '/usr/bin/cat', '/usr/bin/mysql_tzinfo_to_sql',
-  '/usr/bin/grep', '/usr/bin/cut', '/usr/bin/tail', '/usr/bin/sed', '/usr/bin/find', '/usr/bin/kill', '/usr/bin/gawk', '/usr/bin/mysqlsh'
+  '/usr/bin/hostname', '/usr/bin/gunzip', '/usr/bin/my_print_defaults', '/usr/bin/mysql_tzinfo_to_sql',
+  '/usr/bin/grep', '/usr/bin/sed', '/usr/bin/find', '/usr/bin/kill', '/usr/bin/gawk', '/usr/bin/mysqlsh'
 )
 ps80_plugins = (
   ('audit_log','audit_log.so'),('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
@@ -68,7 +68,7 @@ ps80_plugins = (
   ('authentication_ldap_sasl','authentication_ldap_sasl.so'),('authentication_fido','authentication_fido.so')
 )
 ps80_components = (
-  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions')
+        ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions')
 )
 ps80_functions = (
   ('fnv1a_64', 'libfnv1a_udf.so', 'INTEGER'),('fnv_64', 'libfnv_udf.so', 'INTEGER'),('murmur_hash', 'libmurmur_udf.so', 'INTEGER'),

@@ -1,0 +1,97 @@
+  - name: include playbook for removing Percona repo
+    include_tasks: remove_percona_repository.yml
+
+  - name: PRINT install_repo_eol
+    debug:
+      msg: "{{ lookup('env', 'install_repo_eol') }}"
+
+  - name: Install percona release Debian
+    apt:
+      deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+    when: ansible_os_family == "Debian"
+
+  - name: Install percona release RHEL
+    command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    when: ansible_os_family == "RedHat"
+
+  - name: add pro repository on debian testing
+    template: src=../templates/eol_deb_repo_file_pxc57.j2
+              dest=/etc/apt/sources.list.d/post-eol.list
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "testing"
+    when:
+      - ansible_os_family == "Debian"
+      - lookup('env', 'install_repo_eol') == "testing" 
+
+  - name: add pro repository on Redhat testing
+    template: src=../templates/eol_rpm_repo_file_pxc57.j2
+             dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "testing"
+    when:
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'install_repo_eol') == "testing" 
+
+
+  - name: add pro repository on debian main
+    template: src=../templates/eol_deb_repo_file_pxc57.j2
+              dest=/etc/apt/sources.list.d/post-eol.list
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "release"
+    when:
+      - ansible_os_family == "Debian"
+      - lookup('env', 'install_repo_eol') == "main" 
+
+  - name: add pro repository on Redhat main
+    template: src=../templates/eol_rpm_repo_file_pxc57.j2
+             dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "release"
+    when:
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'install_repo_eol') == "main" 
+      
+
+  - name: Mandatory step for PXC 57 EOL (Disable all old repos)
+    command: percona-release disable all
+    when: lookup('env', 'pxc57repo') == "EOL"
+
+  - name: Mandatory step for PXC 57 EOL (Enable only pxc-57)
+    command: percona-release setup -y pxc-57 
+    when: lookup('env', 'pxc57repo') == "EOL"
+
+  - name: enable the tools {{ repo }}
+    command: percona-release enable tools {{ repo }}
+    vars:
+      repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
+
+  - name: add an apt signing key to enable repo
+    apt_key:
+      url: https://percona.com/downloads/deb-percona-keyring.gpg
+      state: present
+    when: ansible_os_family == "Debian"
+
+  - name: update deb cache
+    apt:
+      update_cache: yes
+    when:
+      - ansible_os_family == "Debian"
+
+#  - name: clean and update yum cache
+#    shell: |
+#      yum clean all
+#      yum makecache
+#    when: ansible_os_family == "RedHat"
+
+#  - name: update cache rpm
+#    yum:
+#      update_cache: yes
+#    when: ansible_os_family == "RedHat"

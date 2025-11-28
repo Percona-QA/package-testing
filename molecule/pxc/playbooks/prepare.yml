@@ -4,7 +4,12 @@
   become: true
   become_method: sudo
   gather_facts: true
+  serial: 1
   tasks:
+
+    - name: Check the ansible distribution and os family
+      ansible.builtin.debug:
+        msg: "ansible_distribution is {{ ansible_distribution }} , ansible_os_family is {{ ansible_os_family }}  ansible_distribution_major_version is {{ ansible_distribution_major_version }}"
 
     - name: install GPG key for epel 8
       rpm_key:
@@ -18,8 +23,14 @@
         key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
       when: (ansible_os_family == "RedHat") and (ansible_distribution_major_version == "8" or ansible_distribution_major_version == "9") 
 
+    - name: install GPG key for Percona repos PACKAGING 
+      rpm_key:
+        state: present
+        key: https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+      
     - name: setup epel 8 repo
-      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
+      dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
     - name: install GPG key for epel 9
@@ -29,32 +40,90 @@
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
     - name: setup epel 9 repo
-      yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
+      dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
-
-    - name: setup ca-certificates release
+    - name: setup ca-certificates release yum
       yum:
         name: ca-certificates
         update_cache: yes
         state: present
-      when: ansible_os_family == "RedHat"
+      when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
 
-    - name: setup epel release centos 7
-      yum:
-        name: epel-release
+    - name: setup ca-certificates release dnf
+      dnf:
+        name: ca-certificates
         update_cache: yes
         state: present
+      when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8 and ansible_distribution_major_version != "10" or (ansible_facts['distribution_major_version'] | int == 10 and ansible_facts['architecture'] == "aarch64")
+
+    - name: setup epel release centos 7
+      yum: name=https://dl.fedoraproject.org/pub/archive/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm state=present
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    - name: Remove the base repo for CentOS 7
+      shell: |
+          sudo sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* || true
+          sudo sed -i 's|#\\s*baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-* || true
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    - name: Remove the base repo for CentOS 7
+      shell: rm /etc/yum.repos.d/CentOS-Base.repo
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+
+    - name: Ensure base.repo exists CentOS 7
+      ansible.builtin.copy:
+        dest: /etc/yum.repos.d/base.repo
+        content: |
+          [base]
+          name=CentOS-$releasever - Base
+          baseurl=http://vault.centos.org/centos/$releasever/os/$basearch/
+          gpgcheck=1
+          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+          enabled=1
+        owner: root
+        group: root
+        mode: '0644'
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+      
+    - name: Update YUM cache CentOS 7
+      yum:
+        update_cache: yes
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
     - name: setup epel release for amazon linux 2
       shell: amazon-linux-extras install epel -y
-      when: ansible_distribution == "Amazon"
+      when: ansible_distribution == "Amazon" and ansible_distribution_major_version != "2023"
 
-    - name: upgrade deb packages apt
-      apt: update_cache=yes upgrade=safe
+    - name: Remove any line containing 'backports' in sources.list
+      lineinfile:
+        path: /etc/apt/sources.list
+        regexp: '.*backports.*'
+        state: absent
+      when: ansible_os_family == "Debian"  and ansible_distribution_release == "buster"
+
+    - name: Update the apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"  and ansible_distribution_release == "buster"
+
+    - name: Allow release info change
+      command: apt-get update --allow-releaseinfo-change
+      when: ansible_os_family == "Debian"  and ansible_distribution_release == "buster"
+
+    - name: Upgrade deb packages
+      apt:
+        upgrade: dist
       when: ansible_os_family == "Debian"
-
+      
+    - name: upgrade deb packages apt
+      apt: update_cache=yes
+      when: ansible_os_family == "Debian"
 
     - name: install needed packages for running tests with apt
       apt:
@@ -85,7 +154,7 @@
         - systemd-sysv
       when: ansible_os_family == "Debian" and ansible_distribution_release != "trusty"
 
-    - name: install needed packages for running tests with yum
+    - name: install needed packages for running tests yum
       yum:
         name: "{{ packages }}"
         state: latest
@@ -96,10 +165,12 @@
           - unzip
           - wget
           - rsync
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int <= 7
+      when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
 
-    - name: install needed packages for running tests with yum on RHEL8
-      yum:
+    - name: install needed packages for running tests with yum on RHEL8 dnf
+      dnf:
         name: "{{ packages }}"
         state: latest
       vars:
@@ -107,13 +178,47 @@
         - unzip
         - wget
         - net-tools
-      when: (ansible_os_family == "RedHat") and (ansible_distribution_major_version|int == 8 or ansible_distribution_major_version|int == 9)
+      when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
-    - name: disable firewalld for OL8
+    - name: Display OS Family
+      debug:
+        msg: "OS Family: {{ ansible_os_family }}"
+
+    - name: Display Distribution Major Version
+      debug:
+        msg: "Distribution Major Version: {{ ansible_distribution_major_version }}"
+
+    - name: Install firewalld if missing
+      package:
+        name: firewalld
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Disable firewalld for RHEL
       service:
         name: firewalld
         state: stopped
-      when: (ansible_os_family == "RedHat") and (ansible_distribution_major_version|int == 8 or ansible_distribution_major_version|int == 9)
+        enabled: no
+      when: ansible_os_family == "RedHat" and (ansible_distribution_major_version|int == 8 or ansible_distribution_major_version|int == 9)
+
+
+#    - name: disable firewalld for RHEL
+#      service:
+#        name: firewalld
+#        state: stopped
+#      when: ansible_os_family == "RedHat" and (ansible_distribution_major_version|int == 8 or ansible_distribution_major_version|int == 9)
+
+    - name: Setup SSH keys for RedHat
+      authorized_key:
+        user: ec2-user
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: 
+        - ansible_os_family == "RedHat"
+        - ansible_distribution != "CentOS"
 
     - name: Setup SSH keys CentOS
       authorized_key:
@@ -121,7 +226,7 @@
         key: "{{ lookup('file', 'public_keys') }}"
         state: present
         exclusive: False
-      when: (ansible_distribution == "CentOS") and (lookup('env', 'DESTROY_ENV') == "no")
+      when: ansible_distribution == "CentOS"
 
     - name: Setup SSH keys for Oracle Linux or Amazon
       authorized_key:
@@ -129,8 +234,7 @@
         key: "{{ lookup('file', 'public_keys') }}"
         state: present
         exclusive: False
-      when: (ansible_distribution == "OracleLinux" and lookup('env', 'DESTROY_ENV') == "no") or
-            (ansible_distribution == "Amazon" and lookup('env', 'DESTROY_ENV') == "no")
+      when: ansible_distribution == "OracleLinux" or ansible_distribution == "Amazon"
 
     - name: Setup SSH keys Debian
       authorized_key:
@@ -138,7 +242,7 @@
         key: "{{ lookup('file', 'public_keys') }}"
         state: present
         exclusive: False
-      when: (ansible_distribution == "Debian") and (lookup('env', 'DESTROY_ENV') == "no")
+      when: ansible_distribution == "Debian"
 
     - name: Setup SSH keys Ubuntu
       authorized_key:
@@ -146,4 +250,4 @@
         key: "{{ lookup('file', 'public_keys') }}"
         state: present
         exclusive: False
-      when: (ansible_distribution == "Ubuntu") and (lookup('env', 'DESTROY_ENV') == "no")
+      when: ansible_distribution == "Ubuntu"

@@ -1,0 +1,40 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: unoble-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
+    region: us-west-2
+    image: ami-08c47e4b2806964ce
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: t2.medium
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: ps-package-testing
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    create: ../../playbooks/create.yml
+    destroy: ../../playbooks/destroy.yml
+    prepare: ../../playbooks/prepare.yml
+    cleanup: ../../playbooks/cleanup.yml
+    converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
+scenario:
+  name: ubuntu-noble
+#  destroy_sequence:
+#    - destroy
+  clenup_sequence:
+    - cleanup
+  test_sequence:
+ #   - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+  #  - destroy

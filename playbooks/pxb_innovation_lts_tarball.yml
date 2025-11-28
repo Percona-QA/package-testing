@@ -1,0 +1,178 @@
+---
+# This playbook does following:
+#   enables Percona testing repository
+#   installs latest version of PS innovation lts, PXB innovation lts tarball
+#   then runs some tests
+
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+#    binary_type: "{{ lookup('env', 'binary_type') }}"
+    install_repo: "{{ lookup('env', 'install_repo') }}"
+
+  tasks:
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: install libev apt package
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - libev4
+    when: ansible_os_family == "Debian"
+
+  - name: install libev rpm package
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - libev
+    when: ansible_os_family == "RedHat"
+  
+  - name: Extract version number for PS with 3 values using shell commands
+    shell: cat /package-testing/VERSIONS | grep -P 'PXB_INN_LTS_VER=' | cut -d'=' -f2 | sed 's/\([0-9]\+\.[0-9]\+\).*/\1/' | sed 's/"//g'
+    register: pxb_major_release
+
+  - name: Set pxb_major_release variable
+    set_fact:
+      pxb_major_release: "{{ pxb_major_release.stdout }}"
+
+  - name: Extract version number using shell commands
+    shell: cat /package-testing/VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    register: major_release_version
+
+  - name: Set major_release_version variable
+    set_fact:
+      major_release_version: "{{ major_release_version.stdout }}"
+
+  - name: Extract values using shell command for repo name used for innovation/lts release
+    shell: grep 'PS_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: ps_inn_lts_repo_name
+
+  - name: Set ps_inn_lts_repo_name variable
+    set_fact:
+      ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
+
+  - name: include tasks for enabling PS {{ major_release_version }} main repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling PS {{ major_release_version }} test repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling PS {{ major_release_version }} experimental repo
+    include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+# INSTALL PS 
+  - name: install Percona Server {{ major_release_version }} packages
+    include_tasks: ../tasks/install_ps_innovation_lts.yml
+    when:
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+# INSTALL MS 
+
+  - name: install MYSQL MS Server {{ pxb_version_main }} packages
+    include_tasks: ../tasks/install_ms_innovation_lts.yml
+    vars:
+      pxb_version_major: "{{ pxb_major_release }}"
+      pxb_version_major_minor: "{{ pxb_major_release }}.0"
+    when:
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+  - name: install and check Percona XtraBackup {{ major_release_version }} normal tarball from {{ install_repo }} downloads area
+    command: /package-testing/test_binary_tarball.sh pxb{{ major_release_version }} {{ install_repo }} normal
+
+  - name: start mysql service with service command
+    command: service mysql start
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+  - name: start mysql service with systemctl command for Redhat/Centos 7
+    command: systemctl start mysqld
+    when:
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+
+  - name: start mysql service with systemctl command for Redhat/Centos 7 for PS
+    command: systemctl start mysql
+    when:
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: 
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+
+  - name: install plugins, import world database
+    command: /package-testing/plugins_test.sh
+
+  - name: run backup for Redhat/Centos
+    command: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian
+    command: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
+    when: ansible_os_family == "Debian"
+
+  - name: prepare backup
+    command: pxb{{ major_release_version }}/bin/xtrabackup --prepare --target-dir=/tmp/backups/
+
+  - name: run backup for Redhat/Centos with streaming and encryption enabled
+    shell: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian with streaming and encryption enabled
+    shell: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "Debian"
+
+  - name: extract and decrypt backup
+    shell: pxb{{ major_release_version }}/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream
+
+  - name: prepare backup
+    command: pxb{{ major_release_version }}/bin/xtrabackup --prepare --target-dir=backups/
+
+  - name: remove backup files
+    command: rm -r pxb{{ major_release_version }} backups /tmp/backups
+
+  - name: install and check Percona XtraBackup {{ major_release_version }} minimal tarball from {{ install_repo }} downloads area
+    command: /package-testing/test_binary_tarball.sh pxb{{ major_release_version }} {{ install_repo }} minimal
+
+  - name: run backup for Redhat/Centos
+    command: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian
+    command: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
+    when: ansible_os_family == "Debian"
+
+  - name: prepare backup
+    command: pxb{{ major_release_version }}/bin/xtrabackup --prepare --target-dir=/tmp/backups/
+
+  - name: run backup for Redhat/Centos with streaming and encryption enabled
+    shell: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian with streaming and encryption enabled
+    shell: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "Debian"
+
+  - name: extract and decrypt backup
+    shell: pxb{{ major_release_version }}/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream
+
+  - name: prepare backup
+    command: pxb{{ major_release_version }}/bin/xtrabackup --prepare --target-dir=backups/

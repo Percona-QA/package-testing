@@ -10,23 +10,25 @@
     apt:
       deb: https://repo.mysql.com/mysql-apt-config_0.8.29-1_all.deb
     when: ansible_os_family == "Debian" and ansible_distribution_major_version |int >= 10
-  
+
+  - name: Download GPG key for MySQL repo
+    command: curl -O https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7
+
+  - name: Import GPG key for MySQL repo
+    command: rpm --import RPM-GPG-KEY-mysql-2023
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7
+
   - name: Install MySQL RHEL 7 yum repository package
     yum: name=https://repo.mysql.com/mysql80-community-release-el7-5.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: Import key for mysql-repo
-    rpm_key:
-      state: present
-      key: http://repo.mysql.com/RPM-GPG-KEY-mysql-2023
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
-
-  - name: Install MySQL RHEL 8 yum repository package
-    yum: name=https://repo.mysql.com/mysql80-community-release-el8-3.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+  - name: Install MySQL repository package
+    command: dnf install -y https://repo.mysql.com/mysql80-community-release-el8-3.noarch.rpm
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
 
   - name: Install MySQL RHEL 9 yum repository package
-    yum: name=https://repo.mysql.com/mysql80-community-release-el9-1.noarch.rpm state=present
+    command: dnf install -y https://repo.mysql.com/mysql80-community-release-el9-1.noarch.rpm
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: setup epel 7 repo
@@ -34,7 +36,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
   - name: setup epel 8 repo
-    yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
+    dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: disable the mysql module on RHEL/CentOS 8
@@ -60,7 +62,7 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
 
   - name: install MySQL Community packages in rhel/centos 8
-    yum:
+    package:
       name: "{{ packages }}"
       state: present
     vars:

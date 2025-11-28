@@ -11,11 +11,24 @@
       - percona-mysql-shell
     when: ansible_os_family == "Debian"
 
-  - name: install percona-mysql-shell new rpm packages
+  - name: install percona-mysql-shell new rpm packages using yum
     yum:
       name: "{{ packages }}"
       state: latest
     vars:
       packages:
       - percona-mysql-shell
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install percona-mysql-shell new rpm packages using dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-mysql-shell
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8

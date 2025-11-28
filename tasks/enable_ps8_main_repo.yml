@@ -7,23 +7,52 @@
 
   - name: Install percona repository package
     apt:
-#     deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-21.generic_all.deb
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
     when: ansible_os_family == "Debian"
 
-  - name: add the Percona testing yum repos for centos 6 and 7
-    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-#   yum: name=https://repo.percona.com/yum/testing/7Server/RPMS/noarch/percona-release-1.0-21.noarch.rpm
+  - name: Ensure gnupg home exists (Amazon Linux)
+    file:
+      path: "{{ gnupg_home }}"
+      state: directory
+      mode: '0700'
+    when:
+      - ansible_os_family == "RedHat"
+
+  - name: Download Percona GPG key from Percona's repo (Amazon Linux)
+    get_url:
+      url: https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
+      dest: "{{ percona_key1_file }}"
+      mode: '0644'
     when: ansible_os_family == "RedHat"
 
-  - name: enable the PS-80 main repo
-    command: percona-release setup ps-80 -y
+  - name: Import GPG keys with rpmkeys
+    command: "rpmkeys --import {{ percona_key1_file }}"
+    when: ansible_os_family == "RedHat"
+
+  - name: Add the Percona Release yum repo without GPG check
+    yum:
+      name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+      disable_gpg_check: yes
+    when: ansible_os_family == "RedHat"
+
+  - name: enable the PS-80 testing repo
+    command: percona-release enable ps-80 release
+
+  - name: enable the pxb-80 release repo
+    command: percona-release enable pxb-80 release
+    when:
+      - ansible_distribution != "Amazon"
 
 # - name: enable the tools main repo
 #   command: percona-release enable tools release
 
-  - name: clean and update yum cache
+  - name: Clean and update package cache
     shell: |
-      yum clean all
-      yum makecache
-    when: ansible_os_family == "RedHat"
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+
+  - name: Add ARM support into percona-release
+    shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
+    when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"

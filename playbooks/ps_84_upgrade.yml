@@ -1,0 +1,584 @@
+---
+# This playbook does following:
+#   sets main Percona repo
+#   installs PS 8.4, PT and PXB 8.4
+#   changes repo to testing
+#   upgrades packages to the new version
+#   does some tests
+
+# Cosmic is still missing python
+# import_playbook: test_prep.yml
+
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    install_mysql_shell: "{{ lookup('env', 'install_mysql_shell', default='') }}"
+    gnupg_home: /root/.gnupg
+    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+  environment:
+    install_mysql_shell: '{{ install_mysql_shell }}'
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  tasks:
+  - name: Display distribution info
+    debug:
+      msg: "Distribution: {{ ansible_facts['distribution'] }}"
+
+  - set_fact:
+      pro_suf: "{{ '-pro' if ('yes' in lookup('env', 'pro_test') and lookup('env', 'cur_action_to_test') != 'not_pro_to_pro') else '' }}"
+      allowerasing_value: "{{ true if 'yes' in lookup('env', 'pro_test') else false }}"
+
+  - name: Debug cur_action_to_test
+    debug:
+      msg: Current value of cur_action_to_test is {{ lookup('env', 'cur_action_to_test') | default('Not applicable') }}
+
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: Extract PS84_PRO_VER version number using shell commands
+    shell: grep -oP 'PS84_PRO_VER="\K(\d+\.\d+\.\d+)' /package-testing/VERSIONS
+    register: version_output
+
+  - name: Set versionpdps fact
+    set_fact:
+      versionpdps: "{{ version_output.stdout }}"
+
+  - name: include tasks for local vault setup
+    include_tasks: ../tasks/setup_local_vault.yml
+
+  - name: setup config file for keyring vault
+    template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test_v2.j2
+              dest=/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
+              mode=0664 owner=root group=root
+
+# Install from main repository
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_main_repo.yml
+    when:
+      - lookup('env', 'pro_test') != "yes"
+
+  - name: include tasks for enabling PS 84 main repo
+    include_tasks: ../tasks/enable_ps84_main_repo.yml
+    when:
+      - lookup('env', 'pro_test') != "yes"
+
+  - name: include tasks for selecting PS 84 repos for PRO update tests
+    include_tasks: ../tasks/select_repo_ps84_pro_update.yml
+    when:
+      - lookup('env', 'pro_test') == "yes"
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: install Percona Server 8.4 packages
+    include_tasks:
+      file: ../tasks/install_ps84.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
+
+# Disable Percona Toolkit installation till its supported in OL9 and Jammy
+#  - name: install Percona Toolkit new deb packages
+#    include_tasks: ../tasks/install_pt.yml
+
+# Commenting sysbench installation because of jammy
+    #  - name: install sysbench new deb packages
+    #    include_tasks: ../tasks/install_sysbench.yml
+    #    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: Enable PXB 84 repo
+    command: percona-release enable-only pxb-84-lts testing
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
+
+  - name: install Percona xtrabackup 8.4 packages
+    include_tasks:
+      file: ../tasks/install_pxb84.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
+
+  - name: list installed packages
+    include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: start mysql service with service command
+    command: service mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7)
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: append include for RedHat
+    lineinfile:
+        path: /etc/my.cnf
+        line: '!includedir /etc/my.cnf.d'
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
+
+  - name: disable selinux on centos7 for TokuDB to work
+    shell: setenforce 0 || true
+    when: ansible_os_family == "RedHat"
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+
+  - name: re-run ps_admin to install rocksdb
+    command: /usr/bin/ps-admin --enable-rocksdb
+
+  - name: install percona-mysql-shell package
+    include_tasks: ../tasks/install_pshell.yml
+    when: install_mysql_shell == "yes" or install_mysql_shell == ""
+
+  - name: install 3rd party packages with apt
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "Debian"
+
+  - name: install 3rd party packages with dnf
+    dnf:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: start my.cnf change test
+    command: /package-testing/check_mycnf_pre.sh
+
+#
+# Enable testing repository
+#
+  - name: include tasks for enabling PS 84 testing repo
+    include_tasks: ../tasks/enable_ps84_testing_repo.yml
+    when:
+      - lookup('env', 'pro_test') != "yes"
+
+  - name: include tasks for enabling PS 84 pro testing repo
+    include_tasks: ../tasks/enable_ps84_pro_tools_repo.yml
+    when:
+      - lookup('env', 'pro_test') == "yes"
+      - lookup('env', 'cur_action_to_test') != 'downgrade'
+
+  - name: include tasks for enabling PDPS {{ version }} {{ repo }} repo
+    command: percona-release enable-only pdps-{{ version }} {{ repo }}
+    vars:
+      repo: "testing"
+      version: "{{ versionpdps }}"
+    when:
+      - lookup('env', 'pro_test') == "yes"
+      - lookup('env', 'cur_action_to_test') == 'downgrade'
+
+  - set_fact:
+      pro: "{{ 'pro' if ('yes' in lookup('env', 'pro_test') and lookup('env', 'cur_action_to_test') != 'downgrade') else '' }}"
+      pro_suf: "{{ '-pro' if ('yes' in lookup('env', 'pro_test') and lookup('env', 'cur_action_to_test') != 'downgrade') else '' }}"
+
+# Upgrade packages
+#
+  - name: stop mysql service with systemctl command
+    command: systemctl stop mysql
+    when:
+      - lookup('env', 'cur_action_to_test') == "not_pro_to_pro" or lookup('env', 'cur_action_to_test') == "downgrade"
+      - lookup('env', 'pro_test') == "yes"
+
+  - name: upgrade Percona Server{{ pro_suf }} to new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: latest
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+      - percona-server-test{{ pro_suf }}
+      - percona-server-client{{ pro_suf }}
+      - percona-server{{ pro_suf }}-dbg
+      - percona-server{{ pro_suf }}-source
+      - percona-server-rocksdb{{ pro_suf }}
+      - percona-mysql-router{{ pro_suf }}
+    when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on RHEL7
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+      - percona-server-test{{ pro_suf }}
+      - percona-server{{ pro_suf }}-debuginfo
+      - percona-server-devel{{ pro_suf }}
+      - percona-server-rocksdb{{ pro_suf }}
+      - percona-server-shared{{ pro_suf }}
+      - percona-server-shared{{ pro_suf }}-compat
+      - percona-server-client{{ pro_suf }}
+      - percona-mysql-router{{ pro_suf }}
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on OL8 AMD using dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+      allowerasing: "{{ allowerasing_value | default (false) }}"
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+      - percona-server-test{{ pro_suf }}
+      - percona-server{{ pro_suf }}-debuginfo
+      - percona-server-devel{{ pro_suf }}
+      - percona-server-rocksdb{{ pro_suf }}
+      - percona-server-shared{{ pro_suf }}
+      - percona-server-shared{{ pro_suf }}-compat
+      - percona-server-client{{ pro_suf }}
+      - percona-mysql-router{{ pro_suf }}
+    when:
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+      - ansible_architecture != "aarch64" and ansible_architecture != "arm64"
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on OL8 ARM using dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+      allowerasing: "{{ allowerasing_value | default (false) }}"
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+      - percona-server-test{{ pro_suf }}
+      - percona-server{{ pro_suf }}-debuginfo
+      - percona-server-devel{{ pro_suf }}
+      - percona-server-rocksdb{{ pro_suf }}
+      - percona-server-shared{{ pro_suf }}
+      - percona-server-client{{ pro_suf }}
+      - percona-mysql-router{{ pro_suf }}
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_distribution_major_version == "8"
+      - ansible_architecture in ["aarch64", "arm64"]
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on Oracle Linux 9 using dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+      allowerasing: "{{ allowerasing_value | default (false) }}"
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+      - percona-server-test{{ pro_suf }}
+      - percona-server{{ pro_suf }}-debuginfo
+      - percona-server-devel{{ pro_suf }}
+      - percona-server-rocksdb{{ pro_suf }}
+      - percona-server-shared{{ pro_suf }}
+      - percona-server-client{{ pro_suf }}
+      - percona-mysql-router{{ pro_suf }}
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 9
+    environment:
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: upgrade Percona Toolkit to new deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona xtrabackup 8.4 packages
+    include_tasks:
+      file: ../tasks/install_pxb84.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
+
+#  - name: upgrade Percona Toolkit to new rpm packages
+#    yum:
+#      name: "{{ packages }}"
+#      state: latest
+#    vars:
+#      packages:
+#      - percona-toolkit
+#    when:
+#      -  ansible_os_family == "RedHat"
+#      -  ansible_distribution_major_version != "9"
+
+  - name: upgrade Percona release to new rpm packages using yum
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-release
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: upgrade Percona release to new rpm packages using dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-release
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when:
+      - lookup('env', 'cur_action_to_test') == "not_pro_to_pro" or lookup('env', 'cur_action_to_test') == "downgrade"
+      - lookup('env', 'pro_test') == "yes"
+      - ansible_os_family == "RedHat"
+
+  - name: install percona-mysql-shell package
+    include_tasks: ../tasks/install_pshell.yml
+    when: install_mysql_shell == "yes" or install_mysql_shell == ""
+
+  - name: list installed packages
+    include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: check that Percona Server {{ pro }} version is correct
+    command: /package-testing/version_check.sh ps84 {{ pro }}
+
+  - name: check that Percona Server {{ pro }} package versions are correct
+    command: /package-testing/package_check.sh ps84 {{ pro }}
+
+  - name: finish my.cnf change test
+    command: /package-testing/check_mycnf_post.sh
+
+  - name: include tasks for checking FIPS mode
+    include_tasks: ../tasks/check_ps84_fips.yml
+    when:
+      - lookup('env', 'pro_test') == "yes"
+      - lookup('env', 'cur_action_to_test') != 'downgrade'
+      - ansible_distribution_release != "bookworm"
+
+# - name: check that Percona Toolkit version is correct
+#   command: /package-testing/version_check.sh pt
+
+  - name: check the clone and data masking plugins
+    command: /package-testing/scripts/ps_clone_dm_plugin_test.sh
+    when:
+      - lookup('env', 'product_to_test') == "ps80"
+
+  - name: check the data masking component
+    command: /package-testing/scripts/ps_dm_component.sh
+    when:
+      - lookup('env', 'product_to_test') == "ps80"
+
+  - name: check the audit log v2 plugin
+    command: /package-testing/scripts/ps_audit_log_v2.sh
+    when:
+      - lookup('env', 'product_to_test') == "ps80"
+
+  - name: run some MyRocks tests
+    command: /package-testing/scripts/ps_myrocks_test.sh
+
+# - name: run bats tests for PAM
+#   command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
+
+#  - name: keyring plugins test
+#    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps84
+
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb84
+    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
+
+  - name: run bats unit tests for ps-admin script
+    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
+
+  - name: run bats integration tests for ps-admin script
+    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
+
+  - name: run bats tests for mysql init scripts
+    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
+
+  - name: start mysql service
+    service: name=mysql state=started
+
+  - name: remove Percona Server{{ pro_suf }} deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server{{ pro_suf }} rpm packages using yum
+    command: yum remove -y percona-server-server{{ pro_suf }}
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: remove Percona Server{{ pro_suf }} rpm packages using dnf
+    dnf:
+      name:
+        - percona-server-server{{ pro_suf }}
+        - mariadb-connector-c-config
+      state: absent
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: remove mariadb-connector-c-config package
+    yum:
+      name:
+        - mariadb-connector-c-config
+      state: absent
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "OracleLinux"]
+      - ansible_facts['distribution_major_version'] | int == 9
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mysql stopped
+
+  - stat:
+      path: /var/lib/mysql
+    register: p
+
+  - name: check /var/lib/mysql exists and not empty
+    fail:
+      msg: "Path exists and is a directory and is not empty"
+    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
+
+## Changes done for telemetry: add iptables rule for Telemetry Server - install only ps package.
+## Expected resuld - telemetry_uuid file has only instanceID
+
+  - name: Install iptables on RHEL using yum
+    yum:
+      name:
+        - iptables
+        - iptables-services
+      state: present
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: Install iptables on RHEL using dnf
+    dnf:
+      name:
+        - iptables
+        - iptables-services
+      state: present
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: Enable and start iptables service
+    systemd:
+      name: iptables
+      state: started
+      enabled: true
+    when: ansible_facts['distribution'] == "RedHat"
+
+  - name: Block pmm.check-dev.percona.com IP for non REDHAT
+    iptables:
+      chain: OUTPUT
+      destination: check-dev.percona.com
+      jump: DROP
+    when: 
+      - lookup('env', 'upgrade_repo') == ""  
+
+  - name: install Percona Server{{ pro_suf }} deb package for telemetry
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: latest
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona Server{{ pro_suf }} rpm RHEL7 package for telemetry using yum
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install Percona Server{{ pro_suf }} rpm RHEL8+ package for telemetry using dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+      allowerasing: "{{ allowerasing_value | default (false) }}"
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: check telemetry (disabled)
+    command: /package-testing/check_telemetry.sh ps -u
+
+  - name: remove Percona Server{{ pro_suf }} deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server{{ pro_suf }} rpm packages using yum
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: remove Percona Server{{ pro_suf }} rpm packages using dnf
+    dnf:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf }}
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+

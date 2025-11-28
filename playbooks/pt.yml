@@ -1,6 +1,6 @@
 ---
 # This playbook does following:
-#   enables Percona tools, pt, original repository
+#   enables Percona pt, original repository
 #   installs latest version of Percona-Toolkit (pt)
 
 - hosts: all
@@ -8,6 +8,9 @@
   become_method: sudo
   vars:
       install_repo: "{{ lookup('env', 'install_repo') }}"
+      gnupg_home: /root/.gnupg
+      percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+      percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
@@ -16,13 +19,11 @@
     include_tasks: ../tasks/test_prep.yml
 
 # Run task in loop that installs pt from {{ repo_name }} repo and then remove pt
-  - name: include tasks to install pt from [pt,tools, original] repos
+  - name: include tasks to install pt from [pt, original] repos
     include_tasks: ../tasks/enable_pt_repos_and_install.yml
     vars:
       repo_name: "{{ repo }}"
     loop:
-      - tools
       - pt
-      - original
     loop_control:
       loop_var: repo

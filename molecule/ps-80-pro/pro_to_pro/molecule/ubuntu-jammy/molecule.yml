@@ -14,12 +14,13 @@ platforms:
     instance_tags:
       iit-billing-tag: jenkins-ps80-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   log: True
   playbooks:
-    create: ../../../../playbooks/create.yml
-    destroy: ../../../../playbooks/destroy.yml
+    create: ../../../../playbooks/create_noble.yml
+    destroy: ../../../../playbooks/destroy-noble-arm.yml
     prepare: ../../playbooks/prepare-ubuntu-pro.yml
     converge: ../../playbooks/playbook.yml
 scenario:

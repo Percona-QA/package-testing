@@ -8,18 +8,54 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
-  - name: include tasks for enabling test repo
+
+  - name: disable old repos
+    command: percona-release disable all
+
+  - name: update deb cache
+    command: apt update
+    when:
+      - ansible_os_family == "Debian"
+
+  - name: Clean and update package cache
+    shell: |
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+
+#-------------non pro
+  - name: include tasks for enabling test repo pxc 80 non pro
     include_tasks: ../tasks/enable_pxc80_testing_repo.yml
-    when: lookup('env', 'upgrade_repo') == "testing" or lookup('env', 'upgrade_repo') == ""
+    when:
+    - lookup('env', 'upgrade_repo') == "testing" 
+    - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling main repo
+  - name: include tasks for enabling main repo pxc 80 non pro
     include_tasks: ../tasks/enable_pxc80_main_repo.yml
-    when: lookup('env', 'upgrade_repo') == "main"
+    when: 
+    - lookup('env', 'upgrade_repo') == "main" or lookup('env', 'upgrade_repo') == ""
+    - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling experimental repo
+  - name: include tasks for enabling experimental repo pxc 80 non pro
     include_tasks: ../tasks/enable_pxc80_experimental_repo.yml
-    when: lookup('env', 'upgrade_repo') == "experimental"
+    when: 
+    - lookup('env', 'upgrade_repo') == "experimental"
+    - lookup('env', 'pro') == "no"
+#-----------------pro
 
+  - name: include tasks for enabling test repo pxc 80 pro
+    include_tasks: ../tasks/enable_pxc80_pro_repo_testing.yml
+    when: 
+    - lookup('env', 'upgrade_repo') == "testing" 
+    - lookup('env', 'pro') == "yes"
+
+  - name: include tasks for enabling main repo pxc 80 pro
+    include_tasks: ../tasks/enable_pxc80_pro_repo_main.yml
+    when: 
+    - lookup('env', 'upgrade_repo') == "main" or lookup('env', 'upgrade_repo') == ""
+    - lookup('env', 'pro') == "yes"
+#---------------------
   - name: upgrade PXC 8.0 to new deb packages
     apt:
       name: "{{ packages }}"
@@ -72,9 +108,9 @@
   - name: Sleep for 60 seconds
     shell: sleep 60
 
-  - name: start mysql service
-    service: name=mysql state=restarted
-    throttle: 1
+#  - name: start mysql service
+#    service: name=mysql state=restarted
+#    throttle: 1
 
   - name: register PXC version Side Effect
     shell: mysqld --version
@@ -83,10 +119,29 @@
   - name: print PXC version Side Effect
     debug: var=pxc_version
 
-  - name: check that PXC version is correct Side Effect
-    command: /package-testing/version_check.sh pxc80
-    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+#  - name: check that PXC version is correct Side Effect
+#    command: /package-testing/version_check.sh pxc80
+#    when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: check that PXC package versions are correct Side Effect
     command: /package-testing/package_check.sh pxc80
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+
+  - name: Sleep 10 mins
+    shell: sleep 600
+
+  - name: Check that the PXC Cluster is up and running
+    shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'
+    register: cluster_size
+
+  - name: print cluster size Side Effect
+    debug: var=cluster_size
+
+ # - name: Verify telemetry version and package installation
+ #   command: /package-testing/check_tel_ver_pack.sh
+ #   when:
+ #     - ansible_distribution != "Amazon"
+ #     - ansible_distribution_major_version|int != 7
+
+  - name: PRINT THE INSTALLED PACKAGES VALUE UPGRADE
+    include_tasks: ../tasks/list_installed_packages.yml

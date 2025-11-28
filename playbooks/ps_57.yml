@@ -1,0 +1,233 @@
+---
+# This playbook does following:
+#   enables Percona testing repository
+#   installs latest version of PS 5.7, PT and PXB 2.4
+#   does some tests
+
+# Cosmic is still missing python
+# import_playbook: test_prep.yml
+
+- hosts: all
+  become: true
+  become_method: sudo
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  tasks:
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: include tasks for local vault setup
+    include_tasks: ../tasks/setup_local_vault.yml
+
+  - name: setup config file for keyring vault
+    template:
+      src: ../scripts/ps_keyring_plugins_test/keyring_vault_test_v2.j2
+      dest: /package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
+      mode: '0644'
+      owner: root
+      group: root
+
+
+  - name: include tasks for enabling test repo
+    include_tasks: ../tasks/enable_testing_repo.yml
+    when: 
+      - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+      - lookup('env', 'EOL') != "yes"
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_main_repo.yml
+    when: 
+      - lookup('env', 'install_repo') == "main"
+      - lookup('env', 'EOL') != "yes"  
+
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../tasks/enable_experimental_repo.yml
+    when: 
+      - lookup('env', 'install_repo') == "experimental"
+      - lookup('env', 'EOL') != "yes"
+
+  - name: include tasks for enabling PS 57 EOL repo
+    include_tasks: ../tasks/enable_ps57_eol_tools_repo.yml
+    when:
+      - lookup('env', 'EOL') == "yes"
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: clear apt/yum logs
+    command: /package-testing/scripts/log-clear.sh
+
+  - name: install Percona Server 5.7 packages
+    include_tasks: ../tasks/install_ps57.yml
+
+  - name: install Percona Toolkit new deb packages
+    include_tasks: ../tasks/install_pt.yml
+
+  - name: install sysbench packages
+    include_tasks: ../tasks/install_sysbench.yml
+    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: install Percona XtraBackup 2.4 packages
+    include_tasks: ../tasks/install_pxb24.yml
+    when: ansible_distribution_release != "bookworm"
+
+  - name: list installed packages
+    include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: use Percona Server my.cnf
+    shell: update-alternatives --set my.cnf /etc/mysql/percona-server.cnf
+    when: ansible_os_family == "Debian" and (ansible_distribution_release == "bullseye" or ansible_distribution_release == "bookworm")
+
+  - name: start mysql service
+    service: name=mysql state=started
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
+
+  - name: run PAM test
+    include_tasks: ../tasks/pam_test.yml
+
+  - name: disable selinux on centos7 for TokuDB to work
+    shell: setenforce 0 || true
+    when: ansible_os_family == "RedHat"
+
+  - name: Create symlink for libjemalloc.so.1
+    ansible.builtin.file:
+      src: /usr/lib64/libjemalloc.so.2
+      dest: /usr/lib64/libjemalloc.so.1
+      state: link
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+
+  - name: install tokudb and restart server
+    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+
+  - name: re-run ps_tokudb_admin to finish tokudb install
+    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
+
+  - name: install plugins, import world database, test tokudb
+    command: /package-testing/plugins_test_57.sh ps
+
+  - name: keyring plugins test
+    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps57
+
+  - name: re-run ps_admin to install rocksdb
+    command: /usr/bin/ps-admin --enable-rocksdb
+
+  - name: check that Percona Server version is correct
+    command: /package-testing/version_check.sh ps57
+
+  - name: check that Percona Server package versions are correct
+    command: /package-testing/package_check.sh ps57
+
+#  - name: check that sysbench version is correct
+#    command: /package-testing/version_check.sh sysbench
+#    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and ansible_distribution_major_version != "9" and ansible_distribution_release != "bookworm"
+
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb24
+    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bookworm"
+
+  - name: check that Percona XtraBackup package versions are correct
+    command: /package-testing/package_check.sh pxb24
+    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bookworm"
+
+    # pt-mongodb-query-digest version is not good that's why disabling this test
+    #  - name: check that Percona Toolkit version is correct
+    #    command: /package-testing/version_check.sh pt
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
+
+  - name: run some MyRocks tests
+    command: /package-testing/scripts/ps_myrocks_test.sh
+
+  - name: run bats unit tests for ps_tokudb_admin scripts
+    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_unit.bats
+
+    #  - name: run bats integration tests for ps_tokudb_admin script
+    #    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_integration.bats
+
+  - name: run bats unit tests for ps-admin script
+    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
+
+  - name: run bats integration tests for ps-admin script
+    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
+
+  - name: install 3rd party packages with apt
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "Debian"
+
+  - name: install 3rd party packages with yum
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "RedHat"
+
+  - name: run bats tests for mysql init scripts
+    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "9"
+
+  - name: run mysql compression tests script
+    command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps57  
+
+  - name: start mysql service
+    service: name=mysql state=started
+
+  - name: upgrade partitioning
+    command: /package-testing/scripts/ps_upgrade_partitioning.sh
+
+# temporary commented out until BLD-906 is fixed
+# - name: check that mysqladmin shutdown works correctly
+#   command: /package-testing/madmin_check.sh
+
+  - name: disable all percona repos
+    command: percona-release disable all
+
+  - name: get my.cnf stats
+    stat: path=/etc/my.cnf
+    register: mycnf
+
+  - name: copy config file to backup
+    copy:
+      src: /etc/my.cnf
+      dest: /etc/my.cnf.backup
+      remote_src: yes
+    when: mycnf.stat.exists and ansible_os_family == "RedHat"
+
+  - name: remove PS 5.7 packages
+    include_tasks: ../tasks/remove_ps57.yml
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mysql stopped
+
+  - stat:
+      path: /var/lib/mysql
+    register: p
+
+  - name: check /var/lib/mysql exists and not empty
+    fail:
+      msg: "Path exists and is a directory and is not empty"
+    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
+
+  - name: check apt/yum logs for errors
+    command: /package-testing/scripts/log-check.sh

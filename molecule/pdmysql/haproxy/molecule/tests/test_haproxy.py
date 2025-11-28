@@ -13,17 +13,33 @@ VERSION = os.getenv("VERSION")
 @pytest.fixture
 def prepare_test(host):
     with host.sudo("root"):
-        cmd = "mysql -e \"CREATE USER 'clustercheckuser'@'%' IDENTIFIED WITH mysql_native_password by 'clustercheckpassword!';\
-            GRANT PROCESS ON *.* TO 'clustercheckuser'@'%';\
-            CREATE USER 'haproxy_user'@'%' IDENTIFIED WITH mysql_native_password by '$3Kr$t';\""
+        if VERSION.startswith("8.4."):
+            # Commands for version 8.4.*
+            cmd = (
+                "mysql -e \"CREATE USER 'clustercheckuser'@'%' IDENTIFIED by 'clustercheckpassword!';"
+                "GRANT PROCESS ON *.* TO 'clustercheckuser'@'%';"
+                "CREATE USER 'haproxy_user'@'%' IDENTIFIED by '$3Kr$t';\""
+            )
+        else:
+            # Commands for other versions
+            cmd = (
+                "mysql -e \"CREATE USER 'clustercheckuser'@'%' IDENTIFIED WITH mysql_native_password by 'clustercheckpassword!';"
+                "GRANT ALL PRIVILEGES ON *.* TO 'clustercheckuser'@'%';"
+                "CREATE USER 'haproxy_user'@'%' IDENTIFIED WITH mysql_native_password by '$3Kr$t';\""
+            )
+
+        # Run the command
         result = host.run(cmd)
         assert result.rc == 0, result.stdout
-        cmd = 'service xinetd restart'
-        result = host.run(cmd)
-        assert result.rc == 0, result.stdout
-        cmd = 'service haproxy restart'
-        result = host.run(cmd)
-        assert result.rc == 0, result.stdout
+        # Restart services (common for all versions)
+        restart_cmds = [
+            'service xinetd restart',
+            'service haproxy restart'
+        ]
+        for restart_cmd in restart_cmds:
+            result = host.run(restart_cmd)
+            assert result.rc == 0, result.stdout
+
         time.sleep(2)
 
 def test_haproxy_service(host):

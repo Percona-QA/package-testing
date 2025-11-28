@@ -1,0 +1,63 @@
+  - name: include playbook for removing Percona repo
+    include_tasks: remove_percona_repository.yml
+
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: /usr/bin/dnf module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: Install percona repository package for Debain
+    apt:
+      deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+#     deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-21.generic_all.deb
+    when: ansible_os_family == "Debian"
+
+  - name: Receive GPG key 1
+    command: "gpg --batch --keyserver keyserver.ubuntu.com --recv-keys {{ percona_key1 }}"
+    environment:
+      GNUPGHOME: "{{ gnupg_home }}"
+    when: ansible_os_family == "RedHat"
+
+  - name: Export GPG key 1
+    command: "gpg --batch --export --armor {{ percona_key1 }}"
+    register: gpg_key1
+    environment:
+      GNUPGHOME: "{{ gnupg_home }}"
+    when: ansible_os_family == "RedHat"
+
+  - name: Save GPG key 1 to file
+    copy:
+      content: "{{ gpg_key1.stdout }}"
+      dest: "{{ percona_key1_file }}"
+      mode: '0644'
+    when: ansible_os_family == "RedHat"
+
+  - name: Import GPG keys with rpmkeys
+    command: "rpmkeys --import {{ percona_key1_file }}"
+    when: ansible_os_family == "RedHat"
+
+  - name: Install percona repository package for RHEL
+    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    when: ansible_os_family == "RedHat"
+
+  - name: Add ARM support into percona-release
+    shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
+    when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+
+  - name: enable the PS-84-LTS testing repo
+    command: percona-release enable-only ps-84-lts testing
+
+  - name: enable the pxb-84 release repo
+    command: percona-release enable pxb-84-lts release
+    when: ansible_distribution_release == "noble"
+
+  - name: Clean and update package cache
+    shell: |
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+
+  - name: Update APT cache
+    apt:
+      update_cache: yes
+    when: ansible_os_family == "Debian"

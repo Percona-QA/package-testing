@@ -1,0 +1,84 @@
+pipeline {
+  agent { label 'docker' }
+  parameters {
+    string(name: 'UPSTREAM_VERSION', defaultValue: '5.7.44', description: 'only upstream version Example 5.7.44')
+    string(name: 'PS_VERSION', defaultValue: '49', description: 'Only Percona specific version example 49')
+    string(name: 'PXC_REVISION', defaultValue: '38d2944', description: 'Short git hash for release')
+    string(name: 'PXC_PKG_VERSION', defaultValue: '2', description: 'package version')
+    string(name: 'TAG', defaultValue: '5.7.44-31.65.2', description: 'Different tags that are going to be released')
+    string(name: 'PXC_WSREP_VERSION', defaultValue: '31.65', description: 'Galera WSREP version')
+    string(name: 'PXC_PXB_VERSION', defaultValue: '2.4.29', description: 'PXB version installed (only for PXC 5.7)')
+    choice(name: 'REPO', choices: ['testing', 'main'], description: 'Choose repository: testing or main')
+  }
+  stages {
+    stage('Prepare') {
+      steps {
+        script {
+          currentBuild.displayName = "#${BUILD_NUMBER}-${UPSTREAM_VERSION}-${PXC_REVISION}-${REPO}"
+          currentBuild.description = "${TAG}"
+        }
+      }
+    }
+      
+      stage('Prepare Image') {
+          steps {
+              withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+                  script {
+                      def dockerTarURL
+                      if (REPO == 'testing') {
+                          dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${UPSTREAM_VERSION}.${PXC_PKG_VERSION}/percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar"
+                      } else {
+                          dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${UPSTREAM_VERSION}/percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar"
+                      }
+                      sh "wget -q ${dockerTarURL}"
+                      sh "sudo docker load -i percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar"
+                  }
+              }
+          }
+      }       
+
+      stage ('Run trivy analyzer') {
+        steps {
+            sh """
+              sudo yum install -y wget git
+              TRIVY_VERSION=\$(curl --silent 'https://api.github.com/repos/aquasecurity/trivy/releases/latest' | grep '"tag_name":' | tr -d '"' | sed -E 's/.*v(.+),.*/\\1/')
+              wget https://github.com/aquasecurity/trivy/releases/download/v\${TRIVY_VERSION}/trivy_\${TRIVY_VERSION}_Linux-64bit.tar.gz
+              sudo tar zxvf trivy_\${TRIVY_VERSION}_Linux-64bit.tar.gz -C /usr/local/bin/
+              wget https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/junit.tpl
+              /usr/local/bin/trivy -q image --format template --template @junit.tpl  -o trivy-hight-junit.xml \
+              --timeout 10m0s --ignore-unfixed --exit-code 1 --severity HIGH,CRITICAL percona/percona-xtradb-cluster:${TAG}
+            """
+         } //end steps
+         post {
+           always {
+                    junit testResults: "*-junit.xml", keepLongStdio: true, allowEmptyResults: true, skipPublishingChecks: true
+                }
+        }
+      } //end Run trivy analyzer        
+
+      stage('Run tests') {
+        steps {
+            sh '''
+              # disable THP on the host for TokuDB
+              echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" > disable_thp.sh
+              echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag" >> disable_thp.sh
+              chmod +x disable_thp.sh
+              sudo ./disable_thp.sh
+              # run test
+              export PATH=${PATH}:~/.local/bin
+              sudo yum install -y python3 python3-pip
+              rm -rf package-testing
+              git clone https://github.com/Percona-QA/package-testing.git --depth 1
+              cd package-testing/docker-image-tests/pxc-eol
+              pip3 install --user -r requirements.txt
+              ./run.sh
+            '''
+        } //end steps
+        post {
+          always {
+          junit 'package-testing/docker-image-tests/pxc-eol/report.xml'
+        }
+       }
+     } //end Run tests
+    } //end stages
+}

@@ -1,0 +1,393 @@
+---
+# This playbook:
+#   installs Percona Server 5.6 from testing repo
+#   installs TokuDB and some other plugins
+#   removes 5.6
+#   installs 5.7
+#   enables RocksDB and repeats some tests
+#   removes 5.7 packages
+#   NOTICE: it installs both 5.6 and 5.7 from testing repo!
+
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    major_upgrade: true
+    gnupg_home: /root/.gnupg
+    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"      
+
+  tasks:
+### start of 5.6 install
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: include tasks for enabling test repo
+    include_tasks: ../tasks/enable_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../tasks/enable_experimental_repo.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: install Percona Toolkit new packages
+    include_tasks: ../tasks/install_pt.yml
+
+  - name: install sysbench new packages
+    include_tasks: ../tasks/install_sysbench.yml
+
+  - name: install PS 5.6 packages
+    include_tasks: ../tasks/install_ps56.yml
+
+  - name: install PXB 2.4 packages
+    include_tasks: ../tasks/install_pxb24.yml
+
+  - name: Make sure SELinux is in enforcing mode on CentOS
+    selinux:
+      policy: targeted
+      state: enforcing
+    when: ansible_os_family == "RedHat"
+
+  - name: start mysql service with service command
+    command: service mysql start
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version == "7")
+
+  - name: disable selinux on centos for TokuDB to work
+    shell: setenforce 0 || true
+    when: ansible_os_family == "RedHat"
+
+# Start PAM test
+  - group:
+      name: developer
+      state: present
+
+  - group:
+      name: dbadmin
+      state: present
+
+  - user:
+      name: test_pam
+      shell: /bin/bash
+      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+
+  - user:
+      name: test_pam2
+      shell: /bin/bash
+      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+      groups: developer
+      append: yes
+
+  - user:
+      name: test_pam3
+      shell: /bin/bash
+      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+      groups: dbadmin
+      append: yes
+
+  - user:
+      name: test_pam_compat
+      shell: /bin/bash
+      password: $6$mrqBDJUyh13p$elUkdb99/v4fPxnLIS2TAXSUhVt16PvOvIPzVqobKKZKHHMRyXOmJ4puhybn0Go0HpL1RNYvREgqF02qYnGOX1
+
+  - user:
+      name: mysql
+      groups: shadow
+      append: yes
+    when: ansible_os_family == "Debian"
+
+  - file:
+      path: /etc/shadow
+      group: mysql
+      mode: "g+r"
+    when: ansible_os_family == "RedHat"
+
+  - name: copy config file for mysql PAM into system dir
+    template:
+      src: ../scripts/ps_pam_test/mysqld
+      dest: /etc/pam.d/mysqld
+      owner: root
+      group: root
+      mode: 0644
+      force: yes
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+
+  - name: run mysql setup for PAM
+    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_setup.bats
+
+  - name: run bats tests for PAM
+    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
+# End PAM test
+
+  - name: install tokudb and restart server
+    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
+
+  - name: restart mysql service
+    command: service mysql restart
+
+  - name: re-run ps_tokudb_admin to finish tokudb install
+    command: /usr/bin/ps_tokudb_admin --enable --enable-backup
+
+  - name: install plugins, import world database, test tokudb
+    command: /package-testing/plugins_test_56.sh ps
+
+  - name: check that Percona Server version is correct
+    command: /package-testing/version_check.sh ps56
+    when: ansible_os_family == "Debian" and ansible_distribution_release != "cosmic"
+
+  - name: check that Percona Server package versions are correct
+    command: /package-testing/package_check.sh ps56
+
+# - name: check that Percona Toolkit version is correct
+#   command: /package-testing/version_check.sh pt
+
+  - name: check that sysbench version is correct
+    command: /package-testing/version_check.sh sysbench
+
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb24
+    when: ansible_os_family == "Debian"
+
+  - name: check that Percona XtraBackup package versions are correct
+    command: /package-testing/package_check.sh pxb24
+    when: ansible_os_family == "Debian"
+
+  - name: run sysbench prepare script
+    command: sysbench --mysql-user=root --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write prepare
+
+  - name: run sysbench benchmark
+    command: sysbench --mysql-user=root --mysql-db=sb --time=30 --threads=64 --tables=3 oltp_read_write run
+
+  - name: run sysbench tpcc prepare script
+    command: /usr/share/sysbench/tpcc.lua --mysql-user=root --mysql-db=sbt --time=30 --threads=64 --report-interval=1 --tables=3 --scale=5 --db-driver=mysql prepare
+
+  - name: run sysbench tpcc benchmark
+    command: /usr/share/sysbench/tpcc.lua --mysql-user=root --mysql-db=sbt --time=30 --threads=64 --report-interval=1 --tables=3 --scale=5 --db-driver=mysql run
+
+  - name: install 3rd party packages with apt
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "Debian"
+
+  - name: install 3rd party packages with yum
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "RedHat"
+
+  - name: run bats unit tests for ps_tokudb_admin scripts
+    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_unit.bats
+
+  - name: run bats integration tests for ps_tokudb_admin script
+    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_integration.bats
+
+  - name: run bats tests for mysql init scripts
+    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+
+  - name: start mysql service
+    service: name=mysql state=started
+
+    # temporary commented out until BLD-906 is resolved
+# - name: check that mysqladmin shutdown works correctly
+#   command: /package-testing/madmin_check.sh
+
+  - name: uninstall PAM before final package uninstall
+    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
+
+  - name: get my.cnf stats
+    stat: path=/etc/my.cnf
+    register: mycnf
+
+  - name: copy config file to backup
+    copy:
+      src: /etc/my.cnf
+      dest: /etc/my.cnf.backup
+      remote_src: yes
+    when: mycnf.stat.exists and ansible_os_family == "RedHat"
+
+  - name: remove Percona Server 5.6 deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server*
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server 5.6 rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - Percona-Server*
+    when: ansible_os_family == "RedHat"
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mysql stopped
+
+  - stat:
+      path: /var/lib/mysql
+    register: p
+
+  - fail:
+      msg: "Path exists and is a directory and is not empty"
+    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
+### end of 5.6 install
+
+  - name: copy config file to original location
+    copy:
+      src: /etc/my.cnf.backup
+      dest: /etc/my.cnf
+      remote_src: yes
+      force: yes
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
+
+  # BUG: PS-3664
+  - name: create env file for systemd service
+    copy:
+      dest: "/etc/sysconfig/mysql"
+      content: |
+        LD_PRELOAD=/usr/lib64/libjemalloc.so.1 /usr/lib64/mysql/libHotBackup.so
+        THP_SETTING=never
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
+
+  - name: include tasks for local vault setup
+    include_tasks: ../tasks/setup_local_vault.yml
+
+  - name: setup config file for keyring vault
+    template:
+      src: ../scripts/ps_keyring_plugins_test/keyring_vault_test_v2.j2
+      dest: /package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
+      mode: '0644'
+      owner: root
+      group: root
+
+  - name: remove mysql package on centos 8
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+      packages:
+      - mysql
+      - mysql-common
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+
+  - name: include tasks for enabling test repo
+    include_tasks: ../tasks/enable_testing_repo.yml
+    when:
+      - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+      - lookup('env', 'EOL') != "yes"
+
+  - name: include tasks for enabling main repo
+    include_tasks: ../tasks/enable_main_repo.yml
+    when:
+      - lookup('env', 'install_repo') == "main"
+      - lookup('env', 'EOL') != "yes"
+
+  - name: include tasks for enabling experimental repo
+    include_tasks: ../tasks/enable_experimental_repo.yml
+    when:
+      - lookup('env', 'install_repo') == "experimental"
+      - lookup('env', 'EOL') != "yes"
+
+  - name: include tasks for enabling PS 57 EOL repo
+    include_tasks: ../tasks/enable_ps57_eol_tools_repo.yml
+    when:
+      - lookup('env', 'EOL') == "yes"      
+
+  - name: enable tools testing repo
+    command: percona-release enable tools testing
+
+  - name: install Percona Server 5.7 packages
+    include_tasks: ../tasks/install_ps57.yml
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
+    
+  - name: install Percona Toolkit new deb packages
+    include_tasks: ../tasks/install_pt.yml
+
+  - name: install sysbench packages
+    include_tasks: ../tasks/install_sysbench.yml
+    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: install Percona XtraBackup 2.4 packages
+    include_tasks: ../tasks/install_pxb24.yml
+
+  - name: list installed packages
+    include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: start mysql service
+    service: name=mysql state=started
+
+  - name: run mysql_upgrade
+    command: mysql_upgrade -uroot
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+
+  - name: keyring plugins test
+    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps57
+
+  - name: run ps_admin to install rocksdb
+    command: /usr/bin/ps-admin --enable-rocksdb
+
+  - name: check that Percona Server version is correct
+    command: /package-testing/version_check.sh ps57
+
+  - name: check that Percona Server package versions are correct
+    command: /package-testing/package_check.sh ps57
+
+# - name: check that Percona Toolkit version is correct
+#   command: /package-testing/version_check.sh pt
+#   when: lookup('env', 'install_repo') != "experimental"
+
+# - name: check that sysbench version is correct
+#   command: /package-testing/version_check.sh sysbench
+#   when: lookup('env', 'install_repo') != "experimental"
+
+  - name: check that Percona XtraBackup version is correct
+    command: /package-testing/version_check.sh pxb24
+    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: check that Percona XtraBackup package versions are correct
+    command: /package-testing/package_check.sh pxb24
+    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: remove PS 5.7 packages
+    include_tasks: ../tasks/remove_ps57.yml
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mysql stopped
+
+  - stat:
+      path: /var/lib/mysql
+    register: p
+
+  - name: check /var/lib/mysql exists and not empty
+    fail:
+      msg: "Path exists and is a directory and is not empty"
+    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000

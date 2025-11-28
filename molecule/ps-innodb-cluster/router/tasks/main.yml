@@ -5,38 +5,32 @@
 
   - set_fact:
       UPSTREAM_VERSION: "{{ lookup('env', 'UPSTREAM_VERSION') }}"
+      gnupg_home: "/root/.gnupg"
+      percona_key1: "4D1BB29D63D98E422B2113B19334A25F8507EFA5"
+      percona_key1_file: "/root/.gnupg/PERCONA-PACKAGING-KEY"
 
   - name: Determine Percona Server major version
     set_fact:
-      PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') if '8.3' in UPSTREAM_VERSION else 8 }}"
+      PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') if '8.4' in UPSTREAM_VERSION else 8 }}"
 
   - name: Print Percona Server major version
     debug:
-      var: PS_MAJ_VER  
+      var: PS_MAJ_VER
 
-  - name: include tasks for enabling PS 80/83 main repo
+  - name: include tasks for enabling PS 80/84 main repo
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_main_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "main"
 
-  - name: include tasks for enabling PS 80/83 test repo
+  - name: include tasks for enabling PS 80/84 test repo
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_testing_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "testing" or lookup('env', 'INSTALL_REPO') == ""
 
-  - name: include tasks for enabling PS 80/83 experimental repo
+  - name: include tasks for enabling PS 80/84 experimental repo
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_experimental_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "experimental"
 
-  - name: enable tools main repo
-    command: percona-release enable tools release
-    when: lookup('env', 'INSTALL_REPO') == "main"
-
-  - name: include tasks for enabling tools test repo
-    command: percona-release enable tools testing
-    when: lookup('env', 'INSTALL_REPO') == "testing" or lookup('env', 'INSTALL_REPO') == ""
-
-  - name: enable tools experimental repo
-    command: percona-release enable tools experimental
-    when: lookup('env', 'INSTALL_REPO') == "experimental"
+#  - name: enable sysbench main repo
+#    command: percona-release enable sysbench release
 
   - name: setup hosts file
     copy:
@@ -68,11 +62,11 @@
       packages:
       - percona-mysql-router
       - percona-mysql-shell
-      - sysbench
+#      - sysbench
       - jq
     when: ansible_os_family == "Debian"
 
-  - name: install router and shell rpm packages
+  - name: install router and shell rpm packages yum
     yum:
       name: "{{ packages }}"
       state: latest
@@ -82,22 +76,44 @@
       - percona-mysql-shell
       - sysbench
       - jq
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install router and shell rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-mysql-router
+      - percona-mysql-shell
+#      - sysbench
+      - jq
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: remove conflicting bundled libssh
+    file:
+      path: /usr/lib/mysqlsh/libssh.so.4
+      state: absent
+
 
   - name: create cluster
-    shell: mysqlsh --uri=root@ps-node1 --password=Test1234# -- dba create-cluster testCluster
+    command: mysqlsh --uri=root@ps-node1 --password=Test1234# -- dba create-cluster testCluster
 
   - pause:
       seconds: 10
 
   - name: add slave1
-    shell: mysqlsh --uri=root@ps-node1 --password=Test1234# -- cluster add-instance root@ps-node2:3306 --options-password=Test1234# --recoveryMethod=clone
+    shell: mysqlsh --uri=root@ps-node1 --password=Test1234# -- cluster add-instance root@ps-node2:3306 --recoveryMethod=clone
 
   - name: add slave2
-    shell: mysqlsh --uri=root@ps-node1 --password=Test1234# -- cluster add-instance root@ps-node3:3306 --options-password=Test1234# --recoveryMethod=clone
+    shell: mysqlsh --uri=root@ps-node1 --password=Test1234# -- cluster add-instance root@ps-node3:3306 --recoveryMethod=clone
 
   - name: bootstrap router
-    shell: echo "Test1234#" | sudo mysqlrouter --bootstrap root@ps-node1 --user=mysqlrouter
+    shell: echo "Test1234#" | sudo mysqlrouter --bootstrap root@ps-node1:3306 --user=mysqlrouter
 
   - name: restart mysqlrouter service
     service:
@@ -107,5 +123,5 @@
   - name: create sbtest database
     shell: mysqlsh root@localhost:6446 --password=Test1234# --sql -e 'create database sbtest;'
 
-  - name: run sysbench
-    shell: sysbench --report-interval=1 --tables=2 --table-size=10000 --time=0 --events=0 --threads=1 --rand-type=pareto --db-driver=mysql --mysql-user=sysbench --mysql-password=Test1234# --mysql-host=mysql-router --mysql-port=6446 --mysql-db=sbtest --mysql-storage-engine=innodb /usr/share/sysbench/oltp_read_write.lua prepare
+#  - name: run sysbench
+#    shell: sysbench --report-interval=1 --tables=2 --table-size=10000 --time=0 --events=0 --threads=1 --rand-type=pareto --db-driver=mysql --mysql-user=sysbench --mysql-password=Test1234# --mysql-host=mysql-router --mysql-port=6446 --mysql-db=sbtest --mysql-storage-engine=innodb /usr/share/sysbench/oltp_read_write.lua prepare

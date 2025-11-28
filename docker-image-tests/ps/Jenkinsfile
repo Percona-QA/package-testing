@@ -2,10 +2,54 @@ pipeline {
   agent { label 'docker' }
   parameters {
     choice(name: 'DOCKER_ACC', choices: ['percona','perconalab'], description: 'Docker repo to use: percona or perconalab')
-    string(name: 'PS_VERSION', defaultValue: '8.0.33-25', description: 'Full PS version')
-    string(name: 'PS_REVISION', defaultValue: '9468fd1d', description: 'Short git hash for release')
+    choice(
+            choices: ['PS80', 'PS84', 'PS_INN_LTS'],
+            description: 'Choose the product version to test',
+            name: 'PRODUCT_TO_TEST'
+        )
   }
   stages {
+    stage('SET PS_VERSION and PS_REVISION') {
+        steps {
+          script {
+            sh '''
+              rm -rf /package-testing
+              rm -f master.zip
+              wget https://github.com/Percona-QA/package-testing/archive/master.zip
+              unzip master.zip
+              rm -f master.zip
+              mv "package-testing-master" package-testing
+            '''
+                    
+            def VERSION = sh(
+                script: '''grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
+                returnStdout: true
+                ).trim()
+
+            def REVISION = sh(
+                script: ''' grep ${PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
+                returnStdout: true
+                ).trim()
+                    
+    
+             env.PS_VERSION = "${VERSION}-amd64"
+            env.PS_REVISION = "${REVISION}"
+
+            echo "PS_VERSION fetched: ${env.PS_VERSION}"
+            echo "PS_REVISION fetched: ${env.PS_REVISION}"
+
+          }
+       }
+     }
+    stage('Set environmental variable'){
+      steps{
+        script {
+                    // Now, you can access these global environment variables
+          echo "Using PS_VERSION: ${env.PS_VERSION}"
+          echo "Using PS_REVISION: ${env.PS_REVISION}"
+                }
+            }
+        }
     stage('Prepare') {
       steps {
           script {
@@ -62,4 +106,4 @@ pipeline {
     } //end stages
    } 
   }
- }
+}

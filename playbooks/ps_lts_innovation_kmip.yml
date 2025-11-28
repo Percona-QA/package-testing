@@ -11,8 +11,11 @@
 
   tasks:
 
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
   - name: Extract version number using shell commands
-    shell: cat ../VERSIONS | grep -oP 'PS_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
+    shell: cat /package-testing/VERSIONS | grep -oP 'PS_INN_LTS_VER="\K(\d+)\.(\d+)' | tr -d '.'
     register: major_release_version
 
   - name: Set major_release_version variable
@@ -20,15 +23,12 @@
       major_release_version: "{{ major_release_version.stdout }}"
 
   - name: Extract values using shell command for repo name used for innovation/lts release
-    shell: grep 'PS_INN_LTS_REPO=' ../VERSIONS | cut -d'=' -f2 | tr -d '"'
+    shell: grep 'PS_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
     register: ps_inn_lts_repo_name
 
   - name: Set major_release_version variable
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
-
-  - name: include tasks for test env setup
-    include_tasks: ../tasks/test_prep.yml
 
   - name: disable selinux
     selinux: state=disabled
@@ -67,13 +67,25 @@
   - name: remove mysql data directory
     command: rm -r /var/lib/mysql
 
-  - name: install python3-pip on RedHat/CentOS
+  - name: install python3-pip on RedHat/CentOS yum
     yum:
       name:
       - python3-pip
       state: latest
       update_cache: yes
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install python3-pip on RedHat/CentOS dnf
+    dnf:
+      name:
+      - python3-pip
+      state: latest
+      update_cache: yes
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: install python3-pip on Debian/Ubuntu
     apt:

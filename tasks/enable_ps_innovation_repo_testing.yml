@@ -11,9 +11,10 @@
 #     deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-21.generic_all.deb
     when: ansible_os_family == "Debian"
 
-  - name: add the Percona testing yum repos for centos 6 and 7
-#   yum: name=https://repo.percona.com/yum/testing/7Server/RPMS/noarch/percona-release-1.0-21.noarch.rpm
-    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+  - name: Add the Percona Release yum repo without GPG check
+    yum:
+      name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+      disable_gpg_check: yes
     when: ansible_os_family == "RedHat"
 
   - name: check file dir
@@ -28,8 +29,18 @@
   - name: enable the tools testing repo
     command: percona-release enable tools testing
 
-  - name: clean and update yum cache
+  - name: Print detected package manager
+    debug:
+      msg: "Detected package manager: {{ ansible_pkg_mgr }}"
+    when: ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+
+  - name: Clean and update package cache
     shell: |
-      yum clean all
-      yum makecache
-    when: ansible_os_family == "RedHat"
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+
+  - name: Add ARM support into percona-release
+    shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
+    when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"

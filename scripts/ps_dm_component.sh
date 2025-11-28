@@ -33,7 +33,7 @@ mysql -NBe "CREATE TABLE IF NOT EXISTS mysql.masking_dictionaries (Dictionary VA
       Term VARCHAR(256) NOT NULL, UNIQUE INDEX dictionary_term_idx (Dictionary, Term), INDEX dictionary_idx (Dictionary))\
       ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;"
 mysql -NBe "GRANT MASKING_DICTIONARIES_ADMIN on *.* to 'root'@'localhost';"
-
+mysql -NBe "GRANT SELECT, INSERT, UPDATE, DELETE ON mysql.masking_dictionaries TO 'mysql.session'@'localhost';"
 
 
 #Create lists of static UDFs (we know expected result), reference list for static UDFs and list for random UDFs

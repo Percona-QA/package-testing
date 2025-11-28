@@ -14,10 +14,7 @@ def host():
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd,
          '-e', 'PERCONA_TELEMETRY_DISABLE=1',
          '-d', docker_image]).decode().strip()
-    if pxc_version_major in ['8.0','5.7','5.6']:
-        exec_command = ['microdnf', 'install', 'net-tools']
-    else:
-         exec_command = ['yum', 'install', '-y', 'net-tools']
+    exec_command = ['microdnf', 'install', '-y', 'net-tools']
     subprocess.check_call(['docker','exec','--user','root',container_name] + exec_command)
     time.sleep(80)
     yield testinfra.get_host("docker://root@" + docker_id)
@@ -104,3 +101,6 @@ class TestMysqlEnvironment:
             pytest.skip('telemetry was added in 8.0')
         else:
             assert not host.file('/usr/local/percona/telemetry_uuid').exists
+
+    def test_cyrus_package_installed(self, host):
+        assert host.package('cyrus-sasl-scram').is_installed
