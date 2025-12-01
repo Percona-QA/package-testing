@@ -1,4 +1,4 @@
-# This task installs and starts Percona Server 5.7 on CentOS and Debian/Ubuntu
+# This task installs and starts Percona Server 8.4 on CentOS and Debian/Ubuntu
 #
 # Task adjustments are handled by parent playbook vars:
 #             var "port_flag"      :  to access agent with custom port
@@ -9,15 +9,15 @@
   set_fact:
     mysql_password: "UfY9s73Gx~!?@#$%^&*(){}[]<>|/:;,.-_+="
 
-- name: enable ps-57 release repo
+- name: enable ps-84 release repo
   include_tasks: ./enable_repo.yml
   vars:
     only: yes
-    package: "ps-57"
-    repository: "release"
+    package: "ps-84-lts"
+    repository: "{{ ps_repository | default('release') }}"
 
-- name: install Percona Server 5.7 packages
-  include_tasks: ./install_ps57.yml
+- name: install Percona Server 8.4 packages
+  include_tasks: ./install_ps84.yml
 
 - name: start mysql service
   service: name=mysql state=started
@@ -27,7 +27,7 @@
   command: service mysql start
 
 - name: start mysql service with systemctl command
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7
   command: systemctl start mysql
 
 - name: set root password on centos
