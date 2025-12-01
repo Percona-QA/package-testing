@@ -11,7 +11,7 @@ echo "Installing dependencies..."
 # ---------------------------------------------------------
 #  Detect Amazon Linux 2023
 # ---------------------------------------------------------
-if grep -qi "Amazon Linux release 2023" /etc/os-release; then
+if grep -qiE 'platform:al2023|Amazon Linux 2023|ID="amzn"' /etc/os-release; then
   echo "Detected Amazon Linux 2023"
 
   sudo dnf install -y \
