@@ -1,36 +1,69 @@
-# This task installs and starts PostgreSQL 16 on CentOS and Debian/Ubuntu
+# This task installs and starts PostgreSQL on CentOS and Debian/Ubuntu
 #
 # Task adjustments are handled by parent playbook vars:
 #             var "port_flag"      :  to access agent with custom port
 #                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
 #
+- set_fact:
+    pg_version: "{{ pg_to_test.split('-')[1] }}"
+#    pgsql_password: "UfY9s73Gx~!?@#$%^&*(){}[]<>|/:;,.-_+="
+    pgsql_password: "temp_password"
 
-- name: set password for pgsql
-  set_fact:
-# workaround to pass pg_version_to_install check in install_ppg.yml
-    pgsql_password: "UfY9s73Gx~!?@#$%^&*(){}[]<>|/:;,.-_+="
+- name: Install Perl (IPC::RUN) on RedHat linux 8
+  shell: |
+    dnf config-manager --set-enabled ol8_codeready_builder
+    dnf install perl-IPC-Run -y
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+  ignore_errors: yes
 
-- name: Download install_ppg16.yml
+- name: Install Perl (IPC::RUN) on RedHat linux 9
+  shell: |
+    dnf config-manager --set-enabled ol9_codeready_builder
+    dnf install perl-IPC-Run -y
+  when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+  ignore_errors: yes
+
+- name: Install Perl (IPC::RUN) on Rocky linux 8
+  shell: |
+    sudo dnf install dnf-plugins-core
+    sudo dnf module enable llvm-toolset
+    sudo dnf config-manager --set-enabled powertools
+  when: ansible_distribution == "Rocky" and ansible_distribution_major_version == "8"
+  ignore_errors: yes
+
+- name: Install Perl (IPC::RUN) on Rocky linux 9
+  shell: |
+    dnf install dnf-plugins-core
+    dnf module enable llvm-toolset
+    dnf config-manager --set-enabled crb
+    dnf install perl-IPC-Run -y
+  when: ansible_distribution == "Rocky" and ansible_distribution_major_version == "9"
+  ignore_errors: yes
+
+- name: Download install_ppg.yml
   get_url:
-    url: https://raw.githubusercontent.com/Percona-QA/ppg-testing/main/tasks/install_ppg16.yml
+    url: "https://raw.githubusercontent.com/Percona-QA/ppg-testing/main/tasks/install_ppg{{ pg_version }}.yml"
     dest: /tmp
     mode: 0777
 
 - name: Enable postgresql repository
-  command: percona-release setup -y ppg-16
+  command: "percona-release setup -y ppg-{{ pg_version }}"
 
-- name: Run install_ppg16.yml
-  include_tasks: /tmp/install_ppg16.yml
+- name: Run install_ppg.yml
+  include_tasks: /tmp/install_ppg{{ pg_version }}.yml
+  vars:
+    # workaround to pass pg_version_to_install check in install_ppg.yml
+    pg_version_to_install: "{{ pg_version }}.5"
 
 - name: Initialize Postgres RHEL
-  command: /usr/pgsql-16/bin/postgresql-16-setup initdb
+  command: /usr/pgsql-{{ pg_version }}/bin/postgresql-{{ pg_version }}-setup initdb
   environment:
     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   when: ansible_os_family == "RedHat"
 
 - name: Start Postgres RHEL
   service:
-    name: postgresql-16
+    name: postgresql-{{ pg_version }}
     state: started
     enabled: true
   when: ansible_os_family == "RedHat"
@@ -50,34 +83,34 @@
 - name: setup postgresql pg_stat_statements for Debian based Systems
   shell: "{{item}}"
   with_items:
-    - chmod a+w /etc/postgresql/16/main/postgresql.conf
-    - echo "shared_preload_libraries = 'pg_stat_statements'" >> /etc/postgresql/16/main/postgresql.conf
-    - cat /etc/postgresql/16/main/postgresql.conf | grep "pg_stat_statements"
+    - chmod a+w /etc/postgresql/{{ pg_version }}/main/postgresql.conf
+    - echo "shared_preload_libraries = 'pg_stat_statements'" >> /etc/postgresql/{{ pg_version }}/main/postgresql.conf
+    - cat /etc/postgresql/{{ pg_version }}/main/postgresql.conf | grep "pg_stat_statements"
   become: yes
   when: ansible_os_family == "Debian"
 
 - name: setup postgresql pg_stat_statements for redhat based systems
   shell: "{{item}}"
   with_items:
-    - chmod a+w /var/lib/pgsql/16/data/postgresql.conf
-    - echo "shared_preload_libraries = 'pg_stat_statements'" >> /var/lib/pgsql/16/data/postgresql.conf
-    - cat /var/lib/pgsql/16/data/postgresql.conf | grep "pg_stat_statements"
+    - chmod a+w /var/lib/pgsql/{{ pg_version }}/data/postgresql.conf
+    - echo "shared_preload_libraries = 'pg_stat_statements'" >> /var/lib/pgsql/{{ pg_version }}/data/postgresql.conf
+    - cat /var/lib/pgsql/{{ pg_version }}/data/postgresql.conf | grep "pg_stat_statements"
   become: yes
   when: ansible_os_family == "RedHat"
 
 - name: Enable Socket Based Connection for pgsql via pgsql configuration for debian based systems
-  command: sed -i 's/local   all             postgres                                peer/local   all             postgres                                trust/' /etc/postgresql/16/main/pg_hba.conf
+  command: sed -i 's/local   all             postgres                                peer/local   all             postgres                                trust/' /etc/postgresql/{{ pg_version }}/main/pg_hba.conf
   become: yes
   when: ansible_os_family == "Debian"
 
 - name: Enable Socket Based Connection for pgsql via pgsql configuration for redhat based systems
-  command: sed -i 's/local   all             all                                     peer/local   all             all                                     trust/' /var/lib/pgsql/16/data/pg_hba.conf
+  command: sed -i 's/local   all             all                                     peer/local   all             all                                     trust/' /var/lib/pgsql/{{ pg_version }}/data/pg_hba.conf
   become: yes
   when: ansible_os_family == "RedHat"
 
 - name: Start Postgres RHEL
   service:
-    name: postgresql-16
+    name: postgresql-{{ pg_version }}
     state: restarted
     enabled: true
   when: ansible_os_family == "RedHat"
