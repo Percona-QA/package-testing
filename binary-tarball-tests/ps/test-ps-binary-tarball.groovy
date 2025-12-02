@@ -36,10 +36,10 @@ pipeline {
                     sh '''
                         rm -rf /package-testing
                         rm -f master.zip
-                        wget -O master.zip https://github.com/kaushikpuneet07/package-testing/archive/refs/heads/ps84-up.zip
+                        wget -O master.zip https://github.com/Percona-QA/package-testing/archive/refs/heads/master.zip
                         unzip master.zip
                         rm -f master.zip
-                        mv "package-testing-ps84-up" package-testing
+                        mv "package-testing-master" package-testing
                     '''
 
                     def VERSION = sh(
@@ -183,8 +183,8 @@ pipeline {
                     string(name: 'product_to_test', value: "${product_to_test}"),
                     string(name: 'install_repo', value: "testing"),
                     string(name: 'EOL', value: "${eol_param}"),
-                    string(name: 'git_repo', value: "https://github.com/kaushikpuneet07/package-testing.git"),
-                    string(name: 'git_branch', value: "ps84-up"),
+                    string(name: 'git_repo', value: "https://github.com/Percona-QA/package-testing.git"),
+                    string(name: 'git_branch', value: "master"),
                     string(name: 'check_warnings', value: "yes"),
                     string(name: 'install_mysql_shell', value: "yes")
                 ]
@@ -224,7 +224,7 @@ def runtarballtests(String psVersion, boolean buildMinimal, String glibcVersion)
 
         rm -rf /usr/local/package-testing
         cd /tmp
-        git clone https://github.com/kaushikpuneet07/package-testing.git --branch ps84-up --depth 1
+        git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
         cd /tmp/package-testing/binary-tarball-tests/ps
 
         wget "\${TARBALL_LINK}\${TARBALL_NAME}"

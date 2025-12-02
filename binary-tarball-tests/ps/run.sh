@@ -114,7 +114,7 @@ if [[ "$PRO" != "true" ]]; then
     exit 1
   fi
   tar xf "${TARBALL_NAME}"
-  PS_DIR_NAME=$(echo "${TARBALL_NAME}" | sed 's/.tar.gz$//' | sed 's/.deb$//' | sed 's/.rpm$//')
+  PS_DIR_NAME=$(echo "${TARBALL_NAME}"|sed 's/.tar.gz$//'|sed 's/.deb$//'|sed 's/.rpm$//')
   export BASE_DIR="${PWD}/${PS_DIR_NAME}"
   echo "BASE_DIR is for non PRO $BASE_DIR"
 else
@@ -133,4 +133,4 @@ fi
 #  Run Tests
 # ---------------------------------------------------------
 echo "Running tests..."
-python3 -m pytest -v --junit-xml report.xml "$@"
+python3 -m pytest -v --junit-xml report.xml $@
