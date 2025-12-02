@@ -1,0 +1,59 @@
+---
+scenario:
+  name: debian-13-arm
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: ps-node1-debian-13-arm
+    region: us-west-2
+    image: ami-00f9bd78b9eb2c2d0
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: c6g.large
+    ssh_user: admin
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
+  - name: ps-node2-debian-12-arm
+    region: us-west-2
+    image: ami-00f9bd78b9eb2c2d0
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: c6g.large
+    ssh_user: admin
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
+  - name: ps-node3-debian-12-arm
+    region: us-west-2
+    image: ami-00f9bd78b9eb2c2d0
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: c6g.large
+    ssh_user: admin
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-ps-worker
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
+provisioner:
+  name: ansible
+  lint:
+    name: ansible-lint
+  playbooks:
+    create: ../../../playbooks/create.yml
+    destroy: ../../../playbooks/destroy.yml
+    prepare: ../../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../tests/
+  options:
+    verbose: true
+    s: true
+    junitxml: report.xml
+  lint:
+    name: flake8
