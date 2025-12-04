@@ -243,7 +243,7 @@ pipeline {
                 }
                 stage('AmazonLinux2023') {
                     agent {
-                        label "min-al-2023-x64"
+                        label "min-al2023-x64"
                     }
                     steps {
                         script {
