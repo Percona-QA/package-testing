@@ -106,8 +106,18 @@
     owner: root
     group: root
     mode: 0644
+  register: mysqlchk_copy_result
+
+- name: Debug: show result of mysqlchk cnf creation
+  debug:
+    var: mysqlchk_copy_result
 
 - name: add mysqlchk to services with 9200 port
   lineinfile:
     path: /etc/services
     line: mysqlchk        9200/tcp                # mysqlchk
+  register: mysqlchk_lineinfile_result
+
+- name: Debug: show result of adding mysqlchk to services
+  debug:
+    var: mysqlchk_lineinfile_result
