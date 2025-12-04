@@ -262,11 +262,11 @@
     debug: var=pxc_version
 
   - name: check that PXC version is correct Molecule
-    command: /package-testing/version_check.sh pxc80pro
+    command: /package-testing/version_check.sh pxc80
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: check that PXC package versions are correct Molecule
-    command: /package-testing/package_check.sh pxc80 pro
+    command: /package-testing/package_check.sh pxc80
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
 # - name: install plugins
