@@ -139,8 +139,8 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - percona-toolkit
-      - percona-xtrabackup-80
+#      - percona-toolkit
+#      - percona-xtrabackup-80
     when: 
       - ansible_os_family == "RedHat" 
       - ansible_architecture == "x86_64"
@@ -329,8 +329,8 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - percona-toolkit
-      - percona-xtrabackup-80
+#      - percona-toolkit
+#      - percona-xtrabackup-80
     when: 
       - ansible_os_family == "RedHat" 
       - ansible_architecture == "x86_64"
