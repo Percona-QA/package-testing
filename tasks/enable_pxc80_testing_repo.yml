@@ -24,8 +24,10 @@
     when:
       - ansible_distribution != "Amazon"
 
-  - name: enable pxb repo 
+  - name: enable pxb repo
     command: percona-release enable pxb-80 release
+    when:
+      - ansible_distribution != "Amazon"
 
   - name: Clean and update package cache
     shell: |
