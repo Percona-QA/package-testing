@@ -231,7 +231,9 @@
   - name: copy PXC config on centos 7
     template: src=../../../../templates/my_rpm_80.j2
               dest=/etc/my.cnf
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_distribution != "Amazon"
 
   - name: copy PXC config on debian/ubuntu
     template: src=../../../../templates/my_8.j2
@@ -243,7 +245,9 @@
     template: src=../../../../templates/my_57.j2
               dest=/root/.my.cnf
               mode=0640 owner=root group=root
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_distribution != "Amazon"
 
   - name: copy pxc certs
     copy:
