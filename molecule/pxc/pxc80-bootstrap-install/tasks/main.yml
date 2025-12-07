@@ -284,7 +284,6 @@
     command: /package-testing/setpass_57.sh
     when:
       - ansible_os_family == "RedHat"
-      - ansible_distribution != "Amazon"
 
   - name: copy .my.cnf with credentials on centos
     template: src=../../../../templates/my_57.j2
@@ -292,7 +291,6 @@
               mode=0640 owner=root group=root
     when:
       - ansible_os_family == "RedHat"
-      - ansible_distribution != "Amazon"
 
   # other tests
 # - name: install plugins

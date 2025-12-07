@@ -233,7 +233,6 @@
               dest=/etc/my.cnf
     when:
       - ansible_os_family == "RedHat"
-      - ansible_distribution != "Amazon"
 
   - name: copy PXC config on debian/ubuntu
     template: src=../../../../templates/my_8.j2
@@ -247,7 +246,6 @@
               mode=0640 owner=root group=root
     when:
       - ansible_os_family == "RedHat"
-      - ansible_distribution != "Amazon"
 
   - name: copy pxc certs
     copy:
@@ -257,7 +255,7 @@
   - name: start mysql service
     service: name=mysql state=started
     throttle: 1
-    
+
   - name: register PXC version Molecule
     shell: mysqld --version
     register: pxc_version
