@@ -18,12 +18,16 @@
 
   - name: Add pxc-80 testing repo for qpress
     command: percona-release enable-only pxc-80 testing
-    
+
   - name: add the testing tools repo
     command: percona-release enable tools release
+    when:
+      - ansible_distribution != "Amazon"
 
-  - name: enable pxb repo 
+  - name: enable pxb repo
     command: percona-release enable pxb-80 release
+    when:
+      - ansible_distribution != "Amazon"
 
   - name: Clean and update package cache
     shell: |

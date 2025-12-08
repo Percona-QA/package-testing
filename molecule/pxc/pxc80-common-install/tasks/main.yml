@@ -109,13 +109,13 @@
       - percona-xtradb-cluster-full
       - percona-xtrabackup-80
       - percona-toolkit
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - ansible_architecture == "aarch64"
       - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      
+
   - name: install PXC 8 deb packages amd64 non pro
     apt:
       name: "{{ packages }}"
@@ -125,7 +125,7 @@
       - percona-xtradb-cluster-full
       - percona-xtrabackup-80
       - percona-toolkit
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - ansible_architecture == "x86_64"
       - lookup('env', 'pro') == "no"
@@ -141,8 +141,23 @@
       - percona-xtradb-cluster-full
       - percona-toolkit
       - percona-xtrabackup-80
-    when: 
-      - ansible_os_family == "RedHat" 
+    when:
+      - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+      - ansible_architecture == "x86_64"
+      - lookup('env', 'pro') == "no"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC 8 amazon packages amd64 non pro
+    package:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+#      - percona-toolkit
+    when:
+      - ansible_distribution == "Amazon"
       - ansible_architecture == "x86_64"
       - lookup('env', 'pro') == "no"
     environment:
@@ -155,13 +170,29 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - percona-xtrabackup-80
-    when: 
-      - ansible_os_family == "RedHat"
+#      - percona-xtrabackup-80
+    when:
+      - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
       - ansible_architecture == "aarch64"
       - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC 8 amazon packages ARM64 non pro
+    package:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+#      - percona-toolkit
+    when:
+      - ansible_distribution == "Amazon"
+      - ansible_architecture == "aarch64"
+      - lookup('env', 'pro') == "no"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
 #--------------------------------------------------------------------------------------------
 
 
@@ -173,13 +204,13 @@
     vars:
       packages:
       - percona-xtradb-cluster-pro-full
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - ansible_architecture == "aarch64"
       - lookup('env', 'pro') == "yes"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      
+
   - name: install PXC 8 deb packages amd64 pro
     apt:
       name: "{{ packages }}"
@@ -187,7 +218,7 @@
     vars:
       packages:
       - percona-xtradb-cluster-pro-full
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - ansible_architecture == "x86_64"
       - lookup('env', 'pro') == "yes"
@@ -201,8 +232,8 @@
     vars:
       packages:
       - percona-xtradb-cluster-pro-full
-    when: 
-      - ansible_os_family == "RedHat" 
+    when:
+      - ansible_os_family == "RedHat"
       - ansible_architecture == "x86_64"
       - lookup('env', 'pro') == "yes"
     environment:
@@ -215,7 +246,7 @@
     vars:
       packages:
       - percona-xtradb-cluster-pro-full
-    when: 
+    when:
       - ansible_os_family == "RedHat"
       - ansible_architecture == "aarch64"
       - lookup('env', 'pro') == "yes"
@@ -229,9 +260,10 @@
 #    command: /package-testing/check_telemetry.sh pxc -d
 
   - name: copy PXC config on centos 7
-    template: src=../../../../templates/my_rpm_80.j2 
+    template: src=../../../../templates/my_rpm_80.j2
               dest=/etc/my.cnf
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_os_family == "RedHat"
 
   - name: copy PXC config on debian/ubuntu
     template: src=../../../../templates/my_8.j2
@@ -243,7 +275,8 @@
     template: src=../../../../templates/my_57.j2
               dest=/root/.my.cnf
               mode=0640 owner=root group=root
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_os_family == "RedHat"
 
   - name: copy pxc certs
     copy:
@@ -253,7 +286,7 @@
   - name: start mysql service
     service: name=mysql state=started
     throttle: 1
-    
+
   - name: register PXC version Molecule
     shell: mysqld --version
     register: pxc_version
@@ -262,11 +295,11 @@
     debug: var=pxc_version
 
   - name: check that PXC version is correct Molecule
-    command: /package-testing/version_check.sh pxc80pro
+    command: /package-testing/version_check.sh pxc80
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: check that PXC package versions are correct Molecule
-    command: /package-testing/package_check.sh pxc80 pro
+    command: /package-testing/package_check.sh pxc80
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
 # - name: install plugins
@@ -299,13 +332,13 @@
       - percona-xtradb-cluster-full
       - percona-xtrabackup-80
       - percona-toolkit
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - ansible_architecture == "aarch64"
       - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      
+
   - name: install PXC 8 deb packages amd64 non pro
     apt:
       name: "{{ packages }}"
@@ -331,8 +364,8 @@
       - percona-xtradb-cluster-full
       - percona-toolkit
       - percona-xtrabackup-80
-    when: 
-      - ansible_os_family == "RedHat" 
+    when:
+      - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
       - ansible_architecture == "x86_64"
       - lookup('env', 'pro') == "no"
     environment:
@@ -346,8 +379,38 @@
       packages:
       - percona-xtradb-cluster-full
       - percona-xtrabackup-80
-    when: 
-      - ansible_os_family == "RedHat"
+    when:
+      - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+      - ansible_architecture == "aarch64"
+      - lookup('env', 'pro') == "no"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC 8 amazon packages amd64 non pro
+    package:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+#      - percona-toolkit
+    when:
+      - ansible_distribution == "Amazon"
+      - ansible_architecture == "x86_64"
+      - lookup('env', 'pro') == "no"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC 8 amazon packages ARM64 non pro
+    package:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+#      - percona-toolkit
+    when:
+      - ansible_distribution == "Amazon"
       - ansible_architecture == "aarch64"
       - lookup('env', 'pro') == "no"
     environment:
@@ -368,7 +431,7 @@
       - lookup('env', 'pro') == "yes"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      
+
   - name: install PXC 8 deb packages amd64 pro
     apt:
       name: "{{ packages }}"
