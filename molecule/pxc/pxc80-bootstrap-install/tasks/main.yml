@@ -148,8 +148,8 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-#      - percona-toolkit
-#      - percona-xtrabackup-80
+      - percona-toolkit
+      - percona-xtrabackup-80
     when:
       - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
       - ansible_architecture == "x86_64"
@@ -181,7 +181,22 @@
       - percona-xtradb-cluster-full
 #      - percona-xtrabackup-80
     when:
-      - ansible_os_family == "RedHat"
+      - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+      - ansible_architecture == "aarch64"
+      - lookup('env', 'pro') == "no"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC 8 amazon packages ARM64 non pro
+    package:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+#      - percona-toolkit
+    when:
+      - ansible_distribution == "Amazon"
       - ansible_architecture == "aarch64"
       - lookup('env', 'pro') == "no"
     environment:
@@ -314,7 +329,7 @@
     shell: mysql -uroot --password='U?fY)9s7|3gxUm' -e "SELECT @@INNODB_VERSION;"
     register: innod_version
 
-  - name: print INNODB version debug  
+  - name: print INNODB version debug
     debug: var=innod_version
 
   - name: check PXC 8.0 version Molecule
