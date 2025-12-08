@@ -48,7 +48,7 @@
 
   - name: enable the pxb-84 release repo
     command: percona-release enable pxb-84-lts release
-    when: ansible_distribution_release == "noble"
+#    when: ansible_distribution_release == "noble"
 
   - name: Clean and update package cache
     shell: |
