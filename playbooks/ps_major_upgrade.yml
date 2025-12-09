@@ -12,14 +12,12 @@
     gnupg_home: /root/.gnupg
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
-    # Support both new variables and legacy install_repo environment variable
-    install_repo: "{{ lookup('env', 'install_repo', default='') }}"
-    eol_repo: "{{ lookup('env', 'EOL', default='') }}"
-    # New standardized variables with fallbacks to install_repo
+    install_repo: "{{ lookup('env', 'install_repo') }}"
+    eol_repo: "{{ lookup('env', 'EOL') }}"
     major_upgrade_from_product: "{{ lookup('env', 'major_upgrade_from_product', default='ps57') }}"
-    major_upgrade_from_repo: "{{ lookup('env', 'major_upgrade_from_repo', default=install_repo) }}"
+    major_upgrade_from_repo: "{{ lookup('env', 'major_upgrade_from_repo') }}"
     major_upgrade_to_product: "{{ lookup('env', 'major_upgrade_to_product', default='ps84') }}"
-    major_upgrade_to_repo: "{{ lookup('env', 'major_upgrade_to_repo', default=install_repo) }}"
+    major_upgrade_to_repo: "{{ lookup('env', 'major_upgrade_to_repo') }}"
   environment:
     install_mysql_shell: '{{ install_mysql_shell }}'
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
