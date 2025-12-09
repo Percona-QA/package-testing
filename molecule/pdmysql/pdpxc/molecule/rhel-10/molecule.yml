@@ -34,7 +34,6 @@ verifier:
     junitxml: report.xml
 scenario:
   name: rhel-10
-  enabled: "{{ lookup('env','VERSION') | regex_search('^8\\.4') }}"
   destroy_sequence:
     - destroy
   clenup_sequence:
