@@ -18,6 +18,10 @@
     when: 
     - "'pxc3' in inventory_hostname"
 
+  - name: Update all dnf packages without reboot
+    ansible.builtin.dnf: name='*' state=latest
+    when: ansible_facts['distribution'] in ['RedHat','OracleLinux']
+
   - name: include tasks for test env setup
     include_tasks: ../../../../tasks/test_prep.yml
 

@@ -169,9 +169,7 @@
         key: "{{ lookup('file', 'public_keys') }}"
         state: present
         exclusive: False
-      when: (ansible_distribution == "OracleLinux" and lookup('env', 'DESTROY_ENV') == "no") or
-            (ansible_distribution == "Amazon" and lookup('env', 'DESTROY_ENV') == "no") or
-            (ansible_distribution == "RedHat" and lookup('env', 'DESTROY_ENV') == "no")
+      when: ansible_distribution in ["OracleLinux", "Amazon", "RedHat"]
 
     - name: Setup SSH keys for Rocky Linux
       authorized_key:
