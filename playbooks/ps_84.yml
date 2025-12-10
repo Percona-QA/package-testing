@@ -127,13 +127,16 @@
 
   - name: Enable PXB 84 repo
     command: percona-release enable-only pxb-84-lts testing
-    when: ansible_distribution != "Amazon"
+    when: 
+      - ansible_distribution != "Amazon"
+      - not (ansible_distribution == "Debian" and ansible_distribution_major_version|int == 13)
 
   - name: install Percona XtraBackup 8.4 packages
     include_tasks: ../tasks/install_pxb84.yml
     when: 
       - lookup('env', 'install_repo') != "experimental"
-      - ansible_distribution != "Amazon"
+      - ansible_distribution != "Amazon" 
+      - not (ansible_distribution == "Debian" and ansible_distribution_major_version|int == 13)
 
 #  - name: enable the Tools release repo
 #    command: percona-release enable tools release
@@ -332,4 +335,3 @@
     fail:
       msg: "Path exists and is a directory and is not empty"
     when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
-
