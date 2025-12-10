@@ -94,10 +94,10 @@
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
-  - name: remove conflicting bundled libssh
-    file:
-      path: /usr/lib/mysqlsh/libssh.so.4
-      state: absent
+#  - name: remove conflicting bundled libssh
+#    file:
+#      path: /usr/lib/mysqlsh/libssh.so.4
+#      state: absent
 
 
   - name: create cluster
