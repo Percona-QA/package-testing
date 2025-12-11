@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+sudo dnf install -y python3 || sudo yum install -y python3
 # Define MySQL command (adjust credentials if needed)
 MYSQL="mysql -uroot -NBe"
 

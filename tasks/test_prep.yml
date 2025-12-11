@@ -37,6 +37,10 @@
       - ansible_facts['distribution'] == "CentOS"
       - ansible_facts['distribution_major_version'] | int == 7
 
+  - name: Update all dnf packages without reboot
+    ansible.builtin.dnf: name='*' state=latest
+    when: ansible_facts['distribution'] in ['RedHat','OracleLinux']
+
   - name: Install wget
     yum:
       name: wget
@@ -243,10 +247,10 @@
     with_items:
     - rm -rf /package-testing
     - rm -f master.zip
-    - wget --no-check-certificate -O master.zip "https://github.com/{{ git_account }}/package-testing/archive/{{ branch }}.zip"
+    - wget --no-check-certificate -O master.zip "https://github.com/kaushikpuneet07/package-testing/archive/js-fix.zip"
     - unzip master.zip
     - rm -f master.zip
-    - mv "package-testing-{{ branch }}" /package-testing
+    - mv "package-testing-js-fix" /package-testing
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('master', true) }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
