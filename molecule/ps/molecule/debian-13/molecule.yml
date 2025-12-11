@@ -8,7 +8,7 @@ platforms:
     region: us-west-2
     image: ami-081ac37fe26dacc98
     vpc_subnet_id: subnet-03136d8c244f56036
-    instance_type: t3.micro
+    instance_type: t3.medium
     ssh_user: admin
     root_device_name: /dev/xvda
     instance_tags:
