@@ -174,7 +174,7 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
         rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-rocksdb-${rpm_maj_version}"
       fi
     elif [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
-      if [ "${centos_maj_version}" == "9" ]; then
+      if [[ "${centos_maj_version}" == "9" || "${centos_maj_version}" == "10" ]]; then
         rpm_num_pkgs="7"
         rpm_opt_package="percona-server-rocksdb${pro_suf}"
       else
