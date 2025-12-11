@@ -54,7 +54,7 @@
   when: ansible_os_family != "RedHat"
   command: >-
     pmm-admin add mysql {{ port_flag if port_flag is defined else '' }}
-    --socket=/var/run/mysqld/mysqld.sock --service-name={{ mysql_service_name }} --query-source=perfschema
+    --socket=/var/run/mysqld/mysqld.sock --service-name={{ mysql_socket_service_name }} --query-source=perfschema
     {{ '' if agent_password is not defined or '/agent_id/' in agent_password else '--agent-password=%s' | format(agent_password) }}
 
 - name: "Validate pmm-admin list output contains 'MySQL'"

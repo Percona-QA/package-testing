@@ -64,6 +64,7 @@
 ### start PS
   - set_fact:
       mysql_service_name: "mysql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+      mysql_socket_service_name: "mysql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
 #      mysql_service_name: "mysql_{{ rnd }}_{{ instance_ip }}"
 
   - name: Install and start Percona Server 5.7
@@ -83,6 +84,7 @@
     include_tasks: ../tasks/verify_pmm3_service_metric.yml
     loop:
       - { service_name: '{{ mysql_service_name }}', metric: 'mysql_up 1' }
+      - { service_name: '{{ mysql_socket_service_name }}', metric: 'mysql_up 1' }
 ### end PS
 
 ### start PSMDB
