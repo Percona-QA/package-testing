@@ -42,7 +42,7 @@
 
 - name: Download install_ppg.yml
   get_url:
-    url: "https://raw.githubusercontent.com/Percona-QA/ppg-testing/pg-18/tasks/install_ppg{{ pg_version }}.yml"
+    url: "https://raw.githubusercontent.com/Percona-QA/ppg-testing/main/tasks/install_ppg{{ pg_version }}.yml"
     dest: /tmp
     mode: 0777
 
