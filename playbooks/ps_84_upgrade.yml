@@ -55,10 +55,10 @@
 
 # Install from main repository
 
-  - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_main_repo.yml
-    when:
-      - lookup('env', 'pro_test') != "yes"
+#  - name: include tasks for enabling main repo
+#    include_tasks: ../tasks/enable_main_repo.yml
+#    when:
+#      - lookup('env', 'pro_test') != "yes"
 
   - name: include tasks for enabling PS 84 main repo
     include_tasks: ../tasks/enable_ps84_main_repo.yml
