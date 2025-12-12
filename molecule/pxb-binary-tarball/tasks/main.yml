@@ -208,13 +208,13 @@
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
       - lookup('env', 'PXB_RELEASE') == "84"
 
-  - name: Install MySQL 8.4 Community Server
-    ansible.builtin.yum:
-      name: mysql-community-server
-      state: present
-    when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
-      - lookup('env', 'PXB_RELEASE') == "84"
+#  - name: install MySQL 8.4 Community Server
+#    ansible.builtin.yum:
+#      name: mysql-community-server
+#      state: present
+#    when: 
+#      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+#      - lookup('env', 'PXB_RELEASE') == "84"
 
   - name: install Percona Server rpm packages Amazon PRO PXB80
     dnf:
