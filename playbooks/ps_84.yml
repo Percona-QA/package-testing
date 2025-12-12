@@ -198,12 +198,12 @@
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
 
-# Bookworm does not support fips mode out of the box. It requires opennsl module rebuid. So we skip fips mode enabling for bookworm.
+  # Bookworm does not support fips mode out of the box. It requires opennsl module rebuid. So we skip fips mode enabling for bookworm.
   - name: include tasks for checking FIPS mode
-    include_tasks: ../tasks/check_ps84_fips.yml
+    include_tasks: ../tasks/check_ps80_fips.yml
     when:
-      - lookup('env', 'pro_test') == "yes"
-      - ansible_distribution_release != "bookworm"
+      - ansible_distribution_release not in ["trixie", "bookworm", "bullseye", "focal", "noble"]
+      - not (ansible_distribution_release == "jammy" and ansible_architecture in ["aarch64", "arm64"])
 
 #  - name: keyring plugins test
 #    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps84
