@@ -58,10 +58,16 @@
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
-  - name: Install MySQL RHEL 9 yum repository package
+  - name: Install MySQL RHEL 10 yum repository package
     dnf: name=https://repo.mysql.com/mysql80-community-release-el10.rpm state=present
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+
+  - name: Install MySQL RHEL 9 yum repository package
+    dnf: name=https://repo.mysql.com/mysql80-community-release-el9.rpm state=present
+    when: 
+      - ansible_os_family == "Amazon"
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: setup epel 8 repo
@@ -376,8 +382,9 @@
 
   - name: YUM UPDATE after RHEL REPO ENABLE
     shell: yum update -y
-    when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when:
+      - (ansible_os_family == "RedHat" or ansible_os_family == "Amazon")
+      - ansible_distribution_major_version | int >= 7
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install packages in centos
@@ -405,7 +412,7 @@
     debug:
       msg: "Available MySQL packages are '{{ yum_list.stdout }}'"
     when: 
-      - ansible_os_family == "RedHat"
+      - (ansible_os_family == "RedHat" or ansible_os_family == "Amazon")
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install packages in rhel/centos 8
@@ -428,8 +435,9 @@
       packages:
       - python3-libselinux
       - mysql-community-server-"{{ pxb_version_major_minor }}"-1.el9
-    when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    when:
+      - (ansible_os_family == "RedHat" or ansible_os_family == "Amazon")
+      - ansible_distribution_major_version | int >= 9
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
 ## INSTALL MS .rpm packages RHEL/OL 8 & 9
@@ -439,7 +447,7 @@
       name: tar
       state: present
     when: 
-      - ansible_os_family == "RedHat"
+      - (ansible_os_family == "RedHat" or ansible_os_family == "Amazon")
 
   - name: Install mysql RPM packages using tarballs OL8 
     command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-"{{ pxb_version_major_minor }}"-1.el8.x86_64.rpm-bundle.tar 
@@ -451,14 +459,15 @@
   - name: Install mysql RPM packages using tarballs OL9
     command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-"{{ pxb_version_major_minor }}"-1.el9.x86_64.rpm-bundle.tar 
     when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+      - (ansible_os_family == "RedHat" or ansible_os_family == "Amazon")
+      - ansible_distribution_major_version | int >= 9
       - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
       - pxb_version_major != "8.3"
 
   - name: List the dirs ol8 and ol9
     command: ls -l
     when: 
-      - ansible_os_family == "RedHat"
+      - (ansible_os_family == "RedHat" or ansible_os_family == "Amazon")
       - lookup('env', 'server_to_test') == "ms-80"
     register: ls_output
 
@@ -476,14 +485,15 @@
   - name: extract mysql RPM packages for OL9
     command: tar -xvf mysql-"{{ pxb_version_major_minor }}"-1.el9.x86_64.rpm-bundle.tar -C /tmp
     when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+      - (ansible_os_family == "RedHat" or ansible_os_family == "Amazon")
+      - ansible_distribution_major_version | int >= 9
       - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
       - pxb_version_major != "8.3"
 
   - name: install mysql RPM packages
     shell: dnf install -y /tmp/*.rpm
     when: 
-      - ansible_os_family == "RedHat"
+      - (ansible_os_family == "RedHat" or ansible_os_family == "Amazon")
       - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
       - pxb_version_major != "8.3"
       - ansible_distribution_major_version in ["8", "9"]
@@ -551,7 +561,8 @@
       state: started
     become: yes
     when:
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+      - (ansible_os_family == "RedHat" or ansible_os_family == "Amazon")
+      - ansible_distribution_major_version | int >= 7
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: start mysql service with systemctl MS80
@@ -561,7 +572,8 @@
       state: started
     become: yes
     when: 
-      - ansible_os_family == "RedHat"
+      - (ansible_os_family == "RedHat" or ansible_os_family == "Amazon")
+      - ansible_distribution_major_version | int >= 7
       - lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
 
   - name: Fetch current MySQL root password from log
@@ -611,7 +623,7 @@
     command: systemctl restart mysqld
     when:
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
-      - ansible_os_family == "RedHat"
+      - (ansible_os_family == "RedHat" or ansible_os_family == "Amazon")
 
   - name: restart mysql service DEBIAN
     command: systemctl restart mysql
