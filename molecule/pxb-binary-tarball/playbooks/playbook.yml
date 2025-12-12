@@ -29,4 +29,4 @@
       "debian:bullseye": "2.31"
       "debian:bookworm": "2.36"
       "rhel:10.0": "2.39"
-      "debian:trixie": "2.41"
+      "debian:trixie": "2.36"
