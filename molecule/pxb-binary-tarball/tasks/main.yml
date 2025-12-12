@@ -147,18 +147,14 @@
       - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: Enable Percona Server 8.4 main repository PXB84
-    include_tasks: ../../../tasks/enable_ps84_main_repo.yml
+    include_tasks: ../../../tasks/enable_ps84_testing_repo.yml
     when:
-      - ansible_distribution_major_version != "2023"
       - lookup('env', 'PXB_RELEASE') == "84"
-      - ansible_distribution_major_version != "10"
 
   - name: include playbook for Install Percona Server 8.4 PXB84
     include_tasks: ../../../tasks/install_ps84.yml
     when:
-      - ansible_distribution_major_version != "2023"
       - lookup('env', 'PXB_RELEASE') == "84"
-      - ansible_distribution_major_version != "10"
 
   - name: Enable Percona Server 8.4 PRO main repository PXB84
     include_tasks: ../../../tasks/enable_ps84_pro_tools_repo.yml
@@ -212,13 +208,13 @@
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
       - lookup('env', 'PXB_RELEASE') == "84"
 
-  - name: Install MySQL 8.4 Community Server
-    ansible.builtin.yum:
-      name: mysql-community-server
-      state: present
-    when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
-      - lookup('env', 'PXB_RELEASE') == "84"
+#  - name: install MySQL 8.4 Community Server
+#    ansible.builtin.yum:
+#      name: mysql-community-server
+#      state: present
+#    when: 
+#      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+#      - lookup('env', 'PXB_RELEASE') == "84"
 
   - name: install Percona Server rpm packages Amazon PRO PXB80
     dnf:
@@ -261,9 +257,7 @@
   - name: install Percona Server 8.4 packages PXB84
     include_tasks: ../../../tasks/install_ps84.yml
     when:
-      - ansible_distribution_major_version != "2023"
       - lookup('env', 'PXB_RELEASE') == "84"
-      - ansible_distribution_major_version != "10"
 
   - name: Download {{ TARBALL_NAME_REGULAR }} REGULAR MAIN REPO PS80 PXB 80
     ansible.builtin.get_url:
