@@ -554,52 +554,52 @@
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
       - lookup('env', 'server_to_test') == "ms-84"
 
-  - name: Download MySQL 8.0 Community repo RPM
+  - name: Download MySQL 8.0 Community repo RPM Amazon
     ansible.builtin.get_url:
       url: https://repo.mysql.com/mysql80-community-release-el9-1.noarch.rpm
       dest: /tmp/mysql80-community-release-el9-1.noarch.rpm
     when:
-      - ansible_distribution == "amazon"
+      - ansible_distribution == "Amazon"
       - lookup('env', 'server_to_test') == "ms-80"
 
-  - name: Download MySQL 8.4 Community repo RPM
+  - name: Download MySQL 8.4 Community repo RPM AMzon
     ansible.builtin.get_url:
       url: https://repo.mysql.com/mysql84-community-release-el9-1.noarch.rpm
       dest: /tmp/mysql84-community-release-el9-1.noarch.rpm
     when:
-      - ansible_distribution == "amazon"
+      - ansible_distribution == "Amazon"
       - lookup('env', 'server_to_test') == "ms-84"
 
-  - name: Install MySQL repo RPM
+  - name: Install MySQL repo RPM Amazon
     ansible.builtin.yum:
       name: /tmp/mysql80-community-release-el9-1.noarch.rpm
       state: present
     when:
-      - ansible_distribution == "amazon"
+      - ansible_distribution == "Amazon"
       - lookup('env', 'server_to_test') == "ms-80"
 
-  - name: Install MySQL repo RPM
+  - name: Install MySQL repo RPM Amazon
     ansible.builtin.yum:
       name: /tmp/mysql84-community-release-el9-1.noarch.rpm
       state: present
     when:
-      - ansible_distribution == "amazon"
+      - ansible_distribution == "Amazon"
       - lookup('env', 'server_to_test') == "ms-84"
 
-  - name: Install MySQL 8.0 Community Server
+  - name: Install MySQL 8.0 Community Server Amazon
     ansible.builtin.yum:
       name: mysql-community-server
       state: present
     when:
-      - ansible_distribution == "amazon"
+      - ansible_distribution == "Amazon"
       - lookup('env', 'server_to_test') == "ms-80"
 
-  - name: Install MySQL 8.4 Community Server
+  - name: Install MySQL 8.4 Community Server Amazon
     ansible.builtin.yum:
       name: mysql-community-server
       state: present
     when:
-      - ansible_distribution == "amazon"
+      - ansible_distribution == "Amazon"
       - lookup('env', 'server_to_test') == "ms-84"
 
   - name: start mysql service with ansible module for ms_innovation_lts
