@@ -301,13 +301,13 @@
   - name: Install mysql deb packages using tarballs Debian 13 INNOVATION_LTS
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1debian13_amd64.deb-bundle.tar
     when: 
-      - ansible_distribution == 'Debian' and ansible_distribution_version == '13.0'
+      - ansible_distribution == 'Debian' and ansible_distribution_major_version == '13.0'
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Install mysql deb packages using tarballs Debian 13 MS84
     command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-server_"{{ pxb_version_major_minor }}"-1debian13_amd64.deb-bundle.tar
     when: 
-      - ansible_distribution == 'Debian' and ansible_distribution_version == '13'
+      - ansible_distribution == 'Debian' and ansible_distribution_major_version == '13'
       - lookup('env', 'server_to_test') == "ms-84"
 
   - name: extract mysql deb packages for ubuntu 20.04
@@ -349,7 +349,7 @@
   - name: extract mysql deb packages for Debian 13
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1debian13_amd64.deb-bundle.tar -C /tmp
     when: 
-      - ansible_distribution == 'Debian' and ansible_distribution_version == '13'
+      - ansible_distribution == 'Debian' and ansible_distribution_major_version == '13'
       - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-84"
 
   - name: install mysql deb packages
