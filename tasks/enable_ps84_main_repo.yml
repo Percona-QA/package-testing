@@ -41,7 +41,7 @@
     when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"
 
   - name: enable the PS-84 main repo
-    command: percona-release enable-only ps-84-lts release
+    command: percona-release enable ps-84-lts release
 
   - name: enable the pxb-84 release repo
     command: percona-release enable pxb-84-lts release
