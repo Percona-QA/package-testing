@@ -9,7 +9,7 @@ platforms:
   - name: ps-node1-debian-13-arm
     region: us-west-2
     image: ami-00f9bd78b9eb2c2d0
-    vpc_subnet_id: subnet-03136d8c244f56036
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: c6g.large
     ssh_user: admin
     root_device_name: /dev/xvda
@@ -17,10 +17,10 @@ platforms:
       iit-billing-tag: jenkins-ps-worker
       job-name: ${JOB_NAME}
       build-number: ${BUILD_NUMBER}
-  - name: ps-node2-debian-12-arm
+  - name: ps-node2-debian-13-arm
     region: us-west-2
     image: ami-00f9bd78b9eb2c2d0
-    vpc_subnet_id: subnet-03136d8c244f56036
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: c6g.large
     ssh_user: admin
     root_device_name: /dev/xvda
@@ -28,10 +28,10 @@ platforms:
       iit-billing-tag: jenkins-ps-worker
       job-name: ${JOB_NAME}
       build-number: ${BUILD_NUMBER}
-  - name: ps-node3-debian-12-arm
+  - name: ps-node3-debian-13-arm
     region: us-west-2
     image: ami-00f9bd78b9eb2c2d0
-    vpc_subnet_id: subnet-03136d8c244f56036
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: c6g.large
     ssh_user: admin
     root_device_name: /dev/xvda
