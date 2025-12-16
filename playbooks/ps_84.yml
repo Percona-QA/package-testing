@@ -83,31 +83,30 @@
     vars:
       pro_suf: "{{ '-pro' if 'yes' in lookup('env', 'pro_test') else '' }}"
 
-# Enable only tools repo to install pt
-#  - name: include tasks for enabling "{{ repo_name }}" test repo
-#    include_tasks: ../tasks/enable_only_repo_for_pt.yml
-#    vars:
-#      repo_type: testing
-#      repo_name: pt
-#    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-#
-#  - name: include tasks for enabling "{{ repo_name }}" main repo
-#    include_tasks: ../tasks/enable_only_repo_for_pt.yml
-#    vars:
-#      repo_type: release
-#      repo_name: pt
-#    when: lookup('env', 'install_repo') == "main"
-#
-#  - name: include tasks for enabling  "{{ repo_name }}" experimental repo
-#    include_tasks: ../tasks/enable_only_repo_for_pt.yml
-#    vars:
-#      repo_type: experimental
-#      repo_name: pt
-#    when: lookup('env', 'install_repo') == "experimental"
-#
-#  - name: include tasks for pt installation
-#    include_tasks: ../tasks/install_pt.yml
-#
+  - name: include tasks for enabling "{{ repo_name }}" test repo
+    include_tasks: ../tasks/enable_only_repo_for_pt.yml
+    vars:
+      repo_type: testing
+      repo_name: pt
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling "{{ repo_name }}" main repo
+    include_tasks: ../tasks/enable_only_repo_for_pt.yml
+    vars:
+      repo_type: release
+      repo_name: pt
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling  "{{ repo_name }}" experimental repo
+    include_tasks: ../tasks/enable_only_repo_for_pt.yml
+    vars:
+      repo_type: experimental
+      repo_name: pt
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: include tasks for pt installation
+    include_tasks: ../tasks/install_pt.yml
+
   - name: enable the mysql shell testing repo
     command: percona-release enable mysql-shell testing
     when: 
