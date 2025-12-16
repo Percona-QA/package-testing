@@ -1,0 +1,18 @@
+---
+- name: Cleanup
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: remove Tarball directories
+      file:
+        path: "{{ paths }}"
+        state: absent
+      vars:
+        paths:
+        - /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
+        - /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}-minimal.tar.gz
+        - /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}-debug.tar.gz
+        - /usr/percona-server
+        - /tmp/percona-server-minimal
+        - /tmp/percona-server-debug
