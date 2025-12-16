@@ -5,22 +5,17 @@
     command: /usr/bin/dnf module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: Receive GPG key 1
-    command: "gpg --batch --keyserver keyserver.ubuntu.com --recv-keys {{ percona_key1 }}"
-    environment:
-      GNUPGHOME: "{{ gnupg_home }}"
-    when: ansible_os_family == "RedHat"
+  - name: Ensure gnupg home exists (Amazon Linux)
+    file:
+      path: "{{ gnupg_home }}"
+      state: directory
+      mode: '0700'
+    when:
+      - ansible_os_family == "RedHat"
 
-  - name: Export GPG key 1
-    command: "gpg --batch --export --armor {{ percona_key1 }}"
-    register: gpg_key1
-    environment:
-      GNUPGHOME: "{{ gnupg_home }}"
-    when: ansible_os_family == "RedHat"
-
-  - name: Save GPG key 1 to file
-    copy:
-      content: "{{ gpg_key1.stdout }}"
+  - name: Download Percona GPG key from Percona's repo (Amazon Linux)
+    get_url:
+      url: https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
       dest: "{{ percona_key1_file }}"
       mode: '0644'
     when: ansible_os_family == "RedHat"
@@ -46,11 +41,13 @@
     when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"
 
   - name: enable the PS-84 main repo
-    command: percona-release enable-only ps-84-lts release
+    command: percona-release enable ps-84-lts release
 
   - name: enable the pxb-84 release repo
     command: percona-release enable pxb-84-lts release
-    when: ansible_distribution_release == "noble"
+    when:
+      - ansible_distribution_release == "noble"
+      - ansible_distribution != "Amazon"
 
 # - name: enable the tools main repo
 #   command: percona-release enable tools release

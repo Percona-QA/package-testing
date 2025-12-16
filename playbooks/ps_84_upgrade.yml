@@ -55,10 +55,10 @@
 
 # Install from main repository
 
-  - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_main_repo.yml
-    when:
-      - lookup('env', 'pro_test') != "yes"
+#  - name: include tasks for enabling main repo
+#    include_tasks: ../tasks/enable_main_repo.yml
+#    when:
+#      - lookup('env', 'pro_test') != "yes"
 
   - name: include tasks for enabling PS 84 main repo
     include_tasks: ../tasks/enable_ps84_main_repo.yml
@@ -200,109 +200,12 @@
       - lookup('env', 'cur_action_to_test') == "not_pro_to_pro" or lookup('env', 'cur_action_to_test') == "downgrade"
       - lookup('env', 'pro_test') == "yes"
 
-  - name: upgrade Percona Server{{ pro_suf }} to new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: latest
-    vars:
-      packages:
-      - percona-server-server{{ pro_suf }}
-      - percona-server-test{{ pro_suf }}
-      - percona-server-client{{ pro_suf }}
-      - percona-server{{ pro_suf }}-dbg
-      - percona-server{{ pro_suf }}-source
-      - percona-server-rocksdb{{ pro_suf }}
-      - percona-mysql-router{{ pro_suf }}
-    when: ansible_os_family == "Debian"
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on RHEL7
-    yum:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-server-server{{ pro_suf }}
-      - percona-server-test{{ pro_suf }}
-      - percona-server{{ pro_suf }}-debuginfo
-      - percona-server-devel{{ pro_suf }}
-      - percona-server-rocksdb{{ pro_suf }}
-      - percona-server-shared{{ pro_suf }}
-      - percona-server-shared{{ pro_suf }}-compat
-      - percona-server-client{{ pro_suf }}
-      - percona-mysql-router{{ pro_suf }}
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on OL8 AMD using dnf
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-      allowerasing: "{{ allowerasing_value | default (false) }}"
-    vars:
-      packages:
-      - percona-server-server{{ pro_suf }}
-      - percona-server-test{{ pro_suf }}
-      - percona-server{{ pro_suf }}-debuginfo
-      - percona-server-devel{{ pro_suf }}
-      - percona-server-rocksdb{{ pro_suf }}
-      - percona-server-shared{{ pro_suf }}
-      - percona-server-shared{{ pro_suf }}-compat
-      - percona-server-client{{ pro_suf }}
-      - percona-mysql-router{{ pro_suf }}
-    when:
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-      - ansible_architecture != "aarch64" and ansible_architecture != "arm64"
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on OL8 ARM using dnf
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-      allowerasing: "{{ allowerasing_value | default (false) }}"
-    vars:
-      packages:
-      - percona-server-server{{ pro_suf }}
-      - percona-server-test{{ pro_suf }}
-      - percona-server{{ pro_suf }}-debuginfo
-      - percona-server-devel{{ pro_suf }}
-      - percona-server-rocksdb{{ pro_suf }}
-      - percona-server-shared{{ pro_suf }}
-      - percona-server-client{{ pro_suf }}
-      - percona-mysql-router{{ pro_suf }}
-    when:
-      - ansible_os_family == "RedHat"
-      - ansible_distribution_major_version == "8"
-      - ansible_architecture in ["aarch64", "arm64"]
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: upgrade Percona Server{{ pro_suf }} to new rpm packages on Oracle Linux 9 using dnf
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-      allowerasing: "{{ allowerasing_value | default (false) }}"
-    vars:
-      packages:
-      - percona-server-server{{ pro_suf }}
-      - percona-server-test{{ pro_suf }}
-      - percona-server{{ pro_suf }}-debuginfo
-      - percona-server-devel{{ pro_suf }}
-      - percona-server-rocksdb{{ pro_suf }}
-      - percona-server-shared{{ pro_suf }}
-      - percona-server-client{{ pro_suf }}
-      - percona-mysql-router{{ pro_suf }}
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 9
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
+  - name: install Percona Server 8.4 packages
+    include_tasks:
+      file: ../tasks/install_ps84.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: upgrade Percona Toolkit to new deb packages
     apt:

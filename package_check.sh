@@ -173,16 +173,27 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
         rpm_num_pkgs="8"
         rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-rocksdb-${rpm_maj_version}"
       fi
-    elif [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
-      if [ "${centos_maj_version}" == "9" ]; then
-        rpm_num_pkgs="7"
+    elif [ "${product}" = "ps80" ]; then
+      if [[ "${centos_maj_version}" == "9" || "${centos_maj_version}" == "10" ]]; then
+        rpm_num_pkgs="8"
         rpm_opt_package="percona-server-rocksdb${pro_suf}"
       else
+        rpm_num_pkgs="9"
+        rpm_opt_package="percona-server-rocksdb percona-server-shared-compat"
+      fi
+    elif [[ ${product} =~ ^ps8[3-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
+      if [[ "${centos_maj_version}" == "9" || "${centos_maj_version}" == "10" ]]; then
         rpm_num_pkgs="8"
+        rpm_opt_package="percona-server-rocksdb${pro_suf}"
+      else
+        rpm_num_pkgs="9"
         rpm_opt_package="percona-server-rocksdb percona-server-shared-compat"
       fi
     fi
-    if [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
+    if [[ ${product} =~ ^ps8[3-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
+      ps_name="percona-server"
+      rpm_pkgs_list="${ps_name}-server${pro_suf} ${ps_name}-test${pro_suf} ${ps_name}${pro_suf}-debuginfo ${ps_name}-devel${pro_suf} ${ps_name}-shared${pro_suf} ${ps_name}-client${pro_suf} ${ps_name}-js${pro_suf}"
+    elif [ "${product}" = "ps80" ]; then
       ps_name="percona-server"
       rpm_pkgs_list="${ps_name}-server${pro_suf} ${ps_name}-test${pro_suf} ${ps_name}${pro_suf}-debuginfo ${ps_name}-devel${pro_suf} ${ps_name}-shared${pro_suf} ${ps_name}-client${pro_suf}"
     else
@@ -212,9 +223,12 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
     elif [ "${product}" = "ps57" ]; then
       deb_opt_package="percona-server-rocksdb-${deb_maj_version} percona-server-tokudb-${deb_maj_version}"
       deb_num_pkgs="8"
-    else
+    elif [ "${product}" = "ps80" ]; then
       deb_opt_package="percona-server-rocksdb"
       deb_num_pkgs="7"
+    else
+      deb_opt_package="percona-server-rocksdb percona-server-js"
+      deb_num_pkgs="8"
     fi
     if [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
       deb_dbg_pkg="percona-server${pro_suf}-dbg"
@@ -224,7 +238,7 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
     if [ "$(dpkg -l | grep percona-server | grep -c ${version})" == "${deb_num_pkgs}" ]; then
       echo "all packages are installed"
     else
-      for package in percona-server-server${pro_suf} percona-server-client${pro_suf} percona-server-test${pro_suf} ${deb_dbg_pkg} percona-server${pro_suf}-source percona-server${pro_suf}-common ${deb_opt_package}; do
+      for package in percona-server-server${pro_suf} percona-server-client${pro_suf} percona-server-test${pro_suf} ${deb_dbg_pkg} percona-server${pro_suf}-source percona-server${pro_suf}-common ${deb_opt_package} percona-server-js; do
         if [ "$(dpkg -l | grep ${package} | grep -c ${version})" != 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed"
         else

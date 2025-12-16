@@ -18,6 +18,10 @@
     when: 
     - "'pxc3' in inventory_hostname"
 
+  - name: Update all dnf packages without reboot
+    ansible.builtin.dnf: name='*' state=latest
+    when: ansible_facts['distribution'] in ['RedHat','OracleLinux']
+
   - name: include tasks for test env setup
     include_tasks: ../../../../tasks/test_prep.yml
 
@@ -118,13 +122,13 @@
       - percona-xtradb-cluster-full
       - percona-xtrabackup-80
       - percona-toolkit
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - ansible_architecture == "aarch64"
       - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      
+
   - name: install PXC 8 deb packages amd64 non pro
     apt:
       name: "{{ packages }}"
@@ -134,7 +138,7 @@
       - percona-xtradb-cluster-full
       - percona-xtrabackup-80
       - percona-toolkit
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - ansible_architecture == "x86_64"
       - lookup('env', 'pro') == "no"
@@ -150,7 +154,7 @@
       - percona-xtradb-cluster-full
       - percona-toolkit
       - percona-xtrabackup-80
-    when: 
+    when:
       - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
       - ansible_architecture == "x86_64"
       - lookup('env', 'pro') == "no"
@@ -164,9 +168,9 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - percona-toolkit
-    when: 
-      - ansible_distribution == "Amazon" 
+#      - percona-toolkit
+    when:
+      - ansible_distribution == "Amazon"
       - ansible_architecture == "x86_64"
       - lookup('env', 'pro') == "no"
     environment:
@@ -179,9 +183,24 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - percona-xtrabackup-80
-    when: 
-      - ansible_os_family == "RedHat"
+#      - percona-xtrabackup-80
+    when:
+      - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+      - ansible_architecture == "aarch64"
+      - lookup('env', 'pro') == "no"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC 8 amazon packages ARM64 non pro
+    package:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+#      - percona-toolkit
+    when:
+      - ansible_distribution == "Amazon"
       - ansible_architecture == "aarch64"
       - lookup('env', 'pro') == "no"
     environment:
@@ -196,13 +215,13 @@
     vars:
       packages:
       - percona-xtradb-cluster-pro-full
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - ansible_architecture == "aarch64"
       - lookup('env', 'pro') == "yes"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      
+
   - name: install PXC 8 deb packages amd64 pro
     apt:
       name: "{{ packages }}"
@@ -282,13 +301,15 @@
   # set root password on centos
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_os_family == "RedHat"
 
   - name: copy .my.cnf with credentials on centos
     template: src=../../../../templates/my_57.j2
               dest=/root/.my.cnf
               mode=0640 owner=root group=root
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_os_family == "RedHat"
 
   # other tests
 # - name: install plugins
@@ -312,11 +333,11 @@
     shell: mysql -uroot --password='U?fY)9s7|3gxUm' -e "SELECT @@INNODB_VERSION;"
     register: innod_version
 
-  - name: print INNODB version debug  
+  - name: print INNODB version debug
     debug: var=innod_version
 
   - name: check PXC 8.0 version Molecule
-    command: /package-testing/version_check.sh pxc80pro
+    command: /package-testing/version_check.sh pxc80
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: Verify telemetry version and package installation
