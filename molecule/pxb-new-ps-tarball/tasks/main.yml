@@ -1,0 +1,473 @@
+---
+  - name: Debug distribution major version
+    debug:
+      msg: "ansible_distribution_major_version = {{ ansible_distribution_major_version }}"
+
+  - name: Ensure 'tar' is installed
+    ansible.builtin.package:
+      name: tar
+      state: present
+
+  - name: Ensure 'gtar' symlink exists (some distros require it)
+    ansible.builtin.file:
+      src: /usr/bin/tar
+      dest: /usr/bin/gtar
+      state: link
+    when: ansible_facts['os_family'] == "RedHat"
+
+  - name: Get OS ID
+    command: awk -F= '/^ID=/{print $2}' /etc/os-release
+    register: os_id_raw
+
+  - name: Get OS VERSION_CODENAME or VERSION_ID
+    shell: |
+      source /etc/os-release
+      echo "${VERSION_CODENAME:-$VERSION_ID}"
+    args:
+      executable: /bin/bash
+    register: os_codename_raw
+
+  - name: Normalize os_version key
+    set_fact:
+      os_version: "{{ os_id_raw.stdout | regex_replace('\"', '') }}:{{ os_codename_raw.stdout | regex_replace('\"', '') }}"
+
+#  - name: Remove the decimal value from the os_version
+#    shell: |
+#      echo "{{ os_version_full }}" | grep -oE '\b\w+:[0-9]+'
+#    register: os_version
+
+  - name: Set glibc version based on os_version
+    set_fact:
+      glibc_version: "{{ glibc_versions_map.get(os_version, 'Unknown OS version') }}"
+
+  - name: Show detected values
+    debug:
+      msg: "Detected OS: {{ os_version }}, glibc version: {{ glibc_version }}"
+
+  - name: SET PXB_VERSION VAR
+    set_fact:
+      PXB_VERSION: "{{ lookup('env', 'PXB_VERSION') }}"
+
+#
+  - name: Set Tarball and Folder name for REGULAR
+    set_fact:
+      TARBALL_NAME_REGULAR: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}.tar.gz"
+      TARBALL_NAME_REGULAR_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}"
+    when: lookup('env', 'REPO_TYPE') == "NORMAL"
+
+
+  - name: Set Tarball and Folder name for MINIMAL
+    set_fact:
+      TARBALL_NAME_MINIMAL: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal.tar.gz"
+      TARBALL_NAME_MINIMAL_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal"
+    when: lookup('env', 'REPO_TYPE') == "NORMAL"
+
+#TARBALL_NAME_REGULAR_PRO
+
+  - name: Set Tarball and Folder name for REGULAR PRO
+    set_fact:
+      TARBALL_NAME_REGULAR: "percona-xtrabackup-pro-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}.tar.gz"
+      TARBALL_NAME_REGULAR_FOLDER: "percona-xtrabackup-pro-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}"
+    when: lookup('env', 'REPO_TYPE') == "PRO"
+
+  - name: Set Tarball and Folder name for MINIMAL PRO
+    set_fact:
+      TARBALL_NAME_MINIMAL: "percona-xtrabackup-pro-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal.tar.gz"
+      TARBALL_NAME_MINIMAL_FOLDER: "percona-xtrabackup-pro-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal"
+    when: lookup('env', 'REPO_TYPE') == "PRO"
+
+  - name: Set Fact USERNAME and PASSWORD
+    set_fact:
+      USERNAME: "{{ lookup('env', 'USERNAME') }}"
+      PASSWORD: "{{ lookup('env', 'PASSWORD') }}"
+    when: lookup('env', 'REPO_TYPE') == "PRO"
+
+  - name: ECHO USERNAME and PASSWORD
+    debug:
+      msg: "USERNAME: {{ USERNAME }}"
+    when: lookup('env', 'REPO_TYPE') == "PRO"
+
+  - name: Extract major version
+    set_fact:
+      major_version: "{{ PXB_VERSION.split('-')[0] }}"
+    
+  - name: Extract minor version
+    set_fact:
+      minor_version: "{{ PXB_VERSION.split('-')[1] }}"
+
+  - name: Print major and minor versions
+    debug:
+      msg: "Major version: {{ major_version }}, Minor version: {{ minor_version }}"
+
+  - name: include tasks for test env setup
+    include_tasks: ../../../tasks/test_prep.yml
+
+  - name: install libev rpm package dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - libev
+    when:
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+    - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: Remove gnupg2-minimal (AL2023 only)
+    package:
+      name: gnupg2-minimal
+      state: absent
+    when: os_version == "amzn:2023"
+
+  - name: Install full gnupg2 (for dirmngr support)
+    package:
+      name: gnupg2
+      state: present
+    when: os_version == "amzn:2023"
+
+  - name: Enable Percona Server 8.0 main repository PXB80
+    include_tasks: ../../../tasks/enable_ps8_main_repo.yml
+    when:
+      - ansible_distribution_major_version != "2023"
+      - lookup('env', 'PXB_RELEASE') == "80"
+      - ansible_distribution_major_version != "10"
+
+  - name: include playbook for Install Percona Server 8.0 PXB80
+    include_tasks: ../../../tasks/install_ps80.yml
+    when:
+      - ansible_distribution_major_version != "2023"
+      - lookup('env', 'PXB_RELEASE') == "80"
+      - ansible_distribution_major_version != "10"
+
+  - name: Enable Percona Server 8.0 PRO main repository PXB80
+    include_tasks: ../../../tasks/enable_ps80_pro_tools_repo.yml
+    when:
+      - ansible_distribution_major_version == "2023"
+      - lookup('env', 'PXB_RELEASE') == "80"
+      - lookup('env', 'REPO_TYPE') == "PRO"
+
+  - name: Enable Percona Server 8.4 main repository PXB84
+    include_tasks: ../../../tasks/enable_ps84_testing_repo.yml
+    when:
+      - lookup('env', 'PXB_RELEASE') == "84"
+
+  - name: include playbook for Install Percona Server 8.4 PXB84
+    include_tasks: ../../../tasks/install_ps84.yml
+    when:
+      - lookup('env', 'PXB_RELEASE') == "84"
+
+  - name: Enable Percona Server 8.4 PRO main repository PXB84
+    include_tasks: ../../../tasks/enable_ps84_pro_tools_repo.yml
+    when:
+      - ansible_distribution_major_version == "2023"
+      - lookup('env', 'PXB_RELEASE') == "84"
+      - lookup('env', 'REPO_TYPE') == "PRO"
+
+  - name: Install libgflags-dev for rhel9 aarm64
+    dnf:
+      name: https://dl.fedoraproject.org/pub/epel/9/Everything/aarch64/Packages/g/gflags-2.2.2-9.el9.aarch64.rpm
+      state: present
+      disable_gpg_check: yes
+    when: 
+      - ansible_os_family == "RedHat" 
+      - (ansible_distribution_major_version == "9") or (ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023")
+      - ansible_architecture == "aarch64"
+      - lookup('env', 'REPO_TYPE') == "PRO"
+
+  - name: Install libgflags-dev for rhel9
+    dnf:
+      name: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
+      state: present
+      disable_gpg_check: yes
+    when: 
+      - ansible_os_family == "RedHat" 
+      - (ansible_distribution_major_version == "9") or (ansible_distribution == "Amazon")
+      - ansible_architecture != "aarch64"
+      - lookup('env', 'REPO_TYPE') == "PRO"
+
+  - name: Import MySQL GPG key (2023)
+    ansible.builtin.rpm_key:
+      state: present
+      key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+
+  - name: Download MySQL 8.4 Community repo RPM
+    ansible.builtin.get_url:
+      url: https://repo.mysql.com/mysql84-community-release-el9-1.noarch.rpm
+      dest: /tmp/mysql84-community-release-el9-1.noarch.rpm
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+      - lookup('env', 'PXB_RELEASE') == "84"
+
+  - name: Install MySQL repo RPM
+    ansible.builtin.yum:
+      name: /tmp/mysql84-community-release-el9-1.noarch.rpm
+      state: present
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+      - lookup('env', 'PXB_RELEASE') == "84"
+
+#  - name: install MySQL 8.4 Community Server
+#    ansible.builtin.yum:
+#      name: mysql-community-server
+#      state: present
+#    when: 
+#      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+#      - lookup('env', 'PXB_RELEASE') == "84"
+
+  - name: install Percona Server rpm packages Amazon PRO PXB80
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+      disablerepo: "epel"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-server-server-pro
+      - percona-mysql-router-pro
+      - percona-server-client-pro
+      - percona-server-test-pro
+      - percona-server-pro-debuginfo
+      - percona-server-devel-pro
+      - percona-server-rocksdb-pro
+    when:
+      - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
+      - lookup('env', 'REPO_TYPE') == "PRO"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: clean and update cache {{ ansible_pkg_mgr }} using package manager
+    shell: |
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when: ansible_os_family == "RedHat"
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: install Percona Server 8.0 packages PXB80
+    include_tasks: ../../../tasks/install_ps80.yml
+    when:
+      - ansible_distribution_major_version != "2023"
+      - lookup('env', 'PXB_RELEASE') == "80"
+
+  - name: install Percona Server 8.4 packages PXB84
+    include_tasks: ../../../tasks/install_ps84.yml
+    when:
+      - lookup('env', 'PXB_RELEASE') == "84"
+
+  - name: Download {{ TARBALL_NAME_REGULAR }} REGULAR MAIN REPO PS80 PXB 80
+    ansible.builtin.get_url:
+      url: https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-{{ PXB_VERSION }}/binary/tarball/{{ TARBALL_NAME_REGULAR }}
+      dest: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR }}
+      mode: '0644'
+    when: 
+      - lookup('env', 'REPO_TYPE') == "NORMAL"
+      - lookup('env', 'TESTING_REPO') == "main"
+      - lookup('env', 'PXB_RELEASE') == "80"
+
+  - name: Download {{ TARBALL_NAME_REGULAR_PRO }} REGULAR PRO MAIN REPO PXB 80
+    ansible.builtin.get_url:
+      url: "https://repo.percona.com/private/{{ USERNAME }}-{{ PASSWORD }}/pxb-80-pro/tarballs/Percona-XtraBackup-{{ PXB_VERSION }}/{{ TARBALL_NAME_REGULAR }}"
+      dest: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR }}
+      mode: '0644'
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'TESTING_REPO') == "main"
+      - lookup('env', 'PXB_RELEASE') == "80"
+
+  - name: Download {{ TARBALL_NAME_REGULAR }} REGULAR MAIN REPO PS84 PXB 84
+    ansible.builtin.get_url:
+      url: https://downloads.percona.com/downloads/Percona-XtraBackup-8.4/Percona-XtraBackup-{{ PXB_VERSION }}/binary/tarball/{{ TARBALL_NAME_REGULAR }}
+      dest: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR }}
+      mode: '0644'
+    when: 
+      - lookup('env', 'REPO_TYPE') == "NORMAL"
+      - lookup('env', 'TESTING_REPO') == "main"
+      - lookup('env', 'PXB_RELEASE') == "84"
+
+  - name: Download {{ TARBALL_NAME_REGULAR_PRO }} REGULAR PRO MAIN REPO PXB 84
+    ansible.builtin.get_url:
+      url: "https://repo.percona.com/private/{{ USERNAME }}-{{ PASSWORD }}/pxb-84-pro/tarballs/Percona-XtraBackup-{{ PXB_VERSION }}/{{ TARBALL_NAME_REGULAR }}"
+      dest: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR }}
+      mode: '0644'
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'TESTING_REPO') == "main"
+      - lookup('env', 'PXB_RELEASE') == "84"
+
+  - name: Download {{ TARBALL_NAME_REGULAR }} REGULAR TESTING REPO
+    ansible.builtin.get_url:
+      url: https://downloads.percona.com/downloads/TESTING/pxb-{{ PXB_VERSION }}/{{ TARBALL_NAME_REGULAR }}
+      dest: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR }}
+      mode: '0644'
+    when: 
+      - lookup('env', 'REPO_TYPE') == "NORMAL"
+      - lookup('env', 'TESTING_REPO') == "testing"
+
+  - name: Download {{ TARBALL_NAME_REGULAR }} REGULAR PRO TESTING REPO
+    ansible.builtin.get_url:
+      url: "https://repo.percona.com/private/{{ USERNAME }}-{{ PASSWORD }}/qa-test/pxb-gated-{{ PXB_VERSION }}/{{ TARBALL_NAME_REGULAR }}"
+      dest: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR }}
+      mode: '0644'
+    when:
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'TESTING_REPO') == "testing"
+
+  - name: Extract {{ TARBALL_NAME_REGULAR }} REGULAR 
+    ansible.builtin.unarchive:
+      src: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR }}
+      dest: /package-testing/molecule/pxb-binary-tarball/
+      remote_src: yes
+
+  - name: List contents of the extracted tarball
+    command: ls -l /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}
+    register: tarball_contents
+
+  - name: Print contents of the extracted tarball
+    debug:
+      msg: "{{ tarball_contents.stdout_lines }}"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when:
+      - ansible_distribution_major_version != "10"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysqld
+    when:
+      - ansible_distribution_major_version == "10"
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: install plugins, import world database
+    command: /package-testing/plugins_test.sh
+
+  - name: run backup for Redhat/Centos
+    command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian
+    command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
+    when: ansible_os_family == "Debian"
+
+  - name: prepare backup
+    command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --prepare --target-dir=/tmp/backups/
+
+  - name: run backup for Redhat/Centos with streaming and encryption enabled
+    shell: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian with streaming and encryption enabled
+    shell: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "Debian"
+
+  - name: extract and decrypt backup
+    shell: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream
+
+  - name: prepare backup
+    command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin/xtrabackup --prepare --target-dir=backups/
+
+  - name: remove backup files
+    command: rm -r /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }} backups /tmp/backups
+
+  - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL MAIN REPO 80 PXB80
+    ansible.builtin.get_url:
+      url: https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-{{ PXB_VERSION }}/binary/tarball/{{ TARBALL_NAME_MINIMAL }}
+      dest: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_MINIMAL }}
+      mode: '0644'
+    when: 
+      - lookup('env', 'REPO_TYPE') == "NORMAL"
+      - lookup('env', 'TESTING_REPO') == "main"
+      - lookup('env', 'PXB_RELEASE') == "80"
+
+  - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL PRO MAIN REPO PXB80
+    ansible.builtin.get_url:
+      url: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/pxb-80-pro/tarballs/Percona-XtraBackup-{{ PXB_VERSION }}/{{ TARBALL_NAME_MINIMAL }}"
+      dest: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_MINIMAL }}
+      mode: '0644'
+    when: 
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'TESTING_REPO') == "main"
+      - lookup('env', 'PXB_RELEASE') == "80"
+
+  - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL MAIN REPO PXB84
+    ansible.builtin.get_url:
+      url: https://downloads.percona.com/downloads/Percona-XtraBackup-8.4/Percona-XtraBackup-{{ PXB_VERSION }}/binary/tarball/{{ TARBALL_NAME_MINIMAL }}
+      dest: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_MINIMAL }}
+      mode: '0644'
+    when: 
+      - lookup('env', 'REPO_TYPE') == "NORMAL"
+      - lookup('env', 'TESTING_REPO') == "main"
+      - lookup('env', 'PXB_RELEASE') == "84"
+
+  - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL PRO MAIN REPO PXB84
+    ansible.builtin.get_url:
+      url: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/pxb-84-pro/tarballs/Percona-XtraBackup-{{ PXB_VERSION }}/{{ TARBALL_NAME_MINIMAL }}"
+      dest: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_MINIMAL }}
+      mode: '0644'
+    when: 
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'TESTING_REPO') == "main"
+      - lookup('env', 'PXB_RELEASE') == "84"
+
+  - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL TESTING REPO
+    ansible.builtin.get_url:
+      url: https://downloads.percona.com/downloads/TESTING/pxb-{{ PXB_VERSION }}/{{ TARBALL_NAME_MINIMAL }}
+      dest: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_MINIMAL }}
+      mode: '0644'
+    when: 
+      - lookup('env', 'REPO_TYPE') == "NORMAL"
+      - lookup('env', 'TESTING_REPO') == "testing"
+
+  - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL PRO TESTING REPO
+    ansible.builtin.get_url:
+      url: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/pxb-gated-{{ PXB_VERSION }}/{{ TARBALL_NAME_MINIMAL }}"
+      dest: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_MINIMAL }}
+      mode: '0644'
+    when: 
+      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'TESTING_REPO') == "testing"
+
+  - name: Extract {{ TARBALL_NAME_MINIMAL }} MINIMAL NORMAL
+    ansible.builtin.unarchive:
+      src: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_MINIMAL }}
+      dest: /package-testing/molecule/pxb-binary-tarball/
+      remote_src: yes
+
+  - name: ERROR if TARBALL_NAME_MINIMAL_FOLDER is not set
+    fail:
+      msg: "TARBALL_NAME_MINIMAL_FOLDER is not set. Please check the environment variable REPO_TYPE."
+    when: TARBALL_NAME_MINIMAL_FOLDER is not defined
+
+  - name: run backup for Redhat/Centos minimal
+    command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian minimal
+    command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup  --backup --user=root --target-dir=/tmp/backups/
+    when: ansible_os_family == "Debian"
+
+  - name: prepare backup
+    command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup --prepare --target-dir=/tmp/backups/
+
+  - name: run backup for Redhat/Centos with streaming and encryption enabled
+    shell: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "RedHat"
+
+  - name: run backup for Debian with streaming and encryption enabled
+    shell: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
+    when: ansible_os_family == "Debian"
+
+  - name: extract and decrypt backup
+    shell: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream
+
+  - name: prepare backup
+    command: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_MINIMAL_FOLDER }}/bin/xtrabackup --prepare --target-dir=backups/
+
+

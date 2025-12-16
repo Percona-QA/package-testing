@@ -1,0 +1,32 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  become_method: sudo
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+  roles:
+    - role: pxb-binary-tarball
+  vars:
+    install_repo: "{{ lookup('env', 'install_repo') }}"
+    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+    gnupg_home: "/root/.gnupg"
+    glibc_versions_map:
+      "rhel:8.6": "2.28"
+      "rhel:8.7": "2.28"
+      "rhel:8.8": "2.28"
+      "rhel:8.9": "2.28"
+      "amzn:2023" : "2.34"
+      "centos:8": "2.28"
+      "ol:8.5": "2.28"
+      "ol:9.0": "2.34"
+      "rhel:8.0" : "2.28"
+      "rhel:9.0" : "2.34"
+      "ubuntu:focal": "2.31"
+      "ubuntu:jammy": "2.35"
+      "ubuntu:noble": "2.39"
+      "debian:bullseye": "2.31"
+      "debian:bookworm": "2.36"
+      "rhel:10.0": "2.39"
+      "debian:trixie": "2.36"
