@@ -55,6 +55,9 @@
     include_tasks: ../tasks/verify_pmm_client_version.yml
 
 ### Setup PMM Client
+  - name: Find pmm logs location
+    shell: find / -name *.log
+
   - name: Use "pmm-admin config" to connect pmm client to server
     shell: pmm-admin config --force --debug --server-insecure-tls --metrics-mode={{ metrics_mode }} --server-url=https://admin:{{ pmm_server_password }}@{{ pmm_server_address }} {{ instance_ip }} generic node_{{ instance_ip }}
 
