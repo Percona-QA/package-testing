@@ -6,7 +6,7 @@
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
   roles:
-    - role: pxb-binary-tarball
+    - role: pxb-new-ps-tarball
   vars:
     install_repo: "{{ lookup('env', 'install_repo') }}"
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
