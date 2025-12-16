@@ -9,7 +9,7 @@ platforms:
   - name: ps-node1-debian-13
     region: us-west-2
     image: ami-081ac37fe26dacc98
-    vpc_subnet_id: subnet-03136d8c244f56036
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.micro
     ssh_user: admin
     root_device_name: /dev/xvda
@@ -20,7 +20,7 @@ platforms:
   - name: ps-node2-debian-13
     region: us-west-2
     image: ami-081ac37fe26dacc98
-    vpc_subnet_id: subnet-03136d8c244f56036
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.micro
     ssh_user: admin
     root_device_name: /dev/xvda
@@ -31,7 +31,7 @@ platforms:
   - name: ps-node3-debian-13
     region: us-west-2
     image: ami-081ac37fe26dacc98
-    vpc_subnet_id: subnet-03136d8c244f56036
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.micro
     ssh_user: admin
     root_device_name: /dev/xvda
