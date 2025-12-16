@@ -11,22 +11,17 @@
 #     deb: https://repo.percona.com/apt/pool/testing/p/percona-release/percona-release_1.0-21.generic_all.deb
     when: ansible_os_family == "Debian"
 
-  - name: Receive GPG key 1
-    command: "gpg --batch --keyserver keyserver.ubuntu.com --recv-keys {{ percona_key1 }}"
-    environment:
-      GNUPGHOME: "{{ gnupg_home }}"
-    when: ansible_os_family == "RedHat"
+  - name: Ensure gnupg home exists (Amazon Linux)
+    file:
+      path: "{{ gnupg_home }}"
+      state: directory
+      mode: '0700'
+    when:
+      - ansible_os_family == "RedHat"
 
-  - name: Export GPG key 1
-    command: "gpg --batch --export --armor {{ percona_key1 }}"
-    register: gpg_key1
-    environment:
-      GNUPGHOME: "{{ gnupg_home }}"
-    when: ansible_os_family == "RedHat"
-
-  - name: Save GPG key 1 to file
-    copy:
-      content: "{{ gpg_key1.stdout }}"
+  - name: Download Percona GPG key from Percona's repo (Amazon Linux)
+    get_url:
+      url: https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
       dest: "{{ percona_key1_file }}"
       mode: '0644'
     when: ansible_os_family == "RedHat"
@@ -48,7 +43,9 @@
 
   - name: enable the pxb-84 release repo
     command: percona-release enable pxb-84-lts release
-    when: ansible_distribution_release == "noble"
+    when:
+      - ansible_distribution_release == "noble"
+      - ansible_distribution != "Amazon"
 
   - name: Clean and update package cache
     shell: |
