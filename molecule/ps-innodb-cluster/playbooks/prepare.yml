@@ -75,21 +75,21 @@
         update_cache: yes
         state: present
       when: 
-        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux"]
         - ansible_facts['distribution_major_version'] | int <= 7
 
-    - name: setup epel release centos dnf
+    - name: setup epel release dnf
       dnf:
         name: epel-release
         update_cache: yes
         state: present
       when: 
-        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux"]
         - ansible_facts['distribution_major_version'] | int >= 8
 
     - name: buster workaround
       shell: |
-        apt -y update --allow-releaseinfo-change || true 
+        apt -y update --allow-releaseinfo-change || true
       when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
 
     - name: install needed packages for running tests with apt
