@@ -12,7 +12,6 @@
     gnupg_home: /root/.gnupg
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
-    install_repo: "{{ lookup('env', 'install_repo') }}"
     eol_repo: "{{ lookup('env', 'EOL') }}"
     major_upgrade_from_product: "{{ lookup('env', 'major_upgrade_from_product', default='ps57') }}"
     major_upgrade_from_repo: "{{ lookup('env', 'major_upgrade_from_repo') }}"
@@ -40,37 +39,37 @@
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
     when:
       - major_upgrade_from_product == 'ps80'
-      - major_upgrade_from_repo == 'testing' or (major_upgrade_from_repo == '' and (install_repo == 'testing' or install_repo == ''))
+      - major_upgrade_from_repo == 'testing'
 
   - name: enable ps80 main repo for source Percona Server {{ major_upgrade_from_product }}
     include_tasks: ../tasks/enable_ps8_main_repo.yml
     when:
       - major_upgrade_from_product == 'ps80'
-      - major_upgrade_from_repo == 'main' or (major_upgrade_from_repo == '' and install_repo == 'main')
+      - major_upgrade_from_repo == 'main'
 
   - name: enable ps80 experimental repo for source Percona Server {{ major_upgrade_from_product }}
     include_tasks: ../tasks/enable_ps8_experimental_repo.yml
     when:
       - major_upgrade_from_product == 'ps80'
-      - major_upgrade_from_repo == 'experimental' or (major_upgrade_from_repo == '' and install_repo == 'experimental')
+      - major_upgrade_from_repo == 'experimental'
 
   - name: enable ps84 testing repo for source Percona Server {{ major_upgrade_from_product }}
     include_tasks: ../tasks/enable_ps84_testing_repo.yml
     when:
       - major_upgrade_from_product == 'ps84'
-      - major_upgrade_from_repo == 'testing' or (major_upgrade_from_repo == '' and (install_repo == 'testing' or install_repo == ''))
+      - major_upgrade_from_repo == 'testing'
 
   - name: enable ps84 main repo for source Percona Server {{ major_upgrade_from_product }}
     include_tasks: ../tasks/enable_ps84_main_repo.yml
     when:
       - major_upgrade_from_product == 'ps84'
-      - major_upgrade_from_repo == 'main' or (major_upgrade_from_repo == '' and install_repo == 'main')
+      - major_upgrade_from_repo == 'main'
 
   - name: enable ps84 experimental repo for source Percona Server {{ major_upgrade_from_product }}
     include_tasks: ../tasks/enable_ps84_experimental_repo.yml
     when:
       - major_upgrade_from_product == 'ps84'
-      - major_upgrade_from_repo == 'experimental' or (major_upgrade_from_repo == '' and install_repo == 'experimental')
+      - major_upgrade_from_repo == 'experimental'
 
   - name: enable PS 5.7 EOL tools repo for source Percona Server {{ major_upgrade_from_product }}
     include_tasks: ../tasks/enable_ps57_eol_tools_repo.yml
@@ -90,7 +89,6 @@
     vars:
       pro_suf: "{{ pro_suffix | default('') }}"
       allowerasing_value: "{{ allowerasing | default(false) }}"
-      install_repo: "{{ major_upgrade_from_repo }}"
 
   ### Install additional tools for source version
   - name: install Percona Toolkit for source Percona Server {{ major_upgrade_from_product }}
@@ -275,62 +273,56 @@
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
     when:
       - major_upgrade_to_product == 'ps80'
-      - major_upgrade_to_repo == 'testing' or (major_upgrade_to_repo == '' and (install_repo == 'testing' or install_repo == ''))
+      - major_upgrade_to_repo == 'testing'
 
   - name: enable ps80 main repo for target Percona Server {{ major_upgrade_to_product }}
     include_tasks: ../tasks/enable_ps8_main_repo.yml
     when:
       - major_upgrade_to_product == 'ps80'
-      - major_upgrade_to_repo == 'main' or (major_upgrade_to_repo == '' and install_repo == 'main')
+      - major_upgrade_to_repo == 'main'
 
   - name: enable ps80 experimental repo for target Percona Server {{ major_upgrade_to_product }}
     include_tasks: ../tasks/enable_ps8_experimental_repo.yml
     when:
       - major_upgrade_to_product == 'ps80'
-      - major_upgrade_to_repo == 'experimental' or (major_upgrade_to_repo == '' and install_repo == 'experimental')
+      - major_upgrade_to_repo == 'experimental'
 
   - name: enable ps84 testing repo for target Percona Server {{ major_upgrade_to_product }}
     include_tasks: ../tasks/enable_ps84_testing_repo.yml
     when:
       - major_upgrade_to_product == 'ps84'
-      - major_upgrade_to_repo == 'testing' or (major_upgrade_to_repo == '' and (install_repo == 'testing' or install_repo == ''))
+      - major_upgrade_to_repo == 'testing'
 
   - name: enable ps84 main repo for target Percona Server {{ major_upgrade_to_product }}
     include_tasks: ../tasks/enable_ps84_main_repo.yml
     when:
       - major_upgrade_to_product == 'ps84'
-      - major_upgrade_to_repo == 'main' or (major_upgrade_to_repo == '' and install_repo == 'main')
+      - major_upgrade_to_repo == 'main'
 
   - name: enable ps84 experimental repo for target Percona Server {{ major_upgrade_to_product }}
     include_tasks: ../tasks/enable_ps84_experimental_repo.yml
     when:
       - major_upgrade_to_product == 'ps84'
-      - major_upgrade_to_repo == 'experimental' or (major_upgrade_to_repo == '' and install_repo == 'experimental')
+      - major_upgrade_to_repo == 'experimental'
 
   ### Enable PS-specific repo for target version
   - name: enable PS {{ major_upgrade_to_product }} main repo
     include_tasks: "../tasks/enable_{{ major_upgrade_to_product }}_main_repo.yml"
-    vars:
-      install_repo: "{{ major_upgrade_to_repo }}"
     when:
       - major_upgrade_to_product in ['ps80', 'ps81', 'ps84']
-      - major_upgrade_to_repo == 'main' or (major_upgrade_to_repo == '' and install_repo == 'main')
+      - major_upgrade_to_repo == 'main'
 
   - name: enable PS {{ major_upgrade_to_product }} testing repo
     include_tasks: "../tasks/enable_{{ major_upgrade_to_product }}_testing_repo.yml"
-    vars:
-      install_repo: "{{ major_upgrade_to_repo }}"
     when:
       - major_upgrade_to_product in ['ps80', 'ps81', 'ps84']
-      - major_upgrade_to_repo == 'testing' or (major_upgrade_to_repo == '' and (install_repo == 'testing' or install_repo == ''))
+      - major_upgrade_to_repo == 'testing'
 
   - name: enable PS {{ major_upgrade_to_product }} experimental repo
     include_tasks: "../tasks/enable_{{ major_upgrade_to_product }}_experimental_repo.yml"
-    vars:
-      install_repo: "{{ major_upgrade_to_repo }}"
     when:
       - major_upgrade_to_product in ['ps80', 'ps81', 'ps84']
-      - major_upgrade_to_repo == 'experimental' or (major_upgrade_to_repo == '' and install_repo == 'experimental')
+      - major_upgrade_to_repo == 'experimental'
 
   - name: append include for RedHat
     lineinfile:
@@ -344,7 +336,6 @@
     vars:
       pro_suf: "{{ pro_suffix | default('') }}"
       allowerasing_value: "{{ allowerasing | default(false) }}"
-      install_repo: "{{ major_upgrade_to_repo }}"
 
 #  - name: enable the Tools release repo for target Percona Server {{ major_upgrade_to_product }}
 #    command: percona-release enable tools release
@@ -371,7 +362,7 @@
     command: /package-testing/version_check.sh pxb{{ pxb_version_to }}
     vars:
       pxb_version_to: "{{ '24' if major_upgrade_to_product in ['ps56', 'ps57'] else '80' if major_upgrade_to_product in ['ps80', 'ps81'] else '84' if major_upgrade_to_product == 'ps84' else '' }}"
-    when: major_upgrade_to_repo != "experimental" and (install_repo == '' or install_repo != "experimental")
+    when: major_upgrade_to_repo != "experimental"
 
   - name: list installed packages for target Percona Server {{ major_upgrade_to_product }}
     include_tasks: ../tasks/list_installed_packages.yml
