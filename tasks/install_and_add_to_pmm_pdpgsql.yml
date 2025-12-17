@@ -78,6 +78,9 @@
   command: psql -c "ALTER USER postgres PASSWORD '{{ pgsql_password }}';"
   become: yes
   become_user: postgres
+  become_flags: '-i'
+  vars:
+    ansible_common_remote_group: postgres
 
 - name: setup postgresql pg_stat_statements for Debian based Systems
   shell: "{{item}}"
