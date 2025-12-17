@@ -28,6 +28,10 @@
     - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
     - ansible_facts['distribution_major_version'] | int >= 8
 
+- name: Print detected package manager
+  debug:
+    msg: "Detected distribution: {{ ansible_facts['distribution'] }}"
+
 - name: Clean package manager cache dynamic using ansible_pkg_mgr
   shell: "{{ ansible_pkg_mgr }} clean all"
   when: ansible_os_family == "RedHat"
