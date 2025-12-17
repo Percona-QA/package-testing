@@ -191,7 +191,7 @@ pxc57_executables = pxc57_binaries + [
     'bin/clustercheck',
     'bin/mysql_config',
     'bin/mysqld_multi', 'bin/mysqld_safe', 'bin/mysqldumpslow',
-    'bin/ps-admin', 'bin/pxc_tokudb_admin', 'bin/pyclustercheck',
+    'bin/ps-admin', 'bin/pyclustercheck',
     'bin/wsrep_sst_common', 'bin/wsrep_sst_mysqldump', 'bin/wsrep_sst_rsync', 'bin/wsrep_sst_xtrabackup-v2',
   ]
 pxc57_plugins = (
