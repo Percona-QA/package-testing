@@ -29,13 +29,11 @@
     include_tasks: ../tasks/enable_ps84_main_repo.yml
     when:
       - lookup('env', 'install_repo') == "main"
-      - ansible_distribution_major_version != "2023"
 
   - name: include tasks for enabling PS 84 test repo
     include_tasks: ../tasks/enable_ps84_testing_repo.yml
     when:
       - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-      - ansible_distribution_major_version != "2023"
 
   - name: include tasks for enabling PS 84 experimental repo
     include_tasks: ../tasks/enable_ps84_experimental_repo.yml
@@ -60,7 +58,6 @@
           PERCONA_TELEMETRY_DISABLE: "1"
     when:
       - lookup('env', 'server_to_test') == "ps-84"
-      - ansible_distribution_major_version != "2023"
 
   #### FOR AL2023 ######
   - name: include tasks for enabling PS 84 pro repo

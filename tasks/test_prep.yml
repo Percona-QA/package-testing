@@ -37,6 +37,10 @@
       - ansible_facts['distribution'] == "CentOS"
       - ansible_facts['distribution_major_version'] | int == 7
 
+  - name: Update all dnf packages without reboot
+    ansible.builtin.dnf: name='*' state=latest
+    when: ansible_facts['distribution'] in ['RedHat','OracleLinux']
+
   - name: Install wget
     yum:
       name: wget
@@ -191,6 +195,7 @@
       packages:
       - unzip
       - wget
+      - python3
       - jq # for exporter end point metric fetch
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
 
@@ -201,6 +206,7 @@
           name:
             - unzip
             - wget
+            - python3
             - jq # for exporter endpoint metric fetch
           state: latest
         register: dnf_result
@@ -218,6 +224,7 @@
         - unzip
         - wget
         - jq
+        - python3
       state: latest
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 10
 

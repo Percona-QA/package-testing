@@ -16,7 +16,7 @@
     test_repo: "{{ lookup('env', 'install_repo') }}"
     metrics_mode: "{{ lookup('env', 'METRICS_MODE') | default('auto', true) }}"
     pmm_version: "{{ lookup('env', 'PMM_VERSION') | regex_search('\\S(.*\\S)?') }}"
-    ps_repository: "{{ lookup('env', 'PS_REPOSITORY') | default('release', true)}}"
+    ps_repository: "{{ lookup('env', 'PS_REPOSITORY') | default('testing', true)}}"
     psmdb_repository: "{{ lookup('env', 'PSMDB_REPOSITORY') | default('release', true)}}"
 
   tasks:
