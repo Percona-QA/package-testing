@@ -89,16 +89,19 @@
   - name: include tasks for pt installation
     include_tasks: ../tasks/install_pt.yml
 
-  - name: list installed packages
-    include_tasks: ../tasks/list_installed_packages.yml
-
   - name: enable the mysql shell testing repo
     command: percona-release enable mysql-shell testing
-    when: install_mysql_shell == "yes" or install_mysql_shell == ""
+    when: 
+      - install_mysql_shell == "yes" or install_mysql_shell == ""
+      - ansible_distribution != "Amazon"
+      - not (ansible_distribution == "Debian" and ansible_distribution_major_version|int == 11)
 
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
-    when: install_mysql_shell == "yes" or install_mysql_shell == ""
+    when: 
+      - install_mysql_shell == "yes" or install_mysql_shell == ""
+      - ansible_distribution != "Amazon"
+      - not (ansible_distribution == "Debian" and ansible_distribution_major_version|int == 11)
 
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
