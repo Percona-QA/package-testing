@@ -25,7 +25,7 @@
 
 #
 # Install from main repository
-#
+
   - name: include tasks for enabling PS 57 EOL main repo
     include_tasks: ../tasks/enable_ps57_eol_main_repo.yml
 
@@ -51,11 +51,14 @@
   - name: install PS 5.7 packages from main repos
     include_tasks: ../tasks/install_ps57.yml
 
+  - name: Enable PT release repo
+    command: percona-release enable pt release  
+
   - name: install Percona Toolkit packages from main repos
     include_tasks: ../tasks/install_pt.yml
 
-  - name: install sysbench packages from main repos
-    include_tasks: ../tasks/install_sysbench.yml
+#  - name: install sysbench packages from main repos
+#    include_tasks: ../tasks/install_sysbench.yml
 
   - name: install Percona XtraBackup 2.4 packages from main repos
     include_tasks: ../tasks/install_pxb24.yml
@@ -136,17 +139,12 @@
 #
 # Enable testing repository
 #
-  - name: include tasks for enabling PS 57 Testing repo  
-    include_tasks: ../tasks/enable_testing_repo.yml
-    when:
-      - lookup('env', 'EOL') != "yes"
 
-  - name: include tasks for enabling PS 57 EOL repo
-    include_tasks: ../tasks/enable_ps57_eol_tools_repo.yml
+  - name: include tasks for enabling PS 57 EOL install_repo repo
+    include_tasks: ../tasks/enable_ps57_eol_install_repo.yml
     when:
       - lookup('env', 'EOL') == "yes"      
 
-#
 # Upgrade packages
 #
   - name: upgrade Percona release to new rpm packages
@@ -173,11 +171,11 @@
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
 
+  - name: enable pt release repo
+    command: percona-release enable pt release
+
   - name: install Percona Toolkit packages from testing repos
     include_tasks: ../tasks/install_pt.yml
-
-  - name: install sysbench packages from testing repos
-    include_tasks: ../tasks/install_sysbench.yml
 
   - name: install Percona XtraBackup 2.4 packages from testing repos
     include_tasks: ../tasks/install_pxb24.yml

@@ -16,31 +16,29 @@
       state: present
     when: ansible_os_family == "Debian"
 
-  - name: add pro repository on debian
+  - name: add eol install repository on debian from install_repo
     template: src=../templates/eol_deb_repo_file_ps57.j2
               dest=/etc/apt/sources.list.d/post-eol.list
     vars:
       client_id: "{{ lookup('env', 'USERNAME') }}"
       client_token: "{{ lookup('env', 'PASSWORD') }}"
-      repo: "{{ lookup('env', 'install_repo') | default('testing') }}"
+      repo: "{{ lookup('env', 'install_repo') }}"
     when:
       - ansible_os_family == "Debian"
 
-  - name: add pro repository on Redhat
+  - name: add eol release repository on Redhat
     template: src=../templates/eol_rpm_repo_file_ps57.j2
              dest=/etc/yum.repos.d/post-eol.repo
     vars:
       client_id: "{{ lookup('env', 'USERNAME') }}"
       client_token: "{{ lookup('env', 'PASSWORD') }}"
-      repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
+      repo: "{{ 'release' if lookup('env', 'install_repo') == 'main' else lookup('env', 'install_repo') }}"
     when:
       - ansible_os_family == "RedHat"
 
   - name: enable the tools release
     command: percona-release enable tools release
-    vars:
-      repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
-  
+
   - name: update deb cache
     command: apt update
     when:
