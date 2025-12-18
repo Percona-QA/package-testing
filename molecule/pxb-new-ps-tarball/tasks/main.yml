@@ -53,25 +53,11 @@
     set_fact:
       TARBALL_NAME_REGULAR: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}.tar.gz"
       TARBALL_NAME_REGULAR_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}"
-    when: lookup('env', 'REPO_TYPE') == "NORMAL"
-
 
   - name: Set Tarball and Folder name for MINIMAL
     set_fact:
       TARBALL_NAME_MINIMAL: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal.tar.gz"
       TARBALL_NAME_MINIMAL_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal"
-    when: lookup('env', 'REPO_TYPE') == "NORMAL"
-
-  - name: Set Fact USERNAME and PASSWORD
-    set_fact:
-      USERNAME: "{{ lookup('env', 'USERNAME') }}"
-      PASSWORD: "{{ lookup('env', 'PASSWORD') }}"
-    when: lookup('env', 'REPO_TYPE') == "PRO"
-
-  - name: ECHO USERNAME and PASSWORD
-    debug:
-      msg: "USERNAME: {{ USERNAME }}"
-    when: lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: Extract major version
     set_fact:
@@ -111,43 +97,43 @@
       state: present
     when: os_version == "amzn:2023"
 
-  - name: Enable Percona Server 8.0 main repository PXB80
-    include_tasks: ../../../tasks/enable_ps8_main_repo.yml
-    when:
-      - ansible_distribution_major_version != "2023"
-      - lookup('env', 'PXB_RELEASE') == "80"
-      - ansible_distribution_major_version != "10"
+  # - name: Enable Percona Server 8.0 main repository PXB80
+  #   include_tasks: ../../../tasks/enable_ps8_main_repo.yml
+  #   when:
+  #     - ansible_distribution_major_version != "2023"
+  #     - lookup('env', 'PXB_RELEASE') == "80"
+  #     - ansible_distribution_major_version != "10"
 
-  - name: include playbook for Install Percona Server 8.0 PXB80
-    include_tasks: ../../../tasks/install_ps80.yml
-    when:
-      - ansible_distribution_major_version != "2023"
-      - lookup('env', 'PXB_RELEASE') == "80"
-      - ansible_distribution_major_version != "10"
+  # - name: include playbook for Install Percona Server 8.0 PXB80
+  #   include_tasks: ../../../tasks/install_ps80.yml
+  #   when:
+  #     - ansible_distribution_major_version != "2023"
+  #     - lookup('env', 'PXB_RELEASE') == "80"
+  #     - ansible_distribution_major_version != "10"
 
-  - name: Enable Percona Server 8.0 PRO main repository PXB80
-    include_tasks: ../../../tasks/enable_ps80_pro_tools_repo.yml
-    when:
-      - ansible_distribution_major_version == "2023"
-      - lookup('env', 'PXB_RELEASE') == "80"
-      - lookup('env', 'REPO_TYPE') == "PRO"
+  # - name: Enable Percona Server 8.0 PRO main repository PXB80
+  #   include_tasks: ../../../tasks/enable_ps80_pro_tools_repo.yml
+  #   when:
+  #     - ansible_distribution_major_version == "2023"
+  #     - lookup('env', 'PXB_RELEASE') == "80"
+  #     - lookup('env', 'REPO_TYPE') == "PRO"
 
-  - name: Enable Percona Server 8.4 main repository PXB84
-    include_tasks: ../../../tasks/enable_ps84_testing_repo.yml
-    when:
-      - lookup('env', 'PXB_RELEASE') == "84"
+  # - name: Enable Percona Server 8.4 main repository PXB84
+  #   include_tasks: ../../../tasks/enable_ps84_testing_repo.yml
+  #   when:
+  #     - lookup('env', 'PXB_RELEASE') == "84"
 
-  - name: include playbook for Install Percona Server 8.4 PXB84
-    include_tasks: ../../../tasks/install_ps84.yml
-    when:
-      - lookup('env', 'PXB_RELEASE') == "84"
+  # - name: include playbook for Install Percona Server 8.4 PXB84
+  #   include_tasks: ../../../tasks/install_ps84.yml
+  #   when:
+  #     - lookup('env', 'PXB_RELEASE') == "84"
 
-  - name: Enable Percona Server 8.4 PRO main repository PXB84
-    include_tasks: ../../../tasks/enable_ps84_pro_tools_repo.yml
-    when:
-      - ansible_distribution_major_version == "2023"
-      - lookup('env', 'PXB_RELEASE') == "84"
-      - lookup('env', 'REPO_TYPE') == "PRO"
+  # - name: Enable Percona Server 8.4 PRO main repository PXB84
+  #   include_tasks: ../../../tasks/enable_ps84_pro_tools_repo.yml
+  #   when:
+  #     - ansible_distribution_major_version == "2023"
+  #     - lookup('env', 'PXB_RELEASE') == "84"
+  #     - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: Install libgflags-dev for rhel9 aarm64
     dnf:
@@ -158,7 +144,6 @@
       - ansible_os_family == "RedHat"
       - (ansible_distribution_major_version == "9") or (ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023")
       - ansible_architecture == "aarch64"
-      - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: Install libgflags-dev for rhel9
     dnf:
@@ -169,7 +154,6 @@
       - ansible_os_family == "RedHat"
       - (ansible_distribution_major_version == "9") or (ansible_distribution == "Amazon")
       - ansible_architecture != "aarch64"
-      - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: Import MySQL GPG key (2023)
     ansible.builtin.rpm_key:
