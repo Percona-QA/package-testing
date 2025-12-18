@@ -20,18 +20,11 @@
     - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
     - ansible_facts['distribution_major_version'] | int <= 7
 
-- name: Import Percona GPG key
-  rpm_key:
-    state: present
-    key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
-  when:
-    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "AlmaLinux"]
-    - ansible_facts['distribution_major_version'] | int >= 10
-
 - name: Install percona-release package RedHat using dnf
   dnf:
     name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     state: present
+    disable_gpg_check: yes
   when:
     - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "AlmaLinux"]
     - ansible_facts['distribution_major_version'] | int >= 8
