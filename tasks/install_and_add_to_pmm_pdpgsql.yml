@@ -120,9 +120,7 @@
   when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
 
 - name: Create Extension pg_stat_statements
-  command: psql -c "create extension pg_stat_statements;"
-  become: yes
-  become_user: postgres
+  shell: sudo -u postgres psql -c "create extension pg_stat_statements;"
 
 - name: add postgresql metrics to monitoring
   command: >-
