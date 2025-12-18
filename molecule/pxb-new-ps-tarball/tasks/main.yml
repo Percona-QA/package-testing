@@ -291,9 +291,7 @@
     when: TARBALL_NAME_MINIMAL_FOLDER is not defined
 
   - name: list items in package testing
-    command: "{{ item }}"
-    with_items:
-    - ls -alh /package-testing/molecule/pxb-new-ps-tarball/
+    command: ls -alh /package-testing/molecule/pxb-new-ps-tarball/
     register: package_testing_contents
 
   - name: Print contents of the package testing
@@ -301,9 +299,7 @@
       msg: "{{ package_testing_contents.stdout_lines }}"
 
   - name: list items in server-qa repo
-    command: "{{ item }}"
-    with_items:
-    - ls -alh /server-qa/
+    command: ls -alh /server-qa/
     register: server_qa_contents
 
   - name: Print contents of the server-qa repo
