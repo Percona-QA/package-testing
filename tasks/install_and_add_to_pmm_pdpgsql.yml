@@ -75,10 +75,11 @@
   when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
 
 - name: Change Postgresql Password
-  shell: psql -c "ALTER USER postgres PASSWORD '{{ pgsql_password }}';"
-  become: yes
+  command: psql -c "ALTER USER postgres PASSWORD '{{ pgsql_password }}';"
+  become:  yes
   become_user: postgres
-  become_method: su
+  vars:
+    ansible_pipelining: yes
 
 - name: setup postgresql pg_stat_statements for Debian based Systems
   shell: "{{item}}"
