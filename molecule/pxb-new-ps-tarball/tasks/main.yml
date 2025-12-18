@@ -294,8 +294,18 @@
     command: "{{ item }}"
     with_items:
     - ls -alh /package-testing/molecule/pxb-new-ps-tarball/
+    register: package_testing_contents
 
-  - name: list items in package testing
+  - name: Print contents of the package testing
+    debug:
+      msg: "{{ package_testing_contents.stdout_lines }}"
+
+  - name: list items in server-qa repo
     command: "{{ item }}"
     with_items:
     - ls -alh /server-qa/
+    register: server_qa_contents
+
+  - name: Print contents of the server-qa repo
+    debug:
+      msg: "{{ server_qa_contents.stdout_lines }}"
