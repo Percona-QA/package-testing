@@ -45,9 +45,9 @@
         exclusive: False
       when: ansible_distribution == "Ubuntu"
 
-    - name: Checkout server-qa repository
-      git:
-        repo: https://github.com/Percona-QA/server-qa.git
-        dest: /server-qa
-        version: tomislav-pxb-python
-        force: yes
+    # - name: Checkout server-qa repository
+    #   git:
+    #     repo: https://github.com/Percona-QA/server-qa.git
+    #     dest: /server-qa
+    #     version: tomislav-pxb-python
+    #     force: yes
