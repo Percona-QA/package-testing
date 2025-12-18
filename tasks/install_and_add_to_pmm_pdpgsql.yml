@@ -75,9 +75,7 @@
   when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
 
 - name: Change Postgresql Password
-  command: psql -c "ALTER USER postgres PASSWORD '{{ pgsql_password }}';"
-  become: yes
-  become_user: postgres
+  shell: sudo -u postgres psql -c "ALTER USER postgres PASSWORD '{{ pgsql_password }}';"
 
 - name: setup postgresql pg_stat_statements for Debian based Systems
   shell: "{{item}}"
@@ -122,9 +120,7 @@
   when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
 
 - name: Create Extension pg_stat_statements
-  command: psql -c "create extension pg_stat_statements;"
-  become: yes
-  become_user: postgres
+  shell: sudo -u postgres psql -c "create extension pg_stat_statements;"
 
 - name: add postgresql metrics to monitoring
   command: >-
