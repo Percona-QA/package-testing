@@ -310,14 +310,6 @@
     debug:
       msg: "{{ python_contents.stdout_lines }}"
 
-  - name: list content of local bin
-    command: ls -alh ~/.local/bin/
-    register: bin_contents
-
-  - name: Print bin content
-    debug:
-      msg: "{{ bin_contents.stdout_lines }}"
-
   - name: list path
     command: echo $PATH
     register: path_contents
@@ -335,7 +327,7 @@
       msg: "{{ pwd_contents.stdout_lines }}"
 
   - name: list items pytest version
-    command: pytest --version
+    command: python3 -m pytest --version
     register: pytest_contents
 
   - name: Print pytest version
