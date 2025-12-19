@@ -310,7 +310,7 @@
     debug:
       msg: "{{ python_contents.stdout_lines }}"
 
-  - name: list items python version
+  - name: list items pytest version
     command: pytest --version
     register: pytest_contents
 
