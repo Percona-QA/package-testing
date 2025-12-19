@@ -68,6 +68,41 @@
         - ansible_os_family == "RedHat"
         - ansible_distribution_major_version | int >= 8
 
+    - name: Install python3 and python3-pip for Debian family
+      apt:
+        name:
+          - python3
+          - python3-pip
+        update_cache: yes
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install python3 and python3-pip for RedHat family (RHEL 7 and earlier)
+      yum:
+        name:
+          - python3
+          - python3-pip
+        state: present
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int <= 7
+
+    - name: Install python3 and python3-pip for RedHat family (RHEL 8 and later)
+      dnf:
+        name:
+          - python3
+          - python3-pip
+        state: present
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int >= 8
+
+    - name: Install pytest using pip3
+      pip:
+        name: pytest
+        executable: pip3
+        state: present
+
     - name: Checkout server-qa repository
       git:
         repo: https://github.com/Percona-QA/server-qa.git
