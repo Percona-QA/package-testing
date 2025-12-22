@@ -5,6 +5,10 @@
   become_method: sudo
   gather_facts: true
   tasks:
+    - name: Update all dnf packages without reboot
+      ansible.builtin.dnf: name='*' state=latest
+      when: ansible_facts['distribution'] in ['RedHat','OracleLinux']
+
     - name: Edit mirrorlist for Centos8 repos
       shell: "sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-Linux-*"
       when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "8"
