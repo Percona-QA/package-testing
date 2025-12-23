@@ -2,6 +2,9 @@
 
 set -x
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "${SCRIPT_DIR}"
+
 export PATH=${HOME}/.local/bin:${PATH}
 echo "FETCHING from /etc/environment"
 source /etc/environment
@@ -65,7 +68,12 @@ else
   fi
 
   sudo apt-get update -y
-  sudo apt install -y libaio1 libnuma1 libldap-2.4-2 libaio-dev
+  # libldap-2.4-2 is replaced by libldap-common on newer Ubuntu versions
+  if apt-cache show libldap-2.4-2 >/dev/null 2>&1; then
+    sudo apt install -y libaio1 libnuma1 libldap-2.4-2 libaio-dev
+  else
+    sudo apt install -y libaio1 libnuma1 libldap-common libaio-dev
+  fi
 
 fi
 fi  # closes AL2023 + RHEL + Debian logic
@@ -105,23 +113,26 @@ fi
 # ---------------------------------------------------------
 #  BASE_DIR setup
 # ---------------------------------------------------------
-echo "non pro base dir setting.."
-if [[ "$PRO" != "true" ]]; then
-  echo "PRO IS NOT TRUE HERE!!!"
-  TARBALL_NAME=$(basename "$(find . -maxdepth 1 -name '*.tar.gz'|head -n1)")
-  if [ -z "${TARBALL_NAME}" ]; then
-    echo "Please put PS tarball into this directory!"
-    exit 1
-  fi
-  tar xf "${TARBALL_NAME}"
-  PS_DIR_NAME=$(echo "${TARBALL_NAME}"|sed 's/.tar.gz$//'|sed 's/.deb$//'|sed 's/.rpm$//')
-  export BASE_DIR="${PWD}/${PS_DIR_NAME}"
-  echo "BASE_DIR is for non PRO $BASE_DIR"
-else
-  echo "PRO is TRUE HERE !!! base dir setting.."
-  export BASE_DIR="/usr/percona-server"
-  echo "BASE_DIR is for PRO $BASE_DIR"
+echo "Setting unified BASE_DIR under ${SCRIPT_DIR}"
+BASE_DIR_DEFAULT="${SCRIPT_DIR}/percona-server"
+TARBALL_NAME=$(find "${SCRIPT_DIR}" -maxdepth 1 -name '*.tar.gz' | head -n1)
+
+if [ -z "${TARBALL_NAME}" ]; then
+  echo "PS tarball not found in ${SCRIPT_DIR}"
+  exit 1
 fi
+
+if [ ! -d "${BASE_DIR_DEFAULT}" ]; then
+  tar xf "${TARBALL_NAME}" --transform 's,^[^/]*/,percona-server/,'
+fi
+
+if [ ! -d "${BASE_DIR_DEFAULT}" ]; then
+  echo "BASE_DIR directory ${BASE_DIR_DEFAULT} is missing after extraction"
+  exit 1
+fi
+
+export BASE_DIR="${BASE_DIR_DEFAULT}"
+echo "BASE_DIR set to ${BASE_DIR}"
 
 if [ -z "${BASE_DIR}" ]; then
   echo "BASE_DIR environment variable needs to be set!"

@@ -3,6 +3,26 @@ import os
 import re
 import pytest
 
+def resolve_base_dir():
+    """
+    Determine the base directory for the extracted tarball.
+    Priority:
+    1) BASE_DIR env var (exported by run.sh / Ansible)
+    2) Local repo path (for developer runs)
+    3) Remote Molecule path
+    """
+    env_base = os.getenv("BASE_DIR")
+    if env_base:
+        return env_base
+
+    local_repo_base = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), '..', '..', 'molecule', 'ps80-binary-tarball', 'percona-server')
+    )
+    if os.path.exists(local_repo_base):
+        return local_repo_base
+
+    return "/package-testing/molecule/ps80-binary-tarball/percona-server"
+
 def source_environment_file(filepath="/etc/environment"):
     """
     Loads environment variables from a given file into os.environ.
@@ -27,49 +47,46 @@ def source_environment_file(filepath="/etc/environment"):
     except Exception as e:
         print(f"Error while sourcing environment file: {e}")
 
-def set_pro_fips_vars():
-    """
-    Retrieves and returns environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
-    """
-    source_environment_file()
 
+def is_kernel_fips_enabled():
+    try:
+        with open("/proc/sys/crypto/fips_enabled") as f:
+            return f.read().strip() == "1"
+    except FileNotFoundError:
+        return False
+
+def set_pro_fips_vars():
+    source_environment_file()
     value = os.getenv('PRO', '').strip().lower()  # Normalize the input
     pro = value in {"yes", "true", "1"}
 
     print(pro)  # True if value is "yes", "true", or "1", otherwise False
 
-    fips_supported = True if os.getenv('PRO') == "yes" else False
-    #fips_supported = os.getenv('FIPS_SUPPORTED') in {"yes", "True"}
-    debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
-    ps_revision = os.getenv('PS_REVISION')
-    ps_version = os.getenv('PS_VERSION')
+   # fips_supported = True if os.getenv('PRO') == "yes" else False
+    fips_supported = os.getenv('FIPS_SUPPORTED', '').lower() in {'yes', 'true', '1'}
+    fips_enabled = pro and fips_supported
 
+    debug = "-debug" if os.getenv("DEBUG") == "yes" else ""
+    ps_revision = os.getenv("PS_REVISION")
+    ps_version = os.getenv("PS_VERSION")
 
-    if (os.getenv('PRO')):
-      base_dir = '/usr/percona-server'
-      print(f"PRINTING THE PRO VALUE PRO: {pro}")
-    else:
-      base_dir = os.getenv('BASE_DIR')
+    base_dir = resolve_base_dir()
+    print(f"BASE_DIR resolved to {base_dir}")
 
-
-    if pro:
-      print(f"TRUE PRO VAR WORKING")
-    else:
-      print(f"FALSE PRO VAR NOT WORKING")
-
-    ps_version_upstream, ps_version_percona = ps_version.split('-')
-    ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
+    ps_version_upstream, ps_version_percona = ps_version.split("-")
+    ps_version_major = ".".join(ps_version_upstream.split(".")[:2])
 
     return {
-        'pro': pro,
-        'debug': debug,
+        "pro": pro,
+        "debug": debug,
         'fips_supported': fips_supported,
-        'ps_revision': ps_revision,
-        'ps_version': ps_version,
-        'base_dir': base_dir,
-        'ps_version_upstream': ps_version_upstream,
-        'ps_version_major': ps_version_major,
-        'ps_version_percona': ps_version_percona
+        'fips_enabled': fips_enabled, 
+        "ps_revision": ps_revision,
+        "ps_version": ps_version,
+        "base_dir": base_dir,
+        "ps_version_upstream": ps_version_upstream,
+        "ps_version_major": ps_version_major,
+        "ps_version_percona": ps_version_percona,
     }
 
 @pytest.fixture(scope="module")
@@ -82,8 +99,7 @@ def pro_fips_vars():
 
 source_environment_file()
 
-
-base_dir = os.getenv('BASE_DIR')
+base_dir = resolve_base_dir()
 ps_version = os.getenv('PS_VERSION')
 ps_revision = os.getenv('PS_REVISION')
 
@@ -121,7 +137,7 @@ ps80_functions = (
 )
 
 ps80_components = (
-  'component_masking_functions', 'component_encryption_udf', 'component_keyring_kmip', 'component_keyring_kms',
+  'component_masking_functions', 'component_encryption_udf', 'component_keyring_kmip', 'component_keyring_kms', 'component_js_lang' ,
 )
 ps80_files = (
   'lib/libcoredumper.a',
@@ -229,7 +245,7 @@ ps8x_functions = (
 )
 
 ps8x_components = (
-  'component_masking_functions', 'component_binlog_utils_udf', 'component_percona_udf', 'component_audit_log_filter', 'component_keyring_vault'
+  'component_masking_functions', 'component_binlog_utils_udf', 'component_percona_udf', 'component_audit_log_filter', 'component_keyring_vault','component_js_lang'
 )
 
 ps8x_files = (
