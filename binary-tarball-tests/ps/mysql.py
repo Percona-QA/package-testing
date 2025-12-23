@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import subprocess
 import re
 import os
@@ -17,11 +16,16 @@ class MySQL:
         self.pidfile = base_dir+'/mysql.pid'
         self.mysql_install_db = base_dir+'/scripts/mysql_install_db'
         self.features=features
+        self.extra_param = []
 
-        if 'fips' in self.features:
-            self.extra_param=['--ssl-fips-mode=ON', '--log-error-verbosity=3']
+        if "fips" in self.features:
+            self.extra_param.extend([
+                "--ssl-fips-mode=ON",
+                "--log-error-verbosity=3"
+            ])
         else:
-            self.extra_param=[]
+            self.extra_param = []
+
 
         subprocess.call(['rm','-Rf',self.datadir])
         subprocess.call(['rm','-f',self.logfile])

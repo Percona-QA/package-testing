@@ -1,0 +1,44 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: debian13-${BUILD_NUMBER}-${JOB_NAME}
+    region: us-west-2
+    image: ami-081ac37fe26dacc98
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: t3.micro
+    ssh_user: admin
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-ps80-worker
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    create: ../../playbooks/create.yml
+    destroy: ../../playbooks/destroy.yml
+    prepare: ../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../tests/
+  options:
+    verbose: true
+    s: true
+  env:
+    FIPS_SUPPORTED: "no"
+scenario:
+  name: debian-13
+  destroy_sequence:
+    - destroy
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy
