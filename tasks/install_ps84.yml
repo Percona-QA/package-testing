@@ -7,7 +7,7 @@
       update_cache: yes
       state: latest
     vars:
-      packages:
+      packages_base:
       - percona-server-server{{ pro_suf | default('') }}
       - percona-server-test{{ pro_suf | default('') }}
       - percona-server{{ pro_suf | default('') }}-dbg
@@ -15,7 +15,8 @@
       - percona-server-client{{ pro_suf | default('') }}
       - percona-server-rocksdb{{ pro_suf | default('') }}
       - percona-mysql-router{{ pro_suf | default('') }}
-      - percona-server-js{{ pro_suf | default('') }}
+      percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
+      packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
     when: ansible_os_family == "Debian"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -46,7 +47,7 @@
       disablerepo: "epel"
       update_cache: yes
     vars:
-      packages:
+      packages_base:
       - percona-server-server{{ pro_suf | default('') }}
       - percona-mysql-router{{ pro_suf | default('') }}
       - percona-server-client{{ pro_suf | default('') }}
@@ -54,7 +55,8 @@
       - percona-server{{ pro_suf | default('') }}-debuginfo
       - percona-server-devel{{ pro_suf | default('') }}
       - percona-server-rocksdb{{ pro_suf | default('') }}
-      - percona-server-js{{ pro_suf | default('') }}
+      percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
+      packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
     when: ansible_os_family == "RedHat"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
