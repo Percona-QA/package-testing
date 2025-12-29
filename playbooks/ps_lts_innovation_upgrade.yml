@@ -127,6 +127,9 @@
   - name: include tasks for enabling PS {{ major_release_version }} main repo
     include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
 
+  - name: install Percona PS Innovation {{ major_release_version }} packages
+    include_tasks: ../tasks/install_ps_innovation_lts.yml
+
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
     when: install_mysql_shell == "yes" or install_mysql_shell == ""
