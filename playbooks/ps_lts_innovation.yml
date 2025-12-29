@@ -88,14 +88,6 @@
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e  
 
-  - name: enable Percona XtraBackup repo {{ pxb_inn_lts_repo_name }} for {{ major_release_version }}
-    command: percona-release enable {{ pxb_inn_lts_repo_name }} release
-    when: lookup('env', 'install_repo') != "experimental"
-
-  - name: install Percona XtraBackup {{ major_release_version }} packages
-    include_tasks: ../tasks/install_pxb_innovation_lts.yml
-    when: lookup('env', 'install_repo') != "experimental"
-
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
@@ -196,9 +188,6 @@
 
   - name: start mysql service
     service: name=mysql state=started
-
-    #  - name: check that mysqladmin shutdown works correctly
-    #    command: /package-testing/madmin_check.sh
 
   - name: disable all percona repos
     command: percona-release disable all
