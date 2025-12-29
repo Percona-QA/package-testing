@@ -37,7 +37,7 @@
     dnf module enable llvm-toolset
     dnf config-manager --set-enabled crb
     dnf install perl-IPC-Run -y
-  when: ansible_distribution == "Rocky" and ansible_distribution_major_version == "9"
+  when: ansible_distribution == "Rocky" and ansible_distribution_major_version | int >= 9
   ignore_errors: yes
 
 - name: Download install_ppg.yml
@@ -52,8 +52,7 @@
 - name: Run install_ppg.yml
   include_tasks: /tmp/install_ppg{{ pg_version }}.yml
   vars:
-    # workaround to pass pg_version_to_install check in install_ppg.yml
-    pg_version_to_install: "{{ pg_version }}.5"
+    pg_version_to_install: "{{ pg_version }}"
 
 - name: Initialize Postgres RHEL
   command: /usr/pgsql-{{ pg_version }}/bin/postgresql-{{ pg_version }}-setup initdb
@@ -76,9 +75,7 @@
   when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
 
 - name: Change Postgresql Password
-  command: psql -c "ALTER USER postgres PASSWORD '{{ pgsql_password }}';"
-  become: yes
-  become_user: postgres
+  shell: sudo -u postgres psql -c "ALTER USER postgres PASSWORD '{{ pgsql_password }}';"
 
 - name: setup postgresql pg_stat_statements for Debian based Systems
   shell: "{{item}}"
@@ -123,9 +120,7 @@
   when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
 
 - name: Create Extension pg_stat_statements
-  command: psql -c "create extension pg_stat_statements;"
-  become: yes
-  become_user: postgres
+  shell: sudo -u postgres psql -c "create extension pg_stat_statements;"
 
 - name: add postgresql metrics to monitoring
   command: >-

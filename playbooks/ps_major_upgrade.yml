@@ -1,0 +1,425 @@
+---
+# Standardized Percona Server upgrade playbook
+# This playbook handles major upgrades between different Percona Server versions
+# based on configurable variables for source and target versions and repositories
+
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    major_upgrade: true
+    install_mysql_shell: "{{ lookup('env', 'install_mysql_shell', default='') }}"
+    gnupg_home: /root/.gnupg
+    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+    install_repo: "{{ lookup('env', 'install_repo') }}"
+    eol_repo: "{{ lookup('env', 'EOL') }}"
+    major_upgrade_from_product: "{{ lookup('env', 'major_upgrade_from_product', default='ps57') }}"
+    major_upgrade_from_repo: "{{ lookup('env', 'major_upgrade_from_repo') }}"
+    major_upgrade_to_product: "{{ lookup('env', 'major_upgrade_to_product', default='ps84') }}"
+    major_upgrade_to_repo: "{{ lookup('env', 'major_upgrade_to_repo') }}"
+  environment:
+    install_mysql_shell: '{{ install_mysql_shell }}'
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  tasks:
+  ### Common setup tasks
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: include tasks for local vault setup
+    include_tasks: ../tasks/setup_local_vault.yml
+
+  - name: setup config file for keyring vault
+    template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test_v2.j2
+              dest=/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
+              mode=0664 owner=root group=root
+
+  ### Enable repository for source version
+  - name: enable ps80 testing repo for source Percona Server {{ major_upgrade_from_product }}
+    include_tasks: ../tasks/enable_ps8_testing_repo.yml
+    when:
+      - major_upgrade_from_product == 'ps80'
+      - major_upgrade_from_repo == 'testing' or (major_upgrade_from_repo == '' and (install_repo == 'testing' or install_repo == ''))
+
+  - name: enable ps80 main repo for source Percona Server {{ major_upgrade_from_product }}
+    include_tasks: ../tasks/enable_ps8_main_repo.yml
+    when:
+      - major_upgrade_from_product == 'ps80'
+      - major_upgrade_from_repo == 'main' or (major_upgrade_from_repo == '' and install_repo == 'main')
+
+  - name: enable ps80 experimental repo for source Percona Server {{ major_upgrade_from_product }}
+    include_tasks: ../tasks/enable_ps8_experimental_repo.yml
+    when:
+      - major_upgrade_from_product == 'ps80'
+      - major_upgrade_from_repo == 'experimental' or (major_upgrade_from_repo == '' and install_repo == 'experimental')
+
+  - name: enable ps84 testing repo for source Percona Server {{ major_upgrade_from_product }}
+    include_tasks: ../tasks/enable_ps84_testing_repo.yml
+    when:
+      - major_upgrade_from_product == 'ps84'
+      - major_upgrade_from_repo == 'testing' or (major_upgrade_from_repo == '' and (install_repo == 'testing' or install_repo == ''))
+
+  - name: enable ps84 main repo for source Percona Server {{ major_upgrade_from_product }}
+    include_tasks: ../tasks/enable_ps84_main_repo.yml
+    when:
+      - major_upgrade_from_product == 'ps84'
+      - major_upgrade_from_repo == 'main' or (major_upgrade_from_repo == '' and install_repo == 'main')
+
+  - name: enable ps84 experimental repo for source Percona Server {{ major_upgrade_from_product }}
+    include_tasks: ../tasks/enable_ps84_experimental_repo.yml
+    when:
+      - major_upgrade_from_product == 'ps84'
+      - major_upgrade_from_repo == 'experimental' or (major_upgrade_from_repo == '' and install_repo == 'experimental')
+
+  - name: enable PS 5.7 EOL tools repo for source Percona Server {{ major_upgrade_from_product }}
+    include_tasks: ../tasks/enable_ps57_eol_tools_repo.yml
+    when:
+      - major_upgrade_from_product == 'ps57'
+      - eol_repo == 'yes'
+
+  ### Download test database
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  ### Install source version
+  - name: install source Percona Server {{ major_upgrade_from_product }} from {{ major_upgrade_from_repo }} repo
+    include_tasks: "../tasks/install_{{ major_upgrade_from_product }}.yml"
+    vars:
+      pro_suf: "{{ pro_suffix | default('') }}"
+      allowerasing_value: "{{ allowerasing | default(false) }}"
+      install_repo: "{{ major_upgrade_from_repo }}"
+
+  ### Install additional tools for source version
+  - name: install Percona Toolkit for source Percona Server {{ major_upgrade_from_product }}
+    include_tasks: ../tasks/install_pt.yml
+    when: major_upgrade_from_product in ['ps56', 'ps57']
+
+  - name: install Percona XtraBackup 2.4 for source Percona Server {{ major_upgrade_from_product }}
+    include_tasks: ../tasks/install_pxb24.yml
+    when: major_upgrade_from_product in ['ps56', 'ps57']
+
+  - name: install Percona XtraBackup 8.0 for source Percona Server {{ major_upgrade_from_product }}
+    include_tasks: ../tasks/install_pxb80.yml
+    when: major_upgrade_from_product == 'ps80'
+
+  - name: install Percona XtraBackup 8.4 for source Percona Server {{ major_upgrade_from_product }}
+    include_tasks: ../tasks/install_pxb84.yml
+    when: major_upgrade_from_product == 'ps84'
+
+  ### Configure and start source version
+  - name: list installed packages for source Percona Server {{ major_upgrade_from_product }}
+    include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: start mysql service for source Percona Server {{ major_upgrade_from_product }}
+    service: name=mysql state=started
+
+  - name: set root password for source Percona Server {{ major_upgrade_from_product }} on RedHat
+    command: /package-testing/setpass_{{ '57' if major_upgrade_from_product == 'ps57' else 'ms' }}.sh
+    when: ansible_os_family == "RedHat" and major_upgrade_from_product == 'ps57'
+
+  - name: copy .my.cnf with credentials for source Percona Server {{ major_upgrade_from_product }} on RedHat
+    template: src=../templates/my_{{ '57' if major_upgrade_from_product == 'ps57' else 'ms' }}.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat" and major_upgrade_from_product == 'ps57'
+
+  - name: disable selinux for source Percona Server {{ major_upgrade_from_product }} on RedHat
+    shell: setenforce 0 || true
+    when: ansible_os_family == "RedHat"
+
+  - name: restart mysql service for source Percona Server {{ major_upgrade_from_product }}
+    service: name=mysql state=restarted
+
+
+  - name: print mysql version for source Percona Server {{ major_upgrade_from_product }}
+    command: mysql --version
+    register: mysql_version_output
+
+  - name: show mysql version output before upgrade
+    debug:
+      var: mysql_version_output.stdout
+
+
+
+  ### Version checks for source version
+#  - name: check source Percona Server {{ major_upgrade_from_product }} version
+#    command: /package-testing/version_check.sh {{ major_upgrade_from_product }}
+
+#  - name: check source Percona Server {{ major_upgrade_from_product }} package versions
+#    command: /package-testing/package_check.sh {{ major_upgrade_from_product }}
+
+#  - name: check source Percona XtraBackup 2.4 version for PS {{ major_upgrade_from_product }}
+#    command: /package-testing/version_check.sh pxb24
+#    when:
+#      - major_upgrade_from_product in ['ps56', 'ps57']
+#      - major_upgrade_from_repo != "experimental" and (install_repo == '' or install_repo != "experimental")
+#
+#  - name: check source Percona XtraBackup 2.4 package versions for PS {{ major_upgrade_from_product }}
+#    command: /package-testing/package_check.sh pxb24
+#    when:
+#      - major_upgrade_from_product in ['ps56', 'ps57']
+#      - major_upgrade_from_repo != "experimental" and (install_repo == '' or install_repo != "experimental")
+#
+#  - name: check source Percona XtraBackup 8.0 version for PS {{ major_upgrade_from_product }}
+#    command: /package-testing/version_check.sh pxb80
+#    when:
+#      - major_upgrade_from_product in ['ps80', 'ps81']
+#      - major_upgrade_from_repo != "experimental" and (install_repo == '' or install_repo != "experimental")
+#
+#  - name: check source Percona XtraBackup 8.4 version for PS {{ major_upgrade_from_product }}
+#    command: /package-testing/version_check.sh pxb84
+#    when:
+#      - major_upgrade_from_product == 'ps84'
+#      - major_upgrade_from_repo != "experimental" and (install_repo == '' or install_repo != "experimental")
+
+  ### Install 3rd party packages
+  - name: install 3rd party packages with apt
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "Debian"
+
+  - name: install 3rd party packages with yum
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install 3rd party packages with dnf
+    dnf:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+#  ### Run tests for source version
+#  - name: run keyring plugins test for source Percona Server {{ major_upgrade_from_product }}
+#    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh {{ major_upgrade_from_product }}
+#    when: major_upgrade_from_product in ['ps57', 'ps80', 'ps84']
+#
+#  - name: run bats unit tests for ps-admin script with source Percona Server {{ major_upgrade_from_product }}
+#    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
+#
+#  - name: run bats integration tests for ps-admin script with source Percona Server {{ major_upgrade_from_product }}
+#    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
+#
+#  - name: run bats tests for mysql init scripts with source Percona Server {{ major_upgrade_from_product }}
+#    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+
+  ### Prepare for upgrade - backup config and disable repos
+  - name: disable all percona repos
+    command: percona-release disable all
+
+  - name: get my.cnf stats
+    stat: path=/etc/my.cnf
+    register: mycnf
+
+  - name: copy config file to backup
+    copy:
+      src: /etc/my.cnf
+      dest: /etc/my.cnf.backup
+      remote_src: yes
+    when: mycnf.stat.exists and ansible_os_family == "RedHat"
+
+  ### Remove source version
+  - name: remove source Percona Server {{ major_upgrade_from_product }} packages
+    include_tasks: "../tasks/remove_{{ major_upgrade_from_product }}.yml"
+
+  - name: remove Percona XtraBackup packages for source Percona Server {{ major_upgrade_from_product }}
+    include_tasks: "../tasks/remove_pxb{{ pxb_version_from }}.yml"
+    vars:
+      pxb_version_from: "{{ '24' if major_upgrade_from_product in ['ps56', 'ps57'] else '80' if major_upgrade_from_product in ['ps80', 'ps81'] else '84' if major_upgrade_from_product == 'ps84' else '' }}"
+    when: major_upgrade_from_product in ['ps56', 'ps57', 'ps80', 'ps81', 'ps84']
+
+  - name: check if mysql process is stopped after source Percona Server {{ major_upgrade_from_product }} removal
+    command: /package-testing/check_running.sh mysql stopped
+
+  - stat:
+      path: /var/lib/mysql
+    register: p
+
+  - name: check /var/lib/mysql exists and not empty
+    fail:
+      msg: "Path exists and is a directory and is not empty"
+    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
+
+  ### Restore config files
+  - name: copy config file to original location
+    copy:
+      src: /etc/my.cnf.backup
+      dest: /etc/my.cnf
+      remote_src: yes
+      force: yes
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
+
+  - name: restore percona-server.conf.d and mysql.cnf.d
+    shell: |
+      mv /etc/percona-server.conf.d_backup-* /etc/percona-server.conf.d
+      mv /etc/my.cnf.d_backup-* /etc/my.cnf.d
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
+
+  ### Enable repository for target version
+  - name: enable ps80 testing repo for target Percona Server {{ major_upgrade_to_product }}
+    include_tasks: ../tasks/enable_ps8_testing_repo.yml
+    when:
+      - major_upgrade_to_product == 'ps80'
+      - major_upgrade_to_repo == 'testing' or (major_upgrade_to_repo == '' and (install_repo == 'testing' or install_repo == ''))
+
+  - name: enable ps80 main repo for target Percona Server {{ major_upgrade_to_product }}
+    include_tasks: ../tasks/enable_ps8_main_repo.yml
+    when:
+      - major_upgrade_to_product == 'ps80'
+      - major_upgrade_to_repo == 'main' or (major_upgrade_to_repo == '' and install_repo == 'main')
+
+  - name: enable ps80 experimental repo for target Percona Server {{ major_upgrade_to_product }}
+    include_tasks: ../tasks/enable_ps8_experimental_repo.yml
+    when:
+      - major_upgrade_to_product == 'ps80'
+      - major_upgrade_to_repo == 'experimental' or (major_upgrade_to_repo == '' and install_repo == 'experimental')
+
+  - name: enable ps84 testing repo for target Percona Server {{ major_upgrade_to_product }}
+    include_tasks: ../tasks/enable_ps84_testing_repo.yml
+    when:
+      - major_upgrade_to_product == 'ps84'
+      - major_upgrade_to_repo == 'testing' or (major_upgrade_to_repo == '' and (install_repo == 'testing' or install_repo == ''))
+
+  - name: enable ps84 main repo for target Percona Server {{ major_upgrade_to_product }}
+    include_tasks: ../tasks/enable_ps84_main_repo.yml
+    when:
+      - major_upgrade_to_product == 'ps84'
+      - major_upgrade_to_repo == 'main' or (major_upgrade_to_repo == '' and install_repo == 'main')
+
+  - name: enable ps84 experimental repo for target Percona Server {{ major_upgrade_to_product }}
+    include_tasks: ../tasks/enable_ps84_experimental_repo.yml
+    when:
+      - major_upgrade_to_product == 'ps84'
+      - major_upgrade_to_repo == 'experimental' or (major_upgrade_to_repo == '' and install_repo == 'experimental')
+
+  ### Enable PS-specific repo for target version
+  - name: enable PS {{ major_upgrade_to_product }} main repo
+    include_tasks: "../tasks/enable_{{ major_upgrade_to_product }}_main_repo.yml"
+    vars:
+      install_repo: "{{ major_upgrade_to_repo }}"
+    when:
+      - major_upgrade_to_product in ['ps80', 'ps81', 'ps84']
+      - major_upgrade_to_repo == 'main' or (major_upgrade_to_repo == '' and install_repo == 'main')
+
+  - name: enable PS {{ major_upgrade_to_product }} testing repo
+    include_tasks: "../tasks/enable_{{ major_upgrade_to_product }}_testing_repo.yml"
+    vars:
+      install_repo: "{{ major_upgrade_to_repo }}"
+    when:
+      - major_upgrade_to_product in ['ps80', 'ps81', 'ps84']
+      - major_upgrade_to_repo == 'testing' or (major_upgrade_to_repo == '' and (install_repo == 'testing' or install_repo == ''))
+
+  - name: enable PS {{ major_upgrade_to_product }} experimental repo
+    include_tasks: "../tasks/enable_{{ major_upgrade_to_product }}_experimental_repo.yml"
+    vars:
+      install_repo: "{{ major_upgrade_to_repo }}"
+    when:
+      - major_upgrade_to_product in ['ps80', 'ps81', 'ps84']
+      - major_upgrade_to_repo == 'experimental' or (major_upgrade_to_repo == '' and install_repo == 'experimental')
+
+  - name: append include for RedHat
+    lineinfile:
+        path: /etc/my.cnf
+        line: '!includedir /etc/my.cnf.d'
+    when: ansible_os_family == "RedHat"
+
+  ### Install target version
+  - name: install target Percona Server {{ major_upgrade_to_product }} from {{ major_upgrade_to_repo }} repo
+    include_tasks: "../tasks/install_{{ major_upgrade_to_product }}.yml"
+    vars:
+      pro_suf: "{{ pro_suffix | default('') }}"
+      allowerasing_value: "{{ allowerasing | default(false) }}"
+      install_repo: "{{ major_upgrade_to_repo }}"
+
+#  - name: enable the Tools release repo for target Percona Server {{ major_upgrade_to_product }}
+#    command: percona-release enable tools release
+
+  ### Install XtraBackup for target version
+  - name: install Percona XtraBackup 2.4 for target Percona Server {{ major_upgrade_to_product }}
+    include_tasks: ../tasks/install_pxb24.yml
+    when: major_upgrade_to_product in ['ps56', 'ps57']
+
+  - name: install Percona XtraBackup 8.0 for target Percona Server {{ major_upgrade_to_product }}
+    include_tasks: ../tasks/install_pxb80.yml
+    when: major_upgrade_to_product in ['ps80', 'ps81']
+
+  - name: install Percona XtraBackup 8.4 for target Percona Server {{ major_upgrade_to_product }}
+    include_tasks: ../tasks/install_pxb84.yml
+    when: major_upgrade_to_product == 'ps84'
+
+  - name: install percona-mysql-shell for target Percona Server {{ major_upgrade_to_product }}
+    include_tasks: ../tasks/install_pshell.yml
+    when: install_mysql_shell == "yes" or install_mysql_shell == ""
+
+  ### Version checks for target version
+  - name: check target Percona XtraBackup version for PS {{ major_upgrade_to_product }}
+    command: /package-testing/version_check.sh pxb{{ pxb_version_to }}
+    vars:
+      pxb_version_to: "{{ '24' if major_upgrade_to_product in ['ps56', 'ps57'] else '80' if major_upgrade_to_product in ['ps80', 'ps81'] else '84' if major_upgrade_to_product == 'ps84' else '' }}"
+    when: major_upgrade_to_repo != "experimental" and (install_repo == '' or install_repo != "experimental")
+
+  - name: list installed packages for target Percona Server {{ major_upgrade_to_product }}
+    include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: start mysql service for target Percona Server {{ major_upgrade_to_product }}
+    service: name=mysql state=started
+
+  - name: print mysql version for source Percona Server {{ major_upgrade_from_product }}
+    command: mysql --version
+    register: mysql_version_output
+
+  - name: show mysql version output before upgrade
+    debug:
+      var: mysql_version_output.stdout
+
+
+#  - name: check target Percona Server {{ major_upgrade_to_product }} version
+#    command: /package-testing/version_check.sh {{ major_upgrade_to_product }}
+#
+#  - name: check target Percona Server {{ major_upgrade_to_product }} package versions
+#    command: /package-testing/package_check.sh {{ major_upgrade_to_product }}
+
+  ### Run tests for target version
+  - name: run keyring plugins test for target Percona Server {{ major_upgrade_to_product }}
+    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh {{ major_upgrade_to_product }}
+    when: major_upgrade_to_product in ['ps57', 'ps80', 'ps84']
+
+  - name: run bats unit tests for ps-admin script with target Percona Server {{ major_upgrade_to_product }}
+    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
+
+  - name: run bats integration tests for ps-admin script with target Percona Server {{ major_upgrade_to_product }}
+    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
+
+  - name: run bats tests for mysql init scripts with target Percona Server {{ major_upgrade_to_product }}
+    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+
+  ### Clean up - remove target version
+  - name: remove target Percona Server {{ major_upgrade_to_product }} packages
+    include_tasks: "../tasks/remove_{{ major_upgrade_to_product }}.yml"
+
+  - name: check if mysql process is stopped after target Percona Server {{ major_upgrade_to_product }} removal
+    command: /package-testing/check_running.sh mysql stopped
+
+  - stat:
+      path: /var/lib/mysql
+    register: p
+
+  - name: check /var/lib/mysql exists and not empty
+    fail:
+      msg: "Path exists and is a directory and is not empty"
+    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000

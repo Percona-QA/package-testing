@@ -77,12 +77,24 @@
     command: "{{ item }}"
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
-
-# Disable Percona Toolkit installation till its supported in OL9 and Jammy
+ 
+#  - name: include tasks for enabling "{{ repo_name }}" test repo
+#    include_tasks: ../tasks/enable_only_repo_for_pt.yml
+#    vars:
+#      repo_type: testing
+#      repo_name: pt
+#    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+#
+#  - name: include tasks for enabling "{{ repo_name }}" main repo
+#    include_tasks: ../tasks/enable_only_repo_for_pt.yml
+#    vars:
+#      repo_type: release
+#      repo_name: pt
+#    when: lookup('env', 'install_repo') == "main"
+#
 #  - name: install Percona Toolkit new deb packages
 #    include_tasks: ../tasks/install_pt.yml
-#
-#
+
   - name: install Percona Server{{ pro_suf }} 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
     vars:

@@ -1,0 +1,242 @@
+    - name: Display OS Name
+      debug:
+          msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+    - name: Add epel-release
+      package:
+          state: present
+          name: epel-release
+      when: ansible_os_family == "RedHat" and ansible_distribution_version != "2023"
+
+    - name: Remove any line containing 'backports' in sources.list for Debian 11
+      lineinfile:
+        path: /etc/apt/sources.list
+        regexp: '.*backports.*'
+        state: absent
+      when: ansible_os_family == "Debian" and ansible_distribution_release == "bullseye"
+
+
+    - name: Remove backports repository files in sources.list.d for Debian 11
+      shell: |
+        find /etc/apt/sources.list.d/ -type f -name "*backports*" -delete || true
+        find /etc/apt/sources.list.d/ -type f -exec sed -i '/backports/d' {} \; || true
+      when: ansible_os_family == "Debian" and ansible_distribution_release == "bullseye"
+
+    - name: install needed packages for running tests with apt
+      apt:
+        name: "{{ packages }}"
+        update_cache: yes
+        state: latest
+      vars:
+          packages:
+          - git
+          - unzip
+          - wget
+          - python3
+          - python3-pip
+          - libnuma1
+          - tar
+          - gawk
+      register: result
+      until: result is not failed
+      when: ansible_os_family == "Debian"
+
+    - name: install libaio1 package for running tests with apt except for Ubuntu 24.04 and Debian 13
+      apt:
+        name: "{{ packages }}"
+        update_cache: yes
+        state: latest
+      vars:
+        packages:
+        - libaio1 
+      register: result
+      until: result is not failed
+      when: >
+        ansible_os_family == "Debian" 
+        and ansible_distribution_version != "24.04"
+        and not (ansible_distribution == "Debian" and ansible_distribution_major_version|int == 13)
+
+    - name: install needed packages for running tests with yum
+      yum:
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+        - git
+        - unzip
+        - wget
+        - tar
+        - libaio
+        - numactl
+        - gawk
+        - python3
+        - python3-pip
+        - libtirpc
+        - lsb_release
+      when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+    - name: Install required packages using dnf
+      dnf:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+        - git
+        - unzip
+        - wget
+        - tar
+        - libaio
+        - numactl
+        - gawk
+        - python3
+        - python3-pip
+        - libtirpc
+      when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  #      - openldap // this package causes issue on OL-9
+
+  #  - name: get GLIBC_VERSION
+  #    set_fact:
+  #      GLIBC_VERSION: "{{ '2.35' if ansible_os_family == 'Debian' else '2.34' }}"
+
+    - name: get GLIBC_VERSION
+      set_fact:
+        GLIBC_VERSION: >-
+          {% if ansible_distribution == 'RedHat' and ansible_distribution_major_version == '10' %}
+            2.39
+          {% elif ansible_os_family == 'Debian' %}
+            2.35
+          {% else %}
+            2.34
+          {% endif %}
+
+    - name: sanitize GLIBC_VERSION
+      set_fact:
+        GLIBC_VERSION: "{{ GLIBC_VERSION | trim }}"
+
+    - name: get tarball name
+      set_fact:
+        TARBALL_NAME: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
+
+    - name: get testing repo tarball URL
+      set_fact:
+        TARBALL_LINK: "https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
+
+
+# -------------------------------------------------
+# Fetch package-testing (ALWAYS under /)
+# -------------------------------------------------
+
+    - name: Define package-testing variables
+      set_fact:
+        pkg_testing_root: "/package-testing"
+        pkg_testing_branch: "{{ lookup('env', 'TESTING_BRANCH') | default('master', true) }}"
+        pkg_testing_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
+
+
+    - name: Remove existing package-testing directory
+      file:
+        path: "{{ pkg_testing_root }}"
+        state: absent
+
+    - name: Download and extract package-testing repo
+      unarchive:
+        src: "https://github.com/{{ pkg_testing_account }}/package-testing/archive/{{ pkg_testing_branch }}.zip"
+        dest: /
+        remote_src: yes
+
+    - name: Normalize extracted folder name to /package-testing
+      shell: |
+        set -e
+        cd /
+        extracted_dir="$(ls -d package-testing-* | head -n1)"
+        echo "Detected extracted dir: ${extracted_dir}"
+        mv "${extracted_dir}" package-testing
+      args:
+        executable: /bin/bash
+
+    - name: Fix ownership so run.sh can extract tarball
+      file:
+        path: /package-testing
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        recurse: yes
+
+    - name: Verify package-testing structure
+      shell: |
+        echo "Checking package-testing layout:"
+        ls -ld /package-testing
+        ls -ld /package-testing/binary-tarball-tests/ps
+        ls -l  /package-testing/binary-tarball-tests/ps/run.sh
+
+    # -------------------------------------------------
+    # Ensure test directory exists
+    # -------------------------------------------------
+
+    - name: Ensure PS tarball test directory exists
+      file:
+        path: /package-testing/binary-tarball-tests/ps
+        state: directory
+        mode: "0755"
+
+    # -------------------------------------------------
+    # Download tarball INTO run.sh directory
+    # -------------------------------------------------
+
+    - name: Download PS tarball
+      get_url:
+        url: "{{ TARBALL_LINK }}"
+        dest: "/package-testing/binary-tarball-tests/ps/{{ TARBALL_NAME }}"
+        mode: "0644"
+
+    # -------------------------------------------------
+    # DEBUG – final verification
+    # -------------------------------------------------
+
+    - name: Verify tarball presence
+      shell: ls -lh /package-testing/binary-tarball-tests/ps
+      register: tarball_debug
+
+    - debug:
+        var: tarball_debug.stdout_lines
+
+    # -------------------------------------------------
+    # FIPS flags for tests
+    # -------------------------------------------------
+
+    - name: Default FIPS_SUPPORTED
+      set_fact:
+        FIPS_SUPPORTED: "no"
+
+    - name: Enable FIPS for OL9
+      set_fact:
+        FIPS_SUPPORTED: "yes"
+      when:
+        - ansible_distribution == "OracleLinux"
+        - ansible_distribution_major_version == "9"
+
+    - name: Enable FIPS for Debian 12
+      set_fact:
+        FIPS_SUPPORTED: "yes"
+      when:
+        - ansible_distribution == "Debian"
+        - ansible_distribution_release == "bookworm"
+
+    # -------------------------------------------------
+    # Export environment for run.sh
+    # -------------------------------------------------
+
+    - name: Export test environment
+      lineinfile:
+        path: /etc/environment
+        line: "{{ item }}"
+        state: present
+      loop:
+        - "PS_VERSION={{ lookup('env','PS_VERSION') }}"
+        - "PS_REVISION={{ lookup('env','PS_REVISION') }}"
+        - "PRO={{ lookup('env','PRO') }}"
+        - "FIPS_SUPPORTED={{ FIPS_SUPPORTED }}"

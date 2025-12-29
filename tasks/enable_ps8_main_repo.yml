@@ -35,7 +35,7 @@
       disable_gpg_check: yes
     when: ansible_os_family == "RedHat"
 
-  - name: enable the PS-80 testing repo
+  - name: enable the PS-80 release repo
     command: percona-release enable ps-80 release
 
   - name: enable the pxb-80 release repo

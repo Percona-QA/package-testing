@@ -45,9 +45,7 @@
 
   - name: enable the pxb-84 release repo
     command: percona-release enable pxb-84-lts release
-    when:
-      - ansible_distribution_release == "noble"
-      - ansible_distribution != "Amazon"
+#    when: ansible_distribution_release == "noble"
 
 # - name: enable the tools main repo
 #   command: percona-release enable tools release
