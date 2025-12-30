@@ -45,7 +45,7 @@
   - name: Set major_release_version variable
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
-      
+
 # Install from main repository
 
   - name: include tasks for enabling main repo
@@ -65,11 +65,6 @@
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
-      
-
-  - name: install Percona XtraBackup 8.0 packages
-    include_tasks: ../tasks/install_pxb80.yml
-    when: lookup('env', 'install_repo') != "experimental"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -114,7 +109,7 @@
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
     when: install_mysql_shell == "yes" or install_mysql_shell == ""
-    
+
   - name: install 3rd party packages with apt
     apt:
       name: "{{ packages }}"
@@ -146,9 +141,6 @@
   - name: start my.cnf change test
     command: /package-testing/check_mycnf_pre.sh
 
-  - name: Remove PXB 8.0 packages
-    include_tasks: ../tasks/remove_pxb80.yml 
-
 #
 # Enable testing/main repository
 #
@@ -159,18 +151,9 @@
   - name: include tasks for enabling PS {{ major_release_version }} testing repo
     include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
     when: lookup('env', 'install_repo') == "main"
-    
+
 # Upgrade packages
 #
-  - name: upgrade Percona Toolkit to new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - percona-toolkit
-    when: ansible_os_family == "Debian"
 
   - name: upgrade Percona Server to new deb packages {{ major_release_version }}
     apt:
