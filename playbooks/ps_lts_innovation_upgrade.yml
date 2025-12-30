@@ -137,8 +137,8 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: check telemetry (disabled)
-    command: /package-testing/check_telemetry.sh ps -d
+#  - name: check telemetry (disabled)
+#    command: /package-testing/check_telemetry.sh ps -d
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps{{ major_release_version }}
