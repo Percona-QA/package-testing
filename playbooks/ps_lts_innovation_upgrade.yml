@@ -140,6 +140,9 @@
 #  - name: check telemetry (disabled)
 #    command: /package-testing/check_telemetry.sh ps -d
 
+  - name: Test JS component
+    command: /package-testing/scripts/js_component.sh
+
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps{{ major_release_version }}
 
