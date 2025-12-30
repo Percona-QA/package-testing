@@ -124,6 +124,9 @@
     include_tasks: ../tasks/install_pshell.yml
     when: install_mysql_shell == "yes" or install_mysql_shell == ""
 
+  - name: Test JS component
+    command: /package-testing/scripts/js_component.sh
+
   - name: check that Percona Server package versions are correct for ps{{ major_release_version }}
     command: /package-testing/package_check.sh ps{{ major_release_version }}
 
