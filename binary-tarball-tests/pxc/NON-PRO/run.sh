@@ -55,7 +55,7 @@ else
     sudo apt install -y python3 python3-pip
   fi
   sudo apt update
-  if [[ $(lsb_release -sc) == "bookworm" || $(lsb_release -sc) == "noble" ]]; then
+  if [[ $(lsb_release -sc) == "bookworm" || $(lsb_release -sc) == "noble" || "$CODENAME" == "trixie" ]]; then
     sudo apt install -y python3 python3-pip libnuma1 socat lsof curl libev4 libaio-dev
     pip3 install --user --break-system-packages pytest pytest-testinfra
     export PATH=$PATH:$HOME/.local/bin
