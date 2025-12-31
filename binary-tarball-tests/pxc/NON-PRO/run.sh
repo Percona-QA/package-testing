@@ -55,14 +55,14 @@ else
     sudo apt install -y python3 python3-pip
   fi
   sudo apt update
-  if [[ $(lsb_release -sc) == "bookworm" || $(lsb_release -sc) == "noble" || "$CODENAME" == "trixie" ]]; then
+#  if [[ $(lsb_release -sc) == "bookworm" || $(lsb_release -sc) == "noble" || "$CODENAME" == "trixie" ]]; then
     sudo apt install -y python3 python3-pip libnuma1 socat lsof curl libev4 libaio-dev
     pip3 install --user --break-system-packages pytest pytest-testinfra
     export PATH=$PATH:$HOME/.local/bin
-  else
-    sudo apt install -y python3 python3-pip libnuma1 socat lsof curl libev4 libaio1
-    pip3 install --user pytest pytest-testinfra
-  fi
+#  else
+#    sudo apt install -y python3 python3-pip libnuma1 socat lsof curl libev4 libaio1
+#    pip3 install --user pytest pytest-testinfra
+#  fi
 
   if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     wget -q https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb
