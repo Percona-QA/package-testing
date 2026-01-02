@@ -44,9 +44,10 @@
     debug:
       msg: "Detected OS: {{ os_version }}, glibc version: {{ glibc_version }}"
 
-  - name: SET PXB_VERSION VAR
+  - name: Set PXB_VERSION and PS_VERSION vars
     set_fact:
       PXB_VERSION: "{{ lookup('env', 'PXB_VERSION') }}"
+      PS_VERSION: "{{ lookup('env', 'PS_VERSION') }}"
 
 #
   - name: Set Tarball and Folder name for REGULAR
