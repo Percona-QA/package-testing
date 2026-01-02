@@ -53,11 +53,15 @@
     set_fact:
       TARBALL_NAME_REGULAR: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}.tar.gz"
       TARBALL_NAME_REGULAR_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}"
+      PS_TARBALL_NAME_REGULAR: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}.tar.gz"
+      PS_TARBALL_NAME_REGULAR_FOLDER: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}.tar.gz"
 
   - name: Set Tarball and Folder name for MINIMAL
     set_fact:
       TARBALL_NAME_MINIMAL: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal.tar.gz"
       TARBALL_NAME_MINIMAL_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal"
+      PS_TARBALL_NAME_REGULAR: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}-minimal.tar.gz"
+      PS_TARBALL_NAME_REGULAR_FOLDER: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}-minimal.tar.gz"
 
   - name: Extract major version
     set_fact:
@@ -301,3 +305,33 @@
   - name: Print contents of the server-qa repo
     debug:
       msg: "{{ server_qa_contents.stdout_lines }}"
+
+  - name: Download {{ PS_TARBALL_NAME_REGULAR }} REGULAR MAIN REPO PS80 PXB 80
+    ansible.builtin.get_url:
+      url: https://downloads.percona.com/downloads/Percona-Server-8.0/Percona-Server-{{ PS_VERSION }}/binary/tarball/{{ PS_TARBALL_NAME_REGULAR }}
+      dest: /package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR }}
+      mode: '0644'
+    when:
+      - lookup('env', 'PXB_RELEASE') == "80"
+
+  - name: Download {{ PS_TARBALL_NAME_REGULAR }} REGULAR MAIN REPO PS84 PXB 84
+    ansible.builtin.get_url:
+      url: https://downloads.percona.com/downloads/Percona-Server-8.4/Percona-Server-{{ PS_VERSION }}/binary/tarball/{{ PS_TARBALL_NAME_REGULAR }}
+      dest: /package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR }}
+      mode: '0644'
+    when:
+      - lookup('env', 'PXB_RELEASE') == "84"
+
+  - name: Extract {{ PS_TARBALL_NAME_REGULAR }} REGULAR
+    ansible.builtin.unarchive:
+      src: /package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR }}
+      dest: /package-testing/molecule/pxb-new-ps-tarball/
+      remote_src: yes
+
+  - name: List contents of the extracted tarball
+    command: ls -l /package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}
+    register: ps_tarball_contents
+
+  - name: Print contents of the extracted tarball
+    debug:
+      msg: "{{ ps_tarball_contents.stdout_lines }}"
