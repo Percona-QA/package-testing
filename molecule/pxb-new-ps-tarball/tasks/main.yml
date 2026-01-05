@@ -55,14 +55,14 @@
       TARBALL_NAME_REGULAR: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}.tar.gz"
       TARBALL_NAME_REGULAR_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}"
       PS_TARBALL_NAME_REGULAR: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}.tar.gz"
-      PS_TARBALL_NAME_REGULAR_FOLDER: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}.tar.gz"
+      PS_TARBALL_NAME_REGULAR_FOLDER: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}"
 
   - name: Set Tarball and Folder name for MINIMAL
     set_fact:
       TARBALL_NAME_MINIMAL: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal.tar.gz"
       TARBALL_NAME_MINIMAL_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal"
       PS_TARBALL_NAME_REGULAR: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}-minimal.tar.gz"
-      PS_TARBALL_NAME_REGULAR_FOLDER: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}-minimal.tar.gz"
+      PS_TARBALL_NAME_REGULAR_FOLDER: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}-minimal"
 
   - name: Extract major version
     set_fact:
@@ -291,14 +291,6 @@
       msg: "TARBALL_NAME_MINIMAL_FOLDER is not set. Please check the environment variable REPO_TYPE."
     when: TARBALL_NAME_MINIMAL_FOLDER is not defined
 
-  - name: list items in package testing
-    command: ls -alh /package-testing/molecule/pxb-new-ps-tarball/
-    register: package_testing_contents
-
-  - name: Print contents of the package testing
-    debug:
-      msg: "{{ package_testing_contents.stdout_lines }}"
-
   - name: list items in server-qa repo
     command: ls -alh /server-qa/
     register: server_qa_contents
@@ -336,3 +328,11 @@
   - name: Print contents of the extracted tarball
     debug:
       msg: "{{ ps_tarball_contents.stdout_lines }}"
+
+  - name: list items in package testing
+    command: ls -alh /package-testing/molecule/pxb-new-ps-tarball/
+    register: package_testing_contents
+
+  - name: Print contents of the package testing
+    debug:
+      msg: "{{ package_testing_contents.stdout_lines }}"
