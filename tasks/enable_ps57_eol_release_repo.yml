@@ -16,7 +16,7 @@
       state: present
     when: ansible_os_family == "Debian"
 
-  - name: add pro repository on debian
+  - name: add eol main repository on debian
     template: src=../templates/eol_deb_repo_file_ps57.j2
               dest=/etc/apt/sources.list.d/post-eol.list
     vars:
@@ -26,7 +26,7 @@
     when:
       - ansible_os_family == "Debian"
 
-  - name: add pro repository on Redhat
+  - name: add eol release repository on Redhat
     template: src=../templates/eol_rpm_repo_file_ps57.j2
              dest=/etc/yum.repos.d/post-eol.repo
     vars:
