@@ -24,7 +24,7 @@
     when: ansible_os_family == "Debian"
 
   #
-  # Install PSMDB 4.0 packages
+  # Install PSMDB 4.0/4.2/4.4/5.0/6.0/7.0/8.0 packages
   #
   - name: Install psmdb packages in debian
     apt:

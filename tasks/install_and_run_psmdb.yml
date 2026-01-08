@@ -1,4 +1,4 @@
-# This task enables Percona Server for MongoDB 44 (psmdb44) and  MongoDB 50 (psmdb50) main repository, installs and starts modgodb.
+# This task enables Percona Server for MongoDB 44 (psmdb44), MongoDB 50 (psmdb50), MongoDB 60 (psmdb60), MongoDB 70 (psmdb70), and MongoDB 80 (psmdb80) main repository, installs and starts modgodb.
 
 # Enable psmdb repo and install psmdb
   - name: include tasks for enabling psmdb 44 repo
@@ -18,6 +18,18 @@
     vars:
       psmdb_repo: "psmdb-60 release"
     when: lookup('env', 'install_with') == "psmdb60"
+
+  - name: include tasks for enabling psmdb 70 repo
+    include_tasks: ../tasks/enable_psmdb_repo.yml
+    vars:
+      psmdb_repo: "psmdb-70 release"
+    when: lookup('env', 'install_with') == "psmdb70"
+
+  - name: include tasks for enabling psmdb 80 repo
+    include_tasks: ../tasks/enable_psmdb_repo.yml
+    vars:
+      psmdb_repo: "psmdb-80 release"
+    when: lookup('env', 'install_with') == "psmdb80"
 
   - name: include tasks for installing psmdb packages
     vars:
