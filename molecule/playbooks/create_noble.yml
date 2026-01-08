@@ -148,7 +148,7 @@
         host: "{{ item.address }}"
         search_regex: SSH
         delay: 10
-        timeout: 320
+        timeout: 600
       with_items: "{{ lookup('file', molecule_instance_config) | from_yaml }}"
 
     - name: Wait for boot process to finish
