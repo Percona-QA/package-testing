@@ -119,3 +119,10 @@
         dest: /server-qa
         version: tomislav-pxb-python
         force: yes
+
+    - name: Checkout pstress repository
+      git:
+        repo: https://github.com/Percona-QA/pstress.git
+        dest: /pstress
+        version: main
+        force: yes
