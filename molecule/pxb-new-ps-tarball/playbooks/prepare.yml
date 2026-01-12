@@ -127,23 +127,29 @@
         version: master
         force: yes
 
-    - name: Install cmake and build tools
+    - name: Install cmake and build tools for RedHat family
       package:
         name:
           - cmake
           - make
           - gcc
           - gcc-c++
+          - openssl-devel
+          - zlib-devel
+          - libzstd-devel
         state: present
       when: ansible_os_family == "RedHat"
 
-    - name: Install cmake and build tools for Debian
+    - name: Install cmake and build tools for Debian family
       apt:
         name:
           - cmake
           - make
           - gcc
           - g++
+          - libssl-dev
+          - zlib1g-dev
+          - libzstd-dev
         state: present
         update_cache: yes
       when: ansible_os_family == "Debian"
