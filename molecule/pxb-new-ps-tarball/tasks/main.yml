@@ -61,8 +61,8 @@
     set_fact:
       TARBALL_NAME_MINIMAL: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal.tar.gz"
       TARBALL_NAME_MINIMAL_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal"
-      PS_TARBALL_NAME_REGULAR: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}-minimal.tar.gz"
-      PS_TARBALL_NAME_REGULAR_FOLDER: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}-minimal"
+      PS_TARBALL_NAME_MINIMAL: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}-minimal.tar.gz"
+      PS_TARBALL_NAME_MINIMAL_FOLDER: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}-minimal"
 
   - name: Extract major version
     set_fact:
@@ -336,3 +336,11 @@
   - name: Print contents of the package testing
     debug:
       msg: "{{ package_testing_contents.stdout_lines }}"
+
+  - name: list items in pstress
+    command: ls -alh /pstress/
+    register: pstress_contents
+
+  - name: Print contents of the pstress repo
+    debug:
+      msg: "{{ pstress_contents.stdout_lines }}"
