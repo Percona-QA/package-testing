@@ -126,3 +126,24 @@
         dest: /pstress
         version: master
         force: yes
+
+    - name: Install cmake and build tools
+      package:
+        name:
+          - cmake
+          - make
+          - gcc
+          - gcc-c++
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Install cmake and build tools for Debian
+      apt:
+        name:
+          - cmake
+          - make
+          - gcc
+          - g++
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"

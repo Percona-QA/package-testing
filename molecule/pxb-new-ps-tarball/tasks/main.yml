@@ -344,3 +344,15 @@
   - name: Print contents of the pstress repo
     debug:
       msg: "{{ pstress_contents.stdout_lines }}"
+
+  - name: Build pstress
+    shell: |
+      cmake . -DBASEDIR=/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}/ -DPERCONASERVER=ON
+      make -j4
+    args:
+      chdir: /pstress
+    register: pstress_build
+
+  - name: Print pstress build output
+    debug:
+      msg: "{{ pstress_build.stdout_lines }}"
