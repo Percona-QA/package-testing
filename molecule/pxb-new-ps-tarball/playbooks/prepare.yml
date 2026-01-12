@@ -124,5 +124,5 @@
       git:
         repo: https://github.com/Percona-QA/pstress.git
         dest: /pstress
-        version: main
+        version: master
         force: yes
