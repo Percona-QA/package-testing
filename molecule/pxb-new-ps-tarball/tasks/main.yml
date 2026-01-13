@@ -359,7 +359,7 @@
 
   - name: Build pstress
     shell: |
-      cmake . -DBASEDIR=/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}/ -DPERCONASERVER=ON -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF -DCMAKE_CXX_FLAGS="-fno-lto"
+      cmake . -DBASEDIR=/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}/ -DPERCONASERVER=ON
       make -j4
     args:
       chdir: /pstress
