@@ -36,13 +36,25 @@
 #      echo "{{ os_version_full }}" | grep -oE '\b\w+:[0-9]+'
 #    register: os_version
 
-  - name: Set glibc version based on os_version
-    set_fact:
-      glibc_version: "{{ glibc_versions_map.get(os_version, 'Unknown OS version') }}"
+  # - name: Set glibc version based on os_version
+  #   set_fact:
+  #     glibc_version: "{{ glibc_versions_map.get(os_version, 'Unknown OS version') }}"
 
-  - name: Show detected values
-    debug:
-      msg: "Detected OS: {{ os_version }}, glibc version: {{ glibc_version }}"
+  # - name: Show detected values
+  #   debug:
+  #     msg: "Detected OS: {{ os_version }}, glibc version: {{ glibc_version }}"
+
+  - name: Set glibc versions for Debian
+    set_fact:
+      pxb_glibc_version: "{{ lookup('env', 'PXB_DEBIAN_GCLIBC_VERSION') }}"
+      ps_glibc_version: "{{ lookup('env', 'PS_DEBIAN_GCLIBC_VERSION') }}"
+    when: ansible_os_family == "Debian"
+
+  - name: Set glibc versions for RedHat
+    set_fact:
+      pxb_glibc_version: "{{ lookup('env', 'PXB_RHEL_GCLIBC_VERSION') }}"
+      ps_glibc_version: "{{ lookup('env', 'PS_RHEL_GCLIBC_VERSION') }}"
+    when: ansible_os_family == "RedHat"
 
   - name: Set PXB_VERSION and PS_VERSION vars
     set_fact:
@@ -52,17 +64,17 @@
 #
   - name: Set Tarball and Folder name for REGULAR
     set_fact:
-      TARBALL_NAME_REGULAR: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}.tar.gz"
-      TARBALL_NAME_REGULAR_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}"
-      PS_TARBALL_NAME_REGULAR: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}.tar.gz"
-      PS_TARBALL_NAME_REGULAR_FOLDER: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}"
+      TARBALL_NAME_REGULAR: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ pxb_glibc_version }}.tar.gz"
+      TARBALL_NAME_REGULAR_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ pxb_glibc_version }}"
+      PS_TARBALL_NAME_REGULAR: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ ps_glibc_version }}.tar.gz"
+      PS_TARBALL_NAME_REGULAR_FOLDER: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ ps_glibc_version }}"
 
   - name: Set Tarball and Folder name for MINIMAL
     set_fact:
-      TARBALL_NAME_MINIMAL: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal.tar.gz"
-      TARBALL_NAME_MINIMAL_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ glibc_version }}-minimal"
-      PS_TARBALL_NAME_MINIMAL: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}-minimal.tar.gz"
-      PS_TARBALL_NAME_MINIMAL_FOLDER: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ glibc_version }}-minimal"
+      TARBALL_NAME_MINIMAL: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ pxb_glibc_version }}-minimal.tar.gz"
+      TARBALL_NAME_MINIMAL_FOLDER: "percona-xtrabackup-{{ lookup('env', 'PXB_VERSION') }}-Linux-x86_64.glibc{{ pxb_glibc_version }}-minimal"
+      PS_TARBALL_NAME_MINIMAL: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ ps_glibc_version }}-minimal.tar.gz"
+      PS_TARBALL_NAME_MINIMAL_FOLDER: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ ps_glibc_version }}-minimal"
 
   - name: Extract major version
     set_fact:
