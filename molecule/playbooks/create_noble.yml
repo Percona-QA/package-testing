@@ -142,24 +142,13 @@
       debug:
         var: instance_config_dict
 
-    - name: Wait for instance to be running
-      amazon.aws.ec2_instance_info:
-        region: "{{ item.region }}"
-        instance_ids:
-          - "{{ item.instance_id }}"
-      register: ec2_state
-      until: ec2_state.instances[0].state.name == "running"
-      retries: 30
-      delay: 10
-      loop: "{{ lookup('file', molecule_instance_config) | from_yaml }}"
-
     - name: Wait for SSH
       wait_for:
         port: "{{ ssh_port }}"
         host: "{{ item.address }}"
-#        search_regex: SSH
+        search_regex: SSH
         delay: 10
-        timeout: 600
+        timeout: 320
       with_items: "{{ lookup('file', molecule_instance_config) | from_yaml }}"
 
     - name: Wait for boot process to finish
