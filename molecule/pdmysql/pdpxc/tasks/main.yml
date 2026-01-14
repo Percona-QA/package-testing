@@ -1,6 +1,17 @@
 ---
 # tasks file for pdpxc
 
+- name: Check OpenSSL version
+  command: openssl version
+  register: openssl_version
+  changed_when: false
+  failed_when: false
+
+- name: Show OpenSSL version
+  debug:
+    msg: "OpenSSL version on {{ inventory_hostname }}: {{ openssl_version.stdout }}"
+
+
 - name: Update all dnf packages without reboot
   ansible.builtin.dnf: name='*' state=latest
   when: ansible_facts['distribution'] in ['RedHat','OracleLinux']

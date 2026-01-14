@@ -63,7 +63,7 @@ pxc8x_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 pxc8x_files = (
-  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.6' ,
+  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.7' ,
   'lib/libmysqlservices.a' ,
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', #'lib/plugin/keyring_file.so',
   'lib/plugin/keyring_udf.so'
@@ -71,7 +71,7 @@ pxc8x_files = (
 if glibc_version == '2.35':
     pxc8x_symlinks = (
    #   ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),('lib/libgcrypt.so', 'lib/private/libgcrypt.so.20.3.4',),
-      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.0.6'),#('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
+      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.0.7'),#('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
     #  ('lib/libssl.so', 'lib/private/libssl.so.3'),
       ('lib/libtinfo.so', 'lib/private/libtinfo.so.6.3'),
       ('lib/libaio.so','lib/private/libaio.so.1.0.1'),('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
@@ -82,7 +82,7 @@ if glibc_version == '2.35':
 else:
     pxc8x_symlinks = (
       #   ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),('lib/libgcrypt.so', 'lib/private/libgcrypt.so.20.3.4',),
-      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.0.6'),#('lib/libsasl2.so', 'lib/private/libsasl2.so.3.0.0'),
+      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.0.7'),#('lib/libsasl2.so', 'lib/private/libsasl2.so.3.0.0'),
     #  ('lib/libssl.so', 'lib/private/libssl.so.3'),
    #   ('lib/libtinfo.so', 'lib/private/libtinfo.so.6.2'),
       ('lib/libaio.so','lib/private/libaio.so.1.0.1'),#('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
@@ -100,7 +100,7 @@ else:
     #  ('lib/libssl3.so','lib/private/libssl3.so'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
     )
 pxc8x_components = (
-    ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault'),('file://component_binlog_uts_udf')
+    ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault'),('file://component_binlog_uts_udf'),('file://component_js_lang')
   )
 
   # 8.0
