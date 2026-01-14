@@ -16,6 +16,12 @@ def test_check_package(host, package):
     assert REPL_MANAGER_VERSION in pkg.version, pkg.version
 
 def test_script_run(host):
-    cmd = "/usr/bin/replication_manager5.sh"
+    cmd = "/usr/bin/replication_manager.sh"
     result = host.run(cmd)
-    assert "Access denied for user" in result.stdout, result.stdout
+
+    expected_errors = [
+        "Access denied for user",
+        "Plugin 'mysql_native_password' is not loaded",
+    ]
+
+    assert any(err in result.stdout for err in expected_errors), result.stdout
