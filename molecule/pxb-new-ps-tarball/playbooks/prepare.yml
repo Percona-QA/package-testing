@@ -153,3 +153,55 @@
         state: present
         update_cache: yes
       when: ansible_os_family == "Debian"
+
+    - name: Install percona-release for RedHat family (RHEL 7 and earlier)
+      yum:
+        name: percona-release
+        state: present
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int <= 7
+
+    - name: Install percona-release for RedHat family (RHEL 8 and later)
+      dnf:
+        name: percona-release
+        state: present
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int >= 8
+
+    - name: Install percona-release for Debian family
+      apt:
+        name: percona-release
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Enable Percona Toolkit repository
+      command: percona-release enable pt -y
+      changed_when: false
+
+    - name: Install Percona Toolkit for RedHat family (RHEL 7 and earlier)
+      yum:
+        name: percona-toolkit
+        state: latest
+        update_cache: yes
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int <= 7
+
+    - name: Install Percona Toolkit for RedHat family (RHEL 8 and later)
+      dnf:
+        name: percona-toolkit
+        state: latest
+        update_cache: yes
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int >= 8
+
+    - name: Install Percona Toolkit for Debian family
+      apt:
+        name: percona-toolkit
+        state: latest
+        update_cache: yes
+      when: ansible_os_family == "Debian"
