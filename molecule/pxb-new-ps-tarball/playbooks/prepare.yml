@@ -199,3 +199,28 @@
         state: latest
         update_cache: yes
       when: ansible_os_family == "Debian"
+
+    - name: Install sysbench for RedHat family (RHEL 7 and earlier)
+      yum:
+        name: sysbench
+        state: latest
+        update_cache: yes
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int <= 7
+
+    - name: Install sysbench for RedHat family (RHEL 8 and later)
+      dnf:
+        name: sysbench
+        state: latest
+        update_cache: yes
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int >= 8
+
+    - name: Install sysbench for Debian family
+      apt:
+        name: sysbench
+        state: latest
+        update_cache: yes
+      when: ansible_os_family == "Debian"
