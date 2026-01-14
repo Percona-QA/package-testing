@@ -175,6 +175,10 @@
       command: percona-release enable pt
       changed_when: false
 
+    - name: Enable sysbench repository for RHEL 8 and later
+      command: percona-release enable sysbench release
+      changed_when: false
+
     - name: Install Percona Toolkit for RedHat family (RHEL 7 and earlier)
       yum:
         name: percona-toolkit
