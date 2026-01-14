@@ -172,7 +172,7 @@
         - ansible_distribution_major_version | int >= 8
 
     - name: Enable Percona Toolkit repository
-      command: percona-release enable pt -y
+      command: percona-release enable pt
       changed_when: false
 
     - name: Install Percona Toolkit for RedHat family (RHEL 7 and earlier)
