@@ -16,6 +16,6 @@ def test_check_package(host, package):
     assert REPL_MANAGER_VERSION in pkg.version, pkg.version
 
 def test_script_run(host):
-    cmd = "/usr/bin/replication_manager.sh"
+    cmd = "/usr/bin/replication_manager5.sh"
     result = host.run(cmd)
     assert "Access denied for user" in result.stdout, result.stdout
