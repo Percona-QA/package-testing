@@ -200,20 +200,21 @@
         update_cache: yes
       when: ansible_os_family == "Debian"
 
-    - name: Enable EPEL repo on RHEL
-      command: dnf install -y epel-release
-      changed_when: false
+    - name: Install GPG key for EPEL 10
+      rpm_key:
+        state: present
+        key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-10
       when:
         - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int == 10
 
-    - name: Install sysbench for RedHat family (RHEL 7 and earlier)
-      yum:
-        name: sysbench
-        state: latest
-        update_cache: yes
+    - name: Setup EPEL 10 repo
+      dnf:
+        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
+        state: present
       when:
         - ansible_os_family == "RedHat"
-        - ansible_distribution_major_version | int <= 7
+        - ansible_distribution_major_version | int == 10
 
     - name: Install sysbench for RedHat family (RHEL 8 and later)
       dnf:
