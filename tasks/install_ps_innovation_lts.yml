@@ -15,6 +15,7 @@
       - percona-server-client
       - percona-server-rocksdb
       - percona-mysql-router
+      - percona-server-js
     when: ansible_os_family == "Debian"
 
   - name: get list of enabled dnf modules on centos 8
@@ -56,6 +57,7 @@
       - percona-server-debuginfo
       - percona-server-devel
       - percona-server-rocksdb
+      - percona-server-js
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int <= 7
@@ -75,6 +77,7 @@
       - percona-server-debuginfo
       - percona-server-devel
       - percona-server-rocksdb
+      - percona-server-js
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 8

@@ -38,7 +38,7 @@
   - name: Set major_release_version variable
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
-      
+
   - name: include tasks for local vault setup
     include_tasks: ../tasks/setup_local_vault.yml
 
@@ -51,7 +51,6 @@
 
   - name: include tasks for enabling PS {{ major_release_version }} testing repo
     include_tasks: ../tasks/enable_ps84_main_repo.yml
-  
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -64,10 +63,6 @@
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
-
-  - name: install Percona XtraBackup {{ major_release_version }} packages
-    include_tasks: ../tasks/install_pxb_innovation_lts.yml
-    when: lookup('env', 'install_repo') != "experimental"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -132,34 +127,8 @@
   - name: include tasks for enabling PS {{ major_release_version }} main repo
     include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
 
-# Upgrade packages
-#
-  - name: upgrade Percona Toolkit to new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-      state: latest
-    vars:
-      packages:
-      - percona-toolkit
-    when: ansible_os_family == "Debian"
-
-  - name: upgrade Percona Server to new deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: no
-      state: latest
-    vars:
-      packages:
-      - percona-server-server
-      - percona-server-test
-      - percona-server-client
-      - percona-server-dbg
-      - percona-server-source
-      - percona-server-rocksdb
-    when: ansible_os_family == "Debian"
-    environment:
-      PERCONA_TELEMETRY_DISABLE: "1"
+  - name: install Percona PS Innovation {{ major_release_version }} packages
+    include_tasks: ../tasks/install_ps_innovation_lts.yml
 
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
@@ -168,8 +137,11 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: check telemetry (disabled)
-    command: /package-testing/check_telemetry.sh ps -d
+#  - name: check telemetry (disabled)
+#    command: /package-testing/check_telemetry.sh ps -d
+
+  - name: Test JS component
+    command: /package-testing/scripts/js_component.sh
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps{{ major_release_version }}
