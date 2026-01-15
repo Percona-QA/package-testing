@@ -5,10 +5,10 @@ driver:
   name: ec2
 platforms:
   - name: rocky-8-${PLAYBOOK_VAR}
-    region: ap-south-1
-    image:  ami-0bc51e2ea9a9714c8
-    vpc_subnet_id: subnet-07e4afe7c33798902
-    instance_type: t2.large
+    region: us-west-2
+    image:  ami-04310224db1f2a278
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: t2.medium
     ssh_user: rocky
     root_device_name: /dev/xvda
     instance_tags:
@@ -17,8 +17,8 @@ provisioner:
   name: ansible
   log: True
   playbooks:
-    create: ../../playbooks/create_noble.yml
-    destroy: ../../playbooks/destroy-noble.yml
+    create: ../../playbooks/create.yml
+    destroy: ../../playbooks/destroy.yml
     prepare: ../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
