@@ -59,15 +59,12 @@
 #      with_items: "{{ keypair_local.results}}"
 #      when: not item.stat.exists
 
-    - name: Create keypair
-      ec2_key:
-        name: "{{ keypair_name }}"
-        region: "{{ item.region|default(default_region) }}"
-      with_items: "{{ molecule_yml.platforms }}"
-      register: keypair
-      when:
-        - item.ssh_user is defined
-        - item.ssh_user == "rocky"
+#    - name: Create keypair
+#      ec2_key:
+#        name: "{{ keypair_name }}"
+#        region: "{{ item.region|default(default_region) }}"
+#      with_items: "{{ molecule_yml.platforms }}"
+#      register: keypair
 
     - name: Setup keypair for molecule ec2
       copy:
