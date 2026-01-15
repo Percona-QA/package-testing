@@ -175,10 +175,6 @@
       command: percona-release enable pt
       changed_when: false
 
-    - name: Enable sysbench repository for RHEL 8 and later
-      command: percona-release enable sysbench release
-      changed_when: false
-
     - name: Install Percona Toolkit for RedHat family (RHEL 7 and earlier)
       yum:
         name: percona-toolkit
@@ -203,6 +199,12 @@
         state: latest
         update_cache: yes
       when: ansible_os_family == "Debian"
+
+    - name: Enable EPEL repo on RHEL
+      command: dnf install -y epel-release
+      changed_when: false
+      when:
+        - ansible_os_family == "RedHat"
 
     - name: Install sysbench for RedHat family (RHEL 7 and earlier)
       yum:
