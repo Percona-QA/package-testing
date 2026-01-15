@@ -1,0 +1,37 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: rocky-8-${PLAYBOOK_VAR}
+    region: ap-south-1
+    image:  ami-0bc51e2ea9a9714c8
+    vpc_subnet_id: subnet-07e4afe7c33798902
+    instance_type: t2.large
+    ssh_user: rocky
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: ps-package-testing
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    create: ../../playbooks/create.yml
+    destroy: ../../playbooks/destroy.yml
+    prepare: ../../playbooks/prepare.yml
+    cleanup: ../../playbooks/cleanup.yml
+    converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
+scenario:
+  name: rocky-8
+  destroy_sequence:
+    - destroy
+  clenup_sequence:
+    - cleanup
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - cleanup
+    - destroy
