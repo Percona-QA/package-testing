@@ -112,7 +112,6 @@
 ### start PS
   - set_fact:
       mysql_service_name: "mysql_{{ instance_ip }}_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
-#      mysql_service_name: "mysql_{{ rnd }}_{{ instance_ip }}"
 
   - name: Install and start Percona Server 5.7
     when: '"ps-5.7" in enabled_db'
