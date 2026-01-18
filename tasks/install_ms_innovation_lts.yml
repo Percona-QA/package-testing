@@ -32,8 +32,6 @@
   - name: Import MySQL GPG key (legacy)
     shell: |
       curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 | apt-key add -
-    args:
-      warn: false
     when:
       - ansible_os_family == "Debian"
       - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
