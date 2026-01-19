@@ -166,7 +166,7 @@
       disable_gpg_check: yes
     when:
       - ansible_os_family == "RedHat"
-      - (ansible_distribution_major_version == "9") or (ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023")
+      - (ansible_distribution_major_version|int >= 9) or (ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023")
       - ansible_architecture == "aarch64"
       - lookup('env', 'REPO_TYPE') == "PRO"
 
@@ -177,9 +177,8 @@
       disable_gpg_check: yes
     when:
       - ansible_os_family == "RedHat"
-      - (ansible_distribution_major_version == "9") or (ansible_distribution == "Amazon")
+      - (ansible_distribution_major_version|int >= 9) or (ansible_distribution == "Amazon")
       - ansible_architecture != "aarch64"
-      - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: Import MySQL GPG key (2023)
     ansible.builtin.rpm_key:
