@@ -125,6 +125,12 @@ elif [ $1 = "psmdb44" ]; then
   version=${PSMDB44_VER}
 elif [ $1 = "psmdb50" ]; then
   version=${PSMDB50_VER}
+elif [ $1 = "psmdb60" ]; then
+  version=${PSMDB60_VER}
+elif [ $1 = "psmdb70" ]; then
+  version=${PSMDB70_VER}
+elif [ $1 = "psmdb80" ]; then
+  version=${PSMDB80_VER}
 elif [ $1 = "pmm" ]; then
   version=${PMM_VER}
 elif [ $1 = "pbm" ]; then
@@ -429,7 +435,7 @@ elif [ "${product}" = "psmdb30" -o "${product}" = "psmdb32" -o "${product}" = "p
         fi
       done
     else
-      if [ "${product}" = "psmdb40" -o "${product}" = "psmdb42" -o "${product}" = "psmdb44" ]; then
+      if [ "${product}" = "psmdb40" -o "${product}" = "psmdb42" -o "${product}" = "psmdb44" -o "${product}" = "psmdb50" -o "${product}" = "psmdb60" -o "${product}" = "psmdb70" -o "${product}" = "psmdb80" ]; then
         psmdb_name="percona-server-mongodb"
       else
         psmdb_name=""
