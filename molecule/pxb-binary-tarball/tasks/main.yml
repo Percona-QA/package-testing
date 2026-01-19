@@ -90,7 +90,7 @@
   - name: Extract major version
     set_fact:
       major_version: "{{ PXB_VERSION.split('-')[0] }}"
-    
+
   - name: Extract minor version
     set_fact:
       minor_version: "{{ PXB_VERSION.split('-')[1] }}"
@@ -128,16 +128,12 @@
   - name: Enable Percona Server 8.0 main repository PXB80
     include_tasks: ../../../tasks/enable_ps8_main_repo.yml
     when:
-      - ansible_distribution_major_version != "2023"
       - lookup('env', 'PXB_RELEASE') == "80"
-      - ansible_distribution_major_version != "10"
 
   - name: include playbook for Install Percona Server 8.0 PXB80
     include_tasks: ../../../tasks/install_ps80.yml
     when:
-      - ansible_distribution_major_version != "2023"
       - lookup('env', 'PXB_RELEASE') == "80"
-      - ansible_distribution_major_version != "10"
 
   - name: Enable Percona Server 8.0 PRO main repository PXB80
     include_tasks: ../../../tasks/enable_ps80_pro_tools_repo.yml
@@ -168,8 +164,8 @@
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/aarch64/Packages/g/gflags-2.2.2-9.el9.aarch64.rpm
       state: present
       disable_gpg_check: yes
-    when: 
-      - ansible_os_family == "RedHat" 
+    when:
+      - ansible_os_family == "RedHat"
       - (ansible_distribution_major_version == "9") or (ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023")
       - ansible_architecture == "aarch64"
       - lookup('env', 'REPO_TYPE') == "PRO"
@@ -179,8 +175,8 @@
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
       state: present
       disable_gpg_check: yes
-    when: 
-      - ansible_os_family == "RedHat" 
+    when:
+      - ansible_os_family == "RedHat"
       - (ansible_distribution_major_version == "9") or (ansible_distribution == "Amazon")
       - ansible_architecture != "aarch64"
       - lookup('env', 'REPO_TYPE') == "PRO"
@@ -189,14 +185,14 @@
     ansible.builtin.rpm_key:
       state: present
       key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
-    when: 
+    when:
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
 
   - name: Download MySQL 8.4 Community repo RPM
     ansible.builtin.get_url:
       url: https://repo.mysql.com/mysql84-community-release-el9-1.noarch.rpm
       dest: /tmp/mysql84-community-release-el9-1.noarch.rpm
-    when: 
+    when:
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
       - lookup('env', 'PXB_RELEASE') == "84"
 
@@ -204,7 +200,7 @@
     ansible.builtin.yum:
       name: /tmp/mysql84-community-release-el9-1.noarch.rpm
       state: present
-    when: 
+    when:
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
       - lookup('env', 'PXB_RELEASE') == "84"
 
@@ -251,7 +247,6 @@
   - name: install Percona Server 8.0 packages PXB80
     include_tasks: ../../../tasks/install_ps80.yml
     when:
-      - ansible_distribution_major_version != "2023"
       - lookup('env', 'PXB_RELEASE') == "80"
 
   - name: install Percona Server 8.4 packages PXB84
@@ -264,7 +259,7 @@
       url: https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-{{ PXB_VERSION }}/binary/tarball/{{ TARBALL_NAME_REGULAR }}
       dest: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR }}
       mode: '0644'
-    when: 
+    when:
       - lookup('env', 'REPO_TYPE') == "NORMAL"
       - lookup('env', 'TESTING_REPO') == "main"
       - lookup('env', 'PXB_RELEASE') == "80"
@@ -304,7 +299,7 @@
       url: https://downloads.percona.com/downloads/TESTING/pxb-{{ PXB_VERSION }}/{{ TARBALL_NAME_REGULAR }}
       dest: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR }}
       mode: '0644'
-    when: 
+    when:
       - lookup('env', 'REPO_TYPE') == "NORMAL"
       - lookup('env', 'TESTING_REPO') == "testing"
 
@@ -317,7 +312,7 @@
       - lookup('env', 'REPO_TYPE') == "PRO"
       - lookup('env', 'TESTING_REPO') == "testing"
 
-  - name: Extract {{ TARBALL_NAME_REGULAR }} REGULAR 
+  - name: Extract {{ TARBALL_NAME_REGULAR }} REGULAR
     ansible.builtin.unarchive:
       src: /package-testing/molecule/pxb-binary-tarball/{{ TARBALL_NAME_REGULAR }}
       dest: /package-testing/molecule/pxb-binary-tarball/
