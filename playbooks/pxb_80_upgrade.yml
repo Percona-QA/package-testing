@@ -31,9 +31,6 @@
 
   - name: include tasks for enabling PS 8 main repo
     include_tasks: ../tasks/enable_ps8_main_repo.yml
-    when:
-      - ansible_distribution_major_version != "2023"
-
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -47,7 +44,7 @@
       disable_gpg_check: yes
     when:
       - ansible_os_family == "RedHat"
-      - ansible_distribution_major_version == "9"
+      - ansible_distribution_major_version|int >= 9
       - ansible_architecture == "aarch64"
 
   - name: Install libgflags-dev for rhel9 amd64
@@ -57,8 +54,9 @@
       disable_gpg_check: yes
     when:
       - ansible_os_family == "RedHat"
-      - ansible_distribution_major_version == "9"
+      - ansible_distribution_major_version|int >= 9
       - ansible_architecture != "aarch64"
+
 # Disable Percona Toolkit installation till its supported in OL9 and Jammy
 #  - name: install Percona Toolkit new deb packages
 #    include_tasks: ../tasks/install_pt.yml
@@ -71,8 +69,6 @@
           PERCONA_TELEMETRY_DISABLE: "1"
     when:
       - lookup('env', 'server_to_test') == "ps-80"
-      - ansible_distribution_major_version != "2023"
-
 
    #### FOR AL2023 ######
   - name: include tasks for enabling PS 80 pro repo

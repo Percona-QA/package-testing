@@ -29,13 +29,21 @@
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
       - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
-  - name: Import key for mysql-repo add GPG key (Debian)
-    apt_key:
-      url: http://repo.mysql.com/RPM-GPG-KEY-mysql-2023  
-      state: present
-    when: 
+  - name: Import MySQL GPG key (legacy)
+    shell: |
+      curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 | apt-key add -
+    when:
       - ansible_os_family == "Debian"
       - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
+
+
+#  - name: Import key for mysql-repo add GPG key (Debian)
+#    apt_key:
+#      url: http://repo.mysql.com/RPM-GPG-KEY-mysql-2023  
+#      state: present
+#    when: 
+#      - ansible_os_family == "Debian"
+#      - lookup('env', 'server_to_test') == "ms_innovation_lts" or lookup('env', 'server_to_test') == "ms-80"
 
   - name: Import GPG key for RPM 8-3
     rpm_key:
