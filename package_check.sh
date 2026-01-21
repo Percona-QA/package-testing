@@ -106,7 +106,7 @@ elif [ $1 = "pxb84" ]; then
 elif [ $1 = "pxb84" ] && [ "$2" = "pro" ]; then
   version=${PXB84_PRO_VER}
   pkg_version=${PXB84_PRO_PKG_VER}
-elif [[ $1 =~ ^pxb9[1-9]{1}$ ]]; then
+elif [[ $1 =~ ^pxb9[0-9]{1}$ ]]; then
   version=${PXB_INN_LTS_VER}
   pkg_version=${PXB_INN_LTS_PKG_VER}
 elif [ $1 = "psmdb30" ]; then
