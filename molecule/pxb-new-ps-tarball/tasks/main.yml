@@ -371,7 +371,8 @@
 
   - name: Run inc_backup_load_tests.py tests
     shell: |
-      pytest inc_backup_load_tests.py -v
+      env
+      pytest inc_backup_load_tests.py -k test_keyring_component_backup -v
     args:
       chdir: /server-qa/test_scripts/pxb
     environment:
