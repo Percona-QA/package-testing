@@ -368,3 +368,9 @@
   - name: Print pstress build output
     debug:
       msg: "{{ pstress_build.stdout_lines }}"
+
+  - name: Run inc_backup_load_tests.py tests
+    shell: |
+      pytest inc_backup_load_tests.py -v
+    args:
+      chdir: /server-qa/test_scripts/pxb
