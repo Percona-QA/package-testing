@@ -113,6 +113,22 @@
         - ansible_os_family == "RedHat"
         - ansible_distribution_major_version | int > 9
 
+    - name: Install psutil using pip3 for Debian family (with --break-system-packages)
+      command: pip3 install --break-system-packages psutil
+      when: ansible_os_family == "Debian"
+
+    - name: Install psutil using pip3 for RedHat family (RHEL 7 and earlier)
+      command: pip3 install psutil
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int <= 9
+
+    - name: Install psutil using pip3 for RedHat family (RHEL 8 and later, including RHEL 10)
+      command: pip3 install --break-system-packages psutil
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int > 9
+
     - name: Checkout server-qa repository
       git:
         repo: https://github.com/Percona-QA/server-qa.git
