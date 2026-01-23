@@ -387,3 +387,34 @@
       QASCRIPTS: "/server-qa"
       LOAD_TOOL: "pstress"
       LOAD_TOOL_DIR: "/pstress/src"
+    register: test_result
+    failed_when: false
+
+  - name: Collect and archive test logs
+    shell: |
+      TEST_BASE_DIR="{{ ansible_env.HOME }}/inc_backup_load_tests"
+      ARCHIVE_NAME="inc_backup_load_tests_logs_$(date +%Y%m%d_%H%M%S).tar.gz"
+
+      # Use molecule ephemeral directory for Jenkins artifact collection
+      # This directory is synced back to Jenkins workspace
+      MOLECULE_EPHEMERAL_DIR="${MOLECULE_EPHEMERAL_DIRECTORY:-/tmp}"
+      ARCHIVE_PATH="${MOLECULE_EPHEMERAL_DIR}/${ARCHIVE_NAME}"
+
+      if [ -d "$TEST_BASE_DIR" ]; then
+        echo "Archiving logs from $TEST_BASE_DIR to $ARCHIVE_PATH"
+        tar -czf "$ARCHIVE_PATH" -C "$(dirname $TEST_BASE_DIR)" "$(basename $TEST_BASE_DIR)" 2>&1
+        echo "Archive created: $ARCHIVE_PATH"
+        echo "Archive size: $(du -h "$ARCHIVE_PATH" | cut -f1)"
+        ls -lh "$ARCHIVE_PATH"
+      else
+        echo "WARNING: TEST_BASE_DIR $TEST_BASE_DIR does not exist, skipping archive"
+      fi
+    register: archive_result
+    always: yes
+    environment:
+      MOLECULE_EPHEMERAL_DIRECTORY: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') | default('/tmp', true) }}"
+
+  - name: Display archive information
+    debug:
+      msg: "{{ archive_result.stdout_lines }}"
+    when: archive_result is defined
