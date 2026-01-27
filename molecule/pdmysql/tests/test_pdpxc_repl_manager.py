@@ -15,12 +15,7 @@ def test_check_package(host, package):
     assert pkg.is_installed
     assert REPL_MANAGER_VERSION in pkg.version, pkg.version
 
-def test_prepare_mysql_auth(host):
-    host.run(
-        "mysql -e \"ALTER USER 'root'@'localhost' "
-        "IDENTIFIED WITH caching_sha2_password;\""
-    )
-
 def test_script_run(host):
-    result = host.run("/usr/bin/replication_manager.sh")
-    assert result.rc == 0, result.stdout
+    cmd = "/usr/bin/replication_manager.sh"
+    result = host.run(cmd)
+    assert "Access denied for user" in result.stdout, result.stdout

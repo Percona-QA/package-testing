@@ -146,7 +146,7 @@ pipeline {
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-deb13-pxc --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
