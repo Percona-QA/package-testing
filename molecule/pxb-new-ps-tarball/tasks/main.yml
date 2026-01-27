@@ -390,19 +390,14 @@
     register: test_result
     failed_when: false
 
-  - name: Display test results information
-    debug:
-      msg: "{{ test_result.stdout_lines }}"
-    when: test_result is defined
-
   - name: Collect and archive test logs
     shell: |
       TEST_BASE_DIR="{{ ansible_env.HOME }}/inc_backup_load_tests"
-      ARCHIVE_NAME="inc_backup_load_tests_logs.tar.gz"
+      ARCHIVE_NAME="inc_backup_load_tests_logs_$(date +%Y%m%d_%H%M%S).tar.gz"
 
       # Use molecule ephemeral directory for Jenkins artifact collection
       # This directory is synced back to Jenkins workspace
-      MOLECULE_EPHEMERAL_DIR="/tmp"
+      MOLECULE_EPHEMERAL_DIR="${MOLECULE_EPHEMERAL_DIRECTORY:-/tmp}"
       ARCHIVE_PATH="${MOLECULE_EPHEMERAL_DIR}/${ARCHIVE_NAME}"
 
       if [ -d "$TEST_BASE_DIR" ]; then
@@ -417,7 +412,7 @@
     register: archive_result
     failed_when: false
     environment:
-      MOLECULE_EPHEMERAL_DIRECTORY: "/tmp"
+      MOLECULE_EPHEMERAL_DIRECTORY: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') | default('/tmp', true) }}"
 
   - name: Display archive information
     debug:
