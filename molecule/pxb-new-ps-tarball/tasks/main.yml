@@ -393,7 +393,7 @@
   - name: Collect and archive test logs
     shell: |
       TEST_BASE_DIR="{{ ansible_env.HOME }}/inc_backup_load_tests"
-      ARCHIVE_NAME="inc_backup_load_tests_logs_$(date +%Y%m%d_%H%M%S).tar.gz"
+      ARCHIVE_NAME="inc_backup_load_tests_logs.tar.gz"
 
       # Use molecule ephemeral directory for Jenkins artifact collection
       # This directory is synced back to Jenkins workspace
