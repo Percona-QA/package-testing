@@ -410,7 +410,7 @@
         echo "WARNING: TEST_BASE_DIR $TEST_BASE_DIR does not exist, skipping archive"
       fi
     register: archive_result
-    always: yes
+    failed_when: false
     environment:
       MOLECULE_EPHEMERAL_DIRECTORY: "{{ lookup('env', 'MOLECULE_EPHEMERAL_DIRECTORY') | default('/tmp', true) }}"
 
