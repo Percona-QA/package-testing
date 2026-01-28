@@ -3,7 +3,35 @@
   hosts: all
   become: true
   become_method: sudo
+  vars:
+    WORKSPACE_VAR: "{{ lookup('env', 'WORKSPACE_VAR') }}"
   tasks:
+    - name: Find all .tar.gz files in /var/tmp
+      find:
+        paths: /var/tmp
+        patterns: "*.tar.gz"
+        file_type: file
+      register: tarballs
+      become: true
+
+    - name: Fetch all .tar.gz archives to localhost
+      fetch:
+        src: "{{ item.path }}"
+        dest: "/{{ WORKSPACE_VAR }}/{{ ansible_hostname }}_{{ os_id }}_{{ arch_output }}_{{ item.path | basename }}"
+        flat: yes
+      loop: "{{ tarballs.files }}"
+      become: true
+
+    - name: Debug the fetch task status on localhost
+      command: ls -l "/{{ WORKSPACE_VAR }}"
+      register: fetch_list
+      delegate_to: localhost
+
+    - name: Debug the list of files in /{{ WORKSPACE_VAR }} on localhost
+      debug:
+        msg: "Files in /{{ WORKSPACE_VAR }}: {{ fetch_list.stdout_lines }}"
+      delegate_to: localhost
+
     - name: remove Tarball directories
       file:
         path: "{{ paths }}"
