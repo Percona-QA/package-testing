@@ -390,6 +390,11 @@
     register: test_result
     failed_when: false
 
+  - name: Display archive information
+    debug:
+      msg: "{{ test_result.stdout_lines }}"
+    when: test_result is defined
+
   - name: Collect and archive test logs
     shell: |
       TEST_BASE_DIR="{{ ansible_env.HOME }}/inc_backup_load_tests"
