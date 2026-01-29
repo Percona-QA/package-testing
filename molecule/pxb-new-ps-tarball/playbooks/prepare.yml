@@ -54,6 +54,31 @@
         shell: /bin/bash
         state: present
 
+    - name: Install Docker for Debian family (for KMIP tests)
+      ansible.builtin.apt:
+        name: docker.io
+        update_cache: yes
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install Docker for RedHat family (for KMIP tests)
+      ansible.builtin.dnf:
+        name: docker
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Ensure Docker service is started
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add pxbtest to docker group
+      ansible.builtin.user:
+        name: pxbtest
+        groups: docker
+        append: yes
+
     - name: Install git for Debian family
       apt:
         name: git
