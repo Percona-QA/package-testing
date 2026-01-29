@@ -17,7 +17,7 @@
     - name: Fetch all .tar.gz archives to localhost
       fetch:
         src: "{{ item.path }}"
-        dest: "/{{ WORKSPACE_VAR }}/{{ ansible_hostname }}_{{ os_id }}_{{ arch_output }}_{{ item.path | basename }}"
+        dest: "/{{ WORKSPACE_VAR }}/{{ item.path | basename }}_{{ ansible_distribution | lower }}{{ ansible_distribution_major_version | default('', true) }}"
         flat: yes
       loop: "{{ tarballs.files }}"
       become: true
