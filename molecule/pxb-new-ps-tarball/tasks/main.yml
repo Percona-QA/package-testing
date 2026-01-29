@@ -369,6 +369,14 @@
     debug:
       msg: "{{ pstress_build.stdout_lines }}"
 
+  - name: Give pxbtest write access to Percona Server dir (for mysqld.my, keyring files)
+    ansible.builtin.file:
+      path: "/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}"
+      state: directory
+      owner: pxbtest
+      group: pxbtest
+      recurse: true
+
   - name: Run inc_backup_load_tests.py tests
     shell: |
       echo -e "### ldd server ###\n"
@@ -382,13 +390,14 @@
     become: true
     become_user: pxbtest
     environment:
-      PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+      PATH: "/usr/local/bin:/usr/bin:{{ ansible_env.PATH }}"
       TEST_BASE_DIR: "/home/pxbtest/inc_backup_load_tests"
       XTRABACKUP_DIR: "/package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin"
       MYSQLDIR: "/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}"
       QASCRIPTS: "/server-qa"
       LOAD_TOOL: "pstress"
       LOAD_TOOL_DIR: "/pstress/src"
+      PYTEST_CACHE_DIR: "/home/pxbtest/.pytest_cache"
     register: test_result
     failed_when: false
 
