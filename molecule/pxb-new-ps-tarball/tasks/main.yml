@@ -379,9 +379,11 @@
       pytest inc_backup_load_tests.py -k test_keyring_component_backup -v
     args:
       chdir: /server-qa/test_scripts/pxb
+    become: true
+    become_user: pxbtest
     environment:
       PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
-      TEST_BASE_DIR: "{{ ansible_env.HOME }}/inc_backup_load_tests"
+      TEST_BASE_DIR: "/home/pxbtest/inc_backup_load_tests"
       XTRABACKUP_DIR: "/package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin"
       MYSQLDIR: "/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}"
       QASCRIPTS: "/server-qa"
@@ -397,7 +399,7 @@
 
   - name: Collect and archive test logs
     shell: |
-      TEST_BASE_DIR="{{ ansible_env.HOME }}/inc_backup_load_tests"
+      TEST_BASE_DIR="/home/pxbtest/inc_backup_load_tests"
       DIST_NAME="{{ ansible_distribution | lower }}{{ ansible_distribution_major_version | default('', true) }}"
       ARCHIVE_NAME="inc_backup_load_tests_logs_${DIST_NAME}.tar.gz"
       TEST_LOG_DIR="/var/tmp"

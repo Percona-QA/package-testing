@@ -45,6 +45,15 @@
         exclusive: False
       when: ansible_distribution == "Ubuntu"
 
+    - name: Create pxbtest user for running MySQL tests (non-root)
+      ansible.builtin.user:
+        name: pxbtest
+        comment: "PXB test user for mysqld"
+        home: /home/pxbtest
+        create_home: true
+        shell: /bin/bash
+        state: present
+
     - name: Install git for Debian family
       apt:
         name: git
