@@ -377,37 +377,26 @@
       group: pxbtest
       recurse: true
 
-  - name: Pre-create Ansible remote_tmp for pxbtest (avoids become_user chmod ACL on RHEL 10)
-    ansible.builtin.file:
-      path: /home/pxbtest/.ansible/tmp
-      state: directory
-      owner: pxbtest
-      group: pxbtest
-      mode: '0755'
-
+  # Run test as pxbtest via runuser to avoid Ansible become_user chmod ACL error on RHEL 10
   - name: Run inc_backup_load_tests.py tests
     shell: |
-      echo -e "### ldd server ###\n"
-      ldd $MYSQLDIR/bin/mysqld
-      echo -e "### ldd client ###\n"
-      ldd $MYSQLDIR/bin/mysql
-      echo -e "### run test ###\n"
-      pytest inc_backup_load_tests.py -k test_keyring_component_backup -s -v -o cache_dir=/home/pxbtest/.pytest_cache 2>&1
-    args:
-      chdir: /server-qa/test_scripts/pxb
-    become: true
-    become_user: pxbtest
-    vars:
-      ansible_remote_tmp: /home/pxbtest/.ansible/tmp
-      ansible_allow_world_readable_tmpfiles: true
-    environment:
-      PATH: "/usr/local/bin:/usr/bin:{{ ansible_env.PATH }}"
-      TEST_BASE_DIR: "/home/pxbtest/inc_backup_load_tests"
-      XTRABACKUP_DIR: "/package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin"
-      MYSQLDIR: "/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}"
-      QASCRIPTS: "/server-qa"
-      LOAD_TOOL: "pstress"
-      LOAD_TOOL_DIR: "/pstress/src"
+      runuser -u pxbtest -- env \
+        PATH="/usr/local/bin:/usr/bin:{{ ansible_env.PATH }}" \
+        TEST_BASE_DIR="/home/pxbtest/inc_backup_load_tests" \
+        XTRABACKUP_DIR="/package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin" \
+        MYSQLDIR="/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}" \
+        QASCRIPTS="/server-qa" \
+        LOAD_TOOL="pstress" \
+        LOAD_TOOL_DIR="/pstress/src" \
+      bash -c '
+        cd /server-qa/test_scripts/pxb || exit 1
+        echo -e "### ldd server ###\n"
+        ldd $MYSQLDIR/bin/mysqld
+        echo -e "### ldd client ###\n"
+        ldd $MYSQLDIR/bin/mysql
+        echo -e "### run test ###\n"
+        pytest inc_backup_load_tests.py -k test_keyring_component_backup -s -v -o cache_dir=/home/pxbtest/.pytest_cache 2>&1
+      '
     register: test_result
     failed_when: false
 
