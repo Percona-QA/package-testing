@@ -276,32 +276,32 @@
     debug:
       msg: "{{ tarball_contents.stdout_lines }}"
 
-  - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL MAIN REPO 80 PXB80
-    ansible.builtin.get_url:
-      url: https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-{{ PXB_VERSION }}/binary/tarball/{{ TARBALL_NAME_MINIMAL }}
-      dest: /package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_MINIMAL }}
-      mode: '0644'
-    when:
-      - lookup('env', 'PXB_RELEASE') == "80"
+  # - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL MAIN REPO 80 PXB80
+  #   ansible.builtin.get_url:
+  #     url: https://downloads.percona.com/downloads/Percona-XtraBackup-8.0/Percona-XtraBackup-{{ PXB_VERSION }}/binary/tarball/{{ TARBALL_NAME_MINIMAL }}
+  #     dest: /package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_MINIMAL }}
+  #     mode: '0644'
+  #   when:
+  #     - lookup('env', 'PXB_RELEASE') == "80"
 
-  - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL MAIN REPO PXB84
-    ansible.builtin.get_url:
-      url: https://downloads.percona.com/downloads/Percona-XtraBackup-8.4/Percona-XtraBackup-{{ PXB_VERSION }}/binary/tarball/{{ TARBALL_NAME_MINIMAL }}
-      dest: /package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_MINIMAL }}
-      mode: '0644'
-    when:
-      - lookup('env', 'PXB_RELEASE') == "84"
+  # - name: Download {{ TARBALL_NAME_MINIMAL }} MINIMAL MAIN REPO PXB84
+  #   ansible.builtin.get_url:
+  #     url: https://downloads.percona.com/downloads/Percona-XtraBackup-8.4/Percona-XtraBackup-{{ PXB_VERSION }}/binary/tarball/{{ TARBALL_NAME_MINIMAL }}
+  #     dest: /package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_MINIMAL }}
+  #     mode: '0644'
+  #   when:
+  #     - lookup('env', 'PXB_RELEASE') == "84"
 
-  - name: Extract {{ TARBALL_NAME_MINIMAL }} MINIMAL NORMAL
-    ansible.builtin.unarchive:
-      src: /package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_MINIMAL }}
-      dest: /package-testing/molecule/pxb-new-ps-tarball/
-      remote_src: yes
+  # - name: Extract {{ TARBALL_NAME_MINIMAL }} MINIMAL NORMAL
+  #   ansible.builtin.unarchive:
+  #     src: /package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_MINIMAL }}
+  #     dest: /package-testing/molecule/pxb-new-ps-tarball/
+  #     remote_src: yes
 
-  - name: ERROR if TARBALL_NAME_MINIMAL_FOLDER is not set
-    fail:
-      msg: "TARBALL_NAME_MINIMAL_FOLDER is not set. Please check the environment variable REPO_TYPE."
-    when: TARBALL_NAME_MINIMAL_FOLDER is not defined
+  # - name: ERROR if TARBALL_NAME_MINIMAL_FOLDER is not set
+  #   fail:
+  #     msg: "TARBALL_NAME_MINIMAL_FOLDER is not set. Please check the environment variable REPO_TYPE."
+  #   when: TARBALL_NAME_MINIMAL_FOLDER is not defined
 
   - name: list items in server-qa repo
     command: ls -alh /server-qa/
