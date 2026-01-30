@@ -392,7 +392,7 @@
       echo -e "### ldd client ###\n"
       ldd $MYSQLDIR/bin/mysql
       echo -e "### run test ###\n"
-      pytest inc_backup_load_tests.py -k test_keyring_component_backup -v -o cache_dir=/home/pxbtest/.pytest_cache
+      pytest inc_backup_load_tests.py -k test_keyring_component_backup -s -v -o cache_dir=/home/pxbtest/.pytest_cache 2>&1
     args:
       chdir: /server-qa/test_scripts/pxb
     become: true
@@ -429,9 +429,7 @@
 
       if [ -d "$TEST_BASE_DIR" ]; then
         echo "Archiving logs from $TEST_BASE_DIR to $ARCHIVE_PATH"
-        pushd /home/pxbtest
-        tar -czf "$ARCHIVE_PATH" -C "$(dirname $TEST_BASE_DIR)" "$(basename $TEST_BASE_DIR)/backuplogs_*/" 2>&1
-        popd
+        tar -czf "$ARCHIVE_PATH" --transform='s|^/home/pxbtest/||' "$TEST_BASE_DIR/backuplogs_*/" 2>&1
         echo "Archive created: $ARCHIVE_PATH"
         echo "Archive size: $(du -h "$ARCHIVE_PATH" | cut -f1)"
         ls -lh "$ARCHIVE_PATH"
