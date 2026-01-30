@@ -384,7 +384,7 @@
       echo -e "### ldd client ###\n"
       ldd $MYSQLDIR/bin/mysql
       echo -e "### run test ###\n"
-      pytest inc_backup_load_tests.py -k test_keyring_component_backup -v
+      pytest inc_backup_load_tests.py -k test_keyring_component_backup -v -o cache_dir=/home/pxbtest/.pytest_cache
     args:
       chdir: /server-qa/test_scripts/pxb
     become: true
@@ -397,7 +397,6 @@
       QASCRIPTS: "/server-qa"
       LOAD_TOOL: "pstress"
       LOAD_TOOL_DIR: "/pstress/src"
-      PYTEST_CACHE_DIR: "/home/pxbtest/.pytest_cache"
     register: test_result
     failed_when: false
 
