@@ -61,17 +61,56 @@
         state: present
       when: ansible_os_family == "Debian"
 
-    - name: Install Docker for RedHat family (for KMIP tests)
+    - name: Install Podman and docker CLI compatibility for RedHat family (for KMIP tests)
       ansible.builtin.dnf:
-        name: docker
+        name:
+          - podman
+          - podman-docker
         state: present
       when: ansible_os_family == "RedHat"
 
-    - name: Ensure Docker service is started
+    - name: Ensure Docker service is started (Debian)
       ansible.builtin.service:
         name: docker
         state: started
         enabled: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure Podman socket is started (RedHat - for docker CLI compatibility)
+      ansible.builtin.service:
+        name: podman.socket
+        state: started
+        enabled: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Ensure docker group exists (RedHat - for podman socket access)
+      ansible.builtin.group:
+        name: docker
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Create podman.socket.d drop-in directory (RedHat)
+      ansible.builtin.file:
+        path: /etc/systemd/system/podman.socket.d
+        state: directory
+        mode: '0755'
+      when: ansible_os_family == "RedHat"
+
+    - name: Configure podman socket for docker group access (RedHat)
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/podman.socket.d/override.conf
+        content: |
+          [Socket]
+          SocketGroup=docker
+        mode: '0644'
+      when: ansible_os_family == "RedHat"
+
+    - name: Reload systemd and restart podman socket (RedHat)
+      ansible.builtin.systemd:
+        name: podman.socket
+        state: restarted
+        daemon_reload: yes
+      when: ansible_os_family == "RedHat"
 
     - name: Add pxbtest to docker group
       ansible.builtin.user:
