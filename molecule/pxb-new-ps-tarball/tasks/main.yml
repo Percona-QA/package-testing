@@ -419,6 +419,7 @@
 
       if [ -d "$TEST_BASE_DIR" ]; then
         echo "Archiving logs from $TEST_BASE_DIR to $ARCHIVE_PATH"
+        echo "tar -czf $ARCHIVE_PATH -C $(dirname $TEST_BASE_DIR) $(basename $TEST_BASE_DIR)/backuplogs_*/"
         tar -czf "$ARCHIVE_PATH" -C "$(dirname $TEST_BASE_DIR)" "$(basename $TEST_BASE_DIR)/backuplogs_*/" 2>&1
         echo "Archive created: $ARCHIVE_PATH"
         echo "Archive size: $(du -h "$ARCHIVE_PATH" | cut -f1)"
