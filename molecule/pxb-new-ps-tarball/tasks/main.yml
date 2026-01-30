@@ -378,56 +378,58 @@
       recurse: true
 
   # Run test as pxbtest via runuser to avoid Ansible become_user chmod ACL error on RHEL 10
-  - name: Run inc_backup_load_tests.py tests
-    shell: |
-      runuser -u pxbtest -- env \
-        PATH="/usr/local/bin:/usr/bin:{{ ansible_env.PATH }}" \
-        TEST_BASE_DIR="/home/pxbtest/inc_backup_load_tests" \
-        XTRABACKUP_DIR="/package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin" \
-        MYSQLDIR="/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}" \
-        QASCRIPTS="/server-qa" \
-        LOAD_TOOL="pstress" \
-        LOAD_TOOL_DIR="/pstress/src" \
-      bash -c '
-        set -o pipefail
-        cd /server-qa/test_scripts/pxb || exit 1
-        echo -e "### run test ###\n"
-        pytest inc_backup_load_tests.py -s -v -o cache_dir=/home/pxbtest/.pytest_cache 2>&1 | tee $TEST_BASE_DIR/pytest-report.txt
-      '
-    register: test_result
+  - block:
+    - name: Run inc_backup_load_tests.py tests
+      shell: |
+        runuser -u pxbtest -- env \
+          PATH="/usr/local/bin:/usr/bin:{{ ansible_env.PATH }}" \
+          TEST_BASE_DIR="/home/pxbtest/inc_backup_load_tests" \
+          XTRABACKUP_DIR="/package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin" \
+          MYSQLDIR="/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}" \
+          QASCRIPTS="/server-qa" \
+          LOAD_TOOL="pstress" \
+          LOAD_TOOL_DIR="/pstress/src" \
+        bash -c '
+          set -o pipefail
+          cd /server-qa/test_scripts/pxb || exit 1
+          echo -e "### run test ###\n"
+          pytest inc_backup_load_tests.py -s -v -o cache_dir=/home/pxbtest/.pytest_cache 2>&1 | tee $TEST_BASE_DIR/pytest-report.txt
+        '
+      register: test_result
 
-  - name: Display archive information
-    debug:
-      msg: "{{ test_result.stdout_lines }}"
-    when: test_result is defined
+    always:
+      - name: Display test result
+        debug:
+          msg: "{{ test_result.stdout_lines }}"
+        when: test_result is defined
 
-  - name: Collect and archive test logs
-    shell: |
-      TEST_BASE_DIR="/home/pxbtest/inc_backup_load_tests"
-      DIST_NAME="{{ ansible_distribution | lower }}{{ ansible_distribution_major_version | default('', true) }}"
-      ARCHIVE_NAME="inc_backup_load_tests_logs_${DIST_NAME}.tar.gz"
-      TEST_LOG_DIR="/var/tmp"
+      - name: Collect and archive test logs
+        shell: |
+          TEST_BASE_DIR="/home/pxbtest/inc_backup_load_tests"
+          DIST_NAME="{{ ansible_distribution | lower }}{{ ansible_distribution_major_version | default('', true) }}"
+          ARCHIVE_NAME="inc_backup_load_tests_logs_${DIST_NAME}.tar.gz"
+          TEST_LOG_DIR="/var/tmp"
 
-      # Ensure the directory exists
-      mkdir -p "$TEST_LOG_DIR"
-      ARCHIVE_PATH="${TEST_LOG_DIR}/${ARCHIVE_NAME}"
+          # Ensure the directory exists
+          mkdir -p "$TEST_LOG_DIR"
+          ARCHIVE_PATH="${TEST_LOG_DIR}/${ARCHIVE_NAME}"
 
-      if [ -d "$TEST_BASE_DIR" ]; then
-        echo "Archiving logs from $TEST_BASE_DIR to $ARCHIVE_PATH"
-        tar -czf $ARCHIVE_PATH --transform='s|^home/pxbtest/||' $TEST_BASE_DIR/backuplogs_*/ 2>&1
-        echo "Archive created: $ARCHIVE_PATH"
-        echo "Archive size: $(du -h "$ARCHIVE_PATH" | cut -f1)"
-        ls -lh "$ARCHIVE_PATH"
-      else
-        echo "WARNING: TEST_BASE_DIR $TEST_BASE_DIR does not exist, skipping archive"
-      fi
-    register: archive_result
-    failed_when: false
+          if [ -d "$TEST_BASE_DIR" ]; then
+            echo "Archiving logs from $TEST_BASE_DIR to $ARCHIVE_PATH"
+            tar -czf $ARCHIVE_PATH --transform='s|^home/pxbtest/||' $TEST_BASE_DIR/backuplogs_*/ 2>&1
+            echo "Archive created: $ARCHIVE_PATH"
+            echo "Archive size: $(du -h "$ARCHIVE_PATH" | cut -f1)"
+            ls -lh "$ARCHIVE_PATH"
+          else
+            echo "WARNING: TEST_BASE_DIR $TEST_BASE_DIR does not exist, skipping archive"
+          fi
+        register: archive_result
+        failed_when: false
 
-  - name: Display archive information
-    debug:
-      msg: "{{ archive_result.stdout_lines }}"
-    when: archive_result is defined
+      - name: Display archive information
+        debug:
+          msg: "{{ archive_result.stdout_lines }}"
+        when: archive_result is defined
 
   # - name: Pause 15 minutes for debugging
   #   pause:
