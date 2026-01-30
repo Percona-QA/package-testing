@@ -377,6 +377,14 @@
       group: pxbtest
       recurse: true
 
+  - name: Pre-create Ansible remote_tmp for pxbtest (avoids become_user chmod ACL on RHEL 10)
+    ansible.builtin.file:
+      path: /home/pxbtest/.ansible/tmp
+      state: directory
+      owner: pxbtest
+      group: pxbtest
+      mode: '0755'
+
   - name: Run inc_backup_load_tests.py tests
     shell: |
       echo -e "### ldd server ###\n"
@@ -389,6 +397,9 @@
       chdir: /server-qa/test_scripts/pxb
     become: true
     become_user: pxbtest
+    vars:
+      ansible_remote_tmp: /home/pxbtest/.ansible/tmp
+      ansible_allow_world_readable_tmpfiles: true
     environment:
       PATH: "/usr/local/bin:/usr/bin:{{ ansible_env.PATH }}"
       TEST_BASE_DIR: "/home/pxbtest/inc_backup_load_tests"
