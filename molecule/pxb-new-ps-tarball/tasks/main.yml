@@ -395,7 +395,7 @@
         echo -e "### ldd client ###\n"
         ldd $MYSQLDIR/bin/mysql
         echo -e "### run test ###\n"
-        pytest inc_backup_load_tests.py -k test_keyring_component_backup -s -v -o cache_dir=/home/pxbtest/.pytest_cache 2>&1
+        pytest inc_backup_load_tests.py -s -v -o cache_dir=/home/pxbtest/.pytest_cache 2>&1 | tee $TEST_BASE_DIR/pytest-report.txt
       '
     register: test_result
     failed_when: false
@@ -434,7 +434,7 @@
       msg: "{{ archive_result.stdout_lines }}"
     when: archive_result is defined
 
-  - name: Pause 15 minutes for debugging
-    pause:
-      minutes: 15
-      prompt: "Pausing 15 minutes for debugging. Connect to the instance now."
+  # - name: Pause 15 minutes for debugging
+  #   pause:
+  #     minutes: 15
+  #     prompt: "Pausing 15 minutes for debugging. Connect to the instance now."
