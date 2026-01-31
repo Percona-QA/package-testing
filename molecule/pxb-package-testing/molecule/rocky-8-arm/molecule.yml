@@ -9,7 +9,7 @@ platforms:
     image:  ami-0d4e5716e8f0b62b0
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: c6g.large
-    ssh_user: ec2-user
+    ssh_user: rocky
     root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: pxb-package-testing
