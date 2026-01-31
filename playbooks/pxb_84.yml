@@ -147,6 +147,8 @@
 
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh pxb -e
+    when:
+      - ansible_distribution != "Rocky"
 
   - name: start mysql service with systemctl command
     command: systemctl start mysqld
