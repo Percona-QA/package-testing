@@ -11,7 +11,18 @@
         key: "{{ lookup('file', 'public_keys') }}"
         state: present
         exclusive: False
-      when: ansible_os_family == "RedHat"
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution not in ["Rocky"]
+
+    - name: Setup SSH keys for Rocky Linux
+      authorized_key:
+        user: rocky
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when:
+        - ansible_distribution == "Rocky"
 
     - name: Setup SSH keys CentOS
       authorized_key:
