@@ -11,6 +11,12 @@ platforms:
     instance_type: t2.medium
     ssh_user: rocky
     root_device_name: /dev/xvda
+    block_device_mappings:
+      - device_name: /dev/xvda
+        ebs:
+          volume_size: 30        # 👈 IMPORTANT
+          volume_type: gp3
+          delete_on_termination: true
     instance_tags:
       iit-billing-tag: ps-package-testing
       job-name: ${JOB_NAME}
