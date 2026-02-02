@@ -1,20 +1,20 @@
-# ---
-# - name: Destroy
-#   hosts: localhost
-#   connection: local
-#   gather_facts: false
-#   no_log: false
-#   tasks:
-#     - block:
-#         - name: Populate instance config
-#           set_fact:
-#             instance_conf: "{{ lookup('file', molecule_instance_config) | from_yaml }}"
-#             skip_instances: false
-#       rescue:
-#         - name: Populate instance config when file missing
-#           set_fact:
-#             instance_conf: {}
-#             skip_instances: true
+---
+- name: Destroy
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  no_log: false
+  tasks:
+    - block:
+        - name: Populate instance config
+          set_fact:
+            instance_conf: "{{ lookup('file', molecule_instance_config) | from_yaml }}"
+            skip_instances: false
+      rescue:
+        - name: Populate instance config when file missing
+          set_fact:
+            instance_conf: {}
+            skip_instances: true
 
 #     - name: Destroy molecule instance(s)
 #       ec2_instance:
@@ -36,14 +36,14 @@
 #       with_items: "{{ server.results }}"
 #       when: not skip_instances
 
-#     # Mandatory configuration for Molecule to function.
+    # Mandatory configuration for Molecule to function.
 
-#     - name: Populate instance config
-#       set_fact:
-#         instance_conf: {}
+    - name: Populate instance config
+      set_fact:
+        instance_conf: {}
 
-#     - name: Dump instance config
-#       copy:
-#         content: "{{ instance_conf | to_json | from_json | to_yaml }}"
-#         dest: "{{ molecule_instance_config }}"
-#       when: server.changed | bool
+    - name: Dump instance config
+      copy:
+        content: "{{ instance_conf | to_json | from_json | to_yaml }}"
+        dest: "{{ molecule_instance_config }}"
+      when: server.changed | bool
