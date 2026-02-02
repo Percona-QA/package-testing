@@ -432,7 +432,7 @@
           msg: "{{ archive_result.stdout_lines }}"
         when: archive_result is defined
 
-  # - name: Pause 15 minutes for debugging
-  #   pause:
-  #     minutes: 15
-  #     prompt: "Pausing 15 minutes for debugging. Connect to the instance now."
+  - name: Pause 15 minutes for debugging
+    pause:
+      minutes: 15
+      prompt: "Pausing 15 minutes for debugging. Connect to the instance now."
