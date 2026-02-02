@@ -416,7 +416,7 @@
 
           if [ -d "$TEST_BASE_DIR" ]; then
             echo "Archiving logs from $TEST_BASE_DIR to $ARCHIVE_PATH"
-            tar -czf $ARCHIVE_PATH --transform='s|^home/pxbtest/||' $TEST_BASE_DIR/backuplogs_*/ 2>&1
+            tar -czf $ARCHIVE_PATH --transform='s|^home/pxbtest/||' $TEST_BASE_DIR/backuplogs_*/ $TEST_BASE_DIR/pytest-report.txt 2>&1
             echo "Archive created: $ARCHIVE_PATH"
             echo "Archive size: $(du -h "$ARCHIVE_PATH" | cut -f1)"
             ls -lh "$ARCHIVE_PATH"
