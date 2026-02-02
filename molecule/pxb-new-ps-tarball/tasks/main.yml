@@ -391,6 +391,7 @@
           LOAD_TOOL_DIR="/pstress/src" \
         bash -c '
           set -o pipefail
+          mkdir -p $TEST_BASE_DIR
           cd /server-qa/test_scripts/pxb || exit 1
           echo -e "### run test ###\n"
           pytest inc_backup_load_tests.py -s -v -o cache_dir=/home/pxbtest/.pytest_cache 2>&1 | tee $TEST_BASE_DIR/pytest-report.txt
