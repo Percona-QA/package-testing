@@ -36,14 +36,14 @@
 #       with_items: "{{ server.results }}"
 #       when: not skip_instances
 
-    # Mandatory configuration for Molecule to function.
+    # # Mandatory configuration for Molecule to function.
 
-    - name: Populate instance config
-      set_fact:
-        instance_conf: {}
+    # - name: Populate instance config
+    #   set_fact:
+    #     instance_conf: {}
 
-    - name: Dump instance config
-      copy:
-        content: "{{ instance_conf | to_json | from_json | to_yaml }}"
-        dest: "{{ molecule_instance_config }}"
-      when: server.changed | bool
+    # - name: Dump instance config
+    #   copy:
+    #     content: "{{ instance_conf | to_json | from_json | to_yaml }}"
+    #     dest: "{{ molecule_instance_config }}"
+    #   when: server.changed | bool
