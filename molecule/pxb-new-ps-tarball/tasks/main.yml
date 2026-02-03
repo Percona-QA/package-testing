@@ -427,10 +427,10 @@
         register: archive_result
         failed_when: false
 
-      - name: Display archive information
-        debug:
-          msg: "{{ archive_result.stdout_lines }}"
-        when: archive_result is defined
+      # - name: Display archive information
+      #   debug:
+      #     msg: "{{ archive_result.stdout_lines }}"
+      #   when: archive_result is defined
 
   # - name: Pause 15 minutes for debugging
   #   pause:
