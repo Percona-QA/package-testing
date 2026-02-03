@@ -122,23 +122,6 @@
 #    command: percona-release enable mysql-shell testing
 #    when: install_mysql_shell == "yes" or install_mysql_shell == ""
 
-  - name: Install growpart
-    dnf:
-      name: cloud-utils-growpart
-      state: present
-    when: ansible_distribution == "Rocky"
-
-  - name: Grow root partition
-    command: growpart /dev/xvda 5
-    ignore_errors: yes
-    when: ansible_distribution == "Rocky"
-
-  - name: Grow XFS filesystem
-    command: xfs_growfs /
-    when:
-      - ansible_facts['filesystems']['/'] is defined
-      - ansible_distribution == "Rocky"
-
   - name: Check disk space
     command: df -h /
     register: disk_out
