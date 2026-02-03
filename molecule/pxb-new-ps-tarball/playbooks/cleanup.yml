@@ -27,10 +27,10 @@
       register: fetch_list
       delegate_to: localhost
 
-    - name: Debug the list of files in /{{ WORKSPACE_VAR }} on localhost
-      debug:
-        msg: "Files in /{{ WORKSPACE_VAR }}: {{ fetch_list.stdout_lines }}"
-      delegate_to: localhost
+    # - name: Debug the list of files in /{{ WORKSPACE_VAR }} on localhost
+    #   debug:
+    #     msg: "Files in /{{ WORKSPACE_VAR }}: {{ fetch_list.stdout_lines }}"
+    #   delegate_to: localhost
 
     - name: remove Tarball directories
       file:
