@@ -4,15 +4,23 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: rhel8-arm-${PLAYBOOK_VAR}
+  - name: rocky-9-arm-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
     region: us-west-2
-    image:  ami-0bb199dd39edd7d71
+    image:  ami-09aad1f3c008ab0b4
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: c6g.large
-    ssh_user: ec2-user
-    root_device_name: /dev/sda1
+    ssh_user: rocky
+    root_device_name: /dev/xvda
+    block_device_mappings:
+      - device_name: /dev/xvda
+        ebs:
+          volume_size: 30        # 👈 IMPORTANT
+          volume_type: gp3
+          delete_on_termination: true
     instance_tags:
       iit-billing-tag: ps-package-testing
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   log: True
@@ -23,10 +31,10 @@ provisioner:
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
 scenario:
-  name: rhel-8-arm
+  name: rocky-9-arm
   destroy_sequence:
     - destroy
-  cleanup_sequence:
+  clenup_sequence:
     - cleanup
   test_sequence:
     - destroy

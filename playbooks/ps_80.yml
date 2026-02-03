@@ -122,6 +122,13 @@
 #    command: percona-release enable mysql-shell testing
 #    when: install_mysql_shell == "yes" or install_mysql_shell == ""
 
+  - name: Check disk space
+    command: df -h /
+    register: disk_out
+
+  - debug:
+      var: disk_out.stdout
+
   - name: install Percona XtraBackup 8.0 packages
     include_tasks: ../tasks/install_pxb80.yml
     when:
@@ -341,7 +348,7 @@
      packages:
       - percona-server*
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: check if process is stopped after package removal
