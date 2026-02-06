@@ -393,13 +393,17 @@
           set -o pipefail
           mkdir -p $TEST_BASE_DIR
           cd /server-qa/test_scripts/pxb || exit 1
-          echo -e "### run test ###\n"
-          pytest inc_backup_load_tests.py -s -v -o cache_dir=/home/pxbtest/.pytest_cache 2>&1 | tee $TEST_BASE_DIR/pytest-report.txt
+          echo -e "\n### run normal and encryption tests ###\n"
+          pytest inc_backup_load_tests.py -k "test_normal_backup or test_keyring_plugin_backup or test_keyring_component_backup or test_crash_innodb_no_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache 2>&1 | tee $TEST_BASE_DIR/pytest-report-normal-encryption.txt
+          echo -e "\n### run rocksdb tests ###\n"
+          pytest inc_backup_load_tests.py -k "test_rocksdb_backup or test_crash_rocksdb_no_page_tracking or test_crash_rocksdb_no_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache 2>&1 | tee $TEST_BASE_DIR/pytest-report-rocksdb.txt
+          echo -e "\n### run page tracking tests ###\n"
+          pytest inc_backup_load_tests.py -k "test_page_tracking_backup or test_crash_innodb_page_tracking or test_crash_rocksdb_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache 2>&1 | tee $TEST_BASE_DIR/pytest-report-page_tracking.txt
         '
       register: test_result
 
     always:
-      - name: Display test result
+      - name: Display Normal and encryption test result
         debug:
           msg: "{{ test_result.stdout_lines }}"
         when: test_result is defined
@@ -417,7 +421,7 @@
 
           if [ -d "$TEST_BASE_DIR" ]; then
             echo "Archiving logs from $TEST_BASE_DIR to $ARCHIVE_PATH"
-            tar -czf $ARCHIVE_PATH --transform='s|^home/pxbtest/||' $TEST_BASE_DIR/backuplogs_*/ $TEST_BASE_DIR/pytest-report.txt 2>&1
+            tar -czf $ARCHIVE_PATH --transform='s|^home/pxbtest/||' $TEST_BASE_DIR/backuplogs_*/ $TEST_BASE_DIR/pytest-report*.txt 2>&1
             echo "Archive created: $ARCHIVE_PATH"
             echo "Archive size: $(du -h "$ARCHIVE_PATH" | cut -f1)"
             ls -lh "$ARCHIVE_PATH"
