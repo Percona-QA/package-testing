@@ -24,8 +24,7 @@ pipeline {
             export PATH=${PATH}:~/.local/bin
             python3 -m venv ${WORKSPACE}/python-venv-molecule
             source ${WORKSPACE}/python-venv-molecule/bin/activate
-	    python -m pip install -U pip
-            pip3 install wheel
+            python -m pip3 install --upgrade pip setuptools wheel
             if grep -q 'Noble' /etc/os-release; then
               pip3 install molecule==3.0.0
             else
@@ -33,7 +32,7 @@ pipeline {
             fi
             pip3 install ansible python-vagrant testinfra pytest
             rm -rf package-testing
-            git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+            git clone https://github.com/kaushikpuneet07/package-testing.git --branch pkg-fix --depth 1
           '''
       } //end steps
     } //end Prepare stage
