@@ -1,6 +1,6 @@
 ---
-scenario:
-  name: rhel-8
+#scenario:
+#  name: rhel-8
 dependency:
   name: galaxy
 driver:
@@ -17,8 +17,8 @@ platforms:
       iit-billing-tag: jenkins-ps80-worker
 provisioner:
   name: ansible
-  lint:
-    name: ansible-lint
+#  lint:
+#    name: ansible-lint
   playbooks:
     create: ../../../playbooks/create.yml
     destroy: ../../../playbooks/destroy.yml
@@ -31,5 +31,5 @@ verifier:
     verbose: true
     s: true
     junitxml: report.xml
-  lint:
-    name: flake8
+ # lint:
+ #   name: flake8
