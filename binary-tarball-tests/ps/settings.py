@@ -137,7 +137,7 @@ ps80_functions = (
 )
 
 ps80_components = (
-  'component_masking_functions', 'component_encryption_udf', 'component_keyring_kmip', 'component_keyring_kms', 'component_js_lang' ,
+  'component_masking_functions', 'component_encryption_udf', 'component_keyring_kmip', 'component_keyring_kms',
 )
 ps80_files = (
   'lib/libcoredumper.a',
