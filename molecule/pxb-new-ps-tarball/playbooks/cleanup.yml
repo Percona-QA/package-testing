@@ -27,6 +27,27 @@
       register: fetch_list
       delegate_to: localhost
 
+    - name: Find all .xml files in /var/tmp
+      find:
+        paths: /var/tmp
+        patterns: "*.xml"
+        file_type: file
+      register: xmls
+      become: true
+
+    - name: Fetch all .xml archives to localhost
+      fetch:
+        src: "{{ item.path }}"
+        dest: "/{{ WORKSPACE_VAR }}/{{ item.path | basename }}"
+        flat: yes
+      loop: "{{ xmls.files }}"
+      become: true
+
+    - name: Debug the fetch task status on localhost
+      command: ls -l "/{{ WORKSPACE_VAR }}"
+      register: fetch_list_xml
+      delegate_to: localhost
+
     # - name: Debug the list of files in /{{ WORKSPACE_VAR }} on localhost
     #   debug:
     #     msg: "Files in /{{ WORKSPACE_VAR }}: {{ fetch_list.stdout_lines }}"
