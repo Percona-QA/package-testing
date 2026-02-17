@@ -393,7 +393,7 @@
           set -o pipefail
           mkdir -p $TEST_BASE_DIR
           cd /server-qa/test_scripts/pxb || exit 1
-          pytest inc_backup_load_tests.py -k "test_normal_backup or test_keyring_plugin_backup or test_keyring_component_backup or test_crash_innodb_no_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache 2>&1 | tee $TEST_BASE_DIR/pytest-report-normal-encryption.txt
+          pytest inc_backup_load_tests.py -k "test_normal_backup or test_keyring_plugin_backup or test_keyring_component_backup or test_crash_innodb_no_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=pytest-junit-normal_encryption.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-normal_encryption.txt
         '
       register: test_result_normal
 
@@ -418,7 +418,7 @@
           set -o pipefail
           mkdir -p $TEST_BASE_DIR
           cd /server-qa/test_scripts/pxb || exit 1
-          pytest inc_backup_load_tests.py -k "test_rocksdb_backup or test_crash_rocksdb_no_page_tracking or test_crash_rocksdb_no_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache 2>&1 | tee $TEST_BASE_DIR/pytest-report-rocksdb.txt
+          pytest inc_backup_load_tests.py -k "test_rocksdb_backup or test_crash_rocksdb_no_page_tracking or test_crash_rocksdb_no_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=pytest-junit-rocksdb.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-rocksdb.txt
         '
       register: test_result_rocksdb
 
@@ -443,7 +443,7 @@
           set -o pipefail
           mkdir -p $TEST_BASE_DIR
           cd /server-qa/test_scripts/pxb || exit 1
-          pytest inc_backup_load_tests.py -k "test_page_tracking_backup or test_crash_innodb_page_tracking or test_crash_rocksdb_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache 2>&1 | tee $TEST_BASE_DIR/pytest-report-page_tracking.txt
+          pytest inc_backup_load_tests.py -k "test_page_tracking_backup or test_crash_innodb_page_tracking or test_crash_rocksdb_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=pytest-junit-page_tracking.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-page_tracking.txt
         '
       register: test_result_page_tracking
 
@@ -469,6 +469,10 @@
             tar -czf $ARCHIVE_PATH --transform='s|^home/pxbtest/||' $TEST_BASE_DIR/backuplogs_*/ $TEST_BASE_DIR/pytest-report*.txt 2>&1
             echo "Archive created: $ARCHIVE_PATH"
             echo "Archive size: $(du -h "$ARCHIVE_PATH" | cut -f1)"
+
+            for f in pytest-junit-*.xml; do
+              mv "$f" "${f%.xml}-${DIST_NAME}.xml"
+            done
             ls -lh "$ARCHIVE_PATH"
           else
             echo "WARNING: TEST_BASE_DIR $TEST_BASE_DIR does not exist, skipping archive"
