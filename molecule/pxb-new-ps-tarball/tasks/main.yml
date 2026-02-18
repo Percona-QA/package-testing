@@ -474,6 +474,7 @@
 
             cd $TEST_BASE_DIR
             for f in pytest-junit-*.xml; do
+              sed -i "1s/inc_backup_load_tests/inc_backup_load_tests-${DIST_NAME}/" "$f"
               cp "$f" "$TEST_LOG_DIR/${f%.xml}-${DIST_NAME}.xml"
             done
             ls -lh "$ARCHIVE_PATH"
