@@ -472,8 +472,9 @@
             echo "Archive created: $ARCHIVE_PATH"
             echo "Archive size: $(du -h "$ARCHIVE_PATH" | cut -f1)"
 
+            cd $TEST_BASE_DIR
             for f in pytest-junit-*.xml; do
-              mv "$f" "${f%.xml}-${DIST_NAME}.xml"
+              cp "$f" "$TEST_LOG_DIR/${f%.xml}-${DIST_NAME}.xml"
             done
             ls -lh "$ARCHIVE_PATH"
           else
@@ -482,10 +483,10 @@
         register: archive_result
         failed_when: false
 
-      # - name: Display archive information
-      #   debug:
-      #     msg: "{{ archive_result.stdout_lines }}"
-      #   when: archive_result is defined
+      - name: Display archive information
+        debug:
+          msg: "{{ archive_result.stdout_lines }}"
+        when: archive_result is defined
 
   # - name: Pause 15 minutes for debugging
   #   pause:
