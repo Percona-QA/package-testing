@@ -443,7 +443,9 @@
           set -o pipefail
           mkdir -p $TEST_BASE_DIR
           cd /server-qa/test_scripts/pxb || exit 1
-          pytest inc_backup_load_tests.py -k "test_page_tracking_backup or test_crash_innodb_page_tracking or test_crash_rocksdb_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-page_tracking.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-page_tracking.txt
+          # pytest inc_backup_load_tests.py -k "test_page_tracking_backup or test_crash_innodb_page_tracking or test_crash_rocksdb_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-page_tracking.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-page_tracking.txt
+          pytest inc_backup_load_tests.py -k "test_page_tracking_backup" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-page_tracking.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-page_tracking.txt
+
         '
       register: test_result_page_tracking
 

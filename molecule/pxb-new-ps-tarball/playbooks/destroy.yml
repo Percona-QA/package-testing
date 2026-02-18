@@ -31,7 +31,7 @@
       async_status:
         jid: "{{ item.ansible_job_id }}"
       register: ec2_jobs
-      until: ec2_jobs.finished
+      until: ec2_jobs.finished | bool
       retries: 300
       with_items: "{{ server.results }}"
       when: not skip_instances
