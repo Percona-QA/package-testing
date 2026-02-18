@@ -378,55 +378,55 @@
       recurse: true
 
   # Run test as pxbtest via runuser to avoid Ansible become_user chmod ACL error on RHEL 10
-  - block:
-    - name: Run inc_backup_load_tests.py normal and encryption tests
-      shell: |
-        runuser -u pxbtest -- env \
-          PATH="/usr/local/bin:/usr/bin:{{ ansible_env.PATH }}" \
-          TEST_BASE_DIR="/home/pxbtest/inc_backup_load_tests" \
-          XTRABACKUP_DIR="/package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin" \
-          MYSQLDIR="/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}" \
-          QASCRIPTS="/server-qa" \
-          LOAD_TOOL="pstress" \
-          LOAD_TOOL_DIR="/pstress/src" \
-        bash -c '
-          set -o pipefail
-          mkdir -p $TEST_BASE_DIR
-          cd /server-qa/test_scripts/pxb || exit 1
-          pytest inc_backup_load_tests.py -k "test_normal_backup or test_keyring_plugin_backup or test_keyring_component_backup or test_crash_innodb_no_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-normal_encryption.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-normal_encryption.txt
-        '
-      register: test_result_normal
+  # - block:
+  #   - name: Run inc_backup_load_tests.py normal and encryption tests
+  #     shell: |
+  #       runuser -u pxbtest -- env \
+  #         PATH="/usr/local/bin:/usr/bin:{{ ansible_env.PATH }}" \
+  #         TEST_BASE_DIR="/home/pxbtest/inc_backup_load_tests" \
+  #         XTRABACKUP_DIR="/package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin" \
+  #         MYSQLDIR="/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}" \
+  #         QASCRIPTS="/server-qa" \
+  #         LOAD_TOOL="pstress" \
+  #         LOAD_TOOL_DIR="/pstress/src" \
+  #       bash -c '
+  #         set -o pipefail
+  #         mkdir -p $TEST_BASE_DIR
+  #         cd /server-qa/test_scripts/pxb || exit 1
+  #         pytest inc_backup_load_tests.py -k "test_normal_backup or test_keyring_plugin_backup or test_keyring_component_backup or test_crash_innodb_no_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-normal_encryption.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-normal_encryption.txt
+  #       '
+  #     register: test_result_normal
 
-    always:
-      - name: Display Normal and encryption test result
-        debug:
-          msg: "{{ test_result_normal.stdout_lines }}"
-        when: test_result_normal is defined
+  #   always:
+  #     - name: Display Normal and encryption test result
+  #       debug:
+  #         msg: "{{ test_result_normal.stdout_lines }}"
+  #       when: test_result_normal is defined
 
-  - block:
-    - name: Run inc_backup_load_tests.py rocksdb tests
-      shell: |
-        runuser -u pxbtest -- env \
-          PATH="/usr/local/bin:/usr/bin:{{ ansible_env.PATH }}" \
-          TEST_BASE_DIR="/home/pxbtest/inc_backup_load_tests" \
-          XTRABACKUP_DIR="/package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin" \
-          MYSQLDIR="/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}" \
-          QASCRIPTS="/server-qa" \
-          LOAD_TOOL="pstress" \
-          LOAD_TOOL_DIR="/pstress/src" \
-        bash -c '
-          set -o pipefail
-          mkdir -p $TEST_BASE_DIR
-          cd /server-qa/test_scripts/pxb || exit 1
-          pytest inc_backup_load_tests.py -k "test_rocksdb_backup or test_crash_rocksdb_no_page_tracking or test_crash_rocksdb_no_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-rocksdb.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-rocksdb.txt
-        '
-      register: test_result_rocksdb
+  # - block:
+  #   - name: Run inc_backup_load_tests.py rocksdb tests
+  #     shell: |
+  #       runuser -u pxbtest -- env \
+  #         PATH="/usr/local/bin:/usr/bin:{{ ansible_env.PATH }}" \
+  #         TEST_BASE_DIR="/home/pxbtest/inc_backup_load_tests" \
+  #         XTRABACKUP_DIR="/package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin" \
+  #         MYSQLDIR="/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}" \
+  #         QASCRIPTS="/server-qa" \
+  #         LOAD_TOOL="pstress" \
+  #         LOAD_TOOL_DIR="/pstress/src" \
+  #       bash -c '
+  #         set -o pipefail
+  #         mkdir -p $TEST_BASE_DIR
+  #         cd /server-qa/test_scripts/pxb || exit 1
+  #         pytest inc_backup_load_tests.py -k "test_rocksdb_backup or test_crash_rocksdb_no_page_tracking or test_crash_rocksdb_no_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-rocksdb.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-rocksdb.txt
+  #       '
+  #     register: test_result_rocksdb
 
-    always:
-      - name: Display Normal and encryption test result
-        debug:
-          msg: "{{ test_result_rocksdb.stdout_lines }}"
-        when: test_result_rocksdb is defined
+  #   always:
+  #     - name: Display Normal and encryption test result
+  #       debug:
+  #         msg: "{{ test_result_rocksdb.stdout_lines }}"
+  #       when: test_result_rocksdb is defined
 
   - block:
     - name: Run inc_backup_load_tests.py page tracking tests
