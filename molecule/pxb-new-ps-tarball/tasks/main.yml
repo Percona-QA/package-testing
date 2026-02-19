@@ -431,7 +431,7 @@
   #       when: test_result_rocksdb is defined
 
   - block:
-    - name: Run inc_backup_load_tests.py page tracking tests
+    - name: Run inc_backup_load_tests.py tests
       shell: |
         runuser -u pxbtest -- env \
           PATH="/usr/local/bin:/usr/bin:{{ ansible_env.PATH }}" \
@@ -446,15 +446,15 @@
           mkdir -p $TEST_BASE_DIR
           cd /server-qa/test_scripts/pxb || exit 1
           # pytest inc_backup_load_tests.py -k "test_page_tracking_backup or test_crash_innodb_page_tracking or test_crash_rocksdb_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-page_tracking.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-page_tracking.txt
-          pytest inc_backup_load_tests.py -k "test_normal_backup or test_keyring_plugin_backup or test_keyring_component_backup_no_page_tracking or test_keyring_component_backup_page_tracking or test_page_tracking_backup or test_rocksdb_backup or test_memory_estimation_backup" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-page_tracking.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-page_tracking.txt
+          pytest inc_backup_load_tests.py -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-inc_backup_load_tests.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-inc_backup_load_tests.txt
         '
-      register: test_result_page_tracking
+      register: test_result_inc_backup_load_tests
 
     always:
-      - name: Display page tracking test result
+      - name: Display inc_backup_load_tests test result
         debug:
-          msg: "{{ test_result_page_tracking.stdout_lines }}"
-        when: test_result_page_tracking is defined
+          msg: "{{ test_result_inc_backup_load_tests.stdout_lines }}"
+        when: test_result_inc_backup_load_tests is defined
 
       - name: Collect and archive test logs
         shell: |
