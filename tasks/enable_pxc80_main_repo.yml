@@ -25,6 +25,9 @@
   - name: add the main tools repo
     command: percona-release enable tools release
 
+  - name: add the PT repo
+    command: percona-release enable pt release
+
   - name: Clean and update package cache
     shell: |
       {{ ansible_pkg_mgr }} clean all

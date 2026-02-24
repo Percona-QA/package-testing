@@ -25,6 +25,9 @@
   - name: enable pxb repo
     command: percona-release enable pxb-80 release
 
+  - name: enable PT repo
+    command: percona-release enable pt release
+
   - name: Clean and update package cache
     shell: |
       {{ ansible_pkg_mgr }} clean all
