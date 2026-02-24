@@ -27,5 +27,5 @@ provisioner:
     side_effect: ../../../../../playbooks/pxc80_upgrade_bootstrap.yml
   inventory:
     host_vars:
-      pxc1-80-bootstrap-rocky-linux-8-arm-install:
+      pxc1-80-bootstrap-rocky-linux-8-arm-min_upgrade-${test_type}:
         ip_env: "{{ ansible_host }}"
