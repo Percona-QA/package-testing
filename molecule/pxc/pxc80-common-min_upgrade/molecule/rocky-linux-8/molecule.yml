@@ -7,9 +7,9 @@ driver:
   name: ec2
 platforms:
   - name: ${BUILD_NUMBER}-pxc2-80-common-rocky-linux-8-min_upgrade-${test_type}
-    region: us-west-2
-    image: ami-04310224db1f2a278
-    vpc_subnet_id: subnet-03136d8c244f56036
+    region: us-west-1
+    image: ami-0f6a73c434dbc977b
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: t2.large
     ssh_user: rocky
     root_device_name: /dev/xvda
@@ -18,9 +18,9 @@ platforms:
       job-name: ${JOB_NAME}
       build-number: ${BUILD_NUMBER}
   - name: ${BUILD_NUMBER}-pxc3-80-common-rocky-linux-8-min_upgrade-${test_type}
-    region: us-west-2
-    image: ami-04310224db1f2a278
-    vpc_subnet_id: subnet-03136d8c244f56036
+    region: us-west-1
+    image: ami-0f6a73c434dbc977b
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: t2.large
     ssh_user: rocky
     root_device_name: /dev/xvda
