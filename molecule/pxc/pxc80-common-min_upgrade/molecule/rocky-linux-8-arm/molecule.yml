@@ -8,7 +8,7 @@ driver:
 platforms:
   - name: ${BUILD_NUMBER}-pxc2-80-common-rocky-linux-8-arm-min_upgrade-${test_type}
     region: us-west-1
-    image: ami-05b17db2366b5ed66
+    image: ami-05b72bddd6d727ba5
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: c6g.large
     ssh_user: rocky
@@ -19,7 +19,7 @@ platforms:
       build-number: ${BUILD_NUMBER}
   - name: ${BUILD_NUMBER}-pxc3-80-common-rocky-linux-8-arm-min_upgrade-${test_type}
     region: us-west-1
-    image: ami-05b17db2366b5ed66
+    image: ami-05b72bddd6d727ba5
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: c6g.large
     ssh_user: rocky
