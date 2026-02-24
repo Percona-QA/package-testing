@@ -11,7 +11,7 @@ platforms:
     image: ami-023eeffe03f0dd455
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.large
-    ssh_user: ec2-user
+    ssh_user: rocky
     root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
@@ -22,7 +22,7 @@ platforms:
     image: ami-023eeffe03f0dd455
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: t2.large
-    ssh_user: ec2-user
+    ssh_user: rocky
     root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: jenkins-pxc-worker
