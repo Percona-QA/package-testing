@@ -1,0 +1,45 @@
+---
+scenario:
+  name: rocky-linux-9-arm
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: ${BUILD_NUMBER}-pxc2-80-common-rocky-linux-9-arm-min_upgrade-${test_type}
+    region: us-west-2
+    image: ami-09aad1f3c008ab0b4
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: c6g.large
+    ssh_user: ec2-user
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
+  - name: ${BUILD_NUMBER}-pxc3-80-common-rocky-linux-9-arm-min_upgrade-${test_type}
+    region: us-west-2
+    image: ami-09aad1f3c008ab0b4
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: c6g.large
+    ssh_user: ec2-user
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
+provisioner:
+  name: ansible
+  playbooks:
+    create: ../../../playbooks/create_noble.yml
+    destroy: ../../../playbooks/destroy_noble.yml
+    prepare: ../../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+    side_effect: ../../../../../playbooks/pxc80_upgrade_common.yml
+  inventory:
+    host_vars:
+      pxc2-80-common-rocky-linux-9-arm-min_upgrade-${test_type}:
+        ip_env: "{{ ansible_host }}"
+      pxc3-80-common-rocky-linux-9-arm-min_upgrade-${test_type}:
+        ip_env: "{{ ansible_host }}"
+        sleep_before_tests: 40
