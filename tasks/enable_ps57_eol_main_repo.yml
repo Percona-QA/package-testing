@@ -1,3 +1,4 @@
+
   - name: include playbook for removing Percona repo
     include_tasks: remove_percona_repository.yml
 
