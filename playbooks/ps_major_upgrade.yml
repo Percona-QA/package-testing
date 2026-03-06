@@ -309,19 +309,37 @@
   - name: enable PS {{ major_upgrade_to_product }} main repo
     include_tasks: "../tasks/enable_{{ major_upgrade_to_product }}_main_repo.yml"
     when:
-      - major_upgrade_to_product in ['ps80', 'ps81', 'ps84']
+      - major_upgrade_to_product in ['ps84']
       - major_upgrade_to_repo == 'main'
 
   - name: enable PS {{ major_upgrade_to_product }} testing repo
     include_tasks: "../tasks/enable_{{ major_upgrade_to_product }}_testing_repo.yml"
     when:
-      - major_upgrade_to_product in ['ps80', 'ps81', 'ps84']
+      - major_upgrade_to_product in ['ps84']
       - major_upgrade_to_repo == 'testing'
 
   - name: enable PS {{ major_upgrade_to_product }} experimental repo
     include_tasks: "../tasks/enable_{{ major_upgrade_to_product }}_experimental_repo.yml"
     when:
-      - major_upgrade_to_product in ['ps80', 'ps81', 'ps84']
+      - major_upgrade_to_product in ['ps84']
+      - major_upgrade_to_repo == 'experimental'
+
+  - name: enable PS {{ major_upgrade_to_product }} main repo
+    include_tasks: "../tasks/enable_ps8_main_repo.yml"
+    when:
+      - major_upgrade_to_product in ['ps80']
+      - major_upgrade_to_repo == 'main'
+
+  - name: enable PS {{ major_upgrade_to_product }} testing repo
+    include_tasks: "../tasks/enable_ps8_testing_repo.yml"
+    when:
+      - major_upgrade_to_product in ['ps80']
+      - major_upgrade_to_repo == 'testing'
+
+  - name: enable PS {{ major_upgrade_to_product }} experimental repo
+    include_tasks: "../tasks/enable_ps8_experimental_repo.yml"
+    when:
+      - major_upgrade_to_product in ['ps80']
       - major_upgrade_to_repo == 'experimental'
 
   - name: append include for RedHat
