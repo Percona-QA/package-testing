@@ -72,7 +72,7 @@
       - major_upgrade_from_repo == 'experimental'
 
   - name: enable PS 5.7 EOL tools repo for source Percona Server {{ major_upgrade_from_product }}
-    include_tasks: ../tasks/enable_ps57_eol_tools_repo.yml
+    include_tasks: ../tasks/enable_ps57_eol_testing_repo.yml
     when:
       - major_upgrade_from_product == 'ps57'
       - eol_repo == 'yes'
