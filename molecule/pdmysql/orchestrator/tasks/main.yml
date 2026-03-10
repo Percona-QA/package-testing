@@ -148,6 +148,13 @@
     debug:
       var: consul_template_status
 
+  - name: Wait for consul leader
+    shell: curl -s http://127.0.0.1:8500/v1/status/leader
+    register: consul_leader
+    retries: 15
+    delay: 2
+    until: consul_leader.stdout != '""'
+
   - name: Populate consul kv
     shell: consul kv put "mysql/master/ci/hostname" "127.0.0.1"
 
