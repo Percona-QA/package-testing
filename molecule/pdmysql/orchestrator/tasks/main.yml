@@ -72,7 +72,7 @@
   - name: Clone orchestrator sources
     git:
       repo: https://github.com/percona/orchestrator.git
-      version: "{{ lookup('env', 'ORCHESTRATOR_TESTS_VERSION') }}"
+      version: master
       dest: /root/orchestrator
 
   - name: Clone orchestrator-ci-env sources
