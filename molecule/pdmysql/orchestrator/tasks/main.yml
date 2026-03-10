@@ -72,13 +72,13 @@
   - name: Clone orchestrator sources
     git:
       repo: https://github.com/percona/orchestrator.git
-      version: master
+      version: "{{ lookup('env', 'ORCHESTRATOR_TESTS_VERSION') }}"
       dest: /root/orchestrator
 
   - name: Clone orchestrator-ci-env sources
     git:
       repo: https://github.com/openark/orchestrator-ci-env.git
-      version: "{{ lookup('env', 'ORCHESTRATOR_TESTS_VERSION') }}"
+      version: master
       dest: /root/orchestrator-ci-env
 
   - name: Install haproxy for orchestrator system test debian
