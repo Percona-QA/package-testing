@@ -10,10 +10,19 @@
     command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
 
-  - name: add an apt signing key to enable repo
-    apt_key:
-      url: https://percona.com/downloads/deb-percona-keyring.gpg
-      state: present
+  - name: Download Percona GPG key
+    ansible.builtin.get_url:
+      url: https://github.com/percona/percona-repositories/raw/main/deb/percona-keyring.gpg
+      dest: /tmp/percona-keyring.gpg
+      mode: '0644'
+    when: ansible_os_family == "Debian"
+
+  - name: Install Percona GPG key
+    ansible.builtin.copy:
+      src: /tmp/percona-keyring.gpg
+      dest: /etc/apt/trusted.gpg.d/percona-keyring.gpg
+      remote_src: yes
+      mode: '0644'
     when: ansible_os_family == "Debian"
 
   - name: add eol main repository on debian
