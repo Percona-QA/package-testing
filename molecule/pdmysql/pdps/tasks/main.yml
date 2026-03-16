@@ -33,7 +33,7 @@
     command: percona-release enable-only pdps-{{ version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
-      version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
+      version: "{{ '84-lts' if '8.4' in lookup('env', 'VERSION') else '8.0' if '8.0.' in lookup('env', 'VERSION') else '9x-innovation' if (lookup('env', 'VERSION') | default('', true) | trim | regex_search('^9\\.')) else (lookup('env', 'VERSION') | default('', true) | trim).split('-')[0] }}"
     when: not major_repo
 
   - name: enable the major pdps-{{ version }} {{ repo }}
@@ -106,7 +106,8 @@
   - name: install Percona XtraBackup {{ major_release_version }} packages
     include_tasks: ../../../tasks/install_pxb_innovation_lts.yml
     vars:
-      major_release_version: "{{ lookup('env', 'VERSION').split('.')[:2]|join('') }}"
+      # For 9x innovation, PXB packages are named percona-xtrabackup-91 (not 96)
+      major_release_version: "{{ '91' if lookup('env', 'VERSION').split('.')[0] | default('0', true) | int == 9 else lookup('env', 'VERSION').split('.')[:2]|join('') }}"
 
   - name: install proxysql new deb packages
     apt:
