@@ -4,7 +4,7 @@ awsRegions=("us-west-1" "us-west-2" "us-east-1" "us-east-2" "eu-west-1" "eu-west
 
 checkec2-qa(){
            threshold_date=$(date -d "$2 day ago" +%Y-%m-%d)
-            aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --query "Reservations[].Instances[?LaunchTime<='"${threshold_date}"' && (Tags[?Key=='iit-billing-tag' && (contains(Value,'package-testing') || contains(Value,'molecule'))] || Tags[?Key=='job-name' && (contains(Value,'pxb') || contains(Value,'package-testing') || contains(Value,'ps') || contains(Value,'pxc') || contains(Value,'pbm') || contains(Value,'pdmdb') || contains(Value,'orchestrator_docker') || contains(Value,'toolkit') || contains(Value,'pt') || contains(Value,'jenkins-pg-worker') || contains(Value,'jenkins-pg-molecule-rhel'))])].[Tags[?Key=='Name'].Value[],Tags[?Key=='job-name'].Value[], InstanceId, LaunchTime]" --output yaml --region $1 | sed -e 's/\- \[\]//g' -e '/^$/d'
+           aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --query "Reservations[].Instances[?LaunchTime<='"${threshold_date}"' && (Tags[?Key=='iit-billing-tag' && (contains(Value,'package-testing') || contains(Value,'molecule'))] || Tags[?Key=='job-name' && (contains(Value,'pxb') || contains(Value,'package-testing') || contains(Value,'ps') || contains(Value,'pxc') || contains(Value,'pbm') || contains(Value,'pdmdb') || contains(Value,'orchestrator_docker') || contains(Value,'toolkit') || contains(Value,'pt') || contains(Value,'jenkins-pg-worker') || contains(Value,'jenkins-pg-molecule-rhel'))] || KeyName=='molecule-pkg-tests')].[Tags[?Key=='Name'].Value[],Tags[?Key=='job-name'].Value[], InstanceId, LaunchTime]" --output yaml --region $1 | sed -e 's/\- \[\]//g' -e '/^$/d'
     }
 
 checkec2-all(){
