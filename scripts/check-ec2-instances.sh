@@ -12,7 +12,7 @@ checkec2-all(){
            aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --query "Reservations[].Instances[?LaunchTime<='${threshold_date}'].[Tags[?Key=='Name'].Value[],Tags[?Key=='job-name'].Value[], InstanceId, LaunchTime]" --output yaml --region $1 | sed -e 's/\- \[\]//g' -e '/^$/d'
     }
 
-days="2"
+days="1"
 
 for region in "${awsRegions[@]}"
 do
