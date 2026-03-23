@@ -441,6 +441,12 @@
           QASCRIPTS="/server-qa" \
           LOAD_TOOL="pstress" \
           LOAD_TOOL_DIR="/pstress/src" \
+          FORTANIX_EMAIL="{{ lookup('env', 'FORTANIX_EMAIL') }}" \
+          FORTANIX_PASSWORD="{{ lookup('env', 'FORTANIX_PASSWORD') }}" \
+          KMS_KEYID="{{ lookup('env', 'KMS_KEYID') }}" \
+          KMS_AUTH_KEY="{{ lookup('env', 'KMS_AUTH_KEY') }}" \
+          KMS_SECRET_KEY="{{ lookup('env', 'KMS_SECRET_KEY') }}" \
+          KMS_REGION="{{ lookup('env', 'KMS_REGION') }}" \
         bash -c '
           set -o pipefail
           mkdir -p $TEST_BASE_DIR
