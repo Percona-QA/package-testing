@@ -20,7 +20,7 @@ platforms:
           volume_type: gp3
           delete_on_termination: true
     instance_tags:
-      iit-billing-tag: jenkins-pxc-worker
+      iit-billing-tag: ${IIT_BILLING_TAG}
       job-name: ${JOB_NAME}
       build-number: ${BUILD_NUMBER}
   - name: ${BUILD_NUMBER}-pxc3-80-common-rl-9-install-${INSTALLTYPE}
@@ -37,7 +37,7 @@ platforms:
           volume_type: gp3
           delete_on_termination: true
     instance_tags:
-      iit-billing-tag: jenkins-pxc-worker
+      iit-billing-tag: ${IIT_BILLING_TAG}
       job-name: ${JOB_NAME}
       build-number: ${BUILD_NUMBER}
 provisioner:

@@ -14,7 +14,7 @@ platforms:
     ssh_user: ec2-user
     root_device_name: /dev/xvda
     instance_tags:
-      iit-billing-tag: jenkins-pxc-worker
+      iit-billing-tag: ${IIT_BILLING_TAG}
       job-name: ${JOB_NAME}
       build-number: ${BUILD_NUMBER}
   - name: ${BUILD_NUMBER}-pxc3-80-common-al2023-arm-min_upgrade-${test_type}
@@ -25,7 +25,7 @@ platforms:
     ssh_user: ec2-user
     root_device_name: /dev/xvda
     instance_tags:
-      iit-billing-tag: jenkins-pxc-worker
+      iit-billing-tag: ${IIT_BILLING_TAG}
       job-name: ${JOB_NAME}
       build-number: ${BUILD_NUMBER}
 provisioner:
