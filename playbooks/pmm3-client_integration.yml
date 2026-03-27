@@ -20,6 +20,10 @@
     psmdb_repository: "{{ lookup('env', 'PSMDB_REPOSITORY') | default('release', true)}}"
 
   tasks:
+  - name: Print out ansible_facts['distribution']
+    debug:
+      var: ansible_facts['distribution']
+
   - name: Register Instance IP
     shell: echo $(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}')
     register: instance_ip
