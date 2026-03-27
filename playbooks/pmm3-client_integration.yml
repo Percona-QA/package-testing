@@ -51,9 +51,11 @@
 
   - name: Install PMM client new rpm packages
     when: ansible_os_family == "RedHat"
+    become: true
+    become_method: sudo
     shell: |
-      sudo yum -y update
-      sudo yum -y install pmm-client
+      yum -y update
+      yum -y install pmm-client
 
   - name: Check that PMM Client version is correct
     include_tasks: ../tasks/verify_pmm_client_version.yml
