@@ -19,6 +19,8 @@ platforms:
           delete_on_termination: true
     instance_tags:
       iit-billing-tag: ${IIT_BILLING_TAG}
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   log: True
