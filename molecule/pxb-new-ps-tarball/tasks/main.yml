@@ -447,12 +447,17 @@
           KMS_AUTH_KEY="{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}" \
           KMS_SECRET_KEY="{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}" \
           KMS_REGION="us-east-1" \
+          SELECT_TEST="{{ lookup('env', 'SELECT_TEST') }}" \
         bash -c '
           set -o pipefail
           mkdir -p $TEST_BASE_DIR
           cd /server-qa/test_scripts/pxb || exit 1
           # pytest inc_backup_load_tests.py -k "test_page_tracking_backup or test_crash_innodb_page_tracking or test_crash_rocksdb_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-page_tracking.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-page_tracking.txt
-          pytest inc_backup_load_tests.py -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-inc_backup_load_tests.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-inc_backup_load_tests.txt
+          PYTEST_K_OPTION=""
+          if [ "$SELECT_TEST" != "all" ] && [ -n "$SELECT_TEST" ]; then
+            PYTEST_K_OPTION="-k $SELECT_TEST"
+          fi
+          pytest inc_backup_load_tests.py $PYTEST_K_OPTION -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-inc_backup_load_tests.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-inc_backup_load_tests.txt
         '
       register: test_result_inc_backup_load_tests
 
