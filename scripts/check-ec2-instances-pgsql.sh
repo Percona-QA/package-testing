@@ -28,9 +28,9 @@ echo "--------------------------------------------------------------------------
 echo "Region $region has $serversqa_pgsql_to_terminate INSTANCES WITH PGSQL MOLECULE QA TESTS INSTANCES running since past $hours_terminate hours" >> overview-qa-pgsql-to-terminate.txt
 
 # Instances that need to stopped
-echo "--------------Region $region has $serversqa_pgsql_to_stop INSTANCES WITH PGSQL MOLECULE QA TESTS running since past $$hours_stop hours to Stop -----------------" >> STOP-QA-PGSQL.txt
+echo "--------------Region $region has $serversqa_pgsql_to_stop INSTANCES WITH PGSQL MOLECULE QA TESTS running since past $hours_stop hours to Stop -----------------" >> STOP-QA-PGSQL.txt
 checkec2-pgsql-to-stop "$region" "$hours_stop"  >> STOP-QA-PGSQL.txt
 echo "-------------------------------------------------------------------------------------"  >> STOP-QA-PGSQL.txt
-echo "Region $region has $serversqa_pgsql_to_stop INSTANCES WITH PGSQL MOLECULE QA TESTS INSTANCES running since past $$hours_stop hours" >> overview-qa-pgsql-to-stop.txt
+echo "Region $region has $serversqa_pgsql_to_stop INSTANCES WITH PGSQL MOLECULE QA TESTS INSTANCES running since past $hours_stop hours" >> overview-qa-pgsql-to-stop.txt
 
 done
