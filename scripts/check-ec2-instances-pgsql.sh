@@ -22,22 +22,15 @@ serversqa_pgsql_to_terminate=$(checkec2-pgsql-to-terminate "$region" "$hours_ter
 serversqa_pgsql_to_stop=$(checkec2-pgsql-to-stop "$region" "$hours_stop" | /opt/yq 'length')
 
 # Instances that needs to be Terminated
-echo "--------------Region $region has $serversqa_pgsql_to_terminate INSTANCES WITH MOLECULE QA TESTS running since past $hours_terminate hours-----------------" >> DESTROY-QA-PGSQL.txt
+echo "--------------Region $region has $serversqa_pgsql_to_terminate INSTANCES WITH PGSQL MOLECULE QA TESTS running since past $hours_terminate hours to Terminate -----------------" >> DESTROY-QA-PGSQL.txt
 checkec2-pgsql-to-terminate "$region" "$hours_terminate"  >> DESTROY-QA-PGSQL.txt
 echo "-------------------------------------------------------------------------------------"  >> DESTROY-QA-PGSQL.txt
 echo "Region $region has $serversqa_pgsql_to_terminate INSTANCES WITH PGSQL MOLECULE QA TESTS INSTANCES running since past $hours_terminate hours" >> overview-qa-pgsql-to-terminate.txt
 
 # Instances that need to stopped
-echo "--------------Region $region has $serversqa_pgsql_to_stop INSTANCES WITH MOLECULE QA TESTS running since past $hours_terminate hours-----------------" >> STOP-QA-PGSQL.txt
-checkec2-pgsql-to-terminate "$region" "$hours_stop"  >> STOP-QA-PGSQL.txt
+echo "--------------Region $region has $serversqa_pgsql_to_stop INSTANCES WITH PGSQL MOLECULE QA TESTS running since past $$hours_stop hours to Stop -----------------" >> STOP-QA-PGSQL.txt
+checkec2-pgsql-to-stop "$region" "$hours_stop"  >> STOP-QA-PGSQL.txt
 echo "-------------------------------------------------------------------------------------"  >> STOP-QA-PGSQL.txt
-echo "Region $region has $serversqa_pgsql_to_stop INSTANCES WITH PGSQL MOLECULE QA TESTS INSTANCES running since past $hours_terminate hours" >> overview-qa-pgsql-to-stop.txt
-
-
-
-
-
-
-
+echo "Region $region has $serversqa_pgsql_to_stop INSTANCES WITH PGSQL MOLECULE QA TESTS INSTANCES running since past $$hours_stop hours" >> overview-qa-pgsql-to-stop.txt
 
 done
