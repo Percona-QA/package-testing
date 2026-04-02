@@ -59,19 +59,19 @@
 
 # INSTALL PS 
   - name: install Percona Server {{ major_release_version }} packages
-    include_tasks: ../tasks/install_ps_innovation_lts.yml
+    include_tasks: ../tasks/install_ps_innovation.yml
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
 # INSTALL MS 
 
   - name: install MYSQL MS Server {{ pxb_version_main }} packages
-    include_tasks: ../tasks/install_ms_innovation_lts.yml
+    include_tasks: ../tasks/install_ms_innovation.yml
     vars:
       pxb_version_major: "{{ pxb_major_release }}"
       pxb_version_major_minor: "{{ pxb_major_release }}.0"
     when:
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation"
 
   - name: install sysbench new deb packages
     include_tasks: ../tasks/install_sysbench.yml
@@ -142,7 +142,7 @@
         dest: /usr/sbin/
         remote_src: yes
     when:
-    - lookup('env', 'server_to_test') == "ps_innovation_lts"
+    - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: copy the global configuration file for mysql in Redhat/CentOS
     copy:
@@ -165,7 +165,7 @@
         remote_src: yes
     when: 
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: copy the encryption config file on Debian/Ubuntu MS
     copy:
@@ -174,7 +174,7 @@
         remote_src: yes
     when: 
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation"
 
   - name: append include for RedHat
     lineinfile:
@@ -189,7 +189,7 @@
         remote_src: yes
     when: 
       - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: copy the encryption config file on RHEL/CentOS/Amazon MS
     copy:
@@ -198,7 +198,7 @@
         remote_src: yes
     when: 
       - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation"
 
   - name: start mysql service RedHat
     service: name=mysqld state=restarted
@@ -221,7 +221,7 @@
     command: /package-testing/plugins_test.sh
 
   - name: install Percona XtraBackup {{ major_release_version }} packages
-    include_tasks: ../tasks/install_pxb_innovation_lts.yml
+    include_tasks: ../tasks/install_pxb_innovation.yml
     when: lookup('env', 'install_repo') != "experimental"
 
   - name: check that Percona XtraBackup version is correct

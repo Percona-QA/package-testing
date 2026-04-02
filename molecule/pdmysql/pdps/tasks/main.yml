@@ -104,7 +104,7 @@
     when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
 
   - name: install Percona XtraBackup {{ major_release_version }} packages
-    include_tasks: ../../../tasks/install_pxb_innovation_lts.yml
+    include_tasks: ../../../tasks/install_pxb_innovation.yml
     vars:
       # For 9x innovation, PXB packages are named percona-xtrabackup-91 (not 96)
       major_release_version: "{{ '91' if lookup('env', 'VERSION').split('.')[0] | default('0', true) | int == 9 else lookup('env', 'VERSION').split('.')[:2]|join('') }}"

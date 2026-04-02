@@ -77,19 +77,19 @@
 
 # INSTALL PS 
   - name: install Percona Server {{ major_release_version }} packages
-    include_tasks: ../tasks/install_ps_innovation_lts.yml
+    include_tasks: ../tasks/install_ps_innovation.yml
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
 # INSTALL MS 
 
   - name: install MYSQL MS Server {{ pxb_version_main }} packages
-    include_tasks: ../tasks/install_ms_innovation_lts.yml
+    include_tasks: ../tasks/install_ms_innovation.yml
     vars:
       pxb_version_major: "{{ pxb_major_release }}"
       pxb_version_major_minor: "{{ pxb_major_release }}.0"
     when:
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation"
 
   - name: install and check Percona XtraBackup {{ major_release_version }} normal tarball from {{ install_repo }} downloads area
     command: /package-testing/test_binary_tarball.sh pxb{{ major_release_version }} {{ install_repo }} normal
@@ -98,25 +98,25 @@
     command: service mysql start
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: start mysql service with systemctl command for Redhat/Centos 7
     command: systemctl start mysqld
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
   - name: start mysql service with systemctl command for Redhat/Centos 7 for PS
     command: systemctl start mysql
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
     when: 
       - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: install plugins, import world database
     command: /package-testing/plugins_test.sh

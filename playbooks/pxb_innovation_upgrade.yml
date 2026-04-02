@@ -109,12 +109,12 @@
   - name: include tasks for enabling PS {{ pxb_version_main }} main repo
     include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: install Percona Server {{ pxb_version_main }} packages main
-    include_tasks: ../tasks/install_ps_innovation_lts.yml
+    include_tasks: ../tasks/install_ps_innovation.yml
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 # PS INSTALL END
 
 
@@ -124,12 +124,12 @@
 # INSTALL MS 
 
   - name: install MYSQL MS Server {{ pxb_version_main }} packages
-    include_tasks: ../tasks/install_ms_innovation_lts.yml
+    include_tasks: ../tasks/install_ms_innovation.yml
     vars:
       pxb_version_major: "{{ pxb_version_main }}"
       pxb_version_major_minor: "{{ pxb_version_main }}.0"
     when:
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation"
 ##
 ###
 
@@ -139,14 +139,14 @@
 # ENABLE PXB MAIN REPO
 
   - name: ENABLE PXB MAIN REPO
-    include_tasks: ../tasks/enable_pxb_innovation_lts_main_repo.yml
+    include_tasks: ../tasks/enable_pxb_innovation_main_repo.yml
     when:
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation"
 
 # INSTALL PXB
 
   - name: install Percona XtraBackup {{ major_release_version }} packages
-    include_tasks: ../tasks/install_pxb_innovation_lts.yml
+    include_tasks: ../tasks/install_pxb_innovation.yml
     vars:
       major_release_version: "{{ pxb_version_main_no_cs }}"
     when: lookup('env', 'install_repo') != "experimental"
@@ -158,19 +158,19 @@
     command: service mysql start
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
     when: 
       - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: copy .my.cnf with credentials on centos
     template: src=../templates/my_57.j2
@@ -178,17 +178,17 @@
               mode=0640 owner=root group=root
     when: 
       - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: restart mysql service
     service: name=mysql state=restarted
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: install plugins, import world database
     command: /package-testing/plugins_test.sh
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: install 3rd party packages with apt
     apt:
@@ -198,7 +198,7 @@
       - rsyslog-mysql
     when: 
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: install 3rd party packages with yum
     yum:
@@ -209,7 +209,7 @@
     when: 
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int <= 7
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: install 3rd party packages with dnf
     dnf:
@@ -220,7 +220,7 @@
     when: 
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int >= 8
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
 
 # RUN BACKUPS MAIN REPOS
@@ -260,14 +260,14 @@
     register: mysql_packages_raw
     when: 
       - ansible_facts['os_family'] == "Debian"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation"
 
   - name: Set fact for mysql_packages
     set_fact:
       mysql_packages: "{{ mysql_packages_raw.stdout_lines }}"
     when: 
       - ansible_facts['os_family'] == "Debian"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation"
 
   - name: Remove Percona Server deb packages MS
     apt:
@@ -277,7 +277,7 @@
     loop: "{{ mysql_packages }}"
     when: 
       - ansible_facts['os_family'] == "Debian"
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation"
 
 # REMOVE old log file PXB
 
@@ -287,12 +287,12 @@
 # INSTALL MS TESTING REPO VERSION OF PXB
 
   - name: install MYSQL MS Server {{ pxb_version_testing }} packages
-    include_tasks: ../tasks/install_ms_innovation_lts.yml
+    include_tasks: ../tasks/install_ms_innovation.yml
     vars:
       pxb_version_major: "{{ pxb_version_testing }}"
       pxb_version_major_minor: "{{ pxb_version_testing }}.0"
     when:
-      - lookup('env', 'server_to_test') == "ms_innovation_lts"
+      - lookup('env', 'server_to_test') == "ms_innovation"
 ##
 ###
 
@@ -301,12 +301,12 @@
   - name: include tasks for enabling PS {{ pxb_version_testing }} testing repo 
     include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: install Percona Server {{ pxb_version_testing }} packages testing repo
-    include_tasks: ../tasks/install_ps_innovation_lts.yml
+    include_tasks: ../tasks/install_ps_innovation.yml
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
 # INSTALL PS END
 
@@ -314,12 +314,12 @@
 # ENABLE TESTING REPO START PXB
 #
   - name: ENABLE Percona XTRABACKUP MAIN REPO
-    include_tasks: ../tasks/enable_pxb_innovation_lts_testing_repo.yml
+    include_tasks: ../tasks/enable_pxb_innovation_testing_repo.yml
 
 # ENABLE TESTING REPO END
 
   - name: install Percona XtraBackup {{ major_release_version }} packages
-    include_tasks: ../tasks/install_pxb_innovation_lts.yml
+    include_tasks: ../tasks/install_pxb_innovation.yml
     vars:
       major_release_version: "{{ pxb_version_testing_no_cs }}"
     when: lookup('env', 'install_repo') != "experimental"
@@ -351,7 +351,7 @@
       - percona-xtrabackup-8{{ major_release_version }}
     when: 
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: remove Percona Server rpm packages PS
     yum:
@@ -363,7 +363,7 @@
       - percona-xtrabackup-8{{ major_release_version }}
     when: 
       - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - lookup('env', 'server_to_test') == "ps_innovation"
 
 
 

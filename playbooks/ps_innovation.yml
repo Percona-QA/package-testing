@@ -83,7 +83,7 @@
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
   - name: install Percona Server {{ major_release_version }} packages
-    include_tasks: ../tasks/install_ps_innovation_lts.yml
+    include_tasks: ../tasks/install_ps_innovation.yml
 
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e  

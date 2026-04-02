@@ -4,7 +4,7 @@
 #   enables Percona testing repository
 #   installs latest version of PS innovation lts, PXB innovation lts with kms component and runs some tests
 
-- import_playbook: ps_innovation_lts_kms.yml
+- import_playbook: ps_innovation_kms.yml
 
 - hosts: all
   become: true
@@ -33,7 +33,7 @@
       msg: "major_release_version: {{ major_release_version }} ps_inn_lts_repo_name: {{ ps_inn_lts_repo_name }}"
     
   - name: install Percona XtraBackup {{ major_release_version }} packages
-    include_tasks: ../tasks/install_pxb_innovation_lts.yml
+    include_tasks: ../tasks/install_pxb_innovation.yml
     when: lookup('env', 'install_repo') != "experimental"
 
   - name: check that Percona XtraBackup version is correct
