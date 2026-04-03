@@ -210,7 +210,7 @@
     when: lookup('env', 'install_repo') == "experimental"
 
   - name: install Percona XtraBackup {{ major_release_version }} packages
-    include_tasks: ../tasks/install_pxb_innovation_lts.yml
+    include_tasks: ../tasks/install_pxb_innovation.yml
     when: lookup('env', 'install_repo') != "experimental"
 
   - name: install plugins, import world database

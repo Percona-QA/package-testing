@@ -54,7 +54,7 @@
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
   - name: install Percona Server {{ major_release_version }} packages
-    include_tasks: ../tasks/install_ps_innovation_lts.yml
+    include_tasks: ../tasks/install_ps_innovation.yml
 
   - name: Use python3 for Oracle linux 8
     raw: |

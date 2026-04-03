@@ -74,7 +74,7 @@
       msg: "PXB version number is {{ pxb_version_major_reg }} {{ pxb_version_major_minor_reg }}"
       
   - name: install MYSQL MS Server {{ pxb_version_major_reg }} packages
-    include_tasks: ../tasks/install_ms_innovation_lts.yml
+    include_tasks: ../tasks/install_ms_innovation.yml
     vars:
       pxb_version_major: "{{ pxb_version_major_reg }}"
       pxb_version_major_minor: "{{ pxb_version_major_minor_reg }}"
