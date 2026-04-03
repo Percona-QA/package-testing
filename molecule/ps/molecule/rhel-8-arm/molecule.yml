@@ -12,7 +12,9 @@ platforms:
     ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
-      iit-billing-tag: ps-package-testing
+      iit-billing-tag: ${IIT_BILLING_TAG}
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   log: True
