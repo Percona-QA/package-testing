@@ -45,7 +45,7 @@
 ## PS 57 EOL 
 
   - name: Enable PS 57 EOL repos
-    include_tasks: enable_ps57_eol_tools_repo.yml
+    include_tasks: enable_ps57_eol_release_repo.yml
     when: lookup('env', 'client_to_test') == "ps57"
 
 #  - name: Mandatory step for PXC 57 EOL (Disable all old repos)
