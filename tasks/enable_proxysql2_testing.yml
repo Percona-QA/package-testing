@@ -80,7 +80,6 @@
       name:
         - openssl
         - openssl-libs
-        - openssl-fips-provider-latest
       state: latest
       update_cache: yes
     when:
