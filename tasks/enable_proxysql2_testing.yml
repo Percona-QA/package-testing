@@ -66,4 +66,26 @@
     when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"
 
 
+  - name: Refresh AL2023 package metadata
+    shell: |
+      dnf clean all
+      rm -rf /var/cache/dnf
+      dnf makecache
+    when:
+      - ansible_distribution == "Amazon"
+      - ansible_distribution_major_version == "2023"
+
+  - name: Update OpenSSL on AL2023
+    dnf:
+      name:
+        - openssl
+        - openssl-libs
+        - openssl-fips-provider-latest
+      state: latest
+      update_cache: yes
+    when:
+      - ansible_distribution == "Amazon"
+      - ansible_distribution_major_version == "2023"
+
+
 
