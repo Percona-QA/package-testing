@@ -43,7 +43,7 @@
       state: latest
     vars:
       packages:
-      - proxysql2
+      - proxysql3
     when: ansible_os_family == "RedHat"
 
   - name: start proxysql service
