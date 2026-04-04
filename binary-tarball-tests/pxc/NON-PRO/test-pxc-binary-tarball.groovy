@@ -71,34 +71,6 @@ pipeline {
                         }
                     }
                 }
-                stage('Ubuntu Focal') {
-                    agent {
-                        label "min-focal-x64"
-                    }
-                    steps {
-                        script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
-                        }
-                        withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-                            sh '''
-                                echo ${BUILD_TYPE_MINIMAL}
-                                MINIMAL=""
-                                if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
-                                  MINIMAL="-minimal"
-                                fi
-                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.31${MINIMAL}.tar.gz"
-                                TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
-                                rm -rf package-testing
-                                sudo apt install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
-                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
-                                ./run.sh || true
-                              '''
-                            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
-                        }
-                    }
-                }
                 stage('Debian Bullseye') {
                     agent {
                         label "min-bullseye-x64"
@@ -155,7 +127,34 @@ pipeline {
                         }
                     }
                 }
-
+                stage('Debian Trixie') {
+                    agent {
+                        label "min-trixie-x64"
+                    }
+                    steps {
+                        script {
+                            currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
+                        }
+                        withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+                            sh '''
+                                echo ${BUILD_TYPE_MINIMAL}
+                                MINIMAL=""
+                                if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
+                                  MINIMAL="-minimal"
+                                fi
+                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.35${MINIMAL}.tar.gz"
+                                TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
+                                rm -rf package-testing
+                                sudo apt install -y git wget tar
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
+                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
+                                ./run.sh || true
+                              '''
+                            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
+                        }
+                    }
+                }                
                 stage('Oracle Linux 8') {
                     agent {
                         label "min-ol-8-x64"

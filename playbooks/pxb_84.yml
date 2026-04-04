@@ -109,7 +109,7 @@
 ###
 
   - name: install MYSQL MS Server {{ pxb_version_major_reg }} packages
-    include_tasks: ../tasks/install_ms_innovation_lts.yml
+    include_tasks: ../tasks/install_ms_innovation.yml
     vars:
       pxb_version_major: "{{ pxb_version_major_reg }}"
       pxb_version_major_minor: "{{ pxb_version_major_minor_reg }}"
@@ -147,6 +147,8 @@
 
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh pxb -e
+    when:
+      - ansible_distribution != "Rocky"
 
   - name: start mysql service with systemctl command
     command: systemctl start mysqld

@@ -24,8 +24,7 @@ pipeline {
             export PATH=${PATH}:~/.local/bin
             python3 -m venv ${WORKSPACE}/python-venv-molecule
             source ${WORKSPACE}/python-venv-molecule/bin/activate
-	    python -m pip install -U pip
-            pip3 install wheel
+            python -m pip3 install --upgrade pip "setuptools<81" wheel
             if grep -q 'Noble' /etc/os-release; then
               pip3 install molecule==3.0.0
             else

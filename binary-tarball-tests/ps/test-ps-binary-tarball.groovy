@@ -172,7 +172,7 @@ pipeline {
                 } else if (params.PRODUCT_TO_TEST == "PS84") {
                     product_to_test = "ps_84"
                 } else if (params.PRODUCT_TO_TEST == "PS_INN_LTS") {
-                    product_to_test = "ps_lts_innovation"
+                    product_to_test = "ps_innovation"
                 } else if (params.PRODUCT_TO_TEST == "PS57") {
                     product_to_test = "ps_57"
                 }

@@ -30,13 +30,11 @@
     include_tasks: ../tasks/enable_ps8_main_repo.yml
     when:
       - lookup('env', 'install_repo') == "main"
-      - ansible_distribution_major_version != "2023"
 
   - name: include tasks for enabling PS 8 test repo
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
     when:
       - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-      - ansible_distribution_major_version != "2023"
 
   - name: include tasks for enabling PS 8 experimental repo
     include_tasks: ../tasks/enable_ps8_experimental_repo.yml
@@ -59,7 +57,7 @@
       disable_gpg_check: yes
     when:
       - ansible_os_family == "RedHat"
-      - ansible_distribution_major_version == "9"
+      - ansible_distribution_major_version|int >= 9
       - ansible_architecture == "aarch64"
 
   - name: Install libgflags-dev for rhel9 amd64
@@ -69,7 +67,7 @@
       disable_gpg_check: yes
     when:
       - ansible_os_family == "RedHat"
-      - ansible_distribution_major_version == "9"
+      - ansible_distribution_major_version|int >= 9
       - ansible_architecture != "aarch64"
 
 ## INSTALL PS
@@ -77,7 +75,6 @@
     include_tasks: ../tasks/install_ps80.yml
     when:
       - lookup('env', 'server_to_test') == "ps-80"
-      - ansible_distribution_major_version != "2023"
 
 
 #### FOR AL2023 ######
@@ -143,7 +140,7 @@
       msg: "PXB version number is {{ pxb_version_major_reg }} {{ pxb_version_major_minor_reg }}"
 
   - name: install MYSQL MS Server {{ pxb_version_major_reg }} packages
-    include_tasks: ../tasks/install_ms_innovation_lts.yml
+    include_tasks: ../tasks/install_ms_innovation.yml
     vars:
       pxb_version_major: "{{ pxb_version_major_reg }}"
       pxb_version_major_minor: "{{ pxb_version_major_minor_reg }}"
@@ -269,6 +266,8 @@
 
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh pxb -e
+    when:
+      - ansible_distribution != "Rocky"
 
   - name: check that Percona XtraBackup version is correct NON PRO
     command: /package-testing/version_check.sh pxb80

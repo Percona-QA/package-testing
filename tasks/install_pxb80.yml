@@ -37,5 +37,5 @@
       - percona-xtrabackup-test-80
       - percona-xtrabackup-80-debuginfo
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8

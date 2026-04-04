@@ -218,7 +218,7 @@
         exclusive: False
       when: 
         - ansible_os_family == "RedHat"
-        - ansible_distribution != "CentOS"
+        - ansible_distribution not in ["CentOS", "Rocky"]
 
     - name: Setup SSH keys CentOS
       authorized_key:
@@ -235,6 +235,14 @@
         state: present
         exclusive: False
       when: ansible_distribution == "OracleLinux" or ansible_distribution == "Amazon"
+
+    - name: Setup SSH keys for Rocky
+      authorized_key:
+        user: rocky
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: false
+      when: ansible_distribution == "Rocky"
 
     - name: Setup SSH keys Debian
       authorized_key:
