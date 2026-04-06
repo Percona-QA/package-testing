@@ -38,7 +38,7 @@
 ## PXC 57 EOL 
 
   - name: Enable PXC 57 EOL repos
-    include_tasks: enable_pxc57_eol_tools_repo.yml
+    include_tasks: enable_pxc57_eol_proxysql2.yml
     when: lookup('env', 'client_to_test') == "pxc57"
 
 
