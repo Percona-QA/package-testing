@@ -101,7 +101,6 @@ fi
     sudo apt update
     sudo apt-get install -y percona-xtrabackup-24
   fi
-fi
 
 TARBALL_NAME=$(basename "$(find . -maxdepth 1 -name '*.tar.gz'|head -n1)")
 if [ -z "${TARBALL_NAME}" ]; then
