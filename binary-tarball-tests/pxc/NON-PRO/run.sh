@@ -64,6 +64,7 @@ elif [ -f /etc/redhat-release ]; then
 #    pip3 install --user pytest pytest-testinfra
 #    export PATH=$PATH:$HOME/.local/bin
 # fi
+
 else
   UCF_FORCE_CONFOLD=1 DEBIAN_FRONTEND=noninteractive sudo -E apt-get \
     -o Dpkg::Options::="--force-confdef" \
@@ -92,7 +93,6 @@ else
 
   export PATH="$HOME/test-venv/bin:$PATH"
 fi
-
 
   if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     wget -q https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb
