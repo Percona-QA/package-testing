@@ -38,11 +38,17 @@
     when:
       - ansible_os_family == "RedHat"
 
-  - name: Mandatory step for PXC 57 EOL (Disable all old repos)
-    command: percona-release disable all
+#  - name: Mandatory step for PXC 57 EOL (Disable all old repos)
+#    command: percona-release disable all
 
-  - name: Mandatory step for PXC 57 EOL (Enable only pxc-57)
-    command: percona-release setup -y pxc-57 
+#  - name: Mandatory step for PXC 57 EOL (Enable only pxc-57)
+#    command: percona-release setup -y pxc-57 
+
+  - name: clean and update yum cache
+    shell: |
+      yum clean all
+      yum makecache
+    when: ansible_os_family == "RedHat"
 
   - name: update deb cache
     apt:
