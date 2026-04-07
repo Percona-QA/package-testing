@@ -6,7 +6,7 @@ driver:
 platforms:
   - name: al2023-arm-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
     region: us-west-2
-    image:  ami-0c7104b910fd5acb5
+    image:  ami-00478270b6d87a5d1
     vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: c6g.large
     ssh_user: ec2-user
