@@ -42,8 +42,35 @@ elif [ -f /etc/redhat-release ]; then
     sudo percona-release enable pxb-24 testing
     sudo yum install -y percona-xtrabackup-24
   fi
+#else
+#  UCF_FORCE_CONFOLD=1 DEBIAN_FRONTEND=noninteractive sudo -E apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -qq -y install openssl
+#  if [[ $(lsb_release -sc) == 'xenial' ]]; then
+#    DEBIAN_FRONTEND=noninteractive sudo add-apt-repository -y ppa:deadsnakes/ppa
+#    DEBIAN_FRONTEND=noninteractive sudo apt update
+##    DEBIAN_FRONTEND=noninteractive sudo apt -y install python3.6
+#    sudo rm /usr/bin/python3 && sudo ln -sf /usr/bin/python3.6 /usr/bin/python3
+#    wget -O get-pip.py "https://bootstrap.pypa.io/get-pip.py" && sudo python3 get-pip.py
+#    sudo apt install -y libcurl4-openssl-dev
+#  else
+#    sudo apt install -y python3 python3-pip
+#  fi#
+#  sudo apt update
+#  if [[ $(lsb_release -sc) == "bookworm" || $(lsb_release -sc) == "noble" || "$CODENAME" == "trixie" ]]; then
+#    sudo apt install -y python3 python3-pip libnuma1 socat lsof curl libev4 libaio-dev
+#    pip3 install --user --break-system-packages pytest pytest-testinfra
+#    export PATH=$PATH:$HOME/.local/bin
+#  else
+#    sudo apt install -y python3 python3-pip libnuma1 socat lsof curl libev4 libaio-dev
+#    pip3 install --user pytest pytest-testinfra
+#    export PATH=$PATH:$HOME/.local/bin
+# fi
+
 else
-  UCF_FORCE_CONFOLD=1 DEBIAN_FRONTEND=noninteractive sudo -E apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" -qq -y install openssl
+  UCF_FORCE_CONFOLD=1 DEBIAN_FRONTEND=noninteractive sudo -E apt-get \
+    -o Dpkg::Options::="--force-confdef" \
+    -o Dpkg::Options::="--force-confold" \
+    install -y lsb-release software-properties-common
+
   if [[ $(lsb_release -sc) == 'xenial' ]]; then
     DEBIAN_FRONTEND=noninteractive sudo add-apt-repository -y ppa:deadsnakes/ppa
     DEBIAN_FRONTEND=noninteractive sudo apt update
@@ -52,18 +79,20 @@ else
     wget -O get-pip.py "https://bootstrap.pypa.io/get-pip.py" && sudo python3 get-pip.py
     sudo apt install -y libcurl4-openssl-dev
   else
-    sudo apt install -y python3 python3-pip
+    sudo apt update
+    sudo apt install -y python3 python3-pip python3-venv \
+      libnuma1 socat lsof curl libev4 libaio-dev
   fi
-  sudo apt update
-  if [[ $(lsb_release -sc) == "bookworm" || $(lsb_release -sc) == "noble" || "$CODENAME" == "trixie" ]]; then
-    sudo apt install -y python3 python3-pip libnuma1 socat lsof curl libev4 libaio-dev
-    pip3 install --user --break-system-packages pytest pytest-testinfra
-    export PATH=$PATH:$HOME/.local/bin
-  else
-    sudo apt install -y python3 python3-pip libnuma1 socat lsof curl libev4 libaio-dev
-    pip3 install --user pytest pytest-testinfra
-    export PATH=$PATH:$HOME/.local/bin
-  fi
+
+  # create isolated python env
+  python3 -m venv ~/test-venv
+  source ~/test-venv/bin/activate
+
+  python -m pip install --upgrade pip
+  python -m pip install pytest pytest-testinfra
+
+  export PATH="$HOME/test-venv/bin:$PATH"
+fi
 
   if [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
     wget -q https://repo.percona.com/apt/percona-release_latest.$(lsb_release -sc)_all.deb
@@ -72,7 +101,6 @@ else
     sudo apt update
     sudo apt-get install -y percona-xtrabackup-24
   fi
-fi
 
 TARBALL_NAME=$(basename "$(find . -maxdepth 1 -name '*.tar.gz'|head -n1)")
 if [ -z "${TARBALL_NAME}" ]; then
