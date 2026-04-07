@@ -83,12 +83,11 @@
     when: ansible_os_family == "Debian"
 
   - name: install proxysql3 new rpm packages
-    yum:
-      name: "{{ packages }}"
+    dnf:
+      name:
+        - proxysql3
       state: latest
-    vars:
-      packages:
-      - proxysql3
+      allowerasing: true
     when: ansible_os_family == "RedHat"
 
   - name: start proxysql service
