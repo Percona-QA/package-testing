@@ -48,11 +48,11 @@
 
   - name: start proxysql service
     service: name=proxysql state=started
-    when: ansible_distribution != "Amazon
+    when: ansible_distribution != "Amazon"
 
   - name: stop proxysql service
     service: name=proxysql state=stopped
-    when: ansible_distribution != "Amazon
+    when: ansible_distribution != "Amazon"
 
   - name: stop proxysql service on non-AL2023
     service:
@@ -93,11 +93,11 @@
 
   - name: start proxysql service
     service: name=proxysql state=started
-    when: ansible_distribution != "Amazon
+    when: ansible_distribution != "Amazon"
 
   - name: stop proxysql service
     service: name=proxysql state=stopped
-    when: ansible_distribution != "Amazon
+    when: ansible_distribution != "Amazon"
 
   - name: stop proxysql service on non-AL2023
     service:
