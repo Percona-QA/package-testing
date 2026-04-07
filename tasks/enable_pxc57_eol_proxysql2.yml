@@ -42,5 +42,10 @@
     command: percona-release disable all
 
   - name: Mandatory step for PXC 57 EOL (Enable only pxc-57)
-    command: percona-release setup -y pxc-57
+    command: percona-release setup -y pxc-57 
 
+  - name: update deb cache
+    apt:
+      update_cache: yes
+    when:
+      - ansible_os_family == "Debian"
