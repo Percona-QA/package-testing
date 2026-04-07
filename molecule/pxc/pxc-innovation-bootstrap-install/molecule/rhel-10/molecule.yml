@@ -1,16 +1,16 @@
 ---
 scenario:
-  name: rhel-8-arm
+  name: rhel-10
 dependency:
   name: galaxy
 driver:
   name: ec2
 platforms:
-  - name: ${BUILD_NUMBER}-pxc1-80-bootstrap-rhel-8-arm-install-${INSTALLTYPE}
+  - name: ${BUILD_NUMBER}-pxc1-innovation-bootstrap-rhel-10-install
     region: us-west-1
-    image: ami-01be8515d27094d60
+    image: ami-0f7153f6999a5ef60
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
-    instance_type: c6g.large
+    instance_type: t2.large
     ssh_user: ec2-user
     root_device_name: /dev/sda1
     instance_tags:
@@ -24,7 +24,8 @@ provisioner:
     destroy: ../../../playbooks/destroy_noble.yml
     prepare: ../../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
+    side_effect: ../../../../../playbooks/pxc_innovation_upgrade_bootstrap.yml
   inventory:
     host_vars:
-      pxc1-80-bootstrap-rhel-8-arm-install-${INSTALLTYPE}:
+      ${BUILD_NUMBER}-pxc1-innovation-bootstrap-rhel-10-install:
         ip_env: "{{ ansible_host }}"
