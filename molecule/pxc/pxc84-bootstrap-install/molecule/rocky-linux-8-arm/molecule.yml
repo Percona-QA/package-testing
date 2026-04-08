@@ -1,17 +1,17 @@
 ---
 scenario:
-  name: amazon-linux-2023-arm
+  name: rocky-linux-8-arm
 dependency:
   name: galaxy
 driver:
   name: ec2
 platforms:
-  - name: ${BUILD_NUMBER}-pxc1-84-bootstrap-al2023-arm-install-${INSTALLTYPE}
-    region: us-west-1
-    image: ami-052cb5f48074f230f
-    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+  - name: ${BUILD_NUMBER}-pxc1-84-bootstrap-rl-8-arm-install-${INSTALLTYPE}
+    region: us-west-2
+    image: ami-0d4e5716e8f0b62b0
+    vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: c6g.large
-    ssh_user: ec2-user
+    ssh_user: rocky
     root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: ${IIT_BILLING_TAG}
@@ -27,5 +27,5 @@ provisioner:
     side_effect: ../../../../../playbooks/pxc84_upgrade_bootstrap.yml
   inventory:
     host_vars:
-      ${BUILD_NUMBER}-pxc1-84-bootstrap-al2023-arm-install-${INSTALLTYPE}:
+      ${BUILD_NUMBER}-pxc1-84-bootstrap-rl-8-arm-install-${INSTALLTYPE}:
         ip_env: "{{ ansible_host }}"

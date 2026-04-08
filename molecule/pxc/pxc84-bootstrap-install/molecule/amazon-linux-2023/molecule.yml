@@ -8,7 +8,7 @@ driver:
 platforms:
   - name: ${BUILD_NUMBER}-pxc1-84-bootstrap-al2023-install-${INSTALLTYPE}
     region: us-west-1
-    image: ami-061ad72bc140532fd 
+    image: ami-0b1b271ba3d0a22d8
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: t2.large
     ssh_user: ec2-user
