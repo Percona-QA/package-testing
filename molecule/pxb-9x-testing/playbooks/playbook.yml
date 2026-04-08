@@ -1,0 +1,12 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  become_method: sudo
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+  roles:
+    - role: pxb-package-testing
+  vars:
+    install_repo: "{{ lookup('env', 'install_repo') }}"
+    REPO_TYPE: "{{ lookup('env', 'REPO_TYPE') }}"
