@@ -447,14 +447,13 @@
           KMS_AUTH_KEY="{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}" \
           KMS_SECRET_KEY="{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}" \
           KMS_REGION="us-east-1" \
-          SELECT_TEST="{{ lookup('env', 'SELECT_TEST') }}" \
+          SELECT_TEST_INC_BACKUP_LOAD="{{ lookup('env', 'SELECT_TEST_INC_BACKUP_LOAD') }}" \
         bash -c '
           set -o pipefail
           mkdir -p $TEST_BASE_DIR
           cd /server-qa/test_scripts/pxb || exit 1
-          # pytest inc_backup_load_tests.py -k "test_page_tracking_backup or test_crash_innodb_page_tracking or test_crash_rocksdb_page_tracking" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-page_tracking.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-page_tracking.txt
-          if [ "$SELECT_TEST" != "all" ] && [ -n "$SELECT_TEST" ]; then
-            pytest inc_backup_load_tests.py -k "$SELECT_TEST" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-inc_backup_load_tests.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-inc_backup_load_tests.txt
+          if [ "$SELECT_TEST_INC_BACKUP_LOAD" != "all" ] && [ -n "$SELECT_TEST_INC_BACKUP_LOAD" ]; then
+            pytest inc_backup_load_tests.py -k "$SELECT_TEST_INC_BACKUP_LOAD" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-inc_backup_load_tests.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-inc_backup_load_tests.txt
           else
             pytest inc_backup_load_tests.py -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-inc_backup_load_tests.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-inc_backup_load_tests.txt
           fi
@@ -500,6 +499,76 @@
         debug:
           msg: "{{ archive_result.stdout_lines }}"
         when: archive_result is defined
+
+  - block:
+    - name: Run innodb_myrocks_backup_tests.py tests
+      shell: |
+        runuser -u pxbtest -- env \
+          PATH="/usr/local/bin:/usr/bin:{{ ansible_env.PATH }}" \
+          TEST_BASE_DIR="/home/pxbtest/innodb_myrocks_backup_tests" \
+          XTRABACKUP_DIR="/package-testing/molecule/pxb-new-ps-tarball/{{ TARBALL_NAME_REGULAR_FOLDER }}/bin" \
+          MYSQLDIR="/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}" \
+          QASCRIPTS="/server-qa" \
+          LOAD_TOOL="pstress" \
+          LOAD_TOOL_DIR="/pstress/src" \
+          FORTANIX_EMAIL="{{ lookup('env', 'FORTANIX_EMAIL') }}" \
+          FORTANIX_PASSWORD="{{ lookup('env', 'FORTANIX_PASSWORD') }}" \
+          KMS_KEYID="{{ lookup('env', 'KMS_KEYID') }}" \
+          KMS_AUTH_KEY="{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}" \
+          KMS_SECRET_KEY="{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}" \
+          KMS_REGION="us-east-1" \
+          SELECT_TEST_INNODB_MYROCKS="{{ lookup('env', 'SELECT_TEST_INNODB_MYROCKS') }}" \
+        bash -c '
+          set -o pipefail
+          mkdir -p $TEST_BASE_DIR
+          cd /server-qa/test_scripts/pxb || exit 1
+          if [ "$SELECT_TEST_INNODB_MYROCKS" != "all" ] && [ -n "$SELECT_TEST_INNODB_MYROCKS" ]; then
+            pytest innodb_myrocks_backup_tests.py -k "$SELECT_TEST_INNODB_MYROCKS" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-innodb_myrocks_backup_tests.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-innodb_myrocks_backup_tests.txt
+          else
+            pytest innodb_myrocks_backup_tests.py -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-innodb_myrocks_backup_tests.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-innodb_myrocks_backup_tests.txt
+          fi
+        '
+      register: test_result_innodb_myrocks_backup_tests
+
+    always:
+      - name: Display innodb_myrocks_backup_tests test result
+        debug:
+          msg: "{{ test_result_innodb_myrocks_backup_tests.stdout_lines }}"
+        when: test_result_innodb_myrocks_backup_tests is defined
+
+      - name: Collect and archive innodb_myrocks_backup_tests logs
+        shell: |
+          TEST_BASE_DIR="/home/pxbtest/innodb_myrocks_backup_tests"
+          DIST_NAME="{{ ansible_distribution | lower }}{{ ansible_distribution_major_version | default('', true) }}"
+          ARCHIVE_NAME="innodb_myrocks_backup_tests_logs_${DIST_NAME}.tar.gz"
+          TEST_LOG_DIR="/var/tmp"
+
+          # Ensure the directory exists
+          mkdir -p "$TEST_LOG_DIR"
+          ARCHIVE_PATH="${TEST_LOG_DIR}/${ARCHIVE_NAME}"
+
+          if [ -d "$TEST_BASE_DIR" ]; then
+            echo "Archiving logs from $TEST_BASE_DIR to $ARCHIVE_PATH"
+            tar -czf $ARCHIVE_PATH --transform='s|^home/pxbtest/||' $TEST_BASE_DIR/backuplogs_*/ $TEST_BASE_DIR/pytest-report*.txt 2>&1
+            echo "Archive created: $ARCHIVE_PATH"
+            echo "Archive size: $(du -h "$ARCHIVE_PATH" | cut -f1)"
+
+            cd $TEST_BASE_DIR
+            for f in pytest-junit-*.xml; do
+              sed -i "s/classname=\"innodb_myrocks_backup_tests/classname=\"innodb_myrocks_backup_tests-${DIST_NAME}/" "$f"
+              cp "$f" "$TEST_LOG_DIR/${f%.xml}-${DIST_NAME}.xml"
+            done
+            ls -lh "$ARCHIVE_PATH"
+          else
+            echo "WARNING: TEST_BASE_DIR $TEST_BASE_DIR does not exist, skipping archive"
+          fi
+        register: archive_result_innodb_myrocks
+        failed_when: false
+
+      - name: Display innodb_myrocks_backup_tests archive information
+        debug:
+          msg: "{{ archive_result_innodb_myrocks.stdout_lines }}"
+        when: archive_result_innodb_myrocks is defined
 
   # - name: Pause 15 minutes for debugging
   #   pause:
