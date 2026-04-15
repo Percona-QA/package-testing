@@ -6,4 +6,4 @@
   vars:
       ENV_VAR_PATH: "{{ lookup('env', 'MOLECULE_ENV_FILE') }}"
   roles:
-    - role: pxc-innovation-common-min_upgrade
+    - role: pxc_innovation-bootstrap-install
