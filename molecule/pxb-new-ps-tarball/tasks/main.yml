@@ -510,7 +510,6 @@
           MYSQLDIR="/package-testing/molecule/pxb-new-ps-tarball/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}" \
           QASCRIPTS="/server-qa" \
           LOAD_TOOL="sysbench" \
-          LOAD_TOOL_DIR="/pstress/src" \
           FORTANIX_EMAIL="{{ lookup('env', 'FORTANIX_EMAIL') }}" \
           FORTANIX_PASSWORD="{{ lookup('env', 'FORTANIX_PASSWORD') }}" \
           KMS_KEYID="{{ lookup('env', 'KMS_KEYID') }}" \
