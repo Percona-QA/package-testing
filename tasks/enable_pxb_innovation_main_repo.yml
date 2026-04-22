@@ -19,8 +19,8 @@
   - name: enable the PS {{ pxb_inn_lts_repo_name }} testing repo PXB
     command: percona-release enable-only {{ pxb_inn_lts_repo_name }} release
 
-  - name: enable the tools testing repo
-    command: percona-release enable tools release
+#  - name: enable the tools testing repo
+#    command: percona-release enable tools release
 
 
   - name: Print detected package manager

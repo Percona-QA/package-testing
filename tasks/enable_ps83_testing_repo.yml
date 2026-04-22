@@ -17,8 +17,8 @@
   - name: enable the PS-8x Innovation  testing repo
     command: percona-release enable-only ps-8x-innovation testing
 
-  - name: enable the tools testing repo
-    command: percona-release enable tools testing
+#  - name: enable the tools testing repo
+#    command: percona-release enable tools testing
 
   - name: Clean and update package cache
     shell: |

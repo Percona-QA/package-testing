@@ -26,8 +26,8 @@
   - name: enable the PS-{{ major_release_version }} {{ ps_inn_lts_repo_name }} testing repo
     command: percona-release enable-only {{ ps_inn_lts_repo_name }} testing
 
-  - name: enable the tools testing repo
-    command: percona-release enable tools testing
+#  - name: enable the tools testing repo
+#    command: percona-release enable tools testing
 
   - name: Print detected package manager
     debug:
