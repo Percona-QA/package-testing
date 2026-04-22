@@ -109,7 +109,7 @@
       packages:
       - rsyslog-mysql
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: install 3rd party packages with dnf
@@ -119,7 +119,7 @@
       packages:
       - rsyslog-mysql
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start my.cnf change test
@@ -187,7 +187,7 @@
       packages:
       - percona-toolkit
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: upgrade Percona Toolkit to new rpm packages
@@ -198,7 +198,7 @@
       packages:
       - percona-toolkit
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: upgrade Percona release to new rpm packages
@@ -209,7 +209,7 @@
       packages:
       - percona-release
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: upgrade Percona release to new rpm packages
@@ -220,7 +220,7 @@
       packages:
       - percona-release
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: upgrade Percona Server to new rpm packages on CentOS
@@ -330,7 +330,7 @@
       packages:
       - percona-server*
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: remove Percona Server rpm packages
@@ -341,7 +341,7 @@
       packages:
       - percona-server*
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: check if process is stopped after package removal

@@ -156,7 +156,7 @@
       packages:
       - rsyslog-mysql
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start my.cnf change test
@@ -265,7 +265,7 @@
       - percona-server-client{{ pro_suf }}
       - percona-mysql-router{{ pro_suf }}
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 9
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
@@ -289,7 +289,7 @@
       - percona-toolkit
     when:
       - lookup('env', 'pro_test') != "yes"
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
       - ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
@@ -302,7 +302,7 @@
       - percona-toolkit
     when:
       - lookup('env', 'pro_test') != "yes"
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
       - ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
@@ -322,7 +322,7 @@
       packages:
       - percona-release
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: upgrade Percona release to new rpm packages using dnf
@@ -333,7 +333,7 @@
       packages:
       - percona-release
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start mysql service with systemctl command
@@ -443,7 +443,7 @@
         - iptables-services
       state: present
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: Install iptables on RHEL using yum 
@@ -453,7 +453,7 @@
         - iptables-services
       state: present
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: Enable and start iptables service
@@ -489,7 +489,7 @@
       packages:
       - percona-server-server{{ pro_suf }}
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: install Percona Server{{ pro_suf }} rpm RHEL8+ package for telemetry dnf
@@ -501,7 +501,7 @@
       packages:
       - percona-server-server{{ pro_suf }}
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
 

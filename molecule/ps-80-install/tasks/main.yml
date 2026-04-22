@@ -76,7 +76,7 @@
       packages:
       - percona-mysql-shell
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: install percona-mysql-shell package for Debian/Ubuntu
@@ -139,7 +139,7 @@
       packages:
       - rsyslog-mysql
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: install 3rd party packages with dnf
@@ -149,7 +149,7 @@
       packages:
       - rsyslog-mysql
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: run bats tests for mysql init scripts

@@ -320,7 +320,7 @@
       - percona-server-server
       - percona-xtrabackup-84
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: Install iptables on RHEL
@@ -330,7 +330,7 @@
         - iptables-services
       state: present
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: Enable and start iptables service

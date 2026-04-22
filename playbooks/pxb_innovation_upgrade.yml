@@ -207,7 +207,7 @@
       packages:
       - rsyslog-mysql
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
       - lookup('env', 'server_to_test') == "ps_innovation"
 
@@ -218,7 +218,7 @@
       packages:
       - rsyslog-mysql
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
       - lookup('env', 'server_to_test') == "ps_innovation"
 

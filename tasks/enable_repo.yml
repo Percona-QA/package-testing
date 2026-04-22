@@ -24,7 +24,7 @@
     {{ ansible_pkg_mgr }} clean all
     {{ ansible_pkg_mgr }} makecache
   when:
-    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
 
 - name: Update apt repo
   when: ansible_os_family == "Debian"
@@ -37,5 +37,5 @@
 - name: Update yum repo Centos 7
   shell: yum update -y --skip-broken
   when:
-    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
     - ansible_facts['distribution_major_version'] | int <= 7

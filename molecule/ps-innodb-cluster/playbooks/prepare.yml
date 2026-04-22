@@ -57,7 +57,7 @@
         update_cache: yes
         state: present
       when: 
-        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
         - ansible_facts['distribution_major_version'] | int <= 7
 
     - name: setup ca-certificates release dnf
@@ -66,7 +66,7 @@
         update_cache: yes
         state: present
       when: 
-        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
         - ansible_facts['distribution_major_version'] | int >= 8
 
     - name: setup epel release centos 7 yum
@@ -75,7 +75,7 @@
         update_cache: yes
         state: present
       when: 
-        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux"]
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Rocky"]
         - ansible_facts['distribution_major_version'] | int <= 7
 
     - name: setup epel release dnf
@@ -84,7 +84,7 @@
         update_cache: yes
         state: present
       when: 
-        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux"]
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Rocky"]
         - ansible_facts['distribution_major_version'] | int >= 8
 
     - name: buster workaround
@@ -134,7 +134,7 @@
           - wget
           - rsync
       when: 
-        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
         - ansible_facts['distribution_major_version'] | int <= 7
 
     - name: install needed packages for running tests on RHEL8 dnf
@@ -146,14 +146,14 @@
         - unzip
         - wget
       when: 
-        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
         - ansible_facts['distribution_major_version'] | int >= 8
 
     - name: flush iptables
       iptables:
         flush: yes
       when: 
-        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
         - ansible_facts['distribution_major_version'] | int <= 7
 
     - name: disable firewalld 
@@ -161,7 +161,7 @@
         name: firewalld
         state: stopped
       when: 
-        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+        - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
         - ansible_facts['distribution_major_version'] | int >= 8
         - ansible_facts['services']['firewalld.service'] is defined
 

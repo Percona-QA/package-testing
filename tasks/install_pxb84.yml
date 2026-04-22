@@ -24,7 +24,7 @@
       - percona-xtrabackup-test-84
       - percona-xtrabackup-84-debuginfo
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: install Percona XtraBackup new rpm packages dnf

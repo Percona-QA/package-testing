@@ -125,7 +125,7 @@
       packages:
       - rsyslog-mysql
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: install 3rd party packages with dnf
@@ -135,7 +135,7 @@
       packages:
       - rsyslog-mysql
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start my.cnf change test
@@ -195,7 +195,7 @@
       - percona-toolkit
       - percona-release
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: upgrade Percona Toolkit to new rpm packages dnf
@@ -208,7 +208,7 @@
       - percona-release
 
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: upgrade Percona Server to new rpm packages on CentOS
@@ -256,7 +256,7 @@
       - percona-xtrabackup-test-{{ major_release_version }}
       - percona-xtrabackup-{{ major_release_version }}-debuginfo
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
@@ -271,7 +271,7 @@
       - percona-xtrabackup-test-{{ major_release_version }}
       - percona-xtrabackup-{{ major_release_version }}-debuginfo
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
@@ -345,7 +345,7 @@
       packages:
       - percona-server*
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: remove Percona Server rpm packages
@@ -356,7 +356,7 @@
       packages:
       - percona-server*
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: check if process is stopped after package removal

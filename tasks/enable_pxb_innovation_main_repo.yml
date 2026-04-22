@@ -26,14 +26,14 @@
   - name: Print detected package manager
     debug:
       msg: "Detected package manager: {{ ansible_pkg_mgr }}"
-    when: ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+    when: ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
 
   - name: Clean and update package cache
     shell: |
       {{ ansible_pkg_mgr }} clean all
       {{ ansible_pkg_mgr }} makecache
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
 
   - name: Update apt cache
     apt:

@@ -50,7 +50,7 @@
       {{ ansible_pkg_mgr }} clean all
       {{ ansible_pkg_mgr }} makecache
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
 
   - name: Update APT cache
     apt:

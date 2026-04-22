@@ -24,4 +24,4 @@
       - percona-xtrabackup-test-pro-84
       - percona-xtrabackup-pro-84-debuginfo
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]

@@ -23,7 +23,7 @@
       - percona-xtrabackup-test-{{ major_release_version }}
       - percona-xtrabackup-{{ major_release_version }}-debuginfo
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: install Percona XtraBackup new rpm packages for pxb-{{ major_release_version }} dnf
@@ -37,5 +37,5 @@
       - percona-xtrabackup-test-{{ major_release_version }}
       - percona-xtrabackup-{{ major_release_version }}-debuginfo
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8

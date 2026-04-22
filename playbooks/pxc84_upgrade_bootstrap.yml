@@ -22,7 +22,7 @@
       {{ ansible_pkg_mgr }} clean all
       {{ ansible_pkg_mgr }} makecache
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
 
 #-------------non pro
   - name: include tasks for enabling test repo pxc84 non pro

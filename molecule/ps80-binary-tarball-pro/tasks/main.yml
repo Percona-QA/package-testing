@@ -60,7 +60,7 @@
       - libtirpc
       - lsb_release
     when: 
-    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
     - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: Install required packages using dnf
@@ -78,7 +78,7 @@
         - libtirpc
       state: present
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
 #      - openldap // this package causes issue on OL-9
