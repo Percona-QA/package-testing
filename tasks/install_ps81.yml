@@ -22,16 +22,16 @@
   - name: get list of enabled dnf modules on centos 8
     command: dnf module list --enabled
     register: enabled_dnf_modules
-    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int >= "8"
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int >= 8
 
   - name: list enabled dnf modules on centos 8
     debug:
       var: enabled_dnf_modules
-    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int >= "8"
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int >= 8
 
   - name: disable the mysql module on RHEL/CentOS 8
     command: dnf module disable mysql mariadb -y
-    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == "8"
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
   - name: install Percona Server rpm packages
     package:
