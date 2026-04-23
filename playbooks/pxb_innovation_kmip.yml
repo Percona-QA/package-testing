@@ -8,64 +8,75 @@
   become_method: sudo
 
   tasks:
-  - name: include tasks for test env setup
+  - name: "[SETUP] Test environment setup"
     include_tasks: ../tasks/test_prep.yml
 
-  - name: disable selinux for RedHat/CentOS
+  - name: "[SETUP] Disable SELinux (RedHat)"
     selinux: state=disabled
     when: ansible_os_family == "RedHat"
 
-  - name: Extract version number using shell commands
+  - name: "[SETUP] Extract major release version"
     shell: cat /package-testing/VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
     register: major_release_version
 
-  - name: Set major_release_version variable
+  - name: "[SETUP] Set major_release_version fact"
     set_fact:
       major_release_version: "{{ major_release_version.stdout }}"
 
-  - name: Extract values using shell command for repo name used for innovation/lts release
+  - name: "[SETUP] Extract PS innovation/LTS repo name"
     shell: grep 'PS_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
     register: ps_inn_lts_repo_name
 
-  - name: Set pxb_inn_lts_repo_name variable
+  - name: "[SETUP] Set ps_inn_lts_repo_name fact"
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
 
-  - name: Extract version number for PS with 3 values using shell commands
+  - name: "[SETUP] Extract PXB innovation/LTS repo name"
+    shell: grep 'PXB_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: pxb_inn_lts_repo_name
+
+  - name: "[SETUP] Set pxb_inn_lts_repo_name fact"
+    set_fact:
+      pxb_inn_lts_repo_name: "{{ pxb_inn_lts_repo_name.stdout }}"
+
+  - name: "[SETUP] Extract PXB major release version"
     shell: cat /package-testing/VERSIONS | grep -P 'PXB_INN_LTS_VER=' | cut -d'=' -f2 | sed 's/\([0-9]\+\.[0-9]\+\).*/\1/' | sed 's/"//g'
     register: pxb_major_release
 
-  - name: Set pxb_major_release variable
+  - name: "[SETUP] Set pxb_major_release fact"
     set_fact:
       pxb_major_release: "{{ pxb_major_release.stdout }}"
 
-  - name: include tasks for enabling PS {{ major_release_version }} main repo
+  - name: "[PS-REPO] Enable PS {{ major_release_version }} main repo"
     include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
     when: lookup('env', 'install_repo') == "main"
 
-  - name: include tasks for enabling PS {{ major_release_version }} test repo
+  - name: "[PS-REPO] Enable PS {{ major_release_version }} testing repo"
     include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
-  - name: include tasks for enabling PS {{ major_release_version }} experimental repo
+  - name: "[PS-REPO] Enable PS {{ major_release_version }} experimental repo"
     include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
     when: lookup('env', 'install_repo') == "experimental"
 
-  - name: download and extract world database
+  - name: "[PS-INSTALL] Download world database"
     command: "{{ item }}"
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
 
+  - name: "[DEBUG-REPOS] Verify repos after PS repo enable"
+    include_tasks: ../tasks/debug_repos.yml
+
 # INSTALL PS 
-  - name: install Percona Server {{ major_release_version }} packages
+  - name: "[PS-INSTALL] Install Percona Server {{ major_release_version }}"
     include_tasks: ../tasks/install_ps_innovation.yml
     when:
       - lookup('env', 'server_to_test') == "ps_innovation"
 
 # INSTALL MS 
 
-  - name: install MYSQL MS Server {{ pxb_version_main }} packages
+  - name: "[MS-INSTALL] Install MySQL MS Server"
     include_tasks: ../tasks/install_ms_innovation.yml
     vars:
       pxb_version_major: "{{ pxb_major_release }}"
@@ -73,27 +84,27 @@
     when:
       - lookup('env', 'server_to_test') == "ms_innovation"
 
-  - name: install sysbench new deb packages
+  - name: "[SETUP] Install sysbench"
     include_tasks: ../tasks/install_sysbench.yml
     when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bullseye"
 
-  - name: list installed packages
+  - name: "[SETUP] List installed packages"
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: stop mysql service RedHat
+  - name: "[KMIP-SETUP] Stop mysql service (RedHat)"
     service: name=mysqld state=stopped
     when:
       - ansible_os_family == "RedHat"
 
-  - name: stop mysql service DEBIAN
+  - name: "[KMIP-SETUP] Stop mysql service (Debian)"
     command: systemctl stop mysql
     when:
       - ansible_os_family == "Debian"
 
-  - name: remove mysql data directory
+  - name: "[KMIP-SETUP] Remove mysql data directory"
     command: rm -r /var/lib/mysql
 
-  - name: install python3-pip on RedHat/CentOS
+  - name: "[KMIP-SETUP] Install python3-pip (RedHat)"
     yum:
       name:
       - python3-pip
@@ -101,7 +112,7 @@
       update_cache: yes
     when: ansible_os_family == "RedHat"
 
-  - name: install python3-pip on Debian/Ubuntu
+  - name: "[KMIP-SETUP] Install python3-pip (Debian)"
     apt:
       name:
       - python3-pip
@@ -109,7 +120,7 @@
       update_cache: yes
     when: ansible_os_family == "Debian"
 
-  - name: install pykmip
+  - name: "[KMIP-SETUP] Install pykmip"
     command: "{{ item }}"
     with_items:
         - python3 -m pip install -U pip
@@ -117,7 +128,7 @@
         - python3 -m pip install -U pykmip
     when: ansible_distribution_release != "bookworm"
 
-  - name: install pykmip
+  - name: "[KMIP-SETUP] Install pykmip"
     command: "{{ item }}"
     with_items:
         - python3 -m pip install -U --break-system-packages pip
@@ -125,18 +136,18 @@
         - python3 -m pip install -U --break-system-packages pykmip
     when: ansible_distribution_release == "bookworm"    
 
-  - name: downgrade SQLAlchemy as new version doesn't work with pykmip
+  - name: "[KMIP-SETUP] Downgrade SQLAlchemy"
     command: pip3 install SQLAlchemy==1.4.46
     when: ansible_distribution_release != "bookworm"
 
-  - name: downgrade SQLAlchemy as new version doesn't work with pykmip
+  - name: "[KMIP-SETUP] Downgrade SQLAlchemy"
     command: pip3 install --break-system-packages SQLAlchemy==1.4.46
     when: ansible_distribution_release == "bookworm"  
 
-  - name: start pykmip server
+  - name: "[KMIP-SETUP] Start pykmip server"
     shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
 
-  - name: copy the global manifest for mysql only for PS 
+  - name: "[KMIP-SETUP] Copy global manifest for PS"
     copy:
         src: /package-testing/kmip/mysqld.my
         dest: /usr/sbin/
@@ -144,21 +155,21 @@
     when:
     - lookup('env', 'server_to_test') == "ps_innovation"
 
-  - name: copy the global configuration file for mysql in Redhat/CentOS
+  - name: "[KMIP-SETUP] Copy keyring_kmip config (RedHat)"
     copy:
         src: /package-testing/kmip/component_keyring_kmip.cnf
         dest: /usr/lib64/mysql/plugin/
         remote_src: yes
     when: ansible_os_family == "RedHat"
 
-  - name: copy the global configuration file for mysql in Debian/Ubuntu
+  - name: "[KMIP-SETUP] Copy keyring_kmip config (Debian)"
     copy:
         src: /package-testing/kmip/component_keyring_kmip.cnf
         dest: /usr/lib/mysql/plugin/
         remote_src: yes
     when: ansible_os_family == "Debian"
 
-  - name: copy the encryption config file on Debian/Ubuntu PS
+  - name: "[KMIP-SETUP] Copy encryption config for PS (Debian)"
     copy:
         src: /package-testing/kmip/encryption.j2
         dest: /etc/mysql/conf.d/encryption.cnf
@@ -167,7 +178,7 @@
       - ansible_os_family == "Debian"
       - lookup('env', 'server_to_test') == "ps_innovation"
 
-  - name: copy the encryption config file on Debian/Ubuntu MS
+  - name: "[KMIP-SETUP] Copy encryption config for MS (Debian)"
     copy:
         src: /package-testing/kmip/encryption_ms.j2
         dest: /etc/mysql/conf.d/encryption.cnf
@@ -176,13 +187,13 @@
       - ansible_os_family == "Debian"
       - lookup('env', 'server_to_test') == "ms_innovation"
 
-  - name: append include for RedHat
+  - name: "[KMIP-SETUP] Append includedir to my.cnf (RedHat)"
     lineinfile:
         path: /etc/my.cnf
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
 
-  - name: copy the encryption config file on RHEL/CentOS/Amazon PS
+  - name: "[KMIP-SETUP] Copy encryption config for PS (RedHat)"
     copy:
         src: /package-testing/kmip/encryption.j2
         dest: /etc/my.cnf.d/encryption.cnf
@@ -191,7 +202,7 @@
       - ansible_os_family == "RedHat"
       - lookup('env', 'server_to_test') == "ps_innovation"
 
-  - name: copy the encryption config file on RHEL/CentOS/Amazon MS
+  - name: "[KMIP-SETUP] Copy encryption config for MS (RedHat)"
     copy:
         src: /package-testing/kmip/encryption_ms.j2
         dest: /etc/my.cnf.d/encryption.cnf
@@ -200,43 +211,58 @@
       - ansible_os_family == "RedHat"
       - lookup('env', 'server_to_test') == "ms_innovation"
 
-  - name: start mysql service RedHat
+  - name: "[PS-START] Start mysql service (RedHat)"
     service: name=mysqld state=restarted
     when:
       - ansible_os_family == "RedHat"
 
-  - name: start mysql service DEBIAN
+  - name: "[PS-START] Start mysql service (Debian)"
     command: systemctl restart mysql
     when:
       - ansible_os_family == "Debian"
 
-  - name: check mysql service status
+  - name: "[PS-START] Check mysql service status"
     command: /package-testing/check_running.sh mysql running
 
-  - name: set root password on centos
+  - name: "[PS-START] Set root password (RedHat)"
     command: /package-testing/setpass_57.sh
     when: ansible_os_family == "RedHat"
 
-  - name: import world database
+  - name: "[PXB-TEST] Import world database"
     command: /package-testing/plugins_test.sh
 
-  - name: install Percona XtraBackup {{ major_release_version }} packages
+  - name: "[PXB-REPO] Enable PXB {{ major_release_version }} main repo"
+    include_tasks: ../tasks/enable_pxb_innovation_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: "[PXB-REPO] Enable PXB {{ major_release_version }} testing repo"
+    include_tasks: ../tasks/enable_pxb_innovation_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: "[PXB-REPO] Enable PXB {{ major_release_version }} experimental repo"
+    include_tasks: ../tasks/enable_pxb_innovation_experimental.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: "[DEBUG-REPOS] Verify repos after PXB repo enable"
+    include_tasks: ../tasks/debug_repos.yml
+
+  - name: "[PXB-INSTALL] Install PXB {{ major_release_version }}"
     include_tasks: ../tasks/install_pxb_innovation.yml
     when: lookup('env', 'install_repo') != "experimental"
 
-  - name: check that Percona XtraBackup version is correct
+  - name: "[PXB-TEST] Check PXB version is correct"
     command: /package-testing/version_check.sh pxb{{ major_release_version }}
 
-  - name: check that Percona XtraBackup package versions are correct
+  - name: "[PXB-TEST] Check PXB package versions are correct"
     command: /package-testing/package_check.sh pxb{{ major_release_version }}
 
-  - name: run backup
+  - name: "[PXB-TEST] Run backup"
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
 
-  - name: prepare backup on Redhat/CentOS
+  - name: "[PXB-TEST] Prepare backup (RedHat)"
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --component-keyring-config=/usr/lib64/mysql/plugin/component_keyring_kmip.cnf
     when: ansible_os_family == "RedHat"
 
-  - name: prepare backup on Debian/Ubuntu
+  - name: "[PXB-TEST] Prepare backup (Debian)"
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --component-keyring-config=/usr/lib/mysql/plugin/component_keyring_kmip.cnf
     when: ansible_os_family == "Debian"

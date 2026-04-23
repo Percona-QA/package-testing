@@ -12,43 +12,66 @@
 
   tasks:
 
-  - name: Extract version number using shell commands
+  - name: "[SETUP] Extract major release version"
     shell: cat /package-testing/VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
     register: major_release_version
 
-  - name: Set major_release_version variable
+  - name: "[SETUP] Set major_release_version fact"
     set_fact:
       major_release_version: "{{ major_release_version.stdout }}"
 
-  - name: Extract values using shell command for repo name used for innovation/lts release
+  - name: "[SETUP] Extract PS innovation/LTS repo name"
     shell: grep 'PS_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
     register: ps_inn_lts_repo_name
 
-  - name: Set pxb_inn_lts_repo_name variable
+  - name: "[SETUP] Set ps_inn_lts_repo_name fact"
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
 
-  - name: debug the vars
+  - name: "[SETUP] Extract PXB innovation/LTS repo name"
+    shell: grep 'PXB_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: pxb_inn_lts_repo_name
+
+  - name: "[SETUP] Set pxb_inn_lts_repo_name fact"
+    set_fact:
+      pxb_inn_lts_repo_name: "{{ pxb_inn_lts_repo_name.stdout }}"
+
+  - name: "[SETUP] Print repo name vars"
     debug:
       msg: "major_release_version: {{ major_release_version }} ps_inn_lts_repo_name: {{ ps_inn_lts_repo_name }}"
     
-  - name: install Percona XtraBackup {{ major_release_version }} packages
+  - name: "[PXB-REPO] Enable PXB {{ major_release_version }} main repo"
+    include_tasks: ../tasks/enable_pxb_innovation_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: "[PXB-REPO] Enable PXB {{ major_release_version }} testing repo"
+    include_tasks: ../tasks/enable_pxb_innovation_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: "[PXB-REPO] Enable PXB {{ major_release_version }} experimental repo"
+    include_tasks: ../tasks/enable_pxb_innovation_experimental.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: "[DEBUG-REPOS] Verify repos after PXB repo enable"
+    include_tasks: ../tasks/debug_repos.yml
+
+  - name: "[PXB-INSTALL] Install PXB {{ major_release_version }}"
     include_tasks: ../tasks/install_pxb_innovation.yml
     when: lookup('env', 'install_repo') != "experimental"
 
-  - name: check that Percona XtraBackup version is correct
+  - name: "[PXB-TEST] Check PXB version is correct"
     command: /package-testing/version_check.sh pxb{{ major_release_version }}
 
-  - name: check that Percona XtraBackup package versions are correct
+  - name: "[PXB-TEST] Check PXB package versions are correct"
     command: /package-testing/package_check.sh pxb{{ major_release_version }}
 
-  - name: run backup
+  - name: "[PXB-TEST] Run backup"
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
 
-  - name: prepare backup on Redhat/CentOS
+  - name: "[PXB-TEST] Prepare backup (RedHat)"
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --component-keyring-config=/usr/lib64/mysql/plugin/component_keyring_kms.cnf
     when: ansible_os_family == "RedHat"
 
-  - name: prepare backup on Debian/Ubuntu
+  - name: "[PXB-TEST] Prepare backup (Debian)"
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --component-keyring-config=/usr/lib/mysql/plugin/component_keyring_kms.cnf
     when: ansible_os_family == "Debian"
