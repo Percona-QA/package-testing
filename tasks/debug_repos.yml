@@ -1,0 +1,177 @@
+  # ════════════════════════════════════════════════════════════════════════════
+  # 1. Percona repos enabled via standard package manager
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - name: "[DEBUG-REPOS] List Percona repos enabled (RHEL 7, yum)"
+    shell: yum repolist enabled | grep -i percona || echo "No Percona repos found"
+    register: percona_repos_yum
+    changed_when: false
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: "[DEBUG-REPOS] Print Percona repos enabled (RHEL 7, yum)"
+    debug:
+      var: percona_repos_yum.stdout_lines
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: "[DEBUG-REPOS] List Percona repos enabled (RHEL 8+, dnf)"
+    shell: dnf repolist enabled | grep -i percona || echo "No Percona repos found"
+    register: percona_repos_dnf
+    changed_when: false
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: "[DEBUG-REPOS] Print Percona repos enabled (RHEL 8+, dnf)"
+    debug:
+      var: percona_repos_dnf.stdout_lines
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: "[DEBUG-REPOS] List Percona repos enabled (Amazon Linux, dnf)"
+    shell: dnf repolist enabled | grep -i percona || echo "No Percona repos found"
+    register: percona_repos_amazon
+    changed_when: false
+    when: ansible_os_family == "Amazon"
+
+  - name: "[DEBUG-REPOS] Print Percona repos enabled (Amazon Linux, dnf)"
+    debug:
+      var: percona_repos_amazon.stdout_lines
+    when: ansible_os_family == "Amazon"
+
+  - name: "[DEBUG-REPOS] List Percona repos enabled (Debian/Ubuntu, apt)"
+    shell: grep -r -i percona /etc/apt/sources.list.d/ || echo "No Percona repos found"
+    register: percona_repos_apt
+    changed_when: false
+    when: ansible_os_family == "Debian"
+
+  - name: "[DEBUG-REPOS] Print Percona repos enabled (Debian/Ubuntu, apt)"
+    debug:
+      var: percona_repos_apt.stdout_lines
+    when: ansible_os_family == "Debian"
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # 2. Percona repos enabled via percona-release show
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - name: "[DEBUG-REPOS] Show Percona repos (percona-release show)"
+    command: percona-release show
+    register: percona_release_show
+    changed_when: false
+    failed_when: false
+
+  - name: "[DEBUG-REPOS] Print percona-release show output"
+    debug:
+      var: percona_release_show.stdout_lines
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # 3. Installed and available Percona packages
+  # ════════════════════════════════════════════════════════════════════════════
+
+  - name: "[DEBUG-REPOS] List installed Percona packages (RHEL 7, yum)"
+    shell: yum list installed | grep -i percona || echo "No Percona packages installed"
+    register: percona_installed_yum
+    changed_when: false
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: "[DEBUG-REPOS] Print installed Percona packages (RHEL 7, yum)"
+    debug:
+      var: percona_installed_yum.stdout_lines
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: "[DEBUG-REPOS] List available Percona packages (RHEL 7, yum)"
+    shell: yum list available | grep -i percona || echo "No Percona packages available"
+    register: percona_available_yum
+    changed_when: false
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: "[DEBUG-REPOS] Print available Percona packages (RHEL 7, yum)"
+    debug:
+      var: percona_available_yum.stdout_lines
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: "[DEBUG-REPOS] List installed Percona packages (RHEL 8+, dnf)"
+    shell: dnf list installed | grep -i percona || echo "No Percona packages installed"
+    register: percona_installed_dnf
+    changed_when: false
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: "[DEBUG-REPOS] Print installed Percona packages (RHEL 8+, dnf)"
+    debug:
+      var: percona_installed_dnf.stdout_lines
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: "[DEBUG-REPOS] List available Percona packages (RHEL 8+, dnf)"
+    shell: dnf list available | grep -i percona || echo "No Percona packages available"
+    register: percona_available_dnf
+    changed_when: false
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: "[DEBUG-REPOS] Print available Percona packages (RHEL 8+, dnf)"
+    debug:
+      var: percona_available_dnf.stdout_lines
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: "[DEBUG-REPOS] List installed Percona packages (Amazon Linux, dnf)"
+    shell: dnf list installed | grep -i percona || echo "No Percona packages installed"
+    register: percona_installed_amazon
+    changed_when: false
+    when: ansible_os_family == "Amazon"
+
+  - name: "[DEBUG-REPOS] Print installed Percona packages (Amazon Linux, dnf)"
+    debug:
+      var: percona_installed_amazon.stdout_lines
+    when: ansible_os_family == "Amazon"
+
+  - name: "[DEBUG-REPOS] List available Percona packages (Amazon Linux, dnf)"
+    shell: dnf list available | grep -i percona || echo "No Percona packages available"
+    register: percona_available_amazon
+    changed_when: false
+    when: ansible_os_family == "Amazon"
+
+  - name: "[DEBUG-REPOS] Print available Percona packages (Amazon Linux, dnf)"
+    debug:
+      var: percona_available_amazon.stdout_lines
+    when: ansible_os_family == "Amazon"
+
+  - name: "[DEBUG-REPOS] List installed Percona packages (Debian/Ubuntu, dpkg)"
+    shell: dpkg -l | grep -i percona || echo "No Percona packages installed"
+    register: percona_installed_apt
+    changed_when: false
+    when: ansible_os_family == "Debian"
+
+  - name: "[DEBUG-REPOS] Print installed Percona packages (Debian/Ubuntu, dpkg)"
+    debug:
+      var: percona_installed_apt.stdout_lines
+    when: ansible_os_family == "Debian"
+
+  - name: "[DEBUG-REPOS] List available Percona packages (Debian/Ubuntu, apt-cache)"
+    shell: apt-cache search percona || echo "No Percona packages available"
+    register: percona_available_apt
+    changed_when: false
+    when: ansible_os_family == "Debian"
+
+  - name: "[DEBUG-REPOS] Print available Percona packages (Debian/Ubuntu, apt-cache)"
+    debug:
+      var: percona_available_apt.stdout_lines
+    when: ansible_os_family == "Debian"

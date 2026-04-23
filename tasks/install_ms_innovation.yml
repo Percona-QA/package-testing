@@ -84,6 +84,9 @@
       - ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
       - lookup('env', 'server_to_test') == "ms_innovation"
 
+  - name: "[DEBUG-REPOS] Check enabled repos before MS install"
+    include_tasks: debug_repos.yml
+
   - name: "[MS-INSTALL] Download world database"
     command: "{{ item }}"
     with_items:

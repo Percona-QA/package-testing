@@ -1,6 +1,9 @@
 # This task installs Percona Server 8.0 on CentOS and Debian/Ubuntu
 #
 
+  - name: "[DEBUG-REPOS] Check enabled repos before PS install"
+    include_tasks: debug_repos.yml
+
   - name: "[PS-INSTALL] Download world database"
     command: wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 

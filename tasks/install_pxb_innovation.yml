@@ -1,5 +1,8 @@
 # This task install Percona XtraBackup {{ major_release_version }} on CentOS and Debian/Ubuntu
 #
+  - name: "[DEBUG-REPOS] Check enabled repos before PXB install"
+    include_tasks: debug_repos.yml
+
   - name: install Percona XtraBackup new deb packages for pxb-{{ major_release_version }}
     apt:
       name: "{{ packages }}"
