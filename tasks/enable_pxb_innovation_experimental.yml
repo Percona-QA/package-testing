@@ -3,7 +3,7 @@
 
   - name: disable the mysql module on RHEL/CentOS 8
     command: /usr/bin/dnf module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
   - name: Install percona repository package
     apt:
@@ -62,7 +62,7 @@
     register: percona_packages_yum
     when: 
       - ansible_os_family == "RedHat"
-      - ansible_distribution_major_version == "7"
+      - ansible_facts['distribution_major_version'] | int == 7
     ignore_errors: yes
 
   - name: List available packages with percona in them (RHEL/CentOS 8+)
@@ -70,7 +70,7 @@
     register: percona_packages_dnf
     when: 
       - ansible_os_family == "RedHat"
-      - ansible_distribution_major_version >= "8"
+      - ansible_facts['distribution_major_version'] | int >= 8
     ignore_errors: yes
 
   - name: Display available Percona packages (Debian/Ubuntu)
@@ -85,7 +85,7 @@
       var: percona_packages_yum.stdout_lines
     when: 
       - ansible_os_family == "RedHat"
-      - ansible_distribution_major_version == "7"
+      - ansible_facts['distribution_major_version'] | int == 7
       - percona_packages_yum.stdout_lines is defined
 
   - name: Display available Percona packages (RHEL/CentOS 8+)
@@ -93,5 +93,5 @@
       var: percona_packages_dnf.stdout_lines
     when: 
       - ansible_os_family == "RedHat"
-      - ansible_distribution_major_version >= "8"
+      - ansible_facts['distribution_major_version'] | int >= 8
       - percona_packages_dnf.stdout_lines is defined

@@ -83,6 +83,20 @@
     include_tasks: ../tasks/install_ps_innovation.yml
     when: lookup('env', 'server_to_test') == "ps_innovation"
 
+  # ── Shared: enable PXB repo ─────────────────────────────────────────────────
+
+  - name: "[PXB-REPO] Enable PXB {{ major_release_version }} main repo"
+    include_tasks: ../tasks/enable_pxb_innovation_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: "[PXB-REPO] Enable PXB {{ major_release_version }} testing repo"
+    include_tasks: ../tasks/enable_pxb_innovation_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: "[PXB-REPO] Enable PXB {{ major_release_version }} experimental repo"
+    include_tasks: ../tasks/enable_pxb_innovation_experimental.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
   # ── Shared: install Percona XtraBackup ──────────────────────────────────────
 
   - name: "[PXB-INSTALL] Install PXB {{ major_release_version }}"
