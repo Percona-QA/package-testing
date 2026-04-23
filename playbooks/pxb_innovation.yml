@@ -86,7 +86,11 @@
     include_tasks: ../tasks/install_ms_innovation.yml
     when: lookup('env', 'server_to_test') == "ms_innovation"
 
-  # ── PS innovation: install Percona Server ────────────────────────────────────
+  # ── PS innovation: verify repos then install Percona Server ─────────────────
+
+  - name: "[DEBUG-REPOS] Verify repos after PS repo enable"
+    include_tasks: ../tasks/debug_repos.yml
+    when: lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: "[PS-INSTALL] Install PS innovation"
     include_tasks: ../tasks/install_ps_innovation.yml
@@ -106,7 +110,10 @@
     include_tasks: ../tasks/enable_pxb_innovation_experimental.yml
     when: lookup('env', 'install_repo') == "experimental"
 
-  # ── Shared: install Percona XtraBackup ──────────────────────────────────────
+  # ── Shared: verify repos then install Percona XtraBackup ───────────────────
+
+  - name: "[DEBUG-REPOS] Verify repos after PXB repo enable"
+    include_tasks: ../tasks/debug_repos.yml
 
   - name: "[PXB-INSTALL] Install PXB {{ major_release_version }}"
     include_tasks: ../tasks/install_pxb_innovation.yml
