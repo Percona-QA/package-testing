@@ -233,8 +233,8 @@
     when:
       - lookup('env', 'REPO_TYPE') !="PRO"
 
-  - name: "[PXB-REPO] Enable PXB 8.0 testing repo (upgrade)
-    include_tasks: ../tasks/enable_pxb_80_testing_repo.yml"
+  - name: "[PXB-REPO] Enable PXB 8.0 testing repo (upgrade)"
+    include_tasks: ../tasks/enable_pxb_80_testing_repo.yml
     when:
       - lookup('env', 'REPO_TYPE') !="PRO"
 
@@ -375,8 +375,8 @@
     when:
        - lookup('env', 'REPO_TYPE') !="PRO"
 
-  - name: "[PXB-TEST] Check telemetry (uuid)
-    command: /package-testing/check_telemetry.sh pxb -u"
+  - name: "[PXB-TEST] Check telemetry (uuid)"
+    command: /package-testing/check_telemetry.sh pxb -u
     when:
       - lookup('env', 'server_to_test') != "ms-80"
       - lookup('env', 'REPO_TYPE') !="PRO"

@@ -362,8 +362,8 @@
     when:
       - lookup('env', 'REPO_TYPE') !="PRO"
 
-  - name: "[PXB-TEST] Check telemetry (uuid)
-    command: /package-testing/check_telemetry.sh pxb -u"
+  - name: "[PXB-TEST] Check telemetry (uuid)"
+    command: /package-testing/check_telemetry.sh pxb -u
     when:
       - lookup('env', 'REPO_TYPE') !="PRO"
 
