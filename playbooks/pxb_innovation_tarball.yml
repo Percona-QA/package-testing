@@ -97,20 +97,20 @@
   - name: start mysql service with service command
     command: service mysql start
     when: 
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+      - ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 6
       - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: start mysql service with systemctl command for Redhat/Centos 7
     command: systemctl start mysqld
     when:
       - lookup('env', 'server_to_test') == "ps_innovation"
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+      - ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
 
   - name: start mysql service with systemctl command for Redhat/Centos 7 for PS
     command: systemctl start mysql
     when:
       - lookup('env', 'server_to_test') == "ps_innovation"
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+      - ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh

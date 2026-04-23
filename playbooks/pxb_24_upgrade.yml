@@ -42,11 +42,11 @@
 
   - name: start mysql service with service command
     command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 6
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
@@ -60,12 +60,12 @@
 
   - name: disable selinux on centos7 for TokuDB to work
     command: setenforce 0
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 7
 
   - name: configure jemalloc on Oracle Centos 8
     raw: |
         ln --symbolic /usr/lib64/libjemalloc.so.2 /usr/lib64/libjemalloc.so.1
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
   - name: install tokudb and restart server
     command: /usr/bin/ps_tokudb_admin --enable
@@ -145,19 +145,19 @@
 
   - name: run sysbench prepare script
     command: sysbench --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sb --time=20 --threads=64 --tables=3 oltp_read_write prepare
-    when: ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and (ansible_os_family == "RedHat" and ansible_distribution_major_version != "9")
+    when: ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and (ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int != 9)
 
   - name: run sysbench benchmark
     command: sysbench --mysql-user=sbt --mysql-db=sb --mysql-password=s3cret!Pass --time=20 --threads=64 --tables=3 oltp_read_write run
-    when: ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and (ansible_os_family == "RedHat" and ansible_distribution_major_version != "9")
+    when: ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and (ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int != 9)
 
   - name: run sysbench tpcc prepare script
     command: /usr/share/sysbench/tpcc.lua --mysql-user=sbt --mysql-password=s3cret!Pass  --mysql-db=sbt --time=20 --threads=64 --report-interval=1 --tables=2 --scale=1 --db-driver=mysql prepare
-    when: ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and (ansible_os_family == "RedHat" and ansible_distribution_major_version != "9")
+    when: ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and (ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int != 9)
 
   - name: run sysbench tpcc benchmark
     command: /usr/share/sysbench/tpcc.lua --mysql-user=sbt --mysql-password=s3cret!Pass --mysql-db=sbt --time=20 --threads=64 --report-interval=1 --tables=2 --scale=1 --db-driver=mysql run
-    when: ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and (ansible_os_family == "RedHat" and ansible_distribution_major_version != "9")
+    when: ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and (ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int != 9)
 
   - name: run backup
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
@@ -182,7 +182,7 @@
     vars:
       packages:
       - percona-toolkit
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
   - name: remove Percona Server rpm packages
     yum:
@@ -191,7 +191,7 @@
     vars:
       packages:
       - Percona-Server-server-57
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int <= 7
 
     # Fix for PS-6087
   - name: remove Percona Server rpm packages on rhel/centos8/centos9
@@ -201,7 +201,7 @@
     vars:
       packages:
       - Percona-Server*
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 8
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped

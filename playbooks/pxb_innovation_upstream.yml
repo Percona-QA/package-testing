@@ -25,17 +25,17 @@
 
   - name: Install MySQL RHEL 6 yum repository package
     yum: name=https://repo.mysql.com/mysql80-community-release-el6.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 6
 
   - name: Install MySQL RHEL 7 yum repository package
     yum: name=https://repo.mysql.com//mysql80-community-release-el7.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 7
 
   - name: Import GPG key for RPM 7 (Centos 7)
     rpm_key:
       state: present
       key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
 
   - name: Import MySQL GPG key (Debian) apt_key is deprecated, using get_url to add key to trusted.gpg.d
     ansible.builtin.get_url:
@@ -48,23 +48,23 @@
     rpm_key:
       state: present
       key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 8
 
   - name: Install MySQL RHEL 8 yum repository package
     yum: name=https://repo.mysql.com/mysql80-community-release-el8.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
   - name: Install MySQL RHEL 9 yum repository package
     yum: name=https://repo.mysql.com/mysql80-community-release-el9.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 9
 
   - name: epel 7 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 7
 
   - name: setup epel 8 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -73,7 +73,7 @@
 
   - name: disable the mysql module on RHEL/CentOS 8
     command: /usr/bin/dnf module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
   - name: install deb packages
     apt:
@@ -136,7 +136,7 @@
 
   - name: Enable Innovation LTS repo for RHEL
     shell: yum-config-manager --disable mysql80-community && yum-config-manager --enable mysql-innovation-community
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
 
   - name: install packages in centos
     yum:
@@ -148,7 +148,7 @@
       - pv
       - unzip
       - mysql-community-server-8.2.0-1.el7
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int <= 7
 
   - name: install packages in rhel/centos 8
     package:
@@ -158,7 +158,7 @@
       packages:
       - python3-libselinux
       - mysql-community-server-8.2.0-1.el8
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
   - name: install packages in rhel/centos 9
     package:
@@ -168,7 +168,7 @@
       packages:
       - python3-libselinux
       - mysql-community-server-8.2.0-1.el9
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 9
 
   - name: Start the MySQL service
     service: name=mysql state=started

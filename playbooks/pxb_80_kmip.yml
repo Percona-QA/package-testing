@@ -46,7 +46,7 @@
       disable_gpg_check: yes
     when: 
       - ansible_os_family == "RedHat" 
-      - ansible_distribution_major_version == "9"
+      - ansible_facts['distribution_major_version'] | int == 9
       - ansible_architecture == "aarch64"
 
   - name: Install libgflags-dev for rhel9 amd64
@@ -56,7 +56,7 @@
       disable_gpg_check: yes
     when: 
       - ansible_os_family == "RedHat" 
-      - ansible_distribution_major_version == "9"
+      - ansible_facts['distribution_major_version'] | int == 9
       - ansible_architecture != "aarch64"
       
   - name: install Percona Server 8.0 packages

@@ -57,7 +57,7 @@
       disable_gpg_check: yes
     when:
       - ansible_os_family == "RedHat"
-      - ansible_distribution_major_version|int >= 9
+      - ansible_facts['distribution_major_version'] | int >= 9
       - ansible_architecture == "aarch64"
 
   - name: Install libgflags-dev for rhel9 amd64
@@ -67,7 +67,7 @@
       disable_gpg_check: yes
     when:
       - ansible_os_family == "RedHat"
-      - ansible_distribution_major_version|int >= 9
+      - ansible_facts['distribution_major_version'] | int >= 9
       - ansible_architecture != "aarch64"
 
 ## INSTALL PS
@@ -82,7 +82,7 @@
     include_tasks: ../tasks/enable_ps80_pro_tools_repo.yml
     when:
       - lookup('env', 'REPO_TYPE') == "PRO"
-      - ansible_distribution_major_version == "2023"
+      - ansible_facts['distribution_major_version'] | int == 2023
 
   - name: install Percona Server{{ pro_suf }} 8.0 packages on AL2023
     include_tasks: ../tasks/install_ps80.yml
@@ -90,7 +90,7 @@
       pro_suf: "{{ '-pro' if lookup('env', 'REPO_TYPE') == 'PRO' else '' }}"
     when:
       - lookup('env', 'REPO_TYPE') == 'PRO'
-      - ansible_distribution_major_version == "2023"
+      - ansible_facts['distribution_major_version'] | int == 2023
 ##########
 
 # Check for the installed packages using apt list 
@@ -215,14 +215,14 @@
   - name: PRINT INSTALLED XTRABACKUP version rhel
     shell: rpm -qa | grep percona-xtrabackup
     when:
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+      - ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
     register: xtrabackup_version_print
 
   - name: DEBUG xtrabackup_version_print rhel
     debug:
       msg: "Xtrabackup version is {{ xtrabackup_version_print.stdout }}"
     when:
-      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
+      - ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
 
 ##
   - name: PRINT INSTALLED XTRABACKUP version DEBIAN
