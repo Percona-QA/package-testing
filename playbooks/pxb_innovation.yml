@@ -12,173 +12,114 @@
 
   tasks:
 
-  # ── Shared setup ────────────────────────────────────────────────────────────
+  # ── Shared: setup ────────────────────────────────────────────────────────────
 
-  - name: Echo server_to_test variable
+  - name: "[SETUP] Echo server_to_test variable"
     debug:
       msg: "{{ lookup('env', 'server_to_test') }}"
 
-  - name: include tasks for test env setup
+  - name: "[SETUP] Test environment setup"
     include_tasks: ../tasks/test_prep.yml
 
-  - name: Extract PXB major and minor version number
+  - name: "[SETUP] Extract PXB major and minor version number"
     shell: cat /package-testing/VERSIONS | grep 'PXB_INN_LTS_MAJ_VER' | cut -d'=' -f2 | sed 's/"//g'
     register: pxb_version_major_minor
 
-  - name: Extract PXB major version number
+  - name: "[SETUP] Extract PXB major version number"
     shell: cat /package-testing/VERSIONS | grep PXB_INN_LTS_MAJ_VER | awk -F'[=".]' '{print $3"."$4}'
     register: pxb_version_major
 
-  - name: Extract numeric major release version
+  - name: "[SETUP] Extract numeric major release version"
     shell: cat /package-testing/VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
     register: major_release_version
 
-  - name: Set version facts
+  - name: "[SETUP] Set version facts"
     set_fact:
       major_release_version: "{{ major_release_version.stdout }}"
       pxb_version_major: "{{ pxb_version_major.stdout }}"
       pxb_version_major_minor: "{{ pxb_version_major_minor.stdout }}"
 
-  - name: Print versions
+  - name: "[SETUP] Print versions"
     debug:
       msg: "PS={{ major_release_version }}  PXB={{ pxb_version_major }}.{{ pxb_version_major_minor }}"
 
-  - name: Extract PS innovation/LTS repo name
+  - name: "[SETUP] Extract PS innovation/LTS repo name"
     shell: grep 'PS_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
     register: ps_inn_lts_repo_name
 
-  - name: Set ps_inn_lts_repo_name fact
+  - name: "[SETUP] Set ps_inn_lts_repo_name fact"
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
 
   # ── PS innovation: enable repo ───────────────────────────────────────────────
 
-  - name: Enable PS {{ major_release_version }} main repo
+  - name: "[PS-REPO] Enable PS {{ major_release_version }} main repo"
     include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
     when:
       - lookup('env', 'install_repo') == "main"
       - lookup('env', 'server_to_test') == "ps_innovation"
 
-  - name: Enable PS {{ major_release_version }} testing repo
+  - name: "[PS-REPO] Enable PS {{ major_release_version }} testing repo"
     include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
     when:
       - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
       - lookup('env', 'server_to_test') == "ps_innovation"
 
-  - name: Enable PS {{ major_release_version }} experimental repo
+  - name: "[PS-REPO] Enable PS {{ major_release_version }} experimental repo"
     include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
     when:
       - lookup('env', 'install_repo') == "experimental"
       - lookup('env', 'server_to_test') == "ps_innovation"
 
-  # ── MS innovation: install MySQL server ─────────────────────────────────────
+  # ── MS innovation: repo setup, install packages, start service ───────────────
 
-  - name: Install MS innovation (repo setup, packages, service start)
+  - name: "[MS-INSTALL] Install MS innovation"
     include_tasks: ../tasks/install_ms_innovation.yml
     when: lookup('env', 'server_to_test') == "ms_innovation"
 
-  # ── PS innovation: download world DB and install Percona Server ──────────────
+  # ── PS innovation: install Percona Server ────────────────────────────────────
 
-  - name: Download world database
-    command: wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
-    when: lookup('env', 'server_to_test') == "ps_innovation"
-
-  - name: Install Percona Server {{ major_release_version }} packages
+  - name: "[PS-INSTALL] Install PS innovation"
     include_tasks: ../tasks/install_ps_innovation.yml
     when: lookup('env', 'server_to_test') == "ps_innovation"
 
   # ── Shared: install Percona XtraBackup ──────────────────────────────────────
 
-  - name: Install Percona XtraBackup {{ major_release_version }} packages
+  - name: "[PXB-INSTALL] Install PXB {{ major_release_version }}"
     include_tasks: ../tasks/install_pxb_innovation.yml
 
   # ── PS innovation: start service and set root password ───────────────────────
 
-  - name: Start mysql service (RHEL 6)
-    command: service mysql start
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
-      - ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 6
-
-  - name: Start mysql service (RHEL 7+)
-    command: systemctl start mysql
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
-      - ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
-
-  - name: Set root password (RHEL)
-    command: /package-testing/setpass_57.sh
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
-      - ansible_os_family == "RedHat"
+  - name: "[PS-START] Start PS innovation service and set root password"
+    include_tasks: ../tasks/start_ps_innovation.yml
+    when: lookup('env', 'server_to_test') == "ps_innovation"
 
   # ── Shared: PXB smoke tests ──────────────────────────────────────────────────
 
-  - name: Install plugins and import world database
+  - name: "[PXB-TEST] Install plugins and import world database"
     command: /package-testing/plugins_test.sh
 
-  - name: Check Percona XtraBackup version
+  - name: "[PXB-TEST] Check PXB version is correct"
     command: /package-testing/version_check.sh pxb{{ major_release_version }}
 
-  - name: Check Percona XtraBackup package versions
+  - name: "[PXB-TEST] Check PXB package versions are correct"
     command: /package-testing/package_check.sh pxb{{ major_release_version }}
 
-  - name: Run backup
+  - name: "[PXB-TEST] Run backup"
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
 
-  - name: Prepare backup
+  - name: "[PXB-TEST] Prepare backup"
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/
 
-  # ── PS innovation: compression tests ────────────────────────────────────────
+  # ── PS innovation: compression tests (lz4, zstd) ────────────────────────────
 
-  - name: Install lz4 and zstd (RedHat)
-    yum:
-      name: [lz4, zstd]
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
-      - ansible_os_family == "RedHat"
-
-  - name: Install lz4 and zstd (Debian/Ubuntu, non-Bionic)
-    apt:
-      name: [lz4, zstd]
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
-      - ansible_os_family == "Debian" and ansible_distribution_release != "bionic"
-
-  - name: Install lz4 and zstd (Bionic)
-    apt:
-      name: [liblz4-tool, zstd]
-    when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
-      - ansible_os_family == "Debian" and ansible_distribution_release == "bionic"
-
-  - name: Run backup with lz4 compression
-    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_l/ --compress=lz4 --compress-threads=10
-    when: lookup('env', 'server_to_test') == "ps_innovation"
-
-  - name: Decompress lz4 backup
-    command: /usr/bin/xtrabackup --decompress --user=root --target-dir=/tmp/backup_l/
-    when: lookup('env', 'server_to_test') == "ps_innovation"
-
-  - name: Prepare lz4 backup
-    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_l/
-    when: lookup('env', 'server_to_test') == "ps_innovation"
-
-  - name: Run backup with zstd compression
-    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_z/ --compress=zstd --compress-threads=10
-    when: lookup('env', 'server_to_test') == "ps_innovation"
-
-  - name: Decompress zstd backup
-    command: /usr/bin/xtrabackup --decompress --user=root --target-dir=/tmp/backup_z/
-    when: lookup('env', 'server_to_test') == "ps_innovation"
-
-  - name: Prepare zstd backup
-    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_z/
+  - name: "[PXB-COMPRESSION] Run PXB compression tests"
+    include_tasks: ../tasks/test_pxb_compression.yml
     when: lookup('env', 'server_to_test') == "ps_innovation"
 
   # ── PS innovation: cleanup ───────────────────────────────────────────────────
 
-  - name: Remove Percona Server deb packages
+  - name: "[PS-CLEANUP] Remove Percona Server deb packages"
     apt:
       name:
         - percona-server-server*
@@ -188,7 +129,7 @@
       - lookup('env', 'server_to_test') == "ps_innovation"
       - ansible_os_family == "Debian"
 
-  - name: Remove Percona Server rpm packages
+  - name: "[PS-CLEANUP] Remove Percona Server rpm packages"
     yum:
       name:
         - percona-server-server*
@@ -198,6 +139,6 @@
       - lookup('env', 'server_to_test') == "ps_innovation"
       - ansible_os_family == "RedHat"
 
-  - name: Check process is stopped after package removal
+  - name: "[PS-CLEANUP] Check process is stopped after package removal"
     command: /package-testing/check_running.sh mysql stopped
     when: lookup('env', 'server_to_test') == "ps_innovation"

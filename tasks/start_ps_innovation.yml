@@ -1,0 +1,10 @@
+# Debian/Ubuntu: mysql starts automatically after package install, no action needed.
+# RHEL/CentOS: service must be started explicitly and root password set.
+
+  - name: "[PS-START] Start mysql service (RHEL 7+)"
+    command: systemctl start mysql
+    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
+
+  - name: "[PS-START] Set root password (RHEL)"
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
