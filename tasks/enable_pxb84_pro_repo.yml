@@ -12,11 +12,11 @@
 - name: Install percona release Debian
   apt:
     deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
-  when: ansible_os_family == "Debian"
+  when: ansible_facts['os_family'] == "Debian"
 
 - name: Install percona release RHEL
   command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['os_family'] == "RedHat"
 
 - name: add pro repository on debian
   template: src=../templates/pro_deb_repo_file_pxb84.j2
@@ -26,18 +26,18 @@
     client_token: "{{ lookup('env', 'PASSWORD') }}"
     repo: "{{ lookup('env', 'install_repo') | default('testing') }}"
   when:
-    - ansible_os_family == "Debian"
+    - ansible_facts['os_family'] == "Debian"
 
 - name: update deb cache
   command: apt update
   when:
-    - ansible_os_family == "Debian"
+    - ansible_facts['os_family'] == "Debian"
 
 - name: Get release version for RedHat-based systems
   shell: "rpm --eval '%{rhel}'"
   register: release_version
   changed_when: false
-  when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+  when: ansible_facts['os_family'] == "RedHat" and ansible_distribution != "Amazon"
 
 - name: add pro repository on rmp
   template: src=../templates/pro_rpm_repo_file_pxb84.j2
@@ -48,7 +48,7 @@
     repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
     releasever: "{{ release_version.stdout }}"
   when:
-    - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+    - ansible_facts['os_family'] == "RedHat" and ansible_distribution != "Amazon"
     - ansible_architecture == "x86_64"
 
 - name: add pro repository on rmp
@@ -61,7 +61,7 @@
     releasever: "{{ release_version.stdout }}"
   when:
     - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
-    - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+    - ansible_facts['os_family'] == "RedHat" and ansible_distribution != "Amazon"
 
 - name: Get release version for Amazon Linux
   shell: "source /etc/os-release && echo $VERSION_ID"
@@ -89,7 +89,7 @@
     repo: "{{ 'release' if 'main' in lookup('env', 'install_repo') else lookup('env', 'install_repo') | default('testing') }}"
     releasever: "{{ release_version.stdout }}"
   when:
-    - ansible_os_family == "RedHat" and ansible_distribution == "Amazon"
+    - ansible_facts['os_family'] == "RedHat" and ansible_distribution == "Amazon"
     - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
 
 - name: Clean and update package cache

@@ -3,18 +3,18 @@
 
   - name: disable the mysql module on RHEL/CentOS 8
     command: /usr/bin/dnf module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
   - name: Install percona repository package
     apt:
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: Add the Percona Release yum repo without GPG check
     yum:
       name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
       disable_gpg_check: yes
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
     
   - name: enable the PS {{ pxb_inn_lts_repo_name }} testing repo PXB
     command: percona-release enable-only {{ pxb_inn_lts_repo_name }} release
@@ -38,7 +38,7 @@
   - name: Update apt cache
     apt:
       update_cache: yes
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: Show enabled Percona repositories
     command: percona-release show
@@ -56,12 +56,12 @@
     shell: "apt list | grep -i percona"
     register: percona_packages
     when: 
-      - ansible_os_family == "Debian"  
+      - ansible_facts['os_family'] == "Debian"  
   - name: List available packages with percona in them (RHEL/CentOS 7)
     shell: "yum list available | grep -i percona"
     register: percona_packages_yum
     when: 
-      - ansible_os_family == "RedHat"
+      - ansible_facts['os_family'] == "RedHat"
       - ansible_facts['distribution_major_version'] | int == 7
     ignore_errors: yes
 
@@ -69,7 +69,7 @@
     shell: "dnf list available | grep -i percona"
     register: percona_packages_dnf
     when: 
-      - ansible_os_family == "RedHat"
+      - ansible_facts['os_family'] == "RedHat"
       - ansible_facts['distribution_major_version'] | int >= 8
     ignore_errors: yes
 
@@ -77,14 +77,14 @@
     debug:
       var: percona_packages.stdout_lines
     when: 
-      - ansible_os_family == "Debian"
+      - ansible_facts['os_family'] == "Debian"
       - percona_packages.stdout_lines is defined
 
   - name: Display available Percona packages (RHEL/CentOS 7)
     debug:
       var: percona_packages_yum.stdout_lines
     when: 
-      - ansible_os_family == "RedHat"
+      - ansible_facts['os_family'] == "RedHat"
       - ansible_facts['distribution_major_version'] | int == 7
       - percona_packages_yum.stdout_lines is defined
 
@@ -92,6 +92,6 @@
     debug:
       var: percona_packages_dnf.stdout_lines
     when: 
-      - ansible_os_family == "RedHat"
+      - ansible_facts['os_family'] == "RedHat"
       - ansible_facts['distribution_major_version'] | int >= 8
       - percona_packages_dnf.stdout_lines is defined

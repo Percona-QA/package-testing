@@ -3,18 +3,18 @@
 
   - name: disable the mysql module on RHEL/CentOS 8
     command: /usr/bin/dnf module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
   - name: Install percona repository package
     apt:
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: Add the Percona Release yum repo without GPG check
     yum:
       name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
       disable_gpg_check: yes
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
   - name: enable the PXB release repo
     command: percona-release enable pxb-80 release

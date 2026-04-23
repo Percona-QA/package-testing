@@ -19,7 +19,7 @@
       - percona-server-rocksdb
       - percona-mysql-router
       - percona-server-js
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: "[PS-INSTALL] Get enabled dnf modules (RHEL 8+)"
     command: dnf module list --enabled

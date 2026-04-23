@@ -170,19 +170,19 @@
   - name: "[PS-START] Start mysql service (RHEL 6)"
     command: service mysql start
     when: 
-      - ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 6
+      - ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 6
       - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: "[PS-START] Start mysql service (RHEL 7+)"
     command: systemctl start mysql
     when: 
-      - ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
+      - ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
       - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: "[PS-START] Set root password (RedHat)"
     command: /package-testing/setpass_57.sh
     when: 
-      - ansible_os_family == "RedHat"
+      - ansible_facts['os_family'] == "RedHat"
       - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: "[PS-START] Copy .my.cnf (RedHat)"
@@ -190,7 +190,7 @@
               dest=/root/.my.cnf
               mode=0640 owner=root group=root
     when: 
-      - ansible_os_family == "RedHat"
+      - ansible_facts['os_family'] == "RedHat"
       - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: "[PS-START] Restart mysql service"
@@ -210,7 +210,7 @@
       packages:
       - rsyslog-mysql
     when: 
-      - ansible_os_family == "Debian"
+      - ansible_facts['os_family'] == "Debian"
       - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: "[PXB-TEST] Install 3rd party packages (RHEL 7, yum)"
@@ -255,7 +255,7 @@
       packages:
       - percona-xtrabackup-{{ pxb_version_main_no_cs }}*
     when: 
-      - ansible_os_family == "Debian"
+      - ansible_facts['os_family'] == "Debian"
 
   - name: "[PXB-UPGRADE] Remove PXB rpm packages (main)"
     yum:
@@ -265,7 +265,7 @@
       packages:
       - percona-xtrabackup-{{ pxb_version_main_no_cs }}*
     when: 
-      - ansible_os_family == "RedHat"
+      - ansible_facts['os_family'] == "RedHat"
 
 ## REMOVE MS
   - name: "[PXB-UPGRADE] List installed mysql packages (Debian)"
@@ -370,7 +370,7 @@
       - percona-server-server
       - percona-xtrabackup-8{{ major_release_version }}
     when: 
-      - ansible_os_family == "Debian"
+      - ansible_facts['os_family'] == "Debian"
       - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: "[PS-CLEANUP] Remove Percona Server rpm packages"
@@ -382,7 +382,7 @@
       - percona-server-server
       - percona-xtrabackup-8{{ major_release_version }}
     when: 
-      - ansible_os_family == "RedHat"
+      - ansible_facts['os_family'] == "RedHat"
       - lookup('env', 'server_to_test') == "ps_innovation"
 
 

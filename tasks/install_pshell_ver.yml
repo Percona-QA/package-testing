@@ -10,7 +10,7 @@
       packages:
       - "percona-mysql-shell={{ pshell_version }}*"
     when: 
-      - ansible_os_family == "Debian"
+      - ansible_facts['os_family'] == "Debian"
 
 #  - name: install percona-mysql-shell new rpm packages
 #    yum:
@@ -20,7 +20,7 @@
 #      packages:
 #      - "percona-mysql-shell={{ pshell_version }}*"
 #    when: 
-#      - ansible_os_family == "RedHat"
+#      - ansible_facts['os_family'] == "RedHat"
 
   - block:
       - name: Set desired percona version filter
@@ -48,5 +48,5 @@
           state: present
         when: percona_version is defined
     when: 
-      - ansible_os_family == "RedHat"
+      - ansible_facts['os_family'] == "RedHat"
 

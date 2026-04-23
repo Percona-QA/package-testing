@@ -9,7 +9,7 @@
     vars:
       packages:
       - percona-mysql-shell
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: install percona-mysql-shell new rpm packages using yum
     yum:

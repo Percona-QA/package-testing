@@ -14,10 +14,10 @@
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
   tasks:
-  - name: include tasks for test env setup
+  - name: "[SETUP] Test environment setup"
     include_tasks: ../tasks/test_prep.yml
 
-  - name: install libev apt package
+  - name: "[SETUP] Install libev (Debian)"
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -25,110 +25,113 @@
     vars:
       packages:
       - libev4
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
-  - name: install libev rpm package
+  - name: "[SETUP] Install libev (RedHat)"
     yum:
       name: "{{ packages }}"
       state: latest
     vars:
       packages:
       - libev
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
-  - name: include tasks for enabling main repo
+  - name: "[SETUP] Enable main repo"
     include_tasks: ../tasks/enable_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
-  - name: include tasks for enabling PS 84 test repo
+  - name: "[PS-REPO] Enable PS 8.4 main repo"
     include_tasks: ../tasks/enable_ps84_main_repo.yml
     when: lookup('env', 'install_repo') == "main"
 
-  - name: include tasks for enabling PS 84 test repo
+  - name: "[PS-REPO] Enable PS 8.4 testing repo"
     include_tasks: ../tasks/enable_ps84_testing_repo.yml
     when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
-  - name: include tasks for enabling PS 84 experimental repo
+  - name: "[PS-REPO] Enable PS 8.4 experimental repo"
     include_tasks: ../tasks/enable_ps84_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
-  - name: download and extract world database
+  - name: "[DEBUG-REPOS] Verify repos after PS repo enable"
+    include_tasks: ../tasks/debug_repos.yml
+
+  - name: "[SETUP] Download world database"
     command: "{{ item }}"
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
-  - name: install Percona Server 8.4 packages
+  - name: "[PS-INSTALL] Install Percona Server 8.4"
     include_tasks: ../tasks/install_ps84.yml
 
-  - name: install and check Percona XtraBackup 8.4 normal tarball from {{ install_repo }} downloads area
+  - name: "[PXB-TEST] Test PXB 8.4 normal tarball"
     command: /package-testing/test_binary_tarball.sh pxb84 {{ install_repo }} normal
 
-  - name: start mysql service with service command
+  - name: "[PS-START] Start mysql service (RHEL 6)"
     command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 6
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 6
 
-  - name: start mysql service with systemctl command
+  - name: "[PS-START] Start mysql service (RHEL 7+)"
     command: systemctl start mysql
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
 
-  - name: set root password on centos
+  - name: "[PS-START] Set root password (RedHat)"
     command: /package-testing/setpass_57.sh
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
-  - name: install plugins, import world database
+  - name: "[PXB-TEST] Install plugins and import world database"
     command: /package-testing/plugins_test.sh
 
-  - name: run backup for Redhat/Centos
+  - name: "[PXB-TEST] Run backup (RedHat)"
     command: pxb80/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
-  - name: run backup for Debian
+  - name: "[PXB-TEST] Run backup (Debian)"
     command: pxb80/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
-  - name: prepare backup
+  - name: "[PXB-TEST] Prepare backup"
     command: pxb80/bin/xtrabackup --prepare --target-dir=/tmp/backups/
 
-  - name: run backup for Redhat/Centos with streaming and encryption enabled
+  - name: "[PXB-TEST] Run backup with streaming and encryption (RedHat)"
     shell: pxb80/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
-  - name: run backup for Debian with streaming and encryption enabled
+  - name: "[PXB-TEST] Run backup with streaming and encryption (Debian)"
     shell: pxb80/bin/xtrabackup --backup --user=root --target-dir=backups/ --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
-  - name: extract and decrypt backup
+  - name: "[PXB-TEST] Extract and decrypt backup"
     shell: pxb80/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream
 
-  - name: prepare backup
+  - name: "[PXB-TEST] Prepare backup (streaming)"
     command: pxb80/bin/xtrabackup --prepare --target-dir=backups/
 
-  - name: remove backup files
+  - name: "[PXB-TEST] Remove backup files"
     command: rm -r pxb80 backups /tmp/backups
 
-  - name: install and check Percona XtraBackup 8.4 minimal tarball from {{ install_repo }} downloads area
+  - name: "[PXB-TEST] Test PXB 8.4 minimal tarball"
     command: /package-testing/test_binary_tarball.sh pxb84 {{ install_repo }} minimal
 
-  - name: run backup for Redhat/Centos
+  - name: "[PXB-TEST] Run backup (RedHat)"
     command: pxb80/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
-  - name: run backup for Debian
+  - name: "[PXB-TEST] Run backup (Debian)"
     command: pxb80/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
-  - name: prepare backup
+  - name: "[PXB-TEST] Prepare backup"
     command: pxb80/bin/xtrabackup --prepare --target-dir=/tmp/backups/
 
-  - name: run backup for Redhat/Centos with streaming and encryption enabled
+  - name: "[PXB-TEST] Run backup with streaming and encryption (RedHat)"
     shell: pxb80/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
-  - name: run backup for Debian with streaming and encryption enabled
+  - name: "[PXB-TEST] Run backup with streaming and encryption (Debian)"
     shell: pxb80/bin/xtrabackup --backup --user=root --target-dir=backups/ --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
-  - name: extract and decrypt backup
+  - name: "[PXB-TEST] Extract and decrypt backup"
     shell: pxb80/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream
 
-  - name: prepare backup
+  - name: "[PXB-TEST] Prepare backup (streaming)"
     command: pxb80/bin/xtrabackup --prepare --target-dir=backups/

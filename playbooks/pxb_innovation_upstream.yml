@@ -16,55 +16,55 @@
     yum:
       name: yum-utils
       state: present
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
 #  - name: Install MySQL apt repository package
 #    apt:
 #      deb: https://repo.mysql.com/mysql-apt-config_0.8.22-1_all.deb
-#    when: ansible_os_family == "Debian"
+#    when: ansible_facts['os_family'] == "Debian"
 
   - name: "[MS-UPSTREAM] Install MySQL repo (RHEL 6)"
     yum: name=https://repo.mysql.com/mysql80-community-release-el6.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 6
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 6
 
   - name: "[MS-UPSTREAM] Install MySQL repo (RHEL 7)"
     yum: name=https://repo.mysql.com//mysql80-community-release-el7.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 7
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 7
 
   - name: "[MS-UPSTREAM] Import GPG key RPM-2023 (RHEL 7+)"
     rpm_key:
       state: present
       key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
 
   - name: "[MS-UPSTREAM] Import GPG key (Debian)"
     ansible.builtin.get_url:
       url: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
       dest: /etc/apt/trusted.gpg.d/mysql.asc
       mode: '0644'
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: "[MS-UPSTREAM] Import GPG key RPM-2022 (RHEL 8+)"
     rpm_key:
       state: present
       key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 8
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int >= 8
 
   - name: "[MS-UPSTREAM] Install MySQL repo (RHEL 8)"
     yum: name=https://repo.mysql.com/mysql80-community-release-el8.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
   - name: "[MS-UPSTREAM] Install MySQL repo (RHEL 9)"
     yum: name=https://repo.mysql.com/mysql80-community-release-el9.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 9
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 9
 
   - name: "[MS-UPSTREAM] Setup EPEL 7 repo"
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 7
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 7
 
   - name: "[MS-UPSTREAM] Setup EPEL 8 repo"
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
   - name: "[MS-UPSTREAM] Download world database"
     command: "{{ item }}"
@@ -73,7 +73,7 @@
 
   - name: "[MS-UPSTREAM] Disable mysql module (RHEL 8)"
     command: /usr/bin/dnf module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
   - name: "[MS-UPSTREAM] Install prerequisite deb packages"
     apt:
@@ -84,7 +84,7 @@
       - vim
       - pv
       - unzip
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
 #  - name: install MySQL Community deb packages
 #    apt:
@@ -93,7 +93,7 @@
 #    vars:
 #      packages:
 #      - mysql-community-server
-#    when: ansible_os_family == "Debian"
+#    when: ansible_facts['os_family'] == "Debian"
 
   - name: "[MS-UPSTREAM] Download MySQL deb tarball (Ubuntu 22.04)"
     command: wget https://cdn.mysql.com/archives/mysql-8.2/mysql-server_8.2.0-1ubuntu22.04_amd64.deb-bundle.tar
@@ -132,11 +132,11 @@
     shell: dpkg -i /tmp/*.deb || apt-get install -f -y
     environment:
       DEBIAN_FRONTEND: noninteractive
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: "[MS-UPSTREAM] Enable mysql-innovation-community repo (RHEL)"
     shell: yum-config-manager --disable mysql80-community && yum-config-manager --enable mysql-innovation-community
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
 
   - name: "[MS-UPSTREAM] Install MySQL community server (RHEL 7)"
     yum:
@@ -148,7 +148,7 @@
       - pv
       - unzip
       - mysql-community-server-8.2.0-1.el7
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int <= 7
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int <= 7
 
   - name: "[MS-UPSTREAM] Install MySQL community server (RHEL 8)"
     package:
@@ -158,7 +158,7 @@
       packages:
       - python3-libselinux
       - mysql-community-server-8.2.0-1.el8
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
   - name: "[MS-UPSTREAM] Install MySQL community server (RHEL 9)"
     package:
@@ -168,19 +168,19 @@
       packages:
       - python3-libselinux
       - mysql-community-server-8.2.0-1.el9
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 9
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 9
 
   - name: "[MS-UPSTREAM] Start MySQL service"
     service: name=mysql state=started
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: "[MS-UPSTREAM] Start MySQL service"
     service: name=mysqld state=started
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
   - name: "[MS-UPSTREAM] Set root password (RedHat)"
     command: /package-testing/setpass_57.sh
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
   - name: "[SETUP] Extract major release version"
     shell: cat /package-testing/VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'

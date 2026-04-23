@@ -10,7 +10,7 @@
       - percona-xtrabackup-pro-80
       - percona-xtrabackup-test-pro-80
       - percona-xtrabackup-pro-dbg-80
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: install Percona XtraBackup new rpm packages yum
     yum:

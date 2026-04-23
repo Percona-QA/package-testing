@@ -10,7 +10,7 @@
       - percona-xtrabackup-{{ major_release_version }}
       - percona-xtrabackup-test-{{ major_release_version }}
       - percona-xtrabackup-dbg-{{ major_release_version }}
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: install Percona XtraBackup new rpm packages for pxb-{{ major_release_version }} yum
     yum:

@@ -157,7 +157,7 @@
       state: absent
     when:
       - lookup('env', 'server_to_test') == "ps_innovation"
-      - ansible_os_family == "Debian"
+      - ansible_facts['os_family'] == "Debian"
 
   - name: "[PS-CLEANUP] Remove Percona Server rpm packages"
     yum:
@@ -167,7 +167,7 @@
       state: absent
     when:
       - lookup('env', 'server_to_test') == "ps_innovation"
-      - ansible_os_family == "RedHat"
+      - ansible_facts['os_family'] == "RedHat"
 
   - name: "[PS-CLEANUP] Check process is stopped after package removal"
     command: /package-testing/check_running.sh mysql stopped

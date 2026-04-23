@@ -23,7 +23,7 @@
     vars:
       packages:
       - libev4
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: "[SETUP] Install libev (RedHat)"
     yum:
@@ -32,7 +32,7 @@
     vars:
       packages:
       - libev
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
   
   - name: "[SETUP] Extract PXB major release version"
     shell: cat /package-testing/VERSIONS | grep -P 'PXB_INN_LTS_VER=' | cut -d'=' -f2 | sed 's/\([0-9]\+\.[0-9]\+\).*/\1/' | sed 's/"//g'
@@ -108,25 +108,25 @@
   - name: "[PS-START] Start mysql service (RHEL 6)"
     command: service mysql start
     when: 
-      - ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 6
+      - ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 6
       - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: "[PS-START] Start mysqld service (RHEL 7+)"
     command: systemctl start mysqld
     when:
       - lookup('env', 'server_to_test') == "ps_innovation"
-      - ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
+      - ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
 
   - name: "[PS-START] Start mysql service (RHEL 7+)"
     command: systemctl start mysql
     when:
       - lookup('env', 'server_to_test') == "ps_innovation"
-      - ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
+      - ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int >= 7
 
   - name: "[PS-START] Set root password (RedHat)"
     command: /package-testing/setpass_57.sh
     when: 
-      - ansible_os_family == "RedHat"
+      - ansible_facts['os_family'] == "RedHat"
       - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: "[PXB-TEST] Install plugins and import world database"
@@ -134,22 +134,22 @@
 
   - name: "[PXB-TEST] Run backup (RedHat)"
     command: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
   - name: "[PXB-TEST] Run backup (Debian)"
     command: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: "[PXB-TEST] Prepare backup"
     command: pxb{{ major_release_version }}/bin/xtrabackup --prepare --target-dir=/tmp/backups/
 
   - name: "[PXB-TEST] Run streaming encrypted backup (RedHat)"
     shell: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
   - name: "[PXB-TEST] Run streaming encrypted backup (Debian)"
     shell: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: "[PXB-TEST] Extract and decrypt backup"
     shell: pxb{{ major_release_version }}/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream
@@ -165,22 +165,22 @@
 
   - name: "[PXB-TEST] Run backup (RedHat)"
     command: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/ --socket=/var/lib/mysql/mysql.sock
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
   - name: "[PXB-TEST] Run backup (Debian)"
     command: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: "[PXB-TEST] Prepare backup"
     command: pxb{{ major_release_version }}/bin/xtrabackup --prepare --target-dir=/tmp/backups/
 
   - name: "[PXB-TEST] Run streaming encrypted backup (RedHat)"
     shell: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --socket=/var/lib/mysql/mysql.sock --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
   - name: "[PXB-TEST] Run streaming encrypted backup (Debian)"
     shell: pxb{{ major_release_version }}/bin/xtrabackup --backup --user=root --target-dir=backups/ --encrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly --stream=xbstream --parallel=10 > backup.stream
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: "[PXB-TEST] Extract and decrypt backup"
     shell: pxb{{ major_release_version }}/bin/xbstream --directory=backups/ --extract --decrypt=AES256 --encrypt-key=mAU3Xs5sRcSB7zBEJP1BInPP5lgShKly < backup.stream

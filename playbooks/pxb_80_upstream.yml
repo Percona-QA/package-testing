@@ -13,54 +13,54 @@
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
   tasks:
 
-  - name: include tasks for test env setup
+  - name: "[SETUP] Test environment setup"
     include_tasks: ../tasks/test_prep.yml
 
-  - name: Install MySQL apt repository package
+  - name: "[MS-UPSTREAM] Install MySQL apt repository"
     apt:
       deb: https://repo.mysql.com/mysql-apt-config_0.8.22-1_all.deb
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
-  - name: Install MySQL RHEL 6 yum repository package
+  - name: "[MS-UPSTREAM] Install MySQL RHEL 6 yum repository"
     yum: name=https://repo.mysql.com/mysql80-community-release-el6-1.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 6
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 6
 
-  - name: Install MySQL RHEL 7 yum repository package
+  - name: "[MS-UPSTREAM] Install MySQL RHEL 7 yum repository"
     yum: name=https://repo.mysql.com/mysql80-community-release-el7-5.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 7
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 7
 
-  - name: Import key for mysql-repo
+  - name: "[MS-UPSTREAM] Import MySQL GPG key"
     rpm_key:
       state: present
       key: http://repo.mysql.com/RPM-GPG-KEY-mysql-2022
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 8
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int >= 8
 
-  - name: Install MySQL RHEL 8 yum repository package
+  - name: "[MS-UPSTREAM] Install MySQL RHEL 8 yum repository"
     yum: name=https://repo.mysql.com/mysql80-community-release-el8-3.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
-  - name: Install MySQL RHEL 9 yum repository package
+  - name: "[MS-UPSTREAM] Install MySQL RHEL 9 yum repository"
     yum: name=https://repo.mysql.com/mysql80-community-release-el9-1.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 9
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 9
 
-  - name: epel 7 repo
+  - name: "[SETUP] Enable EPEL 7 repo"
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 7
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 7
 
-  - name: setup epel 8 repo
+  - name: "[SETUP] Enable EPEL 8 repo"
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
-  - name: download and extract world database
+  - name: "[SETUP] Download world database"
     command: "{{ item }}"
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: disable the mysql module on RHEL/CentOS 8
+  - name: "[MS-UPSTREAM] Disable mysql module (RHEL 8)"
     command: /usr/bin/dnf module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int == 8
 
-  - name: install deb packages
+  - name: "[SETUP] Install base deb packages"
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -69,18 +69,18 @@
       - vim
       - pv
       - unzip
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
-  - name: install MySQL Community deb packages
+  - name: "[MS-UPSTREAM] Install MySQL Community (Debian)"
     apt:
       name: "{{ packages }}"
       update_cache: yes
     vars:
       packages:
       - mysql-community-server
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
-  - name: install packages in centos
+  - name: "[MS-UPSTREAM] Install MySQL Community (RHEL 7)"
     yum:
       name: "{{ packages }}"
       state: present
@@ -90,9 +90,9 @@
       - pv
       - unzip
       - mysql-community-server
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int <= 7
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int <= 7
 
-  - name: install packages in rhel/centos 8, 9
+  - name: "[MS-UPSTREAM] Install MySQL Community (RHEL 8+)"
     package:
       name: "{{ packages }}"
       state: present
@@ -100,37 +100,40 @@
       packages:
       - python3-libselinux
       - mysql-community-server
-    when: ansible_os_family == "RedHat" and ansible_facts['distribution_major_version'] | int >= 8
+    when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int >= 8
 
-  - name: Start the MySQL service
-    service: name=mysql state=started
-    when: ansible_os_family == "Debian"
+  - name: "[PS-START] Start mysql service (Debian)
+    service: name=mysql state=started"
+    when: ansible_facts['os_family'] == "Debian"
 
-  - name: Start the MySQL service
-    service: name=mysqld state=started
-    when: ansible_os_family == "RedHat"
+  - name: "[PS-START] Start mysqld service (RHEL)
+    service: name=mysqld state=started"
+    when: ansible_facts['os_family'] == "RedHat"
 
-  - name: set root password on centos
+  - name: "[PS-START] Set root password (RedHat)"
     command: /package-testing/setpass_57.sh
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
-  - name: include tasks for enabling tools test repo
+  - name: "[SETUP] Enable tools testing repo"
     include_tasks: ../tasks/enable_tools_testing_repo.yml
 
-  - name: install Percona XtraBackup 8.0 packages
+  - name: "[DEBUG-REPOS] Verify repos before PXB install"
+    include_tasks: ../tasks/debug_repos.yml
+
+  - name: "[PXB-INSTALL] Install PXB 8.0"
     include_tasks: ../tasks/install_pxb80.yml
 
-  - name: install plugins, import world database
+  - name: "[PXB-TEST] Install plugins and import world database"
     command: /package-testing/plugins_test.sh
 
-  - name: check that Percona XtraBackup version is correct
+  - name: "[PXB-TEST] Check PXB version is correct"
     command: /package-testing/version_check.sh pxb80
 
-  - name: check that Percona XtraBackup package versions are correct
+  - name: "[PXB-TEST] Check PXB package versions are correct"
     command: /package-testing/package_check.sh pxb80
 
-  - name: run backup
+  - name: "[PXB-TEST] Run backup"
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
 
-  - name: prepare the backup
+  - name: "[PXB-TEST] Prepare backup"
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/

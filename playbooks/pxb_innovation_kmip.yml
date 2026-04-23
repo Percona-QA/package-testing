@@ -13,7 +13,7 @@
 
   - name: "[SETUP] Disable SELinux (RedHat)"
     selinux: state=disabled
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
   - name: "[SETUP] Extract major release version"
     shell: cat /package-testing/VERSIONS | grep -oP 'PXB_INN_LTS_MAJ_VER="\K(\d+)\.(\d+)' | tr -d '.'
@@ -94,12 +94,12 @@
   - name: "[KMIP-SETUP] Stop mysql service (RedHat)"
     service: name=mysqld state=stopped
     when:
-      - ansible_os_family == "RedHat"
+      - ansible_facts['os_family'] == "RedHat"
 
   - name: "[KMIP-SETUP] Stop mysql service (Debian)"
     command: systemctl stop mysql
     when:
-      - ansible_os_family == "Debian"
+      - ansible_facts['os_family'] == "Debian"
 
   - name: "[KMIP-SETUP] Remove mysql data directory"
     command: rm -r /var/lib/mysql
@@ -110,7 +110,7 @@
       - python3-pip
       state: latest
       update_cache: yes
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
   - name: "[KMIP-SETUP] Install python3-pip (Debian)"
     apt:
@@ -118,7 +118,7 @@
       - python3-pip
       state: latest
       update_cache: yes
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: "[KMIP-SETUP] Install pykmip"
     command: "{{ item }}"
@@ -160,14 +160,14 @@
         src: /package-testing/kmip/component_keyring_kmip.cnf
         dest: /usr/lib64/mysql/plugin/
         remote_src: yes
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
   - name: "[KMIP-SETUP] Copy keyring_kmip config (Debian)"
     copy:
         src: /package-testing/kmip/component_keyring_kmip.cnf
         dest: /usr/lib/mysql/plugin/
         remote_src: yes
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: "[KMIP-SETUP] Copy encryption config for PS (Debian)"
     copy:
@@ -175,7 +175,7 @@
         dest: /etc/mysql/conf.d/encryption.cnf
         remote_src: yes
     when: 
-      - ansible_os_family == "Debian"
+      - ansible_facts['os_family'] == "Debian"
       - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: "[KMIP-SETUP] Copy encryption config for MS (Debian)"
@@ -184,14 +184,14 @@
         dest: /etc/mysql/conf.d/encryption.cnf
         remote_src: yes
     when: 
-      - ansible_os_family == "Debian"
+      - ansible_facts['os_family'] == "Debian"
       - lookup('env', 'server_to_test') == "ms_innovation"
 
   - name: "[KMIP-SETUP] Append includedir to my.cnf (RedHat)"
     lineinfile:
         path: /etc/my.cnf
         line: '!includedir /etc/my.cnf.d'
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
   - name: "[KMIP-SETUP] Copy encryption config for PS (RedHat)"
     copy:
@@ -199,7 +199,7 @@
         dest: /etc/my.cnf.d/encryption.cnf
         remote_src: yes
     when: 
-      - ansible_os_family == "RedHat"
+      - ansible_facts['os_family'] == "RedHat"
       - lookup('env', 'server_to_test') == "ps_innovation"
 
   - name: "[KMIP-SETUP] Copy encryption config for MS (RedHat)"
@@ -208,25 +208,25 @@
         dest: /etc/my.cnf.d/encryption.cnf
         remote_src: yes
     when: 
-      - ansible_os_family == "RedHat"
+      - ansible_facts['os_family'] == "RedHat"
       - lookup('env', 'server_to_test') == "ms_innovation"
 
   - name: "[PS-START] Start mysql service (RedHat)"
     service: name=mysqld state=restarted
     when:
-      - ansible_os_family == "RedHat"
+      - ansible_facts['os_family'] == "RedHat"
 
   - name: "[PS-START] Start mysql service (Debian)"
     command: systemctl restart mysql
     when:
-      - ansible_os_family == "Debian"
+      - ansible_facts['os_family'] == "Debian"
 
   - name: "[PS-START] Check mysql service status"
     command: /package-testing/check_running.sh mysql running
 
   - name: "[PS-START] Set root password (RedHat)"
     command: /package-testing/setpass_57.sh
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
   - name: "[PXB-TEST] Import world database"
     command: /package-testing/plugins_test.sh
@@ -261,8 +261,8 @@
 
   - name: "[PXB-TEST] Prepare backup (RedHat)"
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --component-keyring-config=/usr/lib64/mysql/plugin/component_keyring_kmip.cnf
-    when: ansible_os_family == "RedHat"
+    when: ansible_facts['os_family'] == "RedHat"
 
   - name: "[PXB-TEST] Prepare backup (Debian)"
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --component-keyring-config=/usr/lib/mysql/plugin/component_keyring_kmip.cnf
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"

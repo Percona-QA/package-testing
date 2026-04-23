@@ -11,7 +11,7 @@
       - percona-xtrabackup-pro-84
       - percona-xtrabackup-test-pro-84
       - percona-xtrabackup-pro-dbg-84
-    when: ansible_os_family == "Debian"
+    when: ansible_facts['os_family'] == "Debian"
 
   - name: install Percona XtraBackup new rpm packages dnf
     dnf:
