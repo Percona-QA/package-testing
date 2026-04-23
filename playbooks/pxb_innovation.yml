@@ -47,9 +47,18 @@
     shell: grep 'PS_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
     register: ps_inn_lts_repo_name
 
-  - name: "[SETUP] Set ps_inn_lts_repo_name fact"
+  - name: "[SETUP] Extract PXB innovation/LTS repo name"
+    shell: grep 'PXB_INN_LTS_REPO=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: pxb_inn_lts_repo_name
+
+  - name: "[SETUP] Set repo name facts"
     set_fact:
       ps_inn_lts_repo_name: "{{ ps_inn_lts_repo_name.stdout }}"
+      pxb_inn_lts_repo_name: "{{ pxb_inn_lts_repo_name.stdout }}"
+
+  - name: "[SETUP] Print repo names"
+    debug:
+      msg: "PS repo={{ ps_inn_lts_repo_name }}  PXB repo={{ pxb_inn_lts_repo_name }}"
 
   # ── PS innovation: enable repo ───────────────────────────────────────────────
 
