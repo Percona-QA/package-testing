@@ -87,12 +87,6 @@
     shell: sed -i 's/mirror\.centos\.org/vault\.centos\.org/g;s/\#baseurl=/baseurl=/g;s/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS*.repo
     when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "8"
 
-  - name: "[CENTOS8] Update YUM cache"
-    dnf:
-      update_cache: yes
-      state: present
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
   - name: "[GPG] Install EPEL 8 GPG key"
     rpm_key:
       state: present
@@ -100,8 +94,11 @@
     when:
     - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: "[EPEL8] Yum update"
-    command: dnf update -y
+  - name: "[EPEL8] Full package upgrade"
+    dnf:
+      name: "*"
+      state: latest
+      update_cache: yes
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
   - name: "[EPEL8] Setup epel-release repo"
