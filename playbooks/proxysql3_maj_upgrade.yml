@@ -48,12 +48,29 @@
 
   - name: start proxysql service
     service: name=proxysql state=started
+    when: ansible_distribution != "Amazon"
 
   - name: stop proxysql service
     service: name=proxysql state=stopped
+    when: ansible_distribution != "Amazon"
 
-# - name: start proxysql service
-#   service: name=proxysql state=started
+  - name: stop proxysql service on non-AL2023
+    service:
+      name: proxysql
+      state: stopped
+    when: not (
+            ansible_distribution == "Amazon" and
+            ansible_distribution_major_version == "2023"
+          )
+
+  - name: start proxysql service again on non-AL2023
+    service:
+      name: proxysql
+      state: started
+    when: not (
+            ansible_distribution == "Amazon" and
+            ansible_distribution_major_version == "2023"
+          )
 
   - name: install proxysql3 new deb packages
     apt:
@@ -66,25 +83,44 @@
     when: ansible_os_family == "Debian"
 
   - name: install proxysql3 new rpm packages
-    yum:
-      name: "{{ packages }}"
+    dnf:
+      name:
+        - proxysql3
       state: latest
-    vars:
-      packages:
-      - proxysql3
+      allowerasing: true
     when: ansible_os_family == "RedHat"
+
+  - name: start proxysql service
+    service: name=proxysql state=started
+    when: ansible_distribution != "Amazon"
+
+  - name: stop proxysql service
+    service: name=proxysql state=stopped
+    when: ansible_distribution != "Amazon"
+
+  - name: stop proxysql service on non-AL2023
+    service:
+      name: proxysql
+      state: stopped
+    when: not (
+            ansible_distribution == "Amazon" and
+            ansible_distribution_major_version == "2023"
+          )
+
+  - name: start proxysql service again on non-AL2023
+    service:
+      name: proxysql
+      state: started
+    when: not (
+            ansible_distribution == "Amazon" and
+            ansible_distribution_major_version == "2023"
+          )
 
   - name: run client_check tasks
     include_tasks: ../tasks/client_check.yml
 
   - name: check that proxysql3 version is correct
     command: /package-testing/version_check.sh proxysql3
-
-  - name: start proxysql service
-    service: name=proxysql state=started
-
-  - name: stop proxysql service
-    service: name=proxysql state=stopped
 
   - name: start proxysql service
     service: name=proxysql state=started
