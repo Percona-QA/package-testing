@@ -146,7 +146,7 @@
       - lookup('env', 'PXB_RELEASE') == "84"
 
   - name: Enable Percona Server 9.X main repository
-    include_tasks: ../../../tasks/enable_ps_innovation_repo_main.yml
+    include_tasks: ../../../tasks/enable_ps_innovation_repo_testing.yml
     when:
       - lookup('env', 'PXB_RELEASE') == "96"
 
