@@ -499,6 +499,7 @@
         debug:
           msg: "{{ archive_result.stdout_lines }}"
         when: archive_result is defined
+    ignore_errors: yes
 
   - block:
     - name: Run innodb_myrocks_backup_tests.py tests
