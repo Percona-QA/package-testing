@@ -65,19 +65,19 @@
     include_tasks: ../tasks/enable_ps_innovation_repo_main.yml
     when: 
       - lookup('env', 'install_repo') == "main"
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: include tasks for enabling PS {{ major_release_version }} test repo
     include_tasks: ../tasks/enable_ps_innovation_repo_testing.yml
     when: 
       - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: include tasks for enabling PS {{ major_release_version }} experimental repo
     include_tasks: ../tasks/enable_ps_innovation_repo_experimental.yml
     when: 
       - lookup('env', 'install_repo') == "experimental"
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
 ### UPSTREAM 
 
@@ -88,7 +88,7 @@
       state: present
     when: 
       - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
 #  - name: Install MySQL apt repository package
 #    apt:
@@ -99,13 +99,13 @@
     yum: name=https://repo.mysql.com/mysql80-community-release-el6.rpm state=present
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Install MySQL RHEL 7 yum repository package
     yum: name=https://repo.mysql.com//mysql80-community-release-el7.rpm state=present
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Import GPG key for RPM 7 (Centos 7)
     rpm_key:
@@ -113,7 +113,7 @@
       key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Import key for mysql-repo add GPG key (Debian)
     apt_key:
@@ -121,7 +121,7 @@
       state: present
     when: 
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Import GPG key for RPM 8-3
     rpm_key:
@@ -129,44 +129,44 @@
       key: https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Install MySQL RHEL 8 yum repository package
     yum: name=https://repo.mysql.com/mysql80-community-release-el8.rpm state=present
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Install MySQL RHEL 9 yum repository package
     yum: name=https://repo.mysql.com/mysql80-community-release-el9.rpm state=present
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: epel 7 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: setup epel 8 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
     when:
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: disable the mysql module on RHEL/CentOS 8
     command: /usr/bin/dnf module disable mysql -y
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install deb packages
     apt:
@@ -179,7 +179,7 @@
       - unzip
     when: 
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
 #  - name: install MySQL Community deb packages
 #    apt:
@@ -196,70 +196,70 @@
     command: wget https://cdn.mysql.com/archives/mysql-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu20.04_amd64.deb-bundle.tar
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - pxb_version_major != "8.3"
 
   - name: Install mysql deb packages using tarballs ubuntu 22.04
     command: wget https://cdn.mysql.com/archives/mysql-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - pxb_version_major != "8.3"
 
   - name: Install mysql deb packages using tarballs ubuntu 23.04
     command: wget https://cdn.mysql.com/archives/mysql-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu23.04_amd64.deb-bundle.tar
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.04'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - pxb_version_major != "8.3"
 
   - name: Install mysql deb packages using tarballs Debian 11
     command: wget https://cdn.mysql.com/archives/mysql-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1debian11_amd64.deb-bundle.tar
     when: 
       - ansible_distribution == 'Debian' and ansible_distribution_version == '11'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - pxb_version_major != "8.3"
 
   - name: Install mysql deb packages using tarballs Debian 12
     command: wget https://cdn.mysql.com/archives/mysql-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1debian12_amd64.deb-bundle.tar
     when: 
       - ansible_distribution == 'Debian' and ansible_distribution_version == '12.0'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - pxb_version_major != "8.3"
 
   - name: extract mysql deb packages for ubuntu 20.04
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu20.04_amd64.deb-bundle.tar -C /tmp
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - pxb_version_major != "8.3"
 
   - name: extract mysql deb packages for ubuntu 22.04
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar -C /tmp
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - pxb_version_major != "8.3"
 
   - name: extract mysql deb packages for ubuntu 23.04
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu23.04_amd64.deb-bundle.tar -C /tmp
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.04'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - pxb_version_major != "8.3"
 
   - name: extract mysql deb packages for Debian 11
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1debian11_amd64.deb-bundle.tar -C /tmp
     when: 
       - ansible_distribution == 'Debian' and ansible_distribution_version == '11'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - pxb_version_major != "8.3"
 
   - name: extract mysql deb packages for Debian 12
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1debian12_amd64.deb-bundle.tar -C /tmp
     when: 
       - ansible_distribution == 'Debian' and ansible_distribution_version == '12.0'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
       - pxb_version_major != "8.3"
 
 ##
@@ -269,61 +269,61 @@
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu20.04_amd64.deb-bundle.tar
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Install mysql deb packages using tarballs ubuntu 22.04
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Install mysql deb packages using tarballs ubuntu 23.04
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu23.10_amd64.deb-bundle.tar  
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.04'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Install mysql deb packages using tarballs Debian 11
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1debian11_amd64.deb-bundle.tar
     when: 
       - ansible_distribution == 'Debian' and ansible_distribution_version == '11'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Install mysql deb packages using tarballs Debian 12
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1debian12_amd64.deb-bundle.tar
     when: 
       - ansible_distribution == 'Debian' and ansible_distribution_version == '12.0'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: extract mysql deb packages for ubuntu 20.04
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu20.04_amd64.deb-bundle.tar -C /tmp
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: extract mysql deb packages for ubuntu 22.04
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu22.04_amd64.deb-bundle.tar -C /tmp
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '22.04'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: extract mysql deb packages for ubuntu 23.04
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu23.04_amd64.deb-bundle.tar -C /tmp
     when: 
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '23.04'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: extract mysql deb packages for Debian 11
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1debian11_amd64.deb-bundle.tar -C /tmp
     when: 
       - ansible_distribution == 'Debian' and ansible_distribution_version == '11'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: extract mysql deb packages for Debian 12
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1debian12_amd64.deb-bundle.tar -C /tmp
     when: 
       - ansible_distribution == 'Debian' and ansible_distribution_version == '12.0'
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
 ##
   - name: install mysql deb packages
@@ -332,13 +332,13 @@
       DEBIAN_FRONTEND: noninteractive
     when: 
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Enable Innovation LTS repo for RHEL
     shell: yum-config-manager --disable mysql80-community && yum-config-manager --enable mysql-innovation-community
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install packages in centos
     yum:
@@ -352,7 +352,7 @@
       - mysql-community-server-{{ pxb_version_major_minor }}-1.el7
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install packages in rhel/centos 8
     package:
@@ -364,7 +364,7 @@
       - mysql-community-server-"{{ pxb_version_major_minor }}"-1.el8
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: install packages in rhel/centos 9
     package:
@@ -376,25 +376,25 @@
       - mysql-community-server-"{{ pxb_version_major_minor }}"-1.el9
     when: 
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Start the MySQL service
     service: name=mysql state=started
     when: 
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: Start the MySQL service
     service: name=mysqld state=started
     when: 
       - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
     when: 
       - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ms_innovation"
+      - lookup('env', 'server_to_test') == "ms_innovation_lts"
 ###
 
 ### PS START
@@ -404,39 +404,23 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
 #  Disable Percona Toolkit installation till its supported in OL9 and Jammy
 #  - name: install Percona Toolkit new deb packages
 #    include_tasks: ../tasks/install_pt.yml
 
   - name: install Percona Server {{ major_release_version }} packages
-    include_tasks: ../tasks/install_ps_innovation.yml
+    include_tasks: ../tasks/install_ps_innovation_lts.yml
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
 ### PS END
-  - name: enable Percona XtraBackup {{ major_release_version }} packages 
+  - name: enable repo Percona XtraBackup {{ major_release_version }}  
     include_tasks: ../tasks/enable_pxb_innovation_testing_repo.yml
-    when: 
-      - lookup('env', 'install_repo') == "testing"
-      - lookup('env', 'product_to_test') == "pxb_innovation"
-
-  - name: DEBUG env values
-    debug:
-      msg:
-        - "install_repo={{ lookup('env', 'install_repo') }}"
-        - "product_to_test={{ lookup('env', 'product_to_test') }}"
-        - "server_to_test={{ lookup('env', 'server_to_test') }}"
-
-  - name: enable Percona XtraBackup {{ major_release_version }} packages 
-    include_tasks: ../tasks/enable_pxb_innovation_main_repo.yml
-    when: 
-      - lookup('env', 'install_repo') == "main"
-      - lookup('env', 'product_to_test') == "pxb_innovation"
 
   - name: install Percona XtraBackup {{ major_release_version }} packages 
-    include_tasks: ../tasks/install_pxb_innovation.yml
+    include_tasks: ../tasks/install_pxb_innovation_lts.yml
 #    when: 
 #      - lookup('env', 'install_repo') != "experimental"
 
@@ -444,21 +428,20 @@
   - name: start mysql service with service command
     command: service mysql start
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
-      - ansible_os_family == "RedHat" 
-      - ansible_distribution_major_version | int >= 7
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
+      - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
     when: 
       - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ps_innovation" 
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
 ### PS END
 
@@ -488,7 +471,7 @@
       - zstd
     when: 
       - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: install lz4 and zstd packages on Ubuntu/Debian
     apt:
@@ -499,7 +482,7 @@
       - zstd
     when: 
       - ansible_os_family == "Debian" and ansible_distribution_release != "bionic"
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: install lz4 and zstd packages on Bionic 
     apt:
@@ -510,37 +493,37 @@
       - zstd
     when: 
       - ansible_os_family == "Debian" and ansible_distribution_release == "bionic"
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: run backup with lz4 compression
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_l/ --compress=lz4 --compress-threads=10
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: decompress backup
     command: /usr/bin/xtrabackup --decompress --user=root --target-dir=/tmp/backup_l/
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_l/
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: run backup with zstd compression
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backup_z/ --compress=zstd --compress-threads=10
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: decompress backup
     command: /usr/bin/xtrabackup --decompress --user=root --target-dir=/tmp/backup_z/
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: prepare backup
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backup_z/
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
       
   - name: remove Percona Server deb packages
     apt:
@@ -553,7 +536,7 @@
       - percona-xtrabackup-{{ major_release_version }}
     when: 
       - ansible_os_family == "Debian"
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: remove Percona Server rpm packages
     yum:
@@ -565,10 +548,10 @@
       - percona-xtrabackup-{{ major_release_version }}
     when: 
       - ansible_os_family == "RedHat"
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
     when:
-      - lookup('env', 'server_to_test') == "ps_innovation"
+      - lookup('env', 'server_to_test') == "ps_innovation_lts"
 ### PS END
