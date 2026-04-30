@@ -1,0 +1,322 @@
+---
+- name: Prepare node for running tests
+  hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: true
+  tasks:
+    - name: Setup SSH keys for RedHat
+      authorized_key:
+        user: ec2-user
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: ansible_os_family == "RedHat"
+      
+    - name: Setup SSH keys CentOS
+      authorized_key:
+        user: centos
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: ansible_distribution == "CentOS"
+
+    - name: Setup SSH keys for Oracle Linux or Amazon
+      authorized_key:
+        user: ec2-user
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: ansible_distribution == "OracleLinux" or ansible_distribution == "Amazon"
+
+    - name: Setup SSH keys Debian
+      authorized_key:
+        user: admin
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: ansible_distribution == "Debian"
+
+    - name: Setup SSH keys Ubuntu
+      authorized_key:
+        user: ubuntu
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Create pxbtest user for running MySQL tests (non-root)
+      ansible.builtin.user:
+        name: pxbtest
+        comment: "PXB test user for mysqld"
+        home: /home/pxbtest
+        create_home: true
+        shell: /bin/bash
+        state: present
+
+    - name: Install Docker for Debian family (for KMIP tests)
+      ansible.builtin.apt:
+        name: docker.io
+        update_cache: yes
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install Podman and docker CLI compatibility for RedHat family (for KMIP tests)
+      ansible.builtin.dnf:
+        name:
+          - podman
+          - podman-docker
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Ensure Docker service is started (Debian)
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure Podman socket is started (RedHat - for docker CLI compatibility)
+      ansible.builtin.service:
+        name: podman.socket
+        state: started
+        enabled: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Ensure docker group exists (RedHat - for podman socket access)
+      ansible.builtin.group:
+        name: docker
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Create podman.socket.d drop-in directory (RedHat)
+      ansible.builtin.file:
+        path: /etc/systemd/system/podman.socket.d
+        state: directory
+        mode: '0755'
+      when: ansible_os_family == "RedHat"
+
+    - name: Configure podman socket for docker group access (RedHat)
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/podman.socket.d/override.conf
+        content: |
+          [Socket]
+          SocketGroup=docker
+        mode: '0644'
+      when: ansible_os_family == "RedHat"
+
+    - name: Reload systemd and restart podman socket (RedHat)
+      ansible.builtin.systemd:
+        name: podman.socket
+        state: restarted
+        daemon_reload: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Add pxbtest to docker group
+      ansible.builtin.user:
+        name: pxbtest
+        groups: docker
+        append: yes
+
+    - name: Install git for Debian family
+      apt:
+        name: git
+        update_cache: yes
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install git for RedHat family (RHEL 7 and earlier)
+      yum:
+        name: git
+        state: present
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int <= 7
+
+    - name: Install git for RedHat family (RHEL 8 and later)
+      dnf:
+        name: git
+        state: present
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int >= 8
+
+    - name: Install python3 and python3-pip for Debian family
+      apt:
+        name:
+          - python3
+          - python3-pip
+        update_cache: yes
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install python3 and python3-pip for RedHat family (RHEL 7 and earlier)
+      yum:
+        name:
+          - python3
+          - python3-pip
+        state: present
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int <= 7
+
+    - name: Install python3 and python3-pip for RedHat family (RHEL 8 and later)
+      dnf:
+        name:
+          - python3
+          - python3-pip
+        state: present
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int >= 8
+
+    - name: Install pytest using pip3 for Debian family (with --break-system-packages)
+      command: pip3 install --break-system-packages pytest
+      when: ansible_os_family == "Debian"
+
+    - name: Install pytest using pip3 for RedHat family (RHEL 7 and earlier)
+      command: pip3 install pytest
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int <= 9
+
+    - name: Install pytest using pip3 for RedHat family (RHEL 8 and later, including RHEL 10)
+      command: pip3 install --break-system-packages pytest
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int > 9
+
+    - name: Install psutil using pip3 for Debian family (with --break-system-packages)
+      command: pip3 install --break-system-packages psutil
+      when: ansible_os_family == "Debian"
+
+    - name: Install psutil using pip3 for RedHat family (RHEL 7 and earlier)
+      command: pip3 install psutil
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int <= 9
+
+    - name: Install psutil using pip3 for RedHat family (RHEL 8 and later, including RHEL 10)
+      command: pip3 install --break-system-packages psutil
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int > 9
+
+    - name: Checkout server-qa repository
+      git:
+        repo: https://github.com/Percona-QA/server-qa.git
+        dest: /server-qa
+        version: tomislav-pxb-python
+        force: yes
+
+    - name: Checkout pstress repository
+      git:
+        repo: https://github.com/Percona-QA/pstress.git
+        dest: /pstress
+        version: master
+        force: yes
+
+    - name: Install cmake and build tools for RedHat family
+      package:
+        name:
+          - cmake
+          - make
+          - gcc
+          - gcc-c++
+          - openssl-devel
+          - zlib-devel
+          - libzstd-devel
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Install cmake and build tools for Debian family
+      apt:
+        name:
+          - cmake
+          - make
+          - gcc
+          - g++
+          - libssl-dev
+          - zlib1g-dev
+          - libzstd-dev
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install percona-release for Debian family
+      apt:
+        deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+      when: ansible_os_family == "Debian"
+
+    - name: Install percona-release for RedHat family (RHEL 7 and earlier)
+      command: yum -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int <= 7
+
+    - name: Install percona-release for RedHat family (RHEL 8 and later)
+      command: dnf -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int >= 8
+
+    - name: Enable Percona Toolkit repository
+      command: percona-release enable pt
+      changed_when: false
+
+    - name: Install Percona Toolkit for RedHat family (RHEL 7 and earlier)
+      yum:
+        name: percona-toolkit
+        state: latest
+        update_cache: yes
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int <= 7
+
+    - name: Install Percona Toolkit for RedHat family (RHEL 8 and later)
+      dnf:
+        name: percona-toolkit
+        state: latest
+        update_cache: yes
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int >= 8
+
+    - name: Install Percona Toolkit for Debian family
+      apt:
+        name: percona-toolkit
+        state: latest
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install GPG key for EPEL 10
+      rpm_key:
+        state: present
+        key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-10
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int == 10
+
+    - name: Setup EPEL 10 repo
+      dnf:
+        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
+        state: present
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int == 10
+
+    - name: Install sysbench for RedHat family (RHEL 8 and later)
+      dnf:
+        name: sysbench
+        state: latest
+        update_cache: yes
+      when:
+        - ansible_os_family == "RedHat"
+        - ansible_distribution_major_version | int >= 8
+
+    - name: Install sysbench for Debian family
+      apt:
+        name: sysbench
+        state: latest
+        update_cache: yes
+      when: ansible_os_family == "Debian"
