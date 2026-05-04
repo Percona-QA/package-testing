@@ -25,13 +25,13 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: include tasks for enabling test repo pxc80 non pro
+  - name: include tasks for enabling test repo pxc inovation non pro
     include_tasks: ../../../../tasks/enable_pxc_innovation_testing_repo.yml
     when:
-    - lookup('env', 'install_repo') == "testing" 
+    - lookup('env', 'install_repo') == "testing"
     - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling main repo pxc80 non pro
+  - name: include tasks for enabling main repo pxc inovation  non pro
     include_tasks: ../../../../tasks/enable_pxc_innovation_main_repo.yml
     when: 
     - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
@@ -76,7 +76,7 @@
       - ansible_os_family == "Debian"
 
 
-  - name: install PXC 8 deb packages arm64 debian non pro
+  - name: install PXC deb packages arm64 debian non pro
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -84,13 +84,13 @@
       packages:
       - percona-xtradb-cluster-full
       - percona-toolkit
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - ansible_architecture == "aarch64"
       - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      
+
   - name: install PXC 8 deb packages amd64 non pro
     apt:
       name: "{{ packages }}"
@@ -99,7 +99,7 @@
       packages:
       - percona-xtradb-cluster-full
       - percona-toolkit
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - ansible_architecture == "x86_64"
       - lookup('env', 'pro') == "no"
@@ -148,7 +148,7 @@
   - name: Extract only the major.minor.patch version from mysqld --version
     set_fact:
       pxc_version_parsed: "{{ pxc_version.stdout | regex_search('Ver\\s+(\\d+\\.\\d+\\.\\d+)', '\\1') }}"
-    
+
   - name: Print parsed PXC version
     debug:
       msg: "Parsed PXC version is: {{ pxc_version_parsed }}"
@@ -156,7 +156,7 @@
   - name: PRINT WSREP version
     shell: mysql -uroot --password='U?fY)9s7|3gxUm' -e "SHOW STATUS LIKE 'wsrep_provider_version';"
     register: wsrep_version
-  
+
   - name: print WSREP version debug
     debug: var=wsrep_version
 
@@ -164,7 +164,7 @@
     shell: mysql -uroot --password='U?fY)9s7|3gxUm' -e "SELECT @@INNODB_VERSION;"
     register: innod_version
 
-  - name: print INNODB version debug  
+  - name: print INNODB version debug
     debug: var=innod_version
 
   - name: stop mysql service with service command
@@ -186,7 +186,6 @@
     set_fact:
       pxc_inn_lts_repo_name: "{{ pxc_inn_lts_repo_name.stdout }}"
 
-  
   - name: check PXC 8.0 version Molecule
     command: /package-testing/version_check.sh pxc{{ major_release_version}}
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
