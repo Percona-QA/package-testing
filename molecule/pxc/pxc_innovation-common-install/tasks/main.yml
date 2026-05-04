@@ -172,8 +172,16 @@
       dest: /etc/mysql/certs/
 
   - name: start mysql service
-    service: name=mysql state=started
+    service:
+      name: mysql
+      state: started
+    register: mysql_start
+    ignore_errors: yes
     throttle: 1
+
+  - name: Print start result
+    debug:
+      var: mysql_start
 
   - name: Check mysql error log
     shell: cat /var/log/mysqld.log || true
