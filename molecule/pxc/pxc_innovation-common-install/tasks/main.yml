@@ -123,7 +123,6 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-#      - percona-toolkit
       - percona-xtrabackup-96
     when:
       - ansible_os_family == "RedHat"
