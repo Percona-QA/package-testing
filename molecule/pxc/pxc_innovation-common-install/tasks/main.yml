@@ -86,9 +86,9 @@
       - ansible_os_family == "Debian"
 
 # resolving qpress error
-  - name: enable the pdpxc-80 main repo for qpress in noble
-    command: percona-release enable pdpxc-8.0 release
-    when: ansible_distribution_release == "noble"
+#  - name: enable the pdpxc-80 main repo for qpress in noble
+#    command: percona-release enable pdpxc-8.0 release
+#    when: ansible_distribution_release == "noble"
 
   - name: install PXC {{ major_release_version}} deb packages
     apt:
@@ -134,11 +134,6 @@
     service: name=mysql state=started
     throttle: 1
 
-  
-  - name: start mysql service
-    service: name=mysql state=started
-    throttle: 1
-    
   - name: register PXC version Molecule
     shell: mysqld --version
     register: pxc_version
@@ -185,7 +180,7 @@
       - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      
+
   - name: install PXC 8 deb packages amd64 non pro
     apt:
       name: "{{ packages }}"
