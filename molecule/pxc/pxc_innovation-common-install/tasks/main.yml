@@ -146,8 +146,8 @@
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: check telemetry (disabled)
-    command: /package-testing/check_telemetry.sh pxc -d
+#  - name: check telemetry (disabled)
+#    command: /package-testing/check_telemetry.sh pxc -d
 
   - name: copy PXC config on centos 7
     template: src=../../../../templates/my_rpm_80.j2
