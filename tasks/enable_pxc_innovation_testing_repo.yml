@@ -25,7 +25,7 @@
 #    command: percona-release enable tools release
 
   - name: enable pxb 9X repo
-    command: percona-release enable pxb-9x-innovation release
+    command: percona-release enable pxb-9x-innovation testing
 
   - name: Clean and update package cache
     shell: |
