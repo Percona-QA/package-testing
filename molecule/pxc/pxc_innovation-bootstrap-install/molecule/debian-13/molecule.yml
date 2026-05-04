@@ -8,7 +8,7 @@ driver:
 platforms:
   - name: ${BUILD_NUMBER}-pxc1-innovation-bootstrap-debian-13-install-${INSTALLTYPE}
     region: us-west-1
-    image: ami-0bc30e61111dcfe46
+    image: ami-0afb0dfa8abe5db5b
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: t2.large
     ssh_user: admin
