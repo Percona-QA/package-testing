@@ -5,6 +5,11 @@
     command: /usr/bin/dnf module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
+  - name: Disable MariaDB module (RHEL 10)
+    command: dnf module disable mariadb -y
+    ignore_errors: yes
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+
   - name: Install percona repository package
     apt:
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
