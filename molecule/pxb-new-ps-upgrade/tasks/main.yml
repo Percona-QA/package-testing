@@ -413,6 +413,15 @@
       recurse: true
 
   - block:
+    - name: Show free disk space (before tests)
+      ansible.builtin.command: df -h
+      register: df_before_tests
+      changed_when: false
+
+    - name: Display free disk space (before tests)
+      debug:
+        msg: "{{ df_before_tests.stdout_lines }}"
+
     - name: Run upgrade_backup_tests.py tests
       shell: |
         runuser -u pxbtest -- env \
@@ -482,6 +491,15 @@
         debug:
           msg: "{{ archive_result.stdout_lines }}"
         when: archive_result is defined
+
+      - name: Show free disk space (after tests)
+        ansible.builtin.command: df -h
+        register: df_after_tests
+        changed_when: false
+
+      - name: Display free disk space (after tests)
+        debug:
+          msg: "{{ df_after_tests.stdout_lines }}"
 
   # - name: Pause 15 minutes for debugging
   #   pause:
