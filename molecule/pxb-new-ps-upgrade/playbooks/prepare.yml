@@ -226,6 +226,8 @@
           - openssl-devel
           - zlib-devel
           - libzstd-devel
+          - lz4
+          - zstd
         state: present
       when: ansible_os_family == "RedHat"
 
@@ -239,6 +241,8 @@
           - libssl-dev
           - zlib1g-dev
           - libzstd-dev
+          - lz4
+          - zstd
         state: present
         update_cache: yes
       when: ansible_os_family == "Debian"
