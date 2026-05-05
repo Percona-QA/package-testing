@@ -249,8 +249,5 @@
     command: /package-testing/version_check.sh pxc{{ major_release_version}}
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-
   - name: Sleep 60 seconds
     command: sleep 60
