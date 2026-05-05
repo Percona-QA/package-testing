@@ -268,23 +268,6 @@
       command: percona-release enable pt
       changed_when: false
 
-    - name: Enable Percona tools repository (for qpress)
-      command: percona-release enable tools release
-      changed_when: false
-
-    - name: Install qpress for RedHat family
-      package:
-        name: qpress
-        state: present
-      when: ansible_os_family == "RedHat"
-
-    - name: Install qpress for Debian family
-      apt:
-        name: qpress
-        state: present
-        update_cache: yes
-      when: ansible_os_family == "Debian"
-
     - name: Install Percona Toolkit for RedHat family (RHEL 7 and earlier)
       yum:
         name: percona-toolkit
