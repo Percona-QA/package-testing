@@ -93,7 +93,7 @@
       - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
       - ansible_os_family == "Debian"
 
-  - name: install PXC deb packages arm64 debian non pro
+  - name: install PXC deb packages arm64 debian
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -109,7 +109,7 @@
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: install PXC 8 deb packages amd64 non pro
+  - name: install PXC deb packages amd64 debian
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -125,7 +125,7 @@
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: install PXC 8 rpm packages amd64 non pro
+  - name: install PXC rpm packages amd64 RHEL
     package:
       name: "{{ packages }}"
       state: latest
@@ -140,7 +140,7 @@
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: install PXC 8 rpm packages arm OS non pro
+  - name: install PXC rpm packages ARM64 RHEL
     package:
       name: "{{ packages }}"
       state: latest

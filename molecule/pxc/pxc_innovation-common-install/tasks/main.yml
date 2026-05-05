@@ -171,6 +171,9 @@
       src: ../../../../support-files/certs/
       dest: /etc/mysql/certs/
 
+  - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL COMMON
+    include_tasks: ../../../../tasks/list_installed_packages.yml
+
   - name: start mysql service
     service:
       name: mysql
@@ -240,61 +243,61 @@
 ## Changes done for telemetry: remove pxc package - add iptables rule for Telemetry Server - install only pxc package.
 ## Expected resuld - telemetry_uuid file has only instanceID
 
-  - name: install PXC deb packages arm64 debian
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-    vars:
-      packages:
-      - percona-xtradb-cluster-full
-    when:
-      - ansible_os_family == "Debian"
-      - ansible_architecture == "aarch64"
-      - lookup('env', 'pro') == "no"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+#  - name: install PXC deb packages arm64 debian
+#    apt:
+#      name: "{{ packages }}"
+#      update_cache: yes
+#    vars:
+#      packages:
+#      - percona-xtradb-cluster-full
+#    when:
+#      - ansible_os_family == "Debian"
+#      - ansible_architecture == "aarch64"
+#      - lookup('env', 'pro') == "no"
+#    environment:
+#      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: install PXC deb packages amd64
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-    vars:
-      packages:
-      - percona-xtradb-cluster-full
-    when:
-      - ansible_os_family == "Debian"
-      - ansible_architecture == "x86_64"
-      - lookup('env', 'pro') == "no"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+#  - name: install PXC deb packages amd64
+#    apt:
+#      name: "{{ packages }}"
+#      update_cache: yes
+#    vars:
+#      packages:
+#      - percona-xtradb-cluster-full
+#    when:
+#      - ansible_os_family == "Debian"
+#      - ansible_architecture == "x86_64"
+#      - lookup('env', 'pro') == "no"#
+#    environment:
+#      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: install PXC rpm packages amd64
-    package:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtradb-cluster-full
-    when:
-      - ansible_os_family == "RedHat"
-      - ansible_architecture == "x86_64"
-      - lookup('env', 'pro') == "no"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+#  - name: install PXC rpm packages amd64
+#    package:
+#      name: "{{ packages }}"
+#      state: latest
+#    vars:
+#      packages:
+#      - percona-xtradb-cluster-full
+#    when:
+#      - ansible_os_family == "RedHat"
+#      - ansible_architecture == "x86_64"
+#      - lookup('env', 'pro') == "no"
+#    environment:
+#      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: install PXC rpm packages arm
-    package:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtradb-cluster-full
-    when:
-      - ansible_os_family == "RedHat"
-      - ansible_architecture == "aarch64"
-      - lookup('env', 'pro') == "no"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+#  - name: install PXC rpm packages arm
+#    package:
+#      name: "{{ packages }}"
+#      state: latest
+#    vars:
+#      packages:
+#      - percona-xtradb-cluster-full#
+#    when:
+#      - ansible_os_family == "RedHat"
+#      - ansible_architecture == "aarch64"
+#      - lookup('env', 'pro') == "no"#
+#    environment:
+#      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: Install iptables on RHEL 9
     package:
