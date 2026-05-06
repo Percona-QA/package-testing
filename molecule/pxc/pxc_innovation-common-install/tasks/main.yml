@@ -370,3 +370,6 @@
 
   - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL COMMON
     include_tasks: ../../../../tasks/list_installed_packages.yml
+
+  - name: check PXC 9.6 version Molecule
+    command: /package-testing/version_check.sh pxc96
