@@ -8,7 +8,7 @@ if [ "$#" = 2 ]; then
     exit 1
   fi
 elif [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps56, ps57, ps80, ps81,ps90 !"
+  echo "This script requires product parameter: ps56, ps57, ps80, ps84, ps9X, pxc9X !"
   echo "Usage: ./version_check.sh <prod> [pro]"
   exit 1
 fi
@@ -204,7 +204,7 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
     fi
   fi
 
-elif [[ ${product} = "pxc56" || ${product} = "pxc57" ]] || [[ ${product} =~ ^pxc8[0-9]{1}$ ]] || [[ ${product} =~ ^pxc8[0-9]{1}pro$ ]]; then
+elif [[ ${product} = "pxc56" || ${product} = "pxc57" ]] || [[ ${product} =~ ^pxc8[0-9]{1}$ ]] || [[ ${product} =~ ^pxc8[0-9]{1}pro$ ]] || [[ ${product} =~ ^pxc9[0-9]{1}$ ]]; then
   for i in @@INNODB_VERSION @@VERSION; do
     if [ "$(mysql -e "SELECT ${i}; "| grep -c ${version}-${innodb_ver})" = 1 ]; then
       echo "${i} is correct" >> "${log}"
