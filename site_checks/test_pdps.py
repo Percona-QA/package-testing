@@ -49,10 +49,10 @@ ORCH_VER = ORCH_VER_FULL.split('-')[0]
 
 # Create list of supported software files
 if version.parse(PS_VER) > version.parse("8.1.0"):
-    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy']
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'jammy']
     RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
 elif version.parse(PS_VER) > version.parse("8.0.0") and version.parse(PS_VER) < version.parse("8.1.0"):
-    DEB_SOFTWARE_FILES=[ 'bullseye', 'bookworm', 'focal', 'jammy']
+    DEB_SOFTWARE_FILES=[ 'bullseye', 'bookworm', 'jammy']
     RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
 elif version.parse(PS_VER) > version.parse("5.7.0") and version.parse(PS_VER) < version.parse("8.0.0"):
     assert not version.parse(PS_VER) > version.parse("5.7.0") and version.parse(PS_VER) < version.parse("8.0.0"), "PS 5.7 is not suported"

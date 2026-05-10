@@ -30,13 +30,13 @@ BASE_PATH = f"https://downloads.percona.com/downloads/Percona-XtraDB-Cluster-{DA
 
 # Create list of supported software files and PXC 57 specific version numbers
 if version.parse(PXC_VER_UPSTREAM) >= version.parse("8.1.0"):
-    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy', 'noble']
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'jammy','noble']
     RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
 elif version.parse(PXC_VER_UPSTREAM) > version.parse("8.0.0") and version.parse(PXC_VER_UPSTREAM) < version.parse("8.1.0"):
-    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'focal', 'jammy', 'noble']
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'jammy','noble']
     RHEL_SOFTWARE_FILES=['redhat/8', 'redhat/9']
 elif version.parse(PXC_VER_UPSTREAM) > version.parse("5.7.0") and version.parse(PXC_VER_UPSTREAM) < version.parse("8.0.0"):
-    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'bionic','focal', 'jammy', 'noble']
+    DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'bionic','jammy', 'noble']
     RHEL_SOFTWARE_FILES=['redhat/8', 'redhat/9']
     # Get PXC57 specific version numbers
     PXC57_WSREP_PROV_VER = PXC_VER_FULL.split('.')[-2] # for 5.7.43-31.65.1 = 65
