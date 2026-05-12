@@ -96,6 +96,28 @@
   - name: include tasks for test env setup
     include_tasks: ../../../tasks/test_prep.yml
 
+  # Workaround: PS 8.4 component_keyring_kms.so contains a statically-linked
+  # libcurl with the Debian CA bundle path hardcoded ('/etc/ssl/certs/ca-certificates.crt')
+  # and no fallback. On RHEL-family systems that path does not exist and KMS
+  # init fails with "KMS communication error: Error during HTTP request".
+  # Remove once Percona Server rebuilds the component with --with-ca-fallback
+  # or RHEL paths added.
+  - name: Provide Debian-style CA bundle path expected by PS 8.4 component_keyring_kms
+    when: ansible_os_family == "RedHat"
+    block:
+      - name: Ensure /etc/ssl/certs exists (CApath expected by static libcurl)
+        ansible.builtin.file:
+          path: /etc/ssl/certs
+          state: directory
+          mode: "0755"
+
+      - name: Symlink RHEL CA bundle to Debian-conventional path
+        ansible.builtin.file:
+          src: /etc/pki/tls/cert.pem
+          dest: /etc/ssl/certs/ca-certificates.crt
+          state: link
+          force: true
+
   - name: install libev rpm package dnf
     dnf:
       name: "{{ packages }}"
