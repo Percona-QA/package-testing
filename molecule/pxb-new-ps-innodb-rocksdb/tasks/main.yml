@@ -424,6 +424,7 @@
           KMS_AUTH_KEY="{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}" \
           KMS_SECRET_KEY="{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}" \
           KMS_REGION="us-east-1" \
+          ROCKSDB="enabled" \
           SELECT_TEST_PYTEST="{{ lookup('env', 'SELECT_TEST_PYTEST') }}" \
         bash -c '
           set -o pipefail
