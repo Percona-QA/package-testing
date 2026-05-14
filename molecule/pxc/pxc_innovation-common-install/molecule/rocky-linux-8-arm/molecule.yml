@@ -1,41 +1,35 @@
 ---
 scenario:
-  name: ubuntu-jammy-arm
+  name: rocky-linux-8-arm
 dependency:
   name: galaxy
 driver:
   name: ec2
 platforms:
-  - name: ${BUILD_NUMBER}-pxc2-innovation-common-ubuntu-jammy-arm-install-${INSTALLTYPE}
-    region: us-west-1
-    image: ami-076ce4c214a7e0764
-    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+  - name: ${BUILD_NUMBER}-pxc2-innovation-common-rl-8-arm-install-${INSTALLTYPE}
+    region: us-west-2
+    image: ami-0d4e5716e8f0b62b0
+    vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: c6g.large
-    ssh_user: ubuntu
-    root_device_name: /dev/sda1
+    ssh_user: rocky
+    root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: ${IIT_BILLING_TAG}
       job-name: ${JOB_NAME}
       build-number: ${BUILD_NUMBER}
-  - name: ${BUILD_NUMBER}-pxc3-innovation-common-ubuntu-jammy-arm-install-${INSTALLTYPE}
-    region: us-west-1
-    image: ami-076ce4c214a7e0764
-    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+  - name: ${BUILD_NUMBER}-pxc3-innovation-common-rl-8-arm-install-${INSTALLTYPE}
+    region: us-west-2
+    image: ami-0d4e5716e8f0b62b0
+    vpc_subnet_id: subnet-03136d8c244f56036
     instance_type: c6g.large
-    ssh_user: ubuntu
-    root_device_name: /dev/sda1
+    ssh_user: rocky
+    root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: ${IIT_BILLING_TAG}
       job-name: ${JOB_NAME}
       build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
-  log: true
-  options:
-    vvv: True
-  config_options:
-    defaults:
-      verbosity: 3
   playbooks:
     create: ../../../playbooks/create_noble.yml
     destroy: ../../../playbooks/destroy_noble.yml
@@ -44,8 +38,8 @@ provisioner:
     side_effect: ../../../../../playbooks/pxc_innovation_upgrade_common.yml
   inventory:
     host_vars:
-      ${BUILD_NUMBER}-pxc2-innovation-common-ubuntu-jammy-arm-install-${INSTALLTYPE}:
+      pxc2-innovation-common-rl-8-arm-install-${INSTALLTYPE}:
         ip_env: "{{ ansible_host }}"
-      ${BUILD_NUMBER}-pxc3-innovation-common-ubuntu-jammy-arm-install-${INSTALLTYPE}:
+      pxc3-innovation-common-rl-8-arm-install-${INSTALLTYPE}:
         ip_env: "{{ ansible_host }}"
         sleep_before_tests: 40
