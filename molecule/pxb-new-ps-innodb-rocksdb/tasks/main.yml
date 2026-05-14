@@ -88,9 +88,8 @@
     debug:
       msg: "Major version: {{ major_version }}, Minor version: {{ minor_version }}"
 
-  # sometimes takes a long time on RedHat and suspected not needed
-  # - name: include tasks for test env setup
-  #   include_tasks: ../../../tasks/test_prep.yml
+  - name: include tasks for test env setup
+    include_tasks: ../../../tasks/test_prep.yml
 
   # Workaround: PS 8.4 component_keyring_kms.so contains a statically-linked
   # libcurl with the Debian CA bundle path hardcoded ('/etc/ssl/certs/ca-certificates.crt')
