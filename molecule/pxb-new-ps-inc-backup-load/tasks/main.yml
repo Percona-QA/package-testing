@@ -431,9 +431,9 @@
           mkdir -p $TEST_BASE_DIR
           cd /server-qa/test_scripts/pxb || exit 1
           if [ "$SELECT_TEST_PYTEST" != "all" ] && [ -n "$SELECT_TEST_PYTEST" ]; then
-            pytest inc_backup_load_tests.py -k "$SELECT_TEST_PYTEST" -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-inc_backup_load_tests.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-inc_backup_load_tests.txt
+            pytest inc_backup_load_tests.py -k "$SELECT_TEST_PYTEST" -s -v -ra -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-inc_backup_load_tests.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-inc_backup_load_tests.txt
           else
-            pytest inc_backup_load_tests.py -s -v -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-inc_backup_load_tests.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-inc_backup_load_tests.txt
+            pytest inc_backup_load_tests.py -s -v -ra -o cache_dir=/home/pxbtest/.pytest_cache --capture=tee-sys -o junit_logging=all --junit-xml=$TEST_BASE_DIR/pytest-junit-inc_backup_load_tests.xml 2>&1 | tee $TEST_BASE_DIR/pytest-report-inc_backup_load_tests.txt
           fi
         '
       register: test_result_inc_backup_load_tests
