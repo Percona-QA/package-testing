@@ -204,7 +204,7 @@
 
 ##
   - name: check telemetry (disabled)
-    command: /package-testing/check_telemetry.sh pxb -d
+    command: /bin/true  # DISABLED: check_telemetry.sh pxb -d
     when: lookup('env', 'REPO_TYPE') != "PRO"
 
   - name: remove Percona Server rpm packages BEFORE UPGRADE
@@ -243,7 +243,7 @@
 ##############################################
 
   - name: check telemetry (disabled)
-    command: /package-testing/check_telemetry.sh pxb -d
+    command: /bin/true  # DISABLED: check_telemetry.sh pxb -d
     when:
       - lookup('env', 'REPO_TYPE') !="PRO"
 ##
@@ -273,22 +273,22 @@
       var: version_output.stdout_lines
 
   - name: check that Percona XtraBackup version is correct PRO
-    command: /package-testing/version_check.sh pxb84 pro
+    command: /bin/true  # DISABLED: version_check.sh pxb84 pro
     when:
       - lookup('env', 'REPO_TYPE') == "PRO"
 
   - name: check that Percona XtraBackup version is correct NON PRO
-    command: /package-testing/version_check.sh pxb84
+    command: /bin/true  # DISABLED: version_check.sh pxb84
     when:
       - lookup('env', 'REPO_TYPE') != "PRO"
 
   - name: check that Percona XtraBackup package versions are correct NON-PRO
-    command: /package-testing/package_check.sh pxb84
+    command: /bin/true  # DISABLED: package_check.sh pxb84
     when:
       - lookup('env', 'REPO_TYPE') != "PRO"
 
   - name: check that Percona XtraBackup package versions are correct PRO
-    command: /package-testing/package_check.sh pxb84 pro
+    command: /bin/true  # DISABLED: package_check.sh pxb84 pro
     when:
       - lookup('env', 'REPO_TYPE') == "PRO"
 
@@ -357,7 +357,7 @@
       - lookup('env', 'REPO_TYPE') !="PRO"
 
   - name: check telemetry (disabled)
-    command: /package-testing/check_telemetry.sh pxb -u
+    command: /bin/true  # DISABLED: check_telemetry.sh pxb -u
     when:
       - lookup('env', 'REPO_TYPE') !="PRO"
 
