@@ -14,21 +14,49 @@
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
-  - name: Install MySQL APT GPG key 2023 (replaces expired 2022 key)
-    apt_key:
-      url: https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
-      state: present
-    when: ansible_os_family == "Debian"
-
-  - name: Remove expired MySQL 2022 APT key if present
-    apt_key:
-      id: B7B3B788A8D3785C
-      state: absent
-    when: ansible_os_family == "Debian"
-
   - name: Install MySQL apt repository package
     apt:
       deb: https://repo.mysql.com/mysql-apt-config_0.8.32-1_all.deb
+    when: ansible_os_family == "Debian"
+
+  - name: Remove expired MySQL APT keyring files dropped by mysql-apt-config
+    shell: |
+      rm -f /etc/apt/trusted.gpg.d/mysql.gpg /etc/apt/trusted.gpg.d/mysql.asc
+      rm -f /etc/apt/keyrings/mysql.gpg /etc/apt/keyrings/mysql.asc
+      if [ -f /etc/apt/trusted.gpg ]; then
+        apt-key --keyring /etc/apt/trusted.gpg del B7B3B788A8D3785C || true
+      fi
+    args:
+      executable: /bin/bash
+    when: ansible_os_family == "Debian"
+
+  - name: Ensure /etc/apt/keyrings exists
+    file:
+      path: /etc/apt/keyrings
+      state: directory
+      mode: '0755'
+    when: ansible_os_family == "Debian"
+
+  - name: Install MySQL 2023 APT signing key (dearmored)
+    shell: |
+      set -euo pipefail
+      curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 \
+        | gpg --dearmor --yes -o /etc/apt/keyrings/mysql.gpg
+      chmod 0644 /etc/apt/keyrings/mysql.gpg
+    args:
+      executable: /bin/bash
+    when: ansible_os_family == "Debian"
+
+  - name: Point MySQL apt sources at the new keyring (signed-by)
+    shell: |
+      set -e
+      for f in /etc/apt/sources.list.d/mysql.list /etc/apt/sources.list.d/mysql-tools.list; do
+        [ -f "$f" ] || continue
+        sed -i -E 's|^deb (\[[^]]*\] )?|deb [signed-by=/etc/apt/keyrings/mysql.gpg] |' "$f"
+        sed -i -E 's|\[signed-by=/etc/apt/keyrings/mysql.gpg\] \[[^]]*\]|[signed-by=/etc/apt/keyrings/mysql.gpg]|' "$f"
+      done
+    args:
+      executable: /bin/bash
     when: ansible_os_family == "Debian"
 
   - name: Install MySQL RHEL 7 yum repository package
@@ -42,7 +70,7 @@
     loop:
       - https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
       - https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version | int >= 8
 
   - name: Install MySQL RHEL 8 yum repository package
     yum: name=https://repo.mysql.com/mysql84-community-release-el8.rpm state=present
@@ -99,7 +127,7 @@
       - pv
       - unzip
       - mysql-community-server
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version <= "7"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version | int <= 7
 
   - name: install packages in rhel/centos 8, 9
     package:
@@ -109,7 +137,7 @@
       packages:
       - python3-libselinux
       - mysql-community-server
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version | int >= 8
 
   - name: Start the MySQL service
     service: name=mysql state=started
