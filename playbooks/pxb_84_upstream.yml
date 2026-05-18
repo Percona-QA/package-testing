@@ -19,27 +19,40 @@
       deb: https://repo.mysql.com/mysql-apt-config_0.8.32-1_all.deb
     when: ansible_os_family == "Debian"
 
-  - name: Replace MySQL APT keyring with current 2023 signing key
+  - name: Replace MySQL APT keyring with the newest available signing key
     shell: |
       set -euo pipefail
-      curl -fsSL https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 -o /tmp/mysql-2023.asc
-      # Overwrite whichever keyring file mysql-apt-config actually uses
+      KEY_FILE=/tmp/mysql-current.asc
+      rm -f "$KEY_FILE"
+      FETCHED=""
+      for year in 2026 2025 2024 2023; do
+        if curl -fsSL "https://repo.mysql.com/RPM-GPG-KEY-mysql-${year}" -o "$KEY_FILE"; then
+          FETCHED="$year"
+          echo "Fetched RPM-GPG-KEY-mysql-${year}"
+          break
+        fi
+      done
+      test -n "$FETCHED" && test -s "$KEY_FILE"
       for target in \
         /usr/share/keyrings/mysql-apt-config.gpg \
         /etc/apt/keyrings/mysql.gpg \
         /etc/apt/trusted.gpg.d/mysql.gpg; do
         if [ -e "$target" ]; then
-          gpg --dearmor --yes -o "$target" < /tmp/mysql-2023.asc
+          gpg --dearmor --yes -o "$target" < "$KEY_FILE"
           chmod 0644 "$target"
         fi
       done
-      # Also drop expired key from legacy trusted.gpg if present
       if [ -f /etc/apt/trusted.gpg ]; then
         apt-key --keyring /etc/apt/trusted.gpg del B7B3B788A8D3785C || true
       fi
-      rm -f /tmp/mysql-2023.asc
+      rm -f "$KEY_FILE"
     args:
       executable: /bin/bash
+    when: ansible_os_family == "Debian"
+
+  - name: Verify MySQL APT repo signature (apt update)
+    apt:
+      update_cache: yes
     when: ansible_os_family == "Debian"
 
   - name: Install MySQL RHEL 7 yum repository package
@@ -86,17 +99,6 @@
   - name: disable the mysql module on RHEL/CentOS 8
     command: /usr/bin/dnf module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
-  - name: install deb packages
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-    vars:
-      packages:
-      - vim
-      - pv
-      - unzip
-    when: ansible_os_family == "Debian"
 
   - name: install MySQL Community deb packages
     apt:
