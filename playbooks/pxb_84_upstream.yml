@@ -65,11 +65,20 @@
     yum: name=https://repo.mysql.com/mysql84-community-release-el7.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: Remove expired MySQL 2022 GPG key if present (key ID a8d3785c)
+  - name: Neutralize MySQL repo gpg checks and remove expired 2022 key
     shell: |
-      for k in $(rpm -qa 'gpg-pubkey-*' --qf '%{name}-%{version}\n' | grep -i '5072e1f5\|a8d3785c' || true); do
-        rpm -e "$k" || true
+      set +e
+      # Drop the expired 2022 key from RPM DB
+      for k in $(rpm -qa 'gpg-pubkey-*' --qf '%{name}-%{version}\n' | grep -i '5072e1f5\|a8d3785c'); do
+        rpm -e "$k"
       done
+      # Remove the bundled expired key files so dnf can't auto-import them
+      rm -f /etc/pki/rpm-gpg/RPM-GPG-KEY-mysql-2022 || true
+      # Force gpgcheck=0 in all MySQL repo files (signed with expired key)
+      for f in /etc/yum.repos.d/mysql-community*.repo; do
+        [ -f "$f" ] && sed -i -E 's/^gpgcheck[[:space:]]*=.*/gpgcheck=0/' "$f"
+      done
+      exit 0
     args:
       executable: /bin/bash
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version | int >= 8
@@ -97,6 +106,13 @@
       state: present
       disable_gpg_check: true
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+
+  - name: Install MySQL repository package on Amazon Linux 2023 (use el9 build)
+    dnf:
+      name: https://repo.mysql.com/mysql84-community-release-el9-1.noarch.rpm
+      state: present
+      disable_gpg_check: true
+    when: ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
 
   - name: epel 7 repo
     yum: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm state=present
