@@ -32,6 +32,8 @@
       name: "{{ packages }}"
       state: latest
       update_cache: yes
+      allowerasing: yes
+      disable_gpg_check: yes
     vars:
       packages:
       - percona-xtrabackup-84
