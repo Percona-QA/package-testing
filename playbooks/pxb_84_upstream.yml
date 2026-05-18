@@ -124,6 +124,8 @@
       # libaio1 was renamed to libaio1t64 in noble/trixie (time_t transition)
       apt-get install -y libaio1t64 || apt-get install -y libaio1
       apt-get install -y libnuma1 xz-utils curl ca-certificates
+      # PXB test package requires a 'mysql-client' provider; tarball doesn't supply one.
+      apt-get install -y default-mysql-client || apt-get install -y mariadb-client
       # libtinfo/libncurses: try the t64 variants first, fall back
       apt-get install -y libtinfo6t64 libncurses6t64 \
         || apt-get install -y libtinfo6 libncurses6 \
