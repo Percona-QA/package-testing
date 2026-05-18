@@ -124,14 +124,46 @@
       # libaio1 was renamed to libaio1t64 in noble/trixie (time_t transition)
       apt-get install -y libaio1t64 || apt-get install -y libaio1
       apt-get install -y libnuma1 xz-utils curl ca-certificates
-      # PXB test package requires a 'mysql-client' provider; tarball doesn't supply one.
-      apt-get install -y default-mysql-client || apt-get install -y mariadb-client
+      apt-get install -y equivs
       # libtinfo/libncurses: try the t64 variants first, fall back
       apt-get install -y libtinfo6t64 libncurses6t64 \
         || apt-get install -y libtinfo6 libncurses6 \
         || true
+      # On noble/trixie, libaio1t64 only provides libaio.so.1t64; MySQL needs libaio.so.1
+      for d in /usr/lib/aarch64-linux-gnu /usr/lib64 /usr/lib; do
+        if [ -e "$d/libaio.so.1t64" ] && [ ! -e "$d/libaio.so.1" ]; then
+          ln -s libaio.so.1t64 "$d/libaio.so.1"
+        fi
+      done
     args:
       executable: /bin/bash
+    when: mysql_via_tarball
+
+  - name: write equivs control file for dummy mysql-client
+    copy:
+      dest: /tmp/mysql-client.ctl
+      mode: "0644"
+      content: |
+        Section: misc
+        Priority: optional
+        Standards-Version: 3.9.2
+        Package: mysql-client
+        Version: 8.4.99-tarball
+        Provides: mysql-client, mysql-client-8.4, default-mysql-client, virtual-mysql-client
+        Description: Dummy mysql-client satisfied by MySQL tarball install
+         Provides the mysql-client package name so other packages can depend on it.
+         Real client binaries are installed under /usr/local/mysql/bin.
+    when: mysql_via_tarball
+
+  - name: build and install dummy mysql-client deb
+    shell: |
+      set -e
+      cd /tmp
+      equivs-build mysql-client.ctl
+      dpkg -i mysql-client_8.4.99-tarball_all.deb
+    args:
+      executable: /bin/bash
+      creates: /var/lib/dpkg/info/mysql-client.list
     when: mysql_via_tarball
 
   - name: create mysql group (tarball)
