@@ -492,8 +492,9 @@
         debug:
           msg: "{{ df_after_tests.stdout_lines }}"
 
-  - name: Pause 20 minutes for debugging
-    pause:
-      minutes: 20
-      prompt: "Pausing 20 minutes for debugging. Connect to the instance now."
-    when: ansible_os_family == "Debian"
+      - name: Pause 20 minutes for debugging (only on test failure)
+        pause:
+          minutes: 20
+          prompt: "Test failed. Pausing 20 minutes for debugging. Connect to the instance now."
+        when:
+          - ansible_os_family == "Debian"
