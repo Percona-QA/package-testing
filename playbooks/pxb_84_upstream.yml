@@ -118,16 +118,18 @@
 
   # --- Tarball install path: Debian/Ubuntu arm64 (Oracle ships no arm64 .debs) ---
   - name: install MySQL tarball dependencies (Debian/Ubuntu arm64)
-    apt:
-      name:
-        - libaio1
-        - libnuma1
-        - libtinfo6
-        - libncurses6
-        - xz-utils
-        - curl
-        - ca-certificates
-      update_cache: yes
+    shell: |
+      set -e
+      apt-get update -y
+      # libaio1 was renamed to libaio1t64 in noble/trixie (time_t transition)
+      apt-get install -y libaio1t64 || apt-get install -y libaio1
+      apt-get install -y libnuma1 xz-utils curl ca-certificates
+      # libtinfo/libncurses: try the t64 variants first, fall back
+      apt-get install -y libtinfo6t64 libncurses6t64 \
+        || apt-get install -y libtinfo6 libncurses6 \
+        || true
+    args:
+      executable: /bin/bash
     when: mysql_via_tarball
 
   - name: create mysql group (tarball)
@@ -252,9 +254,10 @@
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version | int <= 7
 
   - name: install packages in rhel/centos 8, 9
-    package:
+    dnf:
       name: "{{ packages }}"
       state: present
+      disable_gpg_check: yes
     vars:
       packages:
       - python3-libselinux
