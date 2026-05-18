@@ -25,7 +25,7 @@
       KEY_FILE=/tmp/mysql-current.asc
       rm -f "$KEY_FILE"
       FETCHED=""
-      for year in 2026 2025 2024 2023; do
+      for year in 2025 2023 2022; do
         if curl -fsSL "https://repo.mysql.com/RPM-GPG-KEY-mysql-${year}" -o "$KEY_FILE"; then
           FETCHED="$year"
           echo "Fetched RPM-GPG-KEY-mysql-${year}"
@@ -66,6 +66,7 @@
     loop:
       - https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
       - https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
+      - https://repo.mysql.com/RPM-GPG-KEY-mysql-2025
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version | int >= 8
 
   - name: Install MySQL RHEL 8 yum repository package
