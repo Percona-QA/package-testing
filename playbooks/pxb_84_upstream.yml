@@ -10,7 +10,7 @@
     gnupg_home: /root/.gnupg
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
-    mysql_tarball_version: "8.4.6"
+    mysql_tarball_version: "8.4.8"
     mysql_tarball_glibc: "glibc2.28"
   tasks:
   - name: include tasks for test env setup
@@ -148,7 +148,7 @@
 
   - name: download MySQL Community tarball (arm64)
     get_url:
-      url: "https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-{{ mysql_tarball_version }}-linux-{{ mysql_tarball_glibc }}-aarch64.tar.xz"
+      url: "https://cdn.mysql.com/archives/mysql-8.4/mysql-{{ mysql_tarball_version }}-linux-{{ mysql_tarball_glibc }}-aarch64.tar.xz"
       dest: "/tmp/mysql-{{ mysql_tarball_version }}-aarch64.tar.xz"
       mode: "0644"
     when: mysql_via_tarball
