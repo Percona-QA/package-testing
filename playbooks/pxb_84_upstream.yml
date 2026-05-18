@@ -65,12 +65,20 @@
     yum: name=https://repo.mysql.com/mysql84-community-release-el7.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: Import keys for mysql-repo
+  - name: Remove expired MySQL 2022 GPG key if present (key ID a8d3785c)
+    shell: |
+      for k in $(rpm -qa 'gpg-pubkey-*' --qf '%{name}-%{version}\n' | grep -i '5072e1f5\|a8d3785c' || true); do
+        rpm -e "$k" || true
+      done
+    args:
+      executable: /bin/bash
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version | int >= 8
+
+  - name: Import keys for mysql-repo (only current, non-expired)
     rpm_key:
       state: present
       key: "{{ item }}"
     loop:
-      - https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
       - https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
       - https://repo.mysql.com/RPM-GPG-KEY-mysql-2025
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version | int >= 8
