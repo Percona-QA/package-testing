@@ -10,14 +10,20 @@
     gnupg_home: /root/.gnupg
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+    mysql_tarball_version: "8.4.6"
+    mysql_tarball_glibc: "glibc2.28"
   tasks:
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
+  - name: Decide MySQL install method (tarball on Debian/Ubuntu arm64; apt elsewhere on Debian)
+    set_fact:
+      mysql_via_tarball: "{{ ansible_os_family == 'Debian' and ansible_architecture in ['aarch64', 'arm64'] }}"
+
   - name: Install MySQL apt repository package
     apt:
       deb: https://repo.mysql.com/mysql-apt-config_0.8.32-1_all.deb
-    when: ansible_os_family == "Debian"
+    when: ansible_os_family == "Debian" and not mysql_via_tarball
 
   - name: Replace MySQL APT keyring with the newest available signing key
     shell: |
@@ -48,12 +54,12 @@
       rm -f "$KEY_FILE"
     args:
       executable: /bin/bash
-    when: ansible_os_family == "Debian"
+    when: ansible_os_family == "Debian" and not mysql_via_tarball
 
   - name: Verify MySQL APT repo signature (apt update)
     apt:
       update_cache: yes
-    when: ansible_os_family == "Debian"
+    when: ansible_os_family == "Debian" and not mysql_via_tarball
 
   - name: Install MySQL RHEL 7 yum repository package
     yum: name=https://repo.mysql.com/mysql84-community-release-el7.rpm state=present
@@ -108,7 +114,130 @@
     vars:
       packages:
       - mysql-community-server
-    when: ansible_os_family == "Debian"
+    when: ansible_os_family == "Debian" and not mysql_via_tarball
+
+  # --- Tarball install path: Debian/Ubuntu arm64 (Oracle ships no arm64 .debs) ---
+  - name: install MySQL tarball dependencies (Debian/Ubuntu arm64)
+    apt:
+      name:
+        - libaio1
+        - libnuma1
+        - libtinfo6
+        - libncurses6
+        - xz-utils
+        - curl
+        - ca-certificates
+      update_cache: yes
+    when: mysql_via_tarball
+
+  - name: create mysql group (tarball)
+    group:
+      name: mysql
+      system: yes
+    when: mysql_via_tarball
+
+  - name: create mysql user (tarball)
+    user:
+      name: mysql
+      group: mysql
+      system: yes
+      shell: /usr/sbin/nologin
+      home: /var/lib/mysql
+      create_home: no
+    when: mysql_via_tarball
+
+  - name: download MySQL Community tarball (arm64)
+    get_url:
+      url: "https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-{{ mysql_tarball_version }}-linux-{{ mysql_tarball_glibc }}-aarch64.tar.xz"
+      dest: "/tmp/mysql-{{ mysql_tarball_version }}-aarch64.tar.xz"
+      mode: "0644"
+    when: mysql_via_tarball
+
+  - name: extract MySQL tarball to /usr/local
+    unarchive:
+      src: "/tmp/mysql-{{ mysql_tarball_version }}-aarch64.tar.xz"
+      dest: /usr/local
+      remote_src: yes
+      creates: "/usr/local/mysql-{{ mysql_tarball_version }}-linux-{{ mysql_tarball_glibc }}-aarch64"
+    when: mysql_via_tarball
+
+  - name: symlink /usr/local/mysql -> versioned dir
+    file:
+      src: "/usr/local/mysql-{{ mysql_tarball_version }}-linux-{{ mysql_tarball_glibc }}-aarch64"
+      dest: /usr/local/mysql
+      state: link
+      force: yes
+    when: mysql_via_tarball
+
+  - name: create datadir and runtime dirs
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: mysql
+      group: mysql
+      mode: "0750"
+    loop:
+      - /var/lib/mysql
+      - /var/log/mysql
+      - /var/run/mysqld
+    when: mysql_via_tarball
+
+  - name: drop minimal /etc/my.cnf
+    copy:
+      dest: /etc/my.cnf
+      mode: "0644"
+      content: |
+        [mysqld]
+        datadir=/var/lib/mysql
+        socket=/var/run/mysqld/mysqld.sock
+        log-error=/var/log/mysql/error.log
+        pid-file=/var/run/mysqld/mysqld.pid
+        user=mysql
+        [client]
+        socket=/var/run/mysqld/mysqld.sock
+    when: mysql_via_tarball
+
+  - name: initialize datadir (insecure — sets empty root password)
+    command: /usr/local/mysql/bin/mysqld --initialize-insecure --user=mysql --datadir=/var/lib/mysql
+    args:
+      creates: /var/lib/mysql/mysql
+    when: mysql_via_tarball
+
+  - name: install mysql systemd unit
+    copy:
+      dest: /etc/systemd/system/mysql.service
+      mode: "0644"
+      content: |
+        [Unit]
+        Description=MySQL Community Server (tarball)
+        After=network.target
+
+        [Service]
+        Type=simple
+        User=mysql
+        Group=mysql
+        ExecStart=/usr/local/mysql/bin/mysqld --defaults-file=/etc/my.cnf
+        Restart=on-failure
+        LimitNOFILE=10000
+
+        [Install]
+        WantedBy=multi-user.target
+    when: mysql_via_tarball
+
+  - name: symlink mysql client binaries into PATH
+    file:
+      src: "/usr/local/mysql/bin/{{ item }}"
+      dest: "/usr/local/bin/{{ item }}"
+      state: link
+      force: yes
+    loop: [mysql, mysqladmin, mysqld, mysqldump]
+    when: mysql_via_tarball
+
+  - name: reload systemd
+    systemd:
+      daemon_reload: yes
+    when: mysql_via_tarball
+  # --- end tarball install path ---
 
   - name: install packages in centos
     yum:
