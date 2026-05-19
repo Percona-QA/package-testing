@@ -65,22 +65,29 @@
     yum: name=https://repo.mysql.com/mysql84-community-release-el7.rpm state=present
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "7"
 
-  - name: Neutralize MySQL repo gpg checks and remove expired 2022 key
-    shell: |
-      set +e
-      # Drop the expired 2022 key from RPM DB
-      for k in $(rpm -qa 'gpg-pubkey-*' --qf '%{name}-%{version}\n' | grep -i '5072e1f5\|a8d3785c'); do
-        rpm -e "$k"
-      done
-      # Remove the bundled expired key files so dnf can't auto-import them
-      rm -f /etc/pki/rpm-gpg/RPM-GPG-KEY-mysql-2022 || true
-      # Force gpgcheck=0 in all MySQL repo files (signed with expired key)
-      for f in /etc/yum.repos.d/mysql-community*.repo; do
-        [ -f "$f" ] && sed -i -E 's/^gpgcheck[[:space:]]*=.*/gpgcheck=0/' "$f"
-      done
-      exit 0
-    args:
-      executable: /bin/bash
+  - name: Write helper script to neutralize MySQL expired GPG key
+    copy:
+      dest: /tmp/neutralize-mysql-gpg.sh
+      mode: "0755"
+      content: |
+        #!/bin/bash
+        set +e
+        rpm -qa 'gpg-pubkey-*' | while read -r k; do
+          info=$(rpm -qi "$k" 2>/dev/null)
+          case "$info" in
+            *5072e1f5*) rpm -e "$k" ;;
+            *a8d3785c*) rpm -e "$k" ;;
+          esac
+        done
+        rm -f /etc/pki/rpm-gpg/RPM-GPG-KEY-mysql-2022 || true
+        for f in /etc/yum.repos.d/mysql-community*.repo; do
+          [ -f "$f" ] && sed -i -E 's/^gpgcheck[[:space:]]*=.*/gpgcheck=0/' "$f"
+        done
+        exit 0
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version | int >= 8
+
+  - name: Run MySQL GPG neutralizer
+    command: /bin/bash /tmp/neutralize-mysql-gpg.sh
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version | int >= 8
 
   - name: Import keys for mysql-repo (only current, non-expired)
