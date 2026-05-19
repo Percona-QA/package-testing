@@ -32,29 +32,55 @@ docker_network = 'pxc-network'
 base_node_name = 'pxc-docker-test-cluster-node'
 cluster_name = 'pxc-cluster1'
 
-# Innovation
-pxc8x_packages = [(package, pxc_version_upstream) for package in (
+# PXC 9.x innovation
+pxc9x_packages = [(package, pxc_version_upstream) for package in (
   'percona-xtradb-cluster-client', 'percona-xtradb-cluster-server',
   'percona-xtradb-cluster-shared'
 )]
-pxc8x_binaries = (
+pxc9x_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/mysqladmin',
   '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow',
   '/usr/bin/mysql_secure_installation', '/usr/bin/mysqlbinlog',
   '/usr/bin/mysql_tzinfo_to_sql','/usr/bin/mysql_keyring_encryption_test','/usr/bin/mysql_migrate_keyring',
   '/usr/bin/mysqld_multi','/usr/bin/mysqld_safe','/usr/bin/mysql-systemd'
 )
-pxc8x_plugins = (
+pxc9x_plugins = (
   ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
   ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
   ('clone','mysql_clone.so')
 )
-pxc8x_functions = (
+pxc9x_functions = (
   ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
   ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_exclusive', 'version_token.so', 'INT'),
   ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
 )
-pxc8x_components = (
+pxc9x_components = (
+  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault')
+)
+
+# PXC84
+pxc84_packages = [(package, pxc_version_upstream) for package in (
+  'percona-xtradb-cluster-client', 'percona-xtradb-cluster-server',
+  'percona-xtradb-cluster-shared'
+)]
+pxc84_binaries = (
+  '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/mysqladmin',
+  '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow',
+  '/usr/bin/mysql_secure_installation', '/usr/bin/mysqlbinlog',
+  '/usr/bin/mysql_tzinfo_to_sql','/usr/bin/mysql_keyring_encryption_test','/usr/bin/mysql_migrate_keyring',
+  '/usr/bin/mysqld_multi','/usr/bin/mysqld_safe','/usr/bin/mysql-systemd'
+)
+pxc84_plugins = (
+  ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
+  ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
+  ('clone','mysql_clone.so')
+)
+pxc84_functions = (
+  ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
+  ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_exclusive', 'version_token.so', 'INT'),
+  ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
+)
+pxc84_components = (
   ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault')
 )
 
@@ -133,12 +159,17 @@ pxc56_functions = (
 )
 #####
 
-if re.match(r'^8\.[1-9]$', pxc_version_major):
-    pxc_packages = pxc8x_packages
-    pxc_binaries = pxc8x_binaries
-    pxc_plugins = pxc8x_plugins
-    pxc_functions = pxc8x_functions
-    pxc_components = pxc8x_components
+if re.match(r'^9\.[0-9]$', pxc_version_major):
+    pxc_packages = pxc9x_packages
+    pxc_binaries = pxc9x_binaries
+    pxc_plugins = pxc9x_plugins
+    pxc_functions = pxc9x_functions
+    pxc_components = pxc9x_components
+elif pxc_version_major == '8.4':
+    pxc_packages = pxc84_packages
+    pxc_binaries = pxc84_binaries
+    pxc_plugins = pxc84_plugins
+    pxc_functions = pxc84_functions
 elif pxc_version_major == '8.0':
     pxc_packages = pxc80_packages
     pxc_binaries = pxc80_binaries
@@ -155,5 +186,7 @@ elif pxc_version_major == '5.6':
     pxc_binaries = pxc56_binaries
     pxc_plugins = pxc56_plugins
     pxc_functions = pxc56_functions
+
+
 
 pxc_pwd = 'pwd1234#'
