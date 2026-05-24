@@ -135,13 +135,6 @@
     when:
       - lookup('env', 'PXB_RELEASE') == "80"
 
-  - name: Enable Percona Server 8.0 PRO main repository PXB80
-    include_tasks: ../../../tasks/enable_ps80_pro_tools_repo.yml
-    when:
-      - ansible_distribution_major_version == "2023"
-      - lookup('env', 'PXB_RELEASE') == "80"
-      - lookup('env', 'REPO_TYPE') == "PRO"
-
   - name: Enable Percona Server 8.4 main repository PXB84
     include_tasks: ../../../tasks/enable_ps84_testing_repo.yml
     when:
@@ -152,12 +145,15 @@
     when:
       - lookup('env', 'PXB_RELEASE') == "84"
 
-  - name: Enable Percona Server 8.4 PRO main repository PXB84
-    include_tasks: ../../../tasks/enable_ps84_pro_tools_repo.yml
+  - name: Enable Percona Server 9.X main repository
+    include_tasks: ../../../tasks/enable_ps_innovation_repo_testing.yml
     when:
-      - ansible_distribution_major_version == "2023"
-      - lookup('env', 'PXB_RELEASE') == "84"
-      - lookup('env', 'REPO_TYPE') == "PRO"
+      - lookup('env', 'PXB_RELEASE') == "96"
+
+  - name: include playbook for Install Percona Server 9.6
+    include_tasks: ../../../tasks/install_ps_innovation.yml
+    when:
+      - lookup('env', 'PXB_RELEASE') == "96"
 
   - name: Install libgflags-dev for rhel9 aarm64
     dnf:
@@ -211,27 +207,6 @@
 #      - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
 #      - lookup('env', 'PXB_RELEASE') == "84"
 
-  - name: install Percona Server rpm packages Amazon PRO PXB80
-    dnf:
-      name: "{{ packages }}"
-      state: latest
-      disablerepo: "epel"
-      update_cache: yes
-    vars:
-      packages:
-      - percona-server-server-pro
-      - percona-mysql-router-pro
-      - percona-server-client-pro
-      - percona-server-test-pro
-      - percona-server-pro-debuginfo
-      - percona-server-devel-pro
-      - percona-server-rocksdb-pro
-    when:
-      - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
-      - lookup('env', 'REPO_TYPE') == "PRO"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
   - name: clean and update cache {{ ansible_pkg_mgr }} using package manager
     shell: |
       {{ ansible_pkg_mgr }} clean all
@@ -252,6 +227,11 @@
     include_tasks: ../../../tasks/install_ps84.yml
     when:
       - lookup('env', 'PXB_RELEASE') == "84"
+
+  - name: include playbook for Install Percona Server 9.6
+    include_tasks: ../../../tasks/install_ps_innovation.yml
+    when:
+      - lookup('env', 'PXB_RELEASE') == "96"
 
   - name: Download {{ TARBALL_NAME_REGULAR }} REGULAR MAIN REPO PS80 PXB 80
     ansible.builtin.get_url:
