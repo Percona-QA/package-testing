@@ -3,11 +3,7 @@
 
   - name: disable the mysql module on RHEL/CentOS 8
     command: /usr/bin/dnf module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
-  - name: disable the mariadb module on RHEL/CentOS 10
-    command: /usr/bin/dnf module disable mariadb -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
+    when: ansible_os_family == "RedHat" and (ansible_distribution_major_version == "8" or ansible_distribution_major_version == "10")
 
   - name: Install percona repository package for Debain
     apt:
