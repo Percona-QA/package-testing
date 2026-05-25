@@ -5,15 +5,6 @@
     command: /usr/bin/dnf module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: Remove MariaDB packages on EL10
-    ansible.builtin.dnf:
-      name:
-        - "mariadb*"
-        - "mariadb11.8*"
-      state: absent
-      autoremove: true
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
-
   - name: Install percona repository package for Debain
     apt:
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
