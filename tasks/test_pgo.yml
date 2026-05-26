@@ -1,0 +1,62 @@
+---
+# Checks that INFO_BIN exists and contains PGO compiler flags.
+# On RedHat the file is plain text; on Debian it is shipped as INFO_BIN.gz.
+
+# --- RedHat ---
+- name: find INFO_BIN file path (RedHat)
+  shell: find /usr/share/doc -name "INFO_BIN" -path "*percona-server*" | head -1
+  register: info_bin_path_rh
+  when: ansible_os_family == "RedHat"
+
+- name: check that INFO_BIN file exists (RedHat)
+  assert:
+    that:
+      - info_bin_path_rh.stdout != ""
+    fail_msg: "INFO_BIN file not found under /usr/share/doc/percona-server* - this is a bug, file should be present"
+  when: ansible_os_family == "RedHat"
+
+- name: read INFO_BIN content (RedHat)
+  slurp:
+    src: "{{ info_bin_path_rh.stdout }}"
+  register: info_bin_content_rh
+  when: ansible_os_family == "RedHat"
+
+- name: check that PGO flags are present in INFO_BIN (RedHat)
+  fail:
+    msg: "PGO flag '{{ item }}' not found in {{ info_bin_path_rh.stdout }} - this is a bug, PGO flag should be present"
+  when:
+    - ansible_os_family == "RedHat"
+    - item not in (info_bin_content_rh.content | b64decode)
+  loop:
+    - '-fprofile-use='
+    - '-fprofile-correction'
+    - '-fprofile-partial-training'
+
+# --- Debian ---
+- name: find INFO_BIN.gz file path (Debian)
+  shell: find /usr/share/doc -name "INFO_BIN.gz" -path "*percona-server*" | head -1
+  register: info_bin_path_deb
+  when: ansible_os_family == "Debian"
+
+- name: check that INFO_BIN.gz file exists (Debian)
+  assert:
+    that:
+      - info_bin_path_deb.stdout != ""
+    fail_msg: "INFO_BIN.gz file not found under /usr/share/doc/percona-server* - this is a bug, file should be present"
+  when: ansible_os_family == "Debian"
+
+- name: decompress and read INFO_BIN.gz content (Debian)
+  shell: gunzip -c {{ info_bin_path_deb.stdout }}
+  register: info_bin_content_deb
+  when: ansible_os_family == "Debian"
+
+- name: check that PGO flags are present in INFO_BIN (Debian)
+  fail:
+    msg: "PGO flag '{{ item }}' not found in {{ info_bin_path_deb.stdout }} - this is a bug, PGO flag should be present"
+  when:
+    - ansible_os_family == "Debian"
+    - item not in info_bin_content_deb.stdout
+  loop:
+    - '-fprofile-use='
+    - '-fprofile-correction'
+    - '-fprofile-partial-training'

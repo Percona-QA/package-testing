@@ -1,0 +1,94 @@
+# This task installs Percona Server 8.0 on CentOS and Debian/Ubuntu
+
+  - name: Clean apt cache
+    apt:
+      autoclean: yes
+      autoremove: yes
+    when: ansible_os_family == "Debian"
+
+  - name: Fix broken packages
+    command: apt --fix-broken install -y  
+    ignore_errors: true
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona Server deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest 
+    vars:
+      packages_base:
+      - percona-client{{ pro_suf | default('') }}
+      - percona-testsuite{{ pro_suf | default('') }}
+      - percona-server-test{{ pro_suf | default('') }}
+  #    - percona-server-test-dbgsym{{ pro_suf | default('') }}
+      - percona-server-source{{ pro_suf | default('') }}
+      - percona-server-server{{ pro_suf | default('') }}
+      - percona-server-server-core{{ pro_suf | default('') }}
+   #   - percona-server-server-core-dbgsym{{ pro_suf | default('') }}
+      - percona-server-rocksdb{{ pro_suf | default('') }}
+    #  - percona-server-rocksdb-dbgsym{{ pro_suf | default('') }}
+      - percona-server-common{{ pro_suf | default('') }}
+     # - percona-server-client-core-dbgsym{{ pro_suf | default('') }}
+      - percona-server-client-core{{ pro_suf | default('') }}
+      #- percona-server-client-dbgsym{{ pro_suf | default('') }}
+      - percona-server-client-plugins{{ pro_suf | default('') }}
+     # - percona-server-client-plugins-dbgsym{{ pro_suf | default('') }}
+      - percona-server-client{{ pro_suf | default('') }}
+      - percona-mysql-router{{ pro_suf | default('') }}
+      #- percona-mysql-router-dbgsym{{ pro_suf | default('') }}
+      percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
+      packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
+    when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: get list of enabled dnf modules on centos 8
+    command: dnf module list --enabled
+    register: enabled_dnf_modules
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
+
+  - name: list enabled dnf modules on centos 8
+    debug:
+      var: enabled_dnf_modules
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
+
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: yum module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: disable the mariadb module on RHEL/CentOS 8
+    command: yum module disable mariadb -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: install Percona Server rpm packages
+    yum:
+      allowerasing: "{{ allowerasing_value | default (false) }}"
+      name: "{{ packages }}"
+      state: latest
+      disablerepo: "epel"
+      update_cache: yes
+    vars:
+      packages_base:
+      - percona-icu-data-files{{ pro_suf | default('') }}
+      - percona-mysql-router{{ pro_suf | default('') }}
+      - percona-mysql-router-debuginfo{{ pro_suf | default('') }}
+   #   - percona-mysql-router-plugins{{ pro_suf | default('') }}
+      - percona-server-client{{ pro_suf | default('') }}
+      - percona-server-client-debuginfo{{ pro_suf | default('') }}
+      - percona-server-client-plugins-debuginfo{{ pro_suf | default('') }}
+      - percona-server-debugsource{{ pro_suf | default('') }}
+      - percona-server-test{{ pro_suf | default('') }}
+      - percona-server-devel{{ pro_suf | default('') }}
+      - percona-server-shared{{ pro_suf | default('') }}
+      - percona-server-shared-debuginfo{{ pro_suf | default('') }}
+      - percona-server-rocksdb{{ pro_suf | default('') }}
+      - percona-server-rocksdb-debuginfo{{ pro_suf | default('') }}
+      shared_compat_pkg: "{{ (ansible_architecture not in ['aarch64', 'arm64']) | ternary(['percona-server-shared-compat' ~ (pro_suf | default(''))], []) }}"
+      percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
+      packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
+    when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+

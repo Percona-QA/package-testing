@@ -10,7 +10,7 @@ if [ "$#" = 2 ]; then
     exit 1
   fi
 elif [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps56, ps57, ps80, ps81,ps90 !"
+  echo "This script requires product parameter: ps56, ps57, ps80, ps81, ps84, ps97, ps9x !"
   echo "Usage: ./version_check.sh <prod> [pro]"
   exit 1
 fi
@@ -47,6 +47,16 @@ elif [ $1 = "ps84" ]; then
     version=${PS84_VER}
     release=${PS84_VER#*-}
     revision=${PS84_REV}
+  fi
+elif [ $1 = "ps97" ]; then
+  if [ "$2" = "pro" ]; then
+    version=${PS97_PRO_VER}
+    release=${PS97_PRO_VER#*-}
+    revision=${PS97_PRO_REV}
+  else
+    version=${PS97_VER}
+    release=${PS97_VER#*-}
+    revision=${PS97_REV}
   fi
 elif [[ $1 =~ ^ps9[1-9]{1}$ ]]; then
   version=${PS_INN_LTS_VER}
@@ -192,7 +202,7 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
     fi
     if [[ ${product} =~ ^ps8[3-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
       ps_name="percona-server"
-      rpm_pkgs_list="${ps_name}-server${pro_suf} ${ps_name}-test${pro_suf} ${ps_name}${pro_suf}-debuginfo ${ps_name}-devel${pro_suf} ${ps_name}-shared${pro_suf} ${ps_name}-client${pro_suf} ${ps_name}-js${pro_suf}"
+      rpm_pkgs_list="${ps_name}-server${pro_suf} ${ps_name}-test${pro_suf} ${ps_name}-devel${pro_suf} ${ps_name}-shared${pro_suf} ${ps_name}-client${pro_suf} ${ps_name}-js${pro_suf}"
     elif [ "${product}" = "ps80" ]; then
       ps_name="percona-server"
       rpm_pkgs_list="${ps_name}-server${pro_suf} ${ps_name}-test${pro_suf} ${ps_name}${pro_suf}-debuginfo ${ps_name}-devel${pro_suf} ${ps_name}-shared${pro_suf} ${ps_name}-client${pro_suf}"
@@ -227,18 +237,19 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
       deb_opt_package="percona-server-rocksdb"
       deb_num_pkgs="7"
     else
-      deb_opt_package="percona-server-rocksdb percona-server-js"
+      deb_opt_package="percona-server-rocksdb"
       deb_num_pkgs="8"
-    fi
-    if [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
-      deb_dbg_pkg="percona-server${pro_suf}-dbg"
-    else
-      deb_dbg_pkg="percona-server-${deb_maj_version}-dbg"
     fi
     if [ "$(dpkg -l | grep percona-server | grep -c ${version})" == "${deb_num_pkgs}" ]; then
       echo "all packages are installed"
     else
-      for package in percona-server-server${pro_suf} percona-server-client${pro_suf} percona-server-test${pro_suf} ${deb_dbg_pkg} percona-server${pro_suf}-source percona-server${pro_suf}-common ${deb_opt_package} percona-server-js; do
+      for package in percona-server-server${pro_suf} \
+                percona-server-client${pro_suf} \
+                percona-server-test${pro_suf} \
+                percona-server${pro_suf}-source \
+                percona-server${pro_suf}-common \
+                ${deb_opt_package} \
+                percona-server-js; do
         if [ "$(dpkg -l | grep ${package} | grep -c ${version})" != 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed"
         else
