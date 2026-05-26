@@ -107,6 +107,7 @@ if [ -z "${TARBALL_NAME}" ]; then
   echo "Please put PXC tarball into this directory!"
   exit 1
 fi
+
 if [ -z "${PXC_VERSION}" ]; then
   echo "PXC_VERSION environment variable needs to be set!"
   echo "export PXC_VERSION=\"8.0.17-8\""

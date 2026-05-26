@@ -18,16 +18,16 @@ class PxcNode:
                  '-e', 'CLUSTER_NAME='+cluster_name, '-e', 'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport',
                  '--net='+docker_network, '-d', docker_image]).decode().strip()
             time.sleep(120)
-            if pxc_version_major == "8.0" or re.match(r'^8\.[1-9]$', pxc_version_major):
+            if pxc_version_major == "8.0" or pxc_version_major == "8.4" or re.match(r'^9\.[0-9]$', pxc_version_major):
                 subprocess.check_call(['mkdir', '-p', test_pwd+'/cert'])
                 subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/ca.pem', test_pwd+'/cert'])
-                subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/server-cert.pem', test_pwd+'/cert'])
+                subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/server-cert.pem', test_pwd+'/cert'])  
                 subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/server-key.pem', test_pwd+'/cert'])
                 subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/client-cert.pem', test_pwd+'/cert'])
                 subprocess.check_call(['docker', 'cp', node_name+':/var/lib/mysql/client-key.pem', test_pwd+'/cert'])
                 subprocess.check_call(['chmod','-R','a+r', test_pwd+'/cert'])
         else:
-            if pxc_version_major == "8.0" or re.match(r'^8\.[1-9]$', pxc_version_major):
+            if pxc_version_major == "8.0" or pxc_version_major == "8.4" or re.match(r'^9\.[0-9]$', pxc_version_major):
                 self.docker_id = subprocess.check_output(
                 ['docker', 'run', '--name', node_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd,
                 '-e', 'CLUSTER_NAME='+cluster_name, '-e', 'CLUSTER_JOIN='+base_node_name+'1',

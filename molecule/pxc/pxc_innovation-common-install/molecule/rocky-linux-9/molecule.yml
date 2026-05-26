@@ -1,29 +1,29 @@
 ---
 scenario:
-  name: rhel-10-arm
+  name: rocky-linux-9
 dependency:
   name: galaxy
 driver:
   name: ec2
 platforms:
-  - name: ${BUILD_NUMBER}-pxc2-innovation-common-rhel-10-arm-install-${INSTALLTYPE}
-    region: us-west-1
-    image: ami-0e9952104eb33d5ac
-    vpc_subnet_id: subnet-04a8ad1b1d4da874c
-    instance_type: c6g.large
-    ssh_user: ec2-user
-    root_device_name: /dev/sda1
+  - name: ${BUILD_NUMBER}-pxc2-innovation-common-rl-9-install-${INSTALLTYPE}
+    region: us-west-2
+    image: ami-023eeffe03f0dd455
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: t2.large
+    ssh_user: rocky
+    root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: ${IIT_BILLING_TAG}
       job-name: ${JOB_NAME}
       build-number: ${BUILD_NUMBER}
-  - name: ${BUILD_NUMBER}-pxc3-innovation-common-rhel-10-arm-install-${INSTALLTYPE}
-    region: us-west-1
-    image: ami-0e9952104eb33d5ac
-    vpc_subnet_id: subnet-04a8ad1b1d4da874c
-    instance_type: c6g.large
-    ssh_user: ec2-user
-    root_device_name: /dev/sda1
+  - name: ${BUILD_NUMBER}-pxc3-innovation-common-rl-9-install-${INSTALLTYPE}
+    region: us-west-2
+    image: ami-023eeffe03f0dd455
+    vpc_subnet_id: subnet-03136d8c244f56036
+    instance_type: t2.large
+    ssh_user: rocky
+    root_device_name: /dev/xvda
     instance_tags:
       iit-billing-tag: ${IIT_BILLING_TAG}
       job-name: ${JOB_NAME}
@@ -38,8 +38,8 @@ provisioner:
     side_effect: ../../../../../playbooks/pxc_innovation_upgrade_common.yml
   inventory:
     host_vars:
-      ${BUILD_NUMBER}-pxc2-innovation-common-rhel-10-arm-install-${INSTALLTYPE}:
+      pxc2-innovation-common-rl-9-install-${INSTALLTYPE}:
         ip_env: "{{ ansible_host }}"
-      ${BUILD_NUMBER}-pxc3-innovation-common-rhel-10-arm-install-${INSTALLTYPE}:
+      pxc3-innovation-common-rl-9-install-${INSTALLTYPE}:
         ip_env: "{{ ansible_host }}"
         sleep_before_tests: 40

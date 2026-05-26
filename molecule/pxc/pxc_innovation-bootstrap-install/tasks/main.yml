@@ -1,20 +1,20 @@
 ---
   - name: Fetch the vars from file for install
     ansible.builtin.include_vars: "{{ ENV_VAR_PATH }}"
-      
+
   - set_fact:
       man_ip: "{{ PXC1_IP }}"
-    when: 
+    when:
     - "'pxc1' in inventory_hostname"
 
   - set_fact:
       man_ip: "{{ PXC2_IP }}"
-    when: 
+    when:
     - "'pxc2' in inventory_hostname"
 
   - set_fact:
       man_ip: "{{ PXC3_IP }}"
-    when: 
+    when:
     - "'pxc3' in inventory_hostname"
 
   - name: include tasks for test env setup
@@ -25,23 +25,41 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-  - name: include tasks for enabling test repo pxc80 non pro
+  - name: include tasks for enabling test repo pxc_innovation
     include_tasks: ../../../../tasks/enable_pxc_innovation_testing_repo.yml
     when:
-    - lookup('env', 'install_repo') == "testing" 
+    - lookup('env', 'install_repo') == "testing"
     - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling main repo pxc80 non pro
+  - name: include tasks for enabling main repo pxc_innovation main repo
     include_tasks: ../../../../tasks/enable_pxc_innovation_main_repo.yml
-    when: 
+    when:
     - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
     - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling experimental repo non pro
+  - name: include tasks for enabling PXC_innovation experimental repo
     include_tasks: ../../../../tasks/enable_pxc_innovation_experimental_repo.yml
-    when: 
+    when:
     - lookup('env', 'install_repo') == "experimental"
     - lookup('env', 'pro') == "no"
+
+  - name: install python3-libselinux
+    package:
+      name: "{{ packages }}"
+      state: present
+    vars:
+      packages:
+      - python3-libselinux
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: allow all users to connect to mysql
+    shell: setsebool -P mysql_connect_any 1
+    when: ((ansible_os_family == "RedHat") and (ansible_distribution != "Amazon"))
+
+  - name: flush iptables
+    iptables:
+      flush: yes
+    when: (ansible_os_family == "RedHat") and (ansible_facts['distribution'] == "OracleLinux")
 
   - name: Generate required locales
     command: locale-gen "{{ item }}"
@@ -50,7 +68,7 @@
       - en_IN.utf8
     args:
       creates: "/usr/lib/locale/{{ item }}"
-    when: 
+    when:
       - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
       - ansible_os_family == "Debian"
 
@@ -62,7 +80,7 @@
     loop:
       - 'LANG="en_US.UTF-8"'
       - 'LC_ALL="en_US.UTF-8"'
-    when: 
+    when:
       - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
       - ansible_os_family == "Debian"
 
@@ -71,37 +89,68 @@
       path: /etc/apparmor.d/local/usr.sbin.mysqld.in
       state: touch
       mode: '0644'
-    when: 
+    when:
       - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
       - ansible_os_family == "Debian"
 
-
-  - name: install PXC 8 deb packages arm64 debian non pro
+  - name: install PXC deb packages arm64 debian
     apt:
       name: "{{ packages }}"
       update_cache: yes
     vars:
       packages:
       - percona-xtradb-cluster-full
+      - percona-xtrabackup-96
       - percona-toolkit
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - ansible_architecture == "aarch64"
       - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      
-  - name: install PXC 8 deb packages amd64 non pro
+
+  - name: install PXC deb packages amd64 debian
     apt:
       name: "{{ packages }}"
       update_cache: yes
     vars:
       packages:
       - percona-xtradb-cluster-full
+      - percona-xtrabackup-96
       - percona-toolkit
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - ansible_architecture == "x86_64"
+      - lookup('env', 'pro') == "no"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC rpm packages amd64 RHEL
+    package:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+      - percona-xtrabackup-96
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_architecture == "x86_64"
+      - lookup('env', 'pro') == "no"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC rpm packages ARM64 RHEL
+    package:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+      - percona-xtrabackup-96
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_architecture == "aarch64"
       - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -117,6 +166,9 @@
     debug:
       var: t_uuid_output
 
+  - name: stop mysql service with service command
+    command: systemctl stop mysql
+
   - name: copy pxc config on centos
     template: src=../../../../templates/my_rpm_80.j2 dest=/etc/my.cnf
     when: ansible_os_family == "RedHat"
@@ -126,17 +178,26 @@
       src: ../../../../support-files/certs/
       dest: /etc/mysql/certs/
 
-  - name: Safely configure custom my.cnf for Debian/Ubuntu
-    template:
-      src: ../../../../templates/my_8.j2
-      dest: /etc/mysql/conf.d/custom.cnf
-      mode: '0644'
-      owner: root
-      group: root
+  - name: configure PXC on debian/ubuntu
+    template: src=../../../../templates/my_8.j2
+              dest=/etc/mysql/my.cnf
+              mode=0640 owner=mysql group=root
     when: ansible_os_family == "Debian"
 
+  # bootstrap the cluster
   - name: bootstrap cluster on CentOS
     command: systemctl start mysql@bootstrap.service
+
+  # set root password on centos
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../../../../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
 
   - name: register PXC version Molecule
     shell: mysqld --version
@@ -145,18 +206,10 @@
   - name: print PXC version Molecule
     debug: var=pxc_version
 
-  - name: Extract only the major.minor.patch version from mysqld --version
-    set_fact:
-      pxc_version_parsed: "{{ pxc_version.stdout | regex_search('Ver\\s+(\\d+\\.\\d+\\.\\d+)', '\\1') }}"
-    
-  - name: Print parsed PXC version
-    debug:
-      msg: "Parsed PXC version is: {{ pxc_version_parsed }}"
-
   - name: PRINT WSREP version
     shell: mysql -uroot --password='U?fY)9s7|3gxUm' -e "SHOW STATUS LIKE 'wsrep_provider_version';"
     register: wsrep_version
-  
+
   - name: print WSREP version debug
     debug: var=wsrep_version
 
@@ -164,11 +217,17 @@
     shell: mysql -uroot --password='U?fY)9s7|3gxUm' -e "SELECT @@INNODB_VERSION;"
     register: innod_version
 
-  - name: print INNODB version debug  
+  - name: print INNODB version debug
     debug: var=innod_version
 
-  - name: stop mysql service with service command
-    command: systemctl stop mysql
+#  - name: check PXC 8.4 version Molecule
+#    command: /package-testing/version_check.sh pxc84
+#    when:
+#      - lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+#      - lookup('env', 'pro') == "no"
+
+  - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL BOOTSTRAP
+    include_tasks: ../../../../tasks/list_installed_packages.yml
 
   - name: Extract version number using shell commands
     shell: grep -oP 'PXC_INN_LTS_VER="\K(\d+)\.(\d+)' /package-testing/VERSIONS | tr -d '.'
@@ -186,17 +245,9 @@
     set_fact:
       pxc_inn_lts_repo_name: "{{ pxc_inn_lts_repo_name.stdout }}"
 
-  
-  - name: check PXC 8.0 version Molecule
+  - name: check PXC version Molecule
     command: /package-testing/version_check.sh pxc{{ major_release_version}}
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
-
-
-  - name: Verify telemetry version and package installation
-    command: /package-testing/check_tel_ver_pack.sh
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
 
   - name: Sleep 60 seconds
     command: sleep 60

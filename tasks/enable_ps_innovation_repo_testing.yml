@@ -24,7 +24,7 @@
     shell: ls -la && pwd
 
   - name: enable the PS-{{ major_release_version }} {{ ps_inn_lts_repo_name }} testing repo
-    command: percona-release enable-only {{ ps_inn_lts_repo_name }} testing
+    command: percona-release enable-only ps-9x-innovation testing
 
   - name: enable the tools testing repo
     command: percona-release enable tools testing
