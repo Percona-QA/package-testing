@@ -125,11 +125,11 @@
 
     - name: get tarball name
       set_fact:
-        TARBALL_NAME: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
+        TARBALL_NAME: "Percona-Server-9.7.0-1-Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
 
     - name: get testing repo tarball URL
       set_fact:
-        TARBALL_LINK: "https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
+        TARBALL_LINK: "https://downloads.percona.com/downloads/TESTING/ps-9.7.0-1-1/{{ TARBALL_NAME }}"
 
 
 # -------------------------------------------------
