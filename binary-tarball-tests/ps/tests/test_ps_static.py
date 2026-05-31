@@ -34,7 +34,6 @@ def test_binaries_version(host,pro_fips_vars):
         # Get actual version output from binaries
         mysql_output = host.check_output(base_dir + '/bin/mysql --version')
         mysqld_output = host.check_output(base_dir + '/bin/mysqld --version')
-        
         if pro:
             # For PRO builds, check version-pro, release, and that revision exists (but not exact match)
             assert f"{base_dir}/bin/mysql  Ver {ps_version}-pro for Linux on x86_64 (Percona Server Pro (GPL), Release {ps_version_percona}, Revision" in mysql_output
@@ -42,7 +41,7 @@ def test_binaries_version(host,pro_fips_vars):
             # Verify revision format (alphanumeric hash)
             assert re.search(r'Revision [a-f0-9]+\)', mysql_output), f"Expected revision pattern in mysql output: {mysql_output}"
             assert re.search(r'Revision [a-f0-9]+\)', mysqld_output), f"Expected revision pattern in mysqld output: {mysqld_output}"
-        else: 
+        else:
             # For non-PRO builds, check version, release, and that revision exists (but not exact match)
             assert f"{base_dir}/bin/mysql  Ver {ps_version} for Linux on x86_64 (Percona Server (GPL), Release {ps_version_percona}, Revision" in mysql_output
             assert f"{base_dir}/bin/mysqld  Ver {ps_version} for Linux on x86_64 (Percona Server (GPL), Release {ps_version_percona}, Revision" in mysqld_output
@@ -106,3 +105,23 @@ def test_pro_openssl_files_linked(host,pro_fips_vars):
                 for file_name in ['libcrypto.so', 'libssl.so']:
                     if file_name in line:
                         assert not '=> not found' in line
+
+def test_pgo_flags_present(host, pro_fips_vars):
+    v = pro_fips_vars['ps_version_major']
+
+    if not (v.startswith("8.4") or v.startswith("9.")):
+        pytest.skip("PGO is only supported/tested for PS 8.7 and 9.x")
+
+    base_dir = pro_fips_vars['base_dir']
+
+    info_bin = f"{base_dir}/docs/INFO_BIN"
+    assert host.file(info_bin).exists
+
+    content = host.file(info_bin).content_string
+
+    for flag in [
+        '-fprofile-use=',
+        '-fprofile-correction',
+        '-fprofile-partial-training'
+    ]:
+        assert flag in content, f"{flag} not found in INFO_BIN"

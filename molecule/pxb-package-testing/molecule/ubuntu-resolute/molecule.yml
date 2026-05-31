@@ -4,13 +4,13 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: rocky-8-${PLAYBOOK_VAR}
+  - name: uresolute-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
     region: us-west-2
-    image: ami-02dd44a54586c69fb
+    image: ami-0d13e2317a7e75c95
     vpc_subnet_id: subnet-03136d8c244f56036
-    instance_type: t2.large
-    ssh_user: rocky
-    root_device_name: /dev/xvda
+    instance_type: t2.medium
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: ${IIT_BILLING_TAG}
       job-name: ${JOB_NAME}
@@ -25,15 +25,16 @@ provisioner:
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
 scenario:
-  name: rocky-8
+  name: ubuntu-resolute
   destroy_sequence:
     - destroy
-  clenup_sequence:
+  cleanup_sequence:
     - cleanup
   test_sequence:
     - destroy
     - create
     - prepare
     - converge
+    - verify
     - cleanup
     - destroy
