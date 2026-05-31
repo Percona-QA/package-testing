@@ -130,7 +130,7 @@
 
     - name: get testing repo tarball URL
       set_fact:
-        TARBALL_LINK: "https://downloads.percona.com/downloads/TESTING/{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
+        TARBALL_LINK: "https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
 
 
 # -------------------------------------------------
