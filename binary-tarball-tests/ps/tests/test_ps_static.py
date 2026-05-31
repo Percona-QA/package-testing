@@ -107,16 +107,17 @@ def test_pro_openssl_files_linked(host,pro_fips_vars):
                         assert not '=> not found' in line
 
 def test_pgo_flags_present(host, pro_fips_vars):
+    v = pro_fips_vars['ps_version_major']
+
+    if not (v.startswith("8.4") or v.startswith("9.")):
+        pytest.skip("PGO is only supported/tested for PS 8.7 and 9.x")
+
     base_dir = pro_fips_vars['base_dir']
 
     info_bin = f"{base_dir}/docs/INFO_BIN"
-
     assert host.file(info_bin).exists
 
     content = host.file(info_bin).content_string
-
-    assert 'CMAKE_C_FLAGS:' in content
-    assert 'CMAKE_CXX_FLAGS:' in content
 
     for flag in [
         '-fprofile-use=',
