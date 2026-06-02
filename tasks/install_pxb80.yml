@@ -11,6 +11,8 @@
       - percona-xtrabackup-test-80
       - percona-xtrabackup-dbg-80
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install Percona XtraBackup new rpm packages yum
     yum:
@@ -25,6 +27,8 @@
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int <= 7
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: install Percona XtraBackup new rpm packages dnf
     dnf:
@@ -39,3 +43,5 @@
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
