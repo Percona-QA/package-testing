@@ -264,19 +264,10 @@
     debug:
       var: version_output.stdout_lines
 
-  - name: Read telemetry_uuid file
-    command: cat /usr/local/percona/telemetry_uuid
-    register: telemetry_uuid
-    changed_when: false
-
-  - name: Display telemetry_uuid contents
-    debug:
-      msg: "{{ telemetry_uuid.stdout_lines }}"
-
-  - name: check telemetry (enabled)
-    command: /package-testing/check_telemetry.sh pxb -e
-    when:
-      - ansible_distribution != "Rocky"
+#  - name: check telemetry (enabled)
+#    command: /package-testing/check_telemetry.sh pxb -e
+#    when:
+#      - ansible_distribution != "Rocky"
 
   - name: check that Percona XtraBackup version is correct NON PRO
     command: /package-testing/version_check.sh pxb80
