@@ -175,7 +175,7 @@ def test_install_functions(mysql_server):
 
 def test_install_component(mysql_server, pro_fips_vars):
     v = pro_fips_vars['ps_version_major']
-    if v == '8.0' or v.startswith("8."):
+    if v.startswith("8.", "9."):
         for component in ps_components:
             mysql_server.install_component(component)
     else:
@@ -188,30 +188,44 @@ def test_install_plugin(mysql_server):
 
 
 def test_audit_log_v2(mysql_server, pro_fips_vars):
-    if pro_fips_vars['ps_version_major'] == '8.0':
+    if pro_fips_vars['ps_version_major'].startswith(("8.", "9.")):
         base_dir = pro_fips_vars['base_dir']
-        mysql_server.run_query(f"source {base_dir}/share/audit_log_filter_linux_install.sql;")
-        output = mysql_server.run_query(
-            'SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = "audit_log_filter";'
+
+        mysql_server.run_query(
+            f"source {base_dir}/share/audit_log_filter_linux_install.sql;"
         )
+
+        output = mysql_server.run_query(
+            'SELECT plugin_status '
+            'FROM information_schema.plugins '
+            'WHERE plugin_name = "audit_log_filter";'
+        )
+
         assert 'ACTIVE' in output
+
     else:
-        pytest.skip("Audit log v2 only for 8.0")
+        pytest.skip("Audit log v2 only for PS 8.x and 9.x")
 
 
 def test_telemetry_status(mysql_server, pro_fips_vars):
-    if pro_fips_vars['ps_version_major'] != '8.0':
-        pytest.skip("Telemetry only tested for 8.0")
+    if not pro_fips_vars['ps_version_major'].startswith(("8.", "9.")):
+        pytest.skip("Telemetry only tested for PS 8.x and 9.x")
 
-    output = mysql_server.run_query("SHOW VARIABLES LIKE '%percona_telemetry%';")
+    output = mysql_server.run_query(
+        "SHOW VARIABLES LIKE '%percona_telemetry%';"
+    )
+
     print("Telemetry raw output:", output)
 
     telemetry_settings = {}
+
     for line in output.split("\n"):
         parts = line.split("\t")
+
         if len(parts) == 2:
             telemetry_settings[parts[0]] = parts[1]
 
     print("Parsed telemetry settings:", telemetry_settings)
 
-    assert telemetry_settings.get("percona_telemetry_disable") == "OFF", "Telemetry is enabled"
+    assert telemetry_settings.get("percona_telemetry_disable") == "OFF", \
+        "Telemetry is enabled"

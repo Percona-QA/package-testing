@@ -267,6 +267,54 @@ ps8x_openssl_files = (
   'lib/libcrypto.so', 'lib/libk5crypto.so', 'lib/libssl.so', 'lib/libsasl2.so'
 )
 
+# 97
+ps97_binaries = [
+  'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog',
+  'bin/mysqldump', 'bin/mysqlimport', 'bin/mysqlshow',
+  'bin/mysqlslap', 'bin/mysqlcheck', 'bin/mysql_config_editor',
+  'bin/mysqlrouter', 'bin/mysqlrouter_passwd', 'bin/mysqlrouter_plugin_info', 'bin/mysql_secure_installation',
+  'bin/mysql_tzinfo_to_sql'
+]
+ps97_executables = ps97_binaries + [
+  'bin/ps-admin',
+  'bin/mysqldumpslow',
+  'bin/mysql_config',
+]
+ps97_plugins = (
+  ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
+  ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
+  ('clone','mysql_clone.so'),
+  ('procfs', 'procfs.so')
+)
+ps97_functions = (
+  ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
+  ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_exclusive', 'version_token.so', 'INT'),
+  ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
+)
+
+ps97_components = (
+  'component_masking_functions', 'component_binlog_utils_udf', 'component_percona_udf', 'component_audit_log_filter', 'component_keyring_vault','component_js_lang'
+)
+
+ps97_files = (
+  'lib/libcoredumper.a',
+  'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.1.0' ,'lib/mysql/libjemalloc.so.1',
+  'lib/plugin/ha_rocksdb.so', 'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so',
+  'lib/plugin/component_binlog_utils_udf.so',
+  'lib/plugin/keyring_udf.so', 'lib/plugin/component_keyring_vault.so', 'lib/plugin/component_binlog_utils_udf.so',
+  'lib/plugin/component_audit_log_filter.so', 'lib/plugin/component_masking_functions.so'
+)
+
+ps97_symlinks = (
+  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.1.0'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.1.0'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+)
+
+ps97_openssl_files = (
+  'lib/libcrypto.so', 'lib/libk5crypto.so', 'lib/libssl.so', 'lib/libsasl2.so'
+)
+
 #####
 
 if re.match(r'^8\.[1-9]$', ps_version_major):
@@ -301,3 +349,11 @@ elif ps_version_major == '5.6':
     ps_functions = ps56_functions
     ps_files = ps56_files
     ps_symlinks = ps56_symlinks
+elif ps_version_major == '9.7':
+    ps_binaries = ps97_binaries
+    ps_executables = ps97_executables
+    ps_plugins = ps97_plugins
+    ps_functions = ps97_functions
+    ps_files = ps97_files
+    ps_symlinks = ps97_symlinks
+    ps_openssl_files=ps97_openssl_files
