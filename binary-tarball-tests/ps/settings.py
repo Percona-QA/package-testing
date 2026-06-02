@@ -282,14 +282,12 @@ ps97_executables = ps97_binaries + [
 ]
 ps97_plugins = (
   ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
-  ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
+  ('rpl_semi_sync_source','semisync_source.so'),('rpl_semi_sync_replica','semisync_replica.so'),
   ('clone','mysql_clone.so'),
   ('procfs', 'procfs.so')
 )
 ps97_functions = (
-  ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
-  ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_exclusive', 'version_token.so', 'INT'),
-  ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
+  ('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
 )
 
 ps97_components = (
@@ -356,4 +354,5 @@ elif ps_version_major == '9.7':
     ps_functions = ps97_functions
     ps_files = ps97_files
     ps_symlinks = ps97_symlinks
+    ps_components = ps97_components
     ps_openssl_files=ps97_openssl_files
