@@ -114,14 +114,21 @@
 #  - name: Yum update for epel 8
 #    command: dnf update -y
 #    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-  - name: System upgrade for RedHat family (RHEL, Oracle, Rocky)
+
+  - name: System upgrade for RedHat family (RHEL, Oracle)
     ansible.builtin.command: dnf upgrade -y --setopt=install_weak_deps=False
     register: upgrade_output
     changed_when: "'Nothing to do' not in upgrade_output.stdout"
     when: >
       ansible_facts['os_family'] == "RedHat" and
-      (ansible_facts['distribution'] in ['RedHat', 'OracleLinux'] or
-      ansible_facts['distribution_major_version'] == "8")
+      (
+        ansible_facts['distribution'] in ['RedHat', 'OracleLinux']
+        or
+        (
+          ansible_facts['distribution_major_version'] == "8"
+          and ansible_facts['distribution'] != "Rocky"
+        )
+      )
 
   - name: setup epel 8 repo
     dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
