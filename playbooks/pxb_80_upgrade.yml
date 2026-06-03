@@ -333,7 +333,7 @@
       - percona-server-server
       - percona-xtrabackup-80
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - lookup('env', 'server_to_test') == "ps-80"
       - lookup('env', 'REPO_TYPE') !="PRO"
 
