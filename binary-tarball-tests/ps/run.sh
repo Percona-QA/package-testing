@@ -69,11 +69,18 @@ else
 
   sudo apt-get update -y
   # libldap-2.4-2 is replaced by libldap-common on newer Ubuntu versions
+  # libaio1 is replaced by libaio1t64 on Ubuntu 24.04+ / Debian 13+
   if apt-cache show libldap-2.4-2 >/dev/null 2>&1; then
-    sudo apt install -y libaio1 libnuma1 libldap-2.4-2 libaio-dev
+    LDAP_PKG="libldap-2.4-2"
   else
-    sudo apt install -y libaio1 libnuma1 libldap-common libaio-dev
+    LDAP_PKG="libldap-common"
   fi
+  if apt-cache show libaio1 >/dev/null 2>&1; then
+    LIBAIO_PKG="libaio1"
+  else
+    LIBAIO_PKG="libaio1t64"
+  fi
+  sudo apt install -y ${LIBAIO_PKG} libnuma1 ${LDAP_PKG} libaio-dev
 
 fi
 fi  # closes AL2023 + RHEL + Debian logic
@@ -89,7 +96,7 @@ else
   CODENAME=""
 fi
 
-if [[ "$CODENAME" == "bookworm" || "$CODENAME" == "noble" || "$CODENAME" == "trixie" ]]; then
+if [[ "$CODENAME" == "bookworm" || "$CODENAME" == "noble" || "$CODENAME" == "trixie" || "$CODENAME" == "resolute" ]]; then
   pip3 install --user --break-system-packages pytest-testinfra pytest
 else
   pip3 install --user pytest-testinfra pytest

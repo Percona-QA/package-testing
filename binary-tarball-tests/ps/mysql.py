@@ -68,6 +68,10 @@ class MySQL:
         command = self.mysql+' --user=root -S'+self.socket+' -s -N -e '+shlex.quote(query)
         return subprocess.check_output(command,shell=True,universal_newlines=True)
 
+    def run_file(self, sql_file):
+        command = self.mysql+' --user=root -S'+self.socket+' -s -N < '+shlex.quote(sql_file)
+        return subprocess.check_output(command,shell=True,universal_newlines=True)
+
     def install_function(self, fname, soname, return_type):
         query = 'CREATE FUNCTION {} RETURNS {} SONAME "{}";'.format(fname,return_type,soname)
         self.run_query(query)

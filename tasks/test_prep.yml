@@ -37,8 +37,19 @@
       - ansible_facts['distribution'] == "CentOS"
       - ansible_facts['distribution_major_version'] | int == 7
 
-  - name: Update all dnf packages without reboot
-    ansible.builtin.dnf: name='*' state=latest
+#  - name: Update all dnf packages without reboot
+#    ansible.builtin.dnf: name='*' state=latest
+#    when: ansible_facts['distribution'] in ['RedHat','OracleLinux']
+
+  - name: Fix packaging locks and clear bad metadata
+    ansible.builtin.command: "{{ item }}"
+    with_items:
+      - killall -9 dnf dnf-automatic packagekitd yum
+      - rpm --rebuilddb
+      - dnf clean all
+      - rm -rf /var/cache/dnf
+    failed_when: false
+    changed_when: true
     when: ansible_facts['distribution'] in ['RedHat','OracleLinux']
 
   - name: Install wget
@@ -100,9 +111,17 @@
     when: 
     - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: Yum update for epel 8
-    command: dnf update -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+#  - name: Yum update for epel 8
+#    command: dnf update -y
+#    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+  - name: System upgrade for RedHat family (RHEL, Oracle, Rocky)
+    ansible.builtin.command: dnf upgrade -y --setopt=install_weak_deps=False
+    register: upgrade_output
+    changed_when: "'Nothing to do' not in upgrade_output.stdout"
+    when: >
+      ansible_facts['os_family'] == "RedHat" and
+      (ansible_facts['distribution'] in ['RedHat', 'OracleLinux'] or
+      ansible_facts['distribution_major_version'] == "8")
 
   - name: setup epel 8 repo
     dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
