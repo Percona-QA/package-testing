@@ -43,11 +43,6 @@
 
 # Install from main repository
 
-  - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_main_repo.yml
-    when: 
-      - lookup('env', 'pro_test') != "yes"
-
   - name: include tasks for enabling PS 8 main repo
     include_tasks: ../tasks/enable_ps8_main_repo.yml
     when: 
@@ -65,7 +60,7 @@
 
   - name: Enable PXB 8 Main repo
     command: percona-release enable pxb-80 release
-    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
+#    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -94,7 +89,7 @@
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
-    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
+#    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -140,7 +135,7 @@
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
     when: install_mysql_shell == "yes" or install_mysql_shell == ""
-    
+
   - name: install 3rd party packages with apt
     apt:
       name: "{{ packages }}"
@@ -156,7 +151,7 @@
       packages:
       - rsyslog-mysql
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start my.cnf change test
@@ -265,7 +260,7 @@
       - percona-server-client{{ pro_suf }}
       - percona-mysql-router{{ pro_suf }}
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 9
     environment:
       PERCONA_TELEMETRY_DISABLE: "1"
@@ -312,7 +307,7 @@
       apply:
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
-    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
+#    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: upgrade Percona release to new rpm packages using yum
     yum:
@@ -333,7 +328,7 @@
       packages:
       - percona-release
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start mysql service with systemctl command
@@ -392,7 +387,7 @@
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb80
-    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
+#    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: run bats unit tests for ps-admin script
     command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
@@ -443,7 +438,7 @@
         - iptables-services
       state: present
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: Install iptables on RHEL using yum 
@@ -453,7 +448,7 @@
         - iptables-services
       state: present
     when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
   - name: Enable and start iptables service
@@ -461,7 +456,7 @@
       name: iptables
       state: started
       enabled: true
-    when: ansible_facts['distribution'] in ["RedHat", "Amazon"]
+    when: ansible_facts['distribution'] in ["RedHat", "Amazon", "Rocky"]
 
   - name: Block pmm.check-dev.percona.com IP for non REDHAT
     iptables:
@@ -469,7 +464,7 @@
       destination: check-dev.percona.com
       jump: DROP
     when: 
-      - lookup('env', 'upgrade_repo') == ""  
+      - lookup('env', 'upgrade_repo') == ""
 
   - name: install Percona Server{{ pro_suf }} deb package for telemetry
     apt:
@@ -501,7 +496,7 @@
       packages:
       - percona-server-server{{ pro_suf }}
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
 
