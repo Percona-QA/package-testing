@@ -117,9 +117,9 @@
         volumes:
           - device_name: "{{ item.root_device_name }}"
             ebs:
-              volume_type: gp2
-              volume_size: 30
-              delete_on_termination: true
+              volume_type: "{{ item.block_device_mappings[0].ebs.volume_type | default('gp2') }}"
+              volume_size: "{{ item.block_device_mappings[0].ebs.volume_size | default(30) }}"
+              delete_on_termination: "{{ item.block_device_mappings[0].ebs.delete_on_termination | default(true) }}"
       register: server
       loop: "{{ molecule_yml.platforms }}"
       loop_control:
