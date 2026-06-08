@@ -106,8 +106,8 @@
       - lookup('env', 'pro_test') != "yes"
       - ansible_distribution != "Amazon"
 
-#  - name: check telemetry (enabled)
-#    command: /package-testing/check_telemetry.sh ps -e
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
 
   - name: Verify telemetry version and package installation
     command: /package-testing/check_tel_ver_pack.sh
