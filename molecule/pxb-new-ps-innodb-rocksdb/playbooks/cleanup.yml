@@ -1,0 +1,67 @@
+---
+- name: Cleanup
+  hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    WORKSPACE_VAR: "{{ lookup('env', 'WORKSPACE_VAR') }}"
+  tasks:
+    - name: Find all .tar.gz files in /var/tmp
+      find:
+        paths: /var/tmp
+        patterns: "*.tar.gz"
+        file_type: file
+      register: tarballs
+      become: true
+
+    - name: Fetch all .tar.gz archives to localhost
+      fetch:
+        src: "{{ item.path }}"
+        dest: "/{{ WORKSPACE_VAR }}/{{ item.path | basename }}"
+        flat: yes
+      loop: "{{ tarballs.files }}"
+      become: true
+
+    - name: Debug the fetch task status on localhost
+      command: ls -l "/{{ WORKSPACE_VAR }}"
+      register: fetch_list
+      delegate_to: localhost
+
+    - name: Find all .xml files in /var/tmp
+      find:
+        paths: /var/tmp
+        patterns: "*.xml"
+        file_type: file
+      register: xmls
+      become: true
+
+    - name: Fetch all .xml archives to localhost
+      fetch:
+        src: "{{ item.path }}"
+        dest: "/{{ WORKSPACE_VAR }}/{{ item.path | basename }}"
+        flat: yes
+      loop: "{{ xmls.files }}"
+      become: true
+
+    - name: Debug the fetch task status on localhost
+      command: ls -l "/{{ WORKSPACE_VAR }}"
+      register: fetch_list_xml
+      delegate_to: localhost
+
+    # - name: Debug the list of files in /{{ WORKSPACE_VAR }} on localhost
+    #   debug:
+    #     msg: "Files in /{{ WORKSPACE_VAR }}: {{ fetch_list.stdout_lines }}"
+    #   delegate_to: localhost
+
+    - name: remove Tarball directories
+      file:
+        path: "{{ paths }}"
+        state: absent
+      vars:
+        paths:
+        - /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}.tar.gz
+        - /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}-minimal.tar.gz
+        - /tmp/percona-server-{{ lookup('env', 'PS_VERSION') }}-debug.tar.gz
+        - /usr/percona-server
+        - /tmp/percona-server-minimal
+        - /tmp/percona-server-debug
