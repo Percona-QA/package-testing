@@ -146,7 +146,7 @@ else
   echo "Illegal product selected!"
   exit 1
 fi
-
+arch=$(uname -m)
 product=$1
 log="/tmp/${product}_package_check.log"
 echo -n > $log
@@ -188,8 +188,13 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
         rpm_num_pkgs="8"
         rpm_opt_package="percona-server-rocksdb${pro_suf}"
       else
-        rpm_num_pkgs="9"
-        rpm_opt_package="percona-server-rocksdb percona-server-shared-compat"
+        if [[ "${arch}" == "aarch64" ]]; then
+          rpm_num_pkgs="8"
+          rpm_opt_package="percona-server-rocksdb${pro_suf}"
+        else
+          rpm_num_pkgs="9"
+          rpm_opt_package="percona-server-rocksdb percona-server-shared-compat"
+        fi
       fi
     elif [[ ${product} =~ ^ps8[3-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
       if [[ "${centos_maj_version}" == "9" || "${centos_maj_version}" == "10" ]]; then
