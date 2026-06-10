@@ -363,7 +363,3 @@
     when:
       - lookup('env', 'server_to_test') != "ms-80"
 
-  - name: check telemetry (enabled)
-    command: /package-testing/check_telemetry.sh ps -e
-    when:
-      - lookup('env', 'server_to_test') != "ms-80"

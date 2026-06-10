@@ -8,7 +8,7 @@ driver:
 platforms:
   - name: ps-node1-al-2023
     region: us-west-2
-    image: ami-0005ee01bca55ab66
+    image: ami-00563078bca04e287
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.small
     ssh_user: ec2-user
@@ -19,7 +19,7 @@ platforms:
       build-number: ${BUILD_NUMBER}
   - name: ps-node2-al-2023
     region: us-west-2
-    image: ami-0005ee01bca55ab66
+    image: ami-00563078bca04e287
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.small
     ssh_user: ec2-user
@@ -30,7 +30,7 @@ platforms:
       build-number: ${BUILD_NUMBER}
   - name: ps-node3-al-2023
     region: us-west-2
-    image: ami-0005ee01bca55ab66
+    image: ami-00563078bca04e287
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.small
     ssh_user: ec2-user
