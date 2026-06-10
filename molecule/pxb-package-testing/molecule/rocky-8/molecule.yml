@@ -7,7 +7,7 @@ platforms:
   - name: rocky-8-${PLAYBOOK_VAR}
     region: us-west-2
     image: ami-02dd44a54586c69fb
-    vpc_subnet_id: subnet-03136d8c244f56036
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.large
     ssh_user: rocky
     root_device_name: /dev/xvda
