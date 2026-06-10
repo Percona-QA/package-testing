@@ -19,7 +19,7 @@ provisioner:
   name: ansible
   log: True
   playbooks:
-    create: ../../playbooks/create.yml
+    create: ../../playbooks/create-noble-arm.yml
     destroy: ../../playbooks/destroy.yml
     prepare: ../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
