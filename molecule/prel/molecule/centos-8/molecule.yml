@@ -7,7 +7,7 @@ platforms:
   - name: centos8-${BUILD_NUMBER}-${JOB_NAME}
     region: eu-central-1
     image: ami-032025b3afcbb6b34
-    vpc_subnet_id: subnet-085deaca8c1c59a4f
+    vpc_subnet_id: subnet-0129be02b1e99d0a1
     instance_type: t2.micro
     ssh_user: centos
     root_device_name: /dev/sda1
