@@ -20,7 +20,7 @@ provisioner:
   log: True
   playbooks:
     create: ../../../playbooks/create-noble-arm.yml
-    destroy: ../../../playbooks/destroy-noble-arm.yml
+    destroy: ../../playbooks/destroy.yml
     prepare: ../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
 verifier:
@@ -36,10 +36,8 @@ scenario:
   destroy_sequence:
     - destroy
   test_sequence:
-    - destroy
     - create
     - prepare
     - converge
     - verify
     - destroy
-
