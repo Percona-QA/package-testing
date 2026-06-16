@@ -76,6 +76,15 @@
       PS_TARBALL_NAME_MINIMAL: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ ps_glibc_version }}-minimal.tar.gz"
       PS_TARBALL_NAME_MINIMAL_FOLDER: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ ps_glibc_version }}-minimal"
 
+  # When PXB_TARBALL_URL is set (job built an unreleased PXB from a branch),
+  # override the REGULAR tarball/folder names with the branch-built artifact so the
+  # download/extract/test steps below transparently use it instead of the released PXB.
+  - name: Override PXB tarball name when building from a branch (PXB_TARBALL_URL set)
+    set_fact:
+      TARBALL_NAME_REGULAR: "{{ lookup('env', 'PXB_TARBALL_URL') | basename }}"
+      TARBALL_NAME_REGULAR_FOLDER: "{{ (lookup('env', 'PXB_TARBALL_URL') | basename) | regex_replace('\\.tar\\.gz$', '') }}"
+    when: lookup('env', 'PXB_TARBALL_URL') | default('', true) | length > 0
+
   - name: Extract major version
     set_fact:
       major_version: "{{ PXB_VERSION.split('-')[0] }}"
@@ -282,6 +291,7 @@
       mode: '0644'
     when:
       - lookup('env', 'PXB_RELEASE') == "80"
+      - lookup('env', 'PXB_TARBALL_URL') | default('', true) | length == 0
 
   - name: Download {{ TARBALL_NAME_REGULAR }} REGULAR MAIN REPO PS84 PXB 84
     ansible.builtin.get_url:
@@ -290,6 +300,15 @@
       mode: '0644'
     when:
       - lookup('env', 'PXB_RELEASE') == "84"
+      - lookup('env', 'PXB_TARBALL_URL') | default('', true) | length == 0
+
+  - name: Download branch-built PXB tarball from S3 ({{ TARBALL_NAME_REGULAR }})
+    ansible.builtin.get_url:
+      url: "{{ lookup('env', 'PXB_TARBALL_URL') }}"
+      dest: /package-testing/molecule/pxb-new-ps-innodb-rocksdb/{{ TARBALL_NAME_REGULAR }}
+      mode: '0644'
+    when:
+      - lookup('env', 'PXB_TARBALL_URL') | default('', true) | length > 0
 
   - name: Extract {{ TARBALL_NAME_REGULAR }} REGULAR
     ansible.builtin.unarchive:
