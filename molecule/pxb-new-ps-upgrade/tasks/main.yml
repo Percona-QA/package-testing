@@ -312,6 +312,7 @@
       url: "{{ lookup('env', 'PXB_TARBALL_URL') }}"
       dest: /package-testing/molecule/pxb-new-ps-upgrade/{{ TARBALL_NAME_REGULAR }}
       mode: '0644'
+      follow_redirects: all
     when:
       - lookup('env', 'PXB_TARBALL_URL') | default('', true) | length > 0
 
