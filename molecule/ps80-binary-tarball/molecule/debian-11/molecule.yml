@@ -37,10 +37,8 @@ scenario:
   destroy_sequence:
     - destroy
   test_sequence:
-    - destroy
     - create
     - prepare
     - converge
     - verify
     - destroy
-

@@ -1,0 +1,31 @@
+---
+- name: Destroy
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  no_log: "{{ not (lookup('env', 'MOLECULE_DEBUG') | bool or molecule_yml.provisioner.log|default(false) | bool) }}"
+  vars:
+    default_region: "{{ lookup('env', 'AWS_DEFAULT_REGION') | default('us-east-1', true) }}"
+
+  tasks:
+    # Terminate by the unique Name tag set in create.yml (item.name already embeds
+    # BUILD_NUMBER + JOB_NAME, so it is unique to this run and cannot match unrelated
+    # instances). This works even when molecule instance-config was never written.
+    - name: Destroy molecule instance(s)
+      amazon.aws.ec2_instance:
+        state: absent
+        filters:
+          "tag:Name": "{{ item.name }}"
+          instance-state-name:
+            - pending
+            - running
+            - stopping
+            - stopped
+        region: "{{ item.region|default(default_region) }}"
+        wait: true
+      with_items: "{{ molecule_yml.platforms }}"
+      register: server
+
+    - name: Print destroy result
+      debug:
+        var: server
