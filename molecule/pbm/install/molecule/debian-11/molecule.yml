@@ -7,7 +7,7 @@ platforms:
   - name: debian11-${BUILD_NUMBER}-${JOB_NAME}
     region: us-west-2
     image: ami-05f9dcaa9ddb9a15e
-    vpc_subnet_id: subnet-03136d8c244f56036
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.micro
     ssh_user: admin
     root_device_name: /dev/xvda

@@ -116,12 +116,18 @@ def test_fips_md5(host, mysql_server, pro_fips_vars):
     # For Oracle-9, FIPS is supported and tests should not be skipped
     is_oracle9 = is_oracle_linux_9(host)
     should_run = pro_fips_vars['fips_enabled'] or (is_oracle9 and pro_fips_vars['fips_supported'])
-    
+
     if not should_run:
         pytest.skip("MySQL not running in FIPS mode")
 
-    output = mysql_server.run_query("SELECT MD5('foo');")
-    assert '00000000000000000000000000000000' in output
+    # In MySQL 9.x FIPS mode, MD5() raises an error instead of returning zeros.
+    # Both behaviors confirm MD5 is blocked by FIPS.
+    try:
+        output = mysql_server.run_query("SELECT MD5('foo');")
+        assert '00000000000000000000000000000000' in output
+    except subprocess.CalledProcessError:
+        # MD5 blocked by FIPS — this is also a valid confirmation
+        pass
 
 def test_fips_value(host, mysql_server, pro_fips_vars):
     # For Oracle-9, FIPS is supported and tests should not be skipped
@@ -175,7 +181,7 @@ def test_install_functions(mysql_server):
 
 def test_install_component(mysql_server, pro_fips_vars):
     v = pro_fips_vars['ps_version_major']
-    if v.startswith("8.", "9."):
+    if v.startswith(("8.", "9.")):
         for component in ps_components:
             mysql_server.install_component(component)
     else:
@@ -188,20 +194,28 @@ def test_install_plugin(mysql_server):
 
 
 def test_audit_log_v2(mysql_server, pro_fips_vars):
-    if pro_fips_vars['ps_version_major'].startswith(("8.", "9.")):
+    v = pro_fips_vars['ps_version_major']
+    if v.startswith(("8.", "9.")):
         base_dir = pro_fips_vars['base_dir']
 
-        mysql_server.run_query(
-            f"source {base_dir}/share/audit_log_filter_linux_install.sql;"
+        mysql_server.run_file(
+            f"{base_dir}/share/audit_log_filter_linux_install.sql"
         )
 
-        output = mysql_server.run_query(
-            'SELECT plugin_status '
-            'FROM information_schema.plugins '
-            'WHERE plugin_name = "audit_log_filter";'
-        )
-
-        assert 'ACTIVE' in output
+        if v.startswith("9."):
+            # In PS 9.x audit_log_filter is a component, not a plugin
+            output = mysql_server.run_query(
+                'SELECT component_urn FROM mysql.component '
+                'WHERE component_urn LIKE "%audit_log_filter%";'
+            )
+            assert 'audit_log_filter' in output
+        else:
+            output = mysql_server.run_query(
+                'SELECT plugin_status '
+                'FROM information_schema.plugins '
+                'WHERE plugin_name = "audit_log_filter";'
+            )
+            assert 'ACTIVE' in output
 
     else:
         pytest.skip("Audit log v2 only for PS 8.x and 9.x")

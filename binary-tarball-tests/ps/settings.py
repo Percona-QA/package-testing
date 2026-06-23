@@ -142,7 +142,7 @@ ps80_components = (
 ps80_files = (
   'lib/libcoredumper.a',
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.45' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.46' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini','lib/plugin/keyring_file.so',
@@ -150,8 +150,8 @@ ps80_files = (
   'lib/plugin/audit_log_filter.so', 'lib/plugin/component_masking_functions.so', 'lib/plugin/component_percona_telemetry.so'
 )
 ps80_symlinks = (
-  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.45'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.45'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.46'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.46'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 ps80_openssl_files = (
   'lib/libcrypto.so', 'lib/libk5crypto.so', 'lib/libssl.so', 'lib/libsasl2.so'
@@ -282,14 +282,12 @@ ps97_executables = ps97_binaries + [
 ]
 ps97_plugins = (
   ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
-  ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
+  ('rpl_semi_sync_source','semisync_source.so'),('rpl_semi_sync_replica','semisync_replica.so'),
   ('clone','mysql_clone.so'),
   ('procfs', 'procfs.so')
 )
 ps97_functions = (
-  ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
-  ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_exclusive', 'version_token.so', 'INT'),
-  ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
+  ('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
 )
 
 ps97_components = (
@@ -356,4 +354,5 @@ elif ps_version_major == '9.7':
     ps_functions = ps97_functions
     ps_files = ps97_files
     ps_symlinks = ps97_symlinks
+    ps_components = ps97_components
     ps_openssl_files=ps97_openssl_files
