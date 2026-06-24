@@ -43,7 +43,7 @@
 
   - name: enable the pxb-97 release repo
     command: percona-release enable pxb-97-lts release
-    when: ansible_distribution_release == "resolute"
+    when: ansible_distribution_release != "resolute"
 
   - name: Clean and update package cache
     shell: |
