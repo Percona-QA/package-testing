@@ -11,7 +11,7 @@
 
   - name: Determine Percona Server major version
     set_fact:
-      PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') if '8.4' in UPSTREAM_VERSION else 8 }}"
+      PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') }}"
 
   - name: Print Percona Server major version
     debug:
