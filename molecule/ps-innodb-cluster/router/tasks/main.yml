@@ -17,15 +17,15 @@
     debug:
       var: PS_MAJ_VER
 
-  - name: include tasks for enabling PS 80/84 main repo
+  - name: include tasks for enabling PS 80/84/97 main repo
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_main_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "main"
 
-  - name: include tasks for enabling PS 80/84 test repo
+  - name: include tasks for enabling PS 80/84/97 test repo
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_testing_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "testing" or lookup('env', 'INSTALL_REPO') == ""
 
-  - name: include tasks for enabling PS 80/84 experimental repo
+  - name: include tasks for enabling PS 80/84/97 experimental repo
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_experimental_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "experimental"
 
