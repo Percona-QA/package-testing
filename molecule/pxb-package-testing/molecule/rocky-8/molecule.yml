@@ -10,7 +10,13 @@ platforms:
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.large
     ssh_user: rocky
-    root_device_name: /dev/xvda
+    root_device_name: /dev/sda1
+    block_device_mappings:
+      - device_name: /dev/sda1
+    ebs:
+      volume_size: 40
+      volume_type: gp2
+      delete_on_termination: true
     instance_tags:
       iit-billing-tag: ${IIT_BILLING_TAG}
       job-name: ${JOB_NAME}

@@ -195,7 +195,7 @@ def test_install_plugin(mysql_server):
 
 def test_audit_log_v2(mysql_server, pro_fips_vars):
     v = pro_fips_vars['ps_version_major']
-    if v.startswith(("8.", "9.")):
+    if v.startswith("8.0") or v.startswith("9."):
         base_dir = pro_fips_vars['base_dir']
 
         mysql_server.run_file(
@@ -218,7 +218,7 @@ def test_audit_log_v2(mysql_server, pro_fips_vars):
             assert 'ACTIVE' in output
 
     else:
-        pytest.skip("Audit log v2 only for PS 8.x and 9.x")
+        pytest.skip("Audit log v2 only for PS 8.0 and 9.x")
 
 
 def test_telemetry_status(mysql_server, pro_fips_vars):
