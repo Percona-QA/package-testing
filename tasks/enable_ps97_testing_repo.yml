@@ -41,9 +41,9 @@
   - name: enable the PS-97-LTS testing repo
     command: percona-release enable-only ps-97-lts testing
 
-  - name: enable the pxb-97 release repo
-    command: percona-release enable pxb-97-lts release
-    when: ansible_distribution_release != "resolute"
+#  - name: enable the pxb-97 release repo
+#    command: percona-release enable pxb-97-lts release
+#    when: ansible_distribution_release != "resolute"
 
   - name: Clean and update package cache
     shell: |
