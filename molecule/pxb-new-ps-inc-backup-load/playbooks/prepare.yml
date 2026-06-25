@@ -226,24 +226,11 @@
           - make
           - gcc
           - gcc-c++
-          - openssl-devel
           - zlib-devel
           - libzstd-devel
           - lz4
           - zstd
         state: present
-      when: ansible_os_family == "RedHat"
-
-    # Installing openssl-devel can transitively upgrade openssl-libs (libcrypto.so.3)
-    # on older OL9 images. That swaps the shared crypto lib out from under the
-    # running sshd, so newly-forked sshd sessions crash during key exchange
-    # ("Connection reset by peer" / scp "Connection closed") and the host becomes
-    # unreachable mid-prepare. Restarting sshd makes it re-exec against the new
-    # libcrypto so subsequent connections work. RedHat-only (Debian is unaffected).
-    - name: Restart sshd after openssl-libs may have been upgraded (RedHat)
-      ansible.builtin.service:
-        name: sshd
-        state: restarted
       when: ansible_os_family == "RedHat"
 
     - name: Install cmake and build tools for Debian family
@@ -345,3 +332,17 @@
         state: latest
         update_cache: yes
       when: ansible_os_family == "Debian"
+
+    # Keep this as the LAST step of the playbook. Installing openssl-devel can
+    # transitively upgrade openssl-libs (libcrypto.so.3) on older OL9 images,
+    # swapping the shared crypto lib out from under the running sshd. Newly-forked
+    # sshd sessions then crash during key exchange ("Connection reset by peer" /
+    # scp "Connection closed") and the host becomes unreachable. By doing it last,
+    # all other prepare tasks have already completed, so a broken connection here
+    # no longer aborts the rest of the playbook. RedHat-only (Debian's libssl-dev
+    # is installed above with the other build tools and does not have this issue).
+    - name: Install openssl-devel for RedHat family (last to avoid sshd disconnect)
+      package:
+        name: openssl-devel
+        state: present
+      when: ansible_os_family == "RedHat"
