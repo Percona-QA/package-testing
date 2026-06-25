@@ -58,7 +58,9 @@
       - percona-server-shared-compat{{ pro_suf | default('') }}
       percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
       packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == 8
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_distribution_major_version | int == 8
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
@@ -80,6 +82,8 @@
       - percona-server-rocksdb{{ pro_suf | default('') }}
       percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
       packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version != 8
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_distribution_major_version | int != 8
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport" 
