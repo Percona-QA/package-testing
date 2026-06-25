@@ -5,22 +5,6 @@
   become_method: sudo
   gather_facts: true
   tasks:
-    # DEBUG (PS-11200 oracle-9 hang): launch a detached health sampler that writes
-    # host stats to the serial console every 15s. On the Xen t2 instance the serial
-    # console is the only thing `aws ec2 get-console-output` can still capture after
-    # sshd wedges, so this leaves breadcrumbs (load/mem/disk/dmesg) showing what
-    # kills the host during prepare. Gated to RedHat (oracle-9) only.
-    # REMOVE once the oracle-9 prepare hang is diagnosed.
-    - name: DEBUG start serial-console health sampler (oracle-9 only)
-      ansible.builtin.command: >
-        systemd-run --unit=pxb-debug-breadcrumbs --collect
-        /bin/bash -c 'while true; do
-        { echo "===== $(date -u) ====="; uptime; free -m; df -h /; ss -s; dmesg | tail -n 8; }
-        > /dev/console 2>&1; sleep 15; done'
-      changed_when: false
-      failed_when: false
-      when: ansible_os_family == "RedHat"
-
     - name: Setup SSH keys for RedHat
       authorized_key:
         user: ec2-user
