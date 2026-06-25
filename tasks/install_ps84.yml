@@ -81,7 +81,6 @@
       - percona-server{{ pro_suf | default('') }}-debuginfo
       - percona-server-devel{{ pro_suf | default('') }}
       - percona-server-rocksdb{{ pro_suf | default('') }}
-      - percona-server-shared-compat{{ pro_suf | default('') }}
       percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
       packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
     when:
