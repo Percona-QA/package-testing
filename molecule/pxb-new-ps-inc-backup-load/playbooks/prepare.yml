@@ -226,7 +226,6 @@
           - make
           - gcc
           - gcc-c++
-          - openssl-devel
           - zlib-devel
           - libzstd-devel
           - lz4
