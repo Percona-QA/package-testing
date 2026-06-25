@@ -226,11 +226,24 @@
           - make
           - gcc
           - gcc-c++
+          - openssl-devel
           - zlib-devel
           - libzstd-devel
           - lz4
           - zstd
         state: present
+      when: ansible_os_family == "RedHat"
+
+    # Installing openssl-devel can transitively upgrade openssl-libs (libcrypto.so.3)
+    # on older OL9 images. That swaps the shared crypto lib out from under the
+    # running sshd, so newly-forked sshd sessions crash during key exchange
+    # ("Connection reset by peer" / scp "Connection closed") and the host becomes
+    # unreachable mid-prepare. Restarting sshd makes it re-exec against the new
+    # libcrypto so subsequent connections work. RedHat-only (Debian is unaffected).
+    - name: Restart sshd after openssl-libs may have been upgraded (RedHat)
+      ansible.builtin.service:
+        name: sshd
+        state: restarted
       when: ansible_os_family == "RedHat"
 
     - name: Install cmake and build tools for Debian family
