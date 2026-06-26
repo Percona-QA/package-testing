@@ -448,6 +448,55 @@
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
+  - name: Check if telemetry UUID file exists
+    stat:
+      path: /usr/local/percona/telemetry_uuid
+    register: telemetry_file
+
+  - name: Display telemetry UUID file status
+    debug:
+      var: telemetry_file.stat
+
+  - name: Show telemetry UUID file
+    shell: |
+      if [ -f /usr/local/percona/telemetry_uuid ]; then
+        cat /usr/local/percona/telemetry_uuid
+      else
+        echo "telemetry_uuid does not exist"
+      fi
+    register: telemetry_uuid
+    changed_when: false
+
+  - debug:
+      var: telemetry_uuid.stdout_lines
+
+  - name: Check installed telemetry packages
+    shell: |
+      rpm -qa | grep -i telemetry || true
+    register: telemetry_rpm
+    changed_when: false
+
+  - debug:
+      var: telemetry_rpm.stdout_lines
+
+  - name: Check telemetry agent service
+    shell: |
+      systemctl status percona-telemetry-agent --no-pager || true
+    register: telemetry_service
+    changed_when: false
+
+  - debug:
+      var: telemetry_service.stdout_lines
+
+  - name: Check telemetry agent logs
+    shell: |
+      journalctl -u percona-telemetry-agent -n 100 --no-pager || true
+    register: telemetry_logs
+    changed_when: false
+
+  - debug:
+      var: telemetry_logs.stdout_lines
+
   - name: check telemetry (disabled)
     command: /package-testing/check_telemetry.sh ps -u
 
