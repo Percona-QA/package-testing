@@ -36,7 +36,7 @@
               mode=0664 owner=root group=root
 
   - name: include tasks for enabling PS 8.0 test repo
-    include_tasks: ../tasks/enable_ps8_testing_repo.yml
+    include_tasks: ../tasks/enable_ps8_main_repo.yml
 
   - name: download and extract world database
     command: "{{ item }}"
