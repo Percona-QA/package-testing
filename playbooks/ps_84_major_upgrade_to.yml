@@ -54,8 +54,9 @@
       - lookup('env', 'pro_test') != "yes"
       - ansible_distribution != "Amazon"
 
-  - name: start mysql service
-    service: name=mysql state=started
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7)
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -74,6 +75,16 @@
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
 
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
+
+  - name: disable selinux on centos7 for TokuDB to work
+    shell: setenforce 0 || true
+    when: ansible_os_family == "RedHat"
+
   - name: restart mysql service
     service: name=mysql state=restarted
 
@@ -85,28 +96,24 @@
       - rsyslog-mysql
     when: ansible_os_family == "Debian"
 
-  - name: install 3rd party packages with yum
+  - name: install 3rd party packages with dnf
     yum:
       name: "{{ packages }}"
     vars:
       packages:
       - rsyslog-mysql
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-
-  - name: install 3rd party packages with dnf
-    dnf:
-      name: "{{ packages }}"
-    vars:
-      packages:
-      - rsyslog-mysql
-    when: 
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start mysql service
     service: name=mysql state=started
+
+  - name: start my.cnf change test
+    command: /package-testing/check_mycnf_pre.sh
+
+  - name: stop mysql service with systemctl command
+    command: systemctl stop mysql
 
   - name: disable all percona repos
     command: percona-release disable all
@@ -115,18 +122,18 @@
     stat: path=/etc/my.cnf
     register: mycnf
 
-  - name: copy config file to backup
-    copy:
-      src: /etc/my.cnf
-      dest: /etc/my.cnf.backup
-      remote_src: yes
-    when: mycnf.stat.exists and ansible_os_family == "RedHat"
+#  - name: copy config file to backup
+#    copy:
+#      src: /etc/my.cnf
+#      dest: /etc/my.cnf.backup
+#      remote_src: yes
+#    when: mycnf.stat.exists and ansible_os_family == "RedHat"
 
-  - name: remove PS 8.0 packages
-    include_tasks: ../tasks/remove_ps80.yml
+#  - name: remove PS 8.0 packages
+#    include_tasks: ../tasks/remove_ps80.yml
 
-  - name: check if process is stopped after package removal
-    command: /package-testing/check_running.sh mysql stopped
+#  - name: check if process is stopped after package removal
+#    command: /package-testing/check_running.sh mysql stopped
 
   - stat:
       path: /var/lib/mysql
@@ -138,28 +145,28 @@
     when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
 ### end of PS 8.0 install
 
-  - name: copy config file to original location
-    copy:
-      src: /etc/my.cnf.backup
-      dest: /etc/my.cnf
-      remote_src: yes
-      force: yes
-    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
+#  - name: copy config file to original location
+#    copy:
+#      src: /etc/my.cnf.backup
+#      dest: /etc/my.cnf
+#      remote_src: yes
+#      force: yes
+#    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
 
-  - name: restore percona-server.conf.d and mysql.cnf.d
-    shell: |
-      mv /etc/percona-server.conf.d_backup-* /etc/percona-server.conf.d
-      mv /etc/my.cnf.d_backup-* /etc/my.cnf.d
-    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
+#  - name: restore percona-server.conf.d and mysql.cnf.d
+#    shell: |
+#      mv /etc/percona-server.conf.d_backup-* /etc/per##cona-server.conf.d
+#      mv /etc/my.cnf.d_backup-* /etc/my.cnf.d
+#    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
 
   - name: include tasks for enabling PS 84 test repo
     include_tasks: ../tasks/enable_ps84_testing_repo.yml
 
-  - name: append include for RedHat
-    lineinfile:
-        path: /etc/my.cnf
-        line: '!includedir /etc/my.cnf.d'
-    when: ansible_os_family == "RedHat"
+#  - name: append include for RedHat
+#    lineinfile:
+#        path: /etc/my.cnf
+#        line: '!includedir /etc/my.cnf.d'
+#    when: ansible_os_family == "RedHat"
 
   - name: install Percona Server 8.4 packages
     include_tasks: ../tasks/install_ps84.yml
