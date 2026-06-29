@@ -62,10 +62,6 @@
     command: /package-testing/setpass_57.sh
     when: ansible_os_family == "RedHat"
 
-  - name: disable selinux on centos7
-    shell: setenforce 0 || true
-    when: ansible_os_family == "RedHat"
-
   - name: append include for RedHat
     lineinfile:
         path: /etc/my.cnf
@@ -93,7 +89,7 @@
       - rsyslog-mysql
     when: ansible_os_family == "Debian"
 
-  - name: install 3rd party packages with dnf
+  - name: install 3rd party packages
     yum:
       name: "{{ packages }}"
     vars:
