@@ -26,8 +26,7 @@ ps97_binaries = (
   '/usr/sbin/mysqld-debug', '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow', '/usr/bin/mysqlimport',
   '/usr/bin/mysqlshow', '/usr/bin/mysqlslap', '/usr/bin/mysqlcheck', '/usr/bin/mysql_config_editor', '/usr/bin/mysql_config',
   '/usr/bin/mysql_secure_installation', '/usr/bin/sed', '/usr/bin/find'
-  '/usr/bin/gunzip', '/usr/bin/my_print_defaults', '/usr/bin/mysql_tzinfo_to_sql',
-  '/usr/bin/grep'
+  '/usr/bin/my_print_defaults', '/usr/bin/mysql_tzinfo_to_sql', '/usr/bin/grep'
 )
 ps97_plugins = (
   ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
