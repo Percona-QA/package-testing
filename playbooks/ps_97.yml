@@ -68,11 +68,6 @@
       - lookup('env', 'install_repo') == "experimental"
       - lookup('env', 'pro_test') != "yes"
 
-  - name: include tasks for enabling PS 97 pro repo
-    include_tasks: ../tasks/enable_ps97_pro_tools_repo.yml
-    when:
-      - lookup('env', 'pro_test') == "yes"
-
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
@@ -83,36 +78,33 @@
     vars:
       pro_suf: "{{ '-pro' if 'yes' in lookup('env', 'pro_test') else '' }}"
 
-  - name: enable pt testing repo
-    command: percona-release enable pt testing
-    when: ansible_distribution_release != "resolute"
+#  - name: enable pt testing repo
+#    command: percona-release enable pt testing
+#    when: ansible_distribution_release != "resolute"
 
-  - name: include tasks for pt installation
-    include_tasks: ../tasks/install_pt.yml
-    when: ansible_distribution_release != "resolute"
+#  - name: include tasks for pt installation
+#    include_tasks: ../tasks/install_pt.yml
+#    when: ansible_distribution_release != "resolute"
 
   - name: enable the mysql shell testing repo
     command: percona-release enable mysql-shell testing
-    when: 
+    when:
       - install_mysql_shell == "yes" or install_mysql_shell == ""
       - ansible_distribution != "Amazon"
-      - not (ansible_distribution == "Debian" and ansible_distribution_major_version|int == 11)
 
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
-    when: 
+    when:
       - install_mysql_shell == "yes" or install_mysql_shell == ""
       - ansible_distribution != "Amazon"
-      - not (ansible_distribution == "Debian" and ansible_distribution_major_version|int == 11)
 
-  #- name: check telemetry (enabled)
-   # command: /package-testing/check_telemetry.sh ps -e
-#
- # - name: Verify telemetry version and package installation
-  #  command: /package-testing/check_tel_ver_pack.sh
-   # when:
-    #  - ansible_distribution != "Amazon"
-     # - ansible_distribution_release != "focal"
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution != "Amazon"
 
  # - name: Enable PXB 97 repo
   #  command: percona-release enable-only pxb-97-lts testing
@@ -189,11 +181,6 @@
   - name: include PGO flags check for INFO_BIN
     include_tasks: ../tasks/test_pgo.yml
 
- # - name: check telemetry (enabled)
-  #  command: /package-testing/check_telemetry.sh ps -e
-   # when: ansible_os_family != "RedHat"
-
-
   # Bookworm does not support fips mode out of the box. It requires opennsl module rebuid. So we skip fips mode enabling for bookworm.
   - name: include tasks for checking FIPS mode
     include_tasks: ../tasks/check_ps80_fips.yml
@@ -229,9 +216,6 @@
   - name: run mysql compression tests script
     command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps97
 
- # - name: run PAM tests
-  #  include_tasks: ../tasks/pam_test.yml
-
   - name: install 3rd party packages with apt
     apt:
       name: "{{ packages }}"
@@ -246,7 +230,7 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: 
+    when:
       - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
       - ansible_facts['distribution_major_version'] | int <= 7
 
@@ -256,7 +240,7 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: 
+    when:
       - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
       - ansible_facts['distribution_major_version'] | int >= 8
 
@@ -268,9 +252,6 @@
 
   - name: start mysql service
     service: name=mysql state=started
-
-  - name: disable all percona repos
-    command: percona-release disable all
 
   - name: get my.cnf stats
     stat: path=/etc/my.cnf
@@ -301,7 +282,7 @@
     vars:
      packages:
       - percona-server*
-    when: 
+    when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
@@ -312,7 +293,7 @@
     vars:
      packages:
       - percona-server*
-    when: 
+    when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int <= 7
 
