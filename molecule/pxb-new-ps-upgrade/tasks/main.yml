@@ -56,6 +56,19 @@
       ps_glibc_version: "{{ lookup('env', 'PS_RHEL_GCLIBC_VERSION') }}"
     when: ansible_os_family == "RedHat"
 
+  # For branch builds the job builds two binaries in parallel (oraclelinux:9 and
+  # debian:bookworm) and exports a URL for each. Pick the one built on this host's
+  # OS family so each test host runs a binary linked against its own libraries.
+  - name: Select branch-built PXB tarball URL for RedHat host
+    set_fact:
+      pxb_tarball_url: "{{ lookup('env', 'PXB_TARBALL_URL_RHEL') }}"
+    when: ansible_os_family == "RedHat"
+
+  - name: Select branch-built PXB tarball URL for Debian host
+    set_fact:
+      pxb_tarball_url: "{{ lookup('env', 'PXB_TARBALL_URL_DEB') }}"
+    when: ansible_os_family == "Debian"
+
   - name: Set PXB_VERSION and PS_VERSION vars
     set_fact:
       PXB_VERSION: "{{ lookup('env', 'PXB_VERSION') }}"
@@ -80,6 +93,15 @@
       TARBALL_NAME_OLD_MINIMAL_FOLDER: "percona-xtrabackup-{{ lookup('env', 'OLD_PXB_VERSION') }}-Linux-x86_64.glibc{{ pxb_glibc_version }}-minimal"
       PS_TARBALL_NAME_MINIMAL: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ ps_glibc_version }}-minimal.tar.gz"
       PS_TARBALL_NAME_MINIMAL_FOLDER: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ ps_glibc_version }}-minimal"
+
+  # When PXB_TARBALL_URL is set (job built an unreleased NEW PXB from a branch),
+  # override the NEW REGULAR tarball/folder names with the branch-built artifact.
+  # OLD_PXB_VERSION (TARBALL_NAME_OLD_*) is intentionally left as a released download.
+  - name: Override NEW PXB tarball name when building from a branch (pxb_tarball_url set)
+    set_fact:
+      TARBALL_NAME_REGULAR: "{{ pxb_tarball_url | basename }}"
+      TARBALL_NAME_REGULAR_FOLDER: "{{ (pxb_tarball_url | basename) | regex_replace('\\.tar\\.gz$', '') }}"
+    when: pxb_tarball_url | default('', true) | length > 0
 
   - name: Extract major version
     set_fact:
@@ -287,6 +309,7 @@
       mode: '0644'
     when:
       - lookup('env', 'PXB_RELEASE') == "80"
+      - pxb_tarball_url | default('', true) | length == 0
 
   - name: Download {{ TARBALL_NAME_REGULAR }} REGULAR MAIN REPO PS84 PXB 84
     ansible.builtin.get_url:
@@ -295,6 +318,15 @@
       mode: '0644'
     when:
       - lookup('env', 'PXB_RELEASE') == "84"
+      - pxb_tarball_url | default('', true) | length == 0
+
+  - name: Download branch-built NEW PXB tarball from S3 ({{ TARBALL_NAME_REGULAR }})
+    ansible.builtin.get_url:
+      url: "{{ pxb_tarball_url }}"
+      dest: /package-testing/molecule/pxb-new-ps-upgrade/{{ TARBALL_NAME_REGULAR }}
+      mode: '0644'
+    when:
+      - pxb_tarball_url | default('', true) | length > 0
 
   - name: Extract {{ TARBALL_NAME_REGULAR }} REGULAR
     ansible.builtin.unarchive:

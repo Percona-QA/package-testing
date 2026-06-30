@@ -206,7 +206,7 @@
       git:
         repo: https://github.com/Percona-QA/server-qa.git
         dest: /server-qa
-        version: tomislav-pxb-python
+        version: main
         force: yes
 
     - name: Checkout pstress repository
