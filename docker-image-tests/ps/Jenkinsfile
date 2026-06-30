@@ -15,10 +15,10 @@ pipeline {
             sh '''
               rm -rf /package-testing
               rm -f master.zip
-              wget https://github.com/kaushikpuneet07/package-testing/archive/fix-97.zip
+              wget https://github.com/Percona-QA/package-testing/archive/master.zip
               unzip master.zip
               rm -f master.zip
-              mv "package-testing-fix-97" package-testing
+              mv "package-testing-master" package-testing
             '''
                     
             def VERSION = sh(
