@@ -314,21 +314,27 @@
         update_cache: yes
       when: ansible_os_family == "Debian"
 
-    - name: Install GPG key for EPEL 10
+    # EPEL provides sysbench on RHEL/OL. Enable it for 8/9/10 (not just 10),
+    # otherwise the sysbench install below fails with "No package sysbench
+    # available" on Oracle Linux 9. Amazon Linux is excluded (no matching EPEL
+    # release rpm; major_version there is "2023").
+    - name: Install EPEL GPG key for RedHat family (RHEL/OL 8 and later)
       rpm_key:
         state: present
-        key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-10
+        key: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
       when:
         - ansible_os_family == "RedHat"
-        - ansible_distribution_major_version | int == 10
+        - ansible_distribution != "Amazon"
+        - ansible_distribution_major_version | int >= 8
 
-    - name: Setup EPEL 10 repo
+    - name: Setup EPEL repo for RedHat family (RHEL/OL 8 and later)
       dnf:
-        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
+        name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
         state: present
       when:
         - ansible_os_family == "RedHat"
-        - ansible_distribution_major_version | int == 10
+        - ansible_distribution != "Amazon"
+        - ansible_distribution_major_version | int >= 8
 
     - name: Install sysbench for RedHat family (RHEL 8 and later)
       dnf:
