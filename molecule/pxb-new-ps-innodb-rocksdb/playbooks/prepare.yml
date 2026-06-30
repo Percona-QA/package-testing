@@ -223,13 +223,34 @@
           - make
           - gcc
           - gcc-c++
-          - openssl-devel
           - zlib-devel
           - libzstd-devel
           - lz4
           - zstd
         state: present
       when: ansible_os_family == "RedHat"
+
+    # Pin openssl-devel to the EXACT version already installed as openssl-libs.
+    # On older OL9 AMIs, a plain "openssl-devel" install pulls in a newer
+    # openssl-libs (libcrypto.so.3), swapping the shared crypto lib out from
+    # under the running sshd. New sshd sessions then crash during key exchange
+    # ("Connection reset by peer" / scp "Connection closed") and the host goes
+    # unreachable mid-run (prepare or converge). Installing the matching version
+    # means openssl-libs is already satisfied, so nothing is upgraded and sshd is
+    # never disturbed. RedHat-only (Debian's libssl-dev is unaffected).
+    - name: Gather installed package facts (RedHat)
+      ansible.builtin.package_facts:
+        manager: rpm
+      when: ansible_os_family == "RedHat"
+
+    - name: Install openssl-devel pinned to installed openssl-libs version (RedHat)
+      ansible.builtin.dnf:
+        name: "openssl-devel-{{ ansible_facts.packages['openssl-libs'][0].version }}-{{ ansible_facts.packages['openssl-libs'][0].release }}"
+        state: present
+        allow_downgrade: true
+      when:
+        - ansible_os_family == "RedHat"
+        - "'openssl-libs' in ansible_facts.packages"
 
     - name: Install cmake and build tools for Debian family
       apt:
