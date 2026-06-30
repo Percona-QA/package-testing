@@ -23,7 +23,7 @@ docker_image_major = docker_acc + "/" + docker_product + ":" + ps_version_major
 ps97_packages = (
   'percona-server-client', 'percona-server-rocksdb', 'percona-server-server',
   'percona-server-shared', 'percona-mysql-shell', 'percona-server-core',
-  'percona-server-client-core', 'percona-server-client-plugins',
+  'percona-server-client-core', 'percona-server-client-plugins'
 )
 ps97_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/ps-admin', '/usr/bin/mysqladmin', '/usr/bin/mysqlbinlog',
@@ -40,14 +40,13 @@ ps97_plugins = (
   ('authentication_ldap_sasl','authentication_ldap_sasl.so')
 )
 ps97_components = (
-  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functio>
+  ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault')
 )
 ps97_functions = (
-  ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'versi>
-  ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_e>
-  ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', >
+  ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
+  ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_exclusive', 'version_token.so', 'INT'),
+  ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
 )
-
 
 # 8.X
 ps8x_packages = (
