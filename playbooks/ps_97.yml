@@ -78,13 +78,13 @@
     vars:
       pro_suf: "{{ '-pro' if 'yes' in lookup('env', 'pro_test') else '' }}"
 
-#  - name: enable pt testing repo
-#    command: percona-release enable pt testing
-#    when: ansible_distribution_release != "resolute"
+  - name: enable pt testing repo
+    command: percona-release enable pt testing
+    when: ansible_distribution_release != "resolute"
 
-#  - name: include tasks for pt installation
-#    include_tasks: ../tasks/install_pt.yml
-#    when: ansible_distribution_release != "resolute"
+  - name: include tasks for pt installation
+    include_tasks: ../tasks/install_pt.yml
+    when: ansible_distribution_release != "resolute"
 
   - name: enable the mysql shell testing repo
     command: percona-release enable mysql-shell testing
