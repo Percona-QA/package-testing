@@ -420,7 +420,10 @@
 
   - name: Build pstress
     shell: |
-      cmake . -DBASEDIR=/package-testing/molecule/pxb-new-ps-inc-backup-load/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}/ -DPERCONASERVER=ON
+      cmake . -DBASEDIR=/package-testing/molecule/pxb-new-ps-inc-backup-load/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}/ \
+              -DPERCONASERVER=ON \
+              -DSTATIC_LIBRARY=OFF \
+              -DCMAKE_EXE_LINKER_FLAGS="-Wl,-rpath,/package-testing/molecule/pxb-new-ps-inc-backup-load/{{ PS_TARBALL_NAME_REGULAR_FOLDER }}/lib"
       make -j4
     args:
       chdir: /pstress
