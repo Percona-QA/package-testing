@@ -22,20 +22,18 @@ docker_image_major = docker_acc + "/" + docker_product + ":" + ps_version_major
 # 9.7
 ps97_packages = (
   'percona-server-client', 'percona-server-rocksdb', 'percona-server-server',
-  'percona-server-shared', 'percona-mysql-shell', 'percona-server-core',
-  'percona-server-client-core', 'percona-server-client-plugins'
+  'percona-server-shared', 'percona-mysql-shell', 'percona-server-client-plugins'
 )
 ps97_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/ps-admin', '/usr/bin/mysqladmin', '/usr/bin/mysqlbinlog',
   '/usr/sbin/mysqld-debug', '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow', '/usr/bin/mysqlimport',
   '/usr/bin/mysqlshow', '/usr/bin/mysqlslap', '/usr/bin/mysqlcheck', '/usr/bin/mysql_config_editor', '/usr/bin/mysql_config',
-  '/usr/bin/mysql_config-64', '/usr/bin/mysql_secure_installation', '/usr/bin/find', '/usr/bin/kill',
+  '/usr/bin/mysql_config-64', '/usr/bin/mysql_secure_installation', '/usr/bin/find',
   '/usr/bin/hostname', '/usr/bin/gunzip', '/usr/bin/my_print_defaults', '/usr/bin/mysql_tzinfo_to_sql',
   '/usr/bin/grep', '/usr/bin/sed', '/usr/bin/gawk', '/usr/bin/mysqlsh'
 )
 ps97_plugins = (
   ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
-  ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
   ('group_replication','group_replication.so'),('clone','mysql_clone.so'),
   ('authentication_ldap_sasl','authentication_ldap_sasl.so')
 )
@@ -43,9 +41,7 @@ ps97_components = (
   ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault')
 )
 ps97_functions = (
-  ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
-  ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_exclusive', 'version_token.so', 'INT'),
-  ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
+  ('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
 )
 
 # 8.X
@@ -57,7 +53,7 @@ ps8x_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/ps-admin', '/usr/bin/mysqladmin', '/usr/bin/mysqlbinlog',
   '/usr/sbin/mysqld-debug', '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow', '/usr/bin/mysqlimport',
   '/usr/bin/mysqlshow', '/usr/bin/mysqlslap', '/usr/bin/mysqlcheck', '/usr/bin/mysql_config_editor', '/usr/bin/mysql_config',
-  '/usr/bin/mysql_config-64', '/usr/bin/mysql_secure_installation', '/usr/bin/find', '/usr/bin/kill',
+  '/usr/bin/mysql_config-64', '/usr/bin/mysql_secure_installation', '/usr/bin/find',
   '/usr/bin/hostname', '/usr/bin/gunzip', '/usr/bin/my_print_defaults', '/usr/bin/mysql_tzinfo_to_sql',
   '/usr/bin/grep', '/usr/bin/sed', '/usr/bin/gawk', '/usr/bin/mysqlsh'
 )
