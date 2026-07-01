@@ -39,6 +39,24 @@
     include_tasks: ../tasks/enable_ps84_experimental_repo.yml
     when: lookup('env', 'install_repo') == "experimental"
 
+  - name: include tasks for enabling PS 97 main repo
+    include_tasks: ../tasks/enable_ps97_main_repo.yml
+    when:
+      - lookup('env', 'install_repo') == "main"
+      - lookup('env', 'server_to_test') == "ps-97"
+
+  - name: include tasks for enabling PS 97 test repo
+    include_tasks: ../tasks/enable_ps97_testing_repo.yml
+    when:
+      - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+      - lookup('env', 'server_to_test') == "ps-97"
+
+  - name: include tasks for enabling PS 97 experimental repo
+    include_tasks: ../tasks/enable_ps97_experimental_repo.yml
+    when:
+      - lookup('env', 'install_repo') == "experimental"
+      - lookup('env', 'server_to_test') == "ps-97"
+
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
@@ -58,6 +76,15 @@
           PERCONA_TELEMETRY_DISABLE: "1"
     when:
       - lookup('env', 'server_to_test') == "ps-84"
+
+  - name: install Percona Server 9.7 packages
+    include_tasks:
+      file: ../tasks/install_ps97.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
+    when:
+      - lookup('env', 'server_to_test') == "ps-97"
 
   #### FOR AL2023 ######
   - name: include tasks for enabling PS 84 pro repo
@@ -115,6 +142,14 @@
       pxb_version_major_minor: "{{ pxb_version_major_minor_reg }}"
     when:
       - lookup('env', 'server_to_test') == "ms-84"
+
+  - name: install MYSQL MS Server 9.7 packages
+    include_tasks: ../tasks/install_ms_innovation.yml
+    vars:
+      pxb_version_major: "{{ pxb_version_major_reg }}"
+      pxb_version_major_minor: "{{ pxb_version_major_minor_reg }}"
+    when:
+      - lookup('env', 'server_to_test') == "ms-97"
 
   #----- ENABLE PXB REPOS
 
@@ -293,6 +328,7 @@
       - ansible_os_family == "Debian"
       - lookup('env', 'server_to_test') != "ms-80"
       - lookup('env', 'server_to_test') != "ms-84"
+      - lookup('env', 'server_to_test') != "ms-97"
 
   - name: remove Percona Server rpm packages
     yum:
@@ -306,9 +342,11 @@
       - ansible_os_family == "RedHat"
       - lookup('env', 'server_to_test') != "ms-80"
       - lookup('env', 'server_to_test') != "ms-84"
+      - lookup('env', 'server_to_test') != "ms-97"
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped
     when:
       - lookup('env', 'server_to_test') != "ms-80"
       - lookup('env', 'server_to_test') != "ms-84"
+      - lookup('env', 'server_to_test') != "ms-97"
