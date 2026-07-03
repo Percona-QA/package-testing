@@ -24,13 +24,17 @@ class ServiceEnv:
         self.conf = next((c for c in conf_candidates if os.path.isfile(c)), None)
 
     def is_running(self):
-        """True if the daemon process is up (and systemd reports active)."""
-        count = sh("ps aux | grep -v grep | grep '{}' | wc -l".format(self.proc_pattern)).output.strip()
-        if count in ("", "0"):
-            return False
-        if self.systemctl and not self._is_active():
-            return False
-        return True
+        """True if the service is up.
+
+        On a systemd host ``systemctl is-active`` is authoritative, so we rely on
+        it directly. We deliberately do NOT gate on ``ps aux | grep`` there:
+        minimal cloud images (seen on debian12) often ship without ``ps``
+        (procps), which made the grep return 0 and wrongly reported the service
+        as stopped. The ``ps`` fallback is only used when systemd is absent.
+        """
+        if self.systemctl:
+            return self._is_active()
+        return self._proc_running()
 
     def _is_active(self):
         # Check is-active's return code (0 iff active) rather than string-matching
@@ -43,6 +47,10 @@ class ServiceEnv:
         if self.service == "mysql":
             return sh("systemctl is-active --quiet mysqld").returncode == 0
         return False
+
+    def _proc_running(self):
+        count = sh("ps aux | grep -v grep | grep '{}' | wc -l".format(self.proc_pattern)).output.strip()
+        return count not in ("", "0")
 
     def stopit(self):
         if self.is_running():
