@@ -28,7 +28,11 @@ class Result:
 
     @property
     def lines(self):
-        return (self.stdout + self.stderr).splitlines()
+        # bats builds its ${lines[@]} via `IFS=$'\n' lines=($output)`, whose
+        # unquoted word-splitting drops empty lines. Replicate that so line
+        # indices match the originals (e.g. a password prompt emits a leading
+        # blank line that bats never saw).
+        return [l for l in (self.stdout + self.stderr).splitlines() if l != ""]
 
     @property
     def output(self):
