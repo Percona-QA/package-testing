@@ -28,10 +28,21 @@ class ServiceEnv:
         count = sh("ps aux | grep -v grep | grep '{}' | wc -l".format(self.proc_pattern)).output.strip()
         if count in ("", "0"):
             return False
-        if self.systemctl:
-            if sh("systemctl is-active {}".format(self.service)).output.strip() != "active":
-                return False
+        if self.systemctl and not self._is_active():
+            return False
         return True
+
+    def _is_active(self):
+        # Check is-active's return code (0 iff active) rather than string-matching
+        # stdout: our sh() merges stderr into stdout, so a systemctl warning
+        # (e.g. "unit file changed on disk, run daemon-reload") would corrupt an
+        # "active" match. Also handle mysql.service being an alias of
+        # mysqld.service (see PS-8675), mirroring the is-enabled check.
+        if sh("systemctl is-active --quiet {}".format(self.service)).returncode == 0:
+            return True
+        if self.service == "mysql":
+            return sh("systemctl is-active --quiet mysqld").returncode == 0
+        return False
 
     def stopit(self):
         if self.is_running():
