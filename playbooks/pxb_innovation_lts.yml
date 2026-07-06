@@ -416,7 +416,8 @@
       - lookup('env', 'server_to_test') == "ps_innovation_lts"
 
 ### PS END
-
+  - name: enable repo Percona XtraBackup {{ major_release_version }}  
+    include_tasks: ../tasks/enable_pxb_innovation_testing_repo.yml
 
   - name: install Percona XtraBackup {{ major_release_version }} packages 
     include_tasks: ../tasks/install_pxb_innovation_lts.yml

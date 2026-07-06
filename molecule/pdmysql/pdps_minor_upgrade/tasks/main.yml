@@ -90,7 +90,7 @@
 
 # At this moment RHEL PXB packages do not support packages upgrade so we do not install them for major update on rhel. Re-check https://perconacorp.slack.com/archives/C047F39JKEW/p1700822258537029
   - name: install Percona XtraBackup {{ major_release_version }} packages
-    include_tasks: ../../../tasks/install_pxb_innovation_lts.yml
+    include_tasks: ../../../tasks/install_pxb_innovation.yml
     vars:
       major_release_version: "{{ lookup('env', 'FROM_VERSION').split('.')[:2]|join('') }}"
     when: ansible_os_family == "Debian" or (lookup('env', 'FROM_VERSION').split('.')[:2]|join('') == lookup('env', 'VERSION').split('.')[:2]|join('') and ansible_os_family == "RedHat")
@@ -321,7 +321,7 @@
     when: ansible_distribution_release != "focal"
 
   - name: install Percona XtraBackup {{ major_release_version }} packages
-    include_tasks: ../../../tasks/install_pxb_innovation_lts.yml
+    include_tasks: ../../../tasks/install_pxb_innovation.yml
     vars:
       major_release_version: "{{ lookup('env', 'VERSION').split('.')[:2]|join('') }}"
 

@@ -7,7 +7,7 @@ platforms:
   - name: rocky8-${BUILD_NUMBER}-${JOB_NAME}
     region: us-west-2
     image:  ami-08748ab6e1dc7d1c8
-    vpc_subnet_id: subnet-03136d8c244f56036
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.small
     ssh_user: rocky
     root_device_name: /dev/sda1

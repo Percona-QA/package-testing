@@ -17,12 +17,12 @@
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: get list of enabled dnf modules on centos 8
+  - name: get list of enabled dnf modules on rhel >= 8
     command: dnf module list --enabled
     register: enabled_dnf_modules
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
-  - name: list enabled dnf modules on centos 8
+  - name: list enabled dnf modules on rhel >= 8
     debug:
       var: enabled_dnf_modules
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"

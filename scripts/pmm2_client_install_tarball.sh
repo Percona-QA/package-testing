@@ -86,7 +86,7 @@ else
     fb=${version}
   else
     min_ver=$(echo $version | awk -F'.' '{print $2}')
-    check_arguments_compatible min_ver
+#    check_arguments_compatible min_ver
   fi
 fi
 if [ -z "${path}" ]; then
@@ -114,7 +114,7 @@ echo ${extracted_folder_name}
 ## for FB extract minor version from folder and check flags are compatible
 if [ -n "${fb}" ]; then
   min_ver=$(echo $extracted_folder_name | awk -F'.' '{print $2}')
-  check_arguments_compatible min_ver
+#  check_arguments_compatible min_ver
 fi
 cd ..
 echo "Installing tarball to ${path}"

@@ -28,27 +28,8 @@
       owner: root
       group: root
 
-
-  - name: include tasks for enabling test repo
-    include_tasks: ../tasks/enable_testing_repo.yml
-    when: 
-      - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-      - lookup('env', 'EOL') != "yes"
-
-  - name: include tasks for enabling main repo
-    include_tasks: ../tasks/enable_main_repo.yml
-    when: 
-      - lookup('env', 'install_repo') == "main"
-      - lookup('env', 'EOL') != "yes"  
-
-  - name: include tasks for enabling experimental repo
-    include_tasks: ../tasks/enable_experimental_repo.yml
-    when: 
-      - lookup('env', 'install_repo') == "experimental"
-      - lookup('env', 'EOL') != "yes"
-
-  - name: include tasks for enabling PS 57 EOL repo
-    include_tasks: ../tasks/enable_ps57_eol_tools_repo.yml
+  - name: include tasks for enabling PS 57 EOL install repo
+    include_tasks: ../tasks/enable_ps57_eol_install_repo.yml
     when:
       - lookup('env', 'EOL') == "yes"
 
@@ -63,12 +44,18 @@
   - name: install Percona Server 5.7 packages
     include_tasks: ../tasks/install_ps57.yml
 
-  - name: install Percona Toolkit new deb packages
+  - name: Enable PT release repo
+    command: percona-release enable pt release
+
+  - name: install Percona Toolkit packages
     include_tasks: ../tasks/install_pt.yml
 
-  - name: install sysbench packages
-    include_tasks: ../tasks/install_sysbench.yml
-    when: lookup('env', 'install_repo') != "experimental"
+#  - name: install sysbench packages
+#    include_tasks: ../tasks/install_sysbench.yml
+#    when: lookup('env', 'install_repo') != "experimental"
+
+  - name: enable tools release repo
+    command: percona-release enable-only tools release
 
   - name: install Percona XtraBackup 2.4 packages
     include_tasks: ../tasks/install_pxb24.yml
@@ -139,11 +126,11 @@
 
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb24
-    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bookworm"
+    when: ansible_distribution_release != "bookworm"
 
   - name: check that Percona XtraBackup package versions are correct
     command: /package-testing/package_check.sh pxb24
-    when: lookup('env', 'install_repo') != "experimental" and ansible_distribution_release != "bookworm"
+    when: ansible_distribution_release != "bookworm"
 
     # pt-mongodb-query-digest version is not good that's why disabling this test
     #  - name: check that Percona Toolkit version is correct

@@ -45,12 +45,42 @@
 
   - name: start proxysql service
     service: name=proxysql state=started
+    when: ansible_distribution != "Amazon"
 
   - name: stop proxysql service
     service: name=proxysql state=stopped
+    when: ansible_distribution != "Amazon"
 
   - name: start proxysql service
     service: name=proxysql state=started
+    when: ansible_distribution != "Amazon"
+
+  - name: start proxysql service again on non-AL2023
+    service:
+      name: proxysql
+      state: started
+    when: not (
+            ansible_distribution == "Amazon" and
+            ansible_distribution_major_version == "2023"
+          )
+
+  - name: stop proxysql service on non-AL2023
+    service:
+      name: proxysql
+      state: stopped
+    when: not (
+            ansible_distribution == "Amazon" and
+            ansible_distribution_major_version == "2023"
+          )
+
+  - name: start proxysql service again on non-AL2023
+    service:
+      name: proxysql
+      state: started
+    when: not (
+            ansible_distribution == "Amazon" and
+            ansible_distribution_major_version == "2023"
+          )
 
 #
 # Enable testing repository

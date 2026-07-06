@@ -37,6 +37,21 @@
       - ansible_facts['distribution'] == "CentOS"
       - ansible_facts['distribution_major_version'] | int == 7
 
+#  - name: Update all dnf packages without reboot
+#    ansible.builtin.dnf: name='*' state=latest
+#    when: ansible_facts['distribution'] in ['RedHat','OracleLinux']
+
+  - name: Fix packaging locks and clear bad metadata
+    ansible.builtin.command: "{{ item }}"
+    with_items:
+      - killall -9 dnf dnf-automatic packagekitd yum
+      - rpm --rebuilddb
+      - dnf clean all
+      - rm -rf /var/cache/dnf
+    failed_when: false
+    changed_when: true
+    when: ansible_facts['distribution'] in ['RedHat','OracleLinux']
+
   - name: Install wget
     yum:
       name: wget
@@ -96,9 +111,24 @@
     when: 
     - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: Yum update for epel 8
-    command: dnf update -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+#  - name: Yum update for epel 8
+#    command: dnf update -y
+#    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: System upgrade for RedHat family (RHEL, Oracle)
+    ansible.builtin.command: dnf upgrade -y --setopt=install_weak_deps=False
+    register: upgrade_output
+    changed_when: "'Nothing to do' not in upgrade_output.stdout"
+    when: >
+      ansible_facts['os_family'] == "RedHat" and
+      (
+        ansible_facts['distribution'] in ['RedHat', 'OracleLinux']
+        or
+        (
+          ansible_facts['distribution_major_version'] == "8"
+          and ansible_facts['distribution'] != "Rocky"
+        )
+      )
 
   - name: setup epel 8 repo
     dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm state=present
@@ -112,10 +142,16 @@
     when: 
     - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
-  - name: setup epel 9 repo package
-    dnf: name=epel-release state=latest
-    when: 
-    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+  - name: setup epel 9 repo
+    dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int == 9
+
+#  - name: setup epel 9 repo package
+#    dnf: name=epel-release state=latest
+#    when: 
+#    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
   - name: install GPG key for epel 10
     rpm_key:
@@ -127,12 +163,6 @@
   - name: Yum update for epel 10
     command: dnf update -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
-
-  - name: setup epel 9 repo
-    dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int == 9
 
   - name: Fix Debian Buster EOL repositories
     shell: sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g; s|http://cdn-aws.deb.debian.org/debian|http://archive.debian.org/debian|g; s|http://security.debian.org/debian-security|http://archive.debian.org/debian-security|g; /buster-updates/d' /etc/apt/sources.list
@@ -191,6 +221,7 @@
       packages:
       - unzip
       - wget
+      - python3
       - jq # for exporter end point metric fetch
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 8
 
@@ -201,6 +232,7 @@
           name:
             - unzip
             - wget
+            - python3
             - jq # for exporter endpoint metric fetch
           state: latest
         register: dnf_result
@@ -218,6 +250,7 @@
         - unzip
         - wget
         - jq
+        - python3
       state: latest
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int == 10
 

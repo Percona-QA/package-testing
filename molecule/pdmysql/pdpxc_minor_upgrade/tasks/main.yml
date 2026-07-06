@@ -1,6 +1,10 @@
 ---
 # tasks file for pdpxc
 
+- name: Update all dnf packages without reboot
+  ansible.builtin.dnf: name='*' state=latest
+  when: ansible_facts['distribution'] in ['RedHat','OracleLinux']
+
 - name: include playbook for removing Percona repo
   include_tasks: ../../../tasks/remove_percona_repository.yml
 

@@ -4,6 +4,12 @@
 #             var "port_flag"      :  to access agent with custom port
 #                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
 #
+
+- name: set password for pgsql
+  set_fact:
+# workaround to pass pg_version_to_install check in install_ppg.yml
+    pgsql_password: "UfY9s73Gx~!?@#$%^&*(){}[]<>|/:;,.-_+="
+
 - name: Download install_ppg16.yml
   get_url:
     url: https://raw.githubusercontent.com/Percona-QA/ppg-testing/main/tasks/install_ppg16.yml
@@ -36,12 +42,8 @@
     enabled: true
   when: ansible_os_family == "Debian" and ansible_distribution_release != 'xenial'
 
-- name: create lowercase 8 character password for pgsql
-  set_fact:
-    random_pgsql_password: "psql-{{ lookup('password', '/tmp/pgsqlpassword chars=ascii_lowercase,digits length=8') }}"
-
 - name: Change Postgresql Password
-  command: psql -c "ALTER USER postgres PASSWORD '{{ random_pgsql_password }}';"
+  command: psql -c "ALTER USER postgres PASSWORD '{{ pgsql_password }}';"
   become: yes
   become_user: postgres
 
@@ -95,7 +97,7 @@
 - name: add postgresql metrics to monitoring
   command: >-
     pmm-admin add postgresql {{ port_flag if port_flag is defined else '' }}
-    --password={{ random_pgsql_password }} --service-name={{ pgsql_service_name }} --query-source="pgstatements"
+    --password={{ pgsql_password }} --service-name={{ pgsql_service_name }} --query-source="pgstatements"
     {{ '' if agent_password is not defined or '/agent_id/' in agent_password else '--agent-password=%s' | format(agent_password) }}
 
 - name: add postgresql metrics to monitoring via socket

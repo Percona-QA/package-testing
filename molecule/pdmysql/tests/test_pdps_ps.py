@@ -194,10 +194,15 @@ def test_mysql_version(host, component):
 
 @pytest.mark.parametrize('plugin_command', PLUGIN_COMMANDS)
 def test_plugins(host, plugin_command):
+    if version.parse(VERSION) >= version.parse("9.0.0"):
+        pytest.skip("Plugin tests are not applicable for 9.x and above")
+
     dist = host.system_info.distribution
     major_version = version.parse(host.system_info.release).major
+
     if dist.lower() in RHEL_DISTS and major_version in [7, 2] and 'authentication_fido.so' in plugin_command:
-        pytest.skip("authentication_fido.so is not supported on Enterprize Linux 7 and Amazon Linux2 from 8.0.35")
+        pytest.skip("authentication_fido.so is not supported on EL7 and Amazon Linux2 from 8.0.35")
+
     with host.sudo("root"):
         result = host.run(plugin_command)
         assert result.rc == 0, (result.stderr, result.stdout)
@@ -239,6 +244,8 @@ def test_madmin(host):
         assert mysql.is_running
 
 def test_disable_validate_password_plugin(host):
+    if version.parse(VERSION.split('-')[0]) >= version.parse("9.0.0"):
+        pytest.skip("UNINSTALL PLUGIN validate_password not applicable for PS 9.x")
     with host.sudo():
         cmd = "mysql -e \"UNINSTALL PLUGIN validate_password;\""
         plugin = host.run(cmd)

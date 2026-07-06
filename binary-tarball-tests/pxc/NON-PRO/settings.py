@@ -63,7 +63,7 @@ pxc8x_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 pxc8x_files = (
-  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.6' ,
+  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.8' ,
   'lib/libmysqlservices.a' ,
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', #'lib/plugin/keyring_file.so',
   'lib/plugin/keyring_udf.so'
@@ -71,23 +71,23 @@ pxc8x_files = (
 if glibc_version == '2.35':
     pxc8x_symlinks = (
    #   ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),('lib/libgcrypt.so', 'lib/private/libgcrypt.so.20.3.4',),
-      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.0.6'),#('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
+      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.0.8'),#('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
     #  ('lib/libssl.so', 'lib/private/libssl.so.3'),
       ('lib/libtinfo.so', 'lib/private/libtinfo.so.6.3'),
       ('lib/libaio.so','lib/private/libaio.so.1.0.1'),('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
-      ('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'), ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
+      ('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'),
       #('lib/librtmp.so', 'lib/private/librtmp.so.1'),
       ('lib/libtirpc.so', 'lib/private/libtirpc.so.3.0.0')
     )
 else:
     pxc8x_symlinks = (
       #   ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),('lib/libgcrypt.so', 'lib/private/libgcrypt.so.20.3.4',),
-      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.0.6'),#('lib/libsasl2.so', 'lib/private/libsasl2.so.3.0.0'),
+      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.0.8'),#('lib/libsasl2.so', 'lib/private/libsasl2.so.3.0.0'),
     #  ('lib/libssl.so', 'lib/private/libssl.so.3'),
    #   ('lib/libtinfo.so', 'lib/private/libtinfo.so.6.2'),
-      ('lib/libaio.so','lib/private/libaio.so.1.0.1'),#('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
+   #   ('lib/libaio.so','lib/private/libaio.so.1.0.1'),#('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
     #  ('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'), 
-      ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
+    #  ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
       #('lib/librtmp.so', 'lib/private/librtmp.so.1'),
       ('lib/libtirpc.so', 'lib/private/libtirpc.so.3.0.0')
     #  ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'), ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
@@ -100,7 +100,60 @@ else:
     #  ('lib/libssl3.so','lib/private/libssl3.so'), ('lib/libtinfo.so','lib/private/libtinfo.so.5.9'),
     )
 pxc8x_components = (
-    ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault'),('file://component_binlog_uts_udf')
+    ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault'),('file://component_binlog_uts_udf'),('file://component_js_lang')
+  )
+
+# 9.X (PXC 9.0, 9.1, … — adjust paths per release tarball as needed)
+pxc9x_binaries = [
+  'bin/garbd',
+  'bin/pxc_extra/pxb-9.6/bin/xtrabackup', 'bin/pxc_extra/pxb-9.6/bin/xbcloud',
+  'bin/pxc_extra/pxb-9.6/bin/xbcrypt', 'bin/pxc_extra/pxb-9.6/bin/xbstream',
+  'bin/pxc_extra/pxb-9.5/bin/xtrabackup', 'bin/pxc_extra/pxb-9.5/bin/xbcloud',
+  'bin/pxc_extra/pxb-9.5/bin/xbcrypt', 'bin/pxc_extra/pxb-9.5/bin/xbstream',
+  'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog',
+  'bin/mysqldump', 'bin/mysqlimport', 'bin/mysqlshow',
+  'bin/mysqlslap', 'bin/mysqlcheck', 'bin/mysql_config_editor',
+  'bin/mysqlrouter', 'bin/mysqlrouter_passwd', 'bin/mysqlrouter_plugin_info', 'bin/mysql_secure_installation',
+  'bin/mysql_tzinfo_to_sql'
+]
+pxc9x_executables = pxc9x_binaries + [
+  'bin/clustercheck', 'bin/wsrep_sst_common', 'bin/wsrep_sst_xtrabackup-v2',
+  'bin/pxc_extra/pxb-9.5/bin/xbcloud_osenv',
+  'bin/pxc_extra/pxb-9.6/bin/xbcloud_osenv',
+  'bin/ps-admin',
+  'bin/mysqldumpslow',
+  'bin/mysql_config',
+]
+pxc9x_plugins = (
+  ('validate_password','validate_password.so'),
+  ('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
+  ('clone','mysql_clone.so')
+)
+pxc9x_functions = (
+  ('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
+  ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_exclusive', 'version_token.so', 'INT'),
+  ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'),
+  ('service_release_locks', 'locking_service.so', 'INT')
+)
+pxc9x_files = (
+  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.1.0' ,
+  'lib/libmysqlservices.a' ,
+  'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so',
+  'lib/plugin/keyring_udf.so'
+)
+if glibc_version == '2.35':
+    pxc9x_symlinks = (
+      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.1.0'),
+      ('lib/libtinfo.so', 'lib/private/libtinfo.so.6.1'),
+      ('lib/libtirpc.so', 'lib/private/libtirpc.so.3.0.0')
+    )
+else:
+    pxc9x_symlinks = (
+      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.1.0'),
+      ('lib/libtirpc.so', 'lib/private/libtirpc.so.3.0.0')
+    )
+pxc9x_components = (
+    ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault'),('file://component_binlog_uts_udf'),('file://component_js_lang')
   )
 
   # 8.0
@@ -137,7 +190,7 @@ pxc80_functions = (
     ('service_release_locks', 'locking_service.so', 'INT')
   )
 pxc80_files = (
-    'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.43' ,
+    'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.45' ,
     'lib/libmysqlservices.a' , 'lib/plugin/audit_log.so',
     'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
     'lib/plugin/data_masking.ini', 'lib/plugin/keyring_file.so',
@@ -146,7 +199,7 @@ pxc80_files = (
 if glibc_version == '2.35':
     pxc80_symlinks = (
         #   ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),('lib/libgcrypt.so', 'lib/private/libgcrypt.so.20.3.4',),
-      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.43'),#('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
+      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.45'),#('lib/libsasl2.so', 'lib/private/libsasl2.so.2.0.25'),
     #  ('lib/libssl.so', 'lib/private/libssl.so.3'),
       ('lib/libtinfo.so', 'lib/private/libtinfo.so.6.3'),
       ('lib/libaio.so','lib/private/libaio.so.1.0.1'),('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
@@ -157,12 +210,12 @@ if glibc_version == '2.35':
 else:
     pxc80_symlinks = (
            #   ('lib/libcrypto.so', 'lib/private/libcrypto.so.3'),('lib/libgcrypt.so', 'lib/private/libgcrypt.so.20.3.4',),
-      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.43'),#('lib/libsasl2.so', 'lib/private/libsasl2.so.3.0.0'),
+      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.21.2.45'),#('lib/libsasl2.so', 'lib/private/libsasl2.so.3.0.0'),
     #  ('lib/libssl.so', 'lib/private/libssl.so.3'),
     #  ('lib/libtinfo.so', 'lib/private/libtinfo.so.6.2'),
       ('lib/libaio.so','lib/private/libaio.so.1.0.1'),#('lib/libbrotlicommon.so', 'lib/private/libbrotlicommon.so.1.0.9'),
       #('lib/libbrotlidec.so', 'lib/private/libbrotlidec.so.1.0.9'),
-      ('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
+      #('lib/libprocps.so', 'lib/private/libprocps.so.8.0.3'),
       #('lib/librtmp.so', 'lib/private/librtmp.so.1'),
      # ('lib/libtirpc.so', 'lib/private/libtirpc.so.3.0.0')
      # ('lib/libcrypto.so','lib/private/libcrypto.so.1.0.2k'), ('lib/libfreebl3.so','lib/private/libfreebl3.so'),
@@ -191,7 +244,7 @@ pxc57_executables = pxc57_binaries + [
     'bin/clustercheck',
     'bin/mysql_config',
     'bin/mysqld_multi', 'bin/mysqld_safe', 'bin/mysqldumpslow',
-    'bin/ps-admin', 'bin/pxc_tokudb_admin', 'bin/pyclustercheck',
+    'bin/ps-admin', 'bin/pyclustercheck',
     'bin/wsrep_sst_common', 'bin/wsrep_sst_mysqldump', 'bin/wsrep_sst_rsync', 'bin/wsrep_sst_xtrabackup-v2',
   ]
 pxc57_plugins = (
@@ -254,6 +307,14 @@ if re.match(r'^8\.[1-9]$', pxc_version_major):
     pxc_files = pxc8x_files
     pxc_symlinks = pxc8x_symlinks
     pxc_components = pxc8x_components
+elif re.match(r'^9\.\d+$', pxc_version_major):
+    pxc_binaries = pxc9x_binaries
+    pxc_executables = pxc9x_executables
+    pxc_plugins = pxc9x_plugins
+    pxc_functions = pxc9x_functions
+    pxc_files = pxc9x_files
+    pxc_symlinks = pxc9x_symlinks
+    pxc_components = pxc9x_components
 elif pxc_version_major == '8.0':
     pxc_binaries = pxc80_binaries
     pxc_executables = pxc80_executables

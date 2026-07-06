@@ -3,6 +3,26 @@ import os
 import re
 import pytest
 
+def resolve_base_dir():
+    """
+    Determine the base directory for the extracted tarball.
+    Priority:
+    1) BASE_DIR env var (exported by run.sh / Ansible)
+    2) Local repo path (for developer runs)
+    3) Remote Molecule path
+    """
+    env_base = os.getenv("BASE_DIR")
+    if env_base:
+        return env_base
+
+    local_repo_base = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), '..', '..', 'molecule', 'ps80-binary-tarball', 'percona-server')
+    )
+    if os.path.exists(local_repo_base):
+        return local_repo_base
+
+    return "/package-testing/molecule/ps80-binary-tarball/percona-server"
+
 def source_environment_file(filepath="/etc/environment"):
     """
     Loads environment variables from a given file into os.environ.
@@ -27,49 +47,46 @@ def source_environment_file(filepath="/etc/environment"):
     except Exception as e:
         print(f"Error while sourcing environment file: {e}")
 
-def set_pro_fips_vars():
-    """
-    Retrieves and returns environment-based settings for PRO, DEBUG, and FIPS_SUPPORTED.
-    """
-    source_environment_file()
 
+def is_kernel_fips_enabled():
+    try:
+        with open("/proc/sys/crypto/fips_enabled") as f:
+            return f.read().strip() == "1"
+    except FileNotFoundError:
+        return False
+
+def set_pro_fips_vars():
+    source_environment_file()
     value = os.getenv('PRO', '').strip().lower()  # Normalize the input
     pro = value in {"yes", "true", "1"}
 
     print(pro)  # True if value is "yes", "true", or "1", otherwise False
 
-    fips_supported = True if os.getenv('PRO') == "yes" else False
-    #fips_supported = os.getenv('FIPS_SUPPORTED') in {"yes", "True"}
-    debug = '-debug' if os.getenv('DEBUG') == "yes" else ''
-    ps_revision = os.getenv('PS_REVISION')
-    ps_version = os.getenv('PS_VERSION')
+   # fips_supported = True if os.getenv('PRO') == "yes" else False
+    fips_supported = os.getenv('FIPS_SUPPORTED', '').lower() in {'yes', 'true', '1'}
+    fips_enabled = pro and fips_supported
 
+    debug = "-debug" if os.getenv("DEBUG") == "yes" else ""
+    ps_revision = os.getenv("PS_REVISION")
+    ps_version = os.getenv("PS_VERSION")
 
-    if (os.getenv('PRO')):
-      base_dir = '/usr/percona-server'
-      print(f"PRINTING THE PRO VALUE PRO: {pro}")
-    else:
-      base_dir = os.getenv('BASE_DIR')
+    base_dir = resolve_base_dir()
+    print(f"BASE_DIR resolved to {base_dir}")
 
-
-    if pro:
-      print(f"TRUE PRO VAR WORKING")
-    else:
-      print(f"FALSE PRO VAR NOT WORKING")
-
-    ps_version_upstream, ps_version_percona = ps_version.split('-')
-    ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
+    ps_version_upstream, ps_version_percona = ps_version.split("-")
+    ps_version_major = ".".join(ps_version_upstream.split(".")[:2])
 
     return {
-        'pro': pro,
-        'debug': debug,
+        "pro": pro,
+        "debug": debug,
         'fips_supported': fips_supported,
-        'ps_revision': ps_revision,
-        'ps_version': ps_version,
-        'base_dir': base_dir,
-        'ps_version_upstream': ps_version_upstream,
-        'ps_version_major': ps_version_major,
-        'ps_version_percona': ps_version_percona
+        'fips_enabled': fips_enabled, 
+        "ps_revision": ps_revision,
+        "ps_version": ps_version,
+        "base_dir": base_dir,
+        "ps_version_upstream": ps_version_upstream,
+        "ps_version_major": ps_version_major,
+        "ps_version_percona": ps_version_percona,
     }
 
 @pytest.fixture(scope="module")
@@ -82,8 +99,7 @@ def pro_fips_vars():
 
 source_environment_file()
 
-
-base_dir = os.getenv('BASE_DIR')
+base_dir = resolve_base_dir()
 ps_version = os.getenv('PS_VERSION')
 ps_revision = os.getenv('PS_REVISION')
 
@@ -126,7 +142,7 @@ ps80_components = (
 ps80_files = (
   'lib/libcoredumper.a',
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.43' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.21.2.46' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/audit_log.so',
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so', 'lib/plugin/data_masking.so',
   'lib/plugin/data_masking.ini','lib/plugin/keyring_file.so',
@@ -134,8 +150,8 @@ ps80_files = (
   'lib/plugin/audit_log_filter.so', 'lib/plugin/component_masking_functions.so', 'lib/plugin/component_percona_telemetry.so'
 )
 ps80_symlinks = (
-  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.43'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.43'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.21','lib/libperconaserverclient.so.21.2.46'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.21.2.46'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 ps80_openssl_files = (
   'lib/libcrypto.so', 'lib/libk5crypto.so', 'lib/libssl.so', 'lib/libsasl2.so'
@@ -229,13 +245,13 @@ ps8x_functions = (
 )
 
 ps8x_components = (
-  'component_masking_functions', 'component_binlog_utils_udf', 'component_percona_udf', 'component_audit_log_filter', 'component_keyring_vault'
+  'component_masking_functions', 'component_binlog_utils_udf', 'component_percona_udf', 'component_audit_log_filter', 'component_keyring_vault','component_js_lang'
 )
 
 ps8x_files = (
   'lib/libcoredumper.a',
   'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
-  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.6' ,'lib/mysql/libjemalloc.so.1',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.0.10' ,'lib/mysql/libjemalloc.so.1',
   'lib/plugin/ha_rocksdb.so', 'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so',
   'lib/plugin/component_binlog_utils_udf.so',
   'lib/plugin/keyring_udf.so', 'lib/plugin/component_keyring_vault.so', 'lib/plugin/component_binlog_utils_udf.so',
@@ -243,11 +259,57 @@ ps8x_files = (
 )
 
 ps8x_symlinks = (
-  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.0.6'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.6'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.0.10'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.0.10'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 
 ps8x_openssl_files = (
+  'lib/libcrypto.so', 'lib/libk5crypto.so', 'lib/libssl.so', 'lib/libsasl2.so'
+)
+
+# 97
+ps97_binaries = [
+  'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog',
+  'bin/mysqldump', 'bin/mysqlimport', 'bin/mysqlshow',
+  'bin/mysqlslap', 'bin/mysqlcheck', 'bin/mysql_config_editor',
+  'bin/mysqlrouter', 'bin/mysqlrouter_passwd', 'bin/mysqlrouter_plugin_info', 'bin/mysql_secure_installation',
+  'bin/mysql_tzinfo_to_sql'
+]
+ps97_executables = ps97_binaries + [
+  'bin/ps-admin',
+  'bin/mysqldumpslow',
+  'bin/mysql_config',
+]
+ps97_plugins = (
+  ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
+  ('rpl_semi_sync_source','semisync_source.so'),('rpl_semi_sync_replica','semisync_replica.so'),
+  ('clone','mysql_clone.so'),
+  ('procfs', 'procfs.so')
+)
+ps97_functions = (
+  ('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
+)
+
+ps97_components = (
+  'component_masking_functions', 'component_binlog_utils_udf', 'component_percona_udf', 'component_audit_log_filter', 'component_keyring_vault','component_js_lang'
+)
+
+ps97_files = (
+  'lib/libcoredumper.a',
+  'lib/mysqlrouter/private/libmysqlrouter_http.so.1', 'lib/mysqlrouter/private/libmysqlrouter.so.1', 'lib/libmysqlservices.a',
+  'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.1.1' ,'lib/mysql/libjemalloc.so.1',
+  'lib/plugin/ha_rocksdb.so', 'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so',
+  'lib/plugin/component_binlog_utils_udf.so',
+  'lib/plugin/keyring_udf.so', 'lib/plugin/component_keyring_vault.so', 'lib/plugin/component_binlog_utils_udf.so',
+  'lib/plugin/component_audit_log_filter.so', 'lib/plugin/component_masking_functions.so'
+)
+
+ps97_symlinks = (
+  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.1.1'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.1.1'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+)
+
+ps97_openssl_files = (
   'lib/libcrypto.so', 'lib/libk5crypto.so', 'lib/libssl.so', 'lib/libsasl2.so'
 )
 
@@ -285,3 +347,12 @@ elif ps_version_major == '5.6':
     ps_functions = ps56_functions
     ps_files = ps56_files
     ps_symlinks = ps56_symlinks
+elif ps_version_major == '9.7':
+    ps_binaries = ps97_binaries
+    ps_executables = ps97_executables
+    ps_plugins = ps97_plugins
+    ps_functions = ps97_functions
+    ps_files = ps97_files
+    ps_symlinks = ps97_symlinks
+    ps_components = ps97_components
+    ps_openssl_files=ps97_openssl_files

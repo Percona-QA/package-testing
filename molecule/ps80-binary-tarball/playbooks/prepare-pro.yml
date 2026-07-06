@@ -1,0 +1,57 @@
+---
+- name: Prepare node for running tests
+  hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: true
+  tasks:
+    - name: update apt cache
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: update yum cache
+      yum:
+        update_cache: yes
+      when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+    - name: update dnf cache
+      dnf:
+        update_cache: yes
+      when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+    - name: Setup SSH keys CentOS
+      authorized_key:
+        user: centos
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: ansible_distribution == "CentOS"
+
+    - name: Setup SSH keys for Oracle Linux or Amazon
+      authorized_key:
+        user: ec2-user
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: (ansible_distribution == "OracleLinux") or (ansible_distribution == "Amazon")
+
+    - name: Setup SSH keys Debian
+      authorized_key:
+        user: admin
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: (ansible_distribution == "Debian")
+
+    - name: Setup SSH keys Ubuntu
+      authorized_key:
+        user: ubuntu
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: (ansible_distribution == "Ubuntu")
