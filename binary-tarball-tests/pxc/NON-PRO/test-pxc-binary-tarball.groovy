@@ -142,11 +142,11 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                   MINIMAL="-minimal"
                                 fi
-                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.41${MINIMAL}.tar.gz"
+                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.35${MINIMAL}.tar.gz"
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-dock-tar --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -170,11 +170,11 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                   MINIMAL="-minimal"
                                 fi
-                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.39${MINIMAL}.tar.gz"
+                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.41${MINIMAL}.tar.gz"
                                 TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch fix-dock-tar --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
