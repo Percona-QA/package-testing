@@ -152,13 +152,20 @@ class TestCluster:
 
     @pytest.mark.parametrize("cmpt", pxc_components)
     def test_install_component(self, cluster, cmpt):
-            if pxc_version_major == "8.0" or pxc_version_major == "8.4" or re.match(r'^9\.[0-9]$', pxc_version_major):
-            cluster[0].run_query(f'INSTALL COMPONENT \'{cmpt}\';')
+        if (
+            pxc_version_major == "8.0"
+            or pxc_version_major == "8.4"
+            or re.match(r'^9\.[0-9]$', pxc_version_major)
+        ):
+            cluster[0].run_query(f"INSTALL COMPONENT '{cmpt}';")
             for node in cluster:
-                output = node.run_query(f'SELECT component_urn FROM mysql.component WHERE component_urn = \'{cmpt}\';')
+                output = node.run_query(
+                    f"SELECT component_urn FROM mysql.component "
+                    f"WHERE component_urn = '{cmpt}';"
+                )
                 assert cmpt in output
         else:
-            pytest.mark.skip('Components are available from 8.0 onwards') 
+            pytest.skip("Components are available from 8.0 onwards")
 
     def test_replication(self, cluster):
         cluster[0].run_query('create database test;')
@@ -181,7 +188,7 @@ class TestCluster:
             assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
 
 class TestGardb:
-    def test_cluster_size_at_startup(self, cluster, garbd):
+      def test_cluster_size_at_startup(self, cluster, garbd):
         output = cluster[0].run_query('SHOW STATUS LIKE "wsrep_cluster_size";')
         assert output.split('\t')[1].strip() == "4"
 
