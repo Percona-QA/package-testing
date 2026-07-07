@@ -181,7 +181,7 @@ class TestCluster:
             assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
 
 class TestGardb:
-      def test_cluster_size_at_startup(self, cluster, garbd):
+    def test_cluster_size_at_startup(self, cluster, garbd):
         output = cluster[0].run_query('SHOW STATUS LIKE "wsrep_cluster_size";')
         assert output.split('\t')[1].strip() == "4"
 
