@@ -6,11 +6,6 @@
       autoremove: yes
     when: ansible_os_family == "Debian"
 
-  - name: Fix broken packages
-    command: apt --fix-broken install -y  
-    ignore_errors: true
-    when: ansible_os_family == "Debian"
-
   - name: install Percona Server deb packages
     apt:
       name: "{{ packages }}"
