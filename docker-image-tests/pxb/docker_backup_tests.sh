@@ -9,7 +9,7 @@
 
 help() {
     echo "Usage: $0 repo_name server ps_tag pxb_tag"
-    echo "Accepted values of repo_name: pxb-24, pxb-80, pxb-8x-innovation, pxb-84-lts, pxb-9x-innovation"
+    echo "Accepted values of repo_name: pxb-24, pxb-80, pxb-8x-innovation, pxb-84-lts, pxb-97-lts, pxb-9x-innovation"
     echo "Accepted value of server: ps, ms"
     echo "ps_tag and pxb_tag must be full Docker Hub tags, e.g. 9.6.0-1"
     echo "Image accounts are picked from \$PS_DOCKER_ACC and \$PXB_DOCKER_ACC env vars (default: percona)."
@@ -58,8 +58,15 @@ clean_setup() {
         $SUDO_CMD rm -rf "$MYSQL_DATA_DIR"
     fi
     
-    # Clean up backup volumes
-    echo "Removing unused Docker volumes..."
+    # Clean up backup volumes. `docker volume prune` only removes anonymous
+    # volumes, so the named backup volume survives across builds and leaves a
+    # non-empty target dir — which makes xtrabackup fail with "File exists"
+    # (OS errno 17). Remove it explicitly so each run backs up into a clean dir.
+    echo "Removing Docker volumes..."
+    backup_volume="${pxb_backup_dir%%:*}"
+    if [ -n "$backup_volume" ]; then
+        $SUDO_CMD $DOCKER_CMD volume rm -f "$backup_volume" >/dev/null 2>&1 || true
+    fi
     $SUDO_CMD $DOCKER_CMD volume prune -f >/dev/null 2>&1 || true
 }
 
@@ -94,7 +101,7 @@ if [ "$repo_name" = "pxb-9x-innovation" ] || [ "$repo_name" = "pxb-8x-innovation
     target_backup_dir="/backup_$pxb_tag"
     mount_dir="-v $MYSQL_DATA_DIR:/var/lib/mysql"
 
-elif [ "$repo_name" = "pxb-80" ] || [ "$repo_name" = "pxb-24" ] || [ "$repo_name" = "pxb-84-lts" ]; then
+elif [ "$repo_name" = "pxb-80" ] || [ "$repo_name" = "pxb-24" ] || [ "$repo_name" = "pxb-84-lts" ] || [ "$repo_name" = "pxb-97-lts" ]; then
     if [ "$server" = "ms" ]; then
         container_name="mysql-$ps_tag"
         mysql_docker_image="mysql:$ps_tag"
