@@ -114,6 +114,9 @@ def test_check_if_mongo_service_is_enabled_in_sysvinit(env):
 def test_add_nonexisting_option_and_start_with_systemctl(env):
     if not env.systemctl:
         pytest.skip("system doesn't have systemctl command")
+    # The config file must exist once the package is installed; a missing one
+    # is a real defect, so fail rather than skip.
+    assert env.conf is not None, "mongo config file (/etc/mongod.conf) not found"
     env.stopit()
     sh('echo "nonexistingoption: true" >> {}'.format(env.conf))
     assert sh("systemctl start mongod").returncode == 1
@@ -124,6 +127,9 @@ def test_add_nonexisting_option_and_start_with_systemctl(env):
 def test_add_nonexisting_option_and_start_with_service(env):
     if not env.service_cmd:
         pytest.skip("system doesn't have service command")
+    # The config file must exist once the package is installed; a missing one
+    # is a real defect, so fail rather than skip.
+    assert env.conf is not None, "mongo config file (/etc/mongod.conf) not found"
     env.stopit()
     sh('echo "nonexistingoption: true" >> {}'.format(env.conf))
     assert sh("service mongod start").returncode == 1

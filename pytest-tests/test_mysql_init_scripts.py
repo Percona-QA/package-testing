@@ -122,6 +122,9 @@ def test_add_nonexisting_option_and_start_with_systemctl(env):
         pytest.skip("system doesn't have systemctl command")
     # TODO: Check if this can be somehow done for centos with systemd
     if not os.path.isfile("/etc/redhat-release") and not os.path.isfile("/etc/system-release"):
+        # The config file must exist once the package is installed; a missing
+        # one is a real defect, so fail rather than skip.
+        assert env.conf is not None, "mysql config file (/etc/mysql/my.cnf or /etc/my.cnf) not found"
         env.stopit()
         env.fix_timeout()
         sh('echo "[mysqld]" >> {}'.format(env.conf))
