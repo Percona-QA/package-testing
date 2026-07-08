@@ -299,9 +299,20 @@
       state: present
     when: ansible_os_family == "RedHat"
 
-  - name: install pytest via pip3
-    shell: pip3 install pytest || pip3 install --break-system-packages pytest
-    changed_when: true
+  # Use the pip module (idempotent). Try a plain install first and only fall
+  # back to --break-system-packages on externally-managed environments
+  # (Debian 12+/Ubuntu 24.04+); passing that flag unconditionally would break
+  # older pip (e.g. RHEL 8) that doesn't support it.
+  - name: install pytest via pip
+    block:
+      - name: install pytest
+        pip:
+          name: pytest
+    rescue:
+      - name: install pytest (externally-managed env)
+        pip:
+          name: pytest
+          extra_args: --break-system-packages
 
   - name: include tasks for listing already installed packages
     include_tasks: list_installed_packages.yml
