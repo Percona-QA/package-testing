@@ -3,7 +3,7 @@
 
 Near-identical to the mysql init-scripts tests, with PXC-specific differences:
 longer ``sleep 40`` on service restart, no systemd-enabled check (PXC doesn't
-support systemd enable), and a RedHat-only guard on the bad-config test.
+support systemd enable), and a non-RedHat guard on the bad-config test.
 Order-dependent; order preserved.
 """
 import os
