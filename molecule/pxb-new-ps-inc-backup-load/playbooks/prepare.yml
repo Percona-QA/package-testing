@@ -182,10 +182,12 @@
         - name: Install pytest
           pip:
             name: pytest
+            executable: pip3
       rescue:
         - name: Install pytest (externally-managed env)
           pip:
             name: pytest
+            executable: pip3
             extra_args: --break-system-packages
 
     - name: Install psutil using pip3 for Debian family (with --break-system-packages)

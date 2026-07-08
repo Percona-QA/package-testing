@@ -289,10 +289,12 @@
     - name: install pytest
       pip:
         name: pytest
+        executable: pip3
   rescue:
     - name: install pytest (externally-managed env)
       pip:
         name: pytest
+        executable: pip3
         extra_args: --break-system-packages
 
 - name: set root password on centos
