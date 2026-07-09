@@ -265,8 +265,26 @@
 
   - name: Install mysql deb packages using tarballs ubuntu 24.04 MS84
     command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu24.04_amd64.deb-bundle.tar
-    when: 
+    when:
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04'
+      - lookup('env', 'server_to_test') == "ms-84"
+
+  - name: Install mysql deb packages using tarballs ubuntu 26.04 INNOVATION_LTS
+    command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu24.04_amd64.deb-bundle.tar
+    when:
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '26.04'
+      - lookup('env', 'server_to_test') == "ms_innovation"
+
+  - name: Install mysql deb packages using tarballs ubuntu 26.04 MS80
+    command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu24.04_amd64.deb-bundle.tar
+    when:
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '26.04'
+      - lookup('env', 'server_to_test') == "ms-80"
+
+  - name: Install mysql deb packages using tarballs ubuntu 26.04 MS84
+    command: wget https://downloads.mysql.com/archives/get/p/23/file/mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu24.04_amd64.deb-bundle.tar
+    when:
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '26.04'
       - lookup('env', 'server_to_test') == "ms-84"
 
 ##
@@ -338,8 +356,14 @@
 
   - name: extract mysql deb packages for ubuntu 24.04
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu24.04_amd64.deb-bundle.tar -C /tmp
-    when: 
+    when:
       - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '24.04'
+      - lookup('env', 'server_to_test') == "ms_innovation" or lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
+
+  - name: extract mysql deb packages for ubuntu 26.04
+    command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1ubuntu24.04_amd64.deb-bundle.tar -C /tmp
+    when:
+      - ansible_distribution == 'Ubuntu' and ansible_distribution_version == '26.04'
       - lookup('env', 'server_to_test') == "ms_innovation" or lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
 
   - name: extract mysql deb packages for Debian 11
@@ -370,10 +394,11 @@
 
   - name: List the installed mysql packages (DEB)
     shell: apt list --installed 2>&1 | grep mysql
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - lookup('env', 'server_to_test') == "ms_innovation" or lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
     register: dpkg_list
+    failed_when: false
 
   - name: Debug - Show installed MySQL packages (DEB)
     debug:
@@ -534,6 +559,7 @@
     ansible.builtin.yum:
       name: /tmp/mysql80-community-release-el9-1.noarch.rpm
       state: present
+      disable_gpg_check: true
     when:
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
       - lookup('env', 'server_to_test') == "ms-80"
@@ -542,6 +568,7 @@
     ansible.builtin.yum:
       name: /tmp/mysql84-community-release-el9-1.noarch.rpm
       state: present
+      disable_gpg_check: true
     when:
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
       - lookup('env', 'server_to_test') == "ms-84"
@@ -550,6 +577,7 @@
     ansible.builtin.yum:
       name: mysql-community-server
       state: present
+      disable_gpg_check: true
     when:
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
       - lookup('env', 'server_to_test') == "ms-80"
@@ -558,6 +586,7 @@
     ansible.builtin.yum:
       name: mysql-community-server
       state: present
+      disable_gpg_check: true
     when:
       - ansible_os_family == "RedHat" and ansible_distribution_major_version == "10"
       - lookup('env', 'server_to_test') == "ms-84"

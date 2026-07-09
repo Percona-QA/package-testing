@@ -7,7 +7,7 @@ platforms:
   - name: ubuntu-noble-${BUILD_NUMBER}-${JOB_NAME}
     region: us-west-2
     image: ami-0cf2b4e024cdb6960
-    vpc_subnet_id: subnet-03136d8c244f56036
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.medium
     ssh_user: ubuntu
     root_device_name: /dev/sda1
@@ -20,7 +20,7 @@ provisioner:
   log: True
   playbooks:
     create: ../../../playbooks/create-noble-arm.yml
-    destroy: ../../../playbooks/destroy-noble-arm.yml
+    destroy: ../../playbooks/destroy.yml
     prepare: ../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
 verifier:
@@ -36,10 +36,8 @@ scenario:
   destroy_sequence:
     - destroy
   test_sequence:
-    - destroy
     - create
     - prepare
     - converge
     - verify
     - destroy
-

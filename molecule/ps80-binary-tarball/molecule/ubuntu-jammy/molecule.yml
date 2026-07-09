@@ -7,7 +7,7 @@ platforms:
   - name: ujammy-${BUILD_NUMBER}-${JOB_NAME}
     region: us-west-2
     image: ami-058168290d30b9c52
-    vpc_subnet_id: subnet-03136d8c244f56036
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.medium
     ssh_user: ubuntu
     root_device_name: /dev/sda1
@@ -20,7 +20,7 @@ provisioner:
   log: True
   playbooks:
     create: ../../../playbooks/create-noble-arm.yml
-   # destroy: ../../../playbooks/destroy-noble-arm.yml
+    destroy: ../../playbooks/destroy.yml
     prepare: ../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
 verifier:
@@ -33,12 +33,11 @@ verifier:
     FIPS_SUPPORTED: "no"
 scenario:
   name: ubuntu-jammy
-#  destroy_sequence:
-#    - destroy
+  destroy_sequence:
+    - destroy
   test_sequence:
- #   - destroy
     - create
     - prepare
     - converge
     - verify
- #   - destroy
+    - destroy

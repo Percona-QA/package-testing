@@ -206,7 +206,7 @@
       git:
         repo: https://github.com/Percona-QA/server-qa.git
         dest: /server-qa
-        version: tomislav-pxb-python
+        version: main
         force: yes
 
     - name: Checkout pstress repository
@@ -223,13 +223,34 @@
           - make
           - gcc
           - gcc-c++
-          - openssl-devel
           - zlib-devel
           - libzstd-devel
           - lz4
           - zstd
         state: present
       when: ansible_os_family == "RedHat"
+
+    # Pin openssl-devel to the EXACT version already installed as openssl-libs.
+    # On older OL9 AMIs, a plain "openssl-devel" install pulls in a newer
+    # openssl-libs (libcrypto.so.3), swapping the shared crypto lib out from
+    # under the running sshd. New sshd sessions then crash during key exchange
+    # ("Connection reset by peer" / scp "Connection closed") and the host goes
+    # unreachable mid-run (prepare or converge). Installing the matching version
+    # means openssl-libs is already satisfied, so nothing is upgraded and sshd is
+    # never disturbed. RedHat-only (Debian's libssl-dev is unaffected).
+    - name: Gather installed package facts (RedHat)
+      ansible.builtin.package_facts:
+        manager: rpm
+      when: ansible_os_family == "RedHat"
+
+    - name: Install openssl-devel pinned to installed openssl-libs version (RedHat)
+      ansible.builtin.dnf:
+        name: "openssl-devel-{{ ansible_facts.packages['openssl-libs'][0].version }}-{{ ansible_facts.packages['openssl-libs'][0].release }}"
+        state: present
+        allow_downgrade: true
+      when:
+        - ansible_os_family == "RedHat"
+        - "'openssl-libs' in ansible_facts.packages"
 
     - name: Install cmake and build tools for Debian family
       apt:
@@ -293,21 +314,27 @@
         update_cache: yes
       when: ansible_os_family == "Debian"
 
-    - name: Install GPG key for EPEL 10
+    # EPEL provides sysbench on RHEL/OL. Enable it for 8/9/10 (not just 10),
+    # otherwise the sysbench install below fails with "No package sysbench
+    # available" on Oracle Linux 9. Amazon Linux is excluded (no matching EPEL
+    # release rpm; major_version there is "2023").
+    - name: Install EPEL GPG key for RedHat family (RHEL/OL 8 and later)
       rpm_key:
         state: present
-        key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-10
+        key: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
       when:
         - ansible_os_family == "RedHat"
-        - ansible_distribution_major_version | int == 10
+        - ansible_distribution != "Amazon"
+        - ansible_distribution_major_version | int >= 8
 
-    - name: Setup EPEL 10 repo
+    - name: Setup EPEL repo for RedHat family (RHEL/OL 8 and later)
       dnf:
-        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
+        name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
         state: present
       when:
         - ansible_os_family == "RedHat"
-        - ansible_distribution_major_version | int == 10
+        - ansible_distribution != "Amazon"
+        - ansible_distribution_major_version | int >= 8
 
     - name: Install sysbench for RedHat family (RHEL 8 and later)
       dnf:

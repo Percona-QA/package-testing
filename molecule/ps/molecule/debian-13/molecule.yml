@@ -7,7 +7,7 @@ platforms:
   - name: debian13-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
     region: us-west-2
     image: ami-081ac37fe26dacc98
-    vpc_subnet_id: subnet-03136d8c244f56036
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t3.medium
     ssh_user: admin
     root_device_name: /dev/xvda
@@ -20,21 +20,21 @@ provisioner:
   log: True
   playbooks:
     create: ../../playbooks/create.yml
- #   destroy: ../../playbooks/destroy.yml
+    destroy: ../../playbooks/destroy.yml
     prepare: ../../playbooks/prepare.yml
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
 scenario:
   name: debian-13
-  #destroy_sequence:
-   # - destroy
+  destroy_sequence:
+    - destroy
   clenup_sequence:
     - cleanup
   test_sequence:
-  #  - destroy
+    - destroy
     - create
     - prepare
     - converge
     - verify
     - cleanup
-   # - destroy
+    - destroy

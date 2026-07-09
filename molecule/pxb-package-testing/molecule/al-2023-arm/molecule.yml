@@ -7,7 +7,7 @@ platforms:
   - name: al-2023-arm-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
     region: us-west-2
     image:  ami-0493fed4130eafff5
-    vpc_subnet_id: subnet-03136d8c244f56036
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: c6g.large
     ssh_user: ec2-user
     root_device_name: /dev/sda1

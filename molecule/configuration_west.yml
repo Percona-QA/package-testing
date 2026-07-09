@@ -1,84 +1,84 @@
 centos-6:
   image: ami-0362922178e02e9f3
   user: centos
-  subnet: subnet-03136d8c244f56036
+  subnet: subnet-0430e63d7cdbcd237
   aws_default_region: us-west-2
   instance_type: t2.micro
   root_device_name: /dev/sda1
 centos-7:
   image: ami-036d2cdf95d86d256
   user: centos
-  subnet: subnet-03136d8c244f56036
+  subnet: subnet-0430e63d7cdbcd237
   aws_default_region: us-west-2
   instance_type: t2.micro
   root_device_name: /dev/sda1
 centos-8:
   image: ami-0af9de0b0b4d7fbb0
   user: root
-  subnet: subnet-03136d8c244f56036
+  subnet: subnet-0430e63d7cdbcd237
   aws_default_region: us-west-2
   instance_type: t2.micro
   root_device_name: /dev/sda1
 debian-8:
   image: ami-4e1cc32e
   user: admin
-  subnet: subnet-03136d8c244f56036
+  subnet: subnet-0430e63d7cdbcd237
   aws_default_region: us-west-2
   instance_type: t2.micro
   root_device_name: xvda
 debian-9:
   image: ami-01d07e14f082b3ba1
   user: admin
-  subnet: subnet-03136d8c244f56036
+  subnet: subnet-0430e63d7cdbcd237
   aws_default_region: us-west-2
   instance_type: t2.micro
   root_device_name: xvda
 debian-10:
   image: ami-0f5d8e2951e3f83a5
   user: admin
-  subnet: subnet-03136d8c244f56036
+  subnet: subnet-0430e63d7cdbcd237
   aws_default_region: us-west-2
   instance_type: t2.micro
   root_device_name: xvda
 ubuntu-cosmic:
   image: ami-0ead033d778487b37
   user: ubuntu
-  subnet: subnet-03136d8c244f56036
+  subnet: subnet-0430e63d7cdbcd237
   aws_default_region: us-west-2
   instance_type: t2.micro
   root_device_name: /dev/sda1
 ubuntu-disco:
   image: ami-084a12ae4a0c27ea7
   user: ubuntu
-  subnet: subnet-03136d8c244f56036
+  subnet: subnet-0430e63d7cdbcd237
   aws_default_region: us-west-2
   instance_type: t2.micro
   root_device_name: /dev/sda1
 ubuntu-bionic:
   image: ami-01946830552766aa5
   user: ubuntu
-  subnet: subnet-03136d8c244f56036
+  subnet: subnet-0430e63d7cdbcd237
   aws_default_region: us-west-2
   instance_type: t2.micro
   root_device_name: /dev/sda1
 ubuntu-xenial:
   image: ami-056f971efe114915a
   user: ubuntu
-  subnet: subnet-03136d8c244f56036
+  subnet: subnet-0430e63d7cdbcd237
   aws_default_region: us-west-2
   instance_type: t2.micro
   root_device_name: /dev/sda1
 ubuntu-focal:
   image: ami-05a98b3bebe1b280e
   user: ubuntu
-  subnet: subnet-03136d8c244f56036
+  subnet: subnet-0430e63d7cdbcd237
   aws_default_region: us-west-2
   instance_type: t2.micro
   root_device_name: /dev/sda1
 rhel8:
   image: ami-087c2c50437d0b80d
   user: ec2-user
-  subnet: subnet-03136d8c244f56036
+  subnet: subnet-0430e63d7cdbcd237
   aws_default_region: us-west-2
   instance_type: t2.micro
   root_device_name: /dev/sda1
