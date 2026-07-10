@@ -15,7 +15,7 @@ non-pro packages, all OSes supported by the corresponding molecule job.
 | `create_noble.yml` (molecule-ec2 driver) | `provision.py` (boto3) |
 | IP JSON files + jq + envfile + `MOLECULE_ENV_FILE` | state JSON + `inventory.py` |
 | `pxcXX-bootstrap-install` scenario (pxc1) | `deploy_bootstrap.py` |
-| `pxcXX-common-install` scenario (pxc2/pxc3, `throttle: 1`) | `deploy_common.py` with `--serial` |
+| `pxcXX-common-install` scenario (pxc2/pxc3, `throttle: 1`) | `deploy_common.py` with `--parallel 1` |
 | `playbooks/logsbackup.yml` | `deploy_logsbackup.py` |
 | `destroy_noble.yml` | `destroy.py` |
 
@@ -63,7 +63,7 @@ pyinfra -y --limit bootstrap inventory.py deploy_bootstrap.py \
     --data product=pxc80 --data install_repo=testing --data check_version=yes \
     --data git_account=Percona-QA --data testing_branch=master
 
-pyinfra -y --limit joiners --serial inventory.py deploy_common.py \
+pyinfra -y --limit joiners --parallel 1 inventory.py deploy_common.py \
     --data product=pxc80 --data install_repo=testing --data check_version=yes \
     --data git_account=Percona-QA --data testing_branch=master
 

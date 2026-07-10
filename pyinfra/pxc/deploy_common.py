@@ -1,9 +1,16 @@
 """pyinfra deploy for the PXC joiner nodes (pxc2, pxc3).
 
 Port of pxc{80,84}-common-install/tasks/main.yml (non-pro, install).
-Must run AFTER deploy_bootstrap.py, one host at a time:
+Must run AFTER deploy_bootstrap.py. Use --parallel 1 (NOT --serial): this
+keeps pyinfra's per-operation barrier across the joiners so the
+wsrep_cluster_size==3 check runs only after every joiner has started mysql,
+while still executing each operation one host at a time (no concurrent SST
+joins, no concurrent restarts that would drop cluster quorum). --serial
+would run the whole deploy on pxc2 first, so its cluster-size check would
+see only 2 nodes and fail. This mirrors the molecule scenario's ansible
+linear strategy + throttle:1.
 
-    pyinfra -y --limit joiners --serial inventory.py deploy_common.py \
+    pyinfra -y --limit joiners --parallel 1 inventory.py deploy_common.py \
         --data product=pxc80 --data install_repo=testing \
         --data check_version=yes \
         --data git_account=Percona-QA --data testing_branch=master
