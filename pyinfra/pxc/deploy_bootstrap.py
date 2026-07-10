@@ -16,8 +16,7 @@ from tasks import prep, pxc_config, pxc_install, repo, system
 
 product = host.data.get("product", "pxc80")
 install_repo = host.data.get("install_repo") or "main"
-# TODO: flip check_version to yes after initial debugging
-check_version = host.data.get("check_version") or "no"
+check_version = host.data.get("check_version") or "yes"
 git_account = host.data.get("git_account") or "Percona-QA"
 testing_branch = host.data.get("testing_branch") or "master"
 
