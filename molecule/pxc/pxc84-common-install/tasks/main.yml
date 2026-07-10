@@ -101,34 +101,28 @@
       - ansible_os_family == "Debian"
 
 #---------------------------------------------------------non-pro
-  - name: install PXC 8 deb packages arm64 debian non pro
+  - name: install PXB 8 deb packages
     apt:
       name: "{{ packages }}"
       update_cache: yes
     vars:
       packages:
-      - percona-xtradb-cluster-full
       - percona-xtrabackup-84
-      - percona-toolkit
-    when: 
+    when:
       - ansible_os_family == "Debian"
-      - ansible_architecture == "aarch64"
       - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      
-  - name: install PXC 8 deb packages amd64 non pro
+
+  - name: install PXC 8 deb packages
     apt:
       name: "{{ packages }}"
       update_cache: yes
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - percona-xtrabackup-84
-      - percona-toolkit
-    when: 
+    when:
       - ansible_os_family == "Debian"
-      - ansible_architecture == "x86_64"
       - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -140,7 +134,6 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-#      - percona-toolkit
       - percona-xtrabackup-84
     when: 
       - ansible_os_family == "RedHat" 

@@ -170,6 +170,7 @@ elif pxc_version_major == '8.4':
     pxc_binaries = pxc84_binaries
     pxc_plugins = pxc84_plugins
     pxc_functions = pxc84_functions
+    pxc_components = pxc84_components
 elif pxc_version_major == '8.0':
     pxc_packages = pxc80_packages
     pxc_binaries = pxc80_binaries
