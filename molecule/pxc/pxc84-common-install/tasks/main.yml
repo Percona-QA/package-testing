@@ -410,7 +410,7 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: include PGO flags check for INFO_BIN
-    include_tasks: ../tasks/test_pgo.yml
+    include_tasks: ../../../tasks/test_pgo.yml
 #--------------------------------------------------------------------------------------------
 
   - name: Install iptables on RHEL 9
