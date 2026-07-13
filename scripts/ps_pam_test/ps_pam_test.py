@@ -14,7 +14,7 @@ CLEARTEXT_ENV = {"LIBMYSQL_ENABLE_CLEARTEXT_PLUGIN": "1"}
 
 def test_check_auth_pam_and_auth_pam_compat_are_installed(connection):
     result = run_mysql(connection, PLUGIN_COUNT_QUERY, suppress_stderr=True).out
-    assert result == "0"  # TEMP-FAIL (inverted check: both PAM plugins are installed, so real count is 2)
+    assert result == "2"
 
 
 def test_check_auth_pam_successful_connect(connection):
