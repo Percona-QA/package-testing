@@ -19,7 +19,7 @@ def test_install_tokudb_plugin(connection, ps_tokudb_admin_bin):
     if not is_root():
         pytest.skip("This test requires that the current user is root!")
     t.install_tokudb(connection, ps_tokudb_admin_bin)
-    t.check_tokudb_notexists(connection)  # TEMP-FAIL (inverted check: TokuDB is installed here)
+    t.check_tokudb_exists(connection)
 
 
 def test_uninstall_tokudb_plugin(connection, ps_tokudb_admin_bin):

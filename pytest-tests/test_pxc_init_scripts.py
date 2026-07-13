@@ -48,7 +48,7 @@ def test_restart_mysql_with_systemctl(env):
     if not env.systemctl:
         pytest.skip("system doesn't have systemctl")
     assert sh("systemctl restart mysql").returncode == 0
-    assert not env.is_running()  # TEMP-FAIL (inverted check: mysql is running after restart)
+    assert env.is_running()
 
 
 def test_stop_mysql_with_initd_start_with_systemctl(env):
