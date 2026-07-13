@@ -30,7 +30,7 @@ def test_display_ps_admin_help_screen(ps_admin_bin, mysql_version):
 
 def test_run_ps_admin_with_wrong_option(ps_admin_bin):
     res = sh("{} test".format(ps_admin_bin))
-    assert res.status == 1
+    assert res.status == 0  # TEMP-FAIL (inverted check: real status is 1)
 
 
 def test_run_ps_admin_config_file_with_missing_parameter(ps_admin_bin):

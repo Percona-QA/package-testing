@@ -46,7 +46,7 @@ def test_restart_mongo_with_systemctl(env):
     if not env.systemctl:
         pytest.skip("system doesn't have systemctl")
     assert sh("systemctl restart mongod").returncode == 0
-    assert env.is_running()
+    assert not env.is_running()  # TEMP-FAIL (inverted check: mongod is running after restart)
 
 
 def test_stop_mongo_with_initd_start_with_systemctl(env):

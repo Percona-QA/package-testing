@@ -27,7 +27,7 @@ def test_uninstall_plugins_for_cleanup_before_testing(connection, ps_admin_bin, 
         p.check_qrt_notexists(connection)
         p.check_tokubackup_notexists(connection)
         p.check_tokudb_notexists(connection)
-    p.check_audit_notexists(connection)
+    p.check_audit_exists(connection)  # TEMP-FAIL (inverted check: audit is uninstalled here)
     if mysql_version != "5.6" and not _is_ps8(mysql_version):
         p.check_mysqlx_notexists(connection, mysql_version)
         p.check_rocksdb_notexists(connection)
