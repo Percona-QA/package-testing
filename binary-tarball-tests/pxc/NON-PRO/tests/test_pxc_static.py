@@ -52,6 +52,24 @@ def test_mysqld_version(host):
             )
             assert expected in host.check_output(base_dir+'/bin/mysqld --version')
 
+def test_pgo_flags_present(host):
+    # PGO is enabled only for PXC 8.4 and 9.x
+    if not (pxc_version_major.startswith("8.4") or
+            pxc_version_major.startswith("9.")):
+        pytest.skip("PGO is only supported/tested for PXC 8.4 and 9.x")
+
+    info_bin = f"{base_dir}/docs/INFO_BIN"
+    assert host.file(info_bin).exists
+
+    content = host.file(info_bin).content_string
+
+    for flag in (
+        "-fprofile-use=",
+        "-fprofile-correction",
+        "-fprofile-partial-training",
+    ):
+        assert flag in content, f"{flag} not found in INFO_BIN"
+
 def test_files_exist(host):
     for f in pxc_files:
         assert host.file(base_dir+'/'+f).exists

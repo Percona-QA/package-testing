@@ -155,8 +155,8 @@
   - name: disable all percona repos
     command: percona-release disable all
 
-  - name: include tasks for enabling PS 9.7 main (release) repo
-    include_tasks: ../tasks/enable_ps97_main_repo.yml
+  - name: include tasks for enabling PS 97 Testing repo
+    include_tasks: ../tasks/enable_ps97_testing_repo.yml
     when:
       - lookup('env', 'server_to_test') == "ps-97"
 
