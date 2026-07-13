@@ -41,7 +41,7 @@
   - name: enable the PS-97-LTS testing repo
     command: percona-release enable-only ps-97-lts testing
 
-  - name: enable the pxb-97 release repo
+  - name: enable the pxb-97 testing repo
     command: percona-release enable pxb-97-lts testing
 
   - name: Clean and update package cache
