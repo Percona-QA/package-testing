@@ -33,13 +33,25 @@
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
 
-  - name: enable the PS-80 testing repo
-    command: percona-release enable-only ps-80 testing
-
-  - name: enable the pxb-80 release repo
-    command: percona-release enable pxb-80 release
+  - name: add eol main repository on debian
+    template: src=../templates/eol_deb_repo_file_ps80.j2
+              dest=/etc/apt/sources.list.d/post-eol.list
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "testing"
     when:
-      - ansible_distribution != "Amazon"
+      - ansible_os_family == "Debian"
+
+  - name: add eol release repository on Redhat
+    template: src=../templates/eol_rpm_repo_file_ps80.j2
+             dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "testing"
+    when:
+      - ansible_os_family == "RedHat"
 
   - name: Clean and update package cache
     shell: |
