@@ -125,6 +125,16 @@
       update_cache: yes
     when: ansible_os_family == "Debian"
 
+  - name: Install python packaging dependencies (Debian)
+    apt:
+      name:
+        - python3-packaging
+        - python3-pip
+        - python3-setuptools
+      state: present
+      update_cache: yes
+    when: ansible_os_family == "Debian"
+
   - name: Upgrade pip, setuptools, and importlib-metadata (Debian)
     pip:
       name: "{{ item }}"
