@@ -156,11 +156,11 @@
   - name: run mysql compression tests script
     command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps81
 
-  - name: run bats unit tests for ps-admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
+  - name: run pytest unit tests for ps-admin script
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_unit.py
 
-  - name: run bats integration tests for ps-admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
+  - name: run pytest integration tests for ps-admin script
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_integration.py
 
   - name: run PAM tests
     include_tasks: ../tasks/pam_test.yml
@@ -196,8 +196,8 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: run bats tests for mysql init scripts
-    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+  - name: run pytest tests for mysql init scripts
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_mysql_init_scripts.py
 
   - name: start mysql service
     service: name=mysql state=started
