@@ -125,19 +125,7 @@
       update_cache: yes
     when: ansible_os_family == "Debian"
 
-  - name: Upgrade pip, setuptools, and importlib-metadata (non-bookworm)
-    pip:
-      name: "{{ item }}"
-      state: latest
-      extra_args: "-U"
-    with_items:
-      - pip
-      - setuptools
-      - importlib-metadata
-      - pykmip
-    when: ansible_distribution_release != "bookworm"
-
-  - name: Upgrade pip, setuptools, and importlib-metadata (bookworm)
+  - name: Upgrade pip, setuptools, and importlib-metadata (Debian)
     pip:
       name: "{{ item }}"
       state: latest
@@ -147,15 +135,28 @@
       - setuptools
       - importlib-metadata
       - pykmip
-    when: ansible_distribution_release == "bookworm"
+    when: ansible_os_family == "Debian"
 
-  - name: downgrade SQLAlchemy as new version doesn't work with pykmip
-    command: pip3 install SQLAlchemy==1.4.46
-    when: ansible_distribution_release != "bookworm"
+  - name: Upgrade pip, setuptools, and importlib-metadata (Redhat)
+    pip:
+      name: "{{ item }}"
+      state: latest
+      extra_args: "-U"
+    with_items:
+      - pip
+      - importlib-metadata
+      - pykmip
+    when: ansible_os_family == "RedHat"
 
-  - name: downgrade SQLAlchemy as new version doesn't work with pykmip
-    command: pip3 install --break-system-packages SQLAlchemy==1.4.46
-    when: ansible_distribution_release == "bookworm"
+  - name: Downgrade SQLAlchemy (Debian/Ubuntu)
+    command:
+      cmd: pip3 install --break-system-packages SQLAlchemy==1.4.46
+    when: ansible_os_family == "Debian"
+
+  - name: Downgrade SQLAlchemy (RedHat)
+    command:
+      cmd: pip3 install SQLAlchemy==1.4.46
+    when: ansible_os_family == "RedHat"
 
   - name: start pykmip server
     shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
