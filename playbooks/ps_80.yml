@@ -106,11 +106,11 @@
   - debug:
       var: disk_out.stdout
 
-  - name: install Percona XtraBackup 8.0 packages
-    include_tasks: ../tasks/install_pxb80.yml
-    when:
-      - lookup('env', 'install_repo') != "experimental"
-      - ansible_distribution != "Amazon"
+##  - name: install Percona XtraBackup 8.0 packages
+#    include_tasks: ../tasks/install_pxb80.yml
+##    when:
+ #     - lookup('env', 'install_repo') != "experimental"
+ #     - ansible_distribution != "Amazon"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
