@@ -35,17 +35,8 @@
               dest=/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
               mode=0664 owner=root group=root
 
-  - name: include tasks for enabling test repo
-    include_tasks: ../tasks/enable_ps57_eol_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-
   - name: include tasks for enabling main repo
     include_tasks: ../tasks/enable_ps57_eol_release_repo.yml
-    when: lookup('env', 'install_repo') == "main"
-
-  - name: include tasks for enabling experimental repo
-    include_tasks: ../tasks/enable_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -176,13 +167,8 @@
 #      mv /etc/my.cnf.d_backup-* /etc/my.cnf.d
 #    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
 
-  - name: include tasks for enabling PS 8 main repo
-    include_tasks: ../tasks/enable_ps8_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
-
   - name: include tasks for enabling PS 8 test repo
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
   - name: append include for RedHat
     lineinfile:
