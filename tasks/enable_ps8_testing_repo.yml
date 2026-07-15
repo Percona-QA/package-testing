@@ -58,7 +58,7 @@
     when:
       - ansible_os_family == "Debian"
 
-  - name: add eol testing repository on Redhat
+  - name: add eol testing repository on Redhat AMD
     template: src=../templates/eol_rpm_repo_file_ps80.j2
              dest=/etc/yum.repos.d/post-eol.repo
     vars:
@@ -67,6 +67,18 @@
       repo: "testing"
     when:
       - ansible_os_family == "RedHat"
+      - ansible_architecture == "x86_64"
+
+  - name: add eol testing repository on Redhat AMD
+    template: src=../templates/eol_rpm_repo_file_ps80_arm.j2
+             dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "testing"
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
 
   - name: Clean and update package cache
     shell: |
