@@ -5,7 +5,7 @@ def osConfigs = [
     "min-bookworm-x64"  : "2.35",
     "min-bullseye-x64"  : "2.31",
     "min-trixie-x64"    : "2.31",
-    "min-ol-9-x64"      : "2.34",
+    "min-ol-9-x64"      : "2.35",
     "min-ol-8-x64"      : "2.28",
     "min-rhel-10-x64"   : "2.35",
     "min-al2023-x64"    : "2.35",

@@ -3,7 +3,7 @@ pipeline {
   parameters {
     choice(name: 'DOCKER_ACC', choices: ['percona','perconalab'], description: 'Docker repo to use: percona or perconalab')
     choice(
-            choices: ['PS80', 'PS84', 'PS_INN_LTS'],
+            choices: ['PS80', 'PS84', 'PS97',  'PS_INN_LTS'],
             description: 'Choose the product version to test',
             name: 'PRODUCT_TO_TEST'
         )

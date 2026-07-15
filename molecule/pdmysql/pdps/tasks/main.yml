@@ -33,7 +33,7 @@
     command: percona-release enable-only pdps-{{ version }} {{ repo }}
     vars:
       repo: "{{ lookup('env', 'REPO') }}"
-      version: "{{ '84-lts' if '8.4' in lookup('env', 'VERSION') else '8.0' if '8.0.' in lookup('env', 'VERSION') else '9x-innovation' if (lookup('env', 'VERSION') | default('', true) | trim | regex_search('^9\\.')) else (lookup('env', 'VERSION') | default('', true) | trim).split('-')[0] }}"
+      version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
     when: not major_repo
 
   - name: enable the major pdps-{{ version }} {{ repo }}
@@ -42,6 +42,14 @@
       repo: "{{ lookup('env', 'REPO') }}"
       version: "{{ '84-lts' if '8.4' in lookup('env', 'VERSION') else '8.0' if '8.0.' in lookup('env', 'VERSION') else '8x-innovation' }}"
     when: major_repo
+
+  - name: check the enabled repositories
+    command: percona-release show
+    register: enabled_repos
+
+  - name: debug enabled repositories
+    debug:
+      var: enabled_repos.stdout_lines
 
   - name: install Percona Toolkit
     include_tasks: ../../../tasks/install_pt.yml

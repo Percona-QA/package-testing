@@ -8,7 +8,7 @@ if [ "$#" = 2 ]; then
     exit 1
   fi
 elif [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps56, ps57, ps80, ps84, ps9X, pxc9X !"
+  echo "This script requires product parameter: ps56, ps57, ps80, ps84, ps97, ps9X, pxc9X !"
   echo "Usage: ./version_check.sh <prod> [pro]"
   exit 1
 fi
@@ -44,6 +44,16 @@ elif [ "$1" = "ps80" ]; then
     version=${PS84_VER}
     release=${PS84_VER#*-}
     revision=${PS84_REV}
+  fi
+  elif [ "$1" = "ps97" ]; then
+  if [ "$2" = "pro" ]; then
+    version=${PS97_PRO_VER}
+    release=${PS97_PRO_VER#*-}
+    revision=${PS97_PRO_REV}
+  else
+    version=${PS97_VER}
+    release=${PS97_VER#*-}
+    revision=${PS97_REV}
   fi
 elif [[ $1 =~ ^ps9[0-9]{1}$ ]]; then
   version=${PS_INN_LTS_VER}

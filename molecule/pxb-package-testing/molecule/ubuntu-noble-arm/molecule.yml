@@ -7,7 +7,7 @@ platforms:
   - name: unoble-arm-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
     region: us-west-2
     image: ami-0f3b814f07ac0db32
-    vpc_subnet_id: subnet-03136d8c244f56036
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: c6g.large
     ssh_user: ubuntu
     root_device_name: /dev/sda1

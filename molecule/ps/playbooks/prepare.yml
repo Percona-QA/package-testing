@@ -36,3 +36,99 @@
         state: present
         exclusive: False
       when: ansible_distribution == "Ubuntu"
+
+    - name: Show disk layout
+      command: "{{ item }}"                                                                                                                           
+      loop:
+        - lsblk                                                                                                                                       
+        - df -hT                            
+        - cat /proc/mounts
+      register: disk_info                                                                                                                             
+      changed_when: false                       
+                                                                                                                                                      
+    - name: Print disk layout
+      debug:
+        var: disk_info.results | map(attribute='stdout') | list
+
+    - name: Install cloud-utils-growpart (Rocky)
+      dnf:
+        name: cloud-utils-growpart
+        state: present
+      when: ansible_distribution == "Rocky"
+
+    - name: Detect root mount source (Rocky)
+      command: findmnt -no SOURCE /
+      register: root_src
+      changed_when: false
+      when: ansible_distribution == "Rocky"
+
+    - name: Detect if root is LVM (Rocky)
+      set_fact:
+        root_is_lvm: "{{ root_src.stdout.startswith('/dev/mapper/') }}"
+      when: ansible_distribution == "Rocky"
+
+    - name: Find underlying partition for LVM root (Rocky)
+      shell: |
+        pv=$(pvs --noheadings -o pv_name | tr -d ' ' | head -n1)
+        echo "$pv"
+      register: lvm_pv
+      changed_when: false
+      when:
+        - ansible_distribution == "Rocky"
+        - root_is_lvm | bool
+
+    - name: Set partition device for growpart (Rocky)
+      set_fact:
+        part_device: "{{ lvm_pv.stdout if root_is_lvm | bool else root_src.stdout }}"
+      when: ansible_distribution == "Rocky"
+
+    - name: Compute parent disk and partition number (Rocky)
+      set_fact:
+        root_disk: "/dev/{{ (part_device | basename) | regex_replace('p?[0-9]+$', '') }}"
+        root_partnum: "{{ part_device | regex_search('[0-9]+$') }}"
+      when: ansible_distribution == "Rocky"
+
+    - name: Grow root partition (Rocky)
+      command: "growpart {{ root_disk }} {{ root_partnum }}"
+      register: growpart_result
+      changed_when: "'CHANGED' in growpart_result.stdout"
+      failed_when:
+        - growpart_result.rc != 0
+        - "'NOCHANGE' not in (growpart_result.stdout + growpart_result.stderr)"
+      when: ansible_distribution == "Rocky"
+
+    - name: Resize physical volume (Rocky, LVM)
+      command: "pvresize {{ part_device }}"
+      when:
+        - ansible_distribution == "Rocky"
+        - root_is_lvm | bool
+
+    - name: Extend root logical volume (Rocky, LVM)
+      command: "lvextend -l +100%FREE {{ root_src.stdout }}"
+      register: lvextend_result
+      changed_when: lvextend_result.rc == 0
+      failed_when:
+        - lvextend_result.rc != 0
+        - "'matches existing size' not in (lvextend_result.stdout + lvextend_result.stderr)"
+        - "'already at maximum size' not in (lvextend_result.stdout + lvextend_result.stderr)"
+      when:
+        - ansible_distribution == "Rocky"
+        - root_is_lvm | bool
+
+    - name: Grow XFS filesystem on / (Rocky)
+      command: xfs_growfs /
+      when: ansible_distribution == "Rocky"
+
+    - name: Show disk layout (After resize)
+      command: "{{ item }}"
+      loop:
+        - lsblk
+        - df -hT
+      register: disk_info_after
+      changed_when: false
+      when: ansible_distribution == "Rocky"
+
+    - name: Print disk layout (After resize)
+      debug:
+        var: disk_info_after.results | map(attribute='stdout') | list
+      when: ansible_distribution == "Rocky"

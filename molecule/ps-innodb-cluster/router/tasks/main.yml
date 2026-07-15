@@ -9,23 +9,23 @@
       percona_key1: "4D1BB29D63D98E422B2113B19334A25F8507EFA5"
       percona_key1_file: "/root/.gnupg/PERCONA-PACKAGING-KEY"
 
-  - name: Determine Percona Server major version
+  - name: Determine Percona Server major version for 80/84/9X
     set_fact:
-      PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') if '8.4' in UPSTREAM_VERSION else 8 }}"
+      PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') }}"
 
   - name: Print Percona Server major version
     debug:
       var: PS_MAJ_VER
 
-  - name: include tasks for enabling PS 80/84 main repo
+  - name: include tasks for enabling PS 80/84/97 main repo
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_main_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "main"
 
-  - name: include tasks for enabling PS 80/84 test repo
+  - name: include tasks for enabling PS 80/84/97 test repo
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_testing_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "testing" or lookup('env', 'INSTALL_REPO') == ""
 
-  - name: include tasks for enabling PS 80/84 experimental repo
+  - name: include tasks for enabling PS 80/84/97 experimental repo
     include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_experimental_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "experimental"
 

@@ -152,13 +152,13 @@ class TestCluster:
 
     @pytest.mark.parametrize("cmpt", pxc_components)
     def test_install_component(self, cluster, cmpt):
-            if pxc_version_major == "8.0" or pxc_version_major == "8.4" or re.match(r'^9\.[0-9]$', pxc_version_major):
+        if pxc_version_major == "8.0" or pxc_version_major == "8.4" or re.match(r'^9\.[0-9]$', pxc_version_major):
             cluster[0].run_query(f'INSTALL COMPONENT \'{cmpt}\';')
             for node in cluster:
                 output = node.run_query(f'SELECT component_urn FROM mysql.component WHERE component_urn = \'{cmpt}\';')
                 assert cmpt in output
         else:
-            pytest.mark.skip('Components are available from 8.0 onwards') 
+            pytest.mark.skip('Components are available from 8.0 onwards')
 
     def test_replication(self, cluster):
         cluster[0].run_query('create database test;')

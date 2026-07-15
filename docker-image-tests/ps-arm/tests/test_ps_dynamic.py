@@ -11,7 +11,7 @@ container_name = container_name.replace("/", "-").replace(".", "-").replace(":",
 
 @pytest.fixture(scope='module')
 def host():
-    if ps_version_major != '8.0' and not re.match(r'^8\.[1-9]$', ps_version_major):
+    if ps_version_major != '8.0' and not re.match(r'^8\.[1-9]$', ps_version_major) and not re.match(r"^9\.[0-9]+$", ps_version_major):
         docker_id = subprocess.check_output(
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e', 'INIT_TOKUDB=1', '-e', 'INIT_ROCKSDB=1', '-e', 'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport', '-d', docker_image]).decode().strip()
     else:
@@ -32,7 +32,7 @@ class TestDynamic:
             pytest.skip('RocksDB is available from 5.7!')
 
     def test_tokudb_installed(self, host):
-        if ps_version_major != '8.0' and not re.match(r'^8\.[1-9]$', ps_version_major):
+        if ps_version_major != '8.0' and not re.match(r'^8\.[1-9]$', ps_version_major) and not re.match(r"^9\.[0-9]+$", ps_version_major):
             cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "select SUPPORT from information_schema.ENGINES where ENGINE = \'TokuDB\';"')
             assert cmd.succeeded
             assert 'YES' in cmd.stdout
@@ -77,7 +77,7 @@ class TestDynamic:
             pytest.mark.skip('Components are available from 8.0 onwards')
 
     def test_telemetry_enabled(self, host):
-        if ps_version_major != '8.0' and not re.match(r'^8\.[1-9]$', ps_version_major):
+        if ps_version_major != '8.0' and not re.match(r'^8\.[1-9]$', ps_version_major) and not re.match(r"^9\.[0-9]+$", ps_version_major):
             pytest.skip('telemetry was added in 8.0')
         else:
             assert host.file('/usr/local/percona/telemetry_uuid').exists
