@@ -1,16 +1,15 @@
-"""pyinfra deploy for the PXC joiner nodes (pxc2, pxc3).
+"""pyinfra deploy for the PXC joiner nodes (pxc2, pxc3) - CLUSTER phase.
 
-Port of pxc{80,84}-common-install/tasks/main.yml (non-pro, install).
-Must run AFTER deploy_bootstrap.py. Use --parallel 1 (NOT --serial): this
-keeps pyinfra's per-operation barrier across the joiners so the
-wsrep_cluster_size==3 check runs only after every joiner has started mysql,
-while still executing each operation one host at a time (no concurrent SST
-joins, no concurrent restarts that would drop cluster quorum). --serial
-would run the whole deploy on pxc2 first, so its cluster-size check would
-see only 2 nodes and fail. This mirrors the molecule scenario's ansible
+Second of the two joiner phases. Runs AFTER deploy_common_install.py, with
+--parallel 1 (NOT --serial): this keeps pyinfra's per-operation barrier across
+the joiners so the wsrep_cluster_size==3 check runs only after every joiner has
+started mysql, while still executing each operation one host at a time (no
+concurrent SST joins, no concurrent restarts that would drop cluster quorum).
+--serial would run the whole deploy on pxc2 first, so its cluster-size check
+would see only 2 nodes and fail. This mirrors the molecule scenario's ansible
 linear strategy + throttle:1.
 
-    pyinfra -y --limit joiners --parallel 1 inventory.py deploy_common.py \
+    pyinfra -y --limit joiners --parallel 1 inventory.py deploy_common_cluster.py \
         --data product=pxc80 --data install_repo=testing \
         --data check_version=yes \
         --data git_account=Percona-QA --data testing_branch=master
@@ -19,25 +18,11 @@ linear strategy + throttle:1.
 from pyinfra import host
 from pyinfra.operations import dnf, server, systemd
 
-from tasks import prep, pxc_config, pxc_install, repo, system
+from tasks import pxc_install, runvars, system
 
-product = host.data.get("product", "pxc80")
-install_repo = host.data.get("install_repo") or "main"
-check_version = host.data.get("check_version") or "yes"
-git_account = host.data.get("git_account") or "Percona-QA"
-testing_branch = host.data.get("testing_branch") or "master"
-# empty for the install test type -> the telemetry-blocked re-install runs,
-# same as the molecule converge (upgrade flows will set this later)
-upgrade_repo = host.data.get("upgrade_repo") or ""
-
-prep.system_prep(product, git_account, testing_branch)
-repo.enable_repo(product, install_repo)
-prep.pre_install_fixes(bootstrap=False)
-pxc_install.install_pxc(product, phase="initial")
-
-pxc_config.deploy_mysql_config()
-pxc_config.deploy_root_mycnf()
-pxc_config.deploy_certs()
+product = runvars.product()
+check_version = runvars.check_version()
+upgrade_repo = runvars.upgrade_repo()
 
 systemd.service(
     name="Start mysql service (join the cluster)",

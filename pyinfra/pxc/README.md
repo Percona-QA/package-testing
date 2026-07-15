@@ -15,7 +15,8 @@ non-pro packages, all OSes supported by the corresponding molecule job.
 | `create_noble.yml` (molecule-ec2 driver) | `provision.py` (boto3) |
 | IP JSON files + jq + envfile + `MOLECULE_ENV_FILE` | state JSON + `inventory.py` |
 | `pxcXX-bootstrap-install` scenario (pxc1) | `deploy_bootstrap.py` |
-| `pxcXX-common-install` scenario (pxc2/pxc3, `throttle: 1`) | `deploy_common.py` with `--parallel 1` |
+| `pxcXX-common-install` scenario, install tasks (pxc2/pxc3, concurrent) | `deploy_common_install.py` (default parallelism) |
+| `pxcXX-common-install` scenario, cluster tasks (`throttle: 1`) | `deploy_common_cluster.py` with `--parallel 1` |
 | `playbooks/logsbackup.yml` | `deploy_logsbackup.py` |
 | `destroy_noble.yml` | `destroy.py` |
 
@@ -27,10 +28,14 @@ non-pro packages, all OSes supported by the corresponding molecule job.
   three private IPs (`pxc1_ip`/`pxc2_ip`/`pxc3_ip`) and its own `man_ip`,
   which feed the `wsrep_cluster_address`/`wsrep_node_address` template.
 - `deploy_bootstrap.py` installs the packages and starts
-  `mysql@bootstrap.service`; `deploy_common.py` joins pxc2 and pxc3 one at a
-  time and asserts `wsrep_cluster_size == 3`, then runs the telemetry-blocked
-  re-install checks. The step-by-step logic is a 1:1 port of the molecule
-  converge tasks (see `tasks/`).
+  `mysql@bootstrap.service`. The joiners run in two phases: the
+  cluster-independent install (`deploy_common_install.py`) runs on both joiners
+  concurrently, then the cluster-forming phase (`deploy_common_cluster.py`,
+  `--parallel 1`) joins pxc2 and pxc3 one at a time, asserts
+  `wsrep_cluster_size == 3`, and runs the telemetry-blocked re-install checks.
+  The step-by-step logic is a 1:1 port of the molecule converge tasks
+  (see `tasks/`); splitting install from cluster-forming recovers the
+  concurrency the molecule linear strategy had on its non-throttled tasks.
 
 ## Requirements
 
@@ -63,7 +68,11 @@ pyinfra -y --limit bootstrap inventory.py deploy_bootstrap.py \
     --data product=pxc80 --data install_repo=testing --data check_version=yes \
     --data git_account=Percona-QA --data testing_branch=master
 
-pyinfra -y --limit joiners --parallel 1 inventory.py deploy_common.py \
+pyinfra -y --limit joiners inventory.py deploy_common_install.py \
+    --data product=pxc80 --data install_repo=testing --data check_version=yes \
+    --data git_account=Percona-QA --data testing_branch=master
+
+pyinfra -y --limit joiners --parallel 1 inventory.py deploy_common_cluster.py \
     --data product=pxc80 --data install_repo=testing --data check_version=yes \
     --data git_account=Percona-QA --data testing_branch=master
 

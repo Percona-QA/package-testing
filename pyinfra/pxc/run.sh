@@ -48,9 +48,11 @@ python3 provision.py --os "${OS}" --product "${PRODUCT}" \
     --state-file "${PXC_STATE_FILE}"
 
 pyinfra -y --limit bootstrap inventory.py deploy_bootstrap.py "${PYINFRA_DATA[@]}"
-# --parallel 1 keeps the per-operation barrier (so the cluster-size check
-# sees all 3 nodes) while joining one node at a time.
-pyinfra -y --limit joiners --parallel 1 inventory.py deploy_common.py "${PYINFRA_DATA[@]}"
+# joiner install phase (cluster-independent): both joiners concurrently
+pyinfra -y --limit joiners inventory.py deploy_common_install.py "${PYINFRA_DATA[@]}"
+# joiner cluster phase: --parallel 1 keeps the per-operation barrier (so the
+# cluster-size check sees all 3 nodes) while forming the cluster one node at a time.
+pyinfra -y --limit joiners --parallel 1 inventory.py deploy_common_cluster.py "${PYINFRA_DATA[@]}"
 
 if [ "${BACKUP_LOGS:-0}" = "1" ]; then
     pyinfra -y inventory.py deploy_logsbackup.py \

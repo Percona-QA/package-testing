@@ -9,19 +9,15 @@ Run against the "bootstrap" inventory group:
         --data git_account=Percona-QA --data testing_branch=master
 """
 
-from pyinfra import host
 from pyinfra.operations import server
 
-from tasks import prep, pxc_config, pxc_install, repo, system
+from tasks import prep, pxc_config, pxc_install, repo, runvars, system
 
-product = host.data.get("product", "pxc80")
-install_repo = host.data.get("install_repo") or "main"
-check_version = host.data.get("check_version") or "yes"
-git_account = host.data.get("git_account") or "Percona-QA"
-testing_branch = host.data.get("testing_branch") or "master"
+product = runvars.product()
+check_version = runvars.check_version()
 
-prep.system_prep(product, git_account, testing_branch)
-repo.enable_repo(product, install_repo)
+prep.system_prep(product, runvars.git_account(), runvars.testing_branch())
+repo.enable_repo(product, runvars.install_repo())
 prep.pre_install_fixes(bootstrap=True)
 pxc_install.install_pxc(product, phase="initial")
 
