@@ -79,6 +79,12 @@
     command: /package-testing/setpass_57.sh
     when: ansible_os_family == "RedHat"
 
+  - name: append include for RedHat
+    lineinfile:
+        path: /etc/my.cnf
+        line: '!includedir /etc/my.cnf.d'
+    when: ansible_os_family == "RedHat"
+
   - name: copy .my.cnf with credentials on centos
     template: src=../templates/my_57.j2
               dest=/root/.my.cnf
@@ -123,6 +129,12 @@
   - name: start mysql service
     service: name=mysql state=started
 
+  - name: start my.cnf change test
+    command: /package-testing/check_mycnf_pre.sh
+
+  - name: stop mysql service with systemctl command
+    command: systemctl stop mysql
+
   - name: disable all percona repos
     command: percona-release disable all
 
@@ -130,12 +142,14 @@
     stat: path=/etc/my.cnf
     register: mycnf
 
-  - name: copy config file to backup
-    copy:
-      src: /etc/my.cnf
-      dest: /etc/my.cnf.backup
-      remote_src: yes
-    when: mycnf.stat.exists and ansible_os_family == "RedHat"
+  - stat:
+      path: /var/lib/mysql
+    register: p
+
+  - name: check /var/lib/mysql exists and not empty
+    fail:
+      msg: "Path exists and is a directory and is not empty"
+    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
 
   - name: remove PS 5.7 packages
     include_tasks: ../tasks/remove_ps57.yml
@@ -187,12 +201,6 @@
 
   - name: include tasks for enabling PS 8 test repo
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
-
-  - name: append include for RedHat
-    lineinfile:
-        path: /etc/my.cnf
-        line: '!includedir /etc/my.cnf.d'
-    when: ansible_os_family == "RedHat"
 
   - name: install Percona Server 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
