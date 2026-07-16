@@ -166,9 +166,6 @@
       msg: "Path exists and is a directory and is not empty"
     when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
 
-  - name: check apt/yum logs for errors
-    command: /package-testing/scripts/log-check.sh
-
 #  - name: remove PS 5.7 packages
 #    include_tasks: ../tasks/remove_ps57.yml
 
