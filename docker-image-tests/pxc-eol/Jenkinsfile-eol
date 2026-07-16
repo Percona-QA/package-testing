@@ -78,12 +78,18 @@ pipeline {
                                 wget -q https://raw.githubusercontent.com/aquasecurity/trivy/v\${TRIVY_VERSION}/contrib/junit.tpl
 
                                 trivy image \
+                                  --severity HIGH,CRITICAL \
+                                  --ignore-unfixed \
+                                  --timeout 10m \
+                                  percona/percona-xtradb-cluster:${TAG}
+
+                                trivy image \
                                   --format template \
                                   --template @junit.tpl \
                                   -o trivy-high-junit.xml \
-                                  --timeout 10m \
-                                  --ignore-unfixed \
                                   --severity HIGH,CRITICAL \
+                                  --ignore-unfixed \
+                                  --timeout 10m \
                                   --exit-code 1 \
                                   percona/percona-xtradb-cluster:${TAG}
                             """
