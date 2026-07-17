@@ -26,20 +26,9 @@ def host():
 
 class TestDynamic:
     def test_rocksdb_installed(self, host):
-        if ps_version_major not in ['5.6']:
-            cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "select SUPPORT from information_schema.ENGINES where ENGINE = \'ROCKSDB\';"')
-            assert cmd.succeeded
-            assert 'YES' in cmd.stdout
-        else:
-            pytest.skip('RocksDB is available from 5.7!')
-
-    def test_tokudb_installed(self, host):
-        if ps_version_major != "8.0" and not re.match(r"^8\.[1-9]$", ps_version_major) and not re.match(r"^9\.[0-9]+$", ps_version_major):
-            cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "select SUPPORT from information_schema.ENGINES where ENGINE = \'TokuDB\';"')
-            assert cmd.succeeded
-            assert 'YES' in cmd.stdout
-        else:
-            pytest.skip('TokuDB is available in 5.7!')
+        cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "select SUPPORT from information_schema.ENGINES where ENGINE = \'ROCKSDB\';"')
+        assert cmd.succeeded
+        assert 'YES' in cmd.stdout
 
     @pytest.mark.parametrize("fname,soname,return_type", ps_functions)
     def test_install_functions(self, host, fname, soname, return_type):
@@ -59,31 +48,20 @@ class TestDynamic:
 
     @pytest.mark.parametrize("cmpt", ps_components)
     def test_install_component(self, host, cmpt):
-        if ps_version_major == '8.0' or re.match(r'^8\.[1-9]$', ps_version_major) or re.match(r"^9\.[0-9]+$", ps_version_major):
-            if cmpt == 'file://component_masking_functions':
+        if cmpt == 'file://component_masking_functions':
                 host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "UNINSTALL PLUGIN data_masking;"')
-            cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "INSTALL component \''+cmpt+'\';"')
-            assert cmd.succeeded
-            cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "SELECT component_urn from mysql.component WHERE component_urn = \''+cmpt+'\';"')
-            assert cmd.succeeded
-            assert cmpt in cmd.stdout
-        else:
-            pytest.mark.skip('Components are available from 8.0 onwards')
+        cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "INSTALL component \''+cmpt+'\';"')
+        assert cmd.succeeded
+        cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "SELECT component_urn from mysql.component WHERE component_urn = \''+cmpt+'\';"')
+        assert cmd.succeeded
+        assert cmpt in cmd.stdout
 
     def test_install_audit_log_v2(self, host):
-        if ps_version_major in ['8.0']:
-            cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "source /usr/share/mysql/audit_log_filter_linux_install.sql;"')
-            assert cmd.succeeded
-            cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "SELECT plugin_status FROM information_schema.plugins WHERE plugin_name = \'audit_log_filter\';"')
-            assert cmd.succeeded
-            assert 'ACTIVE' in cmd.stdout
-        else:
-            pytest.mark.skip('Components are available from 8.0 onwards')
+        cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "source /usr/share/mysql/audit_log_filter_linux_install.sql;"')
+        assert cmd.succeeded
+        assert 'ACTIVE' in cmd.stdout
 
     def test_telemetry_enabled(self, host):
-        if ps_version_major in ['5.6']:
-            pytest.skip('telemetry was added after 5.7')
-        else:
-            assert host.file('/usr/local/percona/telemetry_uuid').exists
-            assert host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PS')
-            assert host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
+        assert host.file('/usr/local/percona/telemetry_uuid').exists
+        assert host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PS')
+        assert host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')

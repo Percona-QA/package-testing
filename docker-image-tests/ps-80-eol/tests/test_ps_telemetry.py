@@ -6,7 +6,7 @@ import time
 from settings import *
 
 
-container_name = 'ps-docker-test-static'
+container_name = 'ps-tel'
 
 @pytest.fixture(scope='module')
 def host():
@@ -31,7 +31,7 @@ class TestMysqlEnvironment:
         cmd = 'ps auxww| grep -v grep  | grep -c "telemetry-agent-supervisor.sh"'
         result = host.run(cmd)
         stdout = int(result.stdout)
-        assert stdout == 1    
+        assert stdout == 1
 
     def test_telemetry_agent_dirs_present(self, host):
         assert host.file("/usr/local/percona/telemetry/").is_directory
