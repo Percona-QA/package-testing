@@ -11,4 +11,4 @@
             - 'master'
             wipe-workspace: false
       lightweight-checkout: true
-      script-path: docker-image-tests/ps-eol-80/Jenkinsfile-80-eol
+      script-path: docker-image-tests/ps-80-eol/Jenkinsfile-80-eol
