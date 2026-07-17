@@ -102,7 +102,6 @@
     - percona-xtradb-cluster-full
     - percona-xtradb-cluster
     - percona-xtradb-cluster-client
-    - percona-xtradb-cluster-debuginfo
     - percona-xtradb-cluster-devel
     - percona-xtradb-cluster-garbd
     - percona-xtradb-cluster-server
