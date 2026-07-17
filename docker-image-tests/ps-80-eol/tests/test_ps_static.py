@@ -32,8 +32,22 @@ class TestMysqlEnvironment:
         assert oct(host.file(binary).mode) == '0o755'
 
     def test_binaries_version(self, host):
-        assert host.check_output('mysql --version') == 'mysql  Ver '+ ps_version_upstream + '-' + ps_version_percona +' for Linux on x86_64 (Percona Server (GPL), Release '+ ps_version_percona +', Revision '+ ps_revision +')'
-        assert host.check_output('mysqld --version') == '/usr/sbin/mysqld  Ver '+ ps_version_upstream + '-' + ps_version_percona +' for Linux on x86_64 (Percona Server (GPL), Release '+ ps_version_percona +', Revision '+ ps_revision +')'
+        arch = host.check_output ("uname -m")
+
+        expected_mysql = (
+            f"mysql  Ver {ps_version_upstream}-{ps_version_percona} "
+            f"for Linux on {arch} "
+            f"(Percona Server (GPL), Release {ps_version_percona}, Revision {ps_revision})"
+        )
+
+        expected_mysqld = (
+            f"/usr/sbin/mysqld  Ver {ps_version_upstream}-{ps_version_percona} "
+            f"for Linux on {arch} "
+            f"(Percona Server (GPL), Release {ps_version_percona}, Revision {ps_revision})"
+        )
+
+        assert host.check_output("mysql --version") == expected_mysql
+        assert host.check_output("mysqld --version") == expected_mysqld
 
     def test_process_running(self, host):
         assert host.process.get(user="mysql", comm="mysqld")

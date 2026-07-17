@@ -57,9 +57,22 @@ class TestDynamic:
         assert cmpt in cmd.stdout
 
     def test_install_audit_log_v2(self, host):
-        cmd = host.run('mysql --user=root --password='+ps_pwd+' -S/var/lib/mysql/mysql.sock -s -N -e "source /usr/share/mysql/audit_log_filter_linux_install.sql;"')
+        cmd = host.run(
+            'mysql --user=root --password=' + ps_pwd +
+            ' -S/var/lib/mysql/mysql.sock '
+            '-e "source /usr/share/mysql/audit_log_filter_linux_install.sql;"'
+        )
+
         assert cmd.succeeded
-        assert 'ACTIVE' in cmd.stdout
+
+        plugin = host.check_output(
+            'mysql --user=root --password=' + ps_pwd +
+            ' -S/var/lib/mysql/mysql.sock -s -N '
+            '-e "SELECT PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS '
+            'WHERE PLUGIN_NAME=\'audit_log\';"'
+        )
+
+    assert plugin == "ACTIVE"
 
     def test_telemetry_enabled(self, host):
         assert host.file('/usr/local/percona/telemetry_uuid').exists
