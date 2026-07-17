@@ -135,18 +135,24 @@
     when: 
     - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
+  - name: setup epel 9 repo
+    dnf:
+      name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+      state: present
+      disable_gpg_check: true
+    register: epel9_repo
+    retries: 60
+    delay: 10
+    until: epel9_repo is not failed
+    when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+
   - name: install GPG key for epel 9
     rpm_key:
       state: present
-      key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9
-    when: 
-    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
-
-  - name: setup epel 9 repo
-    dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
+      key: /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-9
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int == 9
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
 #  - name: setup epel 9 repo package
 #    dnf: name=epel-release state=latest
