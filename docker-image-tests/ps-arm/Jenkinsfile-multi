@@ -131,7 +131,7 @@ pipeline {
 
                                     git clone https://github.com/Percona-QA/package-testing.git --depth 1
 
-                                    cd package-testing/docker-image-tests/ps-eol
+                                    cd package-testing/docker-image-tests/ps
 
                                     pip3 install --user -r requirements.txt
 
@@ -152,7 +152,7 @@ pipeline {
                     }
                 }
 
-                                stage('ARM64') {
+                stage('ARM64') {
 
                     agent { label 'docker-32gb-aarch64' }
 
