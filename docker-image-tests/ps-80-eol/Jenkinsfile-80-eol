@@ -4,7 +4,7 @@ pipeline {
     parameters {
         string(name: 'PS_VERSION', defaultValue: '8.0.46-38', description: 'Full PS version')
         string(name: 'PS_REVISION', defaultValue: '46482fa2', description: 'Short git hash')
-        string(name: 'TAG', defaultValue: '8.0.46-39-1', description: 'Docker tag')
+        string(name: 'TAG', defaultValue: '8.0.46-38', description: 'Docker tag')
         choice(name: 'REPO', choices: ['testing', 'main'], description: 'Repository')
     }
 
@@ -129,7 +129,7 @@ pipeline {
 
                                     rm -rf package-testing
 
-                                    git clone -b add-eol-80 https://github.com/kaushikpuneet07/package-testing.git --depth 1
+                                    git clone https://github.com/Percona-QA/package-testing.git --depth 1
 
                                     cd package-testing/docker-image-tests/ps-80-eol
 
@@ -253,7 +253,7 @@ pipeline {
 
                                     rm -rf package-testing
 
-                                    git clone -b add-eol-80 https://github.com/kaushikpuneet07/package-testing.git --depth 1
+                                    git clone https://github.com/Percona-QA/package-testing.git --depth 1
 
                                     cd package-testing/docker-image-tests/ps-80-eol
 
