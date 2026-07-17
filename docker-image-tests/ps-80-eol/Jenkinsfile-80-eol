@@ -129,7 +129,7 @@ pipeline {
 
                                     rm -rf package-testing
 
-                                    git clone -b master https://github.com/kaushikpuneet07/package-testing.git --depth 1
+                                    git clone -b add-eol-80 https://github.com/kaushikpuneet07/package-testing.git --depth 1
 
                                     cd package-testing/docker-image-tests/ps-80-eol
 
