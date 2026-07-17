@@ -305,7 +305,13 @@ pipeline {
                                     }
                                 }
 
-                            }
-                        }
-                    }
-                }
+                            }   // end ARM Validation parallel
+                        }       // end ARM Validation stage
+                    }           // end ARM stages
+                }               // end ARM64 stage
+
+            }                   // end Validation parallel
+        }                       // end Validation stage
+
+    }                           // end stages
+}                               // end pipeline
