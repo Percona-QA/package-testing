@@ -1,149 +1,163 @@
 pipeline {
-  agent { label 'docker' }
-  parameters {
-    choice(name: 'DOCKER_ACC', choices: ['percona','perconalab'], description: 'Docker repo to use: percona or perconalab')
-    choice(
-            choices: ['PS80', 'PS84', 'PS_INN_LTS'],
-            description: 'Choose the product version to test',
-            name: 'PRODUCT_TO_TEST'
-        )
-  }
-  stages {
-    stage('SET PS_VERSION and PS_REVISION') {
-        steps {
-          script {
-            sh '''
-              rm -rf /package-testing
-              rm -f master.zip
-              wget https://github.com/Percona-QA/package-testing/archive/master.zip
-              unzip master.zip
-              rm -f master.zip
-              mv "package-testing-master" package-testing
-            '''
-                    
-            def VERSION = sh(
-                script: '''grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
-                returnStdout: true
-                ).trim()
+    agent none
 
-            def REVISION = sh(
-                script: ''' grep ${PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
-                returnStdout: true
-                ).trim()
-                    
-    
-            env.PS_VERSION = "${VERSION}.1-multi"
-            env.PS_REVISION = REVISION
+    parameters {
+        string(name: 'PS_VERSION', defaultValue: '8.0.46-38')
+        string(name: 'PS_REVISION', defaultValue: 'c643a1242d8')
+        string(name: 'TAG', defaultValue: '8.0.46-38-1')
+        choice(name: 'REPO', choices: ['testing', 'main'])
+    }
 
-            echo "PS_VERSION fetched: ${env.PS_VERSION}"
-            echo "PS_REVISION fetched: ${env.PS_REVISION}"
+    stages {
 
-          }
-       }
-     }
-    stage('Set environmental variable'){
-      steps{
-        script {
-                    // Now, you can access these global environment variables
-          echo "Using PS_VERSION: ${env.PS_VERSION}"
-          echo "Using PS_REVISION: ${env.PS_REVISION}"
+        stage('Prepare') {
+            agent { label 'docker' }
+
+            steps {
+                script {
+                    currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+                    currentBuild.description = TAG
                 }
             }
         }
-    stage('Prepare') {
-      steps {
-          script {
-            currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-            currentBuild.description = "${DOCKER_ACC}"
-          }
-         }
-        }
-    stage("Run parallel") {
-        parallel {
 
-      stage ('Run trivy analyzer') {
-        steps {
-            sh """
-              sudo yum install -y wget git
-              TRIVY_VERSION="0.69.3"
-              ARCH=\$(uname -m)
-              if [[ "\$ARCH" == "aarch64" ]]; then
-                  ARCH_NAME="ARM64"
-                  TRIVY_CHECKSUM="7e3924a974e912e57b4a99f65ece7931f8079584dae12eb7845024f97087bdfd"
-              elif [[ "\$ARCH" == "x86_64" ]]; then
-                  ARCH_NAME="64bit"
-                  TRIVY_CHECKSUM="1816b632dfe529869c740c0913e36bd1629cb7688bd5634f4a858c1d57c88b75"
-              else
-                  echo "Unsupported architecture: \$ARCH"
-                  exit 1
-              fi
-              echo "Detected architecture: \$ARCH, using Trivy for Linux-\$ARCH_NAME"
-              wget https://github.com/aquasecurity/trivy/releases/download/v\${TRIVY_VERSION}/trivy_\${TRIVY_VERSION}_Linux-\${ARCH_NAME}.tar.gz
-              echo "\${TRIVY_CHECKSUM}  trivy_\${TRIVY_VERSION}_Linux-\${ARCH_NAME}.tar.gz" | sha256sum -c -
-              sudo tar zxvf trivy_\${TRIVY_VERSION}_Linux-\${ARCH_NAME}.tar.gz -C /usr/local/bin/
-              wget https://raw.githubusercontent.com/aquasecurity/trivy/v\${TRIVY_VERSION}/contrib/junit.tpl
-              /usr/local/bin/trivy -q image --format template --template @junit.tpl  -o trivy-hight-junit.xml \
-              --timeout 10m0s --ignore-unfixed --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_ACC}/percona-server:${PS_VERSION}
-            """
-         } //end steps
-         post {
-           always {
-                    junit testResults: "*-junit.xml", keepLongStdio: true, allowEmptyResults: true, skipPublishingChecks: true
+        stage('Validation') {
+
+            failFast false
+
+            parallel {
+
+                stage('AMD') {
+
+                    agent { label 'docker' }
+
+                    stages {
+
+                        stage('Download Image') {
+                            steps {
+                                withCredentials([
+                                    usernamePassword(
+                                        credentialsId: 'PS_PRIVATE_REPO_ACCESS',
+                                        usernameVariable: 'USERNAME',
+                                        passwordVariable: 'PASSWORD'
+                                    )
+                                ]) {
+                                    script {
+
+                                        def url
+
+                                        if (REPO == "testing") {
+                                            url = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/percona-server-${PS_VERSION}-1.docker.tar"
+                                        } else {
+                                            url = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/percona-server-${PS_VERSION}-1.docker.tar"
+                                        }
+
+                                        sh """
+                                            rm -f *.docker.tar
+                                            wget -q ${url}
+                                            sudo docker load -i percona-server-${PS_VERSION}-1.docker.tar
+                                        """
+                                    }
+                                }
+                            }
+                        }
+
+                        stage('Run Trivy') {
+                            steps {
+                                sh '''
+                                    # install trivy
+                                    ...
+                                    trivy image percona/percona-server:${TAG}
+                                '''
+                            }
+                        }
+
+                        stage('Run Tests') {
+                            steps {
+                                sh '''
+                                    git clone https://github.com/Percona-QA/package-testing.git --depth 1
+                                    cd package-testing/docker-image-tests/ps
+                                    pip3 install --user -r requirements.txt
+                                    ./run.sh
+                                '''
+                            }
+                        }
+                    }
+
+                    post {
+                        always {
+                            junit '**/*junit.xml'
+                            junit 'package-testing/docker-image-tests/ps/report.xml'
+                        }
+                    }
                 }
-        }
-      } //end Run trivy analyzer
 
-      stage('Run tests on ARM') {
-        agent { label 'docker-32gb-aarch64' }  
-        steps {
-            sh '''
-              # disable THP on the host for TokuDB
-              echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" > disable_thp.sh
-              echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag" >> disable_thp.sh
-              chmod +x disable_thp.sh
-              sudo ./disable_thp.sh
-              # run test
-              export PATH=${PATH}:~/.local/bin
-              sudo yum install -y python3 python3-pip
-              rm -rf package-testing
-              git clone https://github.com/Percona-QA/package-testing.git --depth 1
-              cd package-testing/docker-image-tests/ps-arm
-              pip3 install --user -r requirements.txt
-              ./run.sh
-            '''
-        } //end steps
-        post {
-          always {
-          junit 'package-testing/docker-image-tests/ps-arm/report.xml'
-        }
-       }
-     } //end Run tests on ARM stage
+                stage('ARM') {
 
-      stage('Run tests on AMD') {
-        steps {
-            sh '''
-              # disable THP on the host for TokuDB
-              echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" > disable_thp.sh
-              echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag" >> disable_thp.sh
-              chmod +x disable_thp.sh
-              sudo ./disable_thp.sh
-              # run test
-              export PATH=${PATH}:~/.local/bin
-              sudo yum install -y python3 python3-pip
-              rm -rf package-testing
-              git clone https://github.com/Percona-QA/package-testing.git --depth 1
-              cd package-testing/docker-image-tests/ps
-              pip3 install --user -r requirements.txt
-              ./run.sh
-            ''' 
+                    agent { label 'docker-32gb-aarch64' }
+
+                    stages {
+
+                        stage('Download Image') {
+                            steps {
+                                withCredentials([
+                                    usernamePassword(
+                                        credentialsId: 'PS_PRIVATE_REPO_ACCESS',
+                                        usernameVariable: 'USERNAME',
+                                        passwordVariable: 'PASSWORD'
+                                    )
+                                ]) {
+                                    script {
+
+                                        def url
+
+                                        if (REPO == "testing") {
+                                            url = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/percona-server-${PS_VERSION}-1.docker.tar"
+                                        } else {
+                                            url = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-57-eol/tarballs/Percona-Server-${PS_VERSION}/percona-server-${PS_VERSION}-1.docker.tar"
+                                        }
+
+                                        sh """
+                                            rm -f *.docker.tar
+                                            wget -q ${url}
+                                            sudo docker load -i percona-server-${PS_VERSION}-1.docker.tar
+                                        """
+                                    }
+                                }
+                            }
+                        }
+
+                        stage('Run Trivy') {
+                            steps {
+                                sh '''
+                                    # install ARM trivy
+                                    ...
+                                    trivy image percona/percona-server:${TAG}
+                                '''
+                            }
+                        }
+
+                        stage('Run Tests') {
+                            steps {
+                                sh '''
+                                    git clone https://github.com/Percona-QA/package-testing.git --depth 1
+                                    cd package-testing/docker-image-tests/ps
+                                    pip3 install --user -r requirements.txt
+                                    ./run.sh
+                                '''
+                            }
+                        }
+                    }
+
+                    post {
+                        always {
+                            junit '**/*junit.xml'
+                            junit 'package-testing/docker-image-tests/ps/report.xml'
+                        }
+                    }
+                }
+
+            }
         }
-        post {
-          always {
-          junit 'package-testing/docker-image-tests/ps/report.xml'
-        }
-       }
-      } //end Run tests on AMD stage       
-    } //end stages
-  } //end pipeline
- }
+    }
 }
