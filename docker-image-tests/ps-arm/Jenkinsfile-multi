@@ -3,8 +3,8 @@ pipeline {
 
     parameters {
         string(name: 'PS_VERSION', defaultValue: '8.0.46-38', description: 'Full PS version')
-        string(name: 'PS_REVISION', defaultValue: '46482fa2', description: 'Short git hash for release')
-        string(name: 'TAG', defaultValue: '8.0.46-38-1', description: 'Docker image tag')
+        string(name: 'PS_REVISION', defaultValue: '46482fa2', description: 'Short git hash')
+        string(name: 'TAG', defaultValue: '8.0.46-39-1', description: 'Docker tag')
         choice(name: 'REPO', choices: ['testing', 'main'], description: 'Repository')
     }
 
@@ -15,13 +15,14 @@ pipeline {
 
             steps {
                 script {
-                    currentBuild.displayName = "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
-                    currentBuild.description = "${TAG}"
+                    currentBuild.displayName =
+                        "#${BUILD_NUMBER}-${PS_VERSION}-${PS_REVISION}"
+                    currentBuild.description = TAG
                 }
             }
         }
 
-        stage('Validation') {
+        stage('Run AMD64 and ARM64') {
 
             failFast false
 
@@ -33,7 +34,7 @@ pipeline {
 
                     stages {
 
-                        stage('Prepare Image') {
+                        stage('Download AMD Image') {
 
                             steps {
 
@@ -47,271 +48,235 @@ pipeline {
 
                                     script {
 
-                                        def dockerTarURL
+                                        def dockerTar
 
                                         if (REPO == "testing") {
-                                            dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/percona-server-${PS_VERSION}-1-amd64.docker.tar"
+
+                                            dockerTar =
+"https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/percona-server-${PS_VERSION}-1-amd64.docker.tar"
+
                                         } else {
-                                            dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-80-eol/tarballs/Percona-Server-${PS_VERSION}/percona-server-${PS_VERSION}-1-amd64.docker.tar"
+
+                                            dockerTar =
+"https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-80-eol/tarballs/Percona-Server-${PS_VERSION}/percona-server-${PS_VERSION}-1-amd64.docker.tar"
+
                                         }
 
                                         sh """
                                             rm -f *.docker.tar
-
-                                            wget -q ${dockerTarURL}
-
+                                            wget -q "${dockerTar}"
                                             sudo docker load -i percona-server-${PS_VERSION}-1-amd64.docker.tar
-
-                                            sudo docker images
                                         """
                                     }
                                 }
                             }
                         }
 
-                        stage('Run Validation') {
+                        stage('Trivy AMD64') {
 
-                            failFast false
+                            steps {
 
-                            parallel {
+                                catchError(
+                                    buildResult: 'SUCCESS',
+                                    stageResult: 'FAILURE'
+                                ) {
 
-                                stage('Run Trivy') {
+                                    sh '''
+                                        sudo yum install -y wget git
 
-                                    steps {
+                                        TRIVY_VERSION=0.69.3
 
-                                        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+                                        wget -q https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz
 
-                                            sh '''
-                                                sudo yum install -y wget git jq
+                                        sudo tar zxf trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz -C /usr/local/bin/
 
-                                                TRIVY_VERSION=0.69.3
+                                        wget -q https://raw.githubusercontent.com/aquasecurity/trivy/v${TRIVY_VERSION}/contrib/junit.tpl
 
-                                                wget -q https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz
-
-                                                echo "1816b632dfe529869c740c0913e36bd1629cb7688bd5634f4a858c1d57c88b75  trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" | sha256sum -c -
-
-                                                sudo tar -zxf trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz -C /usr/local/bin/
-
-                                                wget -q https://raw.githubusercontent.com/aquasecurity/trivy/v${TRIVY_VERSION}/contrib/junit.tpl
-
-                                                /usr/local/bin/trivy image \
-                                                  --format json \
-                                                  -o trivy.json \
-                                                  --ignore-unfixed \
-                                                  --severity HIGH,CRITICAL \
-                                                  percona/percona-server:${TAG}
-
-                                                HIGH=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity=="HIGH")] | length' trivy.json)
-
-                                                CRITICAL=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' trivy.json)
-
-                                                echo "=========================================="
-                                                echo "HIGH vulnerabilities     : ${HIGH}"
-                                                echo "CRITICAL vulnerabilities : ${CRITICAL}"
-                                                echo "=========================================="
-
-                                                /usr/local/bin/trivy image \
-                                                  --format template \
-                                                  --template @junit.tpl \
-                                                  -o trivy-junit.xml \
-                                                  --ignore-unfixed \
-                                                  --exit-code 1 \
-                                                  --severity HIGH,CRITICAL \
-                                                  percona/percona-server:${TAG}
-                                            '''
-                                        }
-                                    }
-
-                                    post {
-                                        always {
-                                            junit allowEmptyResults: true,
-                                                  keepLongStdio: true,
-                                                  skipPublishingChecks: true,
-                                                  testResults: 'trivy-junit.xml'
-                                        }
-                                    }
+                                        trivy image \
+                                          --format template \
+                                          --template @junit.tpl \
+                                          -o trivy-amd-junit.xml \
+                                          --timeout 10m \
+                                          --ignore-unfixed \
+                                          --exit-code 1 \
+                                          --severity HIGH,CRITICAL \
+                                          percona/percona-server:${TAG}
+                                    '''
                                 }
+                            }
 
-                                stage('Run Tests') {
+                            post {
 
-                                    steps {
+                                always {
 
-                                        sh '''
-                                            echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" > disable_thp.sh
-                                            echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag" >> disable_thp.sh
-                                            chmod +x disable_thp.sh
-                                            sudo ./disable_thp.sh
-
-                                            export PATH=${PATH}:~/.local/bin
-
-                                            sudo yum install -y python3 python3-pip git
-
-                                            rm -rf package-testing
-
-                                            git clone https://github.com/Percona-QA/package-testing.git --depth 1
-
-                                            cd package-testing/docker-image-tests/ps-eol
-
-                                            pip3 install --user -r requirements.txt
-
-                                            ./run.sh
-                                        '''
-                                    }
-
-                                    post {
-                                        always {
-                                            junit 'package-testing/docker-image-tests/ps-eol/report.xml'
-                                        }
-                                    }
+                                    junit(
+                                        testResults: 'trivy-amd-junit.xml',
+                                        allowEmptyResults: true,
+                                        skipPublishingChecks: true
+                                    )
                                 }
                             }
                         }
+
+                        stage('Run Tests AMD64') {
+
+                            steps {
+
+                                sh '''
+                                    export PATH=${PATH}:~/.local/bin
+
+                                    sudo yum install -y python3 python3-pip
+
+                                    rm -rf package-testing
+
+                                    git clone https://github.com/Percona-QA/package-testing.git --depth 1
+
+                                    cd package-testing/docker-image-tests/ps-eol
+
+                                    pip3 install --user -r requirements.txt
+
+                                    ./run.sh
+                                '''
+                            }
+
+                            post {
+
+                                always {
+
+                                    junit 'package-testing/docker-image-tests/ps/report.xml'
+
+                                }
+                            }
+                        }
+
                     }
                 }
-   
+
                                 stage('ARM64') {
+
                     agent { label 'docker-32gb-aarch64' }
 
                     stages {
 
-                        stage('Prepare ARM Image') {
+                        stage('Download ARM Image') {
+
                             steps {
+
                                 withCredentials([
                                     usernamePassword(
                                         credentialsId: 'PS_PRIVATE_REPO_ACCESS',
-                                        passwordVariable: 'PASSWORD',
-                                        usernameVariable: 'USERNAME'
+                                        usernameVariable: 'USERNAME',
+                                        passwordVariable: 'PASSWORD'
                                     )
                                 ]) {
-                                    script {
-                                        def dockerTarURL
 
-                                        if (REPO == 'testing') {
-                                            dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/percona-server-${PS_VERSION}-1-arm64.docker.tar"
+                                    script {
+
+                                        def dockerTar
+
+                                        if (REPO == "testing") {
+
+                                            dockerTar =
+"https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/ps-gated-${PS_VERSION}/percona-server-${PS_VERSION}-1-arm64.docker.tar"
+
                                         } else {
-                                            dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-80-eol/tarballs/Percona-Server-${PS_VERSION}/percona-server-${PS_VERSION}-1-arm64.docker.tar"
+
+                                            dockerTar =
+"https://repo.percona.com/private/${USERNAME}-${PASSWORD}/ps-80-eol/tarballs/Percona-Server-${PS_VERSION}/percona-server-${PS_VERSION}-1-arm64.docker.tar"
+
                                         }
 
                                         sh """
-                                            rm -f *.docker.tar || true
-                                            wget -q ${dockerTarURL}
+                                            rm -f *.docker.tar
+                                            wget -q "${dockerTar}"
                                             sudo docker load -i percona-server-${PS_VERSION}-1-arm64.docker.tar
-
-                                            echo "Loaded ARM image:"
-                                            sudo docker images | grep percona-server
                                         """
                                     }
                                 }
                             }
                         }
 
-                        stage('Validation') {
-                            failFast false
+                        stage('Trivy ARM64') {
 
-                            parallel {
+                            steps {
 
-                                stage('Trivy ARM64') {
-                                    steps {
-                                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                            sh '''
-                                                sudo yum install -y wget git jq
+                                catchError(
+                                    buildResult: 'SUCCESS',
+                                    stageResult: 'FAILURE'
+                                ) {
 
-                                                TRIVY_VERSION=0.69.3
-                                                ARCH_NAME=ARM64
-                                                CHECKSUM=7e3924a974e912e57b4a99f65ece7931f8079584dae12eb7845024f97087bdfd
+                                    sh '''
+                                        sudo yum install -y wget git
 
-                                                wget -q https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-${ARCH_NAME}.tar.gz
+                                        TRIVY_VERSION=0.69.3
 
-                                                echo "${CHECKSUM}  trivy_${TRIVY_VERSION}_Linux-${ARCH_NAME}.tar.gz" | sha256sum -c -
+                                        wget -q https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-ARM64.tar.gz
 
-                                                sudo tar zxf trivy_${TRIVY_VERSION}_Linux-${ARCH_NAME}.tar.gz -C /usr/local/bin/
+                                        sudo tar zxf trivy_${TRIVY_VERSION}_Linux-ARM64.tar.gz -C /usr/local/bin/
 
-                                                wget -q https://raw.githubusercontent.com/aquasecurity/trivy/v${TRIVY_VERSION}/contrib/junit.tpl
+                                        wget -q https://raw.githubusercontent.com/aquasecurity/trivy/v${TRIVY_VERSION}/contrib/junit.tpl
 
-                                                echo "========== ARM64 CVE SUMMARY =========="
-
-                                                trivy image \
-                                                    --ignore-unfixed \
-                                                    --severity HIGH,CRITICAL \
-                                                    --format table \
-                                                    percona/percona-server:${TAG} || true
-
-                                                trivy image \
-                                                    --ignore-unfixed \
-                                                    --severity HIGH,CRITICAL \
-                                                    --format json \
-                                                    -o trivy-arm.json \
-                                                    percona/percona-server:${TAG} || true
-
-                                                HIGH=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity=="HIGH")] | length' trivy-arm.json)
-                                                CRITICAL=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' trivy-arm.json)
-
-                                                echo ""
-                                                echo "HIGH CVEs     : ${HIGH}"
-                                                echo "CRITICAL CVEs : ${CRITICAL}"
-                                                echo "======================================="
-
-                                                trivy image \
-                                                    --format template \
-                                                    --template @junit.tpl \
-                                                    -o trivy-arm-junit.xml \
-                                                    --timeout 10m \
-                                                    --ignore-unfixed \
-                                                    --severity HIGH,CRITICAL \
-                                                    --exit-code 1 \
-                                                    percona/percona-server:${TAG}
-                                            '''
-                                        }
-                                    }
-
-                                    post {
-                                        always {
-                                            junit allowEmptyResults: true,
-                                                  keepLongStdio: true,
-                                                  skipPublishingChecks: true,
-                                                  testResults: "trivy-arm-junit.xml"
-                                        }
-                                    }
+                                        trivy image \
+                                          --format template \
+                                          --template @junit.tpl \
+                                          -o trivy-arm-junit.xml \
+                                          --timeout 10m \
+                                          --ignore-unfixed \
+                                          --exit-code 1 \
+                                          --severity HIGH,CRITICAL \
+                                          percona/percona-server:${TAG}
+                                    '''
                                 }
+                            }
 
-                                stage('Run ARM Tests') {
-                                    steps {
-                                        sh '''
-                                            echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" > disable_thp.sh
-                                            echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag" >> disable_thp.sh
-                                            chmod +x disable_thp.sh
-                                            sudo ./disable_thp.sh
+                            post {
 
-                                            export PATH=$PATH:~/.local/bin
+                                always {
 
-                                            sudo yum install -y python3 python3-pip
-
-                                            rm -rf package-testing
-
-                                            git clone https://github.com/Percona-QA/package-testing.git --depth 1
-
-                                            cd package-testing/docker-image-tests/ps-arm
-
-                                            pip3 install --user -r requirements.txt
-
-                                            ./run.sh
-                                        '''
-                                    }
-
-                                    post {
-                                        always {
-                                            junit 'package-testing/docker-image-tests/ps-arm/report.xml'
-                                        }
-                                    }
+                                    junit(
+                                        testResults: 'trivy-arm-junit.xml',
+                                        allowEmptyResults: true,
+                                        skipPublishingChecks: true
+                                    )
                                 }
+                            }
+                        }
 
-                            }   // end ARM Validation parallel
-                        }       // end ARM Validation stage
-                    }           // end ARM stages
-                }               // end ARM64 stage
+                        stage('Run Tests ARM64') {
 
-            }                   // end Validation parallel
-        }                       // end Validation stage
+                            steps {
 
-    }                           // end stages
-}                               // end pipeline
+                                sh '''
+                                    export PATH=${PATH}:~/.local/bin
+
+                                    sudo yum install -y python3 python3-pip
+
+                                    rm -rf package-testing
+
+                                    git clone https://github.com/Percona-QA/package-testing.git --depth 1
+
+                                    cd package-testing/docker-image-tests/ps-arm
+
+                                    pip3 install --user -r requirements.txt
+
+                                    ./run.sh
+                                '''
+                            }
+
+                            post {
+
+                                always {
+
+                                    junit 'package-testing/docker-image-tests/ps-arm/report.xml'
+
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+            }
+        }
+    }
+}
