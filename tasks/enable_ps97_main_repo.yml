@@ -41,14 +41,10 @@
     when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"
 
   - name: enable the PS-97 main repo
-    command: percona-release enable ps-97-lts testing
+    command: percona-release enable ps-97-lts release
 
   - name: enable the pxb-97 release repo
     command: percona-release enable pxb-97-lts release
-#    when: ansible_distribution_release == "noble"
-
-# - name: enable the tools main repo
-#   command: percona-release enable tools release
 
   - name: Clean and update package cache
     shell: |
