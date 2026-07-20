@@ -69,7 +69,7 @@
       - ansible_os_family == "RedHat"
       - ansible_architecture == "x86_64"
 
-  - name: add eol testing repository on Redhat AMD
+  - name: add eol testing repository on Redhat ARM
     template: src=../templates/eol_rpm_repo_file_ps80_arm.j2
              dest=/etc/yum.repos.d/post-eol.repo
     vars:
