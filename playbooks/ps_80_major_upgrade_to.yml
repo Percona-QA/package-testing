@@ -213,12 +213,9 @@
 
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps80
-<<<<<<< HEAD
-=======
  
 #  - name: run pytest tests for PAM
 #    command: python3 -m pytest -v /package-testing/scripts/ps_pam_test/ps_pam_test.py
->>>>>>> upstream/master
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
