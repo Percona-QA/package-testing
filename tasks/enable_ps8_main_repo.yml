@@ -48,23 +48,23 @@
 #    command: "rpmkeys --import {{ percona_key1_file }}"
 #    when: ansible_os_family == "RedHat"
 
-  - name: add eol testing repository on debian
+  - name: add eol main repository on debian
     template: src=../templates/eol_deb_repo_file_ps80.j2
               dest=/etc/apt/sources.list.d/post-eol.list
     vars:
       client_id: "{{ lookup('env', 'USERNAME') }}"
       client_token: "{{ lookup('env', 'PASSWORD') }}"
-      repo: "testing"
+      repo: "main"
     when:
       - ansible_os_family == "Debian"
 
-  - name: add eol testing repository on Redhat AMD
+  - name: add eol main repository on Redhat AMD
     template: src=../templates/eol_rpm_repo_file_ps80.j2
              dest=/etc/yum.repos.d/post-eol.repo
     vars:
       client_id: "{{ lookup('env', 'USERNAME') }}"
       client_token: "{{ lookup('env', 'PASSWORD') }}"
-      repo: "testing"
+      repo: "release"
     when:
       - ansible_os_family == "RedHat"
       - ansible_architecture == "x86_64"
@@ -75,7 +75,7 @@
     vars:
       client_id: "{{ lookup('env', 'USERNAME') }}"
       client_token: "{{ lookup('env', 'PASSWORD') }}"
-      repo: "testing"
+      repo: "release"
     when:
       - ansible_os_family == "RedHat"
       - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
