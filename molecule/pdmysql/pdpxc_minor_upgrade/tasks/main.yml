@@ -508,5 +508,12 @@
   command: /package-testing/check_tel_ver_pack.sh
   when: ansible_distribution_release != "focal"
 
-- name: start mysql service
-  command: systemctl start mysql
+- name: Check MySQL service status
+  command: systemctl status mysql
+  register: mysql_status
+  changed_when: false
+  failed_when: false
+
+- name: Show MySQL service status
+  debug:
+    msg: "MySQL service status: {{ mysql_status.stdout }}"
