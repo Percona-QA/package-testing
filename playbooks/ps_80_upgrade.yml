@@ -202,15 +202,11 @@
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
 
-<<<<<<< HEAD
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
 
-  - name: run bats unit tests for ps-admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
-=======
-# - name: run pytest tests for PAM
-#   command: python3 -m pytest -v /package-testing/scripts/ps_pam_test/ps_pam_test.py
+  - name: run pytest tests for PAM
+    command: python3 -m pytest -v /package-testing/scripts/ps_pam_test/ps_pam_test.py
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
@@ -221,7 +217,6 @@
 
   - name: run pytest unit tests for ps-admin script
     command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_unit.py
->>>>>>> upstream/master
 
   - name: run pytest integration tests for ps-admin script
     command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_integration.py
