@@ -138,7 +138,7 @@
     service: name=mysql state=restarted
 
   - name: run mysql setup for PAM
-    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_setup.bats
+    command: python3 -m pytest -v /package-testing/scripts/ps_pam_test/ps_pam_mysql_setup.py
 # End PAM test
 
 #
@@ -179,23 +179,23 @@
 #   command: /package-testing/version_check.sh pt
 #   when: ansible_os_family == "RedHat" and ansible_distribution_major_version != "6"
 
-  - name: run bats tests for PAM
-    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
+  - name: run pytest tests for PAM
+    command: python3 -m pytest -v /package-testing/scripts/ps_pam_test/ps_pam_test.py
 
-  - name: run bats unit tests for ps_tokudb_admin scripts
-    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_unit.bats
+  - name: run pytest unit tests for ps_tokudb_admin scripts
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_tokudb_admin_unit.py
 
-  - name: run bats integration tests for ps_tokudb_admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps_tokudb_admin_integration.bats
+  - name: run pytest integration tests for ps_tokudb_admin script
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_tokudb_admin_integration.py
 
-  - name: run bats tests for mysql init scripts
-    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+  - name: run pytest tests for mysql init scripts
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_mysql_init_scripts.py
 
   - name: start mysql service
     service: name=mysql state=started
 
   - name: uninstall PAM before final package uninstall
-    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
+    command: python3 -m pytest -v /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.py
 
   - name: remove Percona Server deb packages
     apt:
