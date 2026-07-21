@@ -77,34 +77,35 @@
     command: "{{ item }}"
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
- 
-#  - name: include tasks for enabling "{{ repo_name }}" test repo
-#    include_tasks: ../tasks/enable_only_repo_for_pt.yml
-#    vars:
-#      repo_type: testing
-#      repo_name: pt
-#    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-#
-#  - name: include tasks for enabling "{{ repo_name }}" main repo
-#    include_tasks: ../tasks/enable_only_repo_for_pt.yml
-#    vars:
-#      repo_type: release
-#      repo_name: pt
-#    when: lookup('env', 'install_repo') == "main"
-#
-#  - name: install Percona Toolkit new deb packages
-#    include_tasks: ../tasks/install_pt.yml
 
   - name: install Percona Server{{ pro_suf }} 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
     vars:
       pro_suf: "{{ '-pro' if 'yes' in lookup('env', 'pro_test') else '' }}"
 
-  - name: install Percona Shell
-    include_tasks: ../tasks/install_pshell.yml
-    when:
-      - lookup('env', 'pro_test') != "yes"
-      - ansible_distribution != "Amazon"
+  - name: Enable MySQL error logging and verbosity (Debian)
+    copy:
+      dest: /etc/mysql/conf.d/debug.cnf
+      content: |
+        [mysqld]
+        log_error=/var/log/mysql/error.log
+        log_error_verbosity=3
+      owner: root
+      group: root
+      mode: '0644'
+    when: ansible_os_family == "Debian"
+
+  - name: Enable MySQL error logging and verbosity (RedHat)
+    copy:
+      dest: /etc/my.cnf.d/debug.cnf
+      content: |
+        [mysqld]
+        log_error=/var/log/mysqld.log
+        log_error_verbosity=3
+      owner: root
+      group: root
+      mode: '0644'
+    when: ansible_os_family == "RedHat"
 
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
@@ -129,56 +130,14 @@
   - debug:
       var: disk_out.stdout
 
-  - name: install Percona XtraBackup 8.0 packages
-    include_tasks: ../tasks/install_pxb80.yml
-    when:
-      - lookup('env', 'install_repo') != "experimental"
-      - ansible_distribution != "Amazon"
-
-#  - name: install percona-mysql-shell package
-#    include_tasks: ../tasks/install_pshell_ver.yml
-#    vars:
-#      pshell_version: "8.0"
-#    when: install_mysql_shell == "yes" or install_mysql_shell == ""
-
-# Enable only tools repo to install pt
-  - name: include tasks for enabling "{{ repo_name }}" test repo
-    include_tasks: ../tasks/enable_only_repo_for_pt.yml
-    vars:
-      repo_type: testing
-      repo_name: pt
-    when: 
-    - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
-    - ansible_distribution != "Amazon"
-
-  - name: include tasks for enabling "{{ repo_name }}" main repo
-    include_tasks: ../tasks/enable_only_repo_for_pt.yml
-    vars:
-      repo_type: release
-      repo_name: pt
-    when: 
-    - lookup('env', 'install_repo') == "main"
-    - ansible_distribution != "Amazon"
-
-  - name: include tasks for enabling  "{{ repo_name }}" experimental repo
-    include_tasks: ../tasks/enable_only_repo_for_pt.yml
-    vars:
-      repo_type: experimental
-      repo_name: pt
-    when: 
-    - lookup('env', 'install_repo') == "experimental"
-    - ansible_distribution != "Amazon"
-
-  - name: include tasks for pt installation
-    include_tasks: ../tasks/install_pt.yml
-    when: ansible_distribution != "Amazon"
+##  - name: install Percona XtraBackup 8.0 packages
+#    include_tasks: ../tasks/install_pxb80.yml
+##    when:
+ #     - lookup('env', 'install_repo') != "experimental"
+ #     - ansible_distribution != "Amazon"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
-
-  - name: start mysql service with service command
-    command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
 
   - name: start mysql service with systemctl command
     command: systemctl start mysql
@@ -223,11 +182,11 @@
     command: /package-testing/package_check.sh ps80 {{ pro }}
 
 # Bookworm does not support fips mode out of the box. It requires opennsl module rebuid. So we skip fips mode enabling for bookworm.
-  - name: include tasks for checking FIPS mode
-    include_tasks: ../tasks/check_ps80_fips.yml
-    when:
-      - ansible_distribution_release not in ["bookworm", "bullseye", "focal", "noble"]
-      - not (ansible_distribution_release == "jammy" and ansible_architecture in ["aarch64", "arm64"])
+#  - name: include tasks for checking FIPS mode
+#    include_tasks: ../tasks/check_ps80_fips.yml
+#    when:
+#      - ansible_distribution_release not in ["bookworm", "bullseye", "focal", "noble"]
+#      - not (ansible_distribution_release == "jammy" and ansible_architecture in ["aarch64", "arm64"])
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
@@ -256,11 +215,11 @@
   - name: run mysql compression tests script
     command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps80
 
-  - name: run bats unit tests for ps-admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
+  - name: run pytest unit tests for ps-admin script
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_unit.py
 
-  - name: run bats integration tests for ps-admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
+  - name: run pytest integration tests for ps-admin script
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_integration.py
 
   - name: run PAM tests
     include_tasks: ../tasks/pam_test.yml
@@ -296,8 +255,8 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: run bats tests for mysql init scripts
-    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+  - name: run pytest tests for mysql init scripts
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_mysql_init_scripts.py
 
   - name: start mysql service
     service: name=mysql state=started

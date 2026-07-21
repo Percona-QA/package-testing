@@ -133,8 +133,8 @@
     command: /package-testing/package_check.sh pxc57
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
-#  - name: run bats tests for mysql init scripts
-#    shell: sleep {{ sleep_before_tests | default('0') }}; /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
+#  - name: run pytest tests for mysql init scripts
+#    shell: sleep {{ sleep_before_tests | default('0') }}; python3 -m pytest -v /package-testing/pytest-tests/test_pxc_init_scripts.py
 #    throttle: 1
 
   - name: start mysql service

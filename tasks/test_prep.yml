@@ -135,18 +135,24 @@
     when: 
     - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
+  - name: setup epel 9 repo
+    dnf:
+      name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+      state: present
+      disable_gpg_check: true
+    register: epel9_repo
+    retries: 60
+    delay: 10
+    until: epel9_repo is not failed
+    when:
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
+
   - name: install GPG key for epel 9
     rpm_key:
       state: present
-      key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9
-    when: 
-    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
-
-  - name: setup epel 9 repo
-    dnf: name=https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm state=present
+      key: /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-9
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int == 9
+    - ansible_os_family == "RedHat" and ansible_distribution_major_version == "9"
 
 #  - name: setup epel 9 repo package
 #    dnf: name=epel-release state=latest
@@ -284,15 +290,37 @@
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('master', true) }}"
       git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
 
-  - name: install latest bats from github
-    command: "{{ item }}"
-    with_items:
-    - rm -f master.zip
-    - wget --no-check-certificate -O master.zip https://github.com/sstephenson/bats/archive/master.zip
-    - unzip master.zip
-    - rm -f master.zip
-    - bats-master/install.sh /usr/local
-    - rm -rf bats-master
+  # pytest is used by the package tests under package-testing/pytest-tests/ and
+  # scripts/ps_pam_test/ (both ported from the old bats tests)
+  - name: install python3-pip for pytest with apt
+    apt:
+      name: python3-pip
+      state: present
+      update_cache: yes
+    when: ansible_os_family == "Debian"
+
+  - name: install python3-pip for pytest with yum/dnf
+    package:
+      name: python3-pip
+      state: present
+    when: ansible_os_family == "RedHat"
+
+  # Use the pip module (idempotent). Try a plain install first and only fall
+  # back to --break-system-packages on externally-managed environments
+  # (Debian 12+/Ubuntu 24.04+); passing that flag unconditionally would break
+  # older pip (e.g. RHEL 8) that doesn't support it.
+  - name: install pytest via pip
+    block:
+      - name: install pytest
+        pip:
+          name: pytest
+          executable: pip3
+    rescue:
+      - name: install pytest (externally-managed env)
+        pip:
+          name: pytest
+          executable: pip3
+          extra_args: --break-system-packages
 
   - name: include tasks for listing already installed packages
     include_tasks: list_installed_packages.yml
