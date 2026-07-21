@@ -45,10 +45,6 @@
 
   - name: enable the pxb-97 release repo
     command: percona-release enable pxb-97-lts release
-#    when: ansible_distribution_release == "noble"
-
-# - name: enable the tools main repo
-#   command: percona-release enable tools release
 
   - name: Clean and update package cache
     shell: |
