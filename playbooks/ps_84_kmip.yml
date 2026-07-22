@@ -50,25 +50,14 @@
   - name: remove mysql data directory
     command: rm -r /var/lib/mysql
 
-  - name: install python3-pip on RedHat/CentOS
-    yum:
-      name:
-      - python3-pip
-      state: latest
-      update_cache: yes
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-
-  - name: install python3-pip on RedHat/CentOS dnf
+  - name: install python3-pip on RedHat
     dnf:
       name:
       - python3-pip
       state: latest
       update_cache: yes
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
 
   - name: install python3-pip on Debian/Ubuntu
     apt:
@@ -87,8 +76,7 @@
         - python3 -m pip install urllib3==1.26.6
         - python3 -m pip install -U pykmip
     when:
-        - ansible_distribution_release != "bookworm"
-        - ansible_distribution_release != "noble"
+      - ansible_distribution_release not in ['bookworm', 'noble', 'trixie', 'resolute']
 
 #  - name: install pykmip
 #    command: "{{ item }}"
@@ -104,46 +92,44 @@
       line: 'export PATH=$HOME/.local/bin:$PATH'
       insertafter: EOF
     when:
-      - ansible_distribution_release in ['bookworm', 'noble']
+      - ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
 
   - name: install pykmip on bookworm/noble using user site
     pip:
       name:
         - setuptools
         - pykmip
-      extra_args: --user
+      extra_args: "--user --break-system-packages"
       executable: pip3
     environment:
       PYTHONUSERBASE: "/home/{{ ansible_user }}/.local"
     when:
-      - ansible_distribution_release in ['bookworm', 'noble']
+      - ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
 
   - name: downgrade SQLAlchemy as new version doesn't work with pykmip
     command: pip3 install SQLAlchemy==1.4.46
     when:
-        - ansible_distribution_release != "bookworm"
-        - ansible_distribution_release != "noble"
+      - ansible_distribution_release not in ['bookworm', 'noble', 'trixie', 'resolute']
 
   - name: downgrade SQLAlchemy as new version doesn't work with pykmip
     command: pip3 install --break-system-packages SQLAlchemy==1.4.46
-    when: ansible_distribution_release in ["bookworm", "noble"]
+    when: ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
 
   - name: Check PyKMIP is importable
     command: python3 -c "import pykmip; print(pykmip.__version__)"
     register: pykmip_check
     failed_when: "'No module named' in pykmip_check.stderr"
     when:
-      - ansible_distribution_release in ['bookworm', 'noble']
+      - ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
 
   - name: start pykmip server
     shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
     when:
-        - ansible_distribution_release != "bookworm"
-        - ansible_distribution_release != "noble"
+      - ansible_distribution_release not in ['bookworm', 'noble', 'trixie', 'resolute']
 
   - name: start pykmip server
     shell: nohup ~/.local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
-    when: ansible_distribution_release in ["bookworm", "noble"]
+    when: ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
 
   - name: Check if kmip-server is running
     shell: ps -ef | grep kmip-server | grep -v grep
