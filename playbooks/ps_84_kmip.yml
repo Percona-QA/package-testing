@@ -73,7 +73,7 @@
         - python3 -m pip install --upgrade importlib-metadata
         - python3 -m pip install -U pip --ignore-installed
         - python3 -m pip install --upgrade --ignore-installed setuptools
-        - python3 -m pip install urllib3==1.26.6
+        - python3 -m pip install --ignore-installed urllib3==1.26.6
         - python3 -m pip install -U pykmip
     when:
       - ansible_distribution_release not in ['bookworm', 'noble', 'trixie', 'resolute']
