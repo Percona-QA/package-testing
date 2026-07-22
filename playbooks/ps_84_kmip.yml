@@ -160,12 +160,12 @@
         remote_src: yes
     when: ansible_os_family == "Debian"
 
-#  - name: copy the encryption config file on Debian/Ubuntu
-#    copy:
-#        src: /package-testing/kmip/encryption.j2
-#        dest: /etc/mysql/conf.d/encryption.cnf
-#        remote_src: yes
-#    when: ansible_os_family == "Debian"
+  - name: copy the encryption config file on Debian/Ubuntu
+    copy:
+        src: /package-testing/kmip/encryption.j2
+        dest: /etc/mysql/conf.d/encryption.cnf
+        remote_src: yes
+    when: ansible_os_family == "Debian"
 
   - name: append include for RedHat
     lineinfile:
@@ -173,15 +173,57 @@
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
 
-#  - name: copy the encryption config file on RHEL/CentOS/Amazon
-#    copy:
-#        src: /package-testing/kmip/encryption.j2
-#        dest: /etc/my.cnf.d/encryption.cnf
-#        remote_src: yes
-#    when: ansible_os_family == "RedHat"
+  - name: copy the encryption config file on RHEL/CentOS/Amazon
+    copy:
+        src: /package-testing/kmip/encryption.j2
+        dest: /etc/my.cnf.d/encryption.cnf
+        remote_src: yes
+    when: ansible_os_family == "RedHat"
 
-  - name: start mysql service
-    service: name=mysql state=started
+  - name: Start MySQL and collect logs on failure
+    block:
+      - name: Start mysql service
+        service:
+          name: mysql
+          state: started
+
+      - name: Check mysql service status
+        command: /package-testing/check_running.sh mysql running
+
+    rescue:
+      - name: Show systemctl status
+        command: systemctl status mysql --no-pager -l
+        register: mysql_status
+        ignore_errors: yes
+
+      - debug:
+          var: mysql_status.stdout_lines
+
+      - name: Show last 200 journal logs
+        command: journalctl -u mysql --no-pager -n 200
+        register: mysql_journal
+        ignore_errors: yes
+
+      - debug:
+          var: mysql_journal.stdout_lines
+
+      - name: Show MySQL error log
+        shell: |
+          if [ -f /var/log/mysql/error.log ]; then
+            cat /var/log/mysql/error.log
+          elif [ -f /var/log/mysqld.log ]; then
+            cat /var/log/mysqld.log
+          elif [ -f /var/log/mysqld.err ]; then
+            cat /var/log/mysqld.err
+          fi
+        register: mysql_errorlog
+        ignore_errors: yes
+
+      - debug:
+          var: mysql_errorlog.stdout_lines
+
+      - fail:
+          msg: "MySQL failed to start. See logs above."
 
   - name: check mysql service status
     command: /package-testing/check_running.sh mysql running
