@@ -132,13 +132,13 @@
     when: ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
 
   - name: Check if kmip-server is running
-    shell: pgrep -af kmip-server
+    shell: pgrep -x kmip-server
     register: kmip_status
     failed_when: false
     changed_when: false
 
   - debug:
-      var: kmip_status.stdout
+      var: kmip_status
 
   - name: copy the global manifest for mysql
     copy:
