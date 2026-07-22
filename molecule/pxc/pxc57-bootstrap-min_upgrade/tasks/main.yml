@@ -194,4 +194,3 @@
 
   - name: print PXC version before min_upgrade
     debug: var=pxc_version
-
