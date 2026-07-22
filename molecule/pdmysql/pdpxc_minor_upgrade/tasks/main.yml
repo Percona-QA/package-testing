@@ -125,6 +125,20 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
     PERCONA_TELEMETRY_DISABLE: "1"
 
+- name: Set pxc_strict_mode to PERMISSIVE
+  ansible.builtin.lineinfile:
+    path: /etc/mysql/mysql.conf.d/mysqld.cnf
+    regexp: '^pxc_strict_mode='
+    line: 'pxc_strict_mode=PERMISSIVE'
+
+- name: Verify pxc_strict_mode
+  ansible.builtin.shell: |
+    grep '^pxc_strict_mode' /etc/mysql/mysql.conf.d/mysqld.cnf
+  register: pxc_mode
+
+- debug:
+    var: pxc_mode.stdout
+
 - name: install percona-replication-manager RHEL Packages with yum
   yum:
     name: "{{ packages }}"
