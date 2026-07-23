@@ -125,12 +125,6 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
     PERCONA_TELEMETRY_DISABLE: "1"
 
-- name: Set pxc_strict_mode to PERMISSIVE
-  ansible.builtin.lineinfile:
-    path: /etc/mysql/mysql.conf.d/mysqld.cnf
-    regexp: '^pxc_strict_mode='
-    line: 'pxc_strict_mode=PERMISSIVE'
-
 - name: Verify pxc_strict_mode
   ansible.builtin.shell: |
     grep '^pxc_strict_mode' /etc/mysql/mysql.conf.d/mysqld.cnf
@@ -520,7 +514,6 @@
 
 - name: Verify telemetry version and package installation
   command: /package-testing/check_tel_ver_pack.sh
-  when: ansible_distribution_release != "focal"
 
 - name: Check MySQL service status
   command: systemctl status mysql
