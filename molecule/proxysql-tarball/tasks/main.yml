@@ -39,6 +39,16 @@
     - ansible_distribution == "RedHat"
     - ansible_distribution_major_version == "9"
 
+- name: Ensure wget and unzip are installed on RHEL 9
+  package:
+    name:
+      - wget
+      - unzip
+    state: present
+  when:
+    - ansible_distribution == "RedHat"
+    - ansible_distribution_major_version == "9"
+
 - name: Install required packages using dnf
   dnf:
     name:
