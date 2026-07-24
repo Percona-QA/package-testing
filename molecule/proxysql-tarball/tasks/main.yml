@@ -23,22 +23,6 @@
     - not (ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023")
     - not (ansible_distribution == "RedHat" and ansible_distribution_major_version == "10")
 
-- name: Check if wget and unzip are installed on RHEL 9
-  shell: |
-    rpm -q wget unzip
-  register: package_check
-  changed_when: false
-  ignore_errors: true
-  when:
-    - ansible_distribution == "RedHat"
-    - ansible_distribution_major_version == "9"
-
-- debug:
-    var: package_check.stdout_lines
-  when:
-    - ansible_distribution == "RedHat"
-    - ansible_distribution_major_version == "9"
-
 - name: Ensure wget and unzip are installed on RHEL 9
   package:
     name:
