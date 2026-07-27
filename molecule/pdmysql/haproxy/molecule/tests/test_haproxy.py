@@ -12,15 +12,6 @@ VERSION = os.getenv("VERSION")
 
 
 def dump_mysql_debug(host):
-    print("\n========== MYSQL ACTIVE ==========")
-    print(host.run("systemctl is-active mysql").stdout)
-
-    print("\n========== MYSQL STATUS ==========")
-    print(host.run("systemctl status mysql --no-pager -l || true").stdout)
-
-    print("\n========== MYSQL JOURNAL ==========")
-    print(host.run("journalctl -u mysql -n 200 --no-pager || true").stdout)
-
     print("\n========== MYSQLADMIN PING ==========")
     ping = host.run("mysqladmin ping || true")
     print(ping.stdout)
@@ -39,24 +30,8 @@ def dump_mysql_debug(host):
     )
     print(wsrep.stdout)
 
-    print("\n========== FULL WSREP ==========")
-    print(
-        host.run(
-            """mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep%';" || true"""
-        ).stdout
-    )
-
-    print("\n========== GRASTATE ==========")
-    print(host.run("cat /var/lib/mysql/grastate.dat || true").stdout)
-
-    print("\n========== GVWSTATE ==========")
-    print(host.run("cat /var/lib/mysql/gvwstate.dat || true").stdout)
-
 
 def dump_haproxy_debug(host):
-    print("\n========== HAPROXY STATUS ==========")
-    print(host.run("systemctl status haproxy --no-pager -l || true").stdout)
-
     print("\n========== HAPROXY BACKEND ==========")
     stats = host.run(
         "echo 'show stat' | socat stdio /var/lib/haproxy/stats || true"
