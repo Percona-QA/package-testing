@@ -5,38 +5,109 @@ import pytest
 import testinfra.utils.ansible_runner
 
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
-    os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
+    os.environ["MOLECULE_INVENTORY_FILE"]
+).get_hosts("all")
 
 VERSION = os.getenv("VERSION")
+
+
+def dump_mysql_debug(host):
+    print("\n========== MYSQL ACTIVE ==========")
+    print(host.run("systemctl is-active mysql").stdout)
+
+    print("\n========== MYSQL STATUS ==========")
+    print(host.run("systemctl status mysql --no-pager -l || true").stdout)
+
+    print("\n========== MYSQL JOURNAL ==========")
+    print(host.run("journalctl -u mysql -n 200 --no-pager || true").stdout)
+
+    print("\n========== MYSQLADMIN PING ==========")
+    ping = host.run("mysqladmin ping || true")
+    print(ping.stdout)
+    print(ping.stderr)
+
+    print("\n========== WSREP STATUS ==========")
+    wsrep = host.run(
+        """mysql -Nse "
+        SHOW STATUS LIKE 'wsrep_cluster_status';
+        SHOW STATUS LIKE 'wsrep_local_state_comment';
+        SHOW STATUS LIKE 'wsrep_ready';
+        SHOW STATUS LIKE 'wsrep_connected';
+        SHOW STATUS LIKE 'wsrep_cluster_size';
+        SHOW STATUS LIKE 'wsrep_incoming_addresses';
+        " || true"""
+    )
+    print(wsrep.stdout)
+
+    print("\n========== FULL WSREP ==========")
+    print(
+        host.run(
+            """mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep%';" || true"""
+        ).stdout
+    )
+
+    print("\n========== GRASTATE ==========")
+    print(host.run("cat /var/lib/mysql/grastate.dat || true").stdout)
+
+    print("\n========== GVWSTATE ==========")
+    print(host.run("cat /var/lib/mysql/gvwstate.dat || true").stdout)
+
+
+def dump_haproxy_debug(host):
+    print("\n========== HAPROXY STATUS ==========")
+    print(host.run("systemctl status haproxy --no-pager -l || true").stdout)
+
+    print("\n========== HAPROXY BACKEND ==========")
+    stats = host.run(
+        "echo 'show stat' | socat stdio /var/lib/haproxy/stats || true"
+    )
+    print(stats.stdout)
+    print(stats.stderr)
 
 
 @pytest.fixture
 def prepare_test(host):
     with host.sudo("root"):
+
         if VERSION.startswith("8.4."):
             cmd = (
-                "mysql -e \"CREATE USER 'clustercheckuser'@'%' IDENTIFIED by 'clustercheckpassword!';"
+                "mysql -e \""
+                "CREATE USER IF NOT EXISTS 'clustercheckuser'@'%' IDENTIFIED BY 'clustercheckpassword!';"
                 "GRANT PROCESS ON *.* TO 'clustercheckuser'@'%';"
-                "CREATE USER 'haproxy_user'@'%' IDENTIFIED by '$3Kr$t';\""
+                "CREATE USER IF NOT EXISTS 'haproxy_user'@'%' IDENTIFIED BY '$3Kr$t';"
+                "\""
             )
         else:
             cmd = (
-                "mysql -e \"CREATE USER 'clustercheckuser'@'%' IDENTIFIED WITH mysql_native_password by 'clustercheckpassword!';"
+                "mysql -e \""
+                "CREATE USER IF NOT EXISTS 'clustercheckuser'@'%' IDENTIFIED WITH mysql_native_password BY 'clustercheckpassword!';"
                 "GRANT ALL PRIVILEGES ON *.* TO 'clustercheckuser'@'%';"
-                "CREATE USER 'haproxy_user'@'%' IDENTIFIED WITH mysql_native_password by '$3Kr$t';\""
+                "CREATE USER IF NOT EXISTS 'haproxy_user'@'%' IDENTIFIED WITH mysql_native_password BY '$3Kr$t';"
+                "\""
             )
 
         result = host.run(cmd)
-        assert result.rc == 0, result.stdout
 
-        for restart_cmd in [
-            "service xinetd restart",
-            "service haproxy restart"
+        if result.rc != 0:
+            dump_mysql_debug(host)
+
+        assert result.rc == 0, result.stderr
+
+        print("\n========== BEFORE RESTART ==========")
+        dump_mysql_debug(host)
+
+        for svc in [
+            "xinetd",
+            "haproxy",
         ]:
-            result = host.run(restart_cmd)
-            assert result.rc == 0, result.stdout
+            result = host.run(f"systemctl restart {svc} || service {svc} restart")
+            assert result.rc == 0
 
         time.sleep(2)
+
+        print("\n========== AFTER RESTART ==========")
+        dump_mysql_debug(host)
+        dump_haproxy_debug(host)
 
 
 def test_haproxy_service(host):
@@ -46,46 +117,15 @@ def test_haproxy_service(host):
 def test_haproxy_clustercheck(host, prepare_test):
     with host.sudo("root"):
 
-        print("\n================ WSREP STATUS ================\n")
-        wsrep = host.run(
-            """mysql -Nse "
-            SHOW STATUS LIKE 'wsrep_cluster_status';
-            SHOW STATUS LIKE 'wsrep_local_state_comment';
-            SHOW STATUS LIKE 'wsrep_ready';
-            SHOW STATUS LIKE 'wsrep_connected';
-            SHOW STATUS LIKE 'wsrep_cluster_size';
-            SHOW STATUS LIKE 'wsrep_incoming_addresses';
-            " """
-        )
-        print(wsrep.stdout)
-
         result = host.run("/usr/bin/clustercheck")
 
-        print("\n================ CLUSTERCHECK ================\n")
+        print("\n========== CLUSTERCHECK ==========")
         print(result.stdout)
         print(result.stderr)
 
         if result.rc != 0:
-
-            print("\n================ MYSQL SERVICE ================\n")
-            print(host.run("systemctl status mysql --no-pager -l").stdout)
-
-            print("\n================ MYSQL ERROR LOG ================\n")
-            print(host.run("tail -200 /var/log/mysql/error.log").stdout)
-
-            print("\n================ HAPROXY STATUS ================\n")
-            print(host.run("systemctl status haproxy --no-pager -l").stdout)
-
-            print("\n================ HAPROXY BACKENDS ================\n")
-
-            stats = host.run(
-                "echo 'show stat' | socat stdio /var/lib/haproxy/stats"
-            )
-
-            if stats.rc == 0:
-                print(stats.stdout)
-            else:
-                print("HAProxy stats socket unavailable")
+            dump_mysql_debug(host)
+            dump_haproxy_debug(host)
 
         assert result.rc == 0, result.stdout
         assert "Percona XtraDB Cluster Node is synced." in result.stdout
@@ -94,50 +134,31 @@ def test_haproxy_clustercheck(host, prepare_test):
 def test_haproxy_connect(host):
     with host.sudo("root"):
 
-        wait = 0
-        timeout = 120
-
         cmd = (
-            'mysql --port=9201 -h127.0.0.1 '
-            '-uhaproxy_user -p$3Kr$t '
+            'mysql --port=9201 '
+            '-h127.0.0.1 '
+            '-uhaproxy_user '
+            '-p$3Kr$t '
             '-e "SELECT VERSION();"'
         )
 
-        while wait < timeout:
+        timeout = 120
+
+        for _ in range(timeout):
             result = host.run(cmd)
 
-            if "Lost connection to MySQL server" not in result.stderr:
+            if result.rc == 0:
                 break
 
             time.sleep(1)
-            wait += 1
 
-        result = host.run(cmd)
+        print("\n========== MYSQL CLIENT ==========")
+        print(result.stdout)
+        print(result.stderr)
 
         if result.rc != 0:
-
-            print("\n================ MYSQL CLIENT OUTPUT ================\n")
-            print(result.stdout)
-            print(result.stderr)
-
-            print("\n================ WSREP STATUS ================\n")
-            print(host.run(
-                """mysql -Nse "
-                SHOW STATUS LIKE 'wsrep_cluster_status';
-                SHOW STATUS LIKE 'wsrep_local_state_comment';
-                SHOW STATUS LIKE 'wsrep_ready';
-                SHOW STATUS LIKE 'wsrep_connected';
-                " """
-            ).stdout)
-
-            print("\n================ CLUSTERCHECK ================\n")
-            print(host.run("/usr/bin/clustercheck").stdout)
-
-            print("\n================ HAPROXY STATUS ================\n")
-            print(host.run("systemctl status haproxy --no-pager -l").stdout)
-
-            print("\n================ MYSQL ERROR LOG ================\n")
-            print(host.run("tail -100 /var/log/mysql/error.log").stdout)
+            dump_mysql_debug(host)
+            dump_haproxy_debug(host)
 
         assert result.rc == 0, result.stderr
-        assert VERSION in result.stdout, result.stdout
+        assert VERSION in result.stdout
