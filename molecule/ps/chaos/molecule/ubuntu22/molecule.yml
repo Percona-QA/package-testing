@@ -6,7 +6,7 @@ driver:
 
 platforms:
   - name: ubuntu22
-    image: ${HOME}/qemu-images/jammy-server-cloudimg-amd64.raw
+    image: /opt/jenkins-agent/qemu-images/jammy-server-cloudimg-amd64.raw
     memory: 2048
     cpus: 2
     disk_size: 20G

@@ -6,7 +6,7 @@ driver:
 
 platforms:
   - name: ubuntu24
-    image: ${HOME}/qemu-images/noble-server-cloudimg-amd64.raw
+    image: /opt/jenkins-agent/qemu-images/noble-server-cloudimg-amd64.raw
     memory: 2048
     cpus: 2
     disk_size: 20G

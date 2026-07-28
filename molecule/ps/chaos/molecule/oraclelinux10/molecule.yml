@@ -6,7 +6,7 @@ driver:
 
 platforms:
   - name: oraclelinux10
-    image: ${HOME}/qemu-images/oraclelinux-10-amd64.raw
+    image: /opt/jenkins-agent/qemu-images/oraclelinux-10-amd64.raw
     memory: 2048
     cpus: 2
     disk_size: 32G

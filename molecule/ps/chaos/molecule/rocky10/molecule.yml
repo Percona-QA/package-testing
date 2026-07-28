@@ -6,7 +6,7 @@ driver:
 
 platforms:
   - name: rocky10
-    image: ${HOME}/qemu-images/Rocky-10-GenericCloud.latest.x86_64.raw
+    image: /opt/jenkins-agent/qemu-images/Rocky-10-GenericCloud.latest.x86_64.raw
     memory: 2048
     cpus: 2
     disk_size: 20G

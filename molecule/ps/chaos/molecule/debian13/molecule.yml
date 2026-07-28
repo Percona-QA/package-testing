@@ -6,7 +6,7 @@ driver:
 
 platforms:
   - name: debian13
-    image: ${HOME}/qemu-images/debian-13-genericcloud-amd64.raw
+    image: /opt/jenkins-agent/qemu-images/debian-13-genericcloud-amd64.raw
     memory: 2048
     cpus: 2
     disk_size: 20G

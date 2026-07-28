@@ -6,7 +6,7 @@ driver:
 
 platforms:
   - name: al2023
-    image: ${HOME}/qemu-images/al2023-amd64.raw
+    image: /opt/jenkins-agent/qemu-images/al2023-amd64.raw
     memory: 2048
     cpus: 2
     disk_size: 32G

@@ -6,7 +6,7 @@ driver:
 
 platforms:
   - name: debian11
-    image: ${HOME}/qemu-images/debian-11-genericcloud-amd64.raw
+    image: /opt/jenkins-agent/qemu-images/debian-11-genericcloud-amd64.raw
     memory: 2048
     cpus: 2
     disk_size: 20G
