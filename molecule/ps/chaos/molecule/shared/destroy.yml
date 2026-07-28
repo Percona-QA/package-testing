@@ -1,0 +1,62 @@
+---
+- name: Destroy QEMU VMs
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Kill QEMU process
+      ansible.builtin.shell: |
+        if [ -f /tmp/qemu-{{ item.name }}.pid ]; then
+          kill $(cat /tmp/qemu-{{ item.name }}.pid) 2>/dev/null || true
+          rm -f /tmp/qemu-{{ item.name }}.pid
+        fi
+      ignore_errors: true
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Clean up VM disk
+      ansible.builtin.file:
+        path: "/tmp/molecule-{{ item.name }}.raw"
+        state: absent
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Clean up cloud-init ISO
+      ansible.builtin.file:
+        path: "/tmp/cloud-init-{{ item.name }}.iso"
+        state: absent
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Clean up cloud-init directory
+      ansible.builtin.file:
+        path: "/tmp/cloud-init-{{ item.name }}"
+        state: absent
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Clean up qemu serial log
+      ansible.builtin.file:
+        path: "/tmp/qemu-{{ item.name }}-serial.log"
+        state: absent
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Clean up qemu trace log
+      ansible.builtin.file:
+        path: "/tmp/qemu-{{ item.name }}-qemu.log"
+        state: absent
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Clean up qemu stderr log
+      ansible.builtin.file:
+        path: "/tmp/qemu-{{ item.name }}-stderr.log"
+        state: absent
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Clean up per-VM EFI NVRAM (arm64)
+      ansible.builtin.file:
+        path: "/tmp/qemu-{{ item.name }}-vars.fd"
+        state: absent
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Clear molecule instance config
+      ansible.builtin.copy:
+        content: ""
+        dest: "{{ molecule_instance_config }}"
+        mode: '0644'
+      when: molecule_instance_config is defined

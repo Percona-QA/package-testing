@@ -1,0 +1,27 @@
+---
+driver:
+  name: default
+  options:
+    managed: true
+
+platforms:
+  - name: al2023
+    image: ${HOME}/qemu-images/al2023-amd64.raw
+    memory: 2048
+    cpus: 2
+    disk_size: 32G
+    ssh_port: 2272
+    ssh_user: ec2-user
+    ssh_key: ~/.ssh/id_rsa
+
+provisioner:
+  name: ansible
+  log: true
+  playbooks:
+    create: ../shared/create.yml
+    prepare: ../shared/prepare.yml
+    destroy: ../shared/destroy.yml
+    converge: ../shared/converge.yml
+
+verifier:
+  name: ansible

@@ -1,0 +1,27 @@
+---
+driver:
+  name: default
+  options:
+    managed: true
+
+platforms:
+  - name: ubuntu22
+    image: ${HOME}/qemu-images/jammy-server-cloudimg-amd64.raw
+    memory: 2048
+    cpus: 2
+    disk_size: 20G
+    ssh_port: 2233
+    ssh_user: ubuntu
+    ssh_key: ~/.ssh/id_rsa
+
+provisioner:
+  name: ansible
+  log: true
+  playbooks:
+    create: ../shared/create.yml
+    prepare: ../shared/prepare.yml
+    destroy: ../shared/destroy.yml
+    converge: ../shared/converge.yml
+
+verifier:
+  name: ansible

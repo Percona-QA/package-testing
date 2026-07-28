@@ -1,0 +1,27 @@
+---
+driver:
+  name: default
+  options:
+    managed: true
+
+platforms:
+  - name: oraclelinux9
+    image: ${HOME}/qemu-images/oraclelinux-9-amd64.raw
+    memory: 2048
+    cpus: 2
+    disk_size: 32G
+    ssh_port: 2270
+    ssh_user: cloud-user
+    ssh_key: ~/.ssh/id_rsa
+
+provisioner:
+  name: ansible
+  log: true
+  playbooks:
+    create: ../shared/create.yml
+    prepare: ../shared/prepare.yml
+    destroy: ../shared/destroy.yml
+    converge: ../shared/converge.yml
+
+verifier:
+  name: ansible

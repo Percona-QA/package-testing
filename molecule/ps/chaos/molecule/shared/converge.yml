@@ -1,0 +1,9 @@
+---
+# Chaos QEMU converge.
+#
+# Runs the package-testing playbook selected by the PLAYBOOK_VAR environment
+# variable (exported by the ps-package-testing-molecule-chaos pipeline), from
+# the package-testing clone in the agent's HOME. This mirrors the ec2 scenario
+# converge target (package-testing/playbooks/${PLAYBOOK_VAR}.yml) — only the
+# create/destroy lifecycle differs (local QEMU instead of ec2).
+- import_playbook: "{{ lookup('env', 'HOME') }}/package-testing/playbooks/{{ lookup('env', 'PLAYBOOK_VAR') }}.yml"

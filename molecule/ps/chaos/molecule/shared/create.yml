@@ -1,0 +1,206 @@
+---
+- name: Create VM with QEMU
+  hosts: localhost
+  gather_facts: true
+  tasks:
+    - name: Create disk from raw base image
+      ansible.builtin.command: >
+        cp {{ item.image }} /tmp/molecule-{{ item.name }}.raw
+      args:
+        creates: "/tmp/molecule-{{ item.name }}.raw"
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Resize raw disk
+      ansible.builtin.command: >
+        qemu-img resize /tmp/molecule-{{ item.name }}.raw {{ item.disk_size }}
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Create cloud-init directory
+      ansible.builtin.file:
+        path: "/tmp/cloud-init-{{ item.name }}"
+        state: directory
+        mode: '0755'
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Create cloud-init user-data
+      ansible.builtin.copy:
+        content: |
+          #cloud-config
+          users:
+            - name: {{ item.ssh_user }}
+              sudo: ALL=(ALL) NOPASSWD:ALL
+              shell: /bin/bash
+              ssh_authorized_keys:
+                - {{ lookup('file', (item.ssh_key | default('~/.ssh/id_rsa')) ~ '.pub') }}
+          runcmd:
+            - systemctl disable unattended-upgrades || true
+            - systemctl stop unattended-upgrades || true
+        dest: "/tmp/cloud-init-{{ item.name }}/user-data"
+        mode: '0644'
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Create cloud-init meta-data
+      ansible.builtin.copy:
+        content: |
+          instance-id: {{ item.name }}
+          local-hostname: {{ item.name }}
+        dest: "/tmp/cloud-init-{{ item.name }}/meta-data"
+        mode: '0644'
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Create cloud-init ISO
+      ansible.builtin.command: >
+        genisoimage -output /tmp/cloud-init-{{ item.name }}.iso
+        -volid cidata -joliet -rock /tmp/cloud-init-{{ item.name }}/
+      args:
+        creates: "/tmp/cloud-init-{{ item.name }}.iso"
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Check if VM is already running
+      ansible.builtin.shell: |
+        if [ -f /tmp/qemu-{{ item.name }}.pid ]; then
+          if ps -p $(cat /tmp/qemu-{{ item.name }}.pid) > /dev/null 2>&1; then
+            echo "running"
+          else
+            rm -f /tmp/qemu-{{ item.name }}.pid
+            echo "not running"
+          fi
+        else
+          echo "not running"
+        fi
+      register: vm_status
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Start QEMU VM (x86_64)
+      ansible.builtin.shell: |
+        qemu-system-x86_64 \
+          -name {{ item.item.name }} \
+          -m {{ item.item.memory }} \
+          -smp {{ item.item.cpus }} \
+          -drive file=/tmp/molecule-{{ item.item.name }}.raw,format=raw,if=none,id=disk0,cache=unsafe,aio=threads \
+          -device virtio-blk-pci,drive=disk0 \
+          -cdrom /tmp/cloud-init-{{ item.item.name }}.iso \
+          -netdev user,id=net0,hostfwd=tcp::{{ item.item.ssh_port }}-:22 \
+          -device virtio-net-pci,netdev=net0 \
+          -enable-kvm \
+          -cpu host \
+          -serial file:/tmp/qemu-{{ item.item.name }}-serial.log \
+          -D /tmp/qemu-{{ item.item.name }}-qemu.log \
+          -daemonize \
+          -display none \
+          -pidfile /tmp/qemu-{{ item.item.name }}.pid \
+          2> /tmp/qemu-{{ item.item.name }}-stderr.log
+      when:
+        - item.stdout == "not running"
+        - (item.item.arch | default('amd64')) == 'amd64'
+      loop: "{{ vm_status.results }}"
+
+    - name: Stage writable EFI NVRAM per VM (arm64)
+      ansible.builtin.copy:
+        src: "{{ aavmf_vars_src }}"
+        dest: "/tmp/qemu-{{ item.item.name }}-vars.fd"
+        remote_src: true
+        force: false
+        mode: '0644'
+      vars:
+        aavmf_vars_src: >-
+          {{
+            '/opt/homebrew/share/qemu/edk2-arm-vars.fd'
+              if ansible_facts['system'] == 'Darwin' and
+                 (lookup('ansible.builtin.fileglob', '/opt/homebrew/share/qemu/edk2-arm-vars.fd') | length > 0)
+            else '/usr/share/AAVMF/AAVMF_VARS.fd'
+              if (lookup('ansible.builtin.fileglob', '/usr/share/AAVMF/AAVMF_VARS.fd') | length > 0)
+            else '/usr/share/qemu-efi-aarch64/QEMU_VARS.fd'
+          }}
+      when:
+        - item.stdout == "not running"
+        - (item.item.arch | default('amd64')) == 'arm64'
+      loop: "{{ vm_status.results }}"
+
+    - name: Start QEMU VM (arm64)
+      ansible.builtin.shell: |
+        qemu-system-aarch64 \
+          -name {{ item.item.name }} \
+          -M virt \
+          {{ accel_cpu }} \
+          -m {{ item.item.memory }} \
+          -smp {{ item.item.cpus }} \
+          -drive if=pflash,format=raw,readonly=on,file={{ aavmf_code }} \
+          -drive if=pflash,format=raw,file=/tmp/qemu-{{ item.item.name }}-vars.fd \
+          -drive file=/tmp/molecule-{{ item.item.name }}.raw,format=raw,if=none,id=disk0,cache=unsafe,aio=threads \
+          -device virtio-blk-device,drive=disk0,bootindex=0 \
+          -drive file=/tmp/cloud-init-{{ item.item.name }}.iso,format=raw,if=none,id=cdrom0,readonly=on \
+          -device virtio-blk-device,drive=cdrom0,bootindex=1 \
+          -netdev user,id=net0,hostfwd=tcp::{{ item.item.ssh_port }}-:22 \
+          -device virtio-net-device,netdev=net0 \
+          -serial file:/tmp/qemu-{{ item.item.name }}-serial.log \
+          -D /tmp/qemu-{{ item.item.name }}-qemu.log \
+          -daemonize \
+          -display none \
+          -pidfile /tmp/qemu-{{ item.item.name }}.pid \
+          2> /tmp/qemu-{{ item.item.name }}-stderr.log
+      vars:
+        accel_cpu: >-
+          {{
+            '-accel hvf -cpu host'
+              if ansible_facts['system'] == 'Darwin'
+            else '-enable-kvm -cpu host'
+              if (ansible_facts['system'] == 'Linux' and
+                  ansible_facts['architecture'] in ['aarch64', 'arm64'])
+            else '-cpu max'
+          }}
+        aavmf_code: >-
+          {{
+            '/opt/homebrew/share/qemu/edk2-aarch64-code.fd'
+              if ansible_facts['system'] == 'Darwin' and
+                 (lookup('ansible.builtin.fileglob', '/opt/homebrew/share/qemu/edk2-aarch64-code.fd') | length > 0)
+            else '/usr/share/AAVMF/AAVMF_CODE.fd'
+              if (lookup('ansible.builtin.fileglob', '/usr/share/AAVMF/AAVMF_CODE.fd') | length > 0)
+            else '/usr/share/qemu-efi-aarch64/QEMU_EFI.fd'
+          }}
+      when:
+        - item.stdout == "not running"
+        - (item.item.arch | default('amd64')) == 'arm64'
+      loop: "{{ vm_status.results }}"
+
+    - name: Wait for guest sshd to respond
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ item.ssh_port }}"
+        search_regex: "SSH-"
+        delay: 5
+        sleep: 3
+        timeout: "{{ 1800 if (item.arch | default('amd64')) == 'arm64' else 600 }}"
+      loop: "{{ molecule_yml.platforms }}"
+
+    - name: Create molecule instance config
+      ansible.builtin.copy:
+        content: |
+          {% for item in molecule_yml.platforms %}
+          - address: "127.0.0.1"
+            identity_file: "{{ item.ssh_key | default('~/.ssh/id_rsa') }}"
+            instance: "{{ item.name }}"
+            port: "{{ item.ssh_port }}"
+            user: "{{ item.ssh_user }}"
+            ssh_extra_args: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          {% endfor %}
+        dest: "{{ molecule_instance_config }}"
+        mode: '0644'
+
+    - name: Wait until cloud-init has provisioned the user (real SSH login)
+      ansible.builtin.command: >
+        ssh
+          -i {{ item.ssh_key | default('~/.ssh/id_rsa') }}
+          -p {{ item.ssh_port }}
+          -o StrictHostKeyChecking=no
+          -o UserKnownHostsFile=/dev/null
+          -o BatchMode=yes
+          -o ConnectTimeout=5
+          {{ item.ssh_user }}@127.0.0.1
+          true
+      register: ssh_probe
+      retries: 60
+      delay: 5
+      until: ssh_probe.rc == 0
+      changed_when: false
+      loop: "{{ molecule_yml.platforms }}"

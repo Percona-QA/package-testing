@@ -1,0 +1,27 @@
+---
+driver:
+  name: default
+  options:
+    managed: true
+
+platforms:
+  - name: debian12
+    image: ${HOME}/qemu-images/debian-12-genericcloud-amd64.raw
+    memory: 2048
+    cpus: 2
+    disk_size: 20G
+    ssh_port: 2231
+    ssh_user: debian
+    ssh_key: ~/.ssh/id_rsa
+
+provisioner:
+  name: ansible
+  log: true
+  playbooks:
+    create: ../shared/create.yml
+    prepare: ../shared/prepare.yml
+    destroy: ../shared/destroy.yml
+    converge: ../shared/converge.yml
+
+verifier:
+  name: ansible
