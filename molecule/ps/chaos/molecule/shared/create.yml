@@ -10,9 +10,22 @@
         creates: "/tmp/molecule-{{ item.name }}.raw"
       loop: "{{ molecule_yml.platforms }}"
 
-    - name: Resize raw disk
-      ansible.builtin.command: >
-        qemu-img resize /tmp/molecule-{{ item.name }}.raw {{ item.disk_size }}
+    # Grow the working disk to disk_size, but never shrink it: some base
+    # images (e.g. OracleLinux) already have a virtual size larger than
+    # disk_size, and `qemu-img resize` refuses to shrink without --shrink
+    # (which would discard data). -f raw also silences the format-probe
+    # warning. If the base is already >= disk_size we leave it as-is.
+    - name: Grow raw disk to disk_size (never shrink)
+      ansible.builtin.shell: |
+        set -e
+        want_bytes=$(numfmt --from=iec {{ item.disk_size }})
+        cur_bytes=$(qemu-img info --output=json -f raw /tmp/molecule-{{ item.name }}.raw \
+          | python3 -c 'import sys, json; print(json.load(sys.stdin)["virtual-size"])')
+        if [ "$want_bytes" -gt "$cur_bytes" ]; then
+          qemu-img resize -f raw /tmp/molecule-{{ item.name }}.raw {{ item.disk_size }}
+        else
+          echo "skip resize for {{ item.name }}: base ${cur_bytes}B >= requested ${want_bytes}B"
+        fi
       loop: "{{ molecule_yml.platforms }}"
 
     - name: Create cloud-init directory
