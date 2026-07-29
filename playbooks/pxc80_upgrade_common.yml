@@ -145,3 +145,13 @@
 
   - name: PRINT THE INSTALLED PACKAGES VALUE UPGRADE
     include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: check mysql service status
+    command: service mysql status
+    register: mysql_service_status
+    changed_when: false
+    ignore_errors: true
+
+  - name: print mysql service status
+    debug:
+      var: mysql_service_status.stdout_lines

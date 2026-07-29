@@ -2,6 +2,7 @@
       debug:
           msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
 
+
     - name: Add epel-release
       package:
           state: present
@@ -120,6 +121,7 @@
             2.34
           {% endif %}
 
+
     - name: sanitize GLIBC_VERSION
       set_fact:
         GLIBC_VERSION: "{{ GLIBC_VERSION | trim }}"
@@ -128,9 +130,30 @@
       set_fact:
         TARBALL_NAME: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
 
+
     - name: get testing repo tarball URL
       set_fact:
         TARBALL_LINK: "https://downloads.percona.com/downloads/TESTING/ps-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
+      when: 
+       - lookup('env', 'EOL') == "no"
+
+    - name: get EOL testing repo tarball URL (gated private repo)
+      set_fact:
+        TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/qa-test/ps-gated-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
+      when:
+        - lookup('env', 'EOL') == "yes"
+        - lookup('env', 'REPO') == "testing"
+
+    - name: get EOL main repo tarball URL (ps-80-eol private repo)
+      set_fact:
+        TARBALL_LINK: "https://repo.percona.com/private/{{ lookup('env', 'USERNAME') }}-{{ lookup('env', 'PASSWORD') }}/ps-80-eol/tarballs/Percona-Server-{{ lookup('env', 'PS_VERSION') }}/{{ TARBALL_NAME }}"
+      when:
+        - lookup('env', 'EOL') == "yes"
+        - lookup('env', 'REPO') == "main"
+
+    - name: Display chosen tarball URL (token masked)
+      debug:
+        msg: "TARBALL_LINK={{ TARBALL_LINK | regex_replace('private/[^/]+/', 'private/*****/') }}"
 
 
 # -------------------------------------------------
