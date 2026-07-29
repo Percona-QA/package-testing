@@ -154,3 +154,13 @@
 
   - name: Check that the PXC Cluster is up and running
     shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'
+
+  - name: check mysql service status
+    command: service mysql status
+    register: mysql_service_status
+    changed_when: false
+    ignore_errors: true
+
+  - name: print mysql service status
+    debug:
+      var: mysql_service_status.stdout_lines
