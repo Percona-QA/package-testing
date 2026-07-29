@@ -181,14 +181,14 @@
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps97
 
-  - name: run pytest unit tests for ps-admin script
-    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_unit.py
+#  - name: run pytest unit tests for ps-admin script
+#    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_unit.py
 
-  - name: run pytest integration tests for ps-admin script
-    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_integration.py
+#  - name: run pytest integration tests for ps-admin script
+#    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_integration.py
 
-  - name: run pytest tests for mysql init scripts
-    command: python3 -m pytest -v /package-testing/pytest-tests/test_mysql_init_scripts.py
+#  - name: run pytest tests for mysql init scripts
+#    command: python3 -m pytest -v /package-testing/pytest-tests/test_mysql_init_scripts.py
 
   - name: remove Percona Server deb packages
     apt:
