@@ -13,6 +13,7 @@ pipeline {
     string(name: 'PXC57_PKG_VERSION', defaultValue: '5.7.33-rel36-49.1', description: 'PXC package version (only for PXC 5.7)')
     string(name: 'TESTING_GIT_ACCOUNT', defaultValue: 'Percona-QA', description: 'GitHub account for package-testing repo')
     string(name: 'TESTING_BRANCH', defaultValue: 'master', description: 'Branch of package-testing repo to use')
+    choice(name: 'EOL', choices: ['no', 'yes'], description: 'Use the EOL (password protected) gated docker tarball instead of pulling from Docker Hub')
   }
   stages {
     stage('Prepare') {
@@ -27,6 +28,22 @@ pipeline {
         parallel {
       stage ('Run trivy analyzer') {
         steps {
+            script {
+              if (params.EOL == 'yes') {
+                withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                  def arch = sh(script: 'uname -m', returnStdout: true).trim()
+                  def archSuffix = (arch == 'aarch64' || arch == 'arm64') ? 'arm64' : 'amd64'
+                  def tarName = "percona-xtradb-cluster-${PXC_VERSION}-1-${archSuffix}.docker.tar"
+                  def dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/${tarName}"
+                  sh """
+                    rm -f *.docker.tar
+                    wget -q "${dockerTarURL}"
+                    LOADED_TAG=\$(sudo docker load -i ${tarName} | awk '{print \$NF}')
+                    sudo docker tag "\${LOADED_TAG}" "${DOCKER_ACC}/percona-xtradb-cluster:${PXC_VERSION}"
+                  """
+                }
+              }
+            }
             sh """
               sudo yum install -y wget git
               TRIVY_VERSION="0.69.3"
@@ -59,6 +76,22 @@ pipeline {
 
       stage('Run tests') {
         steps {
+          script {
+            if (params.EOL == 'yes') {
+              withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                def arch = sh(script: 'uname -m', returnStdout: true).trim()
+                def archSuffix = (arch == 'aarch64' || arch == 'arm64') ? 'arm64' : 'amd64'
+                def tarName = "percona-xtradb-cluster-${PXC_VERSION}-1-${archSuffix}.docker.tar"
+                def dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/${tarName}"
+                sh """
+                  rm -f *.docker.tar
+                  wget -q "${dockerTarURL}"
+                  LOADED_TAG=\$(sudo docker load -i ${tarName} | awk '{print \$NF}')
+                  sudo docker tag "\${LOADED_TAG}" "${DOCKER_ACC}/percona-xtradb-cluster:${DOCKER_TAG}"
+                """
+              }
+            }
+          }
           sh """
             export PATH=\${PATH}:~/.local/bin
             sudo yum install -y python3 python3-pip
