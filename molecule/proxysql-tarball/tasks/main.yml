@@ -23,6 +23,16 @@
     - not (ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023")
     - not (ansible_distribution == "RedHat" and ansible_distribution_major_version == "10")
 
+- name: Ensure wget and unzip are installed on RHEL 9
+  package:
+    name:
+      - wget
+      - unzip
+    state: present
+  when:
+    - ansible_distribution == "RedHat"
+    - ansible_distribution_major_version == "9"
+
 - name: Install required packages using dnf
   dnf:
     name:
@@ -38,7 +48,10 @@
       - socat
       - lsof
     state: present
-  when: ansible_distribution == "Amazon" and ansible_distribution_version == "2023"
+  when:
+    - >
+      (ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023") or
+      (ansible_distribution == "RedHat" and ansible_distribution_major_version == "10")
 
 - name: Get glibc version actions
   set_fact:
