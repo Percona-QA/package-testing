@@ -75,11 +75,11 @@
   - name: Install Percona Server packages
     include_tasks: >-
       {{
-        '../tasks/install_ps97.yml'
+        '../../../../tasks/install_ps97.yml'
         if '9.7' in lookup('env', 'VERSION')
-        else '../tasks/install_ps84.yml'
+        else '../../../../tasks/install_ps84.yml'
         if '8.4' in lookup('env', 'VERSION')
-        else '../tasks/install_ps_innovation.yml'
+        else '../../../../tasks/install_ps_innovation.yml'
       }}
 
   - name: install Percona XtraBackup {{ major_release_version }} packages
