@@ -10,6 +10,7 @@ pxc_revision = os.getenv('PXC_REVISION')
 pxc57_pkg_version = os.getenv('PXC57_PKG_VERSION')
 pxc_pxb_version = os.getenv('PXC_PXB_VERSION')
 pxc_wsrep_version = os.getenv('PXC_WSREP_VERSION')
+eol = os.getenv('EOL')
 test_pwd = os.path.dirname(os.path.realpath(__file__))
 
 pxc_version_upstream, pxc_version_percona = pxc_version.split('-')
