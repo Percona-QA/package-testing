@@ -27,7 +27,7 @@ if PS_MAJOR >= 9:
         'percona-testsuite',
         'percona-server-test',
         'percona-server-source',
-        'percona-server-core',
+        'percona-server-server-core',
         'percona-mysql-rocksdb',
         'percona-mysql-shell',
         'percona-server-common',
@@ -36,6 +36,10 @@ if PS_MAJOR >= 9:
         'percona-server-client',
         'percona-server-client-plugins',
         'percona-mysql-router',
+        'percona-client',
+        'percona-server',
+        'percona-server-js',
+        'percona-server-rocksdb'
     ]
 
     RPMPACKAGES = [
@@ -48,7 +52,8 @@ if PS_MAJOR >= 9:
         'percona-server-shared',
         'percona-server-devel',
         'percona-mysql-router',
-        'percona-mysql-shell'
+        'percona-mysql-shell',
+        'percona-server-js'
     ]
 else:
     DEBPACKAGES = [
@@ -58,7 +63,8 @@ else:
         'percona-server-client',
         'percona-server-rocksdb',
         'percona-mysql-router',
-        'percona-mysql-shell'
+        'percona-mysql-shell',
+        'percona-server-js'
     ]
 
     RPMPACKAGES = [
@@ -68,7 +74,8 @@ else:
         'percona-server-devel',
         'percona-server-rocksdb',
         'percona-mysql-router',
-        'percona-mysql-shell'
+        'percona-mysql-shell',
+        'percona-server-js'
     ]
 
 # Define plugins amd components lists for PS8.0.X releases:
