@@ -103,14 +103,6 @@
       update_cache: yes
     when: ansible_os_family == "Debian"
 
-  - name: Install ProxySQL rpm package with yum
-    yum:
-      name: "{{ proxysql_package }}"
-      state: latest
-    when:
-      - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
-      - ansible_facts['distribution_major_version'] | int < 8
-
   - name: Install ProxySQL rpm package with dnf
     dnf:
       name: "{{ proxysql_package }}"
@@ -118,7 +110,7 @@
       update_cache: yes
     when:
       - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
-      - ansible_facts['distribution_major_version'] | int >= 8
+      - ansible_facts['distribution_major_version'] | int > 8
 
   #install initscripts-service manually on OL9 till DISTMYSQL-300 is fixed
   - name: install init scripts for OL9
@@ -131,12 +123,21 @@
 
   - name: start proxysql service
     command: service proxysql start
+    when:
+      - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
+      - ansible_facts['distribution_major_version'] | int > 8
 
   - name: stop proxysql service
     command: service proxysql stop
+    when:
+      - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
+      - ansible_facts['distribution_major_version'] | int > 8
 
   - name: start proxysql service
     command: service proxysql start
+    when:
+      - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
+      - ansible_facts['distribution_major_version'] | int > 8
 
   - name: install orchestrator new deb packages
     apt:
