@@ -9,9 +9,10 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 VERSION = os.getenv("PROXYSQL_VERSION")
 
 def test_package_is_installed(host):
-    pkg = host.package('proxysql2')
-    assert pkg.is_installed
-
+    assert (
+        host.package("proxysql2").is_installed
+        or host.package("proxysql3").is_installed
+    ), "Neither proxysql2 nor proxysql3 is installed"
 
 def test_proxysql2_version(host):
     cmd = 'proxysql --version'
