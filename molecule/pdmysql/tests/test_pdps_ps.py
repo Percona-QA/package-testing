@@ -28,7 +28,6 @@ if PS_MAJOR >= 9:
         'percona-server-test',
         'percona-server-source',
         'percona-server-server-core',
-        'percona-mysql-rocksdb',
         'percona-mysql-shell',
         'percona-server-common',
         'percona-server-client-core',
