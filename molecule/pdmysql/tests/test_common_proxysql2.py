@@ -10,10 +10,22 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 VERSION = os.getenv("PROXYSQL_VERSION")
 
-def is_rhel8(host):
+def skip_proxysql_tests(host):
     dist = host.system_info.distribution.lower()
-    release = host.system_info.release.split(".")[0]
-    return dist in ("redhat", "rhel", "oracle", "ol") and release == "8"
+    major = host.system_info.release.split(".")[0]
+
+    result = host.run("mysqld --version")
+    if result.rc != 0:
+        return False
+
+    # mysqld  Ver 9.7.1-1 ...
+    ps_major = int(result.stdout.split()[2].split(".")[0])
+
+    return (
+        dist in ("redhat", "rhel", "oracle", "ol")
+        and major == "8"
+        and ps_major >= 9
+    )
 
 
 def test_package_is_installed(host):
