@@ -10,6 +10,11 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 VERSION = os.getenv("PROXYSQL_VERSION")
 
+def is_rhel8(host):
+    dist = host.system_info.distribution.lower()
+    release = host.system_info.release.split(".")[0]
+    return dist in ("redhat", "rhel", "oracle", "ol") and release == "8"
+
 
 def test_package_is_installed(host):
     assert (
