@@ -31,6 +31,7 @@
      # - percona-server-client-plugins-dbgsym{{ pro_suf | default('') }}
       - percona-server-client{{ pro_suf | default('') }}
       - percona-mysql-router{{ pro_suf | default('') }}
+      - percona-server-rocksdb
       #- percona-mysql-router-dbgsym{{ pro_suf | default('') }}
       percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
       packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
