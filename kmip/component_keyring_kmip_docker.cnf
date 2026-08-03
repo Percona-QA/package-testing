@@ -1,0 +1,7 @@
+{
+  "server_addr": "127.0.0.1",
+  "server_port": "5696",
+  "client_ca": "/tmp/certs/mysql-client-cert.pem",
+  "client_key": "/tmp/certs/mysql-client-key.pem",
+  "server_ca": "/tmp/certs/vault-kmip-ca.pem"
+}

@@ -252,15 +252,15 @@
 
   - name: copy the global configuration file for mysql in Redhat/CentOS
     copy:
-        src: /package-testing/kmip/component_keyring_kmip.cnf
-        dest: /usr/lib64/mysql/plugin/
+        src: /package-testing/kmip/component_keyring_kmip_docker.cnf
+        dest: /usr/lib64/mysql/plugin/component_keyring_kmip.cnf
         remote_src: yes
     when: ansible_os_family == "RedHat"
 
   - name: copy the global configuration file for mysql in Debian/Ubuntu
     copy:
-        src: /package-testing/kmip/component_keyring_kmip.cnf
-        dest: /usr/lib/mysql/plugin/
+        src: /package-testing/kmip/component_keyring_kmip_docker.cnf
+        dest: /usr/lib/mysql/plugin/component_keyring_kmip.cnf
         remote_src: yes
     when: ansible_os_family == "Debian"
 
