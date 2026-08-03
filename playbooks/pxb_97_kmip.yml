@@ -10,6 +10,7 @@
     gnupg_home: /root/.gnupg
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+    kmip_venv: /opt/kmip-venv
   tasks:
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
@@ -117,59 +118,150 @@
       update_cache: yes
     when: ansible_os_family == "RedHat"
 
-  - name: install python3-pip on Debian/Ubuntu
+  # python3-venv is required to create the isolated virtualenv below.
+  - name: install python3-pip and python3-venv on Debian/Ubuntu
     apt:
       name:
-      - python3-pip
-      state: latest
-      update_cache: yes
-    when: ansible_os_family == "Debian"
-
-  - name: Install python packaging dependencies (Debian)
-    apt:
-      name:
-        - python3-packaging
         - python3-pip
-        - python3-setuptools
+        - python3-venv
       state: present
       update_cache: yes
     when: ansible_os_family == "Debian"
 
-  - name: Upgrade pip, setuptools, and importlib-metadata (Debian)
+  # PyKMIP needs a Python that still has ssl.wrap_socket() (removed in Python
+  # 3.12). Distros whose system python is >= 3.12 (RHEL 10, Ubuntu 24.04+,
+  # Debian 13) ship no older interpreter in their repos, so on those we build the
+  # venv with a self-contained, portable CPython 3.11 from python-build-standalone
+  # (the same prebuilt CPython uv uses) - a static tarball that runs on any glibc
+  # Linux and both amd64/arm64, with no OS dependency and no patching of pykmip.
+  # Distros whose system python is already <= 3.11 keep using the system python3.
+  - name: detect system python3 minor version
+    command: python3 -c "import sys; print(sys.version_info[1])"
+    register: sys_py_minor
+    changed_when: false
+
+  - name: default the pykmip venv interpreter to the system python3
+    set_fact:
+      kmip_py_interp: python3
+
+  - name: provision a portable CPython 3.11 when system python is >= 3.12
+    when: (sys_py_minor.stdout | int) >= 12
+    block:
+      - name: download portable CPython 3.11 (python-build-standalone)
+        get_url:
+          url: "https://github.com/astral-sh/python-build-standalone/releases/download/{{ pbs_tag }}/cpython-{{ pbs_ver }}+{{ pbs_tag }}-{{ (ansible_architecture == 'aarch64') | ternary('aarch64', 'x86_64') }}-unknown-linux-gnu-install_only.tar.gz"
+          dest: /tmp/cpython-3.11-standalone.tar.gz
+          mode: '0644'
+        vars:
+          pbs_tag: "20260807"
+          pbs_ver: "3.11.15"
+        register: pbs_dl
+        retries: 3
+        delay: 5
+        until: pbs_dl is succeeded
+
+      - name: extract portable CPython 3.11 into /opt
+        unarchive:
+          src: /tmp/cpython-3.11-standalone.tar.gz
+          dest: /opt
+          remote_src: yes
+          creates: /opt/python/bin/python3.11
+
+      - name: use the portable CPython 3.11 for the pykmip venv
+        set_fact:
+          kmip_py_interp: /opt/python/bin/python3.11
+
+  - name: show the python interpreter chosen for the pykmip venv
+    debug:
+      msg: "system python3 minor=3.{{ sys_py_minor.stdout }} -> venv interpreter: {{ kmip_py_interp }}"
+
+  # Install the KMIP test Python dependencies into an isolated virtualenv rather
+  # than the OS-managed system Python. This sidesteps the PEP 668
+  # "externally-managed-environment" restriction (Debian 12+/Ubuntu 24.04+)
+  # entirely, so no --break-system-packages override is needed on any distro,
+  # and it works on old pip (Ubuntu 22.04/Jammy) too. The pip module creates the
+  # venv automatically via virtualenv_command when it does not yet exist.
+  # Bootstrap a modern pip/setuptools/wheel into the venv FIRST, in its own
+  # invocation. RHEL 8's system python3 creates the venv with pip 9.0.3, which
+  # cannot use prebuilt wheels for cryptography and instead tries to build it
+  # from source (requiring Rust/setuptools_rust) and fails. Upgrading pip before
+  # installing pykmip lets the new pip fetch the cryptography manylinux wheel.
+  - name: bootstrap pip/setuptools/wheel in the virtualenv
     pip:
-      name: "{{ item }}"
+      name:
+        - pip
+        - setuptools
+        - wheel
       state: latest
-      extra_args: "-U --break-system-packages"
-    with_items:
-      - pip
-      - setuptools
-      - importlib-metadata
-      - pykmip
-    when: ansible_os_family == "Debian"
+      virtualenv: "{{ kmip_venv }}"
+      virtualenv_command: "{{ kmip_py_interp }} -m venv"
 
-  - name: Upgrade pip, setuptools, and importlib-metadata (Redhat)
+  - name: install pykmip dependencies into the virtualenv
     pip:
-      name: "{{ item }}"
+      name:
+        - importlib-metadata
+        - pykmip
       state: latest
-      extra_args: "-U"
-    with_items:
-      - pip
-      - importlib-metadata
-      - pykmip
-    when: ansible_os_family == "RedHat"
+      virtualenv: "{{ kmip_venv }}"
+      virtualenv_command: "{{ kmip_py_interp }} -m venv"
 
-  - name: Downgrade SQLAlchemy (Debian/Ubuntu)
-    command:
-      cmd: pip3 install --break-system-packages SQLAlchemy==1.4.46
-    when: ansible_os_family == "Debian"
+  # pykmip requires SQLAlchemy < 2.0; pin to a known-good version in the venv.
+  - name: pin SQLAlchemy in the virtualenv
+    pip:
+      name: SQLAlchemy==1.4.46
+      virtualenv: "{{ kmip_venv }}"
 
-  - name: Downgrade SQLAlchemy (RedHat)
-    command:
-      cmd: pip3 install SQLAlchemy==1.4.46
-    when: ansible_os_family == "RedHat"
-
+  # Capture stdout AND stderr to /pykmip_server.out. An uncaught exception in the
+  # server (e.g. SSL/cipher setup failing) is written to stderr, NOT to the -l
+  # logging file, so without this the crash traceback is lost to nohup.out.
   - name: start pykmip server
-    shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
+    shell: nohup {{ kmip_venv }}/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log > /pykmip_server.out 2>&1 &
+
+  # Observation only (no behaviour change yet): give the server a few seconds to
+  # come up, then report whether the process is alive, whether port 5696 is
+  # reachable, and dump the server log. mysqld starts later with the KMIP keyring
+  # component and aborts with "BIO_do_connect: Connection refused" if the server
+  # is not reachable, so this surfaces the actual cause before that happens.
+  - name: wait a few seconds for pykmip server to come up
+    pause:
+      seconds: 5
+
+  - name: check pykmip server process is running
+    shell: pgrep -af pykmip-server
+    register: pykmip_status
+    changed_when: false
+    failed_when: false
+
+  - name: check pykmip server is listening on port 5696
+    wait_for:
+      host: 127.0.0.1
+      port: 5696
+      state: started
+      timeout: 30
+    register: kmip_port
+    ignore_errors: true
+
+  - name: read pykmip server log
+    command: cat /pykmip_server.log
+    register: pykmip_startup_log
+    changed_when: false
+    failed_when: false
+
+  - name: read pykmip server stdout/stderr (crash traceback lands here)
+    command: cat /pykmip_server.out
+    register: pykmip_startup_out
+    changed_when: false
+    failed_when: false
+
+  - name: print pykmip server status
+    debug:
+      msg:
+        - "pykmip process: {{ pykmip_status.stdout_lines | default(['<not running>']) }}"
+        - "port 5696 reachable: {{ (kmip_port is succeeded) | ternary('yes', 'no') }}"
+        - "pykmip stdout/stderr:"
+        - "{{ pykmip_startup_out.stdout_lines | default([]) }}"
+        - "pykmip log:"
+        - "{{ pykmip_startup_log.stdout_lines | default([]) }}"
 
   - name: copy the global manifest for mysql
     copy:
@@ -191,9 +283,13 @@
         remote_src: yes
     when: ansible_os_family == "Debian"
 
+  # Use the encryption config WITHOUT innodb-sys-tablespace-encrypt: this test
+  # enables encryption on an already-initialized datadir (no re-init), and that
+  # one option can only be set at bootstrap, otherwise mysqld aborts with
+  # MY-011825. See kmip/encryption_no_sys_tablespace.j2 for details.
   - name: copy the encryption config file on Debian/Ubuntu
     copy:
-        src: /package-testing/kmip/encryption.j2
+        src: /package-testing/kmip/encryption_no_sys_tablespace.j2
         dest: /etc/mysql/conf.d/encryption.cnf
         remote_src: yes
     when: ansible_os_family == "Debian"
@@ -206,18 +302,68 @@
 
   - name: copy the encryption config file on RHEL/CentOS/Amazon
     copy:
-        src: /package-testing/kmip/encryption.j2
+        src: /package-testing/kmip/encryption_no_sys_tablespace.j2
         dest: /etc/my.cnf.d/encryption.cnf
         remote_src: yes
     when: ansible_os_family == "RedHat"
 
-  - name: start mysql service debian
-    service: name=mysql state=started
-    when: ansible_os_family == "Debian"
+  # Observation: mysqld loads the KMIP keyring component at startup and aborts if
+  # it cannot fetch the master key, but systemd only reports a generic failure.
+  # On failure, dump the real cause (mysqld error log + journal) and re-check
+  # that pykmip is still listening, then re-fail.
+  - name: start mysql and capture diagnostics on failure
+    block:
+      - name: start mysql service debian
+        service: name=mysql state=started
+        when: ansible_os_family == "Debian"
 
-  - name: start mysql service rhel
-    service: name=mysqld state=started
-    when: ansible_os_family == "RedHat"
+      - name: start mysql service rhel
+        service: name=mysqld state=started
+        when: ansible_os_family == "RedHat"
+    rescue:
+      - name: re-check pykmip process after mysqld start attempt
+        shell: pgrep -af pykmip-server
+        register: kmip_recheck
+        changed_when: false
+        failed_when: false
+
+      - name: re-check pykmip port 5696 after mysqld start attempt
+        wait_for:
+          host: 127.0.0.1
+          port: 5696
+          state: started
+          timeout: 5
+        register: kmip_port_recheck
+        ignore_errors: true
+
+      - name: read mysqld error log (any distro)
+        shell: >
+          for f in /var/log/mysqld.log /var/log/mysql/error.log /var/log/mysqld.err; do
+            if [ -f "$f" ]; then echo "== $f =="; cat "$f"; fi
+          done
+        register: mysql_err
+        changed_when: false
+        failed_when: false
+
+      - name: read journal for mysql service (any distro)
+        shell: journalctl -xe --no-pager -u mysqld.service -u mysql.service | tail -n 150
+        register: mysql_journal
+        changed_when: false
+        failed_when: false
+
+      - name: print mysqld failure diagnostics
+        debug:
+          msg:
+            - "pykmip still running: {{ kmip_recheck.stdout_lines | default(['<not running>']) }}"
+            - "pykmip port 5696 reachable: {{ (kmip_port_recheck is succeeded) | ternary('yes', 'no') }}"
+            - "mysqld error.log:"
+            - "{{ mysql_err.stdout_lines | default([]) }}"
+            - "journalctl mysql.service:"
+            - "{{ mysql_journal.stdout_lines | default([]) }}"
+
+      - name: fail after dumping mysqld diagnostics
+        fail:
+          msg: "mysqld failed to start - see the diagnostics printed above for the cause."
 
   - name: check mysql service status
     command: /package-testing/check_running.sh mysql running
@@ -251,3 +397,22 @@
   - name: prepare backup on Debian/Ubuntu
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --component-keyring-config=/usr/lib/mysql/plugin/component_keyring_kmip.cnf
     when: ansible_os_family == "Debian"
+
+  - name: check that the pykmip server process is running
+    shell: pgrep -af pykmip-server
+    register: pykmip_proc
+    changed_when: false
+    failed_when: pykmip_proc.rc != 0
+
+  - name: print pykmip server process
+    debug:
+      var: pykmip_proc.stdout_lines
+
+  - name: read pykmip server log
+    command: cat /pykmip_server.log
+    register: pykmip_log
+    changed_when: false
+
+  - name: print pykmip server log
+    debug:
+      var: pykmip_log.stdout_lines

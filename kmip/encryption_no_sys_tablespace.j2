@@ -1,0 +1,25 @@
+[mysqld]
+
+# Encryption options
+# NOTE: innodb-sys-tablespace-encrypt is intentionally omitted. That option can
+# only take effect when the datadir is first bootstrapped (mysqld --initialize);
+# it cannot be enabled on an already-initialized instance and makes mysqld abort
+# with "MY-011825: system tablespace is not encrypted but
+# --innodb_sys_tablespace_encrypt is ON". This playbook enables encryption on an
+# existing datadir (install -> add config -> restart) without re-initializing, so
+# every option here is one that can be turned on for an existing instance.
+log-bin=binlog
+log-replica-updates
+gtid-mode=ON
+enforce-gtid-consistency
+binlog-format=row
+source-verify-checksum=ON
+binlog-checksum=CRC32
+innodb-undo-log-encrypt
+innodb-redo-log-encrypt
+default-table-encryption=ON
+binlog-encryption=ON
+encrypt-tmp-files=ON
+innodb-encrypt-online-alter-logs=ON
+innodb-temp-tablespace-encrypt=ON
+table-encryption-privilege-check=ON
