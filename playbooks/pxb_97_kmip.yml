@@ -10,6 +10,7 @@
     gnupg_home: /root/.gnupg
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+    kmip_venv: /opt/kmip-venv
   tasks:
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
@@ -117,59 +118,41 @@
       update_cache: yes
     when: ansible_os_family == "RedHat"
 
-  - name: install python3-pip on Debian/Ubuntu
+  # python3-venv is required to create the isolated virtualenv below.
+  - name: install python3-pip and python3-venv on Debian/Ubuntu
     apt:
       name:
-      - python3-pip
-      state: latest
-      update_cache: yes
-    when: ansible_os_family == "Debian"
-
-  - name: Install python packaging dependencies (Debian)
-    apt:
-      name:
-        - python3-packaging
         - python3-pip
-        - python3-setuptools
+        - python3-venv
       state: present
       update_cache: yes
     when: ansible_os_family == "Debian"
 
-  - name: Upgrade pip, setuptools, and importlib-metadata (Debian)
+  # Install the KMIP test Python dependencies into an isolated virtualenv rather
+  # than the OS-managed system Python. This sidesteps the PEP 668
+  # "externally-managed-environment" restriction (Debian 12+/Ubuntu 24.04+)
+  # entirely, so no --break-system-packages override is needed on any distro,
+  # and it works on old pip (Ubuntu 22.04/Jammy) too. The pip module creates the
+  # venv automatically via virtualenv_command when it does not yet exist.
+  - name: install pykmip dependencies into an isolated virtualenv
     pip:
-      name: "{{ item }}"
+      name:
+        - pip
+        - setuptools
+        - importlib-metadata
+        - pykmip
       state: latest
-      extra_args: "-U --break-system-packages"
-    with_items:
-      - pip
-      - setuptools
-      - importlib-metadata
-      - pykmip
-    when: ansible_os_family == "Debian"
+      virtualenv: "{{ kmip_venv }}"
+      virtualenv_command: python3 -m venv
 
-  - name: Upgrade pip, setuptools, and importlib-metadata (Redhat)
+  # pykmip requires SQLAlchemy < 2.0; pin to a known-good version in the venv.
+  - name: pin SQLAlchemy in the virtualenv
     pip:
-      name: "{{ item }}"
-      state: latest
-      extra_args: "-U"
-    with_items:
-      - pip
-      - importlib-metadata
-      - pykmip
-    when: ansible_os_family == "RedHat"
-
-  - name: Downgrade SQLAlchemy (Debian/Ubuntu)
-    command:
-      cmd: pip3 install --break-system-packages SQLAlchemy==1.4.46
-    when: ansible_os_family == "Debian"
-
-  - name: Downgrade SQLAlchemy (RedHat)
-    command:
-      cmd: pip3 install SQLAlchemy==1.4.46
-    when: ansible_os_family == "RedHat"
+      name: SQLAlchemy==1.4.46
+      virtualenv: "{{ kmip_venv }}"
 
   - name: start pykmip server
-    shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
+    shell: nohup {{ kmip_venv }}/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
 
   - name: copy the global manifest for mysql
     copy:
@@ -251,3 +234,22 @@
   - name: prepare backup on Debian/Ubuntu
     command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups/ --component-keyring-config=/usr/lib/mysql/plugin/component_keyring_kmip.cnf
     when: ansible_os_family == "Debian"
+
+  - name: check that the pykmip server process is running
+    shell: pgrep -af pykmip-server
+    register: pykmip_proc
+    changed_when: false
+    failed_when: pykmip_proc.rc != 0
+
+  - name: print pykmip server process
+    debug:
+      var: pykmip_proc.stdout_lines
+
+  - name: read pykmip server log
+    command: cat /pykmip_server.log
+    register: pykmip_log
+    changed_when: false
+
+  - name: print pykmip server log
+    debug:
+      var: pykmip_log.stdout_lines
