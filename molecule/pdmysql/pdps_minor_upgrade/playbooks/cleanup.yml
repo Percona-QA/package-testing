@@ -4,6 +4,12 @@
   become: true
   become_method: sudo
   tasks:
+
+    - name: Remove Percona XtraBackup packages
+      include_tasks: ../../../../tasks/remove_pxb_innovation.yml
+      vars:
+        major_release_version: "{{ lookup('env', 'VERSION').split('.')[:2] | join('') }}"
+
     - name: remove PDPS deb packages
       apt:
         name: "{{ packages }}"
