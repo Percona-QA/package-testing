@@ -4,7 +4,7 @@ awsRegions=("us-west-1" "us-west-2" "us-east-1" "us-east-2" "eu-west-1" "eu-west
 
 checkec2-pgsql-to-terminate(){
            threshold_date=$(date -u -d "$2 hours ago" +%Y-%m-%dT%H:%M:%S)
-           aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --query "Reservations[].Instances[?LaunchTime<='"${threshold_date}"' && (Tags[?Key=='iit-billing-tag' && (contains(Value,'jenkins-pg-worker') || contains(Value,'jenkins-pg-molecule-rhel'))])].[Tags[?Key=='Name'].Value[],Tags[?Key=='job-name'].Value[], InstanceId, LaunchTime]" --output yaml --region $1 | sed -e 's/\- \[\]//g' -e '/^$/d'
+           aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --query "Reservations[].Instances[?LaunchTime<='"${threshold_date}"' && (Tags[?Key=='iit-billing-tag' && (contains(Value,'jenkins-pg-molecule') || contains(Value,'jenkins-pg-molecule-rhel'))])].[Tags[?Key=='Name'].Value[],Tags[?Key=='job-name'].Value[], InstanceId, LaunchTime]" --output yaml --region $1 | sed -e 's/\- \[\]//g' -e '/^$/d'
     }
 
 checkec2-pgsql-to-stop(){
