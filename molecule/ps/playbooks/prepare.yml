@@ -2,7 +2,19 @@
   hosts: all
   become: true
   become_method: sudo
-  gather_facts: true
+  gather_facts: false
+  pre_tasks:
+
+    - name: Bootstrap python3 when missing (minimal RHEL/OL 8, CentOS 7, Amazon 2 AMIs)
+      ansible.builtin.raw: >-
+        command -v /usr/bin/python3 >/dev/null 2>&1 ||
+        { command -v dnf >/dev/null 2>&1 && dnf -y install python3; } ||
+        { command -v yum >/dev/null 2>&1 && yum -y install python3; }
+      changed_when: false
+
+    - name: Gather facts (after ensuring python is present)
+      ansible.builtin.setup:
+
   tasks:
 
     - name: Setup SSH keys for RHEL, Oracle Linux and Amazon
