@@ -128,13 +128,17 @@
       update_cache: yes
     when: ansible_os_family == "Debian"
 
-  # PyKMIP needs a Python that still has ssl.wrap_socket() (removed in Python
-  # 3.12). Distros whose system python is >= 3.12 (RHEL 10, Ubuntu 24.04+,
-  # Debian 13) ship no older interpreter in their repos, so on those we build the
-  # venv with a self-contained, portable CPython 3.11 from python-build-standalone
-  # (the same prebuilt CPython uv uses) - a static tarball that runs on any glibc
-  # Linux and both amd64/arm64, with no OS dependency and no patching of pykmip.
-  # Distros whose system python is already <= 3.11 keep using the system python3.
+  # PyKMIP needs a Python in the 3.7 - 3.11 range: modern pykmip/cryptography
+  # require Python >= 3.7 (and no cryptography wheels ship for the old versions
+  # that still support 3.6, especially on aarch64), while ssl.wrap_socket() -
+  # which pykmip relies on - was removed in Python 3.12. Distros outside that
+  # range ship no suitable interpreter in their repos: RHEL 8 has only python 3.6,
+  # and RHEL 10 / Ubuntu 24.04+ / Debian 13 have only python >= 3.12. On those we
+  # build the venv with a self-contained, portable CPython 3.11 from
+  # python-build-standalone (the same prebuilt CPython uv uses) - a static tarball
+  # that runs on any glibc Linux and both amd64/arm64, with no OS dependency and
+  # no patching of pykmip. Distros whose system python is already 3.7 - 3.11 keep
+  # using the system python3.
   - name: detect system python3 minor version
     command: python3 -c "import sys; print(sys.version_info[1])"
     register: sys_py_minor
@@ -144,8 +148,8 @@
     set_fact:
       kmip_py_interp: python3
 
-  - name: provision a portable CPython 3.11 when system python is >= 3.12
-    when: (sys_py_minor.stdout | int) >= 12
+  - name: provision a portable CPython 3.11 when system python is < 3.7 or >= 3.12
+    when: (sys_py_minor.stdout | int) < 7 or (sys_py_minor.stdout | int) >= 12
     block:
       - name: download portable CPython 3.11 (python-build-standalone)
         get_url:
@@ -182,10 +186,12 @@
   # and it works on old pip (Ubuntu 22.04/Jammy) too. The pip module creates the
   # venv automatically via virtualenv_command when it does not yet exist.
   # Bootstrap a modern pip/setuptools/wheel into the venv FIRST, in its own
-  # invocation. RHEL 8's system python3 creates the venv with pip 9.0.3, which
-  # cannot use prebuilt wheels for cryptography and instead tries to build it
-  # from source (requiring Rust/setuptools_rust) and fails. Upgrading pip before
-  # installing pykmip lets the new pip fetch the cryptography manylinux wheel.
+  # invocation. An old venv pip (e.g. the pip 9.0.3 that an old system python3
+  # would seed) cannot use prebuilt wheels for cryptography and instead tries to
+  # build it from source (requiring Rust/setuptools_rust) and fails. Upgrading pip
+  # before installing pykmip lets the new pip fetch the cryptography manylinux
+  # wheel. (RHEL 8 now uses the portable CPython 3.11 above, which already ships a
+  # modern pip, but this bootstrap stays as a safety net for any interpreter.)
   - name: bootstrap pip/setuptools/wheel in the virtualenv
     pip:
       name:
