@@ -1,3 +1,24 @@
+- name: Bootstrap python3.11 on EL8 before fact-gathering
+  # ansible-core 2.19 needs managed-node python >= 3.8, but RHEL/Oracle/Rocky 8
+  # ship python 3.6. gather_facts is off here so this can run before any python
+  # exists; the raw task installs python3.11 and makes it the default
+  # /usr/bin/python3, which Ansible's interpreter auto-discovery then picks up
+  # for both prepare and converge. No-op on every non-EL8 distro.
+  hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: false
+  tasks:
+    - name: Install python3.11 and set it as the default python3 (RHEL/Oracle/Rocky 8 only)
+      ansible.builtin.raw: |
+        set -e
+        if grep -qiE 'release 8\.' /etc/redhat-release 2>/dev/null; then
+          rpm -q python3.11 >/dev/null 2>&1 || dnf -y install python3.11
+          alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 3110
+          alternatives --set python3 /usr/bin/python3.11
+        fi
+      changed_when: false
+
 - name: Prepare node for running tests
   hosts: all
   become: true
