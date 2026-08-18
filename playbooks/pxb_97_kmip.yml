@@ -199,6 +199,8 @@
   # before installing pykmip lets the new pip fetch the cryptography manylinux
   # wheel. (RHEL 8 now uses the portable CPython 3.11 above, which already ships a
   # modern pip, but this bootstrap stays as a safety net for any interpreter.)
+  # PyPI/files.pythonhosted.org occasionally returns transient 5xx gateway
+  # errors, so retry each pip step a few times before failing the whole run.
   - name: bootstrap pip/setuptools/wheel in the virtualenv
     pip:
       name:
@@ -208,6 +210,10 @@
       state: latest
       virtualenv: "{{ kmip_venv }}"
       virtualenv_command: "{{ kmip_py_interp }} -m venv"
+    register: pip_bootstrap
+    retries: 5
+    delay: 10
+    until: pip_bootstrap is succeeded
 
   - name: install pykmip dependencies into the virtualenv
     pip:
@@ -217,12 +223,20 @@
       state: latest
       virtualenv: "{{ kmip_venv }}"
       virtualenv_command: "{{ kmip_py_interp }} -m venv"
+    register: pip_pykmip
+    retries: 5
+    delay: 10
+    until: pip_pykmip is succeeded
 
   # pykmip requires SQLAlchemy < 2.0; pin to a known-good version in the venv.
   - name: pin SQLAlchemy in the virtualenv
     pip:
       name: SQLAlchemy==1.4.46
       virtualenv: "{{ kmip_venv }}"
+    register: pip_sqlalchemy
+    retries: 5
+    delay: 10
+    until: pip_sqlalchemy is succeeded
 
   # Capture stdout AND stderr to /pykmip_server.out. An uncaught exception in the
   # server (e.g. SSL/cipher setup failing) is written to stderr, NOT to the -l
