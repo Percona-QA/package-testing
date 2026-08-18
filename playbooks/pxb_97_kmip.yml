@@ -110,10 +110,15 @@
 #  - name: remove mysql data directory
 #    command: rm -r /var/lib/mysql
 
-  - name: install python3-pip on RedHat/CentOS
+  # tar/gzip are needed by the unarchive step below to extract the portable
+  # CPython tarball; minimal RHEL/OL container images ship without tar, so
+  # unarchive falls back to unzip and fails. Install them explicitly.
+  - name: install python3-pip, tar and gzip on RedHat/CentOS
     yum:
       name:
       - python3-pip
+      - tar
+      - gzip
       state: latest
       update_cache: yes
     when: ansible_os_family == "RedHat"
@@ -124,6 +129,8 @@
       name:
         - python3-pip
         - python3-venv
+        - tar
+        - gzip
       state: present
       update_cache: yes
     when: ansible_os_family == "Debian"
