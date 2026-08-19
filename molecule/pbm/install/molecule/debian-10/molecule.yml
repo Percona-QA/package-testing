@@ -15,8 +15,6 @@ platforms:
       iit-billing-tag: jenkins-psmdb-worker
 provisioner:
   name: ansible
-  env:
-    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
   log: True
   playbooks:
     create: ../../../../playbooks/create.yml
@@ -35,7 +33,7 @@ scenario:
   name: debian-10
   destroy_sequence:
     - destroy
-  cleanup_sequence:
+  clenup_sequence:
     - cleanup
   test_sequence:
     - destroy
