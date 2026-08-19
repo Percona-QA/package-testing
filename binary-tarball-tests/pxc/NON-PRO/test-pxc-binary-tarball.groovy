@@ -46,6 +46,7 @@ pipeline {
                                 git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
+                                df -mh
                                 ./run.sh || true
                               '''
                             junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
