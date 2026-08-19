@@ -18,6 +18,8 @@ platforms:
         ip: "192.168.50.56"
 provisioner:
   name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
   log: True
   playbooks:
     converge: ../../playbooks/playbook.yml
@@ -31,7 +33,7 @@ scenario:
   name: vagrant
   destroy_sequence:
     - destroy
-  clenup_sequence:
+  cleanup_sequence:
     - cleanup
   test_sequence:
     - destroy
