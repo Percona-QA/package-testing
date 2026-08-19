@@ -47,7 +47,7 @@ pipeline {
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 df -mh
-                                ./run.sh || true
+                                ./run.sh || df -mh
                               '''
                             junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
                         }
