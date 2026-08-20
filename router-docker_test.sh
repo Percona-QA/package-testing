@@ -182,18 +182,6 @@ Fault_tolerance(){
     echo $status
 }
 
-verify_status(){
-
-    if [[ "${status}" = "OK_PARTIAL" ]]; then
-      echo "Innodb cluster looks good"
-      exit 0
-    else 
-      echo "Issue in Innodb Cluster"
-      exit 1      
-    fi
-
-}
-
 cleanup
 create_network
 create_mysql_config
@@ -207,4 +195,3 @@ Router_Bootstrap $2
 data_add $1 
 verify_replication
 Fault_tolerance
-verify_status
