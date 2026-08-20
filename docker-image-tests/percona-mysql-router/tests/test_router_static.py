@@ -161,7 +161,7 @@ def host():
          '-e', 'MYSQL_HOST=mysql1', '-e', 'MYSQL_PORT=3306', '-e', 'MYSQL_USER=inno',
          '-e', 'MYSQL_PASSWORD=inno', '-e', 'MYSQL_INNODB_CLUSTER_MEMBERS=4', router_docker_image],
         timeout=60).decode().strip()
-    subprocess.check_call(['docker','exec','--user','root',container_name_mysql_router,'microdnf','install','net-tools'], timeout=120)
+    subprocess.check_call(['docker','exec','--user','root',container_name_mysql_router,'microdnf','install','-y','net-tools'], timeout=120)
     time.sleep(20)
     yield testinfra.get_host("docker://root@" + docker_id)
     subprocess.check_call(['docker', 'rm', '-f', docker_id], timeout=60)
