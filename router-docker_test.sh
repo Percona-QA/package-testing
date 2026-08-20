@@ -173,7 +173,7 @@ Fault_tolerance(){
 
     echo "check status"
 
-    sudo docker exec mysql-client mysqlsh -h mysql-router -P 6446 -uinno -pinno -- cluster status > cluster1.json
+    sudo docker exec mysql2 mysqlsh -uinno -pinno -- cluster status > cluster1.json
 
     sed '1d' cluster1.json > cluster.json
 

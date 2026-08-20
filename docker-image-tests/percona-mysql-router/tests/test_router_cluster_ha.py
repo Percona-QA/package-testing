@@ -63,9 +63,11 @@ class TestReplicationSurvivors:
 
 class TestFaultTolerance:
     def test_cluster_status_ok_partial(self):
+        # AdminAPI needs a direct session to a cluster member to read
+        # cluster metadata; a connection proxied through mysql-router
+        # doesn't give it that, so connect straight to a surviving member.
         raw = docker_exec(
-            "mysql-client", "mysqlsh", "-h", "mysql-router", "-P", "6446",
-            "-uinno", "-pinno", "--", "cluster", "status",
+            "mysql2", "mysqlsh", "-uinno", "-pinno", "--", "cluster", "status",
             timeout=60,
         )
         # mysqlsh prints a banner line before the JSON payload
