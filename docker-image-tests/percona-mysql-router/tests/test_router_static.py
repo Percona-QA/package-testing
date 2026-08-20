@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import atexit
 import subprocess
 import time
 import json
@@ -13,6 +14,18 @@ docker_acc = os.getenv('DOCKER_ACC')
 ps_version = os.getenv('PS_VERSION')
 router_docker_image = f"{docker_acc}/percona-mysql-router:{docker_tag}"
 percona_docker_image = f"{docker_acc}/percona-server:{ps_version}"
+
+def cleanup_cluster():
+    subprocess.run(['docker', 'stop', 'mysql1', 'mysql2', 'mysql3', 'mysql4', container_name_mysql_router], check=False)
+    subprocess.run(['docker', 'rm', 'mysql1', 'mysql2', 'mysql3', 'mysql4', container_name_mysql_router], check=False)
+    subprocess.run(['docker', 'network', 'rm', network_name], check=False)
+    for N in range(1, 5):
+        try:
+            os.remove(f'my{N}.cnf')
+        except FileNotFoundError:
+            pass
+
+atexit.register(cleanup_cluster)
 
 def create_network():
     subprocess.run(['docker', 'network', 'create', network_name], check=True)
@@ -198,14 +211,19 @@ def host():
  #   ]
  #   docker_run(command)
 
-create_network()
-create_mysql_config()
-start_mysql_containers()
-create_new_user()
-verify_new_user()
-docker_restart()
-create_cluster()
-add_slave()
+cleanup_cluster()
+try:
+    create_network()
+    create_mysql_config()
+    start_mysql_containers()
+    create_new_user()
+    verify_new_user()
+    docker_restart()
+    create_cluster()
+    add_slave()
+except Exception:
+    cleanup_cluster()
+    raise
 #test_data_add()
 
 class TestRouterEnvironment:
