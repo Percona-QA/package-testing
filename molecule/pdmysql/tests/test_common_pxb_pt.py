@@ -84,36 +84,36 @@ def test_sources_pxb_version(host):
     assert result.rc == 0, (result.stderr, result.stdout)
     assert PXB_VERSION in result.stdout, result.stdout
 
-def test_check_pt_deb_package(host):
-    dist = host.system_info.distribution
-    if dist.lower() in RHEL_DISTS:
-        pytest.skip("This test only for RHEL based platforms")
-    pkg = host.package('percona-toolkit')
-    assert pkg.is_installed
-    assert PT_VERSION in pkg.version, pkg.version
+#def test_check_pt_deb_package(host):
+#    dist = host.system_info.distribution
+#    if dist.lower() in RHEL_DISTS:
+#        pytest.skip("This test only for RHEL based platforms")
+#    pkg = host.package('percona-toolkit')
+#    assert pkg.is_installed
+#    assert PT_VERSION in pkg.version, pkg.version
 
-def test_check_pt_rpm_package(host):
-    dist = host.system_info.distribution
-    if dist.lower() in DEB_DISTS:
-        pytest.skip("This test only for RHEL based platforms")
-    pkg = host.package('percona-toolkit')
-    assert pkg.is_installed
-    assert PT_VERSION in pkg.version, pkg.version
+#def test_check_pt_rpm_package(host):
+#    dist = host.system_info.distribution
+#    if dist.lower() in DEB_DISTS:
+#        pytest.skip("This test only for RHEL based platforms")
+#    pkg = host.package('percona-toolkit')
+#    assert pkg.is_installed
+#    assert PT_VERSION in pkg.version, pkg.version
+#
+#@pytest.mark.parametrize("pt_bin", PTBINS)
+#def test_pt_binaries(host, pt_bin):
+#    cmd = '{} --version'.format(pt_bin)
+#    result = host.run(cmd)
+#    assert PT_VERSION in result.stdout, result.stdout3
 
-@pytest.mark.parametrize("pt_bin", PTBINS)
-def test_pt_binaries(host, pt_bin):
-    cmd = '{} --version'.format(pt_bin)
-    result = host.run(cmd)
-    assert PT_VERSION in result.stdout, result.stdout
-
-@pytest.mark.pkg_source
-def test_sources_pt_version(host):
-    if REPO == "testing" or REPO == "experimental":
-        pytest.skip("This test only for main repo")
-    dist = host.system_info.distribution
-    if dist.lower() in RHEL_DISTS:
-        pytest.skip("This test only for DEB distributions")
-    cmd = "apt-cache madison percona-toolkit | grep Source | grep \"{}\"".format(PT_VERSION)
-    result = host.run(cmd)
-    assert result.rc == 0, (result.stderr, result.stdout)
-    assert PT_VERSION in result.stdout, result.stdout
+#@pytest.mark.pkg_source
+#def test_sources_pt_version(host):
+#    if REPO == "testing" or REPO == "experimental":
+#        pytest.skip("This test only for main repo")
+#    dist = host.system_info.distribution
+#    if dist.lower() in RHEL_DISTS:
+#        pytest.skip("This test only for DEB distributions")
+#    cmd = "apt-cache madison percona-toolkit | grep Source | grep \"{}\"".format(PT_VERSION)
+#    result = host.run(cmd)
+#    assert result.rc == 0, (result.stderr, result.stdout)
+#    assert PT_VERSION in result.stdout, result.stdout

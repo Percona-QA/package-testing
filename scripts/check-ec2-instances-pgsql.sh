@@ -4,7 +4,7 @@ awsRegions=("us-west-1" "us-west-2" "us-east-1" "us-east-2" "eu-west-1" "eu-west
 
 checkec2-pgsql-to-terminate(){
            threshold_date=$(date -u -d "$2 hours ago" +%Y-%m-%dT%H:%M:%S)
-           aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --query "Reservations[].Instances[?LaunchTime<='"${threshold_date}"' && (Tags[?Key=='iit-billing-tag' && (contains(Value,'jenkins-pg-worker') || contains(Value,'jenkins-pg-molecule-rhel'))])].[Tags[?Key=='Name'].Value[],Tags[?Key=='job-name'].Value[], InstanceId, LaunchTime]" --output yaml --region $1 | sed -e 's/\- \[\]//g' -e '/^$/d'
+           aws ec2 describe-instances --filters "Name=instance-state-name,Values=running" --query "Reservations[].Instances[?LaunchTime<='"${threshold_date}"' && (Tags[?Key=='iit-billing-tag' && (contains(Value,'jenkins-pg-molecule') || contains(Value,'jenkins-pg-molecule-rhel'))])].[Tags[?Key=='Name'].Value[],Tags[?Key=='job-name'].Value[], InstanceId, LaunchTime]" --output yaml --region $1 | sed -e 's/\- \[\]//g' -e '/^$/d'
     }
 
 checkec2-pgsql-to-stop(){
@@ -28,9 +28,9 @@ echo "--------------------------------------------------------------------------
 echo "Region $region has $serversqa_pgsql_to_terminate INSTANCES WITH PGSQL MOLECULE QA TESTS INSTANCES running since past $hours_terminate hours" >> overview-qa-pgsql-to-terminate.txt
 
 # Instances that need to stopped
-echo "--------------Region $region has $serversqa_pgsql_to_stop INSTANCES WITH PGSQL MOLECULE QA TESTS running since past $$hours_stop hours to Stop -----------------" >> STOP-QA-PGSQL.txt
+echo "--------------Region $region has $serversqa_pgsql_to_stop INSTANCES WITH PGSQL MOLECULE QA TESTS running since past $hours_stop hours to Stop -----------------" >> STOP-QA-PGSQL.txt
 checkec2-pgsql-to-stop "$region" "$hours_stop"  >> STOP-QA-PGSQL.txt
 echo "-------------------------------------------------------------------------------------"  >> STOP-QA-PGSQL.txt
-echo "Region $region has $serversqa_pgsql_to_stop INSTANCES WITH PGSQL MOLECULE QA TESTS INSTANCES running since past $$hours_stop hours" >> overview-qa-pgsql-to-stop.txt
+echo "Region $region has $serversqa_pgsql_to_stop INSTANCES WITH PGSQL MOLECULE QA TESTS INSTANCES running since past $hours_stop hours" >> overview-qa-pgsql-to-stop.txt
 
 done

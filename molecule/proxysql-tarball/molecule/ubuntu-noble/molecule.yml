@@ -14,7 +14,6 @@ platforms:
     instance_tags:
       iit-billing-tag: proxysql-binary-tarball
       job-name: ${JOB_NAME}
-      
 provisioner:
   name: ansible
   log: True
@@ -28,7 +27,7 @@ scenario:
   name: ubuntu-noble
   destroy_sequence:
     - destroy
-  clenup_sequence:
+  cleanup_sequence:
     - cleanup
   test_sequence:
     - destroy
