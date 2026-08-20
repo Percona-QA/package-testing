@@ -43,8 +43,8 @@ def create_mysql_config():
                 f"relay_log=mysql{N}-relay-bin\n"
                 f"innodb_dedicated_server=ON\n"
                 f"binlog_transaction_dependency_tracking=WRITESET\n"
-                f"slave_preserve_commit_order=ON\n"
-                f"slave_parallel_type=LOGICAL_CLOCK\n"
+                f"replica_preserve_commit_order=ON\n"
+                f"replica_parallel_type=LOGICAL_CLOCK\n"
                 f"transaction_write_set_extraction=XXHASH64\n"
             )
 
