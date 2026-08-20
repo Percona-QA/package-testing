@@ -219,24 +219,24 @@ class TestRouterEnvironment:
         output = host.check_output(command)
         assert ps_version in output
 
-    def test_mysqlrouter_directory_permissions(self, test_router_bootstrap):
+    def test_mysqlrouter_directory_permissions(self, host):
         assert host.file('/var/lib/mysqlrouter').user == 'mysql'
         assert host.file('/var/lib/mysqlrouter').group == 'mysql'
         assert oct(host.file('/var/lib/mysqlrouter').mode) == '0o755'
 
-    def test_mysql_user(self, test_router_bootstrap):
+    def test_mysql_user(self, host):
         mysql_user = host.user('mysql')
         print(f"Username: {mysql_user.name}, UID: {mysql_user.uid}")
         assert mysql_user.exists
         assert mysql_user.uid == 1001
 
-    def test_mysqlrouter_ports(self, test_router_bootstrap):
-        host.socket("tcp://6446").is_listening
-        host.socket("tcp://6447").is_listening
-        host.socket("tcp://64460").is_listening
-        host.socket("tcp://64470").is_listening
+    def test_mysqlrouter_ports(self, host):
+        assert host.socket("tcp://6446").is_listening
+        assert host.socket("tcp://6447").is_listening
+        assert host.socket("tcp://64460").is_listening
+        assert host.socket("tcp://64470").is_listening
 
-    def test_mysqlrouter_config(self, test_router_bootstrap):
+    def test_mysqlrouter_config(self, host):
         assert host.file("/etc/mysqlrouter/mysqlrouter.conf").exists
         assert host.file("/etc/mysqlrouter/mysqlrouter.conf").user == "root"
         assert host.file("/etc/mysqlrouter/mysqlrouter.conf").group == "root"
