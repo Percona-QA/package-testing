@@ -28,7 +28,7 @@ def cleanup_cluster():
 atexit.register(cleanup_cluster)
 
 def create_network():
-    subprocess.run(['docker', 'network', 'create', network_name], check=True)
+    subprocess.run(['docker', 'network', 'create', network_name], check=True, timeout=30)
 
 def create_mysql_config():
     for N in range(1, 5):
@@ -57,7 +57,7 @@ def start_mysql_containers():
             '--net=innodbnet',
             '-v', f"{os.getcwd()}/my{N}.cnf:/etc/my.cnf",
             '-e', 'MYSQL_ROOT_PASSWORD=root', percona_docker_image
-        ], check=True)
+        ], check=True, timeout=60)
     time.sleep(60)
 
 def create_new_user():
@@ -66,7 +66,7 @@ def create_new_user():
             'docker', 'exec', f'mysql{N}',
             'mysql', '-uroot', '-proot',
             '-e', "CREATE USER 'inno'@'%' IDENTIFIED BY 'inno'; GRANT ALL privileges ON *.* TO 'inno'@'%' with grant option; FLUSH PRIVILEGES;"
-        ], check=True)
+        ], check=True, timeout=30)
 
 def verify_new_user():
     for N in range(1, 5):
@@ -75,18 +75,18 @@ def verify_new_user():
             'mysql', '-uinno', '-pinno',
             '-e', "SHOW VARIABLES WHERE Variable_name = 'hostname';",
             '-e', "SELECT user FROM mysql.user WHERE user = 'inno';"
-        ], check=True)
+        ], check=True, timeout=30)
     time.sleep(30)
 
 def docker_restart():
-    subprocess.run(['docker', 'restart', 'mysql1', 'mysql2', 'mysql3', 'mysql4'], check=True)
+    subprocess.run(['docker', 'restart', 'mysql1', 'mysql2', 'mysql3', 'mysql4'], check=True, timeout=60)
     time.sleep(10)
 
 def create_cluster():
     subprocess.run([
         'docker', 'exec', 'mysql1',
         'mysqlsh', '-uinno', '-pinno', '--', 'dba', 'create-cluster', 'testCluster'
-    ], check=True)
+    ], check=True, timeout=180)
 
 def add_slave():
     try:
@@ -95,7 +95,7 @@ def add_slave():
             'docker', 'exec', 'mysql1',
             'mysqlsh', '-uinno', '-pinno', '--',
             'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=incremental'
-        ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=300)
 
         time.sleep(120)  # Wait for the first instance to finish
 
@@ -112,7 +112,7 @@ def add_slave():
                 'docker', 'exec', 'mysql2',
                 'mysqlsh', '-uinno', '-pinno', '--',
                 'dba', 'reset', '--gtid'
-            ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=300)
             print(f"GTID reset result: {reset_gtid.stdout.decode()}")
             print(f"GTID reset error: {reset_gtid.stderr.decode()}")
 
@@ -121,7 +121,7 @@ def add_slave():
                 'docker', 'exec', 'mysql1',
                 'mysqlsh', '-uinno', '-pinno', '--',
                 'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=incremental'
-            ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=300)
 
             time.sleep(120)
             print(f"STDOUT (mysql2 - retry): {result.stdout.decode()}")
@@ -132,7 +132,7 @@ def add_slave():
             'docker', 'exec', 'mysql1',
             'mysqlsh', '-uinno', '-pinno', '--',
             'cluster', 'add-instance', '--uri=inno@mysql3', '--recoveryMethod=incremental'
-        ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=300)
         time.sleep(120)
         print(f"STDOUT (mysql3): {result.stdout.decode()}")
         print(f"STDERR (mysql3): {result.stderr.decode()}")
@@ -142,7 +142,7 @@ def add_slave():
             'docker', 'exec', 'mysql1',
             'mysqlsh', '-uinno', '-pinno', '--',
             'cluster', 'add-instance', '--uri=inno@mysql4', '--recoveryMethod=incremental'
-        ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=300)
         time.sleep(120)
         print(f"STDOUT (mysql4): {result.stdout.decode()}")
         print(f"STDERR (mysql4): {result.stderr.decode()}")
@@ -159,11 +159,12 @@ def host():
     docker_id = subprocess.check_output(
         ['docker', 'run', '-d', '--name', container_name_mysql_router, '--net', network_name,
          '-e', 'MYSQL_HOST=mysql1', '-e', 'MYSQL_PORT=3306', '-e', 'MYSQL_USER=inno',
-         '-e', 'MYSQL_PASSWORD=inno', '-e', 'MYSQL_INNODB_CLUSTER_MEMBERS=4', router_docker_image]).decode().strip()
-    subprocess.check_call(['docker','exec','--user','root',container_name_mysql_router,'microdnf','install','net-tools'])
+         '-e', 'MYSQL_PASSWORD=inno', '-e', 'MYSQL_INNODB_CLUSTER_MEMBERS=4', router_docker_image],
+        timeout=60).decode().strip()
+    subprocess.check_call(['docker','exec','--user','root',container_name_mysql_router,'microdnf','install','net-tools'], timeout=120)
     time.sleep(20)
     yield testinfra.get_host("docker://root@" + docker_id)
-    subprocess.check_call(['docker', 'rm', '-f', docker_id])
+    subprocess.check_call(['docker', 'rm', '-f', docker_id], timeout=60)
 
 
 #def test_data_add():
