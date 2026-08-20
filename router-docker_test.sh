@@ -175,6 +175,10 @@ Fault_tolerance(){
 
     sudo docker exec mysql2 mysqlsh -uinno -pinno -- cluster status > cluster1.json
 
+    echo "--- raw cluster1.json ---"
+    cat cluster1.json
+    echo "--- end raw cluster1.json ---"
+
     sed '1d' cluster1.json > cluster.json
 
     status=$(jq -r '.defaultReplicaSet.status' cluster.json)
