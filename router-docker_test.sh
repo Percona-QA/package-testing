@@ -56,7 +56,7 @@ echo "server_id=$(echo $[ $RANDOM % 40 + 10 ])" >> my$N.cnf
 cat <<EOF >> my$N.cnf
         enforce_gtid_consistency=ON
         gtid_mode=ON
-        relay_log={{ ansible_hostname }}-relay-bin
+        relay_log=mysql$N-relay-bin
         innodb_dedicated_server=ON
         binlog_transaction_dependency_tracking=WRITESET
         replica_preserve_commit_order=ON
@@ -76,7 +76,7 @@ start_mysql_containers(){
 
 create_new_user(){
     for N in 1 2 3 4
-      do sudo docker exec -it mysql$N mysql -uroot -proot \
+      do sudo docker exec mysql$N mysql -uroot -proot \
       -e "CREATE USER 'inno'@'%' IDENTIFIED BY 'inno';" \
       -e "GRANT ALL privileges ON *.* TO 'inno'@'%' with grant option;" \
       -e "reset master;"
@@ -86,7 +86,7 @@ create_new_user(){
 
 verify_new_user(){
     for N in 1 2 3 4
-      do sudo docker exec -it mysql$N mysql -uinno -pinno \
+      do sudo docker exec mysql$N mysql -uinno -pinno \
       -e "SHOW VARIABLES WHERE Variable_name = 'hostname';" \
       -e "SELECT user FROM mysql.user where user = 'inno';"
     done
@@ -102,19 +102,19 @@ docker_restart(){
 
 
 create_cluster(){
-    sudo docker exec -it mysql1 mysqlsh -uinno -pinno -- dba create-cluster testCluster
+    sudo docker exec mysql1 mysqlsh -uinno -pinno -- dba create-cluster testCluster
 }
 
 add_slave(){
-    sudo docker exec -it mysql1 mysqlsh -uinno -pinno -- cluster add-instance --uri=inno@mysql2 --recoveryMethod=incremental
+    sudo docker exec mysql1 mysqlsh -uinno -pinno -- cluster add-instance --uri=inno@mysql2 --recoveryMethod=incremental
 
     sleep 10
 
-    sudo docker exec -it mysql1 mysqlsh -uinno -pinno -- cluster add-instance --uri=inno@mysql3 --recoveryMethod=incremental
+    sudo docker exec mysql1 mysqlsh -uinno -pinno -- cluster add-instance --uri=inno@mysql3 --recoveryMethod=incremental
 
     sleep 10
 
-    sudo docker exec -it mysql1 mysqlsh -uinno -pinno -- cluster add-instance --uri=inno@mysql4 --recoveryMethod=incremental
+    sudo docker exec mysql1 mysqlsh -uinno -pinno -- cluster add-instance --uri=inno@mysql4 --recoveryMethod=incremental
 
     sleep 10
 }	
@@ -134,32 +134,32 @@ data_add(){
         
     echo "Adding sbtest user"
 
-    sudo docker exec -it mysql-client mysql -h mysql-router -P 6446 -uinno -pinno \
+    sudo docker exec mysql-client mysql -h mysql-router -P 6446 -uinno -pinno \
     -e "CREATE SCHEMA sbtest; CREATE USER sbtest@'%' IDENTIFIED with mysql_native_password by  'password';" \
     -e "GRANT ALL PRIVILEGES ON sbtest.* to sbtest@'%';"
 
     echo "Verify sbtest user"
     
-    sudo docker exec -it mysql-client mysql -h mysql-router -P 6447 -uinno -pinno -e "select host , user from mysql.user where user='sbtest';"
+    sudo docker exec mysql-client mysql -h mysql-router -P 6447 -uinno -pinno -e "select host , user from mysql.user where user='sbtest';"
     
     sleep 5
         
     echo "sysbench run"
 
-    sudo docker run --rm=true --net=innodbnet --name=sb-prepare severalnines/sysbench sysbench --db-driver=mysql --table-size=10000 --tables=1 --threads=1 --mysql-host=mysql-router --mysql-port=6446--mysql-user=sbtest --mysql-password=password /usr/share/sysbench/oltp_insert.lua prepare
+    sudo docker run --rm=true --net=innodbnet --name=sb-prepare severalnines/sysbench sysbench --db-driver=mysql --table-size=10000 --tables=1 --threads=1 --mysql-host=mysql-router --mysql-port=6446 --mysql-user=sbtest --mysql-password=password /usr/share/sysbench/oltp_insert.lua prepare
 
     sleep 20
 
     echo "verify if data is inserted or not"
     
-    sudo docker exec -it mysql-client mysql -h mysql-router -P 6447 -uinno -pinno -e "SELECT count(*) from sbtest.sbtest1;"
+    sudo docker exec mysql-client mysql -h mysql-router -P 6447 -uinno -pinno -e "SELECT count(*) from sbtest.sbtest1;"
 }
 
 verify_replication(){
 
     for N in 1 2 3 4; 
       do 
-      sudo docker exec -it mysql$N mysql -uinno -pinno   -e "SHOW VARIABLES WHERE Variable_name = 'hostname';"   -e "SELECT count(*) from sbtest.sbtest1;"; 
+      sudo docker exec mysql$N mysql -uinno -pinno   -e "SHOW VARIABLES WHERE Variable_name = 'hostname';"   -e "SELECT count(*) from sbtest.sbtest1;"; 
     done
 }
 
@@ -173,9 +173,9 @@ Fault_tolerance(){
 
     echo "check status"
 
-    sudo docker exec -it mysql-client mysqlsh -h mysql-router -P 6446 -uinno -pinno -- cluster status >> cluster1.json
+    sudo docker exec mysql-client mysqlsh -h mysql-router -P 6446 -uinno -pinno -- cluster status > cluster1.json
 
-    sed '1d' cluster1.json >> cluster.json
+    sed '1d' cluster1.json > cluster.json
 
     status=$(jq -r '.defaultReplicaSet.status' cluster.json)
 
