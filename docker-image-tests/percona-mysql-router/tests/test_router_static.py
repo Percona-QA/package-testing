@@ -94,7 +94,7 @@ def add_slave():
         result = subprocess.run([
             'docker', 'exec', 'mysql1',
             'mysqlsh', '-uinno', '-pinno', '--',
-            'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=increamental'
+            'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=incremental'
         ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         time.sleep(120)  # Wait for the first instance to finish
@@ -120,7 +120,7 @@ def add_slave():
             result = subprocess.run([
                 'docker', 'exec', 'mysql1',
                 'mysqlsh', '-uinno', '-pinno', '--',
-                'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=increamental'
+                'cluster', 'add-instance', '--uri=inno@mysql2', '--recoveryMethod=incremental'
             ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
             time.sleep(120)
@@ -131,7 +131,7 @@ def add_slave():
         result = subprocess.run([
             'docker', 'exec', 'mysql1',
             'mysqlsh', '-uinno', '-pinno', '--',
-            'cluster', 'add-instance', '--uri=inno@mysql3', '--recoveryMethod=increamental'
+            'cluster', 'add-instance', '--uri=inno@mysql3', '--recoveryMethod=incremental'
         ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         time.sleep(120)
         print(f"STDOUT (mysql3): {result.stdout.decode()}")
@@ -141,7 +141,7 @@ def add_slave():
         result = subprocess.run([
             'docker', 'exec', 'mysql1',
             'mysqlsh', '-uinno', '-pinno', '--',
-            'cluster', 'add-instance', '--uri=inno@mysql4', '--recoveryMethod=increamental'
+            'cluster', 'add-instance', '--uri=inno@mysql4', '--recoveryMethod=incremental'
         ], check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         time.sleep(120)
         print(f"STDOUT (mysql4): {result.stdout.decode()}")
