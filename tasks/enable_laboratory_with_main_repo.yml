@@ -1,7 +1,7 @@
 # This task enables laboratory and main repositories
 #
   - name: include playbook for removing Percona repo
-    include: remove_percona_repository.yml
+    include_tasks: remove_percona_repository.yml
 
   - name: disable the mysql module on RHEL/CentOS 8
     command: /usr/bin/dnf module disable mysql -y
@@ -51,3 +51,7 @@
       yum clean all
       yum makecache
     when: ansible_os_family == "RedHat"
+
+  - name: Add ARM support into percona-release
+    shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
+    when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"

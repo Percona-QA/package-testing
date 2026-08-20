@@ -8,6 +8,7 @@ pt-fifo-split
 pt-find
 pt-fingerprint
 pt-fk-error-logger
+pt-galera-log-explainer
 pt-heartbeat
 pt-index-usage
 pt-ioprofile
@@ -33,3 +34,6 @@ pt-upgrade
 pt-variable-advisor
 pt-visual-explain
 pt-k8s-debug-collector
+pt-mongodb-index-check
+pt-pg-summary
+pt-secure-collect

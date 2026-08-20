@@ -1,0 +1,15 @@
+---
+- name: Prepare node for running tests
+  hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: true
+  tasks:
+  
+    - name: Setup SSH keys for Oracle Linux or Amazon
+      authorized_key:
+        user: ec2-user
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+

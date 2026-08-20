@@ -42,7 +42,7 @@
     when: ansible_os_family == "RedHat"
 
   - name: include tasks for enabling testing repo
-    include: ../tasks/enable_testing_repo.yml
+    include_tasks: ../tasks/enable_testing_repo.yml
 
   - name: upgrade Percona Toolkit to the latest deb packages
     apt: name={{item}} update_cache=yes state=latest

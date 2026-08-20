@@ -47,23 +47,23 @@ def orchestrator_ip():
     docker_client.networks.create(network_name)
     docker_client.containers.run(docker_image, name=orch_container, network=network_name, detach=True)
     source_container = docker_client.containers.run(ps_docker_image, '--log-error-verbosity=3 --report_host='+source_ps_container+' --max-allowed-packet=134217728',
-                        name=source_ps_container, environment=["MYSQL_ROOT_PASSWORD="+ps_password], network=network_name, detach=True)
+                        name=source_ps_container, environment=["MYSQL_ROOT_PASSWORD="+ps_password, "PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport"], network=network_name, detach=True)
     replica_container = docker_client.containers.run(ps_docker_image, '--log-error-verbosity=3 --report_host='+replica_ps_container+' --max-allowed-packet=134217728 --server-id=2',
-                        name=replica_ps_container, environment=["MYSQL_ROOT_PASSWORD="+ps_password], network=network_name, detach=True)
+                        name=replica_ps_container, environment=["MYSQL_ROOT_PASSWORD="+ps_password, "PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport"], network=network_name, detach=True)
     #wait till replica mysql is up and listening on port
     time.sleep(15)
     #setup replication
-    source_container.exec_run('mysql -uroot -p'+ps_password+' -e "CREATE USER \'repl\'@\'%\' IDENTIFIED WITH mysql_native_password BY \'replicapass\'; \
+    source_container.exec_run('mysql -uroot -p'+ps_password+' -e "CREATE USER \'repl\'@\'%\' IDENTIFIED BY \'replicapass\'; \
                             GRANT REPLICATION SLAVE ON *.* TO \'repl\'@\'%\';"')
     replica_container.exec_run('mysql -uroot -p'+ps_password+' -e "CHANGE REPLICATION SOURCE to SOURCE_HOST=\''+source_ps_container+'\', \
-                            SOURCE_USER=\'repl\',SOURCE_PASSWORD=\'replicapass\',SOURCE_LOG_FILE=\'binlog.000002\';START REPLICA;"')
+                            SOURCE_USER=\'repl\',SOURCE_PASSWORD=\'replicapass\',SOURCE_SSL=1,SOURCE_LOG_FILE=\'binlog.000002\';START REPLICA;"')
     #Add orchestrator user to PS
-    source_container.exec_run('mysql -uroot -p'+ps_password+' -e "CREATE USER \'orchestrator\'@\'%\' IDENTIFIED  WITH mysql_native_password BY \'\'; \
+    source_container.exec_run('mysql -uroot -p'+ps_password+' -e "CREATE USER \'orchestrator\'@\'%\' IDENTIFIED BY \'\'; \
                             GRANT SUPER, PROCESS, REPLICATION SLAVE, RELOAD ON *.* TO \'orchestrator\'@\'%\'; \
                             GRANT SELECT ON mysql.slave_master_info TO \'orchestrator\'@\'%\';"')
     #Add sysbench user to PS
     source_container.exec_run('mysql -uroot -p'+ps_password+' -e \
-                                "CREATE USER \'sysbench\'@\'%\' IDENTIFIED  WITH mysql_native_password BY \'Test1234#\'; \
+                                "CREATE USER \'sysbench\'@\'%\' IDENTIFIED BY \'Test1234#\'; \
                                 GRANT ALL PRIVILEGES on *.* to \'sysbench\'@\'%\'; \
                                 CREATE DATABASE sbtest;"')
     #get orchestrator IP

@@ -1,0 +1,166 @@
+---
+# This playbook:
+#   installs Percona Server 8.0 from testing repo
+#   installs RocksDB and some other plugins
+#   enables ps-84 repo
+#   installs 8.4 and repeats some tests
+#   removes packages
+
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    major_upgrade: true
+    install_mysql_shell: "{{ lookup('env', 'install_mysql_shell', default='') }}"
+    gnupg_home: /root/.gnupg
+    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+  environment:
+    install_mysql_shell: '{{ install_mysql_shell }}'
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  tasks:
+### start of PS 8.0 install
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: include tasks for local vault setup
+    include_tasks: ../tasks/setup_local_vault.yml
+
+  - name: setup config file for keyring vault
+    template: src=../scripts/ps_keyring_plugins_test/keyring_vault_test_v2.j2
+              dest=/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
+              mode=0664 owner=root group=root
+
+  - name: include tasks for enabling PS 8.0 test repo
+    include_tasks: ../tasks/enable_ps8_testing_repo.yml
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: install Percona Server{{ pro_suf }} 8.0 packages
+    include_tasks: ../tasks/install_ps80.yml
+    vars:
+      pro_suf: "{{ '-pro' if 'yes' in lookup('env', 'pro_test') else '' }}"
+
+  - name: install Percona Shell
+    include_tasks: ../tasks/install_pshell.yml
+    when:
+      - lookup('env', 'pro_test') != "yes"
+      - ansible_distribution != "Amazon"
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysql
+    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7)
+
+  - name: list installed packages
+    include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: append include for RedHat
+    lineinfile:
+        path: /etc/my.cnf
+        line: '!includedir /etc/my.cnf.d'
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
+
+  - name: disable selinux on centos7 for TokuDB to work
+    shell: setenforce 0 || true
+    when: ansible_os_family == "RedHat"
+
+  - name: restart mysql service
+    service: name=mysql state=restarted
+
+  - name: install 3rd party packages with apt
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "Debian"
+
+  - name: install 3rd party packages
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Rocky"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: start mysql service
+    service: name=mysql state=started
+
+  - name: start my.cnf change test
+    command: /package-testing/check_mycnf_pre.sh
+
+  - name: stop mysql service with systemctl command
+    command: systemctl stop mysql
+
+  - name: disable all percona repos
+    command: percona-release disable all
+
+  - name: get my.cnf stats
+    stat: path=/etc/my.cnf
+    register: mycnf
+
+  - stat:
+      path: /var/lib/mysql
+    register: p
+
+  - name: check /var/lib/mysql exists and not empty
+    fail:
+      msg: "Path exists and is a directory and is not empty"
+    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
+### end of PS 8.0 install
+
+
+  - name: include tasks for enabling PS 84 test repo
+    include_tasks: ../tasks/enable_ps84_testing_repo.yml
+
+  - name: install Percona Server 8.4 packages
+    include_tasks: ../tasks/install_ps84.yml
+
+  - name: install Percona Shell
+    include_tasks: ../tasks/install_pshell.yml
+    when:
+      - lookup('env', 'pro_test') != "yes"
+      - ansible_distribution != "Amazon"
+
+  - name: list installed packages
+    include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: start mysql service
+    service: name=mysql state=started
+
+  - name: check that Percona Server version is correct
+    command: /package-testing/version_check.sh ps84
+
+  - name: check that Percona Server package versions are correct
+    command: /package-testing/package_check.sh ps84
+
+  - name: remove PS 8.4 packages
+    include_tasks: ../tasks/remove_ps84.yml
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mysql stopped
+
+  - stat:
+      path: /var/lib/mysql
+    register: p
+
+  - name: check /var/lib/mysql exists and not empty
+    fail:
+      msg: "Path exists and is a directory and is not empty"
+    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000

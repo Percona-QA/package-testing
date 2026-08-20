@@ -11,7 +11,7 @@ container_name = 'ps-docker-test-inspect'
 @pytest.fixture(scope='module')
 def inspect_data():
     docker_id = subprocess.check_output(
-        ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-d', docker_image]).decode().strip()
+        ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e', 'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport', '-d', docker_image]).decode().strip()
     inspect_data = json.loads(subprocess.check_output(['docker','inspect',container_name]))
     yield inspect_data[0]
     subprocess.check_call(['docker', 'rm', '-f', docker_id])

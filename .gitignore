@@ -2,3 +2,6 @@
 world_innodb.sql
 world.sql
 docker-image-tests/pxc/.DS_Store
+__pycache__/
+.pytest_cache/
+*.pyc

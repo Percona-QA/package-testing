@@ -1,18 +1,33 @@
+
 ---
 # tasks file for ps-innodb-cluster-server
   - name: include tasks for test env setup
     include_tasks: ../../../../tasks/test_prep.yml
 
-  - name: include tasks for enabling PS 8 main repo
-    include: ../../../../tasks/enable_ps8_main_repo.yml
+  - set_fact:
+      UPSTREAM_VERSION: "{{ lookup('env', 'UPSTREAM_VERSION') }}"
+      gnupg_home: "/root/.gnupg"
+      percona_key1: "4D1BB29D63D98E422B2113B19334A25F8507EFA5"
+      percona_key1_file: "/root/.gnupg/PERCONA-PACKAGING-KEY"
+
+  - name: Determine Percona Server major version for 80/84/9X
+    set_fact:
+      PS_MAJ_VER: "{{ UPSTREAM_VERSION | regex_replace('^([0-9]+)\\.([0-9]+)\\..*$', '\\1\\2') }}"
+
+  - name: Print Percona Server major version
+    debug:
+      var: PS_MAJ_VER
+
+  - name: include tasks for enabling PS 80/84/97 main repo
+    include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_main_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "main"
 
-  - name: include tasks for enabling PS 8 test repo
-    include: ../../../../tasks/enable_ps8_testing_repo.yml
+  - name: include tasks for enabling PS 80/84/97 test repo
+    include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_testing_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "testing" or lookup('env', 'INSTALL_REPO') == ""
 
-  - name: include tasks for enabling PS 8 experimental repo
-    include: ../../../../tasks/enable_ps8_experimental_repo.yml
+  - name: include tasks for enabling PS 80/84/97 experimental repo
+    include_tasks: ../../../../tasks/enable_ps{{ PS_MAJ_VER }}_experimental_repo.yml
     when: lookup('env', 'INSTALL_REPO') == "experimental"
 
   - name: setup hosts file
@@ -50,7 +65,7 @@
       - percona-server-rocksdb
     when: ansible_os_family == "Debian"
 
-  - name: install Percona Server rpm packages
+  - name: install Percona Server rpm packages yum
     yum:
       name: "{{ packages }}"
       state: latest
@@ -61,7 +76,24 @@
       - percona-server-test
       - percona-server-devel
       - percona-server-rocksdb
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install Percona Server rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-server-server
+      - percona-server-client
+      - percona-server-test
+      - percona-server-devel
+      - percona-server-rocksdb
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start mysql service
     service:
@@ -73,9 +105,9 @@
       mysql --connect-expired-password -uroot --password="$(grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}')" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Test1234#';"
       mysql -uroot -pTest1234# -e "create user root@'%' identified with caching_sha2_password by 'Test1234#'"
       mysql -uroot -pTest1234# -e "grant all privileges on *.* to root@'%' with grant option;"
-      mysql -uroot -pTest1234# -e "create user sysbench@'%' identified with mysql_native_password by 'Test1234#'"
+      mysql -uroot -pTest1234# -e "create user sysbench@'%' identified by 'Test1234#'"
       mysql -uroot -pTest1234# -e "grant all privileges on *.* to sysbench@'%';"
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and PS_MAJ_VER == "8"
 
   - name: setup mysql user on Debian/Ubuntu
     shell: |
@@ -84,7 +116,7 @@
       mysql -uroot -e "create user sysbench@'%' identified with mysql_native_password by 'Test1234#'"
       mysql -uroot -e "grant all privileges on *.* to sysbench@'%';"
       mysql -uroot -e "alter user root@localhost identified with caching_sha2_password by 'Test1234#';"
-    when: ansible_os_family == "Debian"
+    when: ansible_os_family == "Debian" and PS_MAJ_VER == "8"
 
   - name: add options to my.cnf on Debian/Ubuntu
     blockinfile:
@@ -103,8 +135,7 @@
         binlog_transaction_dependency_tracking=WRITESET
         slave_preserve_commit_order=ON
         slave_parallel_type=LOGICAL_CLOCK
-        transaction_write_set_extraction=XXHASH64
-    when: ansible_os_family == "Debian"
+    when: ansible_os_family == "Debian" and PS_MAJ_VER == "8"
 
   - name: add options to my.cnf on Centos/RedHat
     blockinfile:
@@ -122,8 +153,54 @@
         binlog_transaction_dependency_tracking=WRITESET
         slave_preserve_commit_order=ON
         slave_parallel_type=LOGICAL_CLOCK
-        transaction_write_set_extraction=XXHASH64
-    when: ansible_os_family == "RedHat"
+    when: ansible_os_family == "RedHat" and PS_MAJ_VER == "8"
+
+  - name: setup mysql user on Centos/RedHat
+    shell: |
+      mysql --connect-expired-password -uroot --password="$(grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}')" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Test1234#';"
+      mysql -uroot -pTest1234# -e "create user root@'%' identified with caching_sha2_password by 'Test1234#'"
+      mysql -uroot -pTest1234# -e "grant all privileges on *.* to root@'%' with grant option;"
+      mysql -uroot -pTest1234# -e "create user sysbench@'%' identified by 'Test1234#'"
+      mysql -uroot -pTest1234# -e "grant all privileges on *.* to sysbench@'%';"
+    when: ansible_os_family == "RedHat" and (PS_MAJ_VER == "84" or PS_MAJ_VER is match("^9[0-9]$"))
+
+  - name: setup mysql user on Debian/Ubuntu
+    shell: |
+      mysql -uroot -pTest1234# -e "create user root@'%' identified with caching_sha2_password by 'Test1234#'"
+      mysql -uroot -pTest1234# -e "grant all privileges on *.* to root@'%' with grant option;"
+      mysql -uroot -pTest1234# -e "create user sysbench@'%' identified by 'Test1234#'"
+      mysql -uroot -pTest1234# -e "grant all privileges on *.* to sysbench@'%';"
+      mysql -uroot -pTest1234# -e "alter user root@localhost identified with caching_sha2_password by 'Test1234#';"
+    when: ansible_os_family == "Debian" and (PS_MAJ_VER == "84" or PS_MAJ_VER is match("^9[0-9]$"))
+
+  - name: add options to my.cnf on Debian/Ubuntu
+    blockinfile:
+      path: /etc/mysql/my.cnf
+      block: |
+        [mysqld]
+        plugin_load_add='group_replication.so'
+        server_id={{ 10000 | random }}
+        binlog_checksum=NONE
+        enforce_gtid_consistency=ON
+        gtid_mode=ON
+        group_replication_group_name="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        group_replication_start_on_boot=OFF
+        relay_log={{ ansible_hostname }}-relay-bin
+    when: ansible_os_family == "Debian" and (PS_MAJ_VER == "84" or PS_MAJ_VER is match("^9[0-9]$"))
+
+  - name: add options to my.cnf on Centos/RedHat
+    blockinfile:
+      path: /etc/my.cnf
+      block: |
+        plugin_load_add='group_replication.so'
+        server_id={{ 4294967295 | random }}
+        binlog_checksum=NONE
+        enforce_gtid_consistency=ON
+        gtid_mode=ON
+        group_replication_group_name="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+        group_replication_start_on_boot=OFF
+        relay_log={{ ansible_hostname }}-relay-bin
+    when: ansible_os_family == "RedHat" and (PS_MAJ_VER == "84" or PS_MAJ_VER is match("^9[0-9]$"))
 
   - name: allow all users to connect to mysql
     shell: setsebool -P mysql_connect_any 1
@@ -133,3 +210,19 @@
     service:
       name: mysql
       state: restarted
+
+  - name: Stop firewalld service
+    systemd:
+      name: firewalld
+      state: stopped
+    when:
+      - ansible_facts['distribution'] in ["OracleLinux"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: Disable firewalld service permanently
+    systemd:
+      name: firewalld
+      enabled: no
+    when:
+      - ansible_facts['distribution'] in ["OracleLinux"]
+      - ansible_facts['distribution_major_version'] | int >= 8

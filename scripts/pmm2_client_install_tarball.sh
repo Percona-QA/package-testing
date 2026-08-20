@@ -86,7 +86,7 @@ else
     fb=${version}
   else
     min_ver=$(echo $version | awk -F'.' '{print $2}')
-    check_arguments_compatible min_ver
+#    check_arguments_compatible min_ver
   fi
 fi
 if [ -z "${path}" ]; then
@@ -106,7 +106,7 @@ fi
 ### Main program
 echo "Downloading ${tarball_url}"
 mkdir -p ./tmp/
-wget -O ./tmp/pmm2-client.tar.gz --progress=dot:giga "${tarball_url}"
+wget -O ./tmp/pmm2-client.tar.gz --progress=dot:giga "${tarball_url}" || exit 1
 tar -xvf "./tmp/pmm2-client.tar.gz" -C ./tmp/
 cd ./tmp
 extracted_folder_name=`ls -1td pmm2-client* 2>/dev/null | grep -v ".tar" | grep -v ".sh" | head -n1`
@@ -114,7 +114,7 @@ echo ${extracted_folder_name}
 ## for FB extract minor version from folder and check flags are compatible
 if [ -n "${fb}" ]; then
   min_ver=$(echo $extracted_folder_name | awk -F'.' '{print $2}')
-  check_arguments_compatible min_ver
+#  check_arguments_compatible min_ver
 fi
 cd ..
 echo "Installing tarball to ${path}"

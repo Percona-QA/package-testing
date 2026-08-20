@@ -1,0 +1,26 @@
+# Performs PMM Server version verification from "pmm-admin status" output
+#
+# Task adjustments are handled by parent playbook vars:
+#             var "port_flag"      :  to access agent with custom port
+#                                     ex: port_flag: "--pmm-agent-listen-port={{ custom_port }}"
+#
+- name: Grep pmm-admin status output
+  shell: "pmm-admin status {{ port_flag if port_flag is defined else '' }}"
+  register: pmm_admin_status
+
+- block:
+    - name: Grep PMM Server version from pmm-admin status output
+      shell: "echo \"{{ pmm_admin_status.stdout }}\" | grep Version | awk -F':' '{print $2}' | awk -F' ' '{print $1}'"
+      register: pmm_server_version
+
+    - name: Validate PMM Server version({{ pmm_server_version.stdout }}) from "status" is "{{ pmm_version }}"
+      assert:
+        that:
+          - "pmm_version in pmm_server_version.stdout"
+        fail_msg: "PMM Server version is not {{ pmm_version }}!"
+        success_msg: "PMM Server version is {{ pmm_version }}!"
+  rescue:
+    - name: Print pmm-admin status on fail
+      debug:
+        msg: "{{ pmm_admin_status.stdout }}"
+      failed_when: true

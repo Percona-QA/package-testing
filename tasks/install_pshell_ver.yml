@@ -1,0 +1,52 @@
+# This task installs percona-mysql-shell
+#
+
+  - name: install percona-mysql-shell deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - "percona-mysql-shell={{ pshell_version }}*"
+    when: 
+      - ansible_os_family == "Debian"
+
+#  - name: install percona-mysql-shell new rpm packages
+#    yum:
+#      name: "{{ packages }}"
+#      state: latest
+#    vars:
+#      packages:
+#      - "percona-mysql-shell={{ pshell_version }}*"
+#    when: 
+#      - ansible_os_family == "RedHat"
+
+  - block:
+      - name: Set desired percona version filter
+        set_fact:
+          version_filter: "{{ pshell_version }}"
+
+      - name: List available percona-mysql-shell versions
+        shell: "yum list available percona-mysql-shell --showduplicates | grep '{{ version_filter }}' | awk '{print $2}' | sort -V | tail -n 1"
+        register: yum_list_output
+        changed_when: false
+        ignore_errors: true
+        when: version_filter is defined
+
+      - name: Parse and select the latest version
+        set_fact:
+          percona_version: "percona-mysql-shell-{{ yum_list_output.stdout }}"
+        when:
+          - yum_list_output is defined
+          - yum_list_output.stdout is defined
+          - yum_list_output.stdout | length > 0
+
+      - name: Install the latest "{{ percona_version }}" version of percona-mysql-shell
+        yum:
+          name: "{{ percona_version }}"
+          state: present
+        when: percona_version is defined
+    when: 
+      - ansible_os_family == "RedHat"
+

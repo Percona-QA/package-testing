@@ -8,14 +8,16 @@
       state: latest
     vars:
       packages:
-      - percona-server-server
-      - percona-server-test
-      - percona-server-dbg
-      - percona-server-source
-      - percona-server-client
-      - percona-server-rocksdb
-      - percona-mysql-router
+      - percona-server-server{{ pro_suf | default('') }}
+      - percona-server-test{{ pro_suf | default('') }}
+      - percona-server{{ pro_suf | default('') }}-dbg
+      - percona-server{{ pro_suf | default('') }}-source
+      - percona-server-client{{ pro_suf | default('') }}
+      - percona-server-rocksdb{{ pro_suf | default('') }}
+      - percona-mysql-router{{ pro_suf | default('') }}
     when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   - name: get list of enabled dnf modules on centos 8
     command: dnf module list --enabled
@@ -27,15 +29,59 @@
       var: enabled_dnf_modules
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
 
-  - name: disable the mysql module on RHEL/CentOS 8
-    command: yum module disable mysql -y
+  - name: disable the mysql module on RHEL/CentOS 8 using DNF
+    dnf:
+      name: '@mysql'
+      state: absent
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: disable the mariadb module on RHEL/CentOS 8
-    command: yum module disable mariadb -y
+  - name: disable the mariadb RHEL/CentOS 8
+    dnf:
+      name: '@mariadb'
+      state: absent
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
-  - name: install Percona Server rpm packages
+  - name: Install libgflags-dev for rhel9 aarm64 using DNF
+    dnf:
+      name: https://dl.fedoraproject.org/pub/epel/9/Everything/aarch64/Packages/g/gflags-2.2.2-9.el9.aarch64.rpm
+      state: present
+      disable_gpg_check: yes
+    when: 
+      - ansible_os_family == "RedHat" 
+      - (ansible_distribution_major_version|int >= 9) or (ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023")
+      - ansible_architecture == "aarch64"
+
+  - name: Install libgflags-dev for rhel9 using DNF
+    dnf:
+      name: https://dl.fedoraproject.org/pub/epel/9/Everything/x86_64/Packages/g/gflags-2.2.2-9.el9.x86_64.rpm
+      state: present
+      disable_gpg_check: yes
+    when: 
+      - ansible_os_family == "RedHat" 
+      - (ansible_distribution_major_version|int >= 9) or (ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023")
+      - ansible_architecture != "aarch64"
+  
+  - name: install Percona Server rpm packages Amazon using DNF
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+      disablerepo: "epel"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf | default('') }}
+      - percona-mysql-router{{ pro_suf | default('') }}
+      - percona-server-client{{ pro_suf | default('') }}
+      - percona-server-test{{ pro_suf | default('') }}
+      - percona-server{{ pro_suf | default('') }}-debuginfo
+      - percona-server-devel{{ pro_suf | default('') }}
+      - percona-server-rocksdb{{ pro_suf | default('') }}
+    when:
+        - ansible_distribution == "Amazon" and ansible_distribution_major_version == "2023"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install Percona Server rpm packages RHEL7 using YUM
     yum:
       name: "{{ packages }}"
       state: latest
@@ -43,11 +89,37 @@
       update_cache: yes
     vars:
       packages:
-      - percona-server-server
-      - percona-mysql-router
-      - percona-server-client
-      - percona-server-test
-      - percona-server-debuginfo
-      - percona-server-devel
-      - percona-server-rocksdb
-    when: ansible_os_family == "RedHat"
+      - percona-server-server{{ pro_suf | default('') }}
+      - percona-mysql-router{{ pro_suf | default('') }}
+      - percona-server-client{{ pro_suf | default('') }}
+      - percona-server-test{{ pro_suf | default('') }}
+      - percona-server{{ pro_suf | default('') }}-debuginfo
+      - percona-server-devel{{ pro_suf | default('') }}
+      - percona-server-rocksdb{{ pro_suf | default('') }}
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install Percona Server rpm packages RHEL8+ using DNF
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+      disablerepo: "epel"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-server-server{{ pro_suf | default('') }}
+      - percona-mysql-router{{ pro_suf | default('') }}
+      - percona-server-client{{ pro_suf | default('') }}
+      - percona-server-test{{ pro_suf | default('') }}
+      - percona-server{{ pro_suf | default('') }}-debuginfo
+      - percona-server-devel{{ pro_suf | default('') }}
+      - percona-server-rocksdb{{ pro_suf | default('') }}
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+

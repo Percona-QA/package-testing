@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  become_method: sudo
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+ 
+- import_playbook: ../../../../playbooks/ps_84.yml

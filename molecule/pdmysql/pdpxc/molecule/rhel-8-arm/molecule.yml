@@ -1,0 +1,48 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: rhel8-arm-${BUILD_NUMBER}-${JOB_NAME}
+    region: eu-central-1
+    image: ami-071e5b360b185b300
+    vpc_subnet_id: subnet-0fad4db6fdd8025b6
+    instance_type: c6g.large
+    ssh_user: ec2-user
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-pxc-worker
+      job-name: ${JOB_NAME}
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    create: ../../../../playbooks/create_noble.yml
+    destroy: ../../../../playbooks/destroy-noble-arm.yml
+    prepare: ../../../../playbooks/prepare.yml
+    cleanup: ../../playbooks/cleanup.yml
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../../tests/
+  options:
+    verbose: true
+    s: true
+    k: "test_pdpxc_ or test_common_"
+    m: "not telemetry_disabled"
+    junitxml: report.xml
+scenario:
+  name: rhel-8-arm
+  destroy_sequence:
+    - destroy
+  clenup_sequence:
+    - cleanup
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+    - destroy

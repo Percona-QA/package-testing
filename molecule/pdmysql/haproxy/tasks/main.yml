@@ -13,10 +13,10 @@
 # /usr/bin/clustercheck
 
 - name: include playbook for removing Percona repo
-  include: ../../../tasks/remove_percona_repository.yml
+  include_tasks: ../../../tasks/remove_percona_repository.yml
 
 - name: Install percona release
-  include: ../../tasks/install_percona_release.yml
+  include_tasks: ../../tasks/install_percona_release.yml
 
 - name: enable the PDMYSQL-80 repo
   command: percona-release enable-only pdpxc-{{ version }} {{ repo }}
@@ -28,15 +28,21 @@
   shell: |
     yum clean all
     yum makecache
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int < 8
 
-- name: disable the mysql module on RHEL/CentOS 8
-  command: yum module disable mysql -y
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+- name: clean and update dnf cache
+  shell: |
+    dnf clean all
+    dnf makecache
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
 
-- name: disable the mariadb module on RHEL/CentOS 8
-  command: yum module disable mariadb -y
-  when: ansible_os_family == "RedHat" and ansible_distribution_major_version >= "8"
+- name: disable the mysql module on RHEL/CentOS 8+
+  command: dnf module disable mysql -y
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
+
+- name: disable the mariadb module on RHEL/CentOS 8+
+  command: dnf module disable mariadb -y
+  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
 
 - name: install PXC 8 deb packages
   apt:
@@ -55,6 +61,8 @@
     - percona-xtradb-cluster-test
     - percona-xtradb-cluster
   when: ansible_os_family == "Debian"
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
 - name: install HA Proxy 8 deb packages
   apt:

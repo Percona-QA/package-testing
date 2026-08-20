@@ -1,5 +1,5 @@
   - name: include playbook for removing Percona repo
-    include: remove_percona_repository.yml
+    include_tasks: remove_percona_repository.yml
 
   - name: disable the mysql module on RHEL/CentOS 8
     command: /usr/bin/dnf module disable mysql -y
@@ -10,18 +10,65 @@
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
     when: ansible_os_family == "Debian"
 
-  - name: add the Percona yum repos for CentOS
-    yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+  - name: Add the Percona Release yum repo without GPG check
+    yum:
+      name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+      disable_gpg_check: yes
     when: ansible_os_family == "RedHat"
+  
+  - name: add eol testing repository on debian
+    template: src=../templates/eol_deb_repo_file_pxc80.j2
+              dest=/etc/apt/sources.list.d/post-eol.list
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "testing"
+    when:
+      - ansible_os_family == "Debian"
+      - lookup('env', 'eol') == "yes"
 
-  - name: change the default repo to testing
+  - name: add eol testing repository on Redhat AMD
+    template: src=../templates/eol_rpm_repo_file_pxc80.j2
+             dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "testing"
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_architecture == "x86_64"
+      - lookup('env', 'eol') == "yes"
+
+  - name: add eol testing repository on Redhat ARM
+    template: src=../templates/eol_rpm_repo_file_pxc80_arm.j2
+             dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "testing"
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+      - lookup('env', 'eol') == "yes"
+
+  - name: Clean and update package cache
+    shell: |
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
+
+  - name: Add pxc-80 testing repo for qpress
     command: percona-release enable-only pxc-80 testing
+    when:
+      - lookup('env', 'eol') == "no"
+
 
   - name: add the testing tools repo
-    command: percona-release enable tools testing
+    command: percona-release enable tools release
 
-  - name: clean and update yum cache
-    shell: |
-      yum clean all
-      yum makecache
-    when: ansible_os_family == "RedHat"
+  - name: enable pxb repo
+    command: percona-release enable pxb-80 release
+
+  - name: enable PT repo
+    command: percona-release enable pt release

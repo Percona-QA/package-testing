@@ -7,12 +7,12 @@ platforms:
   - name: debian10-${BUILD_NUMBER}-${JOB_NAME}
     region: us-west-2
     image: ami-0f5d8e2951e3f83a5
-    vpc_subnet_id: subnet-03136d8c244f56036
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: t2.micro
     ssh_user: admin
     root_device_name: xvda
     instance_tags:
-      iit-billing-tag: jenkins-pg-worker
+      iit-billing-tag: jenkins-psmdb-worker
 provisioner:
   name: ansible
   log: True

@@ -2,11 +2,19 @@
 
 set -e
 
-if [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps56, ps57 or ps80!"
-  echo "Usage: ./package_check.sh <prod>"
+if [ "$#" = 2 ]; then
+  if [ $2 = "pro" ]; then
+    pro_suf="-pro"
+  else
+    echo "Wrong second argument! It is not pro!"
+    exit 1
+  fi
+elif [ "$#" -ne 1 ]; then
+  echo "This script requires product parameter: ps56, ps57, ps80, ps81, ps84, ps97, ps9x !"
+  echo "Usage: ./version_check.sh <prod> [pro]"
   exit 1
 fi
+
 
 SCRIPT_PWD=$(cd `dirname $0` && pwd)
 
@@ -21,9 +29,39 @@ elif [ $1 = "ps57" ]; then
   release=${PS57_VER#*-}
   revision=${PS57_REV}
 elif [ $1 = "ps80" ]; then
-  version=${PS80_VER}
-  release=${PS80_VER#*-}
-  revision=${PS80_REV}
+  if [ "$2" = "pro" ]; then
+    version=${PS80_PRO_VER}
+    release=${PS80_PRO_VER#*-}
+    revision=${PS80_PRO_REV}
+  else
+    version=${PS80_VER}
+    release=${PS80_VER#*-}
+    revision=${PS80_REV}
+  fi
+elif [ $1 = "ps84" ]; then
+  if [ "$2" = "pro" ]; then
+    version=${PS84_PRO_VER}
+    release=${PS84_PRO_VER#*-}
+    revision=${PS84_PRO_REV}
+  else
+    version=${PS84_VER}
+    release=${PS84_VER#*-}
+    revision=${PS84_REV}
+  fi
+elif [ $1 = "ps97" ]; then
+  if [ "$2" = "pro" ]; then
+    version=${PS97_PRO_VER}
+    release=${PS97_PRO_VER#*-}
+    revision=${PS97_PRO_REV}
+  else
+    version=${PS97_VER}
+    release=${PS97_VER#*-}
+    revision=${PS97_REV}
+  fi
+elif [[ $1 =~ ^ps9[1-9]{1}$ ]]; then
+  version=${PS_INN_LTS_VER}
+  release=${PS_INN_LTS_VER#*-}
+  revision=${PS_INN_LTS_REV}  
 elif [ $1 = "pxc56" ]; then
   version=${PXC56_VER}
   release=${PXC56_VER#*-}
@@ -33,9 +71,29 @@ elif [ $1 = "pxc57" ]; then
   release=${PXC57_VER#*-}
   revision=${PXC57_REV}
 elif [ $1 = "pxc80" ]; then
-  version=${PXC80_VER}
-  release=${PXC80_VER#*-}
-  revision=${PXC80_REV}
+  if [ "$2" = "pro" ]; then
+    version=${PXC80PRO_VER}
+    release=${PXC80PRO_VER#*-}
+    revision=${PXC80PRO_REV}
+  else
+    version=${PXC80_VER}
+    release=${PXC80_VER#*-}
+    revision=${PXC80_REV}
+  fi
+elif [ $1 = "pxc84" ]; then
+  if [ "$2" = "pro" ]; then
+    version=${PXC84PRO_VER}
+    release=${PXC84PRO_VER#*-}
+    revision=${PXC84PRO_REV}
+  else
+    version=${PXC84_VER}
+    release=${PXC84_VER#*-}
+    revision=${PXC84_REV}
+  fi
+elif [[ "$1" =~ ^pxc9[0-9]{1}$ ]]; then
+  version=${PXC_INN_LTS_VER}
+  release=${PXC_INN_LTS_VER#*-}
+  revision=${PXC_INN_LTS_REV}
 elif [ $1 = "pt" ]; then
   version=${PT_VER}
 elif [ $1 = "pxb23" ]; then
@@ -45,8 +103,22 @@ elif [ $1 = "pxb24" ]; then
   version=${PXB24_VER}
   pkg_version=${PXB24_PKG_VER}
 elif [ $1 = "pxb80" ]; then
-  version=${PXB80_VER}
-  pkg_version=${PXB80_PKG_VER}
+  if [ "$2" = "pro" ]; then
+    version=${PXB80_PRO_VER}
+    pkg_version=${PXB80_PRO_PKG_VER}
+  else
+    version=${PXB80_VER}
+    pkg_version=${PXB80_PKG_VER}
+  fi
+elif [ $1 = "pxb84" ]; then
+  version=${PXB84_VER}
+  pkg_version=${PXB84_PKG_VER}
+elif [ $1 = "pxb84" ] && [ "$2" = "pro" ]; then
+  version=${PXB84_PRO_VER}
+  pkg_version=${PXB84_PRO_PKG_VER}
+elif [[ $1 =~ ^pxb9[1-9]{1}$ ]]; then
+  version=${PXB_INN_LTS_VER}
+  pkg_version=${PXB_INN_LTS_PKG_VER}
 elif [ $1 = "psmdb30" ]; then
   version=${PSMDB30_VER}
 elif [ $1 = "psmdb32" ]; then
@@ -74,15 +146,15 @@ else
   echo "Illegal product selected!"
   exit 1
 fi
-
+arch=$(uname -m)
 product=$1
 log="/tmp/${product}_package_check.log"
 echo -n > $log
 
-if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
+if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
   if [ -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
     if [ -f /etc/system-release -a $(grep -c Amazon /etc/system-release) -eq 1 ]; then
-      centos_maj_version="7"
+      centos_maj_version="9"
     else
       centos_maj_version=$(cat /etc/redhat-release | grep -oE '[0-9]+' | head -n 1)
     fi
@@ -112,20 +184,41 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
         rpm_opt_package="Percona-Server-tokudb-${rpm_maj_version} Percona-Server-rocksdb-${rpm_maj_version}"
       fi
     elif [ "${product}" = "ps80" ]; then
-      if [ "${centos_maj_version}" == "9" ]; then
-        rpm_num_pkgs="7"
-        rpm_opt_package="percona-server-rocksdb"
-      else
+      if [[ "${centos_maj_version}" == "9" || "${centos_maj_version}" == "10" ]]; then
         rpm_num_pkgs="8"
-        rpm_opt_package="percona-server-rocksdb percona-server-shared-compat"
+        rpm_opt_package="percona-server-rocksdb${pro_suf}"
+      else
+        if [[ "${arch}" == "aarch64" ]]; then
+          rpm_num_pkgs="8"
+          rpm_opt_package="percona-server-rocksdb${pro_suf}"
+        else
+          rpm_num_pkgs="9"
+          rpm_opt_package="percona-server-rocksdb percona-server-shared-compat"
+        fi
+      fi
+    elif [[ ${product} =~ ^ps8[3-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
+      if [[ "${centos_maj_version}" == "9" || "${centos_maj_version}" == "10" ]]; then
+        rpm_num_pkgs="8"
+        rpm_opt_package="percona-server-rocksdb${pro_suf}"
+      else
+        if [[ "${arch}" == "aarch64" ]]; then
+          rpm_num_pkgs="8"
+          rpm_opt_package="percona-server-rocksdb${pro_suf}"
+        else
+          rpm_num_pkgs="9"
+          rpm_opt_package="percona-server-rocksdb percona-server-shared-compat"
+        fi
       fi
     fi
-    if [ "${product}" = "ps80" ]; then
+    if [[ ${product} =~ ^ps8[3-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
       ps_name="percona-server"
-      rpm_pkgs_list="${ps_name}-server ${ps_name}-test ${ps_name}-debuginfo ${ps_name}-devel ${ps_name}-shared ${ps_name}-client"
+      rpm_pkgs_list="${ps_name}-server${pro_suf} ${ps_name}-test${pro_suf} ${ps_name}-devel${pro_suf} ${ps_name}-shared${pro_suf} ${ps_name}-client${pro_suf} ${ps_name}-js${pro_suf}"
+    elif [ "${product}" = "ps80" ]; then
+      ps_name="percona-server"
+      rpm_pkgs_list="${ps_name}-server${pro_suf} ${ps_name}-test${pro_suf} ${ps_name}-devel${pro_suf} ${ps_name}-shared${pro_suf} ${ps_name}-client${pro_suf}"
     else
       ps_name="Percona-Server"
-      rpm_pkgs_list="${ps_name}-server-${rpm_maj_version} ${ps_name}-test-${rpm_maj_version} ${ps_name}-${rpm_maj_version}-debuginfo ${ps_name}-devel-${rpm_maj_version} ${ps_name}-shared-${rpm_maj_version} ${ps_name}-client-${rpm_maj_version}"
+      rpm_pkgs_list="${ps_name}-server-${rpm_maj_version} ${ps_name}-test-${rpm_maj_version} ${ps_name}-devel-${rpm_maj_version} ${ps_name}-shared-${rpm_maj_version} ${ps_name}-client-${rpm_maj_version}"
     fi
     if [ "$(rpm -qa | grep "${ps_name}" | grep -c "${version}")" == "${rpm_num_pkgs}" ]; then
       echo "all packages are installed"
@@ -150,19 +243,23 @@ if [ ${product} = "ps56" -o ${product} = "ps57" -o ${product} = "ps80" ]; then
     elif [ "${product}" = "ps57" ]; then
       deb_opt_package="percona-server-rocksdb-${deb_maj_version} percona-server-tokudb-${deb_maj_version}"
       deb_num_pkgs="8"
-    else
+    elif [ "${product}" = "ps80" ]; then
       deb_opt_package="percona-server-rocksdb"
       deb_num_pkgs="7"
-    fi
-    if [ "${product}" = "ps80" ]; then
-      deb_dbg_pkg="percona-server-dbg"
     else
-      deb_dbg_pkg="percona-server-${deb_maj_version}-dbg"
+      deb_opt_package="percona-server-rocksdb"
+      deb_num_pkgs="8"
     fi
     if [ "$(dpkg -l | grep percona-server | grep -c ${version})" == "${deb_num_pkgs}" ]; then
       echo "all packages are installed"
     else
-      for package in percona-server-server percona-server-client percona-server-test ${deb_dbg_pkg} percona-server-source percona-server-common ${deb_opt_package}; do
+      for package in percona-server-server${pro_suf} \
+                percona-server-client${pro_suf} \
+                percona-server-test${pro_suf} \
+                percona-server${pro_suf}-source \
+                percona-server${pro_suf}-common \
+                ${deb_opt_package} \
+                percona-server-js; do
         if [ "$(dpkg -l | grep ${package} | grep -c ${version})" != 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed"
         else
@@ -187,7 +284,7 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
     if [ ${product} = "pxc56" ]; then
       rpm_opt_package=""
       rpm_num_pkgs="11"
-	  garbd_maj_version=3
+      garbd_maj_version=3
     elif [ ${product} = "pxc57" ]; then
       if [ ${centos_maj_version} == "7" ]; then
         rpm_num_pkgs="10"
@@ -196,7 +293,7 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
         rpm_num_pkgs="9"
         rpm_opt_package=""
       fi      
-	  garbd_maj_version=$(echo ${product} | sed 's/^[a-z]*//')
+      garbd_maj_version=$(echo ${product} | sed 's/^[a-z]*//')
     echo "RPM Num Packages: $rpm_num_pkgs and $rpm_opt_package"
     fi
 
@@ -241,10 +338,10 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
     fi
   fi
 
-elif [ ${product} = "pxc80" ]; then
-  echo "Package check for PXC-80 is not implemented!"
+elif [[ ${product} =~ ^pxc8[0-9]{1}$ ]]; then
+  echo "Package check for PXC-8x is not implemented!"
   exit 0
-
+  
 elif [ ${product} = "pt" ]; then
   echo "Package check for PT is not implemented!"
   exit 1
@@ -253,17 +350,32 @@ elif [ ${product} = "pmm" ]; then
   echo "Package check for PMM is not implemented!"
   exit 1
 
-elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; then
+elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" -o ${product} = "pxb84" ]; then
   if [ ${product} = "pxb24" ]; then
     extra_version="-24"
   elif [ ${product} = "pxb80" ]; then
     extra_version="-80"
+  elif [ ${product} = "pxb84" ]; then
+    extra_version="-84"
   else
     extra_version=""
   fi
   if [ -f /etc/redhat-release ] || [ -f /etc/system-release ] ; then
-    if [ "$(rpm -qa | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" == "3" ]; then
+    if [ "$(rpm -qa | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" -ge "3" ]; then
       echo "all packages are installed"
+    else
+      echo "all packages are not installed"
+    fi
+###
+    if [ "$2" = "pro" ]; then
+      for package in percona-xtrabackup-pro${extra_version} percona-xtrabackup-test-pro${extra_version} percona-xtrabackup-pro${extra_version}-debuginfo; do
+        if [ "$(rpm -qa | grep -c ${package}-${version}-${pkg_version})" -gt 0 ]; then
+          echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
+        else
+          echo "WARNING: ${package}-${version}-${pkg_version} is not installed"
+          exit 1
+        fi
+      done
     else
       for package in percona-xtrabackup${extra_version} percona-xtrabackup-test${extra_version} percona-xtrabackup${extra_version}-debuginfo; do
         if [ "$(rpm -qa | grep -c ${package}-${version}-${pkg_version})" -gt 0 ]; then
@@ -274,9 +386,23 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; t
         fi
       done
     fi
+###
   else
-    if [ "$(dpkg -l | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" == "3" ]; then
+    if [ "$(dpkg -l | grep percona-xtrabackup | grep -c ${version}-${pkg_version})" -ge "3" ]; then
       echo "all packages are installed"
+    else
+      echo "all packages are not installed"
+    fi
+###
+    if [ "$2" = "pro" ]; then
+      for package in percona-xtrabackup-pro-dbg${extra_version} percona-xtrabackup-test-pro${extra_version} percona-xtrabackup-pro${extra_version}; do
+        if [ "$(dpkg -l | grep -c ${package})" -gt 0 ] && [ "$dpkg -l | grep ${package} | awk '{$print $3}' == ${version}-${pkg_version}.$(lsb_release -sc)" ] ; then
+          echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
+        else
+          echo "WARNING: ${package}-${version}-${pkg_version} is not installed"
+          exit 1
+        fi
+      done
     else
       for package in percona-xtrabackup-dbg${extra_version} percona-xtrabackup-test${extra_version} percona-xtrabackup${extra_version}; do
         if [ "$(dpkg -l | grep -c ${package})" -gt 0 ] && [ "$dpkg -l | grep ${package} | awk '{$print $3}' == ${version}-${pkg_version}.$(lsb_release -sc)" ] ; then
@@ -287,6 +413,7 @@ elif [ ${product} = "pxb23" -o ${product} = "pxb24" -o ${product} = "pxb80" ]; t
         fi
       done
     fi
+###
   fi
 
 elif [ "${product}" = "psmdb30" -o "${product}" = "psmdb32" -o "${product}" = "psmdb34" -o "${product}" = "psmdb36" -o "${product}" = "psmdb40" ]; then

@@ -52,7 +52,7 @@
 #
 # Enable testing repository
 #
-  - include: ../tasks/enable_testing_repo.yml
+  - include_tasks: ../tasks/enable_testing_repo.yml
 
 #
 # Upgrade packages

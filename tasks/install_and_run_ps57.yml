@@ -5,7 +5,11 @@
     include_tasks: ../tasks/enable_main_repo.yml
 
   - name: include tasks for installing ps57 packages
-    include_tasks: ../tasks/install_ps57.yml
+    include_tasks: 
+      file: ../tasks/install_ps57.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
 # Start mysql service
   - name: start mysql service on Debian

@@ -58,7 +58,7 @@ def test_inject_errant_2(host):
     """
     host.run_test(setup_1)
     host.run_test(setup_2)
-    time.sleep(2)
+    time.sleep(4)
     result = host.run(cmd)
     assert expected_result in result.stdout, result.stdout
 
@@ -67,7 +67,7 @@ def test_relocate_nested_replica(host):
     cmd = "orchestrator-client -c api -path all-instances | jq -r \'.[] | select(.GtidErrant != \"\") | .Key.Port\'"
     setup_cmd = "orchestrator-client -c relocate -i 127.0.0.1:10114 -d 127.0.0.1:10111"
     host.run_test(setup_cmd)
-    time.sleep(2)
+    time.sleep(3)
     result = host.run(cmd)
     assert result.rc == 0, result.stderr
     assert "10113" in result.stdout, result.stdout

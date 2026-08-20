@@ -1,0 +1,43 @@
+---
+# This vagrant file can be used for local testing of the molecule playbook
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+platforms:
+  - name: vagrant-cstr9
+    box: bento/centos-stream-9
+    groups:
+      - bootstrap
+    memory: 1024
+    # interfaces:
+    #   - network_name: private_network
+    #     ip: "192.168.50.55"
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    # create: ../../../playbooks/create.yml
+    # destroy: ../../../../playbooks/destroy.yml
+    # cleanup: ../../playbooks/cleanup.yml
+    # prepare: ../../playbooks/prepare-pro.yml
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../tests/
+  options:
+    verbose: true
+    s: true
+scenario:
+  name: vagrant-cstr9
+  destroy_sequence:
+    - destroy
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup

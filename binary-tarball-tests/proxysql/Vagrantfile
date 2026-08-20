@@ -1,0 +1,49 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "generic/centos6"
+  
+  config.vm.provision "shell", privileged: false, inline: <<-SHELL
+    ### 5.7
+    export PXC_VERSION=5.7.33-31.49
+    export PXC_REVISION=a1ed9c3
+    export WSREP_VERSION=31.49
+    export PXC57_PKG_VERSION=5.7.33-rel36-49.1
+
+    
+    ### 8.0
+    # export PXC_VERSION=8.0.22-13.1
+    # export PXC_REVISION=a48e6d5
+    # export WSREP_VERSION=26.4.3
+    # export PXC57_PKG_VERSION=5.7.33-rel36-49.1
+
+    echo ${BUILD_TYPE_MINIMAL}
+    PXC_MAJOR_VERSION="$(echo ${PXC_VERSION}|cut -d'.' -f1,2)"
+    MINIMAL=""
+    if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
+      MINIMAL="-minimal"
+    fi
+    if [ "${PXC_MAJOR_VERSION}" = "8.0" ]; then
+      TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.17${MINIMAL}.tar.gz"
+      TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
+    elif [ "${PXC_MAJOR_VERSION}" = "5.7" ]; then
+      export GLIBC_VERSION="2.17"
+      if [ -f /etc/redhat-release ] && [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
+        export GLIBC_VERSION="2.12"
+      fi
+      TARBALL_NAME="Percona-XtraDB-Cluster-${PXC57_PKG_VERSION}.Linux.x86_64.glibc${GLIBC_VERSION}${MINIMAL}.tar.gz"
+      TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION}/"
+    fi
+    rm -rf package-testing
+    if [ -f /usr/bin/yum ]; then
+      sudo yum install -y git wget
+    else
+      sudo apt install -y git wget
+    fi
+    git clone https://github.com/Percona-QA/package-testing.git --branch fix-pxc-57-centos-6 --depth 1
+    cd package-testing/binary-tarball-tests/pxc
+    wget -q ${TARBALL_LINK}${TARBALL_NAME}
+    ./run.sh || true
+  SHELL
+end

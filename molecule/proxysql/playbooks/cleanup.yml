@@ -1,0 +1,14 @@
+---
+- name: Cleanup
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: remove Tarball directories
+      file:
+        path: "{{ paths }}"
+        state: absent
+      vars:
+        paths:
+        - /usr/proxysql
+        - /tmp/proxysql

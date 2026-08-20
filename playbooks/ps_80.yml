@@ -12,10 +12,17 @@
   become_method: sudo
   vars:
     install_mysql_shell: "{{ lookup('env', 'install_mysql_shell', default='') }}"
+    gnupg_home: /root/.gnupg
+    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
   environment:
     install_mysql_shell: '{{ install_mysql_shell }}'
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
+  - set_fact:
+      pro: "{{ 'pro' if 'yes' in lookup('env', 'pro_test') else '' }}"
+
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
@@ -44,47 +51,96 @@
     when: ansible_os_family == "RedHat"
 
   - name: include tasks for enabling PS 8 test repo
-    include: ../tasks/enable_ps8_main_repo.yml
-    when: lookup('env', 'install_repo') == "main"
+    include_tasks: ../tasks/enable_ps8_main_repo.yml
+    when:
+      - lookup('env', 'install_repo') == "main"
+      - lookup('env', 'pro_test') != "yes"
 
   - name: include tasks for enabling PS 8 test repo
-    include: ../tasks/enable_ps8_testing_repo.yml
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    include_tasks: ../tasks/enable_ps8_testing_repo.yml
+    when:
+      - lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+      - lookup('env', 'pro_test') != "yes"
 
   - name: include tasks for enabling PS 8 experimental repo
-    include: ../tasks/enable_ps8_experimental_repo.yml
-    when: lookup('env', 'install_repo') == "experimental"
+    include_tasks: ../tasks/enable_ps8_experimental_repo.yml
+    when:
+      - lookup('env', 'install_repo') == "experimental"
+      - lookup('env', 'pro_test') != "yes"
+
+  - name: include tasks for enabling PS 80 pro repo
+    include_tasks: ../tasks/enable_ps80_pro_tools_repo.yml
+    when:
+      - lookup('env', 'pro_test') == "yes"
 
   - name: download and extract world database
     command: "{{ item }}"
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-# Disable Percona Toolkit installation till its supported in OL9 and Jammy
-#  - name: install Percona Toolkit new deb packages
-#    include_tasks: ../tasks/install_pt.yml
-
-  - name: install Percona Server 8.0 packages
+  - name: install Percona Server{{ pro_suf }} 8.0 packages
     include_tasks: ../tasks/install_ps80.yml
+    vars:
+      pro_suf: "{{ '-pro' if 'yes' in lookup('env', 'pro_test') else '' }}"
 
-  - name: install sysbench new deb packages
-    include_tasks: ../tasks/install_sysbench.yml
-    when: lookup('env', 'install_repo') != "experimental"
+  - name: Enable MySQL error logging and verbosity (Debian)
+    copy:
+      dest: /etc/mysql/conf.d/debug.cnf
+      content: |
+        [mysqld]
+        log_error=/var/log/mysql/error.log
+        log_error_verbosity=3
+      owner: root
+      group: root
+      mode: '0644'
+    when: ansible_os_family == "Debian"
 
-  - name: install Percona XtraBackup 8.0 packages
-    include_tasks: ../tasks/install_pxb80.yml
-    when: lookup('env', 'install_repo') != "experimental"
+  - name: Enable MySQL error logging and verbosity (RedHat)
+    copy:
+      dest: /etc/my.cnf.d/debug.cnf
+      content: |
+        [mysqld]
+        log_error=/var/log/mysqld.log
+        log_error_verbosity=3
+      owner: root
+      group: root
+      mode: '0644'
+    when: ansible_os_family == "RedHat"
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
+    when:
+      - ansible_distribution_release not in ["focal"]
+      - ansible_distribution != "Amazon"
+
+#  - name: enable the Tools release repo
+#    command: percona-release enable tools release
+
+#  - name: enable the mysql shell testing repo
+#    command: percona-release enable mysql-shell testing
+#    when: install_mysql_shell == "yes" or install_mysql_shell == ""
+
+  - name: Check disk space
+    command: df -h /
+    register: disk_out
+
+  - debug:
+      var: disk_out.stdout
+
+##  - name: install Percona XtraBackup 8.0 packages
+#    include_tasks: ../tasks/install_pxb80.yml
+##    when:
+ #     - lookup('env', 'install_repo') != "experimental"
+ #     - ansible_distribution != "Amazon"
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: start mysql service with service command
-    command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
   - name: start mysql service with systemctl command
     command: systemctl start mysql
-    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7)
 
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
@@ -94,23 +150,16 @@
     shell: setenforce 0 || true
     when: ansible_os_family == "RedHat"
 
-  - name: run Group Replication tests
-    include_tasks: ../tasks/gr_test.yml
-
   - name: append include for RedHat
     lineinfile:
         path: /etc/my.cnf
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
 
-  - name: install percona-mysql-shell package
-    include_tasks: ../tasks/install_pshell.yml
-    when: install_mysql_shell == "yes" or install_mysql_shell == ""
-
   - name: Handle check that Percona Server version is correct
     block: 
-      - name: Run the version_check.sh script
-        shell: /package-testing/version_check.sh ps80 > version-check.log 2>&1
+      - name: Run the version_check.sh script {{ pro }}
+        shell: /package-testing/version_check.sh ps80 {{ pro }} > version-check.log 2>&1
 
       - name: Log check for warnings in the previous stage
         command: /package-testing/scripts/log-warning-check.sh version-check.log
@@ -129,11 +178,21 @@
         fail:
           msg: Failing the further tasks due to issues in the previous task.
 
-  - name: check that Percona Server package versions are correct
-    command: /package-testing/package_check.sh ps80
+  - name: check that Percona Server {{ pro }} package versions are correct
+    command: /package-testing/package_check.sh ps80 {{ pro }}
+
+# Bookworm does not support fips mode out of the box. It requires opennsl module rebuid. So we skip fips mode enabling for bookworm.
+#  - name: include tasks for checking FIPS mode
+#    include_tasks: ../tasks/check_ps80_fips.yml
+#    when:
+#      - ansible_distribution_release not in ["bookworm", "bullseye", "focal", "noble"]
+#      - not (ansible_distribution_release == "jammy" and ansible_architecture in ["aarch64", "arm64"])
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
+
+  - name: run Group Replication tests
+    include_tasks: ../tasks/gr_test.yml
 
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
@@ -144,17 +203,23 @@
   - name: check the clone and data masking plugins
     command: /package-testing/scripts/ps_clone_dm_plugin_test.sh
 
+  - name: check the data masking component
+    command: /package-testing/scripts/ps_dm_component.sh
+
+  - name: check the audit log v2 plugin
+    command: /package-testing/scripts/ps_audit_log_v2.sh
+
   - name: run some MyRocks tests
     command: /package-testing/scripts/ps_myrocks_test.sh
 
   - name: run mysql compression tests script
     command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps80
 
-  - name: run bats unit tests for ps-admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
+  - name: run pytest unit tests for ps-admin script
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_unit.py
 
-  - name: run bats integration tests for ps-admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
+  - name: run pytest integration tests for ps-admin script
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_integration.py
 
   - name: run PAM tests
     include_tasks: ../tasks/pam_test.yml
@@ -173,13 +238,25 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install 3rd party packages with dnf
+    dnf:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: run bats tests for mysql init scripts
-    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+  - name: run pytest tests for mysql init scripts
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_mysql_init_scripts.py
 
   - name: start mysql service
     service: name=mysql state=started
@@ -211,14 +288,27 @@
       - percona-server*
     when: ansible_os_family == "Debian"
 
-  - name: remove Percona Server rpm packages
+  - name: remove Percona Server rpm packages yum
     yum:
       name: "{{ packages }}"
       state: absent
     vars:
      packages:
       - percona-server*
-    when: ansible_os_family == "RedHat"
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: remove Percona Server rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+     packages:
+      - percona-server*
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: check if process is stopped after package removal
     command: /package-testing/check_running.sh mysql stopped

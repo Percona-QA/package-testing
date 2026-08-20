@@ -10,17 +10,15 @@ container_name = 'ps-docker-test-static3'
 @pytest.fixture(scope='module')
 def host():
     docker_id = subprocess.check_output(
-        ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-d', docker_image_latest]).decode().strip()
-    if ps_version_major in ['5.7','5.6']:
-        subprocess.check_call(['docker','exec','--user','root',container_name,'microdnf','install','net-tools'])
-    else:
-        subprocess.check_call(['docker','exec','--user','root',container_name,'yum','-y','install','net-tools'])
+        ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e', 'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport', '-d', docker_image_latest]).decode().strip()
+    subprocess.check_call(['docker','exec','--user','root',container_name,'microdnf','install','net-tools'])
     time.sleep(20)
     yield testinfra.get_host("docker://root@" + docker_id)
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
 
 @pytest.mark.skipif(ps_version_major == "5.7", reason="Skipping tests for 5.7")
 @pytest.mark.skipif(docker_acc == "perconalab", reason="Skipping tests in 'testing' repo")
+@pytest.mark.skipif(re.match(r'^8\.[1-9]$', ps_version_major), reason="Skipping latest tests for innovation release")
 class TestMysqlEnvironment:
     @pytest.mark.parametrize("pkg_name", ps_packages)
     def test_packages(self, host, pkg_name):

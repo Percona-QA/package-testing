@@ -65,10 +65,10 @@
     service: name=mysql state=restarted
 
   - name: run mysql setup for PAM
-    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_setup.bats
+    command: python3 -m pytest -v /package-testing/scripts/ps_pam_test/ps_pam_mysql_setup.py
 
-  - name: run bats tests for PAM
-    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
+  - name: run pytest tests for PAM
+    command: python3 -m pytest -v /package-testing/scripts/ps_pam_test/ps_pam_test.py
 
   - name: uninstall PAM before final package uninstall
-    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.bats
+    command: python3 -m pytest -v /package-testing/scripts/ps_pam_test/ps_pam_mysql_uninstall.py

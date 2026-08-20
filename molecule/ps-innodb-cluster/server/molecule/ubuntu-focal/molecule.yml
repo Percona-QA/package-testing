@@ -5,46 +5,47 @@ dependency:
   name: galaxy
 driver:
   name: ec2
-lint:
-  name: yamllint
 platforms:
   - name: ps-node1-ubuntu-focal
     region: us-west-2
     image: ami-09dd2e08d601bff67
     vpc_subnet_id: subnet-0430e63d7cdbcd237
-    instance_type: t2.micro
+    instance_type: t2.medium
     ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
   - name: ps-node2-ubuntu-focal
     region: us-west-2
     image: ami-09dd2e08d601bff67
     vpc_subnet_id: subnet-0430e63d7cdbcd237
-    instance_type: t2.micro
+    instance_type: t2.medium
     ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
   - name: ps-node3-ubuntu-focal
     region: us-west-2
     image: ami-09dd2e08d601bff67
     vpc_subnet_id: subnet-0430e63d7cdbcd237
-    instance_type: t2.micro
+    instance_type: t2.medium
     ssh_user: ubuntu
     root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: jenkins-ps-worker
       job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
   lint:
     name: ansible-lint
   playbooks:
     create: ../../../playbooks/create.yml
-    destroy: ../../../../playbooks/destroy.yml
+    destroy: ../../../playbooks/destroy.yml
     prepare: ../../../playbooks/prepare.yml
     converge: ../../playbooks/playbook.yml
 verifier:

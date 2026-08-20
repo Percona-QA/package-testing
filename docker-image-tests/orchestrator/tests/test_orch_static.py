@@ -34,6 +34,11 @@ class TestOrchEnvironment:
         assert host.file(orch_binary).exists
         assert oct(host.file(orch_binary).mode) == '0o755'
 
+    def test_client_exist(self, host):
+        orch_binary="/usr/bin/orchestrator-client"
+        assert host.file(orch_binary).exists
+        assert oct(host.file(orch_binary).mode) == '0o755'
+
     def test_binaries_version(self, host):
         version_output=host.check_output("/usr/local/orchestrator/orchestrator --version")
         assert orch_version in version_output

@@ -54,15 +54,13 @@ EOF
 echo "server_id=$(echo $[ $RANDOM % 40 + 10 ])" >> my$N.cnf
 
 cat <<EOF >> my$N.cnf
-        binlog_checksum=NONE
         enforce_gtid_consistency=ON
         gtid_mode=ON
         relay_log={{ ansible_hostname }}-relay-bin
         innodb_dedicated_server=ON
         binlog_transaction_dependency_tracking=WRITESET
-        slave_preserve_commit_order=ON
-        slave_parallel_type=LOGICAL_CLOCK
-        transaction_write_set_extraction=XXHASH64
+        replica_preserve_commit_order=ON
+        replica_parallel_type=LOGICAL_CLOCK
 EOF
 done
 }
@@ -130,7 +128,7 @@ Router_Bootstrap(){
 
 data_add(){
 
-    sudo docker run -d --name=mysql-client --hostname=mysql-client --net=innodbnet -e MYSQL_ROOT_PASSWORD=root $1
+    sudo docker run -d --name=mysql-client --hostname=mysql-client --net=innodbnet -e MYSQL_ROOT_PASSWORD=root -e PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport $1
     
     sleep 10
         

@@ -47,3 +47,6 @@ mysql -e "SELECT gen_rnd_email();"
 mysql -e "SELECT gen_rnd_pan();"
 mysql -e "SELECT gen_rnd_ssn();"
 mysql -e "SELECT gen_rnd_us_phone();"
+
+# Disable Data Masking plugin
+mysql -e "UNINSTALL PLUGIN data_masking;"

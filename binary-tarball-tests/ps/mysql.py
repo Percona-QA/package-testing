@@ -1,11 +1,10 @@
-#!/usr/bin/env python3
 import subprocess
 import re
 import os
 import shlex
 
 class MySQL:
-    def __init__(self, base_dir):
+    def __init__(self, base_dir, features=[]):
         self.basedir = base_dir
         self.port = '3306'
         self.datadir = base_dir+'/data'
@@ -16,6 +15,17 @@ class MySQL:
         self.mysqladmin = base_dir+'/bin/mysqladmin'
         self.pidfile = base_dir+'/mysql.pid'
         self.mysql_install_db = base_dir+'/scripts/mysql_install_db'
+        self.features=features
+        self.extra_param = []
+
+        if "fips" in self.features:
+            self.extra_param.extend([
+                "--ssl-fips-mode=ON",
+                "--log-error-verbosity=3"
+            ])
+        else:
+            self.extra_param = []
+
 
         subprocess.call(['rm','-Rf',self.datadir])
         subprocess.call(['rm','-f',self.logfile])
@@ -37,7 +47,8 @@ class MySQL:
             subprocess.check_call([self.mysqld, '--no-defaults', '--initialize-insecure','--basedir='+self.basedir,'--datadir='+self.datadir])
 
     def start(self):
-        subprocess.Popen([self.mysqld,'--no-defaults','--basedir='+self.basedir,'--datadir='+self.datadir,'--tmpdir='+self.datadir,'--socket='+self.socket,'--port='+self.port,'--log-error='+self.logfile,'--pid-file='+self.pidfile,'--server-id=1','--master-info-repository=table','--relay-log-info-repository=table'], env=os.environ)
+        self.basic_param=['--no-defaults','--basedir='+self.basedir,'--datadir='+self.datadir,'--tmpdir='+self.datadir,'--socket='+self.socket,'--port='+self.port,'--log-error='+self.logfile,'--pid-file='+self.pidfile,'--server-id=1']
+        subprocess.Popen([self.mysqld]+ self.basic_param + self.extra_param, env=os.environ)
         subprocess.call(['sleep','5'])
 
     def stop(self):
@@ -57,6 +68,10 @@ class MySQL:
         command = self.mysql+' --user=root -S'+self.socket+' -s -N -e '+shlex.quote(query)
         return subprocess.check_output(command,shell=True,universal_newlines=True)
 
+    def run_file(self, sql_file):
+        command = self.mysql+' --user=root -S'+self.socket+' -s -N < '+shlex.quote(sql_file)
+        return subprocess.check_output(command,shell=True,universal_newlines=True)
+
     def install_function(self, fname, soname, return_type):
         query = 'CREATE FUNCTION {} RETURNS {} SONAME "{}";'.format(fname,return_type,soname)
         self.run_query(query)
@@ -71,6 +86,13 @@ class MySQL:
         output = self.run_query(query)
         assert 'ACTIVE' in output
 
+    def install_component(self, cname):
+        query = 'INSTALL COMPONENT "file://{}";'.format(cname)
+        self.run_query(query)
+        query = 'SELECT component_urn FROM mysql.component where component_urn like "%{}%";'.format(cname)
+        output = self.run_query(query)
+        assert cname in output
+
     def check_engine_active(self, engine):
         query = 'select SUPPORT from information_schema.ENGINES where ENGINE = "{}";'.format(engine)
         output = self.run_query(query)
@@ -78,4 +100,3 @@ class MySQL:
             return True
         else:
             return False
-

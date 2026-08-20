@@ -1,7 +1,7 @@
 ---
 # tasks file for ps-80-upgrade
   - name: include tasks for test env setup
-    include: ../../../tasks/test_prep.yml
+    include_tasks: ../../../tasks/test_prep.yml
 
   - name: include tasks for local vault setup
     include_tasks: ../../../tasks/setup_local_vault.yml
@@ -14,10 +14,10 @@
 # Install from main repository
 
   - name: include tasks for enabling main repo
-    include: ../../../tasks/enable_main_repo.yml
+    include_tasks: ../../../tasks/enable_main_repo.yml
 
   - name: include tasks for enabling PS 8 main repo
-    include: ../../../tasks/enable_ps8_main_repo.yml
+    include_tasks: ../../../tasks/enable_ps8_main_repo.yml
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -84,7 +84,19 @@
     vars:
       packages:
       - rsyslog-mysql
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install 3rd party packages with dnf
+    dnf:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: start my.cnf change test
     command: /package-testing/check_mycnf_pre.sh
@@ -93,7 +105,7 @@
 # Enable testing repository
 #
   - name: include tasks for enabling PS 8 testing repo
-    include: ../../../tasks/enable_ps8_testing_repo.yml
+    include_tasks: ../../../tasks/enable_ps8_testing_repo.yml
 
 #
 # Upgrade packages
@@ -136,16 +148,29 @@
       - percona-xtrabackup-dbg-80
     when: ansible_os_family == "Debian"
 
-  - name: upgrade Percona Toolkit to new rpm packages
+  - name: upgrade Percona Toolkit to new rpm packages yum
     yum:
       name: "{{ packages }}"
       state: latest
     vars:
       packages:
       - percona-toolkit
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
 
-  - name: upgrade Percona Server to new rpm packages on CentOS
+  - name: upgrade Percona Toolkit to new rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-toolkit
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: upgrade Percona Server to new rpm packages yum
     yum:
       name: "{{ packages }}"
       state: latest
@@ -160,9 +185,30 @@
       - percona-server-shared
       - percona-server-shared-compat
       - percona-server-client
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
 
-  - name: upgrade Percona XtraBackup to new rpm packages
+  - name: upgrade Percona Server to new rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-server-server
+      - percona-server-test
+      - percona-server-debuginfo
+      - percona-server-devel
+      - percona-server-tokudb
+      - percona-server-rocksdb
+      - percona-server-shared
+      - percona-server-shared-compat
+      - percona-server-client
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: upgrade Percona XtraBackup to new rpm packages yum
     yum:
       name: "{{ packages }}"
       state: latest
@@ -171,7 +217,22 @@
       - percona-xtrabackup-80
       - percona-xtrabackup-test-80
       - percona-xtrabackup-80-debuginfo
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: upgrade Percona XtraBackup to new rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+      - percona-xtrabackup-80
+      - percona-xtrabackup-test-80
+      - percona-xtrabackup-80-debuginfo
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: check that Percona Server version is correct
     command: /package-testing/version_check.sh ps80
@@ -192,8 +253,8 @@
     command: /package-testing/scripts/ps_myrocks_test.sh
 
 # TODO: PAM test fails in AWS
-#  - name: run bats tests for PAM
-#    command: /usr/local/bin/bats /package-testing/scripts/ps_pam_test/ps_pam_test.bats
+#  - name: run pytest tests for PAM
+#    command: python3 -m pytest -v /package-testing/scripts/ps_pam_test/ps_pam_test.py
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
@@ -201,14 +262,14 @@
   - name: check that Percona XtraBackup version is correct
     command: /package-testing/version_check.sh pxb80
 
-  - name: run bats unit tests for ps-admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps-admin_unit.bats
+  - name: run pytest unit tests for ps-admin script
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_unit.py
 
-  - name: run bats integration tests for ps-admin script
-    command: /usr/local/bin/bats /package-testing/bats/ps-admin_integration.bats
+  - name: run pytest integration tests for ps-admin script
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_integration.py
 
-  - name: run bats tests for mysql init scripts
-    command: /usr/local/bin/bats /package-testing/bats/mysql-init-scripts.bats
+  - name: run pytest tests for mysql init scripts
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_mysql_init_scripts.py
 
   - name: start mysql service
     service: name=mysql state=started

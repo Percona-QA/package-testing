@@ -1,0 +1,23 @@
+- job:
+    name: test-proxysql-docker-image
+    project-type: pipeline
+    description: |
+        Do not edit this job through the web!
+    pipeline-scm:
+      scm:
+        - git:
+            url: https://github.com/kaushikpuneet07/package-testing.git
+            branches:
+            - 'proxy-docker'
+            wipe-workspace: false
+      lightweight-checkout: true
+      script-path: docker-image-tests/proxysql/Jenkinsfile
+      parameters:
+        - choice:
+            name: docker_product
+            choices:
+                - "PROXYSQL2"
+                - "PROXYSQL3"
+            description: "Product for which the packages will be tested"
+
+

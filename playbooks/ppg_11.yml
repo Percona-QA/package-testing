@@ -16,24 +16,24 @@
     include_tasks: ../tasks/test_prep.yml
 
     #  - name: include tasks for enabling main repo
-    #include: ../tasks/enable_main_repo.yml
+    #include_tasks: ../tasks/enable_main_repo.yml
     #when: lookup('env', 'install_repo') == "main"
 
     #- name: include tasks for enabling PS 8 test repo
-    #include: ../tasks/enable_ps8_main_repo.yml
+    #include_tasks: ../tasks/enable_ps8_main_repo.yml
     #when: lookup('env', 'install_repo') == "main"
 
     #- name: include tasks for enabling PS 8 test repo
-    #include: ../tasks/enable_ps8_testing_repo.yml
+    #include_tasks: ../tasks/enable_ps8_testing_repo.yml
     #when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
 
     #- name: include tasks for enabling PS 8 experimental repo
-    #include: ../tasks/enable_ps8_experimental_repo.yml
+    #include_tasks: ../tasks/enable_ps8_experimental_repo.yml
     #when: lookup('env', 'install_repo') == "experimental"
 
   ### temp part until percona-release is updated for PPG project
   - name: include tasks for enabling main repo (do this just for GPG key)
-    include: ../tasks/enable_main_repo.yml
+    include_tasks: ../tasks/enable_main_repo.yml
 
   - name: download newer percona-release script
     get_url:

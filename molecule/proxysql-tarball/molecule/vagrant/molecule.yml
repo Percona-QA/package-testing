@@ -1,0 +1,43 @@
+---
+# This vagrant file can be used for local testing of the molecule playbook for proxysql tarball
+
+dependency:
+  name: galaxy
+driver:
+  name: vagrant
+  provider:
+    name: virtualbox
+platforms:
+  - name: tarball-test-proxysql
+    box: bento/oracle-9
+    groups:
+      - bootstrap
+    memory: 1024
+    interfaces:
+      - network_name: private_network
+        ip: "192.168.50.56"
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../../binary-tarball-tests/proxysql/tests/
+  options:
+    verbose: true
+    s: true
+scenario:
+  name: vagrant
+  destroy_sequence:
+    - destroy
+  clenup_sequence:
+    - cleanup
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup 
+    

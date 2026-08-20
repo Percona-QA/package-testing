@@ -1,0 +1,14 @@
+[mysqld]
+
+# Encryption options
+log-bin=binlog
+log-replica-updates
+gtid-mode=ON
+enforce-gtid-consistency
+binlog-format=row
+source-verify-checksum=ON
+binlog-checksum=CRC32
+default-table-encryption=ON
+binlog-encryption=ON
+table-encryption-privilege-check=ON
+early-plugin-load=keyring_file.so
