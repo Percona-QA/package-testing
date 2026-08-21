@@ -9,8 +9,18 @@ container_name = 'router-docker-test-inspect'
 
 @pytest.fixture(scope='module')
 def inspect_data():
+    # test_router_static.py builds the mysql1-4/innodbnet cluster at import
+    # time, before any test in this session runs, so it's already up here.
+    # Without bootstrap env vars the router entrypoint has nothing to
+    # connect to and exits immediately, which is why this fixture used to
+    # produce a container stuck in 'exited'.
     docker_id = subprocess.check_output(
-        ['docker', 'run', '--name', container_name, '-d', docker_image], stderr=subprocess.STDOUT ).decode().strip()
+        ['docker', 'run', '--name', container_name, '-d',
+         '--net', 'innodbnet',
+         '-e', 'MYSQL_HOST=mysql1', '-e', 'MYSQL_PORT=3306',
+         '-e', 'MYSQL_USER=inno', '-e', 'MYSQL_PASSWORD=inno',
+         '-e', 'MYSQL_INNODB_CLUSTER_MEMBERS=4',
+         docker_image], stderr=subprocess.STDOUT ).decode().strip()
     inspect_data = json.loads(subprocess.check_output(['docker','inspect',container_name]))
     yield inspect_data[0]
     subprocess.check_call(['docker', 'rm', '-f', docker_id])
