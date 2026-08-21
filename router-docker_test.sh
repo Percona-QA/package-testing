@@ -102,8 +102,13 @@ create_new_user(){
     for N in 1 2 3 4
       do sudo docker exec mysql$N mysql -uroot -proot \
       -e "CREATE USER 'inno'@'%' IDENTIFIED BY 'inno';" \
-      -e "GRANT ALL privileges ON *.* TO 'inno'@'%' with grant option;" \
-      -e "reset master;"
+      -e "GRANT ALL privileges ON *.* TO 'inno'@'%' with grant option;"
+
+      # RESET MASTER was renamed to RESET BINARY LOGS AND GTIDS in 8.4
+      # and the old name no longer exists there, so try the new name
+      # first and fall back for anything still on 8.0.
+      sudo docker exec mysql$N mysql -uroot -proot -e "reset binary logs and gtids;" \
+        || sudo docker exec mysql$N mysql -uroot -proot -e "reset master;"
     done
     sleep 30
 }
