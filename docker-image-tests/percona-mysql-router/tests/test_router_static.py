@@ -88,9 +88,9 @@ def create_cluster():
         'mysqlsh', '-uinno', '-pinno', '--', 'dba', 'create-cluster', 'testCluster'
     ], check=True, timeout=180)
 
-def add_slave():
+def add_replica():
     try:
-        # Try adding the first slave with 'incremental' recovery method
+        # Try adding the first replica with 'incremental' recovery method
         result = subprocess.run([
             'docker', 'exec', 'mysql1',
             'mysqlsh', '-uinno', '-pinno', '--',
@@ -221,7 +221,7 @@ try:
     verify_new_user()
     docker_restart()
     create_cluster()
-    add_slave()
+    add_replica()
 except Exception:
     cleanup_cluster()
     raise

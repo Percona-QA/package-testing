@@ -134,7 +134,7 @@ create_cluster(){
     sudo docker exec mysql1 mysqlsh -uinno -pinno -- dba create-cluster testCluster
 }
 
-add_slave(){
+add_replica(){
     sudo docker exec mysql1 mysqlsh -uinno -pinno -- cluster add-instance --uri=inno@mysql2 --recoveryMethod=incremental
 
     sleep 10
@@ -237,7 +237,7 @@ create_new_user
 verify_new_user
 docker_restart
 create_cluster
-add_slave
+add_replica
 Router_Bootstrap $2
 data_add $1 
 verify_replication
