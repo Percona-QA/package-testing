@@ -57,11 +57,6 @@ create_network(){
 }
 
 create_mysql_config(){
-# binlog_transaction_dependency_tracking was removed in Percona Server
-# 8.4 (mysqld rejects it as an unknown variable and aborts
-# --initialize outright) - only write it for 8.0.x.
-local ps_tag="${1##*:}"
-
 for N in 1 2 3 4
   do cat <<EOF > my$N.cnf
         [mysqld]
@@ -79,12 +74,6 @@ cat <<EOF >> my$N.cnf
         replica_preserve_commit_order=ON
         replica_parallel_type=LOGICAL_CLOCK
 EOF
-
-case "$ps_tag" in
-  8.0.*)
-    echo "        binlog_transaction_dependency_tracking=WRITESET" >> my$N.cnf
-    ;;
-esac
 done
 }
 
@@ -237,7 +226,7 @@ Fault_tolerance(){
 cleanup
 reclaim_disk_space
 create_network
-create_mysql_config $1
+create_mysql_config
 start_mysql_containers $1
 create_new_user
 verify_new_user
