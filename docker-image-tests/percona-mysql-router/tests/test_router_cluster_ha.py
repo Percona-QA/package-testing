@@ -11,11 +11,14 @@ fault tolerance. Run explicitly (not picked up by the router_docker job's
     ./run.sh tests/test_router_cluster_ha.py
 """
 import json
+import os
 import subprocess
 
 import pytest
 
 EXPECTED_ROWS = 10000
+ROUTER_VERSION = os.getenv("ROUTER_VERSION")
+PS_VERSION = os.getenv("PS_VERSION")
 
 
 def docker_exec(container, *args, timeout=30):
@@ -31,6 +34,19 @@ def mysql_query(container, query, host_port_args=None, timeout=30):
         args += host_port_args
     args += ["-N", "-e", query]
     return docker_exec(container, *args, timeout=timeout).strip()
+
+
+class TestVersions:
+    def test_mysqlrouter_version(self):
+        out = docker_exec("mysql-router", "mysqlrouter", "--version")
+        assert ROUTER_VERSION in out
+
+    def test_mysqlsh_version(self):
+        # mysql1 is already stopped by Fault_tolerance() by the time this
+        # suite runs (see TestReplicationSurvivors below), so check a node
+        # that's still up.
+        out = docker_exec("mysql2", "mysqlsh", "--version")
+        assert PS_VERSION in out
 
 
 class TestSbtestDataViaRouter:
