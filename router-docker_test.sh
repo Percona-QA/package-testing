@@ -72,7 +72,6 @@ cat <<EOF >> my$N.cnf
         innodb_dedicated_server=ON
         innodb_buffer_pool_size=256M
         replica_preserve_commit_order=ON
-        replica_parallel_type=LOGICAL_CLOCK
 EOF
 done
 }

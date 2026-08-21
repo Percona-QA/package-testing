@@ -44,7 +44,6 @@ def create_mysql_config():
                 f"innodb_dedicated_server=ON\n"
                 f"binlog_transaction_dependency_tracking=WRITESET\n"
                 f"replica_preserve_commit_order=ON\n"
-                f"replica_parallel_type=LOGICAL_CLOCK\n"
                 f"transaction_write_set_extraction=XXHASH64\n"
             )
 
