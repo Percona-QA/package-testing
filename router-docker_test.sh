@@ -144,9 +144,26 @@ data_add(){
     
     sleep 5
         
-    echo "sysbench run"
+    echo "loading sbtest1 data"
 
-    sudo docker run --rm=true --net=innodbnet --name=sb-prepare severalnines/sysbench sysbench --db-driver=mysql --table-size=10000 --tables=1 --threads=1 --mysql-host=mysql-router --mysql-port=6446 --mysql-user=sbtest --mysql-password=password /usr/share/sysbench/oltp_insert.lua prepare
+    # severalnines/sysbench has no arm64 build, so this can't run on the
+    # aarch64 fleet node. Load an equivalent sbtest1 table (same shape
+    # sysbench's oltp_insert.lua prepare would create) directly through
+    # the mysql client already in the mysql-client container instead -
+    # that image is multi-arch, so this works on both amd64 and arm64.
+    sudo docker exec mysql-client mysql -h mysql-router -P 6446 -usbtest -ppassword sbtest -e "
+      CREATE TABLE sbtest1 (
+        id INT NOT NULL AUTO_INCREMENT,
+        k INT NOT NULL DEFAULT 0,
+        c CHAR(120) NOT NULL DEFAULT '',
+        pad CHAR(60) NOT NULL DEFAULT '',
+        PRIMARY KEY (id)
+      ) ENGINE=InnoDB;
+      INSERT INTO sbtest1 (k, c, pad)
+      SELECT ROW_NUMBER() OVER (), REPEAT('a', 120), REPEAT('b', 60)
+      FROM information_schema.columns a, information_schema.columns b
+      LIMIT 10000;
+    "
 
     sleep 20
 

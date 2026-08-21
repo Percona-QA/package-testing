@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-Assertions for the InnoDB cluster + router + sysbench + fault-tolerance
+Assertions for the InnoDB cluster + router + sbtest-data + fault-tolerance
 flow run by router-docker_test.sh (see /router-docker_test.sh at the
 repo root). This file does no setup of its own: it expects that script
 to have already built the mysql1-4 cluster, bootstrapped mysql-router,
-loaded sbtest data via sysbench, and stopped mysql1 to exercise fault
-tolerance. Run explicitly (not picked up by the router_docker job's
+loaded 10000 rows into sbtest.sbtest1, and stopped mysql1 to exercise
+fault tolerance. Run explicitly (not picked up by the router_docker job's
 ./run.sh with no args), e.g.:
 
     ./run.sh tests/test_router_cluster_ha.py
