@@ -58,6 +58,7 @@ cat <<EOF >> my$N.cnf
         gtid_mode=ON
         relay_log=mysql$N-relay-bin
         innodb_dedicated_server=ON
+        innodb_buffer_pool_size=256M
         binlog_transaction_dependency_tracking=WRITESET
         replica_preserve_commit_order=ON
         replica_parallel_type=LOGICAL_CLOCK
@@ -72,6 +73,18 @@ start_mysql_containers(){
       -e MYSQL_ROOT_PASSWORD=root $1
     done
     sleep 60
+
+    # A container that died during startup shows up as a cryptic
+    # "container ... is not running" from whatever docker exec touches
+    # it next (create_new_user). Dump its log here instead, right where
+    # the crash actually happened.
+    for N in 1 2 3 4
+      do if [ "$(sudo docker inspect -f '{{.State.Running}}' mysql$N)" != "true" ]; then
+        echo "mysql$N exited during startup - dumping its log:"
+        sudo docker logs mysql$N
+        exit 1
+      fi
+    done
 }
 
 create_new_user(){
