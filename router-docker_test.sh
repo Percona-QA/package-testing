@@ -164,7 +164,7 @@ data_add(){
     echo "Adding sbtest user"
 
     sudo docker exec mysql-client mysql -h mysql-router -P 6446 -uinno -pinno \
-    -e "CREATE SCHEMA sbtest; CREATE USER sbtest@'%' IDENTIFIED with mysql_native_password by  'password';" \
+    -e "CREATE SCHEMA sbtest; CREATE USER sbtest@'%' IDENTIFIED by 'password';" \
     -e "GRANT ALL PRIVILEGES ON sbtest.* to sbtest@'%';"
 
     echo "Verify sbtest user"

@@ -182,7 +182,7 @@ def host():
     # Create sbtest user and schema
 #    command = [
 #        'docker', 'exec', '-it', 'mysql-client', 'mysql', '-h', 'mysql-router', '-P', '6446', '-uinno', '-pinno',
-#        '-e', "CREATE SCHEMA sbtest; CREATE USER sbtest@'%' IDENTIFIED with mysql_native_password by  'password';",
+#        '-e', "CREATE SCHEMA sbtest; CREATE USER sbtest@'%' IDENTIFIED by 'password';",
 #        '-e', "GRANT ALL PRIVILEGES ON sbtest.* to sbtest@'%';"
 #    ]
 #    docker_run(command)
