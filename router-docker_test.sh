@@ -33,9 +33,21 @@ cleanup(){
 
     sudo docker rm mysql1 mysql2 mysql3 mysql4 mysql-client mysql-router   || true
 
-    sudo docker network rm innodbnet  || true                     
+    sudo docker network rm innodbnet  || true
 
     rm -rf cluster1.json cluster.json || true
+}
+
+reclaim_disk_space(){
+    # mysql1 has been seen dying mid-startup with InnoDB redo log writes
+    # failing "No space left on device" - each run leaves behind stopped
+    # containers and unused image layers on this node's docker data-root,
+    # and it accumulates across runs until the disk is actually full.
+    # cleanup() only removes this job's own named containers/network, not
+    # that leftover cruft, so prune it here before creating anything new.
+    df -h
+    sudo docker system prune -af --volumes || true
+    df -h
 }
 
 create_network(){
@@ -213,6 +225,7 @@ Fault_tolerance(){
 }
 
 cleanup
+reclaim_disk_space
 create_network
 create_mysql_config
 start_mysql_containers $1
