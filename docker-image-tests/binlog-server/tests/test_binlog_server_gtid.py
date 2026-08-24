@@ -6,28 +6,26 @@ import time
 import pytest
 
 from pbs_helpers import run_pbs
-from settings import (network_name, ps_docker_image, ps_pwd, repl_pwd,
-                       repl_user, source_container, test_pwd)
+from settings import (gtid_source_container, network_name, ps_docker_image,
+                       ps_pwd, repl_pwd, repl_user, test_pwd)
 
-CONFIG_DIR = os.path.join(test_pwd, 'conf')
-DATA_DIR = os.path.join(test_pwd, 'data')
+CONFIG_DIR = os.path.join(test_pwd, 'conf-gtid')
+DATA_DIR = os.path.join(test_pwd, 'data-gtid')
 CONFIG_FILE_HOST = os.path.join(CONFIG_DIR, 'config.json')
 CONFIG_FILE_CONTAINER = '/etc/binlog-server/config.json'
 DATA_DIR_CONTAINER = '/var/lib/binlog-server/data'
 
 
 @pytest.fixture(scope='module')
-def source(docker_client):
+def gtid_source(docker_client):
     os.makedirs(CONFIG_DIR, exist_ok=True)
-    # world-writable: the binlog-server container writes here as its
-    # unprivileged image user (uid 1001), which won't match whatever
-    # owns this bind-mounted host directory.
     os.makedirs(DATA_DIR, exist_ok=True, mode=0o777)
     os.chmod(DATA_DIR, 0o777)
 
     docker_client.networks.create(network_name)
     container = docker_client.containers.run(
-        ps_docker_image, name=source_container, network=network_name,
+        ps_docker_image, '--gtid-mode=ON --enforce-gtid-consistency=ON',
+        name=gtid_source_container, network=network_name,
         environment=[
             "MYSQL_ROOT_PASSWORD=" + ps_pwd,
             "PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport",
@@ -48,7 +46,7 @@ def source(docker_client):
     config = {
         "logger": {"level": "info", "file": "/var/log/binlog-server/binsrv.log"},
         "connection": {
-            "host": source_container,
+            "host": gtid_source_container,
             "port": 3306,
             "user": repl_user,
             "password": repl_pwd,
@@ -57,10 +55,10 @@ def source(docker_client):
             "write_timeout": 60,
         },
         "replication": {
-            "server_id": 42,
+            "server_id": 43,
             "idle_time": 10,
             "verify_checksum": True,
-            "mode": "position",
+            "mode": "gtid",
         },
         "storage": {
             "backend": "file",
@@ -76,8 +74,8 @@ def source(docker_client):
     docker_client.networks.get(network_name).remove()
 
 
-class TestBinlogServerFetch:
-    def test_fetch_streams_binlogs(self, docker_client, source):
+class TestBinlogServerGtid:
+    def test_fetch_streams_binlogs_in_gtid_mode(self, docker_client, gtid_source):
         exit_code, output = run_pbs(
             docker_client, network_name, CONFIG_DIR, DATA_DIR, DATA_DIR_CONTAINER,
             ['binlog_server', 'fetch', CONFIG_FILE_CONTAINER])
@@ -85,9 +83,14 @@ class TestBinlogServerFetch:
         files = os.listdir(DATA_DIR)
         assert files, "no files written to storage directory: " + output
 
-    def test_list_shows_fetched_binlogs(self, docker_client, source):
+    def test_search_by_gtid_set(self, docker_client, gtid_source):
+        result = gtid_source.exec_run(
+            'mysql -uroot -p' + ps_pwd + ' -N -s -e "SELECT @@GLOBAL.gtid_executed;"')
+        gtid_set = result.output.decode().strip()
+        assert gtid_set, "source reported an empty gtid_executed value"
+
         exit_code, output = run_pbs(
             docker_client, network_name, CONFIG_DIR, DATA_DIR, DATA_DIR_CONTAINER,
-            ['binlog_server', 'list', CONFIG_FILE_CONTAINER])
+            ['binlog_server', 'search_by_gtid_set', CONFIG_FILE_CONTAINER, gtid_set])
         assert exit_code == 0, output
         assert 'binlog' in output.lower(), output

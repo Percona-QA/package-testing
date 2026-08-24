@@ -15,6 +15,10 @@ DEB_DISTS = ["debian", "ubuntu"]
 
 network_name = 'binlog-server-net'
 source_container = 'binlog-server-source-ps'
+gtid_source_container = 'binlog-server-source-ps-gtid'
+pull_source_container = 'binlog-server-source-ps-pull'
+inspect_source_container = 'binlog-server-source-ps-inspect'
+pull_pbs_container = 'binlog-server-pull-test'
 
 ps_pwd = 'pwd1234#'
 repl_user = 'repl_user'
