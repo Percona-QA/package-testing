@@ -38,9 +38,18 @@ class PxcNode:
                 ['docker', 'run', '--name', node_name, '-e', 'MYSQL_ROOT_PASSWORD='+pxc_pwd,
                 '-e', 'CLUSTER_NAME='+cluster_name, '-e', 'CLUSTER_JOIN='+base_node_name+'1',
                 '--net='+docker_network, '-d', docker_image]).decode().strip()
+        self._dump_diagnostics('after-start')
         self.ti_host = testinfra.get_host("docker://root@" + self.docker_id)
 
+    def _dump_diagnostics(self, phase):
+        print('===== [' + phase + '] docker inspect ' + self.node_name + ' =====')
+        subprocess.run(['docker', 'inspect', '-f', '{{json .State}}', self.node_name])
+        print('===== [' + phase + '] docker logs ' + self.node_name + ' =====')
+        subprocess.run(['docker', 'logs', self.node_name])
+        print('===== [' + phase + '] end logs ' + self.node_name + ' =====')
+
     def destroy(self):
+        self._dump_diagnostics('before-destroy')
         subprocess.check_call(['docker', 'rm', '-f', self.docker_id])
         if self.bootstrap_node:
             subprocess.check_call(['rm', '-rf', test_pwd+'/cert'])
