@@ -58,7 +58,7 @@ def source(docker_client):
         'FLUSH BINARY LOGS;"')
 
     config = {
-        "logger": {"level": "info", "file": "binsrv.log"},
+        "logger": {"level": "info", "file": "/var/log/binlog-server/binsrv.log"},
         "connection": {
             "host": source_container,
             "port": 3306,
