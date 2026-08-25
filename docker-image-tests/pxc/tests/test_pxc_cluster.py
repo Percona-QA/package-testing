@@ -62,8 +62,7 @@ class PxcNode:
 @pytest.fixture(scope='module')
 def cluster():
     cluster = []
-    if eol != 'yes':
-        subprocess.check_call(['docker', 'pull', docker_image])
+    subprocess.check_call(['docker', 'pull', docker_image])
     subprocess.check_call(['docker', 'network', 'create', docker_network])
     node1 = PxcNode(base_node_name+'1',True)
     cluster.append(node1)

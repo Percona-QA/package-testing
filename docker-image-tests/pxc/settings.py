@@ -10,7 +10,6 @@ pxc_revision = os.getenv('PXC_REVISION')
 pxc57_pkg_version = os.getenv('PXC57_PKG_VERSION')
 pxc_pxb_version = os.getenv('PXC_PXB_VERSION')
 pxc_wsrep_version = os.getenv('PXC_WSREP_VERSION')
-eol = os.getenv('EOL')
 test_pwd = os.path.dirname(os.path.realpath(__file__))
 
 pxc_version_upstream, pxc_version_percona = pxc_version.split('-')
@@ -34,26 +33,28 @@ base_node_name = 'pxc-docker-test-cluster-node'
 cluster_name = 'pxc-cluster1'
 
 # PXC 9.x innovation
-pxc97_packages = [(package, pxc_version_upstream) for package in (
+pxc9x_packages = [(package, pxc_version_upstream) for package in (
   'percona-xtradb-cluster-client', 'percona-xtradb-cluster-server',
   'percona-xtradb-cluster-shared'
 )]
-pxc97_binaries = (
+pxc9x_binaries = (
   '/usr/bin/mysql', '/usr/sbin/mysqld', '/usr/bin/mysqladmin',
   '/usr/bin/mysqldump', '/usr/bin/mysqldumpslow',
   '/usr/bin/mysql_secure_installation', '/usr/bin/mysqlbinlog',
   '/usr/bin/mysql_tzinfo_to_sql','/usr/bin/mysql_keyring_encryption_test','/usr/bin/mysql_migrate_keyring',
   '/usr/bin/mysqld_multi','/usr/bin/mysqld_safe','/usr/bin/mysql-systemd'
 )
-pxc97_plugins = (
+pxc9x_plugins = (
   ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
-  ('rpl_semi_sync_source','semisync_source.so'),('rpl_semi_sync_replica','semisync_replica.so'),
+  ('version_tokens','version_token.so'),('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
   ('clone','mysql_clone.so')
 )
-pxc97_functions = (
-  ('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
+pxc9x_functions = (
+  ('version_tokens_set', 'version_token.so', 'STRING'),('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
+  ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_exclusive', 'version_token.so', 'INT'),
+  ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'), ('service_release_locks', 'locking_service.so', 'INT')
 )
-pxc97_components = (
+pxc9x_components = (
   ('file://component_encryption_udf'),('file://component_keyring_kmip'),('file://component_keyring_kms'),('file://component_masking_functions'),('file://component_binlog_utils_udf'),('file://component_percona_udf'),('file://component_audit_log_filter'),('file://component_keyring_vault')
 )
 
@@ -159,11 +160,11 @@ pxc56_functions = (
 #####
 
 if re.match(r'^9\.[0-9]$', pxc_version_major):
-    pxc_packages = pxc97_packages
-    pxc_binaries = pxc97_binaries
-    pxc_plugins = pxc97_plugins
-    pxc_functions = pxc97_functions
-    pxc_components = pxc97_components
+    pxc_packages = pxc9x_packages
+    pxc_binaries = pxc9x_binaries
+    pxc_plugins = pxc9x_plugins
+    pxc_functions = pxc9x_functions
+    pxc_components = pxc9x_components
 elif pxc_version_major == '8.4':
     pxc_packages = pxc84_packages
     pxc_binaries = pxc84_binaries
