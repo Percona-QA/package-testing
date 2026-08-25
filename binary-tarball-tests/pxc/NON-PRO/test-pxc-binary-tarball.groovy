@@ -43,10 +43,11 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar socat
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
-                                ./run.sh || true
+                                df -mh
+                                ./run.sh || df -mh
                               '''
                             junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
                         }
@@ -75,7 +76,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar socat
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -99,7 +100,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                   MINIMAL="-minimal"
                                 fi
-                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.41${MINIMAL}.tar.gz"
+                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.39${MINIMAL}.tar.gz"
                                 if [ "${EOL}" = "yes" ]; then
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
                                 else
@@ -107,7 +108,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar socat
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -139,7 +140,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -171,7 +172,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -195,7 +196,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                   MINIMAL="-minimal"
                                 fi
-                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.41${MINIMAL}.tar.gz"
+                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.39${MINIMAL}.tar.gz"
                                 if [ "${EOL}" = "yes" ]; then
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
                                 else
@@ -203,7 +204,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -235,7 +236,7 @@ pipeline {
                                fi
                                rm -rf package-testing
                                sudo yum install -y git wget tar
-                               git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                               git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
                               ./run.sh || true
@@ -268,7 +269,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q "${TARBALL_LINK}${TARBALL_NAME}"
                                ./run.sh || true
@@ -300,7 +301,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q "${TARBALL_LINK}${TARBALL_NAME}"
                                ./run.sh || true
@@ -332,7 +333,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q "${TARBALL_LINK}${TARBALL_NAME}"
                                ./run.sh || true
@@ -358,8 +359,8 @@ pipeline {
                     string(name: 'test_repo', value: "testing"),
                     string(name: 'test_type', value: "install"),
                     string(name: 'pro_repo', value: "no"),
-                    string(name: 'git_repo', value: "Percona-QA/package-testing"),
-                    string(name: 'BRANCH', value: "master")
+                    string(name: 'git_repo', value: "kaushikpuneet07/package-testing"),
+                    string(name: 'BRANCH', value: "add-pxc97-dock")
                 ]
                 
                 build job: 'pxc-package-testing-parallel', propagate: false, wait: false, parameters: [
@@ -367,8 +368,8 @@ pipeline {
                     string(name: 'test_repo', value: "testing"),
                     string(name: 'test_type', value: "min_upgrade_pxc_${PXC_PRODUCT}"),
                     string(name: 'pro_repo', value: "no"),
-                    string(name: 'git_repo', value: "Percona-QA/package-testing"),
-                    string(name: 'BRANCH', value: "master")
+                    string(name: 'git_repo', value: "kaushikpuneet07/package-testing"),
+                    string(name: 'BRANCH', value: "add-pxc97-dock")
                 ]
             }
         }

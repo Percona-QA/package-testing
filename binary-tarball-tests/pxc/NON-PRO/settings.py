@@ -108,8 +108,8 @@ pxc9x_binaries = [
   'bin/garbd',
   'bin/pxc_extra/pxb-9.6/bin/xtrabackup', 'bin/pxc_extra/pxb-9.6/bin/xbcloud',
   'bin/pxc_extra/pxb-9.6/bin/xbcrypt', 'bin/pxc_extra/pxb-9.6/bin/xbstream',
-  'bin/pxc_extra/pxb-9.5/bin/xtrabackup', 'bin/pxc_extra/pxb-9.5/bin/xbcloud',
-  'bin/pxc_extra/pxb-9.5/bin/xbcrypt', 'bin/pxc_extra/pxb-9.5/bin/xbstream',
+  'bin/pxc_extra/pxb-9.7/bin/xtrabackup', 'bin/pxc_extra/pxb-9.7/bin/xbcloud',
+  'bin/pxc_extra/pxb-9.7/bin/xbcrypt', 'bin/pxc_extra/pxb-9.7/bin/xbstream',
   'bin/mysql', 'bin/mysqld', 'bin/mysqladmin', 'bin/mysqlbinlog',
   'bin/mysqldump', 'bin/mysqlimport', 'bin/mysqlshow',
   'bin/mysqlslap', 'bin/mysqlcheck', 'bin/mysql_config_editor',
@@ -118,7 +118,7 @@ pxc9x_binaries = [
 ]
 pxc9x_executables = pxc9x_binaries + [
   'bin/clustercheck', 'bin/wsrep_sst_common', 'bin/wsrep_sst_xtrabackup-v2',
-  'bin/pxc_extra/pxb-9.5/bin/xbcloud_osenv',
+  'bin/pxc_extra/pxb-9.7/bin/xbcloud_osenv',
   'bin/pxc_extra/pxb-9.6/bin/xbcloud_osenv',
   'bin/ps-admin',
   'bin/mysqldumpslow',
@@ -136,20 +136,20 @@ pxc9x_functions = (
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 pxc9x_files = (
-  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.1.0' ,
+  'lib/libgalera_smm.so', 'lib/libperconaserverclient.a', 'lib/libperconaserverclient.so.24.1.1' ,
   'lib/libmysqlservices.a' ,
   'lib/plugin/auth_pam.so', 'lib/plugin/auth_pam_compat.so',
   'lib/plugin/keyring_udf.so'
 )
 if glibc_version == '2.35':
     pxc9x_symlinks = (
-      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.1.0'),
+      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.1.1'),
       ('lib/libtinfo.so', 'lib/private/libtinfo.so.6.1'),
       ('lib/libtirpc.so', 'lib/private/libtirpc.so.3.0.0')
     )
 else:
     pxc9x_symlinks = (
-      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.1.0'),
+      ('lib/libperconaserverclient.so', 'lib/libperconaserverclient.so.24.1.1'),
       ('lib/libtirpc.so', 'lib/private/libtirpc.so.3.0.0')
     )
 pxc9x_components = (
