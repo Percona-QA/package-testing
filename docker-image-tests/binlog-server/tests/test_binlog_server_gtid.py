@@ -38,10 +38,14 @@ def gtid_source(docker_client):
         'GRANT REPLICATION SLAVE ON *.* TO \'' + repl_user + '\'@\'%\';"')
     container.exec_run(
         'mysql -uroot -p' + ps_pwd + ' -e '
-        '"CREATE DATABASE test; '
-        'CREATE TABLE test.t1 (a INT PRIMARY KEY); '
-        'INSERT INTO test.t1 VALUES (1),(2),(3); '
-        'FLUSH BINARY LOGS;"')
+        '"CREATE DATABASE test; CREATE TABLE test.t1 (a INT PRIMARY KEY);"')
+    # rotate a few times so there's more than one fetched binlog file -
+    # purge_binlogs can't remove the current tail file, so a single-file
+    # storage directory would make that test meaningless.
+    for i in range(3):
+        container.exec_run(
+            'mysql -uroot -p' + ps_pwd + ' -e '
+            '"INSERT INTO test.t1 VALUES (' + str(i) + '); FLUSH BINARY LOGS;"')
 
     config = {
         "logger": {"level": "info", "file": "/var/log/binlog-server/binsrv.log"},
@@ -95,3 +99,34 @@ class TestBinlogServerGtid:
             ['binlog_server', 'search_by_gtid_set', CONFIG_FILE_CONTAINER, gtid_set])
         assert exit_code == 0, output
         assert 'binlog' in output.lower(), output
+
+    def test_list_shows_fetched_binlogs_in_gtid_mode(self, docker_client, gtid_source):
+        exit_code, output = run_pbs(
+            docker_client, network_name, CONFIG_DIR, DATA_DIR, DATA_DIR_CONTAINER,
+            ['binlog_server', 'list', CONFIG_FILE_CONTAINER])
+        assert exit_code == 0, output
+        assert 'binlog' in output.lower(), output
+
+    def test_search_by_timestamp_in_gtid_mode(self, docker_client, gtid_source):
+        now = time.strftime('%Y-%m-%dT%H:%M:%S')
+        exit_code, output = run_pbs(
+            docker_client, network_name, CONFIG_DIR, DATA_DIR, DATA_DIR_CONTAINER,
+            ['binlog_server', 'search_by_timestamp', CONFIG_FILE_CONTAINER, now])
+        assert exit_code == 0, output
+        assert 'binlog' in output.lower(), output
+
+    def test_purge_binlogs_in_gtid_mode(self, docker_client, gtid_source):
+        files_before = sorted(os.listdir(DATA_DIR))
+        assert len(files_before) > 1, (
+            "need more than one fetched binlog file to test purge_binlogs, got: "
+            + str(files_before))
+        oldest = files_before[0]
+
+        exit_code, output = run_pbs(
+            docker_client, network_name, CONFIG_DIR, DATA_DIR, DATA_DIR_CONTAINER,
+            ['binlog_server', 'purge_binlogs', CONFIG_FILE_CONTAINER, oldest])
+        assert exit_code == 0, output
+        files_after = sorted(os.listdir(DATA_DIR))
+        assert oldest not in files_after, (
+            "expected %s to be purged, still present: %s" % (oldest, files_after))
+        assert files_after, "purge_binlogs must not remove the current tail file"

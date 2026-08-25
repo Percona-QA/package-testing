@@ -100,9 +100,12 @@ class TestBinlogServerPull:
         source.exec_run(
             'mysql -uroot -p' + ps_pwd + ' -e '
             '"INSERT INTO test.t1 VALUES (2),(3),(4); FLUSH BINARY LOGS;"')
-        time.sleep(20)
 
+        deadline = time.time() + 20
         after = _dir_size(DATA_DIR)
+        while after <= before and time.time() < deadline:
+            time.sleep(0.5)
+            after = _dir_size(DATA_DIR)
         assert after > before, (
             "storage directory did not grow while pull mode was running "
             "(before=%d bytes, after=%d bytes); pull-mode logs:\n%s"
