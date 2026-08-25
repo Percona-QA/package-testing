@@ -85,7 +85,8 @@ class TestBinlogServerGtid:
 
     def test_search_by_gtid_set(self, docker_client, gtid_source):
         result = gtid_source.exec_run(
-            'mysql -uroot -p' + ps_pwd + ' -N -s -e "SELECT @@GLOBAL.gtid_executed;"')
+            'mysql -uroot -N -s -e "SELECT @@GLOBAL.gtid_executed;"',
+            environment=["MYSQL_PWD=" + ps_pwd])
         gtid_set = result.output.decode().strip()
         assert gtid_set, "source reported an empty gtid_executed value"
 
