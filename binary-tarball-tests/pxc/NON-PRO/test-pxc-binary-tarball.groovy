@@ -43,7 +43,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar socat
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 df -mh
@@ -76,7 +76,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar socat
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -108,7 +108,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar socat
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -140,7 +140,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -172,7 +172,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -204,7 +204,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -236,7 +236,7 @@ pipeline {
                                fi
                                rm -rf package-testing
                                sudo yum install -y git wget tar
-                               git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
+                               git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
                               ./run.sh || true
@@ -269,7 +269,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q "${TARBALL_LINK}${TARBALL_NAME}"
                                ./run.sh || true
@@ -301,7 +301,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q "${TARBALL_LINK}${TARBALL_NAME}"
                                ./run.sh || true
@@ -333,7 +333,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-pxc97-dock --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q "${TARBALL_LINK}${TARBALL_NAME}"
                                ./run.sh || true
@@ -360,7 +360,7 @@ pipeline {
                     string(name: 'test_type', value: "install"),
                     string(name: 'pro_repo', value: "no"),
                     string(name: 'git_repo', value: "kaushikpuneet07/package-testing"),
-                    string(name: 'BRANCH', value: "add-pxc97-dock")
+                    string(name: 'BRANCH', value: "pxc97-tar-work")
                 ]
                 
                 build job: 'pxc-package-testing-parallel', propagate: false, wait: false, parameters: [
@@ -369,7 +369,7 @@ pipeline {
                     string(name: 'test_type', value: "min_upgrade_pxc_${PXC_PRODUCT}"),
                     string(name: 'pro_repo', value: "no"),
                     string(name: 'git_repo', value: "kaushikpuneet07/package-testing"),
-                    string(name: 'BRANCH', value: "add-pxc97-dock")
+                    string(name: 'BRANCH', value: "pxc97-tar-work")
                 ]
             }
         }
