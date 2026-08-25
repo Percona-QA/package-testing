@@ -125,14 +125,12 @@ pxc9x_executables = pxc9x_binaries + [
   'bin/mysql_config',
 ]
 pxc9x_plugins = (
-  ('validate_password','validate_password.so'),
-  ('rpl_semi_sync_master','semisync_master.so'),('rpl_semi_sync_slave','semisync_slave.so'),
+  ('mysql_no_login','mysql_no_login.so'),('validate_password','validate_password.so'),
+  ('rpl_semi_sync_source','semisync_source.so'),('rpl_semi_sync_replica','semisync_replica.so'),
   ('clone','mysql_clone.so')
 )
 pxc9x_functions = (
-  ('version_tokens_show', 'version_token.so', 'STRING'),('version_tokens_edit', 'version_token.so', 'STRING'),
-  ('version_tokens_delete', 'version_token.so', 'STRING'),('version_tokens_lock_shared', 'version_token.so', 'INT'),('version_tokens_lock_exclusive', 'version_token.so', 'INT'),
-  ('version_tokens_unlock', 'version_token.so', 'INT'),('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'),
+  ('service_get_read_locks', 'locking_service.so', 'INT'),('service_get_write_locks', 'locking_service.so', 'INT'),
   ('service_release_locks', 'locking_service.so', 'INT')
 )
 pxc9x_files = (
