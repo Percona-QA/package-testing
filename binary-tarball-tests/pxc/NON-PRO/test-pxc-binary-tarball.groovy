@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'docker'
+        label 'docker-32gb'
     }
     parameters {
         string(name: 'PXC_VERSION', defaultValue: '8.0.37-29.1', description: 'PXC full version')
@@ -43,7 +43,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar socat
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 df -mh
@@ -76,7 +76,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar socat
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -108,7 +108,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar socat
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -140,7 +140,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -172,7 +172,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -204,7 +204,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -236,7 +236,7 @@ pipeline {
                                fi
                                rm -rf package-testing
                                sudo yum install -y git wget tar
-                               git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
+                               git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
                               ./run.sh || true
@@ -269,7 +269,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q "${TARBALL_LINK}${TARBALL_NAME}"
                                ./run.sh || true
@@ -301,7 +301,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q "${TARBALL_LINK}${TARBALL_NAME}"
                                ./run.sh || true
@@ -333,7 +333,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
-                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch pxc97-tar-work --depth 1
+                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q "${TARBALL_LINK}${TARBALL_NAME}"
                                ./run.sh || true
@@ -359,8 +359,8 @@ pipeline {
                     string(name: 'test_repo', value: "testing"),
                     string(name: 'test_type', value: "install"),
                     string(name: 'pro_repo', value: "no"),
-                    string(name: 'git_repo', value: "kaushikpuneet07/package-testing"),
-                    string(name: 'BRANCH', value: "pxc97-tar-work")
+                    string(name: 'git_repo', value: "Percona-QA/package-testing"),
+                    string(name: 'BRANCH', value: "master")
                 ]
                 
                 build job: 'pxc-package-testing-parallel', propagate: false, wait: false, parameters: [
@@ -368,8 +368,8 @@ pipeline {
                     string(name: 'test_repo', value: "testing"),
                     string(name: 'test_type', value: "min_upgrade_pxc_${PXC_PRODUCT}"),
                     string(name: 'pro_repo', value: "no"),
-                    string(name: 'git_repo', value: "kaushikpuneet07/package-testing"),
-                    string(name: 'BRANCH', value: "pxc97-tar-work")
+                    string(name: 'git_repo', value: "Percona-QA/package-testing"),
+                    string(name: 'BRANCH', value: "master")
                 ]
             }
         }
