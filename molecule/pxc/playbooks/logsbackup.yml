@@ -8,19 +8,19 @@
     - set_fact:
         jenkinsworkspace={{ lookup('ansible.builtin.env', 'JENWORKSPACE') }}
         test_phase={{ lookup('ansible.builtin.env', 'test_type') }}
-        man_ip={{ ip_env }}
+        os_name={{ lookup('ansible.builtin.env', 'MOLECULE_SCENARIO_NAME') }}
       delegate_to: localhost
 
     - name: Zip the logs
       community.general.archive:
         path: /var/log
-        dest: /var/log/{{test_phase}}_{{man_ip}}_logs.tar.gz
+        dest: /var/log/{{test_phase}}_{{os_name}}_logs.tar.gz
 
     - name: Fetch the log zip to the main node
       become: true
       ansible.builtin.fetch:
-        src: /var/log/{{test_phase}}_{{man_ip}}_logs.tar.gz
-        dest: "{{jenkinsworkspace}}/PXC/{{test_phase}}_{{man_ip}}/"
+        src: /var/log/{{test_phase}}_{{os_name}}_logs.tar.gz
+        dest: "{{jenkinsworkspace}}/PXC/{{test_phase}}_{{os_name}}/"
 
 
 
