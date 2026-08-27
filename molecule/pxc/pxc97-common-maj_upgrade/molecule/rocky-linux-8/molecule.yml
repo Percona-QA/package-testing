@@ -6,7 +6,7 @@ dependency:
 driver:
   name: ec2
 platforms:
-  - name: ${BUILD_NUMBER}-pxc2-97-common-rl-8-install-${INSTALLTYPE}
+  - name: ${BUILD_NUMBER}-pxc2-97-common-rl-8-maj_upgrade
     region: us-west-2
     image: ami-04310224db1f2a278
     vpc_subnet_id: subnet-0430e63d7cdbcd237
@@ -17,7 +17,7 @@ platforms:
       iit-billing-tag: ${IIT_BILLING_TAG}
       job-name: ${JOB_NAME}
       build-number: ${BUILD_NUMBER}
-  - name: ${BUILD_NUMBER}-pxc3-97-common-rl-8-install-${INSTALLTYPE}
+  - name: ${BUILD_NUMBER}-pxc3-97-common-rl-8-maj_upgrade
     region: us-west-2
     image: ami-04310224db1f2a278
     vpc_subnet_id: subnet-0430e63d7cdbcd237
@@ -39,8 +39,8 @@ provisioner:
     side_effect: ../../../../../playbooks/pxc97_upgrade_common.yml
   inventory:
     host_vars:
-      pxc2-97-common-rl-8-install-${INSTALLTYPE}:
+      pxc2-97-common-rl-8-maj_upgrade:
         ip_env: "{{ ansible_host }}"
-      pxc3-97-common-rl-8-install-${INSTALLTYPE}:
+      pxc3-97-common-rl-8-maj_upgrade:
         ip_env: "{{ ansible_host }}"
         sleep_before_tests: 40
