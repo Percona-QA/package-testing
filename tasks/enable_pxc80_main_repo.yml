@@ -16,8 +16,52 @@
       disable_gpg_check: yes
     when: ansible_os_family == "RedHat"
 
+  - name: add eol testing repository on debian
+    template: src=../templates/eol_deb_repo_file_pxc80.j2
+              dest=/etc/apt/sources.list.d/post-eol.list
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "testing"
+    when:
+      - ansible_os_family == "Debian"
+      - lookup('env', 'eol') == "yes"
+
+  - name: add eol testing repository on Redhat AMD
+    template: src=../templates/eol_rpm_repo_file_pxc80.j2
+             dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "testing"
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_architecture == "x86_64"
+      - lookup('env', 'eol') == "yes"
+
+  - name: add eol testing repository on Redhat ARM
+    template: src=../templates/eol_rpm_repo_file_pxc80_arm.j2
+             dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "testing"
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+      - lookup('env', 'eol') == "yes"
+
+  - name: Clean and update package cache
+    shell: |
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
+
   - name: enable main repo pxc-80
     command: percona-release enable-only pxc-80 release
+    when:
+      - lookup('env', 'eol') == "no"
 
   - name: enable pxb repo
     command: percona-release enable pxb-80 release

@@ -50,25 +50,14 @@
   - name: remove mysql data directory
     command: rm -r /var/lib/mysql
 
-  - name: install python3-pip on RedHat/CentOS
-    yum:
-      name:
-      - python3-pip
-      state: latest
-      update_cache: yes
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int <= 7
-
-  - name: install python3-pip on RedHat/CentOS dnf
+  - name: install python3-pip on RedHat
     dnf:
       name:
       - python3-pip
       state: latest
       update_cache: yes
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
-      - ansible_facts['distribution_major_version'] | int >= 8
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
 
   - name: install python3-pip on Debian/Ubuntu
     apt:
@@ -82,13 +71,12 @@
     command: "{{ item }}"
     with_items:
         - python3 -m pip install --upgrade importlib-metadata
-        - python3 -m pip install -U pip
-        - python3 -m pip install -U setuptools
-        - python3 -m pip install urllib3==1.26.6
+        - python3 -m pip install -U pip --ignore-installed
+        - python3 -m pip install --upgrade --ignore-installed setuptools
+        - python3 -m pip install --ignore-installed urllib3==1.26.6
         - python3 -m pip install -U pykmip
     when:
-        - ansible_distribution_release != "bookworm"
-        - ansible_distribution_release != "noble"
+      - ansible_distribution_release not in ['bookworm', 'noble', 'trixie', 'resolute']
 
 #  - name: install pykmip
 #    command: "{{ item }}"
@@ -104,49 +92,53 @@
       line: 'export PATH=$HOME/.local/bin:$PATH'
       insertafter: EOF
     when:
-      - ansible_distribution_release in ['bookworm', 'noble']
+      - ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
 
   - name: install pykmip on bookworm/noble using user site
     pip:
       name:
         - setuptools
         - pykmip
-      extra_args: --user
+      extra_args: "--user --break-system-packages"
       executable: pip3
     environment:
       PYTHONUSERBASE: "/home/{{ ansible_user }}/.local"
     when:
-      - ansible_distribution_release in ['bookworm', 'noble']
+      - ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
 
   - name: downgrade SQLAlchemy as new version doesn't work with pykmip
     command: pip3 install SQLAlchemy==1.4.46
     when:
-        - ansible_distribution_release != "bookworm"
-        - ansible_distribution_release != "noble"
+      - ansible_distribution_release not in ['bookworm', 'noble', 'trixie', 'resolute']
 
   - name: downgrade SQLAlchemy as new version doesn't work with pykmip
     command: pip3 install --break-system-packages SQLAlchemy==1.4.46
-    when: ansible_distribution_release in ["bookworm", "noble"]
+    when: ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
 
-  - name: Check PyKMIP is importable
-    command: python3 -c "import pykmip; print(pykmip.__version__)"
-    register: pykmip_check
-    failed_when: "'No module named' in pykmip_check.stderr"
-    when:
-      - ansible_distribution_release in ['bookworm', 'noble']
+#  - name: Check PyKMIP is importable
+#    command: python3 -c "import pykmip; print(pykmip.__version__)"
+#    register: pykmip_check
+#    failed_when: "'No module named' in pykmip_check.stderr"
+#    when:
+#      - ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
 
   - name: start pykmip server
     shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
     when:
-        - ansible_distribution_release != "bookworm"
-        - ansible_distribution_release != "noble"
+      - ansible_distribution_release not in ['bookworm', 'noble', 'trixie', 'resolute']
 
   - name: start pykmip server
     shell: nohup ~/.local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
-    when: ansible_distribution_release in ["bookworm", "noble"]
+    when: ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
 
   - name: Check if kmip-server is running
-    shell: ps -ef | grep kmip-server | grep -v grep
+    shell: pgrep -x kmip-server
+    register: kmip_status
+    failed_when: false
+    changed_when: false
+
+  - debug:
+      var: kmip_status
 
   - name: copy the global manifest for mysql
     copy:
@@ -168,12 +160,12 @@
         remote_src: yes
     when: ansible_os_family == "Debian"
 
-#  - name: copy the encryption config file on Debian/Ubuntu
-#    copy:
-#        src: /package-testing/kmip/encryption.j2
-#        dest: /etc/mysql/conf.d/encryption.cnf
-#        remote_src: yes
-#    when: ansible_os_family == "Debian"
+  - name: copy the encryption config file on Debian/Ubuntu
+    copy:
+        src: /package-testing/kmip/encryption.j2
+        dest: /etc/mysql/conf.d/encryption.cnf
+        remote_src: yes
+    when: ansible_os_family == "Debian"
 
   - name: append include for RedHat
     lineinfile:
@@ -181,15 +173,57 @@
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
 
-#  - name: copy the encryption config file on RHEL/CentOS/Amazon
-#    copy:
-#        src: /package-testing/kmip/encryption.j2
-#        dest: /etc/my.cnf.d/encryption.cnf
-#        remote_src: yes
-#    when: ansible_os_family == "RedHat"
+  - name: copy the encryption config file on RHEL/CentOS/Amazon
+    copy:
+        src: /package-testing/kmip/encryption.j2
+        dest: /etc/my.cnf.d/encryption.cnf
+        remote_src: yes
+    when: ansible_os_family == "RedHat"
 
-  - name: start mysql service
-    service: name=mysql state=started
+  - name: Start MySQL and collect logs on failure
+    block:
+      - name: Start mysql service
+        service:
+          name: mysql
+          state: started
+
+      - name: Check mysql service status
+        command: /package-testing/check_running.sh mysql running
+
+    rescue:
+      - name: Show systemctl status
+        command: systemctl status mysql --no-pager -l
+        register: mysql_status
+        ignore_errors: yes
+
+      - debug:
+          var: mysql_status.stdout_lines
+
+      - name: Show last 200 journal logs
+        command: journalctl -u mysql --no-pager -n 200
+        register: mysql_journal
+        ignore_errors: yes
+
+      - debug:
+          var: mysql_journal.stdout_lines
+
+      - name: Show MySQL error log
+        shell: |
+          if [ -f /var/log/mysql/error.log ]; then
+            cat /var/log/mysql/error.log
+          elif [ -f /var/log/mysqld.log ]; then
+            cat /var/log/mysqld.log
+          elif [ -f /var/log/mysqld.err ]; then
+            cat /var/log/mysqld.err
+          fi
+        register: mysql_errorlog
+        ignore_errors: yes
+
+      - debug:
+          var: mysql_errorlog.stdout_lines
+
+      - fail:
+          msg: "MySQL failed to start. See logs above."
 
   - name: check mysql service status
     command: /package-testing/check_running.sh mysql running

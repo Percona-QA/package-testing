@@ -19,15 +19,63 @@ if re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', VERSION): # if full package VERSION 8.
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-DEBPACKAGES = ['percona-server-server', 'percona-server-test',
-               'percona-server-dbg', 'percona-server-source',
-               'percona-server-client', 'percona-server-rocksdb',
-               'percona-mysql-router', 'percona-mysql-shell']
+PS_MAJOR = version.parse(VERSION.split('-')[0]).major
 
-RPMPACKAGES = ['percona-server-server', 'percona-server-client',
-               'percona-server-test', 'percona-server-debuginfo',
-               'percona-server-devel', 'percona-server-rocksdb',
-               'percona-mysql-router', 'percona-mysql-shell']
+if PS_MAJOR >= 9:
+    DEBPACKAGES = [
+        'percona-server-server',
+        'percona-testsuite',
+        'percona-server-test',
+        'percona-server-source',
+        'percona-server-server-core',
+        'percona-mysql-shell',
+        'percona-server-common',
+        'percona-server-client-core',
+        'percona-server-client-plugins',
+        'percona-server-client',
+        'percona-server-client-plugins',
+        'percona-mysql-router',
+        'percona-client',
+        'percona-server',
+        'percona-server-js',
+        'percona-server-rocksdb'
+    ]
+
+    RPMPACKAGES = [
+        'percona-server-server',
+        'percona-server-client',
+        'percona-server-client-plugins',
+        'percona-server-debugsource',
+        'percona-server-rocksdb',
+        'percona-server-test',
+        'percona-server-shared',
+        'percona-server-devel',
+        'percona-mysql-router',
+        'percona-mysql-shell',
+        'percona-server-js'
+    ]
+else:
+    DEBPACKAGES = [
+        'percona-server-server',
+        'percona-server-test',
+        'percona-server-source',
+        'percona-server-client',
+        'percona-server-rocksdb',
+        'percona-mysql-router',
+        'percona-mysql-shell',
+        'percona-server-js'
+    ]
+
+    RPMPACKAGES = [
+        'percona-server-server',
+        'percona-server-client',
+        'percona-server-test',
+        'percona-server-devel',
+        'percona-server-rocksdb',
+        'percona-mysql-router',
+        'percona-mysql-shell',
+        'percona-server-js'
+    ]
 
 # Define plugins amd components lists for PS8.0.X releases:
 if version.parse(VERSION) > version.parse("8.0.0") and version.parse(VERSION) < version.parse("8.1.0"):
@@ -113,9 +161,7 @@ elif version.parse(VERSION) >= version.parse("8.1.0"):
                     "mysql -e \"INSTALL PLUGIN"
                     " connection_control SONAME 'connection_control.so';\"",
                     "mysql -e \"INSTALL PLUGIN"
-                    " authentication_ldap_sasl SONAME 'authentication_ldap_sasl.so';\"",
-                    "mysql -e \"INSTALL PLUGIN"
-                    " connection_control_failed_login_attempts SONAME 'connection_control.so';\""]
+                    " authentication_ldap_sasl SONAME 'authentication_ldap_sasl.so';\""]
     COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
               'component_log_sink_json', 'component_log_filter_dragnet',
               'component_audit_api_message_emit', 'component_binlog_utils_udf',

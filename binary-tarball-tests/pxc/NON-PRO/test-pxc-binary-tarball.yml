@@ -33,6 +33,12 @@
         default: false
         description: Test minimal tarball
         name: BUILD_TYPE_MINIMAL
+    - choice:
+        name: EOL
+        choices:
+          - "no"
+          - "yes"
+        description: Use the EOL gated repo for the tarball download
     pipeline-scm:
       scm:
         - git:

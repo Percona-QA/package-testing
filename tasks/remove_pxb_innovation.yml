@@ -1,0 +1,42 @@
+#
+# This task removes Percona XtraBackup {{ major_release_version }} on CentOS and Debian/Ubuntu
+#
+
+- name: Remove Percona XtraBackup deb packages for pxb-{{ major_release_version }}
+  apt:
+    name: "{{ packages }}"
+    state: absent
+    purge: yes
+    autoremove: yes
+  vars:
+    packages:
+      - percona-xtrabackup-{{ major_release_version }}
+      - percona-xtrabackup-test-{{ major_release_version }}
+      - percona-xtrabackup-dbg-{{ major_release_version }}
+  when: ansible_os_family == "Debian"
+
+- name: Remove Percona XtraBackup rpm packages for pxb-{{ major_release_version }} yum
+  yum:
+    name: "{{ packages }}"
+    state: absent
+  vars:
+    packages:
+      - percona-xtrabackup-{{ major_release_version }}
+      - percona-xtrabackup-test-{{ major_release_version }}
+      - percona-xtrabackup-{{ major_release_version }}-debuginfo
+  when:
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
+    - ansible_facts['distribution_major_version'] | int <= 7
+
+- name: Remove Percona XtraBackup rpm packages for pxb-{{ major_release_version }} dnf
+  dnf:
+    name: "{{ packages }}"
+    state: absent
+  vars:
+    packages:
+      - percona-xtrabackup-{{ major_release_version }}
+      - percona-xtrabackup-test-{{ major_release_version }}
+      - percona-xtrabackup-{{ major_release_version }}-debuginfo
+  when:
+    - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
+    - ansible_facts['distribution_major_version'] | int >= 8

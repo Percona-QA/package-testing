@@ -1,58 +1,92 @@
   - name: include playbook for removing Percona repo
     include_tasks: remove_percona_repository.yml
 
-  - name: disable the mysql module on RHEL/CentOS 8
-    command: /usr/bin/dnf module disable mysql -y
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
-
-  - name: Install percona repository package
+  - name: Install percona release Debian
     apt:
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
     when: ansible_os_family == "Debian"
 
-  - name: Ensure gnupg home exists (Amazon Linux)
-    file:
-      path: "{{ gnupg_home }}"
-      state: directory
-      mode: '0700'
+  - name: Install percona release RHEL
+    command: rpm -ivh --nodigest --nofiledigest https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+    when: ansible_os_family == "RedHat"
+
+  - name: Download Percona GPG key
+    ansible.builtin.get_url:
+      url: https://github.com/percona/percona-repositories/raw/main/deb/percona-keyring.gpg
+      dest: /tmp/percona-keyring.gpg
+      mode: '0644'
+    when: ansible_os_family == "Debian"
+
+  - name: Install Percona GPG key
+    ansible.builtin.copy:
+      src: /tmp/percona-keyring.gpg
+      dest: /etc/apt/trusted.gpg.d/percona-keyring.gpg
+      remote_src: yes
+      mode: '0644'
+    when: ansible_os_family == "Debian"
+
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: /usr/bin/dnf module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+#  - name: Ensure gnupg home exists (Amazon Linux)
+#    file:
+#      path: "{{ gnupg_home }}"
+#      state: directory
+#      mode: '0700'
+#    when:
+#      - ansible_os_family == "Amazon"
+
+#  - name: Download Percona GPG key from Percona's repo (Amazon Linux)
+#    get_url:
+#      url: https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
+#      dest: "{{ percona_key1_file }}"
+#      mode: '0644'
+#    when: ansible_os_family == "Amazon"
+
+#  - name: Import GPG keys with rpmkeys
+#    command: "rpmkeys --import {{ percona_key1_file }}"
+#    when: ansible_os_family == "RedHat"
+
+  - name: add eol main repository on debian
+    template: src=../templates/eol_deb_repo_file_ps80.j2
+              dest=/etc/apt/sources.list.d/post-eol.list
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "main"
+    when:
+      - ansible_os_family == "Debian"
+
+  - name: add eol main repository on Redhat AMD
+    template: src=../templates/eol_rpm_repo_file_ps80.j2
+             dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "release"
     when:
       - ansible_os_family == "RedHat"
+      - ansible_architecture == "x86_64"
 
-  - name: Download Percona GPG key from Percona's repo (Amazon Linux)
-    get_url:
-      url: https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
-      dest: "{{ percona_key1_file }}"
-      mode: '0644'
-    when: ansible_os_family == "RedHat"
-
-  - name: Import GPG keys with rpmkeys
-    command: "rpmkeys --import {{ percona_key1_file }}"
-    when: ansible_os_family == "RedHat"
-
-  - name: Add the Percona Release yum repo without GPG check
-    yum:
-      name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
-      disable_gpg_check: yes
-    when: ansible_os_family == "RedHat"
-
-  - name: enable the PS-80 release repo
-    command: percona-release enable ps-80 release
-
-  - name: enable the pxb-80 release repo
-    command: percona-release enable pxb-80 release
+  - name: add eol testing repository on Redhat ARM
+    template: src=../templates/eol_rpm_repo_file_ps80_arm.j2
+             dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "release"
     when:
-      - ansible_distribution != "Amazon"
-
-# - name: enable the tools main repo
-#   command: percona-release enable tools release
+      - ansible_os_family == "RedHat"
+      - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
 
   - name: Clean and update package cache
     shell: |
       {{ ansible_pkg_mgr }} clean all
       {{ ansible_pkg_mgr }} makecache
     when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
 
-  - name: Add ARM support into percona-release
-    shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
-    when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+#  - name: Add ARM support into percona-release
+#    shell: sed -i "s|x86_64|x86_64 aarch64|" /usr/bin/percona-release
+#    when: ansible_architecture == "aarch64" or ansible_architecture == "arm64"

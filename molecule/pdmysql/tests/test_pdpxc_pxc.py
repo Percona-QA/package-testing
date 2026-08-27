@@ -17,7 +17,7 @@ DEBPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-client',
                'percona-xtradb-cluster']
 
 RPMPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster',
-               'percona-xtradb-cluster-client', 'percona-xtradb-cluster-debuginfo',
+               'percona-xtradb-cluster-client',
                'percona-xtradb-cluster-devel', 'percona-xtradb-cluster-garbd',
                'percona-xtradb-cluster-server', 'percona-xtradb-cluster-shared',
                'percona-xtradb-cluster-test']
