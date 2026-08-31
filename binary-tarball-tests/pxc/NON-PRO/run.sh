@@ -130,7 +130,7 @@ export BASE_DIR="${PWD}/${PXC_DIR_NAME}"
 cp conf/*cnf $BASE_DIR/
 
 PRO=$(echo ${PRO})
-
+df -mh
 echo "Running tests..."
 echo "Pro value inside run.sh is ${PRO}"
 echo "${PXC_DIR_NAME}"

@@ -108,6 +108,12 @@ class GardbNode:
             else:
                 self.repo_name = 'pxc-84-lts testing'
             self.image = 'percona-xtradb-cluster-garbd'
+        elif pxc_version_major == "9.7":
+            if docker_acc == 'percona':
+                self.repo_name = 'pxc-97-lts'
+            else:
+                self.repo_name = 'pxc-97-lts testing'
+            self.image = 'percona-xtradb-cluster-garbd'
         elif re.match(r'^9\.[0-9]$', pxc_version_major):
             if docker_acc == 'percona':
                 self.repo_name = 'pxc-9x-innovation'
@@ -125,7 +131,7 @@ class GardbNode:
         base_node_name+'1', base_node_name+'2',base_node_name+'3']).decode().strip().replace('\n',',').replace('"','')
         if pxc_version_major == "8.0" or pxc_version_major == "8.4" or re.match(r'^9\.[0-9]$', pxc_version_major):
             subprocess.check_call(['docker', 'exec', '-d', self.docker_name, 'garbd', '--group='+cluster_name, '--address=gcomm://'+self.pxc_ips,
-            '--option="socket.ssl_key=/cert/server-key.pem; socket.ssl_cert=/cert/server-cert.pem; socket.ssl_ca=/cert/ca.pem; socket.ssl_cipher=AES128-SHA256"'])
+            '--option=socket.ssl_key=/cert/server-key.pem; socket.ssl_cert=/cert/server-cert.pem; socket.ssl_ca=/cert/ca.pem; socket.ssl_cipher=AES128-SHA256'])
         else:
             subprocess.check_call(['docker', 'exec', '-d', self.docker_name, 'garbd', '--group='+cluster_name, '--address=gcomm://'+self.pxc_ips])
 

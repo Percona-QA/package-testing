@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        label 'docker'
+        label 'docker-32gb'
     }
     parameters {
         string(name: 'PXC_VERSION', defaultValue: '8.0.37-29.1', description: 'PXC full version')
@@ -46,7 +46,8 @@ pipeline {
                                 git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
-                                ./run.sh || true
+                                df -mh
+                                ./run.sh || df -mh
                               '''
                             junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
                         }
@@ -99,7 +100,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                   MINIMAL="-minimal"
                                 fi
-                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.41${MINIMAL}.tar.gz"
+                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.39${MINIMAL}.tar.gz"
                                 if [ "${EOL}" = "yes" ]; then
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
                                 else
@@ -195,7 +196,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                   MINIMAL="-minimal"
                                 fi
-                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.41${MINIMAL}.tar.gz"
+                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.39${MINIMAL}.tar.gz"
                                 if [ "${EOL}" = "yes" ]; then
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
                                 else

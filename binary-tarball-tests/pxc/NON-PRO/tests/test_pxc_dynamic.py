@@ -9,10 +9,7 @@ from settings import *
 @pytest.fixture(scope='module')
 def mysql_server(request):
     mysql_server = mysql.MySQL(base_dir)
-    try:
-        mysql_server.start()
-    except RuntimeError as e:
-        pytest.skip(f"Skipping dynamic tests: {e}")
+    mysql_server.start()
     yield mysql_server
     mysql_server.stop()
 
