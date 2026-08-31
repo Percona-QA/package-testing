@@ -61,6 +61,9 @@
   - name: check that proxysql version is correct
     command: /package-testing/version_check.sh proxysql2
 
+  - name: check that proxysql initial is working correct
+    command: /package-testing/test_proxysql_initial.sh
+
   - name: remove proxysql deb packages
     apt:
       name: "{{ packages }}"
