@@ -280,9 +280,8 @@
 #  - name: Run tests and incase of failure save logs
 #    block:
 
-  - name: run bats tests for mysql init scripts
-    shell: sleep {{ sleep_before_tests | default('0') }}; /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
-    throttle: 1
+  - name: run pytest tests for mysql init scripts
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_pxc_init_scripts.py
 
   - name: start mysql service
     service: name=mysql state=started
@@ -511,10 +510,6 @@
 
   - name: Verify telemetry version and package installation
     command: /package-testing/check_tel_ver_pack.sh
-    when:
-      - ansible_distribution != "Amazon"
-      - ansible_distribution_major_version|int != 7
-      - not (ansible_distribution == "Ubuntu" and ansible_distribution_release == "focal")
 
   - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL COMMON
     include_tasks: ../../../../tasks/list_installed_packages.yml
