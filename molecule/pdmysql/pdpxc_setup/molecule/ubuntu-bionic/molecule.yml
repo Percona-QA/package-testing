@@ -16,6 +16,8 @@ platforms:
       job-name: ${JOB_NAME}_setup
 provisioner:
   name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
   log: True
   playbooks:
     create: ../../../../playbooks/create_noble.yml
@@ -36,7 +38,7 @@ scenario:
   name: ubuntu-bionic
   destroy_sequence:
     - destroy
-  clenup_sequence:
+  cleanup_sequence:
     - cleanup
   test_sequence:
     - destroy
