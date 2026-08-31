@@ -281,7 +281,8 @@
 #    block:
 
   - name: run pytest tests for mysql init scripts
-    command: python3 -m pytest -v /package-testing/pytest-tests/test_pxc_init_scripts.py
+    shell: sleep {{ sleep_before_tests | default('0') }}; python3 -m pytest -v /package-testing/pytest-tests/test_pxc_init_scripts.py
+    throttle: 1
 
   - name: start mysql service
     service: name=mysql state=started
