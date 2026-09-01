@@ -1,97 +1,168 @@
 pipeline {
-  agent { label 'docker' }
-  parameters {
-    string(name: 'UPSTREAM_VERSION', defaultValue: '5.7.44', description: 'only upstream version Example 5.7.44')
-    string(name: 'PS_VERSION', defaultValue: '49', description: 'Only Percona specific version example 49')
-    string(name: 'PXC_REVISION', defaultValue: '38d2944', description: 'Short git hash for release')
-    string(name: 'PXC_PKG_VERSION', defaultValue: '2', description: 'package version')
-    string(name: 'TAG', defaultValue: '5.7.44-31.65.2', description: 'Different tags that are going to be released')
-    string(name: 'PXC_WSREP_VERSION', defaultValue: '31.65', description: 'Galera WSREP version')
-    string(name: 'PXC_PXB_VERSION', defaultValue: '2.4.29', description: 'PXB version installed (only for PXC 5.7)')
-    choice(name: 'REPO', choices: ['testing', 'main'], description: 'Choose repository: testing or main')
-  }
-  stages {
-    stage('Prepare') {
-      steps {
-        script {
-          currentBuild.displayName = "#${BUILD_NUMBER}-${UPSTREAM_VERSION}-${PXC_REVISION}-${REPO}"
-          currentBuild.description = "${TAG}"
-        }
-      }
+    agent none
+
+    parameters {
+        string(name: 'UPSTREAM_VERSION', defaultValue: '5.7.44', description: 'Only upstream version')
+        string(name: 'PS_VERSION', defaultValue: '49', description: 'Percona version')
+        string(name: 'PXC_REVISION', defaultValue: '38d2944', description: 'Git revision')
+        string(name: 'PXC_PKG_VERSION', defaultValue: '2', description: 'Package version')
+        string(name: 'TAG', defaultValue: '5.7.44-31.65.2', description: 'Docker tag')
+        string(name: 'PXC_WSREP_VERSION', defaultValue: '31.65', description: 'WSREP version')
+        string(name: 'PXC_PXB_VERSION', defaultValue: '2.4.29', description: 'PXB version')
+        choice(name: 'REPO', choices: ['testing', 'main'], description: 'Repository')
     }
-      
-      stage('Prepare Image') {
-          steps {
-              withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-                  script {
-                      def dockerTarURL
-                      if (REPO == 'testing') {
-                          dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${UPSTREAM_VERSION}.${PXC_PKG_VERSION}/percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar"
-                      } else {
-                          dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${UPSTREAM_VERSION}/percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar"
-                      }
-                      sh "wget -q ${dockerTarURL}"
-                      sh "sudo docker load -i percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar"
-                  }
-              }
-          }
-      }       
 
-      stage ('Run trivy analyzer') {
-        steps {
-            sh """
-              sudo yum install -y wget git
-              TRIVY_VERSION="0.69.3"
-              ARCH=\$(uname -m)
-              if [[ "\$ARCH" == "aarch64" ]]; then
-                  ARCH_NAME="ARM64"
-                  TRIVY_CHECKSUM="7e3924a974e912e57b4a99f65ece7931f8079584dae12eb7845024f97087bdfd"
-              elif [[ "\$ARCH" == "x86_64" ]]; then
-                  ARCH_NAME="64bit"
-                  TRIVY_CHECKSUM="1816b632dfe529869c740c0913e36bd1629cb7688bd5634f4a858c1d57c88b75"
-              else
-                  echo "Unsupported architecture: \$ARCH"
-                  exit 1
-              fi
-              echo "Detected architecture: \$ARCH, using Trivy for Linux-\$ARCH_NAME"
-              wget https://github.com/aquasecurity/trivy/releases/download/v\${TRIVY_VERSION}/trivy_\${TRIVY_VERSION}_Linux-\${ARCH_NAME}.tar.gz
-              echo "\${TRIVY_CHECKSUM}  trivy_\${TRIVY_VERSION}_Linux-\${ARCH_NAME}.tar.gz" | sha256sum -c -
-              sudo tar zxvf trivy_\${TRIVY_VERSION}_Linux-\${ARCH_NAME}.tar.gz -C /usr/local/bin/
-              wget https://raw.githubusercontent.com/aquasecurity/trivy/v\${TRIVY_VERSION}/contrib/junit.tpl
-              /usr/local/bin/trivy -q image --format template --template @junit.tpl  -o trivy-hight-junit.xml \
-              --timeout 10m0s --ignore-unfixed --exit-code 1 --severity HIGH,CRITICAL percona/percona-xtradb-cluster:${TAG}
-            """
-         } //end steps
-         post {
-           always {
-                    junit testResults: "*-junit.xml", keepLongStdio: true, allowEmptyResults: true, skipPublishingChecks: true
+    stages {
+
+        stage('Prepare') {
+            agent { label 'docker' }
+            steps {
+                script {
+                    currentBuild.displayName = "#${BUILD_NUMBER}-${UPSTREAM_VERSION}-${PXC_REVISION}-${REPO}"
+                    currentBuild.description = "${TAG}"
                 }
+            }
         }
-      } //end Run trivy analyzer        
 
-      stage('Run tests') {
-        steps {
-            sh '''
-              # disable THP on the host for TokuDB
-              echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" > disable_thp.sh
-              echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag" >> disable_thp.sh
-              chmod +x disable_thp.sh
-              sudo ./disable_thp.sh
-              # run test
-              export PATH=${PATH}:~/.local/bin
-              sudo yum install -y python3 python3-pip
-              rm -rf package-testing
-              git clone https://github.com/Percona-QA/package-testing.git --depth 1
-              cd package-testing/docker-image-tests/pxc-eol
-              pip3 install --user -r requirements.txt
-              ./run.sh
-            '''
-        } //end steps
-        post {
-          always {
-          junit 'package-testing/docker-image-tests/pxc-eol/report.xml'
+        stage('Validation') {
+            failFast false
+
+            parallel {
+
+                stage('Run Trivy Analyzer') {
+                    agent { label 'docker' }
+
+                    steps {
+                        withCredentials([
+                            usernamePassword(
+                                credentialsId: 'PS_PRIVATE_REPO_ACCESS',
+                                usernameVariable: 'USERNAME',
+                                passwordVariable: 'PASSWORD'
+                            )
+                        ]) {
+
+                            script {
+                                def dockerTarURL
+
+                                if (REPO == 'testing') {
+                                    dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${UPSTREAM_VERSION}.${PXC_PKG_VERSION}/percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar"
+                                } else {
+                                    dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${UPSTREAM_VERSION}/percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar"
+                                }
+
+                                sh """
+                                    rm -f *.docker.tar
+                                    wget -q ${dockerTarURL}
+                                    sudo docker load -i percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar
+                                """
+                            }
+
+                            sh """
+                                sudo yum install -y wget git
+
+                                TRIVY_VERSION=0.69.3
+                                ARCH=\$(uname -m)
+
+                                if [[ "\$ARCH" == "aarch64" ]]; then
+                                    ARCH_NAME=ARM64
+                                    TRIVY_CHECKSUM=7e3924a974e912e57b4a99f65ece7931f8079584dae12eb7845024f97087bdfd
+                                else
+                                    ARCH_NAME=64bit
+                                    TRIVY_CHECKSUM=1816b632dfe529869c740c0913e36bd1629cb7688bd5634f4a858c1d57c88b75
+                                fi
+
+                                wget -q https://github.com/aquasecurity/trivy/releases/download/v\${TRIVY_VERSION}/trivy_\${TRIVY_VERSION}_Linux-\${ARCH_NAME}.tar.gz
+                                echo "\${TRIVY_CHECKSUM}  trivy_\${TRIVY_VERSION}_Linux-\${ARCH_NAME}.tar.gz" | sha256sum -c -
+                                sudo tar zxf trivy_\${TRIVY_VERSION}_Linux-\${ARCH_NAME}.tar.gz -C /usr/local/bin/
+
+                                wget -q https://raw.githubusercontent.com/aquasecurity/trivy/v\${TRIVY_VERSION}/contrib/junit.tpl
+
+                                trivy image \
+                                  --severity HIGH,CRITICAL \
+                                  --ignore-unfixed \
+                                  --timeout 10m \
+                                  percona/percona-xtradb-cluster:${TAG}
+
+                                trivy image \
+                                  --format template \
+                                  --template @junit.tpl \
+                                  -o trivy-high-junit.xml \
+                                  --severity HIGH,CRITICAL \
+                                  --ignore-unfixed \
+                                  --timeout 10m \
+                                  --exit-code 1 \
+                                  percona/percona-xtradb-cluster:${TAG}
+                            """
+                        }
+                    }
+
+                    post {
+                        always {
+                            junit testResults: 'trivy-*.xml',
+                                  allowEmptyResults: true,
+                                  keepLongStdio: true,
+                                  skipPublishingChecks: true
+                        }
+                    }
+                }
+
+                stage('Run Tests') {
+                    agent { label 'docker' }
+
+                    steps {
+                        withCredentials([
+                            usernamePassword(
+                                credentialsId: 'PS_PRIVATE_REPO_ACCESS',
+                                usernameVariable: 'USERNAME',
+                                passwordVariable: 'PASSWORD'
+                            )
+                        ]) {
+
+                            script {
+                                def dockerTarURL
+
+                                if (REPO == 'testing') {
+                                    dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${UPSTREAM_VERSION}.${PXC_PKG_VERSION}/percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar"
+                                } else {
+                                    dockerTarURL = "https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-57-eol/tarballs/Percona-XtraDB-Cluster-${UPSTREAM_VERSION}/percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar"
+                                }
+
+                                sh """
+                                    rm -f *.docker.tar
+                                    wget -q ${dockerTarURL}
+                                    sudo docker load -i percona-xtradb-cluster-${UPSTREAM_VERSION}-${PXC_WSREP_VERSION}-${PXC_PKG_VERSION}.docker.tar
+                                """
+                            }
+
+                            sh '''
+                                echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" > disable_thp.sh
+                                echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag" >> disable_thp.sh
+                                chmod +x disable_thp.sh
+                                sudo ./disable_thp.sh
+
+                                export PATH=${PATH}:~/.local/bin
+
+                                sudo yum install -y python3 python3-pip
+
+                                rm -rf package-testing
+                                git clone https://github.com/Percona-QA/package-testing.git --depth 1
+
+                                cd package-testing/docker-image-tests/pxc-eol
+
+                                pip3 install --user -r requirements.txt
+
+                                ./run.sh
+                            '''
+                        }
+                    }
+
+                    post {
+                        always {
+                            junit 'package-testing/docker-image-tests/pxc-eol/report.xml'
+                        }
+                    }
+                }
+            }
         }
-       }
-     } //end Run tests
-    } //end stages
+    }
 }

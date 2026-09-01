@@ -42,7 +42,13 @@ fi
 
 mysql -e "INSTALL PLUGIN clone SONAME 'mysql_clone.so';"
 
-for component in component_validate_password component_log_sink_syseventlog component_log_sink_json component_log_filter_dragnet component_audit_api_message_emit component_binlog_utils_udf component_percona_udf component_keyring_vault; do
+COMPONENTS="component_validate_password component_log_sink_syseventlog component_log_sink_json component_log_filter_dragnet component_audit_api_message_emit component_binlog_utils_udf component_percona_udf component_keyring_vault"
+if [ "$(grep '^VERSION_ID="10' /etc/os-release | wc -l)" = 1 ]; then
+  echo "component_keyring_vault is skipped on RHEL 10: dlopen fails with 'cannot allocate memory in static TLS block' (glibc static TLS surplus too small for this component on el10)"
+  COMPONENTS="component_validate_password component_log_sink_syseventlog component_log_sink_json component_log_filter_dragnet component_audit_api_message_emit component_binlog_utils_udf component_percona_udf"
+fi
+
+for component in $COMPONENTS; do
   if [ $(mysql -Ns -e "select count(*) from mysql.component where component_urn=\"file://${component}\";") -eq 0 ]; then
     mysql -e "INSTALL COMPONENT \"file://${component}\";"
   fi

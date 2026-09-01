@@ -31,7 +31,7 @@ verifier:
 scenario:
   destroy_sequence:
     - destroy
-  clenup_sequence:
+  cleanup_sequence:
     - cleanup
   test_sequence:
     - destroy

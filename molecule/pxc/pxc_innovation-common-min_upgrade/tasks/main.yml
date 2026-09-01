@@ -144,8 +144,8 @@
     command: /package-testing/package_check.sh pxc{{ major_release_version}}
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
-  - name: run bats tests for mysql init scripts
-    shell: sleep {{ sleep_before_tests | default('0') }}; /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
+  - name: run pytest tests for mysql init scripts
+    shell: sleep {{ sleep_before_tests | default('0') }}; python3 -m pytest -v /package-testing/pytest-tests/test_pxc_init_scripts.py
     throttle: 1
 
   - name: start mysql service
@@ -154,3 +154,13 @@
 
   - name: Check that the PXC Cluster is up and running
     shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'
+
+  - name: check mysql service status
+    command: service mysql status
+    register: mysql_service_status
+    changed_when: false
+    ignore_errors: true
+
+  - name: print mysql service status
+    debug:
+      var: mysql_service_status.stdout_lines

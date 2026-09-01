@@ -43,6 +43,8 @@ platforms:
       build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
   lint:
     name: ansible-lint
   playbooks:
