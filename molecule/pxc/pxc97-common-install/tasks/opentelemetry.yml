@@ -1,0 +1,19 @@
+---
+  - name: install telemetry_trace component
+    command: mysql -e "INSTALL COMPONENT 'file://component_telemetry';"
+
+  - name: check telemetry_trace component is registered
+    command: mysql -NBe "SELECT component_urn FROM mysql.component WHERE component_urn='file://component_telemetry';"
+    register: telemetry_component
+    failed_when: telemetry_component.stdout != 'file://component_telemetry'
+
+  - name: check telemetry variables are exposed
+    command: mysql -NBe "SHOW VARIABLES LIKE 'telemetry%';"
+    register: telemetry_variables
+    failed_when: telemetry_variables.stdout == ""
+
+# The telemetry client plugin ships with the mysql client binary and is toggled
+# with --telemetry-client / telemetry-client=ON in [mysql]; MySQL has no
+# INSTALL PLUGIN statement for it.
+  - name: check telemetry client plugin option is recognized
+    command: mysql --telemetry-client=ON -e "SELECT 1;"

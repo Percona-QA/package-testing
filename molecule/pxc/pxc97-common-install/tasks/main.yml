@@ -291,6 +291,9 @@
   - name: Check that the PXC Cluster is up and running
     shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'
 
+  - name: include tasks for opentelemetry component and plugin check
+    include_tasks: opentelemetry.yml
+
 ## Changes done for telemetry: remove pxc package - add iptables rule for Telemetry Server - install only pxc package.
 ## Expected resuld - telemetry_uuid file has only instanceID
 
