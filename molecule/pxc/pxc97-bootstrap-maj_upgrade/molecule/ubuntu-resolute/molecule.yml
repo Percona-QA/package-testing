@@ -1,18 +1,18 @@
 ---
 scenario:
-  name: rocky-linux-9
+  name: ubuntu-resolute
 dependency:
   name: galaxy
 driver:
   name: ec2
 platforms:
-  - name: ${BUILD_NUMBER}-pxc1-97-bootstrap-rl-9-maj_upgrade
+  - name: ${BUILD_NUMBER}-pxc1-97-bootstrap-ubuntu-resolute-maj_upgrade
     region: us-west-1
-    image: ami-067373e9ee6ac04e0
+    image: ami-0b823b038ed60697f
     vpc_subnet_id: subnet-04a8ad1b1d4da874c
     instance_type: t2.large
-    ssh_user: rocky
-    root_device_name: /dev/xvda
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
     instance_tags:
       iit-billing-tag: ${IIT_BILLING_TAG}
       job-name: ${JOB_NAME}
@@ -28,5 +28,5 @@ provisioner:
     side_effect: ../../../../../playbooks/pxc97_upgrade_bootstrap.yml
   inventory:
     host_vars:
-      ${BUILD_NUMBER}-pxc1-97-bootstrap-rl-9-maj_upgrade:
+      ${BUILD_NUMBER}-pxc1-97-bootstrap-ubuntu-resolute-maj_upgrade:
         ip_env: "{{ ansible_host }}"
