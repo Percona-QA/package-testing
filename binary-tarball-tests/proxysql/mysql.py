@@ -50,7 +50,7 @@ class MySQL:
         output = subprocess.check_output([self.mysqld, '--version'], universal_newlines=True)
         x = re.search(r"[0-9]+\.[0-9]+", output)
         self.major_version = x.group()
-        if self.major_version != "8.0" and not re.match(r'^8\.[1-9]$', pxc_version_major):
+        if self.major_version.startswith("5."):
             self.sst_opts = ["--wsrep_sst_method=xtrabackup-v2", "--wsrep_sst_auth=root:"]
         else:
             self.sst_opts = ["--wsrep_sst_method=xtrabackup-v2"]

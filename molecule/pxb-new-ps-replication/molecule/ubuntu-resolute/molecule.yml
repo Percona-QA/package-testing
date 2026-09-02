@@ -30,6 +30,7 @@ verifier:
     verbose: true
     s: true
   env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
     FIPS_SUPPORTED: "no"
 scenario:
   name: ubuntu-resolute

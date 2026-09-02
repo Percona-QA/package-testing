@@ -14,6 +14,8 @@ platforms:
       job-name: ${JOB_NAME}
 provisioner:
   name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
   log: True
   playbooks:
     create: ../../../../playbooks/create_noble.yml
@@ -33,7 +35,7 @@ verifier:
 scenario:
   destroy_sequence:
     - destroy
-  clenup_sequence:
+  cleanup_sequence:
     - cleanup
   test_sequence:
     - destroy

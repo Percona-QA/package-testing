@@ -44,4 +44,5 @@ verifier:
     verbose: true
     s: true
   env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
     MOLECULE_INVENTORY_FILE: ${MOLECULE_INVENTORY_FILE}
