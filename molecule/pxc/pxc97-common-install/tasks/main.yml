@@ -228,6 +228,8 @@
 
 #  - name: check telemetry (disabled)
 #    command: /package-testing/check_telemetry.sh pxc -d
+  - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL BOOTSTRAP
+    include_tasks: ../../../../tasks/list_installed_packages.yml
 
   - name: copy PXC config on centos 7
     template: src=../../../../templates/my_rpm_97.j2 
