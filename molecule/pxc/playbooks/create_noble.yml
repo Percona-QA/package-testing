@@ -62,6 +62,15 @@
       no_log: True
       with_items: "{{ molecule_yml.platforms }}"
 
+    - name: Look up each AMI's real root device name
+      amazon.aws.ec2_ami_info:
+        region: "{{ item.region | default(default_region) }}"
+        image_ids: "{{ item.image }}"
+      register: ami_info
+      loop: "{{ molecule_yml.platforms }}"
+      loop_control:
+        index_var: index
+
     - name: Create molecule instance(s)
       ec2_instance:
         key_name: "{{ keypair_name }}"
@@ -87,10 +96,10 @@
         exact_count: 1
         region: "{{ item.region|default(default_region) }}"
         volumes:
-          - device_name: "{{ item.root_device_name }}"
+          - device_name: "{{ ami_info.results[index].images[0].root_device_name | default(item.root_device_name) }}"
             ebs:
               volume_type: gp2
-              volume_size: 30
+              volume_size: 40
               delete_on_termination: true
       register: server
       loop: "{{ molecule_yml.platforms }}"
@@ -337,3 +346,143 @@
     - name: Wait for boot process to finish
       pause:
         minutes: 2
+
+    - name: Register created instances for in-play root resize
+      add_host:
+        name: "{{ item.instance }}"
+        groups: molecule_created
+        ansible_host: "{{ item.address }}"
+        ansible_user: "{{ item.user }}"
+        ansible_port: "{{ item.port }}"
+        ansible_ssh_private_key_file: "{{ item.identity_file }}"
+        ansible_ssh_common_args: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+      changed_when: false
+      with_items: "{{ lookup('file', molecule_instance_config) | from_yaml }}"
+
+
+# Grow the root partition/filesystem to fill the EBS volume during the create phase,
+# so instances leave 'create' already at full size (independent of prepare).
+- name: Resize root filesystem on created instances
+  hosts: molecule_created
+  become: true
+  become_method: sudo
+  gather_facts: true
+  tasks:
+
+    - name: Check the OS name
+      command: cat /etc/os-release
+      register: os_release
+      changed_when: false
+
+    - name: Print the OS name
+      debug:
+        var: os_release.stdout_lines
+
+    - name: Check the CPU architecture
+      command: uname -m
+      register: cpu_arch
+      changed_when: false
+
+    - name: Print the OS name and architecture
+      debug:
+        msg: "OS: {{ ansible_distribution }} {{ ansible_distribution_version }} | arch: {{ cpu_arch.stdout }} ({{ 'arm' if ansible_architecture == 'aarch64' else 'amd' }})"
+
+    - name: Show disk layout (before resize)
+      command: "{{ item }}"
+      loop:
+        - lsblk
+        - df -hT
+        - cat /proc/mounts
+      register: disk_info
+      changed_when: false
+
+    - name: Print disk layout (before resize)
+      debug:
+        var: disk_info.results | map(attribute='stdout') | list
+
+    - name: Install growpart tool (RedHat family)
+      package:
+        name: cloud-utils-growpart
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Install growpart tool (Debian family)
+      apt:
+        name: cloud-guest-utils
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Detect root mount source
+      command: findmnt -no SOURCE /
+      register: root_src
+      changed_when: false
+
+    - name: Detect root filesystem type
+      command: findmnt -no FSTYPE /
+      register: root_fstype
+      changed_when: false
+
+    - name: Detect if root is LVM
+      set_fact:
+        root_is_lvm: "{{ root_src.stdout.startswith('/dev/mapper/') }}"
+
+    - name: Find underlying partition for LVM root
+      shell: |
+        pv=$(pvs --noheadings -o pv_name | tr -d ' ' | head -n1)
+        echo "$pv"
+      register: lvm_pv
+      changed_when: false
+      when: root_is_lvm | bool
+
+    - name: Set partition device for growpart
+      set_fact:
+        part_device: "{{ lvm_pv.stdout if root_is_lvm | bool else root_src.stdout }}"
+
+    - name: Compute parent disk and partition number
+      set_fact:
+        root_disk: "/dev/{{ (part_device | basename) | regex_replace('p?[0-9]+$', '') }}"
+        root_partnum: "{{ part_device | regex_search('[0-9]+$') }}"
+
+    - name: Grow root partition
+      command: "growpart {{ root_disk }} {{ root_partnum }}"
+      register: growpart_result
+      changed_when: "'CHANGED' in growpart_result.stdout"
+      failed_when:
+        - growpart_result.rc != 0
+        - "'NOCHANGE' not in (growpart_result.stdout + growpart_result.stderr)"
+      when: root_partnum | length > 0
+
+    - name: Resize physical volume (LVM)
+      command: "pvresize {{ part_device }}"
+      when: root_is_lvm | bool
+
+    - name: Extend root logical volume (LVM)
+      command: "lvextend -l +100%FREE {{ root_src.stdout }}"
+      register: lvextend_result
+      changed_when: lvextend_result.rc == 0
+      failed_when:
+        - lvextend_result.rc != 0
+        - "'matches existing size' not in (lvextend_result.stdout + lvextend_result.stderr)"
+        - "'already at maximum size' not in (lvextend_result.stdout + lvextend_result.stderr)"
+      when: root_is_lvm | bool
+
+    - name: Grow XFS filesystem on /
+      command: xfs_growfs /
+      when: root_fstype.stdout == "xfs"
+
+    - name: Grow ext filesystem on /
+      command: "resize2fs {{ root_src.stdout }}"
+      when: root_fstype.stdout in ["ext2", "ext3", "ext4"]
+
+    - name: Show disk layout (after resize)
+      command: "{{ item }}"
+      loop:
+        - lsblk
+        - df -hT
+      register: disk_info_after
+      changed_when: false
+
+    - name: Print disk layout (after resize)
+      debug:
+        var: disk_info_after.results | map(attribute='stdout') | list

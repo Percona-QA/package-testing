@@ -47,15 +47,6 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
-      - percona-xtradb-cluster-test
-      - percona-xtradb-cluster-source
-      - percona-xtradb-cluster-server-debug
-      - percona-xtradb-cluster-server
-      - percona-xtradb-cluster-common
-      - percona-xtradb-cluster-dbg
-      - percona-xtradb-cluster-client
-      - percona-xtradb-cluster
-      - percona-xtrabackup-97
     when:
       - ansible_os_family == "Debian"
     environment:
@@ -68,15 +59,7 @@
       state: latest
     vars:
       packages:
-      - percona-xtradb-cluster-shared
-      - percona-xtradb-cluster-garbd
-      - percona-xtradb-cluster-test
-      - percona-xtradb-cluster-devel
-      - percona-xtradb-cluster-debuginfo
-      - percona-xtradb-cluster-server
       - percona-xtradb-cluster-full
-      - percona-xtradb-cluster-client
-      - percona-xtrabackup-97
     when:
       - ansible_os_family == "RedHat"
     environment:
