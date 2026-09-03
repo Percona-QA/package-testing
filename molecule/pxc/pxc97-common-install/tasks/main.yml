@@ -252,9 +252,41 @@
       dest: /etc/mysql/certs/
 
   - name: start mysql service
-    service: name=mysql state=started
+    service:
+      name: mysql
+      state: started
+    register: mysql_start
+    ignore_errors: yes
     throttle: 1
-    
+
+  - name: Print start result
+    debug:
+      var: mysql_start
+
+  - name: Check mysql error log
+    shell: cat /var/log/mysqld.log /var/log/mysql/error.log 2>/dev/null || true
+    register: mysql_log
+    ignore_errors: yes
+
+  - debug:
+      var: mysql_log.stdout
+
+  - name: Check systemd status
+    shell: systemctl status mysql.service -l --no-pager
+    register: mysql_status
+    ignore_errors: yes
+
+  - debug:
+      var: mysql_status.stdout
+
+  - name: Check journal logs
+    shell: journalctl -xeu mysql.service --no-pager | tail -50
+    register: mysql_journal
+    ignore_errors: yes
+
+  - debug:
+      var: mysql_journal.stdout
+
   - name: register PXC version Molecule
     shell: mysqld --version
     register: pxc_version
