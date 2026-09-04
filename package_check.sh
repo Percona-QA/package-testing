@@ -90,6 +90,10 @@ elif [ $1 = "pxc84" ]; then
     release=${PXC84_VER#*-}
     revision=${PXC84_REV}
   fi
+elif [ $1 = "pxc97" ]; then
+  version=${PXC97_VER}
+  release=${PXC97_VER#*-}
+  revision=${PXC97_REV}
 elif [[ "$1" =~ ^pxc9[0-9]{1}$ ]]; then
   version=${PXC_INN_LTS_VER}
   release=${PXC_INN_LTS_VER#*-}
@@ -338,9 +342,48 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
     fi
   fi
 
-elif [[ ${product} =~ ^pxc8[0-9]{1}$ ]]; then
-  echo "Package check for PXC-8x is not implemented!"
-  exit 0
+elif [[ "${product}" =~ ^pxc(8[0-9]|9[0-9])$ ]]; then
+  pxc_name="percona-xtradb-cluster"
+  if [ -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
+    if [ -f /etc/system-release -a $(grep -c Amazon /etc/system-release) -eq 1 ]; then
+      centos_maj_version="9"
+    else
+      centos_maj_version=$(cat /etc/redhat-release | grep -oE '[0-9]+' | head -n 1)
+    fi
+    if [[ "${centos_maj_version}" == "9" || "${centos_maj_version}" == "10" ]] || [[ "${arch}" == "aarch64" ]]; then
+      rpm_opt_package=""
+      rpm_num_pkgs="7"
+    else
+      rpm_opt_package="${pxc_name}-shared-compat"
+      rpm_num_pkgs="8"
+    fi
+    if [ "$(rpm -qa | grep "${pxc_name}" | grep -c "${version}")" == "${rpm_num_pkgs}" ]; then
+      echo "all packages are installed"
+    else
+      for package in ${pxc_name}-server ${pxc_name}-test ${pxc_name}-debuginfo ${pxc_name}-devel ${pxc_name}-shared ${pxc_name}-client ${pxc_name}-full ${rpm_opt_package}; do
+        if [ "$(rpm -qa | grep -c ${package}-${version})" -gt 0 ]; then
+          echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
+        else
+          echo "WARNING: ${package}-${version} is not installed"
+          exit 1
+        fi
+      done
+    fi
+  else
+    deb_num_pkgs="7"
+    if [ "$(dpkg -l | grep ${pxc_name} | grep -c ${version})" == "${deb_num_pkgs}" ]; then
+      echo "all packages are installed"
+    else
+      for package in ${pxc_name}-full ${pxc_name}-server-debug ${pxc_name}-server ${pxc_name}-client ${pxc_name}-test ${pxc_name}-dbg ${pxc_name}-common; do
+        if [ "$(dpkg -l | grep ${package} | grep -c ${version})" != 0 ]; then
+          echo "$(date +%Y%m%d%H%M%S): ${package} is installed"
+        else
+          echo "WARNING: ${package} is not installed"
+          exit 1
+        fi
+      done
+    fi
+  fi
   
 elif [ ${product} = "pt" ]; then
   echo "Package check for PT is not implemented!"
