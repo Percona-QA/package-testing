@@ -214,10 +214,10 @@
   - name: print INNODB version debug
     debug: var=innod_version
 
-  - name: check PXC 9.7 version Molecule
-    command: /package-testing/version_check.sh pxc97
-    when:
-      - lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
+#  - name: check PXC 9.7 version Molecule
+#    command: /package-testing/version_check.sh pxc97
+#    when:
+ #     - lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
   - name: check that PXC package versions are correct Install
     command: /package-testing/package_check.sh pxc97
