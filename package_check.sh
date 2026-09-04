@@ -344,6 +344,18 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
 
 elif [[ "${product}" =~ ^pxc(8[0-9]|9[0-9])$ ]]; then
   pxc_name="percona-xtradb-cluster"
+  if [[ "${product}" =~ ^pxc9[0-9]{1}$ ]]; then
+    # pxc-9x adds a client/server "core" split and separate client-plugins/debugsource packages
+    rpm_extra_pkgs="${pxc_name}-client-plugins ${pxc_name}-debugsource"
+    rpm_extra_num="2"
+    deb_extra_pkgs="${pxc_name}-client-core ${pxc_name}-client-plugins ${pxc_name}-server-core"
+    deb_extra_num="3"
+  else
+    rpm_extra_pkgs=""
+    rpm_extra_num="0"
+    deb_extra_pkgs=""
+    deb_extra_num="0"
+  fi
   if [ -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
     if [ -f /etc/system-release -a $(grep -c Amazon /etc/system-release) -eq 1 ]; then
       centos_maj_version="9"
@@ -352,15 +364,15 @@ elif [[ "${product}" =~ ^pxc(8[0-9]|9[0-9])$ ]]; then
     fi
     if [[ "${centos_maj_version}" == "9" || "${centos_maj_version}" == "10" ]] || [[ "${arch}" == "aarch64" ]]; then
       rpm_opt_package=""
-      rpm_num_pkgs="7"
+      rpm_num_pkgs=$((9 + rpm_extra_num))
     else
       rpm_opt_package="${pxc_name}-shared-compat"
-      rpm_num_pkgs="8"
+      rpm_num_pkgs=$((10 + rpm_extra_num))
     fi
     if [ "$(rpm -qa | grep "${pxc_name}" | grep -c "${version}")" == "${rpm_num_pkgs}" ]; then
       echo "all packages are installed"
     else
-      for package in ${pxc_name}-server ${pxc_name}-test ${pxc_name}-debuginfo ${pxc_name}-devel ${pxc_name}-shared ${pxc_name}-client ${pxc_name}-full ${rpm_opt_package}; do
+      for package in ${pxc_name}-server ${pxc_name}-test ${pxc_name}-debuginfo ${pxc_name}-devel ${pxc_name}-shared ${pxc_name}-client ${pxc_name}-full ${pxc_name}-garbd ${pxc_name}-icu-data-files ${rpm_extra_pkgs} ${rpm_opt_package}; do
         if [ "$(rpm -qa | grep -c ${package}-${version})" -gt 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
         else
@@ -370,11 +382,11 @@ elif [[ "${product}" =~ ^pxc(8[0-9]|9[0-9])$ ]]; then
       done
     fi
   else
-    deb_num_pkgs="7"
+    deb_num_pkgs=$((9 + deb_extra_num))
     if [ "$(dpkg -l | grep ${pxc_name} | grep -c ${version})" == "${deb_num_pkgs}" ]; then
       echo "all packages are installed"
     else
-      for package in ${pxc_name}-full ${pxc_name}-server-debug ${pxc_name}-server ${pxc_name}-client ${pxc_name}-test ${pxc_name}-dbg ${pxc_name}-common; do
+      for package in ${pxc_name}-full ${pxc_name}-server-debug ${pxc_name}-server ${pxc_name}-client ${pxc_name}-test ${pxc_name}-dbg ${pxc_name}-common ${pxc_name}-garbd ${pxc_name}-garbd-debug ${deb_extra_pkgs}; do
         if [ "$(dpkg -l | grep ${package} | grep -c ${version})" != 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed"
         else
