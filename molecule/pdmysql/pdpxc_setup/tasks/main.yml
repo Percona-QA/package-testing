@@ -28,7 +28,6 @@
       {{
         '97-lts' if '9.7' in lookup('env', 'VERSION')
         else '84-lts' if '8.4' in lookup('env', 'VERSION')
-        else '8.0' if '8.0.' in lookup('env', 'VERSION')
         else ''
       }}
   when: major_repo
