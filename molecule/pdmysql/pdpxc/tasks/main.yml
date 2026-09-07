@@ -184,8 +184,8 @@
   vars:
     major_release_version: "{{ lookup('env', 'VERSION').split('.')[:2] | join('') }}"
 
-- name: install Percona Toolkit packages
-  include_tasks: ../../../tasks/install_pt.yml
+#- name: install Percona Toolkit packages
+#  include_tasks: ../../../tasks/install_pt.yml
 
 - name: Set ProxySQL package name
   set_fact:
