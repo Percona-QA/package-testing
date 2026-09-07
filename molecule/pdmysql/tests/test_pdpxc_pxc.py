@@ -42,38 +42,58 @@ else:
 
     EXTRA_RPMPACKAGE = ['percona-xtradb-cluster-shared-compat']
 
-PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
-                   " version_tokens_set RETURNS STRING SONAME 'version_token.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " version_tokens_show RETURNS STRING SONAME 'version_token.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " version_tokens_edit RETURNS STRING SONAME 'version_token.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " version_tokens_delete RETURNS STRING SONAME 'version_token.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " version_tokens_lock_shared RETURNS INT SONAME 'version_token.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " version_tokens_lock_exclusive RETURNS INT SONAME 'version_token.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " version_tokens_unlock RETURNS INT SONAME 'version_token.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " mysql_no_login SONAME 'mysql_no_login.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " service_get_read_locks RETURNS INT SONAME 'locking_service.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " service_get_write_locks RETURNS INT SONAME 'locking_service.so';\"",
-                   "mysql -e \"CREATE FUNCTION"
-                   " service_release_locks RETURNS INT SONAME 'locking_service.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " validate_password SONAME 'validate_password.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " version_tokens SONAME 'version_token.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " rpl_semi_sync_master SONAME 'semisync_master.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " rpl_semi_sync_slave SONAME 'semisync_slave.so';\"",
-                   "mysql -e \"INSTALL PLUGIN"
-                   " connection_control SONAME 'connection_control.so';\""]
+# PXC 9.7 removes the version_token plugin/functions and renames the semisync
+# plugins from master/slave to source/replica.
+if MAJOR_VERSION in ['9.7']:
+    PLUGIN_COMMANDS = ["mysql -e \"INSTALL PLUGIN"
+                       " mysql_no_login SONAME 'mysql_no_login.so';\"",
+                       "mysql -e \"CREATE FUNCTION"
+                       " service_get_read_locks RETURNS INT SONAME 'locking_service.so';\"",
+                       "mysql -e \"CREATE FUNCTION"
+                       " service_get_write_locks RETURNS INT SONAME 'locking_service.so';\"",
+                       "mysql -e \"CREATE FUNCTION"
+                       " service_release_locks RETURNS INT SONAME 'locking_service.so';\"",
+                       "mysql -e \"INSTALL PLUGIN"
+                       " validate_password SONAME 'validate_password.so';\"",
+                       "mysql -e \"INSTALL PLUGIN"
+                       " rpl_semi_sync_source SONAME 'semisync_source.so';\"",
+                       "mysql -e \"INSTALL PLUGIN"
+                       " rpl_semi_sync_replica SONAME 'semisync_replica.so';\"",
+                       "mysql -e \"INSTALL PLUGIN"
+                       " connection_control SONAME 'connection_control.so';\""]
+else:
+    PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
+                       " version_tokens_set RETURNS STRING SONAME 'version_token.so';\"",
+                       "mysql -e \"CREATE FUNCTION"
+                       " version_tokens_show RETURNS STRING SONAME 'version_token.so';\"",
+                       "mysql -e \"CREATE FUNCTION"
+                       " version_tokens_edit RETURNS STRING SONAME 'version_token.so';\"",
+                       "mysql -e \"CREATE FUNCTION"
+                       " version_tokens_delete RETURNS STRING SONAME 'version_token.so';\"",
+                       "mysql -e \"CREATE FUNCTION"
+                       " version_tokens_lock_shared RETURNS INT SONAME 'version_token.so';\"",
+                       "mysql -e \"CREATE FUNCTION"
+                       " version_tokens_lock_exclusive RETURNS INT SONAME 'version_token.so';\"",
+                       "mysql -e \"CREATE FUNCTION"
+                       " version_tokens_unlock RETURNS INT SONAME 'version_token.so';\"",
+                       "mysql -e \"INSTALL PLUGIN"
+                       " mysql_no_login SONAME 'mysql_no_login.so';\"",
+                       "mysql -e \"CREATE FUNCTION"
+                       " service_get_read_locks RETURNS INT SONAME 'locking_service.so';\"",
+                       "mysql -e \"CREATE FUNCTION"
+                       " service_get_write_locks RETURNS INT SONAME 'locking_service.so';\"",
+                       "mysql -e \"CREATE FUNCTION"
+                       " service_release_locks RETURNS INT SONAME 'locking_service.so';\"",
+                       "mysql -e \"INSTALL PLUGIN"
+                       " validate_password SONAME 'validate_password.so';\"",
+                       "mysql -e \"INSTALL PLUGIN"
+                       " version_tokens SONAME 'version_token.so';\"",
+                       "mysql -e \"INSTALL PLUGIN"
+                       " rpl_semi_sync_master SONAME 'semisync_master.so';\"",
+                       "mysql -e \"INSTALL PLUGIN"
+                       " rpl_semi_sync_slave SONAME 'semisync_slave.so';\"",
+                       "mysql -e \"INSTALL PLUGIN"
+                       " connection_control SONAME 'connection_control.so';\""]
 
 COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
              'component_log_sink_json', 'component_log_filter_dragnet',
