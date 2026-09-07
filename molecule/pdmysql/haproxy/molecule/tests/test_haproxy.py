@@ -40,6 +40,17 @@ def dump_haproxy_debug(host):
     print(stats.stderr)
 
 
+def dump_haproxy_service_debug(host):
+    print("\n========== HAPROXY CONFIG CHECK ==========")
+    check = host.run("haproxy -c -f /etc/haproxy/haproxy.cfg")
+    print(check.stdout)
+    print(check.stderr)
+
+    print("\n========== HAPROXY JOURNAL ==========")
+    journal = host.run("journalctl -xeu haproxy.service --no-pager -n 50")
+    print(journal.stdout)
+
+
 @pytest.fixture
 def prepare_test(host):
     with host.sudo("root"):
@@ -67,7 +78,11 @@ def prepare_test(host):
             "haproxy",
         ]:
             result = host.run(f"systemctl restart {svc} || service {svc} restart")
-            assert result.rc == 0
+
+            if result.rc != 0 and svc == "haproxy":
+                dump_haproxy_service_debug(host)
+
+            assert result.rc == 0, result.stderr
 
         time.sleep(2)
 
@@ -76,8 +91,23 @@ def prepare_test(host):
         dump_haproxy_debug(host)
 
 
+def test_haproxy_config_valid(host):
+    with host.sudo("root"):
+        result = host.run("haproxy -c -f /etc/haproxy/haproxy.cfg")
+
+        print("\n========== HAPROXY CONFIG CHECK ==========")
+        print(result.stdout)
+        print(result.stderr)
+
+        assert result.rc == 0, result.stdout + result.stderr
+
+
 def test_haproxy_service(host):
-    assert host.service("haproxy").is_running
+    with host.sudo("root"):
+        if not host.service("haproxy").is_running:
+            dump_haproxy_service_debug(host)
+
+        assert host.service("haproxy").is_running
 
 
 def test_haproxy_clustercheck(host, prepare_test):
