@@ -180,37 +180,37 @@
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
 
 - name: Install Percona XtraBackup packages
-    include_tasks: ../../../tasks/install_pxb_innovation.yml
-    vars:
-      major_release_version: "{{ lookup('env', 'VERSION').split('.')[:2] | join('') }}"
+  include_tasks: ../../../tasks/install_pxb_innovation.yml
+  vars:
+    major_release_version: "{{ lookup('env', 'VERSION').split('.')[:2] | join('') }}"
 
 - name: install Percona Toolkit packages
   include_tasks: ../../../tasks/install_pt.yml
 
 - name: Set ProxySQL package name
-    set_fact:
-      proxysql_package: >-
-        {{
-          'proxysql3'
-          if lookup('env', 'PROXYSQL_VERSION').startswith('3.')
-          else 'proxysql2'
-        }}
+  set_fact:
+    proxysql_package: >-
+      {{
+        'proxysql3'
+        if lookup('env', 'PROXYSQL_VERSION').startswith('3.')
+        else 'proxysql2'
+      }}
 
-  - name: Install ProxySQL deb package
-    apt:
-      name: "{{ proxysql_package }}"
-      state: latest
-      update_cache: yes
-    when: ansible_os_family == "Debian"
+- name: Install ProxySQL deb package
+  apt:
+    name: "{{ proxysql_package }}"
+    state: latest
+    update_cache: yes
+  when: ansible_os_family == "Debian"
 
-  - name: Install ProxySQL rpm package with dnf
-    dnf:
-      name: "{{ proxysql_package }}"
-      state: latest
-      update_cache: yes
-    when:
-      - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
-      - ansible_facts['distribution_major_version'] | int > 8
+- name: Install ProxySQL rpm package with dnf
+  dnf:
+    name: "{{ proxysql_package }}"
+    state: latest
+    update_cache: yes
+  when:
+    - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
+    - ansible_facts['distribution_major_version'] | int > 8
 
 #install initscripts-service manually on OL9 till DISTMYSQL-300 is fixed
 - name: install init scripts for OL9
