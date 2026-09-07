@@ -9,6 +9,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 ).get_hosts("all")
 
 VERSION = os.getenv("VERSION")
+HAPROXY_VERSION = os.getenv("HAPROXY_VERSION")
 
 
 def dump_mysql_debug(host):
@@ -89,6 +90,12 @@ def prepare_test(host):
         print("\n========== AFTER RESTART ==========")
         dump_mysql_debug(host)
         dump_haproxy_debug(host)
+
+
+def test_haproxy_package_version(host):
+    pkg = host.package("percona-haproxy")
+    assert pkg.is_installed
+    assert HAPROXY_VERSION in pkg.version, pkg.version
 
 
 def test_haproxy_config_valid(host):
