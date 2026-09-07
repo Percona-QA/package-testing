@@ -4,17 +4,17 @@
 
   - set_fact:
       man_ip: "{{ PXC1_IP }}"
-    when: 
+    when:
     - "'pxc1' in inventory_hostname"
 
   - set_fact:
       man_ip: "{{ PXC2_IP }}"
-    when: 
+    when:
     - "'pxc2' in inventory_hostname"
 
   - set_fact:
       man_ip: "{{ PXC3_IP }}"
-    when: 
+    when:
     - "'pxc3' in inventory_hostname"
 
   - name: include tasks for test env setup
@@ -25,39 +25,20 @@
     with_items:
     - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
 
-#-------------non pro
-  - name: include tasks for enabling test repo pxc97 non pro
+  - name: include tasks for enabling test repo pxc97
     include_tasks: ../../../../tasks/enable_pxc97_testing_repo.yml
     when:
-    - lookup('env', 'install_repo') == "testing" 
-    - lookup('env', 'pro') == "no"
+    - lookup('env', 'install_repo') == "testing"
 
-  - name: include tasks for enabling main repo pxc97 non pro
+  - name: include tasks for enabling main repo pxc97
     include_tasks: ../../../../tasks/enable_pxc97_main_repo.yml
-    when: 
+    when:
     - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
-    - lookup('env', 'pro') == "no"
 
-  - name: include tasks for enabling experimental repo non pro
+  - name: include tasks for enabling experimental repo
     include_tasks: ../../../../tasks/enable_pxc97_experimental_repo.yml
-    when: 
+    when:
     - lookup('env', 'install_repo') == "experimental"
-    - lookup('env', 'pro') == "no"
-#-----------------pro
-
-  - name: include tasks for enabling test repo pro pxc97
-    include_tasks: ../../../../tasks/enable_pxc97_pro_repo_testing.yml
-    when: 
-    - lookup('env', 'install_repo') == "testing" 
-    - lookup('env', 'pro') == "yes"
-
-  - name: include tasks for enabling main repo pro pxc97
-    include_tasks: ../../../../tasks/enable_pxc97_pro_repo_main.yml
-    when: 
-    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
-    - lookup('env', 'pro') == "yes"
-
-#---------------------
 
   - name: allow all users to connect to mysql
     shell: setsebool -P mysql_connect_any 1
@@ -75,7 +56,7 @@
       - en_IN.utf8
     args:
       creates: "/usr/lib/locale/{{ item }}"
-    when: 
+    when:
       - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
       - ansible_os_family == "Debian"
 
@@ -87,7 +68,7 @@
     loop:
       - 'LANG="en_US.UTF-8"'
       - 'LC_ALL="en_US.UTF-8"'
-    when: 
+    when:
       - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
       - ansible_os_family == "Debian"
 
@@ -96,12 +77,11 @@
       path: /etc/apparmor.d/local/usr.sbin.mysqld.in
       state: touch
       mode: '0644'
-    when: 
+    when:
       - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
       - ansible_os_family == "Debian"
 
-#---------------------------------------------------------non-pro
-  - name: install PXC 9 deb packages arm64 debian non pro
+  - name: install PXC 9 deb packages arm64 debian
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -110,30 +90,28 @@
       - percona-xtradb-cluster-full
       - percona-xtrabackup-97
       - percona-toolkit
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - ansible_architecture == "aarch64"
-      - lookup('env', 'pro') == "no"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      
-  - name: install PXC 9 deb packages amd64 non pro
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-    vars:
-      packages:
-      - percona-xtradb-cluster-full
-      - percona-xtrabackup-97
-      - percona-toolkit
-    when: 
-      - ansible_os_family == "Debian"
-      - ansible_architecture == "x86_64"
-      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: install PXC 9 rpm packages amd64 non pro
+  - name: install PXC 9 deb packages amd64
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+    vars:
+      packages:
+      - percona-xtradb-cluster-full
+      - percona-xtrabackup-97
+      - percona-toolkit
+    when:
+      - ansible_os_family == "Debian"
+      - ansible_architecture == "x86_64"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: install PXC 9 rpm packages amd64
     package:
       name: "{{ packages }}"
       state: latest
@@ -142,14 +120,13 @@
       - percona-xtradb-cluster-full
 #      - percona-toolkit
       - percona-xtrabackup-97
-    when: 
-      - ansible_os_family == "RedHat" 
+    when:
+      - ansible_os_family == "RedHat"
       - ansible_architecture == "x86_64"
-      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: install PXC 9 rpm packages arm OS non pro
+  - name: install PXC 9 rpm packages arm OS
     package:
       name: "{{ packages }}"
       state: latest
@@ -157,80 +134,20 @@
       packages:
       - percona-xtradb-cluster-full
       - percona-xtrabackup-97
-    when: 
+    when:
       - ansible_os_family == "RedHat"
       - ansible_architecture == "aarch64"
-      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-#--------------------------------------------------------------------------------------------
-
-
-#----------------------------------pro
-  - name: install PXC 9 deb packages arm64 debian pro
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-    vars:
-      packages:
-      - percona-xtradb-cluster-pro-full
-    when: 
-      - ansible_os_family == "Debian"
-      - ansible_architecture == "aarch64"
-      - lookup('env', 'pro') == "yes"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      
-  - name: install PXC 9 deb packages amd64 pro
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-    vars:
-      packages:
-      - percona-xtradb-cluster-pro-full
-    when: 
-      - ansible_os_family == "Debian"
-      - ansible_architecture == "x86_64"
-      - lookup('env', 'pro') == "yes"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
-  - name: install PXC 9 rpm packages amd64 pro
-    package:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtradb-cluster-pro-full
-    when: 
-      - ansible_os_family == "RedHat" 
-      - ansible_architecture == "x86_64"
-      - lookup('env', 'pro') == "yes"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
-  - name: install PXC 9 rpm packages arm OS pro
-    package:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtradb-cluster-pro-full
-    when: 
-      - ansible_os_family == "RedHat"
-      - ansible_architecture == "aarch64"
-      - lookup('env', 'pro') == "yes"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-#--------------------------------------------------------------------------------------------
-
-
 
 #  - name: check telemetry (disabled)
 #    command: /package-testing/check_telemetry.sh pxc -d
 
+  - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL BOOTSTRAP
+    include_tasks: ../../../../tasks/list_installed_packages.yml
+
   - name: copy PXC config on centos 7
-    template: src=../../../../templates/my_rpm_97.j2 
+    template: src=../../../../templates/my_rpm_97.j2
               dest=/etc/my.cnf
     when: ansible_os_family == "RedHat"
 
@@ -252,9 +169,41 @@
       dest: /etc/mysql/certs/
 
   - name: start mysql service
-    service: name=mysql state=started
+    service:
+      name: mysql
+      state: started
+    register: mysql_start
+    ignore_errors: yes
     throttle: 1
-    
+
+  - name: Print start result
+    debug:
+      var: mysql_start
+
+  - name: Check mysql error log
+    shell: cat /var/log/mysqld.log /var/log/mysql/error.log 2>/dev/null || true
+    register: mysql_log
+    ignore_errors: yes
+
+  - debug:
+      var: mysql_log.stdout
+
+  - name: Check systemd status
+    shell: systemctl status mysql.service -l --no-pager
+    register: mysql_status
+    ignore_errors: yes
+
+  - debug:
+      var: mysql_status.stdout
+
+  - name: Check journal logs
+    shell: journalctl -xeu mysql.service --no-pager | tail -50
+    register: mysql_journal
+    ignore_errors: yes
+
+  - debug:
+      var: mysql_journal.stdout
+
   - name: register PXC version Molecule
     shell: mysqld --version
     register: pxc_version
@@ -262,26 +211,14 @@
   - name: print PXC version Molecule
     debug: var=pxc_version
 
-  - name: check PXC 9.7 version Molecule pro 
-    command: /package-testing/version_check.sh pxc97pro
-    when:
-      - lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
-      - lookup('env', 'pro') == "yes"
-
   - name: check PXC 9.7 version Molecule
     command: /package-testing/version_check.sh pxc97
     when:
       - lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
       - lookup('env', 'pro') == "no"
 
-# - name: install plugins
-#   command: /package-testing/plugins_test_80.sh pxc
-
-#  - name: Run tests and incase of failure save logs
-#    block:
-
-  - name: run bats tests for mysql init scripts
-    shell: sleep {{ sleep_before_tests | default('0') }}; /usr/local/bin/bats /package-testing/bats/pxc-init-scripts.bats
+  - name: run pytest tests for mysql init scripts
+    shell: sleep {{ sleep_before_tests | default('0') }}; python3 -m pytest -v /package-testing/pytest-tests/test_pxc_init_scripts.py
     throttle: 1
 
   - name: start mysql service
@@ -294,8 +231,7 @@
 ## Changes done for telemetry: remove pxc package - add iptables rule for Telemetry Server - install only pxc package.
 ## Expected resuld - telemetry_uuid file has only instanceID
 
-#---------------------------------------------------------non-pro
-  - name: install PXC 9 deb packages arm64 debian non pro
+  - name: install PXC 9 deb packages arm64 debian
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -304,14 +240,13 @@
       - percona-xtradb-cluster-full
       - percona-xtrabackup-97
 #      - percona-toolkit
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - ansible_architecture == "aarch64"
-      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      
-  - name: install PXC 9 deb packages amd64 non pro
+
+  - name: install PXC 9 deb packages amd64
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -320,14 +255,13 @@
       - percona-xtradb-cluster-full
       - percona-xtrabackup-97
 #      - percona-toolkit
-    when: 
+    when:
       - ansible_os_family == "Debian"
       - ansible_architecture == "x86_64"
-      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: install PXC 9 rpm packages amd64 non pro
+  - name: install PXC 9 rpm packages amd64
     package:
       name: "{{ packages }}"
       state: latest
@@ -336,14 +270,13 @@
       - percona-xtradb-cluster-full
 #      - percona-toolkit
       - percona-xtrabackup-97
-    when: 
-      - ansible_os_family == "RedHat" 
+    when:
+      - ansible_os_family == "RedHat"
       - ansible_architecture == "x86_64"
-      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: install PXC 9 rpm packages arm OS non pro
+  - name: install PXC 9 rpm packages arm OS
     package:
       name: "{{ packages }}"
       state: latest
@@ -351,71 +284,11 @@
       packages:
       - percona-xtradb-cluster-full
       - percona-xtrabackup-97
-    when: 
+    when:
       - ansible_os_family == "RedHat"
       - ansible_architecture == "aarch64"
-      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-#--------------------------------------------------------------------------------------------
-
-#----------------------------------pro
-  - name: install PXC 9 deb packages arm64 debian pro
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-    vars:
-      packages:
-      - percona-xtradb-cluster-pro-full
-    when: 
-      - ansible_os_family == "Debian"
-      - ansible_architecture == "aarch64"
-      - lookup('env', 'pro') == "yes"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-      
-  - name: install PXC 9 deb packages amd64 pro
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-    vars:
-      packages:
-      - percona-xtradb-cluster-pro-full
-    when: 
-      - ansible_os_family == "Debian"
-      - ansible_architecture == "x86_64"
-      - lookup('env', 'pro') == "yes"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
-  - name: install PXC 9 rpm packages amd64 pro
-    package:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtradb-cluster-pro-full
-    when: 
-      - ansible_os_family == "RedHat" 
-      - ansible_architecture == "x86_64"
-      - lookup('env', 'pro') == "yes"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
-  - name: install PXC 9 rpm packages arm OS pro
-    package:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtradb-cluster-pro-full
-    when: 
-      - ansible_os_family == "RedHat"
-      - ansible_architecture == "aarch64"
-      - lookup('env', 'pro') == "yes"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-#--------------------------------------------------------------------------------------------
 
   - name: Install iptables on RHEL 9
     package:
@@ -425,24 +298,15 @@
       state: present
     when: ansible_facts['distribution'] == "RedHat"
 
-#  - name: Enable and start iptables service
-#    systemd:
-#      name: iptables
-#      state: started
-#      enabled: true
-#    when: ansible_facts['distribution'] == "RedHat"
-
-  - name: Block pmm.check-dev.percona.com IP for non REDHAT 
+  - name: Block pmm.check-dev.percona.com IP for non REDHAT
     iptables:
       chain: OUTPUT
       destination: check-dev.percona.com
       jump: DROP
-    when: 
-      - lookup('env', 'upgrade_repo') == ""  
+    when:
+      - lookup('env', 'upgrade_repo') == ""
 
-#-------------Blocked non PRO
-
-  - name: install PXC 9 deb packages with blocked Telemetry Server NON PRO
+  - name: install PXC 9 deb packages with blocked Telemetry Server
     apt:
       name: "{{ packages }}"
       update_cache: yes
@@ -451,11 +315,10 @@
       - percona-xtradb-cluster-full
     when:
       - ansible_os_family == "Debian" and lookup('env', 'upgrade_repo') == ""
-      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-  - name: install PXC 9 rpm packages with blocked Telemetry Server NON PRO
+  - name: install PXC 9 rpm packages with blocked Telemetry Server
     package:
       name: "{{ packages }}"
       state: latest
@@ -464,42 +327,11 @@
       - percona-xtradb-cluster-full
     when:
       - ansible_os_family == "RedHat" and lookup('env', 'upgrade_repo') == ""
-      - lookup('env', 'pro') == "no"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
-#----------------------- Blocked PRO
-
-  - name: install PXC 9 deb packages with blocked Telemetry Server PRO
-    apt:
-      name: "{{ packages }}"
-      update_cache: yes
-    vars:
-      packages:
-      - percona-xtradb-cluster-pro-full
-    when: 
-      - ansible_os_family == "Debian" and lookup('env', 'upgrade_repo') == ""
-      - lookup('env', 'pro') == "yes"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
-  - name: install PXC 9 rpm packages with blocked Telemetry Server PRO
-    package:
-      name: "{{ packages }}"
-      state: latest
-    vars:
-      packages:
-      - percona-xtradb-cluster-pro-full
-    when: 
-      - ansible_os_family == "RedHat" and lookup('env', 'upgrade_repo') == ""
-      - lookup('env', 'pro') == "yes"
-    environment:
-      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-
-#-----------------------------------------------------------
-
-#  - name: check telemetry file presence (unavailable)
-#    command: /package-testing/check_telemetry.sh pxc -u
+  - name: check telemetry file presence (unavailable)
+    command: /package-testing/check_telemetry.sh pxc -u
 
   - name: get telemetry_uuid content
     command: cat /usr/local/percona/telemetry_uuid
