@@ -25,18 +25,24 @@
 - set_fact:
     major_repo: "{{ lookup('env', 'MAJOR_REPO') }}"
 
-- name: enable the PDMYSQL-80 repo pdpxc-{{ version }}
+- name: enable repo pdpxc-{{ version }}
   command: percona-release enable-only pdpxc-{{ version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
     version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
   when: not major_repo
 
-- name: enable the PDMYSQL-80 repo pdpxc-{{ version }}
+- name: enable repo pdpxc-{{ version }}
   command: percona-release enable-only pdpxc-{{ version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
-    version: "{{ '84-lts' if '8.4' in lookup('env', 'VERSION') else '8.0' if '8.0.' in lookup('env', 'VERSION') else ''  }}"
+    version: >-
+      {{
+        '97-lts' if '9.7' in lookup('env', 'VERSION')
+        else '84-lts' if '8.4' in lookup('env', 'VERSION')
+        else '8.0' if '8.0.' in lookup('env', 'VERSION')
+        else ''
+      }}
   when: major_repo
 
 - name: clean and update yum cache
