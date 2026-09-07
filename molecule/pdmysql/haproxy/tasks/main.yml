@@ -18,7 +18,7 @@
 - name: Install percona release
   include_tasks: ../../tasks/install_percona_release.yml
 
-- name: enable the PDMYSQL-80 repo
+- name: enable the PXC repo
   command: percona-release enable-only pdpxc-{{ version }} {{ repo }}
   vars:
     repo: "{{ lookup('env', 'REPO') }}"
@@ -44,22 +44,13 @@
   command: dnf module disable mariadb -y
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
 
-- name: install PXC 8 deb packages
+- name: install PXC packages
   apt:
     name: "{{ packages }}"
     update_cache: yes
   vars:
     packages:
     - percona-xtradb-cluster-full
-    - percona-xtradb-cluster-client
-    - percona-xtradb-cluster-common
-    - percona-xtradb-cluster-dbg
-    - percona-xtradb-cluster-garbd-debug
-    - percona-xtradb-cluster-garbd
-    - percona-xtradb-cluster-server
-    - percona-xtradb-cluster-server-debug
-    - percona-xtradb-cluster-test
-    - percona-xtradb-cluster
   when: ansible_os_family == "Debian"
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
