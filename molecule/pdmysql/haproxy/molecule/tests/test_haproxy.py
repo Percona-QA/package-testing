@@ -44,22 +44,13 @@ def dump_haproxy_debug(host):
 def prepare_test(host):
     with host.sudo("root"):
 
-        if VERSION.startswith("8.4."):
-            cmd = (
-                "mysql -e \""
-                "CREATE USER IF NOT EXISTS 'clustercheckuser'@'%' IDENTIFIED BY 'clustercheckpassword!';"
-                "GRANT PROCESS ON *.* TO 'clustercheckuser'@'%';"
-                "CREATE USER IF NOT EXISTS 'haproxy_user'@'%' IDENTIFIED BY '$3Kr$t';"
-                "\""
-            )
-        else:
-            cmd = (
-                "mysql -e \""
-                "CREATE USER IF NOT EXISTS 'clustercheckuser'@'%' IDENTIFIED WITH mysql_native_password BY 'clustercheckpassword!';"
-                "GRANT ALL PRIVILEGES ON *.* TO 'clustercheckuser'@'%';"
-                "CREATE USER IF NOT EXISTS 'haproxy_user'@'%' IDENTIFIED WITH mysql_native_password BY '$3Kr$t';"
-                "\""
-            )
+        cmd = (
+            "mysql -e \""
+            "CREATE USER IF NOT EXISTS 'clustercheckuser'@'%' IDENTIFIED BY 'clustercheckpassword!';"
+            "GRANT PROCESS ON *.* TO 'clustercheckuser'@'%';"
+            "CREATE USER IF NOT EXISTS 'haproxy_user'@'%' IDENTIFIED BY '$3Kr$t';"
+            "\""
+        )
 
         result = host.run(cmd)
 
