@@ -71,22 +71,13 @@
     - ansible_facts['distribution_major_version'] | int <= 9
 
 
-- name: install PXC 8 deb packages
+- name: install PXC  deb packages
   apt:
     name: "{{ packages }}"
     update_cache: yes
   vars:
     packages:
     - percona-xtradb-cluster-full
-    - percona-xtradb-cluster-client
-    - percona-xtradb-cluster-common
-    - percona-xtradb-cluster-dbg
-    - percona-xtradb-cluster-garbd-debug
-    - percona-xtradb-cluster-garbd
-    - percona-xtradb-cluster-server
-    - percona-xtradb-cluster-server-debug
-    - percona-xtradb-cluster-test
-    - percona-xtradb-cluster
   when: ansible_os_family == "Debian"
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -98,15 +89,6 @@
   vars:
     packages:
     - percona-xtradb-cluster-full
-    - percona-xtradb-cluster
-    - percona-xtradb-cluster-client
-    - percona-xtradb-cluster-debuginfo
-    - percona-xtradb-cluster-devel
-    - percona-xtradb-cluster-garbd
-    - percona-xtradb-cluster-server
-    - percona-xtradb-cluster-shared
-    - percona-xtradb-cluster-shared-compat
-    - percona-xtradb-cluster-test
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int < 8
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -118,14 +100,6 @@
   vars:
     packages:
     - percona-xtradb-cluster-full
-    - percona-xtradb-cluster
-    - percona-xtradb-cluster-client
-    - percona-xtradb-cluster-devel
-    - percona-xtradb-cluster-garbd
-    - percona-xtradb-cluster-server
-    - percona-xtradb-cluster-shared
-    - percona-xtradb-cluster-shared-compat
-    - percona-xtradb-cluster-test
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int == 8
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -137,14 +111,6 @@
   vars:
     packages:
     - percona-xtradb-cluster-full
-    - percona-xtradb-cluster
-    - percona-xtradb-cluster-client
-    - percona-xtradb-cluster-debuginfo
-    - percona-xtradb-cluster-devel
-    - percona-xtradb-cluster-garbd
-    - percona-xtradb-cluster-server
-    - percona-xtradb-cluster-shared
-    - percona-xtradb-cluster-test
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 9
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -213,42 +179,38 @@
     dnf clean all
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
 
-- name: install Percona XtraBackup-{{ version }}  packages
-  include_tasks: ../../../tasks/install_pxb{{ version }}.yml
-  vars:
-    version: "{{ lookup('env', 'VERSION').split('.')[0] + lookup('env', 'VERSION').split('.')[1] }}"
-
+- name: Install Percona XtraBackup packages
+    include_tasks: ../../../tasks/install_pxb_innovation.yml
+    vars:
+      major_release_version: "{{ lookup('env', 'VERSION').split('.')[:2] | join('') }}"
 
 - name: install Percona Toolkit packages
   include_tasks: ../../../tasks/install_pt.yml
 
-- name: install proxysql new deb packages
-  apt:
-    name: "{{ packages }}"
-    update_cache: yes
-    state: latest
-  vars:
-    packages:
-      - proxysql2
-  when: ansible_os_family == "Debian"
+- name: Set ProxySQL package name
+    set_fact:
+      proxysql_package: >-
+        {{
+          'proxysql3'
+          if lookup('env', 'PROXYSQL_VERSION').startswith('3.')
+          else 'proxysql2'
+        }}
 
-- name: install proxysql new rpm packages with yum
-  yum:
-    name: "{{ packages }}"
-    state: latest
-  vars:
-    packages:
-      - proxysql2
-  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int < 8
+  - name: Install ProxySQL deb package
+    apt:
+      name: "{{ proxysql_package }}"
+      state: latest
+      update_cache: yes
+    when: ansible_os_family == "Debian"
 
-- name: install proxysql new rpm packages with dnf
-  dnf:
-    name: "{{ packages }}"
-    state: latest
-  vars:
-    packages:
-      - proxysql2
-  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
+  - name: Install ProxySQL rpm package with dnf
+    dnf:
+      name: "{{ proxysql_package }}"
+      state: latest
+      update_cache: yes
+    when:
+      - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
+      - ansible_facts['distribution_major_version'] | int > 8
 
 #install initscripts-service manually on OL9 till DISTMYSQL-300 is fixed
 - name: install init scripts for OL9
@@ -267,6 +229,7 @@
 
 - name: start proxysql service
   command: service proxysql start
+
 # set root password on centos
 - name: start mysql service
   service: name=mysql state=started
