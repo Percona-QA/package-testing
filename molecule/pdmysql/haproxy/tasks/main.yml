@@ -110,3 +110,14 @@
   lineinfile:
     path: /etc/services
     line: mysqlchk        9200/tcp                # mysqlchk
+
+- name: Clear haproxy failed state from before conf.d existed
+  command: systemctl reset-failed haproxy
+  failed_when: false
+  changed_when: false
+
+- name: Restart haproxy now that config and conf.d are in place
+  service:
+    name: haproxy
+    state: restarted
+    enabled: yes
