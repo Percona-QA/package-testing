@@ -79,6 +79,14 @@
   service: name=mysql@bootstrap.service state=started
   when: ansible_os_family == "Debian"
 
+- name: Ensure haproxy conf.d directory exists
+  file:
+    path: /etc/haproxy/conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
 - name: Update haproxy config
   blockinfile:
     path: /etc/haproxy/haproxy.cfg
