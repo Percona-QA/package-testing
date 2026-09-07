@@ -84,3 +84,9 @@
 
   - name: PRINT THE INSTALLED PACKAGES VALUE UPGRADE
     include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: check PXC 9.7 version Molecule
+    command: /package-testing/version_check.sh pxc97
+
+  - name: check that PXC 9.7 package versions are correct
+    command: /package-testing/package_check.sh pxc97
