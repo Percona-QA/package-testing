@@ -214,6 +214,9 @@
   - name: print INNODB version debug
     debug: var=innod_version
 
+  - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL BOOTSTRAP
+    include_tasks: ../../../../tasks/list_installed_packages.yml
+
   - name: check PXC 9.7 version Molecule
     command: /package-testing/version_check.sh pxc97
     when:
@@ -225,6 +228,3 @@
 
   - name: Sleep 60 seconds
     command: sleep 60
-
-  - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL BOOTSTRAP
-    include_tasks: ../../../../tasks/list_installed_packages.yml
