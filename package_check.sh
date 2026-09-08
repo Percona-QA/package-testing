@@ -345,9 +345,14 @@ elif [ ${product} = "pxc56" -o ${product} = "pxc57" ]; then
 elif [[ "${product}" =~ ^pxc(8[0-9]|9[0-9])$ ]]; then
   pxc_name="percona-xtradb-cluster"
   if [[ "${product}" =~ ^pxc9[0-9]{1}$ ]]; then
-    # pxc-9x adds a client/server "core" split and separate client-plugins/debugsource packages
-    rpm_extra_pkgs="${pxc_name}-client-plugins ${pxc_name}-debugsource"
-    rpm_extra_num="2"
+    # pxc-9x adds a client/server "core" split and separate client-plugins package
+    rpm_extra_pkgs="${pxc_name}-client-plugins"
+    rpm_extra_num="1"
+    if [ "${product}" != "pxc97" ]; then
+      # debugsource package is not shipped for pxc97
+      rpm_extra_pkgs="${rpm_extra_pkgs} ${pxc_name}-debugsource"
+      rpm_extra_num="2"
+    fi
     deb_extra_pkgs="${pxc_name}-client-core ${pxc_name}-client-plugins ${pxc_name}-server-core"
     deb_extra_num="3"
   else
