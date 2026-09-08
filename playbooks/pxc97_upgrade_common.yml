@@ -76,8 +76,8 @@
   - name: print PXC version Side Effect
     debug: var=pxc_version
 
-  - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL COMMON
-    include_tasks: ../../../../tasks/list_installed_packages.yml
+  - name: PRINT THE INSTALLED PACKAGES VALUE UPGRADE
+    include_tasks: ../tasks/list_installed_packages.yml
 
   - name: check that PXC version is correct Side Effect
     command: /package-testing/version_check.sh pxc97

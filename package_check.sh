@@ -367,6 +367,12 @@ elif [[ "${product}" =~ ^pxc(8[0-9]|9[0-9])$ ]]; then
     else
       centos_maj_version=$(cat /etc/redhat-release | grep -oE '[0-9]+' | head -n 1)
     fi
+    if [ "${centos_maj_version}" == "8" ] && [ "${product}" == "pxc97" ]; then
+      # debuginfo package is not shipped for pxc97 on el8 (x86_64 and aarch64)
+      rpm_debuginfo_pkg=""
+    else
+      rpm_debuginfo_pkg="${pxc_name}-debuginfo"
+    fi
     if [[ "${centos_maj_version}" == "9" || "${centos_maj_version}" == "10" ]] || [[ "${arch}" == "aarch64" ]]; then
       rpm_opt_package=""
       rpm_num_pkgs=$((9 + rpm_extra_num))
@@ -374,10 +380,13 @@ elif [[ "${product}" =~ ^pxc(8[0-9]|9[0-9])$ ]]; then
       rpm_opt_package="${pxc_name}-shared-compat"
       rpm_num_pkgs=$((10 + rpm_extra_num))
     fi
+    if [ -z "${rpm_debuginfo_pkg}" ]; then
+      rpm_num_pkgs=$((rpm_num_pkgs - 1))
+    fi
     if [ "$(rpm -qa | grep "${pxc_name}" | grep -c "${version}")" == "${rpm_num_pkgs}" ]; then
       echo "all packages are installed"
     else
-      for package in ${pxc_name}-server ${pxc_name}-test ${pxc_name}-debuginfo ${pxc_name}-devel ${pxc_name}-shared ${pxc_name}-client ${pxc_name}-full ${pxc_name}-garbd ${pxc_name}-icu-data-files ${rpm_extra_pkgs} ${rpm_opt_package}; do
+      for package in ${pxc_name}-server ${pxc_name}-test ${rpm_debuginfo_pkg} ${pxc_name}-devel ${pxc_name}-shared ${pxc_name}-client ${pxc_name}-full ${pxc_name}-garbd ${pxc_name}-icu-data-files ${rpm_extra_pkgs} ${rpm_opt_package}; do
         if [ "$(rpm -qa | grep -c ${package}-${version})" -gt 0 ]; then
           echo "$(date +%Y%m%d%H%M%S): ${package} is installed" >> ${log}
         else
