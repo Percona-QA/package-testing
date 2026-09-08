@@ -90,8 +90,8 @@
     command: /package-testing/package_check.sh pxc97
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
-  - name: Sleep 10 mins
-    shell: sleep 600
+  - name: Sleep 2 mins
+    shell: sleep 120
 
   - name: Check that the PXC Cluster is up and running
     shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'
