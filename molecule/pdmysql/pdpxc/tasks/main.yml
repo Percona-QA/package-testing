@@ -223,12 +223,21 @@
 
 - name: start proxysql service
   command: service proxysql start
+  when:
+    - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
+    - ansible_facts['distribution_major_version'] | int > 8
 
 - name: stop proxysql service
   command: service proxysql stop
+  when:
+    - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
+    - ansible_facts['distribution_major_version'] | int > 8
 
 - name: start proxysql service
   command: service proxysql start
+  when:
+    - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
+    - ansible_facts['distribution_major_version'] | int > 8
 
 # set root password on centos
 - name: start mysql service
