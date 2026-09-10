@@ -76,6 +76,8 @@
   vars:
     packages:
     - percona-xtradb-cluster-full
+    - percona-xtradb-cluster-debuginfo
+    - percona-xtradb-cluster-debugsource
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int < 8
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -87,6 +89,8 @@
   vars:
     packages:
     - percona-xtradb-cluster-full
+    - percona-xtradb-cluster-debuginfo
+    - percona-xtradb-cluster-debugsource
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int == 8
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -98,6 +102,8 @@
   vars:
     packages:
     - percona-xtradb-cluster-full
+    - percona-xtradb-cluster-debuginfo
+    - percona-xtradb-cluster-debugsource
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 9
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
