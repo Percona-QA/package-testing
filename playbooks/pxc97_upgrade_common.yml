@@ -66,6 +66,9 @@
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
       PERCONA_TELEMETRY_DISABLE: "1"
 
+  - name: restart mysql service
+    service: name=mysql state=restarted
+
   - name: Sleep for 60 seconds
     shell: sleep 60
 
@@ -76,8 +79,8 @@
   - name: print PXC version Side Effect
     debug: var=pxc_version
 
-  - name: PRINT THE INSTALLED PACKAGES VALUE INSTALL COMMON
-    include_tasks: ../../../../tasks/list_installed_packages.yml
+  - name: PRINT THE INSTALLED PACKAGES VALUE UPGRADE
+    include_tasks: ../tasks/list_installed_packages.yml
 
   - name: check that PXC version is correct Side Effect
     command: /package-testing/version_check.sh pxc97
@@ -87,8 +90,8 @@
     command: /package-testing/package_check.sh pxc97
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
-  - name: Sleep 10 mins
-    shell: sleep 600
+  - name: Sleep 5 mins
+    shell: sleep 300
 
   - name: Check that the PXC Cluster is up and running
     shell: mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep_cluster_size';" | awk '{print$2}' | sed -n '2 p' | grep '3'
