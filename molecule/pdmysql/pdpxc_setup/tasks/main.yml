@@ -76,7 +76,6 @@
   vars:
     packages:
     - percona-xtradb-cluster-full
-    - percona-xtradb-cluster-debuginfo
     - percona-xtradb-cluster-debugsource
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int < 8
   environment:
@@ -89,7 +88,6 @@
   vars:
     packages:
     - percona-xtradb-cluster-full
-    - percona-xtradb-cluster-debuginfo
     - percona-xtradb-cluster-debugsource
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int == 8
   environment:
