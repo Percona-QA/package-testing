@@ -1,0 +1,105 @@
+---
+# Verifies the SBOM files shipped by the installed Percona XtraBackup package.
+#
+# The RedHat/Debian split that tasks/test_pgo.yml has to spell out twice lives
+# in python here instead (sbom_checks/ sniffs gzip magic rather than branching on
+# os_family), so this file is only glue.
+#
+# Gated by SBOM_CHECK_MODE (off/warn/enforce, default warn): PXB does not ship
+# SBOM files yet, so absence is a skip and only a malformed SBOM fails the run.
+#
+# trivy/cyclonedx-cli are deliberately NOT installed on the target: this job
+# spans 24 platforms from centos-7 to debian-13 on two architectures, and
+# cyclonedx-cli is a self-contained .NET binary. Deep validation happens in the
+# docker job. Set SBOM_EXTERNAL_TOOLS=1 to opt in here for debugging.
+
+- name: SBOM checks
+  block:
+
+    - name: run PXB SBOM checks on the target host
+      command: >
+        python3 -m pytest -v
+        --junitxml=/var/tmp/pxb_sbom_report.xml
+        /package-testing/pytest-tests/test_pxb_sbom.py
+      environment:
+        SBOM_CHECK_MODE: "{{ lookup('env', 'SBOM_CHECK_MODE') | default('warn', true) }}"
+        SBOM_VULN_MODE: "{{ lookup('env', 'SBOM_VULN_MODE') | default('warn', true) }}"
+        SBOM_EXTERNAL_TOOLS: "{{ lookup('env', 'SBOM_EXTERNAL_TOOLS') | default('', true) }}"
+        SBOM_DIR: "{{ lookup('env', 'SBOM_DIR') | default('', true) }}"
+      register: pxb_sbom_result
+
+    - name: show PXB SBOM check output
+      debug:
+        var: pxb_sbom_result.stdout_lines
+
+  always:
+
+    # Runs even when the checks fail. molecule's test_sequence is
+    # destroy,create,prepare,converge,verify,cleanup,destroy -- a failing
+    # converge aborts before cleanup, so artifacts cannot be collected there.
+
+    - name: show PXB SBOM check output on failure
+      debug:
+        var: pxb_sbom_result.stdout_lines
+      when: pxb_sbom_result is defined and pxb_sbom_result.rc is defined and pxb_sbom_result.rc != 0
+
+    - name: get the arch value
+      shell: uname -m
+      register: sbom_arch_output
+      changed_when: false
+
+    - name: get the PRETTY_NAME value from /etc/os-release
+      shell: |
+        grep '^PRETTY_NAME=' /etc/os-release | cut -d'=' -f2 | tr -d '"'
+      register: sbom_pretty_name_output
+      changed_when: false
+
+    - name: build the artifact name
+      set_fact:
+        # 24 platforms run in parallel into one WORKSPACE_VAR, so the same
+        # namespacing as playbooks/cleanup.yml is required or they overwrite
+        # each other and only one arbitrary survivor gets published.
+        sbom_artifact_prefix: >-
+          {{ ansible_hostname }}_{{ sbom_pretty_name_output.stdout | replace(' ', '-') | trim }}_{{ sbom_arch_output.stdout | trim }}
+
+    - name: collect the discovered SBOM files
+      shell: |
+        set -e
+        rm -rf /var/tmp/pxb_sbom && mkdir -p /var/tmp/pxb_sbom
+        for d in /usr/share/doc /usr/share/percona-xtrabackup* /opt/percona*; do
+          [ -d "$d" ] && find "$d" -maxdepth 4 -type f \
+            \( -name '*.cdx.json*' -o -name '*.spdx.json*' \
+               -o -name '*.sbom.txt*' -o -name '*.licenses.txt*' \) \
+            -exec cp -f {} /var/tmp/pxb_sbom/ \; 2>/dev/null
+        done
+        exit 0
+      args:
+        executable: /bin/bash
+      become: true
+      register: sbom_collect
+      failed_when: false
+      changed_when: false
+
+    - name: archive the SBOM files
+      archive:
+        path: /var/tmp/pxb_sbom
+        dest: /var/tmp/pxb_sbom.zip
+        format: zip
+      become: true
+      failed_when: false
+
+    - name: fetch the SBOM junit report to the controller
+      fetch:
+        src: /var/tmp/pxb_sbom_report.xml
+        dest: "/{{ WORKSPACE_VAR }}/{{ sbom_artifact_prefix }}_sbom-junit.xml"
+        flat: yes
+      become: true
+      ignore_errors: yes
+
+    - name: fetch the SBOM files to the controller
+      fetch:
+        src: /var/tmp/pxb_sbom.zip
+        dest: "/{{ WORKSPACE_VAR }}/{{ sbom_artifact_prefix }}_sbom.zip"
+        flat: yes
+      become: true
+      ignore_errors: yes

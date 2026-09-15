@@ -1,0 +1,18 @@
+abseil-cpp 20250814.1 Apache-2.0
+boost 1.87.0 BSL-1.0
+icu 77.1 Unicode-DFS-2016
+jsmn unknown MIT
+json 3.12.0 MIT
+libbacktrace 793921876c981 BSD-3-Clause
+libkmip 5eeea918e7213f32df466be58cf9a68347ae2df2 Apache-2.0 OR BSD-3-Clause
+lz4 1.10.0 BSD-2-Clause
+opentelemetry-cpp 1.23.0 Apache-2.0
+opentelemetry-proto 1.7.0 Apache-2.0
+protobuf 24.4 BSD-3-Clause
+quicklz 1.5.0 GPL-2.0-only
+rapidjson unknown MIT
+unordered_dense 4.4.0 MIT
+xxhash-lz4 1.10.0 BSD-2-Clause
+xxhash 0.8.3 BSD-2-Clause
+zlib 1.3.2 Zlib
+zstd 1.5.7 BSD-3-Clause
