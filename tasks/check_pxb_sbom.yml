@@ -66,7 +66,7 @@
       shell: |
         set -e
         rm -rf /var/tmp/pxb_sbom && mkdir -p /var/tmp/pxb_sbom
-        for d in /usr/share/doc /usr/share/percona-xtrabackup* /opt/percona*; do
+        for d in /usr/share/percona-xtrabackup*; do
           [ -d "$d" ] && find "$d" -maxdepth 4 -type f \
             \( -name '*.cdx.json*' -o -name '*.spdx.json*' \
                -o -name '*.sbom.txt*' -o -name '*.licenses.txt*' \) \

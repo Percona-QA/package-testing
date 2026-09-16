@@ -27,11 +27,11 @@ SUFFIXES = (
     (".licenses.txt", "licenses"),
 )
 
+# Both rpm and deb install the SBOM files under the package's own directory,
+# e.g. /usr/share/percona-xtrabackup-97/sbom/. Searching only there keeps the
+# fallback from picking up unrelated SBOMs belonging to other packages.
 SEARCH_DIRS = (
-    "/usr/share/doc",
     "/usr/share/percona-xtrabackup*",
-    "/usr/share/xtrabackup*",
-    "/opt/percona*",
 )
 
 PACKAGE_GLOB = "percona-xtrabackup*"
@@ -102,18 +102,25 @@ def _find_in_dirs(backend, dirs):
 
 
 def group(paths):
-    """Group SBOM file paths into SbomSets keyed by filename stem."""
+    """Group SBOM file paths into SbomSets keyed by (directory, filename stem).
+
+    Keying on the stem alone would merge sibling directories that hold the same
+    filenames -- a stale or backup copy next to the real one -- and the merged
+    set could take CycloneDX from one directory and SPDX from the other, so the
+    cross-format consistency check would compare unrelated documents.
+    """
     sets = {}
     for path in paths:
         fmt, stem = classify(path)
         if not fmt:
             continue
-        if stem not in sets:
-            sets[stem] = SbomSet(stem)
+        key = (os.path.dirname(path), stem)
+        if key not in sets:
+            sets[key] = SbomSet(stem, directory=key[0])
         # First hit wins; discovery yields package-declared paths before find(1).
-        if not sets[stem].paths.get(fmt):
-            sets[stem].paths[fmt] = path
-    return [sets[stem] for stem in sorted(sets)]
+        if not sets[key].paths.get(fmt):
+            sets[key].paths[fmt] = path
+    return [sets[key] for key in sorted(sets)]
 
 
 def discover(backend, sbom_dir=None):
@@ -131,7 +138,8 @@ def discover(backend, sbom_dir=None):
         if not paths:
             considered.append("  -> directory is empty or unreadable")
         sets = group(paths)
-        considered.append("  -> %d SBOM file set(s)" % len(sets))
+        considered.append("  -> %d SBOM file set(s): %s"
+                          % (len(sets), ", ".join(s.label() for s in sets) or "none"))
         return sets, considered
 
     paths = []
@@ -159,7 +167,7 @@ def discover(backend, sbom_dir=None):
 
     sets = group(paths)
     considered.append("grouped into %d SBOM file set(s): %s"
-                      % (len(sets), ", ".join(s.stem for s in sets) or "none"))
+                      % (len(sets), ", ".join(s.label() for s in sets) or "none"))
     return sets, considered
 
 

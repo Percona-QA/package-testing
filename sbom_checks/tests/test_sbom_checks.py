@@ -234,6 +234,41 @@ def test_sbom_dir_finds_files_nested_several_levels_deep(workdir):
     assert sets[0].missing() == []
 
 
+def test_sibling_directories_do_not_merge_into_one_set(workdir):
+    """A backup or leftover copy next to the real SBOM must stay a separate set.
+
+    Keyed on the stem alone these merged, and the merged set could take
+    CycloneDX from one directory and SPDX from the other -- so cross-format
+    consistency would have compared unrelated documents and passed.
+    """
+    real = os.path.join(workdir, "sbom")
+    backup = os.path.join(workdir, "sbom-backup")
+    os.makedirs(real)
+    os.makedirs(backup)
+    for name in os.listdir(TESTDATA):
+        shutil.copy(os.path.join(TESTDATA, name), os.path.join(real, name))
+        shutil.copy(os.path.join(TESTDATA, name), os.path.join(backup, name))
+    for name in os.listdir(workdir):
+        path = os.path.join(workdir, name)
+        if os.path.isfile(path):
+            os.remove(path)
+
+    sets, considered = discovery.discover(LocalBackend(), sbom_dir=workdir)
+    assert len(sets) == 2, considered
+    directories = sorted(s.directory for s in sets)
+    assert directories == sorted([real, backup])
+    # Every file in a set comes from that set's own directory.
+    for sbom_set in sets:
+        for path in sbom_set.paths.values():
+            assert os.path.dirname(path) == sbom_set.directory
+
+
+def test_default_search_is_limited_to_the_package_directory():
+    """Both rpm and deb install under /usr/share/percona-xtrabackup*/; searching
+    wider picked up SBOMs belonging to other packages."""
+    assert discovery.SEARCH_DIRS == ("/usr/share/percona-xtrabackup*",)
+
+
 def test_empty_directory_yields_no_sets(workdir):
     empty = tempfile.mkdtemp(prefix="pxb-sbom-empty-")
     try:

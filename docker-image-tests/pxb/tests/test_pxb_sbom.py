@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.abspath(
 from settings import *                                    # noqa: F401,F403,E402
 from sbom_checks import audit, config, discovery, oci      # noqa: E402
 from sbom_checks.backends import DOCKER_BIN, DockerBackend  # noqa: E402
-from sbom_checks.models import render                      # noqa: E402
+from sbom_checks.models import Finding, render             # noqa: E402
 
 # Its own container: each test file in this suite starts one.
 container_name = 'pxb-docker-test-sbom'
@@ -71,6 +71,18 @@ def sbom(backend):
 
     report = audit.audit(backend, sets[0], expect_name=package,
                          expect_version=version, run_tools=True)
+
+    # Both entrypoints validate sets[0]. If discovery turned up more than one,
+    # say so loudly rather than silently ignoring the rest -- two SBOM sets
+    # under the package directory means a stale or leftover copy is shipped
+    # alongside the real one.
+    if len(sets) > 1:
+        report.findings.append(Finding(
+            "set",
+            "discovery found %d SBOM sets; only %r was checked. Others: %s"
+            % (len(sets), sets[0].label(),
+               ", ".join(s.label() for s in sets[1:]))))
+
     print(report.text())
     for note in report.tool_notes:
         print("  %s" % note)

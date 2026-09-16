@@ -182,37 +182,46 @@ and `pxb-docker-tests` adds `SBOM_CHECK_OCI`.
 ## What is checked
 
 1. **Discovery** — `$SBOM_DIR`, then `rpm -ql`/`dpkg -L` of the installed
-   `percona-xtrabackup*` package, then `find` under `/usr/share/doc` and
-   friends. Nothing hardcodes a filename: the final install path is not fixed
-   yet. Every candidate location and rejection is printed even on a skip,
-   because otherwise a broken discovery ladder is indistinguishable from "no
-   SBOM shipped yet".
-2. **Completeness** — all four formats are present.
-3. **Structure** — CycloneDX `bomFormat`/`specVersion`/`serialNumber`, unique
+   `percona-xtrabackup*` package, then `find` under
+   `/usr/share/percona-xtrabackup*`. Both rpm and deb install the files in the
+   package's own directory (`/usr/share/percona-xtrabackup-97/sbom/`), so the
+   fallback is scoped to it and cannot pick up SBOMs belonging to other
+   packages. Filenames are still never hardcoded. Every candidate location and
+   rejection is printed even on a skip, because otherwise a broken discovery
+   ladder is indistinguishable from "no SBOM shipped yet".
+2. **One set only** — a set is identified by `(directory, filename stem)`, so a
+   stale or backup copy in a sibling directory stays a separate set rather than
+   merging with the real one. Finding more than one set is reported: only the
+   first is validated, and silently mixing CycloneDX from one directory with
+   SPDX from another would make the consistency check meaningless.
+3. **Completeness** — all four formats are present.
+4. **Structure** — CycloneDX `bomFormat`/`specVersion`/`serialNumber`, unique
    `bom-ref`, every component carries name/version/purl/licence; SPDX
    `spdxVersion`/`SPDXID`/`dataLicense`, a `DESCRIBES` root, every package
    reachable by `CONTAINS`, unique and charset-legal SPDXIDs.
-4. **Identity** — the SBOM's root component matches what it should describe.
+5. **Identity** — the SBOM's root component matches what it should describe.
    The version comes from the installed package, or from `$PXB_VERSION` when
    set (the only option for a directory of downloaded files); the name comes
    from the installed package, falling back to the filename stem. Reported
    separately from structural problems, because "this SBOM is for the wrong
    release" and "this SBOM is malformed" are different failures.
-5. **Cross-format consistency** — three tiers, reported separately so a
+6. **Cross-format consistency** — three tiers, reported separately so a
    licence-vocabulary difference cannot masquerade as a missing component:
    all four files describe exactly the same `(name, version)` set; every
    component states a licence at all; and those licences are equivalent once
    normalised.
-6. **Schema** — `cyclonedx validate`, against the spec version declared *in the
+7. **Schema** — `cyclonedx validate`, against the spec version declared *in the
    document* rather than a hardcoded one.
-7. **Vulnerabilities** — `trivy sbom --severity HIGH,CRITICAL --ignore-unfixed`.
-8. **OCI referrers** — opt-in, for docker images only.
+8. **Vulnerabilities** — `trivy sbom --severity HIGH,CRITICAL --ignore-unfixed`.
+9. **OCI referrers** — opt-in, for docker images only.
 
 ## Notes and limitations
 
-- **Debian gzips files under `/usr/share/doc`**, so an SBOM may arrive as
-  `.json.gz` on deb and plain on rpm. Handled by sniffing the gzip magic bytes,
-  never by branching on `os_family` or on the file extension.
+- **Debian gzips files under `/usr/share/doc`**, so an SBOM shipped there
+  would arrive as `.json.gz` on deb and plain on rpm. PXB installs under
+  `/usr/share/percona-xtrabackup-NN/` instead, where nothing is compressed, but
+  the reader still sniffs the gzip magic bytes — never the file extension or
+  `os_family` — so either layout works.
 - **trivy currently finds almost nothing.** PXB purls are
   `pkg:generic/<name>@<version>`, which match CVE feeds poorly, and some
   components have version `unknown`. A green trivy result is not evidence of no

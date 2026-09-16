@@ -38,11 +38,21 @@ class SbomSet(object):
 
     FORMATS = ("cdx", "spdx", "table", "licenses")
 
-    def __init__(self, stem, paths=None):
+    def __init__(self, stem, paths=None, directory=None):
         self.stem = stem
+        # Sets are identified by (directory, stem), never stem alone: two
+        # directories under the package dir can hold files with identical names
+        # (a leftover or a backup copy), and merging them would validate
+        # CycloneDX from one and SPDX from the other.
+        self.directory = directory
         self.paths = dict((f, None) for f in self.FORMATS)
         if paths:
             self.paths.update(paths)
+
+    def label(self):
+        if self.directory:
+            return "%s in %s" % (self.stem, self.directory)
+        return self.stem
 
     def present(self):
         return [f for f in self.FORMATS if self.paths.get(f)]
@@ -54,7 +64,7 @@ class SbomSet(object):
         return not self.present()
 
     def __repr__(self):
-        return "SbomSet(%r, present=%r)" % (self.stem, self.present())
+        return "SbomSet(%r, present=%r)" % (self.label(), self.present())
 
 
 class Finding(object):
