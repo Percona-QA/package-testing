@@ -54,6 +54,15 @@
       register: sbom_pretty_name_output
       changed_when: false
 
+    - name: resolve the controller workspace
+      set_fact:
+        # WORKSPACE_VAR is an ENVIRONMENT variable set by the Jenkins job, not an
+        # ansible variable -- ansible does not import the environment. The
+        # molecule cleanup playbooks bridge it with this same lookup in their own
+        # play-level vars:, but this file is included from the converge play,
+        # which has no such bridge. Without it both fetches fail as undefined.
+        sbom_workspace: "{{ lookup('env', 'WORKSPACE_VAR') | default('', true) | trim }}"
+
     - name: build the artifact name
       set_fact:
         # 24 platforms run in parallel into one WORKSPACE_VAR, so the same
@@ -88,18 +97,27 @@
       become: true
       failed_when: false
 
+    - name: report that artifacts will not be fetched
+      debug:
+        msg: >-
+          WORKSPACE_VAR is not set, so the SBOM report and files stay on the
+          target in /var/tmp/. This is expected outside Jenkins.
+      when: sbom_workspace | length == 0
+
     - name: fetch the SBOM junit report to the controller
       fetch:
         src: /var/tmp/pxb_sbom_report.xml
-        dest: "/{{ WORKSPACE_VAR }}/{{ sbom_artifact_prefix }}_sbom-junit.xml"
+        dest: "{{ sbom_workspace }}/{{ sbom_artifact_prefix }}_sbom-junit.xml"
         flat: yes
       become: true
+      when: sbom_workspace | length > 0
       ignore_errors: yes
 
     - name: fetch the SBOM files to the controller
       fetch:
         src: /var/tmp/pxb_sbom.zip
-        dest: "/{{ WORKSPACE_VAR }}/{{ sbom_artifact_prefix }}_sbom.zip"
+        dest: "{{ sbom_workspace }}/{{ sbom_artifact_prefix }}_sbom.zip"
         flat: yes
       become: true
+      when: sbom_workspace | length > 0
       ignore_errors: yes
