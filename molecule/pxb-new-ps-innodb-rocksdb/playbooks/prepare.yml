@@ -208,7 +208,7 @@
       git:
         repo: https://github.com/Percona-QA/server-qa.git
         dest: /server-qa
-        version: main
+        version: "{{ lookup('env', 'SERVER_QA_BRANCH') | default('main', true) }}"
         force: yes
 
     - name: Checkout pstress repository
