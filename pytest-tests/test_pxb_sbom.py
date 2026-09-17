@@ -24,6 +24,7 @@ import pytest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from sbom_checks import audit, config, discovery          # noqa: E402
+from sbom_checks import external_tools                    # noqa: E402
 from sbom_checks.backends import LocalBackend             # noqa: E402
 from sbom_checks.models import Finding, render            # noqa: E402
 
@@ -95,6 +96,20 @@ def _only(report, where):
     return [f for f in report.findings if f.where == where]
 
 
+def _require_tool(report, tool, label):
+    """Skip unless the tool actually ran.
+
+    Without this a missing binary produced no findings, so `assert not findings`
+    passed having validated nothing -- a green light for an unchecked SBOM.
+    """
+    status = report.tool_status.get(tool, external_tools.MISSING)
+    if status == external_tools.MISSING:
+        pytest.skip("%s is not installed on this host" % label)
+    if status == external_tools.FAILED:
+        pytest.skip("%s could not complete:\n%s"
+                    % (label, "\n".join(report.tool_notes)))
+
+
 def test_sbom_set_is_complete(sbom):
     """All four formats are shipped, not just some of them."""
     assert not _only(sbom, "set"), render(_only(sbom, "set"))
@@ -133,9 +148,10 @@ def test_formats_agree_with_each_other(sbom):
 
 def test_cyclonedx_passes_schema_validation(sbom):
     if not config.external_tools_on_target():
-        pytest.skip("%s not set -- schema validation runs in the docker job"
-                    % config.ENV_EXTERNAL_TOOLS)
+        pytest.skip("%s is off" % config.ENV_EXTERNAL_TOOLS)
     findings = _only(sbom, "cyclonedx-cli")
+    if not findings:
+        _require_tool(sbom, "cyclonedx", "cyclonedx-cli")
     assert not findings, render(findings)
 
 
@@ -143,9 +159,9 @@ def test_no_known_vulnerabilities(sbom):
     """Gated separately from the structural checks: a new upstream CVE in a
     vendored library is a different signal from a malformed SBOM."""
     if not config.external_tools_on_target():
-        pytest.skip("%s not set -- vulnerability scanning runs in the docker job"
-                    % config.ENV_EXTERNAL_TOOLS)
+        pytest.skip("%s is off" % config.ENV_EXTERNAL_TOOLS)
     if not sbom.vuln_findings:
+        _require_tool(sbom, "trivy", "trivy")
         return
     if config.vuln_mode() != config.ENFORCE:
         pytest.skip("%s=%s\n%s" % (config.ENV_VULN_MODE, config.vuln_mode(),

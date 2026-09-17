@@ -1,0 +1,78 @@
+---
+# Installs the two external SBOM tools on the target host:
+#   trivy         vulnerability scanning of the CycloneDX document
+#   cyclonedx-cli schema validation against the spec version the document declares
+#
+# Every task tolerates failure on purpose. The checks skip when a tool is absent
+# (they consult report.tool_status), so a platform where a download or a binary
+# does not work degrades to a skip instead of failing the whole converge. Never
+# make these blocking.
+#
+# Arch matters: copying the x86_64 asset onto an aarch64 target produces an
+# "Exec format error" that surfaces far from its cause.
+
+- name: set SBOM tool asset names for this architecture
+  set_fact:
+    sbom_trivy_arch: "{{ 'ARM64' if ansible_architecture == 'aarch64' else '64bit' }}"
+    sbom_cdx_asset: "{{ 'cyclonedx-linux-arm64' if ansible_architecture == 'aarch64' else 'cyclonedx-linux-x64' }}"
+    # Pinned to match jenkins-pipelines/vars/installTrivy.groovy, the sanctioned
+    # helper, so the molecule and docker jobs scan with the same version.
+    sbom_trivy_version: "0.74.0"
+    # Overridable so the file can be exercised without writing to a system path.
+    sbom_bindir: "{{ sbom_bindir | default('/usr/local/bin') }}"
+
+# Detection follows PATH rather than one fixed directory, because that is what
+# the checks themselves use (shutil.which). A distro-packaged trivy in /usr/bin
+# counts as installed and is not downloaded again.
+- name: find SBOM tools already on PATH
+  shell: command -v trivy || true
+  register: sbom_have_trivy
+  changed_when: false
+  failed_when: false
+
+- name: find cyclonedx-cli already on PATH
+  shell: command -v cyclonedx || true
+  register: sbom_have_cyclonedx
+  changed_when: false
+  failed_when: false
+
+- name: download trivy
+  unarchive:
+    src: "https://github.com/aquasecurity/trivy/releases/download/v{{ sbom_trivy_version }}/trivy_{{ sbom_trivy_version }}_Linux-{{ sbom_trivy_arch }}.tar.gz"
+    dest: "{{ sbom_bindir }}"
+    remote_src: yes
+    extra_opts:
+      - trivy
+    mode: '0755'
+  become: true
+  when: sbom_have_trivy.stdout | default('') | trim | length == 0
+  failed_when: false
+
+- name: download cyclonedx-cli
+  get_url:
+    url: "https://github.com/CycloneDX/cyclonedx-cli/releases/latest/download/{{ sbom_cdx_asset }}"
+    dest: "{{ sbom_bindir }}/cyclonedx"
+    mode: '0755'
+  become: true
+  when: sbom_have_cyclonedx.stdout | default('') | trim | length == 0
+  failed_when: false
+
+- name: report which SBOM tools are usable
+  shell: |
+    for t in trivy cyclonedx; do
+      if command -v "$t" >/dev/null 2>&1; then
+        echo "$t: $(command -v $t)"
+      else
+        echo "$t: NOT AVAILABLE - the matching check will skip"
+      fi
+    done
+    exit 0
+  args:
+    executable: /bin/bash
+  register: sbom_tools_present
+  changed_when: false
+  failed_when: false
+
+- name: show SBOM tool availability
+  debug:
+    var: sbom_tools_present.stdout_lines

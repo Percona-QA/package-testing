@@ -8,13 +8,24 @@
 # Gated by SBOM_CHECK_MODE (off/warn/enforce, default warn): PXB does not ship
 # SBOM files yet, so absence is a skip and only a malformed SBOM fails the run.
 #
-# trivy/cyclonedx-cli are deliberately NOT installed on the target: this job
-# spans 24 platforms from centos-7 to debian-13 on two architectures, and
-# cyclonedx-cli is a self-contained .NET binary. Deep validation happens in the
-# docker job. Set SBOM_EXTERNAL_TOOLS=1 to opt in here for debugging.
+# trivy and cyclonedx-cli are installed on the target by tasks/install_sbom_tools.yml
+# and run by default. Both installs tolerate failure: a tool that is absent or
+# cannot run makes its check skip, never fail the converge. Set
+# SBOM_EXTERNAL_TOOLS=0 to turn them off entirely.
 
 - name: SBOM checks
   block:
+
+    - name: resolve whether the external SBOM tools should run
+      set_fact:
+        # On by default now: the pxb97 matrix is RHEL/Oracle/Rocky 8+, Debian 12+
+        # and Jammy+, all modern enough for cyclonedx-cli's self-contained .NET
+        # binary. Set SBOM_EXTERNAL_TOOLS=0 in the job to turn them off.
+        sbom_external_tools: "{{ lookup('env', 'SBOM_EXTERNAL_TOOLS') | default('1', true) | trim }}"
+
+    - name: install the external SBOM tools
+      include_tasks: ../tasks/install_sbom_tools.yml
+      when: sbom_external_tools not in ['0', 'false', 'no', 'off', '']
 
     - name: run PXB SBOM checks on the target host
       command: >
@@ -24,7 +35,7 @@
       environment:
         SBOM_CHECK_MODE: "{{ lookup('env', 'SBOM_CHECK_MODE') | default('warn', true) }}"
         SBOM_VULN_MODE: "{{ lookup('env', 'SBOM_VULN_MODE') | default('warn', true) }}"
-        SBOM_EXTERNAL_TOOLS: "{{ lookup('env', 'SBOM_EXTERNAL_TOOLS') | default('', true) }}"
+        SBOM_EXTERNAL_TOOLS: "{{ sbom_external_tools }}"
         SBOM_DIR: "{{ lookup('env', 'SBOM_DIR') | default('', true) }}"
       register: pxb_sbom_result
 

@@ -20,8 +20,8 @@ import pytest
 sys.path.insert(0, os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..")))
 
-from sbom_checks import (audit, config, consistency, discovery, licenses,
-                         parsers, structural)
+from sbom_checks import (audit, config, consistency, discovery, external_tools,
+                         licenses, parsers, structural)
 from sbom_checks.backends import LocalBackend
 from sbom_checks.models import Component
 
@@ -277,6 +277,78 @@ def test_empty_directory_yields_no_sets(workdir):
         assert considered, "discovery must always explain what it looked at"
     finally:
         shutil.rmtree(empty, ignore_errors=True)
+
+
+# --- external tool status -------------------------------------------------
+
+def _stub(directory, name, body):
+    path = os.path.join(directory, name)
+    with open(path, "w") as handle:
+        handle.write(body)
+    os.chmod(path, 0o755)
+    return path
+
+
+def test_missing_tools_are_reported_as_missing_not_as_success(workdir):
+    """A tool that never ran must not look like a tool that found nothing.
+
+    Before this, an absent binary produced no findings and the corresponding
+    tests passed having validated nothing.
+    """
+    backend = LocalBackend()
+    sets, _ = discovery.discover(backend, sbom_dir=workdir)
+    old_cdx, old_trivy = external_tools.CYCLONEDX_BIN, external_tools.TRIVY_BIN
+    external_tools.CYCLONEDX_BIN = "/nonexistent/cyclonedx"
+    external_tools.TRIVY_BIN = "/nonexistent/trivy"
+    try:
+        report = audit.audit(backend, sets[0], run_tools=True)
+    finally:
+        external_tools.CYCLONEDX_BIN, external_tools.TRIVY_BIN = old_cdx, old_trivy
+
+    assert report.tool_status["cyclonedx"] == external_tools.MISSING
+    assert report.tool_status["trivy"] == external_tools.MISSING
+    assert not [f for f in report.findings if f.where == "cyclonedx-cli"]
+    assert not report.vuln_findings
+
+
+def test_trivy_failure_is_not_reported_as_a_vulnerability(workdir):
+    """trivy exits non-zero when it cannot run at all -- a rate-limited DB pull
+    from ghcr.io, say. Treating that as a finding would be a phantom CVE."""
+    stub = _stub(workdir, "trivy-fatal",
+                 "#!/bin/sh\necho 'FATAL failed to download vulnerability DB' >&2\nexit 1\n")
+    old = external_tools.TRIVY_BIN
+    external_tools.TRIVY_BIN = stub
+    try:
+        result = external_tools.trivy_sbom(os.path.join(TESTDATA, STEM + ".cdx.json"))
+    finally:
+        external_tools.TRIVY_BIN = old
+    assert result.status == external_tools.FAILED
+    assert result.status != external_tools.FOUND
+
+
+def test_trivy_findings_are_still_reported(workdir):
+    """rc 1 with no fatal marker is a genuine finding and must stay one."""
+    stub = _stub(workdir, "trivy-vuln",
+                 "#!/bin/sh\necho 'zlib CVE-2023-45853 HIGH'\nexit 1\n")
+    old = external_tools.TRIVY_BIN
+    external_tools.TRIVY_BIN = stub
+    try:
+        result = external_tools.trivy_sbom(os.path.join(TESTDATA, STEM + ".cdx.json"))
+    finally:
+        external_tools.TRIVY_BIN = old
+    assert result.status == external_tools.FOUND
+    assert "CVE-2023-45853" in result.output
+
+
+def test_trivy_clean_scan_is_ok(workdir):
+    stub = _stub(workdir, "trivy-clean", "#!/bin/sh\nexit 0\n")
+    old = external_tools.TRIVY_BIN
+    external_tools.TRIVY_BIN = stub
+    try:
+        result = external_tools.trivy_sbom(os.path.join(TESTDATA, STEM + ".cdx.json"))
+    finally:
+        external_tools.TRIVY_BIN = old
+    assert result.status == external_tools.OK
 
 
 # --- parser edge cases ----------------------------------------------------

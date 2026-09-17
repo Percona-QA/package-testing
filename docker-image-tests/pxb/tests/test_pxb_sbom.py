@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.abspath(
 
 from settings import *                                    # noqa: F401,F403,E402
 from sbom_checks import audit, config, discovery, oci      # noqa: E402
+from sbom_checks import external_tools                     # noqa: E402
 from sbom_checks.backends import DOCKER_BIN, DockerBackend  # noqa: E402
 from sbom_checks.models import Finding, render             # noqa: E402
 
@@ -93,6 +94,16 @@ def _only(report, where):
     return [f for f in report.findings if f.where == where]
 
 
+def _require_tool(report, tool, label):
+    """Skip unless the tool actually ran, rather than passing on no findings."""
+    status = report.tool_status.get(tool, external_tools.MISSING)
+    if status == external_tools.MISSING:
+        pytest.skip("%s is not installed on this agent" % label)
+    if status == external_tools.FAILED:
+        pytest.skip("%s could not complete:\n%s"
+                    % (label, "\n".join(report.tool_notes)))
+
+
 class TestPxbSbom:
     def test_sbom_set_is_complete(self, sbom):
         assert not _only(sbom, "set"), render(_only(sbom, "set"))
@@ -118,17 +129,15 @@ class TestPxbSbom:
 
     def test_cyclonedx_passes_schema_validation(self, sbom):
         findings = _only(sbom, "cyclonedx-cli")
-        if not findings and any("cyclonedx-cli not installed" in n
-                                for n in sbom.tool_notes):
-            pytest.skip("cyclonedx-cli is not installed on this agent")
+        if not findings:
+            _require_tool(sbom, "cyclonedx", "cyclonedx-cli")
         assert not findings, render(findings)
 
     def test_no_known_vulnerabilities(self, sbom):
         """Separate gate: a new upstream CVE is a different signal from a
         malformed SBOM and must not share the same red light."""
-        if any("trivy not installed" in n for n in sbom.tool_notes):
-            pytest.skip("trivy is not installed on this agent")
         if not sbom.vuln_findings:
+            _require_tool(sbom, "trivy", "trivy")
             return
         if config.vuln_mode() != config.ENFORCE:
             pytest.skip("%s=%s\n%s" % (config.ENV_VULN_MODE, config.vuln_mode(),

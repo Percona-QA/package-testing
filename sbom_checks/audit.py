@@ -19,6 +19,10 @@ class Report(object):
         self.by_format = {}
         self.vuln_findings = []     # trivy, gated separately
         self.tool_notes = []
+        # Explicit per-tool outcome, so a caller can tell "did not run" from
+        # "ran and found nothing". Without this a missing binary produced no
+        # findings and the tests passed having validated nothing.
+        self.tool_status = {}
 
     @property
     def ok(self):
@@ -125,29 +129,41 @@ def audit(backend, sbom_set, expect_name=None, expect_version=None,
 
 def _run_tools(backend, sbom_set, report):
     """trivy + cyclonedx-cli, both optional and both non-fatal when absent."""
+    report.tool_status = {"cyclonedx": external_tools.MISSING,
+                          "trivy": external_tools.MISSING}
+
     cdx_path = sbom_set.paths.get("cdx")
     if not cdx_path:
+        report.tool_notes.append("no CycloneDX document -- external tools not run")
         return
     workdir = tempfile.mkdtemp(prefix="pxb-sbom-")
     try:
         local = backend.export(cdx_path, workdir)
     except Exception as exc:                           # noqa: BLE001
         report.tool_notes.append("could not materialise %s: %s" % (cdx_path, exc))
+        report.tool_status["cyclonedx"] = external_tools.FAILED
+        report.tool_status["trivy"] = external_tools.FAILED
         return
 
     validated = external_tools.cyclonedx_validate(local)
-    if not validated.available:
+    report.tool_status["cyclonedx"] = validated.status
+    if validated.status == external_tools.MISSING:
         report.tool_notes.append("cyclonedx-cli not installed -- schema validation skipped")
-    elif validated.ok:
+    elif validated.status == external_tools.OK:
         report.tool_notes.append("cyclonedx-cli validate: OK (%s)"
                                  % (external_tools.spec_version(local) or "unknown spec"))
     else:
         report.findings.append(Finding("cyclonedx-cli", validated.output))
 
     scanned = external_tools.trivy_sbom(local)
-    if not scanned.available:
+    report.tool_status["trivy"] = scanned.status
+    if scanned.status == external_tools.MISSING:
         report.tool_notes.append("trivy not installed -- vulnerability scan skipped")
-    elif scanned.ok:
+    elif scanned.status == external_tools.OK:
         report.tool_notes.append("trivy sbom: no unfixed HIGH/CRITICAL findings")
+    elif scanned.status == external_tools.FAILED:
+        # Could not run -- a DB download failure, a rate limit. Reporting this
+        # as a vulnerability would be a phantom CVE.
+        report.tool_notes.append("trivy could not complete the scan:\n%s" % scanned.output)
     else:
         report.vuln_findings.append(Finding("trivy", scanned.output))

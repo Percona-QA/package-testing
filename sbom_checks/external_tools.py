@@ -14,17 +14,46 @@ CYCLONEDX_BIN = os.environ.get("CYCLONEDX_BIN", "cyclonedx")
 TRIVY_BIN = os.environ.get("TRIVY_BIN", "trivy")
 
 
+# Tool outcomes. FAILED exists because a tool that could not run must never be
+# reported as a tool that found something.
+OK = "ok"
+MISSING = "missing"
+FAILED = "failed"
+FOUND = "found"          # ran cleanly and reported findings (trivy only)
+
+
 class ToolResult(object):
-    def __init__(self, available, ok, output=""):
-        self.available = available
-        self.ok = ok
+    def __init__(self, status, output=""):
+        self.status = status
         self.output = output
 
+    @property
+    def available(self):
+        return self.status != MISSING
+
+    @property
+    def ok(self):
+        return self.status == OK
+
     def __repr__(self):
-        return "ToolResult(available=%r, ok=%r)" % (self.available, self.ok)
+        return "ToolResult(status=%r)" % (self.status,)
 
 
-UNAVAILABLE = ToolResult(False, True, "")
+UNAVAILABLE = ToolResult(MISSING, "")
+
+# Markers that mean trivy could not do its job, rather than that it found
+# vulnerabilities. The vulnerability DB is a ~60MB anonymous pull from ghcr.io
+# at scan time, so on a wide parallel matrix rate-limiting is expected.
+TRIVY_FATAL_MARKERS = (
+    "FATAL",
+    "failed to download",
+    "TOOMANYREQUESTS",
+    "toomanyrequests",
+    "rate limit",
+    "connection refused",
+    "context deadline exceeded",
+    "unable to initialize",
+)
 
 
 def have(binary):
@@ -69,7 +98,7 @@ def cyclonedx_validate(path):
     if version:
         argv += ["--input-version", version]
     rc, out, err = _run(argv, {"DOTNET_SYSTEM_GLOBALIZATION_INVARIANT": "1"})
-    return ToolResult(True, rc == 0, (out + err).strip())
+    return ToolResult(OK if rc == 0 else FAILED, (out + err).strip())
 
 
 def trivy_sbom(path, severity="HIGH,CRITICAL"):
@@ -85,4 +114,12 @@ def trivy_sbom(path, severity="HIGH,CRITICAL"):
         TRIVY_BIN, "sbom", "--severity", severity, "--ignore-unfixed",
         "--exit-code", "1", path,
     ])
-    return ToolResult(True, rc == 0, (out + err).strip())
+    output = (out + err).strip()
+    if rc == 0:
+        return ToolResult(OK, output)
+    # --exit-code 1 means "vulnerabilities found", but trivy also exits non-zero
+    # when it simply could not run. Only treat rc 1 with no fatal marker as a
+    # real finding; everything else is a failed scan, which callers skip.
+    if rc == 1 and not any(m in output for m in TRIVY_FATAL_MARKERS):
+        return ToolResult(FOUND, output)
+    return ToolResult(FAILED, output)

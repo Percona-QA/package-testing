@@ -35,7 +35,7 @@ Other environment variables:
 |---|---|
 | `SBOM_DIR` | check this directory instead of discovering. Escape hatch for verifying a pre-release package. |
 | `PXB_VERSION` | the version the SBOM must describe. The only way to check this for a downloaded directory, which has no installed package to compare against. |
-| `SBOM_EXTERNAL_TOOLS` | run trivy/cyclonedx-cli on a molecule target host (off by default; they run in the docker job) |
+| `SBOM_EXTERNAL_TOOLS` | run trivy/cyclonedx-cli. **On by default in the molecule job**, which installs both on the target; set to `0` to skip them |
 | `SBOM_CHECK_OCI` | also check the SBOM attached to a docker image as an OCI referrer (off: percona-docker publishes none today) |
 | `SBOM_LICENSE_STRICT` | require identical licence operand sets across formats, not just overlap |
 | `DOCKER_BIN`, `TRIVY_BIN`, `CYCLONEDX_BIN`, `ORAS_BIN` | binary overrides |
@@ -133,7 +133,7 @@ the rpm inside it (a tag like `8.0.35-33` against an rpm version of `8.0.35`).
 |---|---|
 | assert which release the SBOM describes | `PXB_VERSION=9.7.1-rc1` |
 | fail instead of skip when no SBOM is found | `SBOM_CHECK_MODE=enforce` |
-| also run trivy / cyclonedx-cli | `SBOM_EXTERNAL_TOOLS=1` (directory and package runs only; the docker run always tries them) |
+| also run trivy / cyclonedx-cli | `SBOM_EXTERNAL_TOOLS=1` (needed for a directory run; the molecule and docker jobs already do) |
 | fail on HIGH/CRITICAL CVEs | `SBOM_VULN_MODE=enforce` |
 | require identical licences across formats | `SBOM_LICENSE_STRICT=1` |
 | also check the registry-attached SBOM | `SBOM_CHECK_OCI=1` (needs `oras`) |
@@ -213,6 +213,13 @@ and `pxb-docker-tests` adds `SBOM_CHECK_OCI`.
 7. **Schema** — `cyclonedx validate`, against the spec version declared *in the
    document* rather than a hardcoded one.
 8. **Vulnerabilities** — `trivy sbom --severity HIGH,CRITICAL --ignore-unfixed`.
+
+   Both tools are optional, and each reports an explicit status — `ok`,
+   `missing` or `failed` — rather than just findings. A tool that did not run
+   makes its check **skip**; it can never pass on an empty result, which is what
+   made an absent binary look like a clean validation. `failed` also keeps a
+   trivy that could not start (a rate-limited vulnerability-DB pull from
+   ghcr.io, say) from being reported as a vulnerability.
 9. **OCI referrers** — opt-in, for docker images only.
 
 ## Notes and limitations
@@ -222,6 +229,12 @@ and `pxb-docker-tests` adds `SBOM_CHECK_OCI`.
   `/usr/share/percona-xtrabackup-NN/` instead, where nothing is compressed, but
   the reader still sniffs the gzip magic bytes — never the file extension or
   `os_family` — so either layout works.
+- **The molecule job installs both tools on the target** via
+  `tasks/install_sbom_tools.yml` — trivy pinned to 0.74.0 (matching
+  `installTrivy.groovy`) and cyclonedx-cli from its latest release, both
+  arch-aware. Installs are non-blocking: a platform where either will not run
+  degrades to a skipped check, never a failed converge. Disable with the
+  `SBOM_EXTERNAL_TOOLS` build parameter.
 - **trivy currently finds almost nothing.** PXB purls are
   `pkg:generic/<name>@<version>`, which match CVE feeds poorly, and some
   components have version `unknown`. A green trivy result is not evidence of no
