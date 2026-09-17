@@ -57,13 +57,27 @@
   when: sbom_have_cyclonedx.stdout | default('') | trim | length == 0
   failed_when: false
 
+# The checks address the tools by absolute path rather than relying on PATH.
+# This play runs under become/sudo, and sudo's secure_path on RHEL-family is
+# "/sbin:/bin:/usr/sbin:/usr/bin" -- no /usr/local/bin, which is where these are
+# installed. Debian/Ubuntu's secure_path does include it, which is why only the
+# RHEL family saw the tools "not installed" after a successful download.
+- name: resolve the installed SBOM tool paths
+  set_fact:
+    sbom_trivy_bin: "{{ sbom_have_trivy.stdout | default('', true) | trim
+                        or (sbom_bindir ~ '/trivy') }}"
+    sbom_cyclonedx_bin: "{{ sbom_have_cyclonedx.stdout | default('', true) | trim
+                            or (sbom_bindir ~ '/cyclonedx') }}"
+
 - name: report which SBOM tools are usable
   shell: |
-    for t in trivy cyclonedx; do
-      if command -v "$t" >/dev/null 2>&1; then
-        echo "$t: $(command -v $t)"
+    for entry in "trivy {{ sbom_trivy_bin }}" "cyclonedx {{ sbom_cyclonedx_bin }}"; do
+      name=${entry%% *}
+      path=${entry#* }
+      if [ -x "$path" ]; then
+        echo "$name: $path"
       else
-        echo "$t: NOT AVAILABLE - the matching check will skip"
+        echo "$name: NOT AVAILABLE at $path - the matching check will skip"
       fi
     done
     exit 0

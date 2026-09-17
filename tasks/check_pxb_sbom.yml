@@ -37,6 +37,16 @@
         SBOM_VULN_MODE: "{{ lookup('env', 'SBOM_VULN_MODE') | default('warn', true) }}"
         SBOM_EXTERNAL_TOOLS: "{{ sbom_external_tools }}"
         SBOM_DIR: "{{ lookup('env', 'SBOM_DIR') | default('', true) }}"
+        # Absolute paths, because this play runs under sudo and RHEL-family
+        # secure_path excludes /usr/local/bin where the tools are installed.
+        # shutil.which() -- which external_tools.have() uses -- resolves an
+        # absolute path directly, so PATH stops mattering.
+        TRIVY_BIN: "{{ sbom_trivy_bin | default('trivy', true) }}"
+        CYCLONEDX_BIN: "{{ sbom_cyclonedx_bin | default('cyclonedx', true) }}"
+        # Deliberately NOT touching PATH here: prepending the tool directory also
+        # changes which python3 is selected, and a stray /usr/local/bin/python3
+        # without pytest would break the run. The absolute paths above are
+        # sufficient -- shutil.which() resolves them without consulting PATH.
       register: pxb_sbom_result
 
     - name: show PXB SBOM check output

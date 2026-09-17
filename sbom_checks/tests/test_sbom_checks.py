@@ -396,6 +396,35 @@ def test_missing_tools_are_reported_as_missing_not_as_success(workdir):
     assert not report.vuln_findings
 
 
+def test_tools_are_found_by_absolute_path_when_not_on_PATH(workdir):
+    """The molecule play runs under sudo, and RHEL-family secure_path excludes
+    /usr/local/bin where the tools are installed -- so the checks address them by
+    absolute path. This pins the resolution the fix depends on."""
+    stub = _stub(workdir, "trivy", "#!/bin/sh\nexit 0\n")
+    old_path = os.environ.get("PATH", "")
+    os.environ["PATH"] = "/nonexistent-bin"
+    try:
+        assert external_tools.have("trivy") is False, "must not be on the stripped PATH"
+        assert external_tools.have(stub) is True, "absolute path must resolve"
+        assert external_tools.have("/nonexistent/trivy") is False
+    finally:
+        os.environ["PATH"] = old_path
+
+
+def test_tool_binary_overrides_are_honoured(workdir):
+    """TRIVY_BIN / CYCLONEDX_BIN are how the ansible task passes those paths in."""
+    stub = _stub(workdir, "trivy-abs", "#!/bin/sh\nexit 0\n")
+    old_bin, old_path = external_tools.TRIVY_BIN, os.environ.get("PATH", "")
+    external_tools.TRIVY_BIN = stub
+    os.environ["PATH"] = "/nonexistent-bin"
+    try:
+        result = external_tools.trivy_sbom(os.path.join(TESTDATA, STEM + ".cdx.json"))
+        assert result.status == external_tools.OK, result.status
+    finally:
+        external_tools.TRIVY_BIN = old_bin
+        os.environ["PATH"] = old_path
+
+
 def test_trivy_failure_is_not_reported_as_a_vulnerability(workdir):
     """trivy exits non-zero when it cannot run at all -- a rate-limited DB pull
     from ghcr.io, say. Treating that as a finding would be a phantom CVE."""
