@@ -35,7 +35,7 @@ Other environment variables:
 |---|---|
 | `SBOM_DIR` | check this directory instead of discovering. Escape hatch for verifying a pre-release package. |
 | `PXB_VERSION` | the version the SBOM must describe. The only way to check this for a downloaded directory, which has no installed package to compare against. |
-| `SBOM_EXTERNAL_TOOLS` | run trivy/cyclonedx-cli. **On by default in the molecule job**, which installs both on the target; set to `0` to skip them |
+| `SBOM_EXTERNAL_TOOLS` | run trivy/cyclonedx-cli, and **require** them: when on, a tool that is missing or cannot complete **fails** the check rather than skipping. On by default in both CI jobs, which install the tools; set to `0` to skip the tool-backed checks entirely |
 | `SBOM_CHECK_OCI` | also check the SBOM attached to a docker image as an OCI referrer (off: percona-docker publishes none today) |
 | `SBOM_LICENSE_STRICT` | require identical licence operand sets across formats, not just overlap |
 | `DOCKER_BIN`, `TRIVY_BIN`, `CYCLONEDX_BIN`, `ORAS_BIN` | binary overrides |
@@ -133,7 +133,7 @@ the rpm inside it (a tag like `8.0.35-33` against an rpm version of `8.0.35`).
 |---|---|
 | assert which release the SBOM describes | `PXB_VERSION=9.7.1-rc1` |
 | fail instead of skip when no SBOM is found | `SBOM_CHECK_MODE=enforce` |
-| also run trivy / cyclonedx-cli | `SBOM_EXTERNAL_TOOLS=1` (needed for a directory run; the molecule and docker jobs already do) |
+| also run trivy / cyclonedx-cli | `SBOM_EXTERNAL_TOOLS=1` — note this also makes a missing tool a failure |
 | fail on HIGH/CRITICAL CVEs | `SBOM_VULN_MODE=enforce` |
 | require identical licences across formats | `SBOM_LICENSE_STRICT=1` |
 | also check the registry-attached SBOM | `SBOM_CHECK_OCI=1` (needs `oras`) |
@@ -247,12 +247,18 @@ and `pxb-docker-tests` adds `SBOM_CHECK_OCI`.
    document* rather than a hardcoded one.
 8. **Vulnerabilities** — `trivy sbom --severity HIGH,CRITICAL --ignore-unfixed`.
 
-   Both tools are optional, and each reports an explicit status — `ok`,
-   `missing` or `failed` — rather than just findings. A tool that did not run
-   makes its check **skip**; it can never pass on an empty result, which is what
-   made an absent binary look like a clean validation. `failed` also keeps a
-   trivy that could not start (a rate-limited vulnerability-DB pull from
-   ghcr.io, say) from being reported as a vulnerability.
+   Each tool reports an explicit status — `ok`, `missing` or `failed` — rather
+   than just findings, so a tool that did not run can never pass on an empty
+   result (which is what made an absent binary look like a clean validation).
+   What happens then depends on `SBOM_EXTERNAL_TOOLS`:
+
+   - **on** — the tools were asked for, so `missing` *and* `failed` both **fail**
+     the check. An unusable toolchain is a setup bug, not a green build.
+   - **off** — the tool-backed checks skip entirely.
+
+   `failed` is still kept distinct from a finding, so a trivy that could not
+   start (a rate-limited vulnerability-DB pull from ghcr.io, say) is reported as
+   a broken scan rather than as a vulnerability.
 9. **OCI referrers** — opt-in, for docker images only.
 
 ## Notes and limitations

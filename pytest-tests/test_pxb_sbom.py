@@ -97,17 +97,25 @@ def _only(report, where):
 
 
 def _require_tool(report, tool, label):
-    """Skip unless the tool actually ran.
+    """Fail unless the tool actually ran.
 
-    Without this a missing binary produced no findings, so `assert not findings`
-    passed having validated nothing -- a green light for an unchecked SBOM.
+    Only reached when SBOM_EXTERNAL_TOOLS is on, i.e. the tools were explicitly
+    asked for -- so a tool that is absent or could not complete is a setup
+    failure, not a benign condition. Skipping here is what previously let an
+    unusable toolchain look like a green build.
     """
     status = report.tool_status.get(tool, external_tools.MISSING)
     if status == external_tools.MISSING:
-        pytest.skip("%s is not installed on this host" % label)
+        pytest.fail(
+            "%s is not installed, but %s is on.\n"
+            "The tool is required when external tools are requested; install it "
+            "or turn %s off.\n%s"
+            % (label, config.ENV_EXTERNAL_TOOLS, config.ENV_EXTERNAL_TOOLS,
+               "\n".join(report.tool_notes)))
     if status == external_tools.FAILED:
-        pytest.skip("%s could not complete:\n%s"
-                    % (label, "\n".join(report.tool_notes)))
+        pytest.fail(
+            "%s is installed but could not complete, and %s is on.\n%s"
+            % (label, config.ENV_EXTERNAL_TOOLS, "\n".join(report.tool_notes)))
 
 
 def test_sbom_set_is_complete(sbom):

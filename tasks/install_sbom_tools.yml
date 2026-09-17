@@ -46,6 +46,7 @@
     mode: '0755'
   become: true
   when: sbom_have_trivy.stdout | default('') | trim | length == 0
+  register: sbom_trivy_download
   failed_when: false
 
 - name: download cyclonedx-cli
@@ -55,6 +56,7 @@
     mode: '0755'
   become: true
   when: sbom_have_cyclonedx.stdout | default('') | trim | length == 0
+  register: sbom_cyclonedx_download
   failed_when: false
 
 # The checks address the tools by absolute path rather than relying on PATH.
@@ -90,3 +92,20 @@
 - name: show SBOM tool availability
   debug:
     var: sbom_tools_present.stdout_lines
+
+# The downloads are non-blocking, so without this their failure is invisible --
+# and a missing tool now FAILS the check, making "why" the first question asked.
+- name: report why an SBOM tool download failed
+  debug:
+    msg: >-
+      {{ item.name }} download failed:
+      {{ item.result.msg | default(item.result.stderr | default('no error recorded')) }}
+  when:
+    - item.result is defined
+    - item.result.skipped is not defined
+    - item.result.failed | default(false)
+  loop:
+    - { name: trivy, result: "{{ sbom_trivy_download | default({}) }}" }
+    - { name: cyclonedx-cli, result: "{{ sbom_cyclonedx_download | default({}) }}" }
+  loop_control:
+    label: "{{ item.name }}"

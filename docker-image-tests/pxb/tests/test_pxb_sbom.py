@@ -71,7 +71,8 @@ def sbom(backend):
     print("  installed package: %s %s" % (package, version or "(version unknown)"))
 
     report = audit.audit(backend, sets[0], expect_name=package,
-                         expect_version=version, run_tools=True)
+                         expect_version=version,
+                         run_tools=config.external_tools_on_target())
 
     # Both entrypoints validate sets[0]. If discovery turned up more than one,
     # say so loudly rather than silently ignoring the rest -- two SBOM sets
@@ -95,13 +96,25 @@ def _only(report, where):
 
 
 def _require_tool(report, tool, label):
-    """Skip unless the tool actually ran, rather than passing on no findings."""
+    """Fail unless the tool actually ran.
+
+    Only reached when SBOM_EXTERNAL_TOOLS is on, i.e. the tools were explicitly
+    asked for -- so a tool that is absent or could not complete is a setup
+    failure, not a benign condition. Skipping here is what previously let an
+    unusable toolchain look like a green build.
+    """
     status = report.tool_status.get(tool, external_tools.MISSING)
     if status == external_tools.MISSING:
-        pytest.skip("%s is not installed on this agent" % label)
+        pytest.fail(
+            "%s is not installed, but %s is on.\n"
+            "The tool is required when external tools are requested; install it "
+            "or turn %s off.\n%s"
+            % (label, config.ENV_EXTERNAL_TOOLS, config.ENV_EXTERNAL_TOOLS,
+               "\n".join(report.tool_notes)))
     if status == external_tools.FAILED:
-        pytest.skip("%s could not complete:\n%s"
-                    % (label, "\n".join(report.tool_notes)))
+        pytest.fail(
+            "%s is installed but could not complete, and %s is on.\n%s"
+            % (label, config.ENV_EXTERNAL_TOOLS, "\n".join(report.tool_notes)))
 
 
 class TestPxbSbom:
@@ -128,6 +141,8 @@ class TestPxbSbom:
         assert not _only(sbom, "consistency"), render(_only(sbom, "consistency"))
 
     def test_cyclonedx_passes_schema_validation(self, sbom):
+        if not config.external_tools_on_target():
+            pytest.skip("%s is off" % config.ENV_EXTERNAL_TOOLS)
         findings = _only(sbom, "cyclonedx-cli")
         if not findings:
             _require_tool(sbom, "cyclonedx", "cyclonedx-cli")
@@ -136,6 +151,8 @@ class TestPxbSbom:
     def test_no_known_vulnerabilities(self, sbom):
         """Separate gate: a new upstream CVE is a different signal from a
         malformed SBOM and must not share the same red light."""
+        if not config.external_tools_on_target():
+            pytest.skip("%s is off" % config.ENV_EXTERNAL_TOOLS)
         if not sbom.vuln_findings:
             _require_tool(sbom, "trivy", "trivy")
             return
@@ -192,5 +209,8 @@ class TestPxbOciSbom:
         from sbom_checks import external_tools
         result = external_tools.cyclonedx_validate(files[0])
         if not result.available:
+            if config.external_tools_on_target():
+                pytest.fail("cyclonedx-cli is not installed, but %s is on"
+                            % config.ENV_EXTERNAL_TOOLS)
             pytest.skip("cyclonedx-cli is not installed on this agent")
         assert result.ok, result.output
