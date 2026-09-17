@@ -250,18 +250,30 @@
         dest: /usr/sbin/
         remote_src: yes
 
-  - name: copy the global configuration file for mysql in Redhat/CentOS
+  - name: write the global configuration file for mysql in Redhat/CentOS
     copy:
-        src: /package-testing/kmip/component_keyring_kmip.cnf
-        dest: /usr/lib64/mysql/plugin/
-        remote_src: yes
+        content: |
+          {
+            "server_addr": "127.0.0.1",
+            "server_port": "5696",
+            "client_ca": "{{ certs_dir }}/mysql-client-cert.pem",
+            "client_key": "{{ certs_dir }}/mysql-client-key.pem",
+            "server_ca": "{{ certs_dir }}/vault-kmip-ca.pem"
+          }
+        dest: /usr/lib64/mysql/plugin/component_keyring_kmip.cnf
     when: ansible_os_family == "RedHat"
 
-  - name: copy the global configuration file for mysql in Debian/Ubuntu
+  - name: write the global configuration file for mysql in Debian/Ubuntu
     copy:
-        src: /package-testing/kmip/component_keyring_kmip.cnf
-        dest: /usr/lib/mysql/plugin/
-        remote_src: yes
+        content: |
+          {
+            "server_addr": "127.0.0.1",
+            "server_port": "5696",
+            "client_ca": "{{ certs_dir }}/mysql-client-cert.pem",
+            "client_key": "{{ certs_dir }}/mysql-client-key.pem",
+            "server_ca": "{{ certs_dir }}/vault-kmip-ca.pem"
+          }
+        dest: /usr/lib/mysql/plugin/component_keyring_kmip.cnf
     when: ansible_os_family == "Debian"
 
   - name: copy the encryption config file on Debian/Ubuntu

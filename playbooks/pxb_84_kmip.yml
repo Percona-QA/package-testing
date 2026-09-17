@@ -129,7 +129,7 @@
     pip:
       name: "{{ item }}"
       state: latest
-      extra_args: "-U"
+      extra_args: "-U --ignore-installed"
     with_items:
       - pip
       - setuptools
