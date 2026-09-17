@@ -208,7 +208,7 @@
       git:
         repo: https://github.com/Percona-QA/server-qa.git
         dest: /server-qa
-        version: main
+        version: pxb_8407
         force: yes
 
     - name: Checkout pstress repository
