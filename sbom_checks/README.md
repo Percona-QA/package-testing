@@ -157,6 +157,35 @@ explicitly.
   entrypoint passes it to discovery too, where it is a path *inside the
   container*, not on your host — a stale export silently redirects the search.
 
+### Platform labels in the junit report
+
+Every molecule platform and both docker architectures publish into one Jenkins
+result set, so the table would otherwise show the same test name 24 times with
+no way to tell which platform skipped or failed. Test names are therefore
+suffixed with the platform:
+
+```
+test_cyclonedx_passes_schema_validation.ubuntu-noble
+test_cyclonedx_passes_schema_validation.debian-12
+test_no_known_vulnerabilities.arm64
+```
+
+pytest cannot do this itself — the junit `name` is the last component of the
+nodeid, and `--junit-prefix` only affects `classname` — so the report is
+rewritten after the run:
+
+```bash
+python3 -m sbom_checks.label_junit report.xml --label ubuntu-noble --only test_pxb_sbom
+```
+
+Post-processing rather than a pytest hook because the docker suite is pinned to
+`pytest==5.2.1` while the targets run a modern pytest, and this touches no
+pytest internals. It is idempotent, leaves a malformed report untouched, and
+`--only` scopes the rewrite by `classname` so the docker `report.xml` keeps its
+`test_container_att.py` results unlabelled. CI applies it automatically:
+`tasks/check_pxb_sbom.yml` labels with `MOLECULE_SCENARIO_NAME` (falling back to
+OS + arch), and `pxb-docker-tests.groovy` labels with `arm64` / `amd64`.
+
 ### The self-test
 
 Runs the whole pipeline against the prototype fixtures in `testdata/`, with no

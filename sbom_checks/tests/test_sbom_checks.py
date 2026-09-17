@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from sbom_checks import (audit, config, consistency, discovery, external_tools,
-                         licenses, parsers, structural)
+                         label_junit, licenses, parsers, structural)
 from sbom_checks.backends import LocalBackend
 from sbom_checks.models import Component
 
@@ -277,6 +277,91 @@ def test_empty_directory_yields_no_sets(workdir):
         assert considered, "discovery must always explain what it looked at"
     finally:
         shutil.rmtree(empty, ignore_errors=True)
+
+
+# --- junit platform labelling ---------------------------------------------
+
+# pytest 6+ wraps the suite in <testsuites>; pytest 5.2.1 (pinned in the docker
+# suite) emits <testsuite> at the root. Both must work.
+JUNIT_NESTED = """<?xml version="1.0" encoding="utf-8"?>
+<testsuites><testsuite name="pytest" tests="3">
+<testcase classname="pytest-tests.test_pxb_sbom" name="test_cyclonedx_is_well_formed"/>
+<testcase classname="tests.test_container_att.TestPxbBinaries" name="test_binary_exists[xbcloud]"/>
+<testcase classname="tests.test_pxb_sbom.TestPxbSbom" name="test_no_known_vulnerabilities"/>
+</testsuite></testsuites>"""
+
+JUNIT_FLAT = """<?xml version="1.0" encoding="utf-8"?>
+<testsuite name="pytest" tests="1">
+<testcase classname="tests.test_pxb_sbom.TestPxbSbom" name="test_sbom_set_is_complete"/>
+</testsuite>"""
+
+
+def _names(path):
+    import xml.etree.ElementTree as ET
+    return dict((tc.get("classname"), tc.get("name"))
+                for tc in ET.parse(path).getroot().iter("testcase"))
+
+
+def _write(directory, name, text):
+    path = os.path.join(directory, name)
+    with open(path, "w") as handle:
+        handle.write(text)
+    return path
+
+
+def test_junit_label_is_appended_to_matching_testcases(workdir):
+    path = _write(workdir, "nested.xml", JUNIT_NESTED)
+    assert label_junit.main([path, "--label", "ubuntu-noble",
+                             "--only", "test_pxb_sbom"]) == 0
+    names = _names(path)
+    assert names["pytest-tests.test_pxb_sbom"] == \
+        "test_cyclonedx_is_well_formed.ubuntu-noble"
+    assert names["tests.test_pxb_sbom.TestPxbSbom"] == \
+        "test_no_known_vulnerabilities.ubuntu-noble"
+
+
+def test_junit_label_leaves_other_test_modules_alone(workdir):
+    """The docker report.xml carries test_container_att.py in the same file."""
+    path = _write(workdir, "nested.xml", JUNIT_NESTED)
+    label_junit.main([path, "--label", "amd64", "--only", "test_pxb_sbom"])
+    names = _names(path)
+    assert names["tests.test_container_att.TestPxbBinaries"] == \
+        "test_binary_exists[xbcloud]"
+
+
+def test_junit_label_handles_the_pytest5_flat_root(workdir):
+    path = _write(workdir, "flat.xml", JUNIT_FLAT)
+    assert label_junit.main([path, "--label", "rhel-9",
+                             "--only", "test_pxb_sbom"]) == 0
+    assert list(_names(path).values()) == ["test_sbom_set_is_complete.rhel-9"]
+
+
+def test_junit_label_is_idempotent(workdir):
+    path = _write(workdir, "nested.xml", JUNIT_NESTED)
+    for _ in range(3):
+        label_junit.main([path, "--label", "debian-12", "--only", "test_pxb_sbom"])
+    for name in _names(path).values():
+        assert name.count(".debian-12") <= 1, name
+
+
+def test_junit_label_leaves_a_malformed_report_untouched(workdir):
+    """A mangled report is worse than an ambiguous one."""
+    path = _write(workdir, "bad.xml", '<testsuite><testcase name="a"')
+    original = open(path).read()
+    assert label_junit.main([path, "--label", "x"]) == 1
+    assert open(path).read() == original
+
+
+def test_junit_label_on_a_missing_file_is_not_an_error(workdir):
+    assert label_junit.main([os.path.join(workdir, "absent.xml"),
+                             "--label", "x"]) == 0
+
+
+def test_junit_label_ignores_an_empty_label(workdir):
+    path = _write(workdir, "nested.xml", JUNIT_NESTED)
+    original = open(path).read()
+    assert label_junit.main([path, "--label", "   "]) == 0
+    assert open(path).read() == original
 
 
 # --- external tool status -------------------------------------------------

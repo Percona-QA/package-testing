@@ -74,6 +74,18 @@
         # which has no such bridge. Without it both fetches fail as undefined.
         sbom_workspace: "{{ lookup('env', 'WORKSPACE_VAR') | default('', true) | trim }}"
 
+    - name: resolve the platform label for the junit report
+      set_fact:
+        # Every platform publishes into one Jenkins result set, so without a
+        # label the table shows the same test name 24 times and a skip cannot be
+        # attributed. MOLECULE_SCENARIO_NAME matches the Jenkins parallel stage
+        # ("ubuntu-noble"); fall back to the OS/arch this task already derives so
+        # the label is never empty.
+        sbom_platform_label: >-
+          {{ lookup('env', 'MOLECULE_SCENARIO_NAME') | default('', true) | trim
+             or (sbom_pretty_name_output.stdout | replace(' ', '-') | trim
+                 ~ '_' ~ sbom_arch_output.stdout | trim) }}
+
     - name: build the artifact name
       set_fact:
         # 24 platforms run in parallel into one WORKSPACE_VAR, so the same
@@ -107,6 +119,23 @@
         format: zip
       become: true
       failed_when: false
+
+    - name: label the junit report with the platform
+      command: >
+        python3 -m sbom_checks.label_junit
+        /var/tmp/pxb_sbom_report.xml
+        --label {{ sbom_platform_label | quote }}
+        --only test_pxb_sbom
+      args:
+        chdir: /package-testing
+      register: sbom_label_result
+      changed_when: false
+      # Non-blocking: an unlabelled report is still a useful report.
+      failed_when: false
+
+    - name: show the junit labelling result
+      debug:
+        var: sbom_label_result.stdout_lines
 
     - name: report that artifacts will not be fetched
       debug:
