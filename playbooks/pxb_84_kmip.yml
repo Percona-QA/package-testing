@@ -201,7 +201,50 @@
     when: ansible_os_family == "RedHat"
 
   - name: start mysql service debian
-    service: name=mysql state=started
+    block:
+      - name: start mysql service debian
+        service: name=mysql state=started
+
+    rescue:
+      - name: dump journalctl for mysql.service
+        command: journalctl -xeu mysql.service --no-pager -n 200
+        register: mysql_journal
+        ignore_errors: yes
+
+      - name: display journalctl for mysql.service
+        debug:
+          var: mysql_journal.stdout_lines
+
+      - name: dump mysqld error log
+        command: tail -n 200 /var/log/mysql/error.log
+        register: mysql_error_log
+        ignore_errors: yes
+
+      - name: display mysqld error log
+        debug:
+          var: mysql_error_log.stdout_lines
+
+      - name: check for apparmor denials affecting mysqld
+        shell: (journalctl -k --no-pager | grep -i apparmor | grep -i mysqld) || (dmesg | grep -i apparmor | grep -i mysqld) || echo "no apparmor denials found"
+        register: apparmor_denials
+        ignore_errors: yes
+
+      - name: display apparmor denials
+        debug:
+          var: apparmor_denials.stdout_lines
+
+      - name: check apparmor status
+        command: aa-status
+        register: apparmor_status
+        ignore_errors: yes
+
+      - name: display apparmor status
+        debug:
+          var: apparmor_status.stdout_lines
+
+      - name: fail after collecting mysql start diagnostics
+        fail:
+          msg: "mysql service failed to start on Debian - see diagnostic output above"
     when: ansible_os_family == "Debian"
 
   - name: start mysql service rhel
