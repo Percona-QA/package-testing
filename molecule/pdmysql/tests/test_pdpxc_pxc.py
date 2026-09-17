@@ -10,44 +10,42 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 VERSION = os.environ['VERSION']
 
 
-DEBPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-client',
-               'percona-xtradb-cluster-common', 'percona-xtradb-cluster-dbg',
-               'percona-xtradb-cluster-garbd-debug', 'percona-xtradb-cluster-garbd',
-               'percona-xtradb-cluster-server-debug', 'percona-xtradb-cluster-test',
-               'percona-xtradb-cluster']
+# PXC 9.7 splits out client-plugins (deb+rpm) and client-core/server-core (deb only),
+# and drops the plain 'percona-xtradb-cluster' and 'percona-xtradb-cluster-shared-compat' packages.
+if MAJOR_VERSION in ['9.7']:
+    DEBPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-client',
+                   'percona-xtradb-cluster-client-core', 'percona-xtradb-cluster-client-plugins',
+                   'percona-xtradb-cluster-common', 'percona-xtradb-cluster-dbg',
+                   'percona-xtradb-cluster-garbd-debug', 'percona-xtradb-cluster-garbd',
+                   'percona-xtradb-cluster-server-core', 'percona-xtradb-cluster-server-debug',
+                   'percona-xtradb-cluster-test']
 
-RPMPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster',
-               'percona-xtradb-cluster-client',
-               'percona-xtradb-cluster-devel', 'percona-xtradb-cluster-garbd',
-               'percona-xtradb-cluster-server', 'percona-xtradb-cluster-shared',
-               'percona-xtradb-cluster-test']
+    RPMPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-client',
+                   'percona-xtradb-cluster-client-plugins', 'percona-xtradb-cluster-devel',
+                   'percona-xtradb-cluster-garbd', 'percona-xtradb-cluster-server',
+                   'percona-xtradb-cluster-shared', 'percona-xtradb-cluster-test',
+                   'percona-xtradb-cluster-debuginfo', 'percona-xtradb-cluster-debugsource']
 
-EXTRA_RPMPACKAGE = ['percona-xtradb-cluster-shared-compat']
+    EXTRA_RPMPACKAGE = []
+else:
+    DEBPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-client',
+                   'percona-xtradb-cluster-common', 'percona-xtradb-cluster-dbg',
+                   'percona-xtradb-cluster-garbd-debug', 'percona-xtradb-cluster-garbd',
+                   'percona-xtradb-cluster-server-debug', 'percona-xtradb-cluster-test',
+                   'percona-xtradb-cluster']
 
-if MAJOR_VERSION in ['8.0']:
-    PLUGIN_COMMANDS = ["mysql -e \"CREATE FUNCTION"
-                       " fnv1a_64 RETURNS INTEGER SONAME 'libfnv1a_udf.so';\"",
-                       "mysql -e \"CREATE FUNCTION"
-                       " fnv_64 RETURNS INTEGER SONAME 'libfnv_udf.so';\"",
-                       "mysql -e \"CREATE FUNCTION"
-                       " murmur_hash RETURNS INTEGER SONAME 'libmurmur_udf.so';\"",
-                       "mysql -e \"INSTALL PLUGIN"
-                       " audit_log SONAME \'audit_log.so\';\"",
-                       "mysql -e \"CREATE FUNCTION"
-                       " version_tokens_set RETURNS STRING SONAME 'version_token.so';\"",
-                       "mysql -e \"CREATE FUNCTION"
-                       " version_tokens_show RETURNS STRING SONAME 'version_token.so';\"",
-                       "mysql -e \"CREATE FUNCTION"
-                       " version_tokens_edit RETURNS STRING SONAME 'version_token.so';\"",
-                       "mysql -e \"CREATE FUNCTION"
-                       " version_tokens_delete RETURNS STRING SONAME 'version_token.so';\"",
-                       "mysql -e \"CREATE FUNCTION"
-                       " version_tokens_lock_shared RETURNS INT SONAME 'version_token.so';\"",
-                       "mysql -e \"CREATE FUNCTION"
-                       " version_tokens_lock_exclusive RETURNS INT SONAME 'version_token.so';\"",
-                       "mysql -e \"CREATE FUNCTION"
-                       " version_tokens_unlock RETURNS INT SONAME 'version_token.so';\"",
-                       "mysql -e \"INSTALL PLUGIN"
+    RPMPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster',
+                   'percona-xtradb-cluster-client',
+                   'percona-xtradb-cluster-devel', 'percona-xtradb-cluster-garbd',
+                   'percona-xtradb-cluster-server', 'percona-xtradb-cluster-shared',
+                   'percona-xtradb-cluster-test']
+
+    EXTRA_RPMPACKAGE = ['percona-xtradb-cluster-shared-compat']
+
+# PXC 9.7 removes the version_token plugin/functions and renames the semisync
+# plugins from master/slave to source/replica.
+if MAJOR_VERSION in ['9.7']:
+    PLUGIN_COMMANDS = ["mysql -e \"INSTALL PLUGIN"
                        " mysql_no_login SONAME 'mysql_no_login.so';\"",
                        "mysql -e \"CREATE FUNCTION"
                        " service_get_read_locks RETURNS INT SONAME 'locking_service.so';\"",
@@ -58,11 +56,9 @@ if MAJOR_VERSION in ['8.0']:
                        "mysql -e \"INSTALL PLUGIN"
                        " validate_password SONAME 'validate_password.so';\"",
                        "mysql -e \"INSTALL PLUGIN"
-                       " version_tokens SONAME 'version_token.so';\"",
+                       " rpl_semi_sync_source SONAME 'semisync_source.so';\"",
                        "mysql -e \"INSTALL PLUGIN"
-                       " rpl_semi_sync_master SONAME 'semisync_master.so';\"",
-                       "mysql -e \"INSTALL PLUGIN"
-                       " rpl_semi_sync_slave SONAME 'semisync_slave.so';\"",
+                       " rpl_semi_sync_replica SONAME 'semisync_replica.so';\"",
                        "mysql -e \"INSTALL PLUGIN"
                        " connection_control SONAME 'connection_control.so';\""]
 else:
@@ -99,17 +95,9 @@ else:
                        "mysql -e \"INSTALL PLUGIN"
                        " connection_control SONAME 'connection_control.so';\""]
 
-if MAJOR_VERSION in ['8.0']:
-    COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
-                 'component_log_sink_json', 'component_log_filter_dragnet',
-                 'component_audit_api_message_emit', 'component_percona-udf', 'component_masking_functions',
-                 'component_binlog_utils']
-
-else:
-
-    COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
-                 'component_log_sink_json', 'component_log_filter_dragnet',
-                 'component_audit_api_message_emit', 'component_percona-udf']
+COMPONENTS = ['component_validate_password', 'component_log_sink_syseventlog',
+             'component_log_sink_json', 'component_log_filter_dragnet',
+             'component_audit_api_message_emit', 'component_percona-udf']
 
 DEB_PERCONA_BUILD_VERSION = ''
 RPM_PERCONA_BUILD_VERSION = ''

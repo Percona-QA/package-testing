@@ -9,6 +9,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 ).get_hosts("all")
 
 VERSION = os.getenv("VERSION")
+HAPROXY_VERSION = os.getenv("HAPROXY_VERSION")
 
 
 def dump_mysql_debug(host):
@@ -40,26 +41,28 @@ def dump_haproxy_debug(host):
     print(stats.stderr)
 
 
+def dump_haproxy_service_debug(host):
+    print("\n========== HAPROXY CONFIG CHECK ==========")
+    check = host.run("haproxy -c -f /etc/haproxy/haproxy.cfg")
+    print(check.stdout)
+    print(check.stderr)
+
+    print("\n========== HAPROXY JOURNAL ==========")
+    journal = host.run("journalctl -xeu haproxy.service --no-pager -n 50")
+    print(journal.stdout)
+
+
 @pytest.fixture
 def prepare_test(host):
     with host.sudo("root"):
 
-        if VERSION.startswith("8.4."):
-            cmd = (
-                "mysql -e \""
-                "CREATE USER IF NOT EXISTS 'clustercheckuser'@'%' IDENTIFIED BY 'clustercheckpassword!';"
-                "GRANT PROCESS ON *.* TO 'clustercheckuser'@'%';"
-                "CREATE USER IF NOT EXISTS 'haproxy_user'@'%' IDENTIFIED BY '$3Kr$t';"
-                "\""
-            )
-        else:
-            cmd = (
-                "mysql -e \""
-                "CREATE USER IF NOT EXISTS 'clustercheckuser'@'%' IDENTIFIED WITH mysql_native_password BY 'clustercheckpassword!';"
-                "GRANT ALL PRIVILEGES ON *.* TO 'clustercheckuser'@'%';"
-                "CREATE USER IF NOT EXISTS 'haproxy_user'@'%' IDENTIFIED WITH mysql_native_password BY '$3Kr$t';"
-                "\""
-            )
+        cmd = (
+            "mysql -e \""
+            "CREATE USER IF NOT EXISTS 'clustercheckuser'@'%' IDENTIFIED BY 'clustercheckpassword!';"
+            "GRANT PROCESS ON *.* TO 'clustercheckuser'@'%';"
+            "CREATE USER IF NOT EXISTS 'haproxy_user'@'%' IDENTIFIED BY '$3Kr$t';"
+            "\""
+        )
 
         result = host.run(cmd)
 
@@ -76,7 +79,11 @@ def prepare_test(host):
             "haproxy",
         ]:
             result = host.run(f"systemctl restart {svc} || service {svc} restart")
-            assert result.rc == 0
+
+            if result.rc != 0 and svc == "haproxy":
+                dump_haproxy_service_debug(host)
+
+            assert result.rc == 0, result.stderr
 
         time.sleep(2)
 
@@ -85,8 +92,29 @@ def prepare_test(host):
         dump_haproxy_debug(host)
 
 
+def test_haproxy_package_version(host):
+    pkg = host.package("percona-haproxy")
+    assert pkg.is_installed
+    assert HAPROXY_VERSION in pkg.version, pkg.version
+
+
+def test_haproxy_config_valid(host):
+    with host.sudo("root"):
+        result = host.run("haproxy -c -f /etc/haproxy/haproxy.cfg")
+
+        print("\n========== HAPROXY CONFIG CHECK ==========")
+        print(result.stdout)
+        print(result.stderr)
+
+        assert result.rc == 0, result.stdout + result.stderr
+
+
 def test_haproxy_service(host):
-    assert host.service("haproxy").is_running
+    with host.sudo("root"):
+        if not host.service("haproxy").is_running:
+            dump_haproxy_service_debug(host)
+
+        assert host.service("haproxy").is_running
 
 
 def test_haproxy_clustercheck(host, prepare_test):
