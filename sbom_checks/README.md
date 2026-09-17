@@ -182,9 +182,13 @@ Post-processing rather than a pytest hook because the docker suite is pinned to
 `pytest==5.2.1` while the targets run a modern pytest, and this touches no
 pytest internals. It is idempotent, leaves a malformed report untouched, and
 `--only` scopes the rewrite by `classname` so the docker `report.xml` keeps its
-`test_container_att.py` results unlabelled. CI applies it automatically:
+`test_container_att.py` results unlabelled. CI applies it automatically, and both hooks live in **this** repo so they ship
+with the branch the job is pointed at rather than waiting on a pipeline merge:
 `tasks/check_pxb_sbom.yml` labels with `MOLECULE_SCENARIO_NAME` (falling back to
-OS + arch), and `pxb-docker-tests.groovy` labels with `arm64` / `amd64`.
+OS + arch), and `docker-image-tests/pxb/run.sh` labels with `arm64` / `amd64`
+(override with `SBOM_PLATFORM_LABEL`). `run.sh` labels *before* exiting and
+preserves pytest's exit code, so the labels survive a failing run — which is
+when they matter most.
 
 ### The self-test
 
