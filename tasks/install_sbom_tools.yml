@@ -3,13 +3,18 @@
 #   trivy         vulnerability scanning of the CycloneDX document
 #   cyclonedx-cli schema validation against the spec version the document declares
 #
-# Every task tolerates failure on purpose. The checks skip when a tool is absent
-# (they consult report.tool_status), so a platform where a download or a binary
-# does not work degrades to a skip instead of failing the whole converge. Never
-# make these blocking.
+# Deliberately NOT using the unarchive module for trivy. On oracle-8, oracle-9
+# and rhel-8-arm it reported "ok" and installed nothing, and because the task
+# carried failed_when: false the reason never reached the log -- the first sign
+# of trouble was the check failing much later with "trivy is not installed".
+# A plain download plus an explicit tar extraction does the same job, was
+# verified by hand on Oracle Linux 8, and surfaces rc/stderr at each step.
 #
-# Arch matters: copying the x86_64 asset onto an aarch64 target produces an
-# "Exec format error" that surfaces far from its cause.
+# Failures here are still non-fatal for the play, but they are always REPORTED:
+# the checks fail when SBOM_EXTERNAL_TOOLS is on, so "why" has to be in the log.
+#
+# Arch matters: the x86_64 asset on an aarch64 target gives an "Exec format
+# error" that surfaces far from its cause.
 
 - name: set SBOM tool asset names for this architecture
   set_fact:
@@ -18,12 +23,8 @@
     # Pinned to match jenkins-pipelines/vars/installTrivy.groovy, the sanctioned
     # helper, so the molecule and docker jobs scan with the same version.
     sbom_trivy_version: "0.74.0"
-    # Overridable so the file can be exercised without writing to a system path.
     sbom_bindir: "{{ sbom_bindir | default('/usr/local/bin') }}"
 
-# Detection follows PATH rather than one fixed directory, because that is what
-# the checks themselves use (shutil.which). A distro-packaged trivy in /usr/bin
-# counts as installed and is not downloaded again.
 - name: find SBOM tools already on PATH
   shell: command -v trivy || true
   register: sbom_have_trivy
@@ -36,34 +37,66 @@
   changed_when: false
   failed_when: false
 
-- name: download trivy
-  unarchive:
-    src: "https://github.com/aquasecurity/trivy/releases/download/v{{ sbom_trivy_version }}/trivy_{{ sbom_trivy_version }}_Linux-{{ sbom_trivy_arch }}.tar.gz"
-    dest: "{{ sbom_bindir }}"
-    remote_src: yes
-    extra_opts:
-      - trivy
-    mode: '0755'
+# --- trivy: download, then extract just the binary ------------------------
+
+- name: download the trivy tarball
+  get_url:
+    url: "https://github.com/aquasecurity/trivy/releases/download/v{{ sbom_trivy_version }}/trivy_{{ sbom_trivy_version }}_Linux-{{ sbom_trivy_arch }}.tar.gz"
+    dest: /var/tmp/trivy.tar.gz
+    mode: '0644'
+    timeout: 60
   become: true
   when: sbom_have_trivy.stdout | default('') | trim | length == 0
   register: sbom_trivy_download
-  failed_when: false
+  ignore_errors: true
+
+- name: extract the trivy binary
+  command: tar xzf /var/tmp/trivy.tar.gz -C {{ sbom_bindir }} trivy
+  become: true
+  when:
+    - sbom_have_trivy.stdout | default('') | trim | length == 0
+    - sbom_trivy_download is not failed
+    - sbom_trivy_download is not skipped
+  register: sbom_trivy_extract
+  changed_when: sbom_trivy_extract.rc == 0
+  ignore_errors: true
+
+- name: make the trivy binary executable
+  file:
+    path: "{{ sbom_bindir }}/trivy"
+    mode: '0755'
+  become: true
+  when:
+    - sbom_have_trivy.stdout | default('') | trim | length == 0
+    - sbom_trivy_extract is not failed
+    - sbom_trivy_extract is not skipped
+  ignore_errors: true
+
+- name: remove the trivy tarball
+  file:
+    path: /var/tmp/trivy.tar.gz
+    state: absent
+  become: true
+  ignore_errors: true
+
+# --- cyclonedx-cli: a single binary, no archive ---------------------------
 
 - name: download cyclonedx-cli
   get_url:
     url: "https://github.com/CycloneDX/cyclonedx-cli/releases/latest/download/{{ sbom_cdx_asset }}"
     dest: "{{ sbom_bindir }}/cyclonedx"
     mode: '0755'
+    timeout: 60
   become: true
   when: sbom_have_cyclonedx.stdout | default('') | trim | length == 0
   register: sbom_cyclonedx_download
-  failed_when: false
+  ignore_errors: true
 
-# The checks address the tools by absolute path rather than relying on PATH.
-# This play runs under become/sudo, and sudo's secure_path on RHEL-family is
-# "/sbin:/bin:/usr/sbin:/usr/bin" -- no /usr/local/bin, which is where these are
-# installed. Debian/Ubuntu's secure_path does include it, which is why only the
-# RHEL family saw the tools "not installed" after a successful download.
+# --- resolve, verify, report ----------------------------------------------
+
+# The checks address the tools by absolute path rather than relying on PATH:
+# this play runs under become/sudo, and sudo's secure_path on RHEL-family is
+# "/sbin:/bin:/usr/sbin:/usr/bin" -- no /usr/local/bin, where these land.
 - name: resolve the installed SBOM tool paths
   set_fact:
     sbom_trivy_bin: "{{ sbom_have_trivy.stdout | default('', true) | trim
@@ -71,20 +104,29 @@
     sbom_cyclonedx_bin: "{{ sbom_have_cyclonedx.stdout | default('', true) | trim
                             or (sbom_bindir ~ '/cyclonedx') }}"
 
-- name: report which SBOM tools are usable
+# Actually run each tool, rather than trusting that a download reported success.
+# DOTNET_SYSTEM_GLOBALIZATION_INVARIANT matches how external_tools.py invokes
+# cyclonedx-cli: it is a self-contained .NET binary and refuses to start on a
+# host without ICU unless invariant globalization is set.
+- name: verify the SBOM tools run
   shell: |
     for entry in "trivy {{ sbom_trivy_bin }}" "cyclonedx {{ sbom_cyclonedx_bin }}"; do
       name=${entry%% *}
       path=${entry#* }
-      if [ -x "$path" ]; then
-        echo "$name: $path"
+      if [ ! -e "$path" ]; then
+        echo "$name: MISSING - no file at $path"
+      elif [ ! -x "$path" ]; then
+        echo "$name: NOT EXECUTABLE at $path"
+      elif out=$(DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 "$path" --version 2>&1 | head -1); then
+        echo "$name: OK at $path ($out)"
       else
-        echo "$name: NOT AVAILABLE at $path - the matching check will skip"
+        echo "$name: PRESENT at $path but --version failed: $out"
       fi
     done
     exit 0
   args:
     executable: /bin/bash
+  become: true
   register: sbom_tools_present
   changed_when: false
   failed_when: false
@@ -93,19 +135,20 @@
   debug:
     var: sbom_tools_present.stdout_lines
 
-# The downloads are non-blocking, so without this their failure is invisible --
-# and a missing tool now FAILS the check, making "why" the first question asked.
-- name: report why an SBOM tool download failed
+# ignore_errors (not failed_when: false) is what makes these conditions work:
+# failed_when: false sets failed=False on the result, so a "did it fail?" test
+# can never be true -- which is why the earlier version of this reported nothing.
+- name: report why an SBOM tool could not be installed
   debug:
     msg: >-
-      {{ item.name }} download failed:
+      {{ item.name }} {{ item.step }} failed:
       {{ item.result.msg | default(item.result.stderr | default('no error recorded')) }}
   when:
     - item.result is defined
-    - item.result.skipped is not defined
-    - item.result.failed | default(false)
+    - item.result is failed
   loop:
-    - { name: trivy, result: "{{ sbom_trivy_download | default({}) }}" }
-    - { name: cyclonedx-cli, result: "{{ sbom_cyclonedx_download | default({}) }}" }
+    - { name: trivy, step: download, result: "{{ sbom_trivy_download | default({}) }}" }
+    - { name: trivy, step: extraction, result: "{{ sbom_trivy_extract | default({}) }}" }
+    - { name: cyclonedx-cli, step: download, result: "{{ sbom_cyclonedx_download | default({}) }}" }
   loop_control:
-    label: "{{ item.name }}"
+    label: "{{ item.name }} {{ item.step }}"
