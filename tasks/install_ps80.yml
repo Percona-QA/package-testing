@@ -41,6 +41,14 @@
       state: absent
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
 
+  - name: remove pre-installed mariadb packages on RHEL 9+ (no dnf modules available)
+    dnf:
+      name: "mariadb*"
+      state: absent
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
+      - ansible_facts['distribution_major_version'] | int >= 9
+
   - name: Install libgflags-dev for rhel9 aarm64 using DNF
     dnf:
       name: https://dl.fedoraproject.org/pub/epel/9/Everything/aarch64/Packages/g/gflags-2.2.2-9.el9.aarch64.rpm
