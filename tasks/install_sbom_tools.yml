@@ -7,8 +7,9 @@
 # and rhel-8-arm it reported "ok" and installed nothing, and because the task
 # carried failed_when: false the reason never reached the log -- the first sign
 # of trouble was the check failing much later with "trivy is not installed".
-# A plain download plus an explicit tar extraction does the same job, was
-# verified by hand on Oracle Linux 8, and surfaces rc/stderr at each step.
+# The cause turned out to be that those AMIs have no tar binary, which unarchive
+# shells out to. Downloading and extracting explicitly does the same job while
+# surfacing rc/stderr at every step, and the extraction avoids tar entirely.
 #
 # Failures here are still non-fatal for the play, but they are always REPORTED:
 # the checks fail when SBOM_EXTERNAL_TOOLS is on, so "why" has to be in the log.
@@ -50,8 +51,21 @@
   register: sbom_trivy_download
   ignore_errors: true
 
+# Extracted with python's tarfile rather than the tar binary: the molecule EC2
+# AMIs for oracle-9 (and others) do not ship tar, which is what broke this --
+# first silently through the unarchive module, then visibly as
+# "[Errno 2] No such file or directory: b'tar'". python3 is guaranteed on any
+# ansible target, so this needs no package install and no repo access.
 - name: extract the trivy binary
-  command: tar xzf /var/tmp/trivy.tar.gz -C {{ sbom_bindir }} trivy
+  command:
+    argv:
+      # discovered_interpreter_python, not ansible_python_interpreter: the
+      # latter is usually undefined and can legitimately be the literal "auto".
+      - "{{ ansible_facts.discovered_interpreter_python | default('/usr/bin/python3', true) }}"
+      - "-c"
+      - "import tarfile, sys; tf = tarfile.open(sys.argv[1]); tf.extract('trivy', sys.argv[2]); tf.close()"
+      - /var/tmp/trivy.tar.gz
+      - "{{ sbom_bindir }}"
   become: true
   when:
     - sbom_have_trivy.stdout | default('') | trim | length == 0
