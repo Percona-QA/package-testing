@@ -106,8 +106,8 @@
     service: name=mysql state=stopped
     when: ansible_os_family == "Debian"
 
-#  - name: remove mysql data directory
-#    command: rm -r /var/lib/mysql
+  - name: remove mysql data directory
+    command: rm -r /var/lib/mysql
 
   - name: install python3-pip on RedHat/CentOS
     yum:
