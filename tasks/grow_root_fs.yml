@@ -4,14 +4,21 @@
 # Several molecule AMIs boot with a root filesystem far smaller than the EBS
 # volume attached to them. Measured on the pxb-97 matrix:
 #
-#   rocky-8      root LV 8.9G on a 30G disk  -> ~20G unallocated
-#   rocky-8-arm  root LV 8.9G on a 30G disk  -> ~20G unallocated
+#   rocky-8      root LV 8.9G on a 40G disk  -> ~30G unallocated
+#   rocky-8-arm  root LV 8.9G on a 40G disk  -> ~30G unallocated
 #
 # Rocky cloud images put root on LVM and their cloud-init does not extend the
 # logical volume, so the space is paid for but never usable. That left ~1.5 GB
 # free, and the SBOM vulnerability scan needs ~1.65 GB (a ~1.4 GB trivy DB plus
 # staging for the tarball), so it failed with "no space left on device" -- after
 # the package install had already pushed the filesystem to 84-89% full.
+#
+# The gate is "can this filesystem grow?", NOT "is it short right now?". An
+# earlier version compared current free space against a threshold and so skipped
+# rocky-8 entirely: at prepare time 7.7 GB was free, and the shortage only
+# appears later in converge once the server packages are installed -- by which
+# point the SBOM scan is already failing. Unallocated disk space is a property
+# of the machine and is safe to claim whenever it exists.
 #
 # Deliberately idempotent and non-fatal: growpart reports NOCHANGE when the
 # partition already fills the disk, and a platform with nothing to grow must be
@@ -28,24 +35,95 @@
   changed_when: false
   failed_when: false
 
-- name: decide whether the root filesystem needs growing
-  set_fact:
-    # 4 GB: comfortably above the ~1.65 GB the SBOM scan needs, so healthy
-    # platforms are never touched, while the three known-short ones (1.5G, 1.4G,
-    # 0.9G free) all qualify.
-    grow_needed: "{{ (grow_free_before.stdout | default('0') | trim | int) < (4 * 1024 * 1024) }}"
+- name: resolve the root device, its disk and partition number
+  # Kept in one script because each value depends on the previous one, and
+  # the LVM walk (lv -> vg -> pv) has no single-command equivalent.
+  #
+  # The partition number comes from /sys, not from stripping digits off the
+  # device name: that is the only approach that handles both /dev/xvda5 and
+  # /dev/nvme0n1p5 without special-casing the nvme "p" separator.
+  shell:
+    cmd: |
+      # No "set -e": every lookup below has a fallback or is optional, and
+      # aborting early would print no JSON at all, leaving the caller unable
+      # to say why nothing was grown. findmnt is absent from some minimal
+      # images, so /proc/mounts and df are the fallbacks -- both universal.
+      src=$(findmnt -no SOURCE / 2>/dev/null \
+            || awk '$2 == "/" {print $1; exit}' /proc/mounts \
+            || df -P / | awk 'NR==2 {print $1}')
+      fstype=$(findmnt -no FSTYPE / 2>/dev/null \
+               || awk '$2 == "/" {print $3; exit}' /proc/mounts)
+      part=$src
+      lv=
+      if [ -n "$(lvs --noheadings -o lv_name "$src" 2>/dev/null || true)" ]; then
+        lv=$src
+        vg=$(lvs --noheadings -o vg_name "$src" 2>/dev/null | tr -d ' ')
+        part=$(pvs --noheadings -o pv_name -S "vg_name=$vg" 2>/dev/null | tr -d ' ' | head -1)
+      fi
+      base=$(basename "$part")
+      disk=$(lsblk -no PKNAME "$part" 2>/dev/null | tr -d ' ' | head -1)
+      num=$(cat "/sys/class/block/$base/partition" 2>/dev/null || true)
 
-- name: report that the root filesystem has enough space
+      # Unallocated bytes after the end of the root partition -- the space a
+      # grow could actually claim. sysfs "size" and "start" are always in
+      # 512-byte sectors regardless of the physical sector size of the drive.
+      slack=0
+      if [ -n "$disk" ] && [ -n "$num" ]; then
+        disk_sectors=$(cat "/sys/class/block/$disk/size" 2>/dev/null || echo 0)
+        start=$(cat "/sys/class/block/$base/start" 2>/dev/null || echo 0)
+        size=$(cat "/sys/class/block/$base/size" 2>/dev/null || echo 0)
+        end=$(( start + size ))
+        if [ "$disk_sectors" -gt "$end" ]; then
+          slack=$(( (disk_sectors - end) * 512 ))
+        fi
+      fi
+      printf '{"src":"%s","fstype":"%s","lv":"%s","part":"%s","disk":"%s","num":"%s","slack":%s}\n' \
+        "$src" "$fstype" "$lv" "$part" "$disk" "$num" "$slack"
+    executable: /bin/bash
+  become: true
+  register: grow_layout
+  changed_when: false
+  failed_when: false
+
+- name: parse the resolved layout
+  # from_json rather than filter gymnastics over key=value lines: `split` is
+  # not dependably available as a filter across the ansible versions in use.
+  set_fact:
+    grow_facts: "{{ grow_layout.stdout | trim | from_json }}"
+  when: (grow_layout.stdout | default('') | trim) is match('^\{.*\}$')
+
+- name: show the resolved disk layout
+  debug:
+    var: grow_facts
+
+- name: decide whether the root filesystem can be grown
+  set_fact:
+    # Keyed on claimable unallocated space, not on how full the disk happens to
+    # be right now. 1 GiB of slack is the floor worth acting on; below that the
+    # partition effectively already fills the disk.
+    grow_slack: "{{ grow_facts.slack | default(0) | int }}"
+    grow_needed: "{{ (grow_facts.slack | default(0) | int) > (1024 * 1024 * 1024) }}"
+
+- name: report that there is nothing to grow
   debug:
     msg: >-
-      Root filesystem has
-      {{ (grow_free_before.stdout | default('0') | trim | int / 1024 / 1024) | round(1) }} GB
-      free, at or above the 4 GB threshold -- not growing.
+      Root partition has
+      {{ (grow_slack | int / 1024 / 1024 / 1024) | round(2) }} GB of unallocated
+      space after it -- below the 1 GB floor, so the filesystem is left as is
+      ({{ (grow_free_before.stdout | default('0') | trim | int / 1024 / 1024) | round(1) }} GB
+      currently free).
   when: not (grow_needed | bool)
 
 - name: grow the root filesystem
   when: grow_needed | bool
   block:
+
+    - name: report the space about to be claimed
+      debug:
+        msg: >-
+          Growing the root filesystem into
+          {{ (grow_slack | int / 1024 / 1024 / 1024) | round(2) }} GB of
+          unallocated space on /dev/{{ grow_facts.disk | default('?') }}.
 
     - name: install growpart
       package:
@@ -56,53 +134,6 @@
       # Non-fatal: without growpart the filesystem simply is not grown, which is
       # the behaviour before this task existed. The report below says so.
       ignore_errors: true
-
-    - name: resolve the root device, its disk and partition number
-      # Kept in one script because each value depends on the previous one, and
-      # the LVM walk (lv -> vg -> pv) has no single-command equivalent.
-      #
-      # The partition number comes from /sys, not from stripping digits off the
-      # device name: that is the only approach that handles both /dev/xvda5 and
-      # /dev/nvme0n1p5 without special-casing the nvme "p" separator.
-      shell:
-        cmd: |
-          # No "set -e": every lookup below has a fallback or is optional, and
-          # aborting early would print no JSON at all, leaving the caller unable
-          # to say why nothing was grown. findmnt is absent from some minimal
-          # images, so /proc/mounts and df are the fallbacks -- both universal.
-          src=$(findmnt -no SOURCE / 2>/dev/null \
-                || awk '$2 == "/" {print $1; exit}' /proc/mounts \
-                || df -P / | awk 'NR==2 {print $1}')
-          fstype=$(findmnt -no FSTYPE / 2>/dev/null \
-                   || awk '$2 == "/" {print $3; exit}' /proc/mounts)
-          part=$src
-          lv=
-          if [ -n "$(lvs --noheadings -o lv_name "$src" 2>/dev/null || true)" ]; then
-            lv=$src
-            vg=$(lvs --noheadings -o vg_name "$src" 2>/dev/null | tr -d ' ')
-            part=$(pvs --noheadings -o pv_name -S "vg_name=$vg" 2>/dev/null | tr -d ' ' | head -1)
-          fi
-          base=$(basename "$part")
-          disk=$(lsblk -no PKNAME "$part" 2>/dev/null | tr -d ' ' | head -1)
-          num=$(cat "/sys/class/block/$base/partition" 2>/dev/null || true)
-          printf '{"src":"%s","fstype":"%s","lv":"%s","part":"%s","disk":"%s","num":"%s"}\n' \
-            "$src" "$fstype" "$lv" "$part" "$disk" "$num"
-        executable: /bin/bash
-      become: true
-      register: grow_layout
-      changed_when: false
-      failed_when: false
-
-    - name: parse the resolved layout
-      # from_json rather than filter gymnastics over key=value lines: `split` is
-      # not dependably available as a filter across the ansible versions in use.
-      set_fact:
-        grow_facts: "{{ grow_layout.stdout | trim | from_json }}"
-      when: (grow_layout.stdout | default('') | trim) is match('^\{.*\}$')
-
-    - name: show the resolved disk layout
-      debug:
-        var: grow_facts
 
     - name: grow the partition, the volume group and the filesystem
       # growpart exits 1 on error but 2 when the partition already fills the
