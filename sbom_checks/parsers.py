@@ -23,6 +23,24 @@ class ParseError(Exception):
     pass
 
 
+def _mapping(value):
+    """The value if it is a JSON object, else an empty one.
+
+    These documents come from a generator we do not control, and "valid JSON of
+    the wrong shape" must be reported as a malformed SBOM, never crash the run.
+    """
+    return value if isinstance(value, dict) else {}
+
+
+def _sequence(value):
+    """The value if it is a JSON array, else an empty one.
+
+    Not just a falsy check: a bare string is truthy and iterates per character,
+    which silently produces nonsense instead of an error.
+    """
+    return value if isinstance(value, list) else []
+
+
 def _text(raw):
     if isinstance(raw, bytes):
         return raw.decode("utf-8", "replace")
@@ -32,7 +50,7 @@ def _text(raw):
 def _cdx_license(component):
     """CycloneDX carries a licence either as an SPDX id or as an expression.
     libkmip in the PXB set uses the expression form, so both must be handled."""
-    entries = component.get("licenses") or []
+    entries = _sequence(component.get("licenses"))
     for entry in entries:
         if not isinstance(entry, dict):
             continue
@@ -55,17 +73,17 @@ def load_cyclonedx(raw):
     if not isinstance(doc, dict):
         raise ParseError("top level is %s, expected an object" % type(doc).__name__)
 
-    meta = (doc.get("metadata") or {}).get("component") or {}
+    meta = _mapping(_mapping(doc.get("metadata")).get("component"))
     root = None
     if meta.get("name"):
         root = Component(meta.get("name", ""), meta.get("version", ""), _cdx_license(meta))
 
     components = []
-    for entry in doc.get("components") or []:
+    for entry in _sequence(doc.get("components")):
         if not isinstance(entry, dict):
             continue
         props = {}
-        for prop in entry.get("properties") or []:
+        for prop in _sequence(entry.get("properties")):
             if isinstance(prop, dict) and prop.get("name"):
                 props[prop["name"]] = prop.get("value", "")
         components.append(Component(
@@ -87,10 +105,12 @@ def _spdx_license(package):
 
 def _spdx_root_id(doc):
     """The root package is whichever SPDXRef the document DESCRIBES."""
-    for rel in doc.get("relationships") or []:
+    for rel in _sequence(doc.get("relationships")):
         if isinstance(rel, dict) and rel.get("relationshipType") == "DESCRIBES":
             return rel.get("relatedSpdxElement")
-    described = doc.get("documentDescribes") or []
+    # _sequence, then index: a documentDescribes that is an object would raise
+    # KeyError on [0], and one that is a string would yield a single character.
+    described = _sequence(doc.get("documentDescribes"))
     if described:
         return described[0]
     return SPDX_ROOT_SPDXID
@@ -113,7 +133,7 @@ def load_spdx(raw):
     root_id = _spdx_root_id(doc)
     root = None
     components = []
-    for package in doc.get("packages") or []:
+    for package in _sequence(doc.get("packages")):
         if not isinstance(package, dict):
             continue
         component = Component(

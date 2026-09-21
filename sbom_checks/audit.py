@@ -64,6 +64,15 @@ def load_set(backend, sbom_set):
         except parsers.ParseError as exc:
             findings.append(Finding(fmt, "%s: %s" % (os.path.basename(path), exc)))
             continue
+        except Exception as exc:                       # noqa: BLE001
+            # Backstop. The parsers normalise the shapes they know about, but
+            # these documents come from a generator we do not control: an
+            # unanticipated shape must be reported as a malformed SBOM, never
+            # abort the whole run.
+            findings.append(Finding(fmt, "%s: could not be parsed (%s: %s)"
+                                    % (os.path.basename(path),
+                                       type(exc).__name__, exc)))
+            continue
         if fmt in ("cdx", "spdx"):
             doc, root, components = loaded
             by_format[fmt] = components
@@ -105,13 +114,23 @@ def audit(backend, sbom_set, expect_name=None, expect_version=None,
         report.notes.append("  expecting root component %s %s"
                             % (expect_name, expect_version or "(any version)"))
 
+    def _checked(fmt, fn, *args):
+        """Run a structural check, turning an unexpected error into a finding."""
+        try:
+            return fn(*args)
+        except Exception as exc:                       # noqa: BLE001
+            return [Finding(fmt, "could not be validated (%s: %s)"
+                            % (type(exc).__name__, exc))]
+
     if "cdx" in docs:
         doc, root = docs["cdx"]
-        report.findings.extend(structural.check_cyclonedx(
+        report.findings.extend(_checked(
+            "cdx", structural.check_cyclonedx,
             doc, root, by_format.get("cdx", []), expect_name, expect_version))
     if "spdx" in docs:
         doc, root = docs["spdx"]
-        report.findings.extend(structural.check_spdx(
+        report.findings.extend(_checked(
+            "spdx", structural.check_spdx,
             doc, root, by_format.get("spdx", []), expect_name, expect_version))
     if "table" in by_format:
         report.findings.extend(structural.check_component_list(by_format["table"], "table"))

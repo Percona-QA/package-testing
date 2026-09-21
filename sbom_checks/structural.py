@@ -13,7 +13,7 @@ every problem instead of stopping at the first.
 import re
 
 from .models import Finding
-from .parsers import SPDX_ROOT_SPDXID
+from .parsers import SPDX_ROOT_SPDXID, _mapping, _sequence
 from . import licenses as lic
 
 CDX_SPEC_VERSIONS = ("1.2", "1.3", "1.4", "1.5", "1.6")
@@ -54,6 +54,17 @@ def check_cyclonedx(doc, root, components, expect_name=None, expect_version=None
     if not doc.get("serialNumber"):
         add("serialNumber is missing")
 
+    if "metadata" in doc and not isinstance(doc.get("metadata"), dict):
+        add("metadata is %s, expected an object"
+            % type(doc.get("metadata")).__name__)
+    elif "component" in _mapping(doc.get("metadata")) \
+            and not isinstance(_mapping(doc.get("metadata")).get("component"), dict):
+        add("metadata.component is %s, expected an object"
+            % type(_mapping(doc.get("metadata")).get("component")).__name__)
+
+    if "components" in doc and not isinstance(doc.get("components"), list):
+        add("components is %s, expected an array" % type(doc.get("components")).__name__)
+
     if root is None:
         add("metadata.component is missing -- the document does not say what it describes")
     else:
@@ -68,7 +79,13 @@ def check_cyclonedx(doc, root, components, expect_name=None, expect_version=None
         return findings
 
     seen_refs = {}
-    for index, entry in enumerate(doc.get("components") or []):
+    for index, entry in enumerate(_sequence(doc.get("components"))):
+        if not isinstance(entry, dict):
+            # The parsers filter these out; the validation loop must too, or a
+            # mixed array parses cleanly and then crashes one function later.
+            add("components[%d] is %s, expected an object"
+                % (index, type(entry).__name__))
+            continue
         where = entry.get("name") or "components[%d]" % index
         if not entry.get("name"):
             add("%s has no name" % where)
@@ -110,13 +127,23 @@ def check_spdx(doc, root, components, expect_name=None, expect_version=None):
     if not doc.get("documentNamespace"):
         add("documentNamespace is missing")
 
-    packages = doc.get("packages") or []
+    if "packages" in doc and not isinstance(doc.get("packages"), list):
+        add("packages is %s, expected an array" % type(doc.get("packages")).__name__)
+    if "relationships" in doc and not isinstance(doc.get("relationships"), list):
+        add("relationships is %s, expected an array"
+            % type(doc.get("relationships")).__name__)
+
+    packages = _sequence(doc.get("packages"))
     if not packages:
         add("packages[] is empty")
         return findings
 
     seen_ids = {}
     for index, package in enumerate(packages):
+        if not isinstance(package, dict):
+            add("packages[%d] is %s, expected an object"
+                % (index, type(package).__name__))
+            continue
         name = package.get("name") or "packages[%d]" % index
         spdx_id = package.get("SPDXID")
         if not spdx_id:
@@ -134,7 +161,8 @@ def check_spdx(doc, root, components, expect_name=None, expect_version=None):
         if not package.get("licenseConcluded") and not package.get("licenseDeclared"):
             add("%s has neither licenseConcluded nor licenseDeclared" % name)
 
-    relationships = doc.get("relationships") or []
+    relationships = [r for r in _sequence(doc.get("relationships"))
+                     if isinstance(r, dict)]
     describes = [r for r in relationships if r.get("relationshipType") == "DESCRIBES"]
     if not describes and not doc.get("documentDescribes"):
         add("no DESCRIBES relationship and no documentDescribes -- "
@@ -153,6 +181,8 @@ def check_spdx(doc, root, components, expect_name=None, expect_version=None):
         if rel.get("relationshipType") == "CONTAINS" and rel.get("spdxElementId") == root_id:
             contained.add(rel.get("relatedSpdxElement"))
     for package in packages:
+        if not isinstance(package, dict):
+            continue
         spdx_id = package.get("SPDXID")
         if spdx_id and spdx_id != root_id and spdx_id not in contained:
             add("%s (%s) has no CONTAINS relationship from the root package"

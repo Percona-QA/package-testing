@@ -682,6 +682,74 @@ def test_trivy_clean_scan_is_ok(workdir):
     assert result.status == external_tools.OK
 
 
+# --- malformed but valid JSON ---------------------------------------------
+
+# Valid JSON of the wrong shape. Each of these used to raise out of the parser
+# or the structural check and abort the whole pytest run; a document checker
+# must report them instead.
+MALFORMED = [
+    ('{"metadata": "bad"}', "cdx"),
+    ('{"metadata": {"component": "x"}}', "cdx"),
+    ('{"metadata": {"component": ["a"]}}', "cdx"),
+    ('{"components": "notalist"}', "cdx"),
+    ('{"components": [{"name": "a", "version": "1"}, "junk"]}', "cdx"),
+    ('{"components": [{"licenses": "x"}]}', "cdx"),
+    ('{"components": [{"properties": "x"}]}', "cdx"),
+    ('{"packages": "notalist"}', "spdx"),
+    ('{"packages": ["plain"]}', "spdx"),
+    ('{"packages": [{"name": "a", "SPDXID": "SPDXRef-a"}, "junk"]}', "spdx"),
+    ('{"relationships": "x"}', "spdx"),
+    ('{"relationships": [{"relationshipType": "DESCRIBES"}, "junk"],'
+     ' "packages": [{"name": "a", "SPDXID": "SPDXRef-a"}]}', "spdx"),
+    ('{"documentDescribes": {"a": 1}}', "spdx"),
+    ('{"documentDescribes": "abc"}', "spdx"),
+]
+
+
+@pytest.mark.parametrize("raw,kind", MALFORMED)
+def test_malformed_documents_are_reported_not_raised(raw, kind):
+    load = parsers.load_cyclonedx if kind == "cdx" else parsers.load_spdx
+    check = structural.check_cyclonedx if kind == "cdx" else structural.check_spdx
+    try:
+        doc, root, components = load(raw)
+    except parsers.ParseError:
+        return                      # a reported parse failure is a valid outcome
+    findings = check(doc, root, components)
+    assert findings, "a malformed document produced no findings at all"
+
+
+def test_non_object_metadata_gives_a_missing_root_finding():
+    """The reviewer's exact input."""
+    doc, root, components = parsers.load_cyclonedx('{"metadata": "bad"}')
+    assert root is None
+    messages = "\n".join(str(f) for f in
+                          structural.check_cyclonedx(doc, root, components))
+    assert "metadata is str, expected an object" in messages
+    assert "metadata.component is missing" in messages
+
+
+def test_broken_metadata_does_not_discard_valid_components():
+    """Normalising rather than raising ParseError means the rest of the document
+    is still checked -- otherwise one bad key would hide every real finding."""
+    raw = ('{"bomFormat":"CycloneDX","specVersion":"1.5","serialNumber":"urn:uuid:x",'
+           '"metadata":"bad",'
+           '"components":[{"name":"zlib","version":"1.3.2",'
+           '"purl":"pkg:generic/zlib@1.3.2","bom-ref":"r1",'
+           '"licenses":[{"license":{"id":"Zlib"}}]}]}')
+    doc, root, components = parsers.load_cyclonedx(raw)
+    assert [(c.name, c.version) for c in components] == [("zlib", "1.3.2")]
+
+
+def test_audit_reports_rather_than_aborts_on_a_malformed_document(workdir):
+    """End to end: a malformed CycloneDX file must make audit() return findings,
+    not raise through the pytest fixture."""
+    with open(os.path.join(workdir, STEM + ".cdx.json"), "w") as handle:
+        handle.write('{"metadata": "bad"}')
+    report = _audit(workdir, run_tools=False)
+    assert not report.ok
+    assert any(f.where == "cdx" for f in report.findings)
+
+
 # --- parser edge cases ----------------------------------------------------
 
 def test_table_licence_column_containing_spaces(workdir):
