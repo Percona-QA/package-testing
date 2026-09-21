@@ -66,9 +66,22 @@ def _run(argv, env=None):
     merged = dict(os.environ)
     if env:
         merged.update(env)
-    process = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                               env=merged)
-    out, err = process.communicate()
+    try:
+        process = subprocess.Popen(argv, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, env=merged)
+        out, err = process.communicate()
+    except OSError as exc:
+        # shutil.which() only checks the executable bit, so a resolved path can
+        # still fail to launch: a wrong-architecture binary (Exec format error)
+        # or a missing dynamic loader. Report a failed run instead of letting
+        # the OSError escape -- FAILED exists precisely for "installed but
+        # unusable", and an escaping error surfaces as a fixture crash with no
+        # indication of which tool was at fault.
+        #
+        # 127 is the shell's "command not found" code, chosen so this maps to
+        # FAILED in both wrappers: trivy_sbom treats rc 1 as "vulnerabilities
+        # found", so a launch failure must never land on that branch.
+        return (127, "", "cannot execute %s: %s" % (argv[0], exc))
     return (process.returncode,
             out.decode("utf-8", "replace"),
             err.decode("utf-8", "replace"))

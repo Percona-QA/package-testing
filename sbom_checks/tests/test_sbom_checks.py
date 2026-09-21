@@ -581,6 +581,67 @@ def test_vuln_mode_warn_does_invoke_trivy(workdir, monkeypatch):
     assert report.tool_status["trivy"] == external_tools.OK
 
 
+def _unlaunchable(directory, name, kind):
+    """A file shutil.which() resolves but the kernel refuses to run."""
+    path = os.path.join(directory, name)
+    with open(path, "wb") as handle:
+        if kind == "bad-elf":
+            handle.write(b"\x7fELF\x00\x00\x00not-a-real-binary")   # wrong arch
+        else:
+            handle.write(b"#!/nonexistent/loader\necho hi\n")         # missing loader
+    os.chmod(path, 0o755)
+    return path
+
+
+def test_unlaunchable_cyclonedx_is_failed_not_an_exception(workdir):
+    """shutil.which() only checks the executable bit, so a resolved path can
+    still fail to launch. That must be a FAILED status, not an escaping OSError
+    that surfaces as a fixture crash naming no tool."""
+    stub = _unlaunchable(workdir, "cyclonedx", "bad-elf")
+    old = external_tools.CYCLONEDX_BIN
+    external_tools.CYCLONEDX_BIN = stub
+    try:
+        result = external_tools.cyclonedx_validate(
+            os.path.join(TESTDATA, STEM + ".cdx.json"))
+    finally:
+        external_tools.CYCLONEDX_BIN = old
+    assert result.status == external_tools.FAILED
+    assert "cannot execute" in result.output
+
+
+def test_unlaunchable_trivy_is_failed_never_a_vulnerability(workdir):
+    """The rc==1 branch means "vulnerabilities found", so a launch failure must
+    not land there -- otherwise a broken binary reads as a phantom CVE."""
+    for kind in ("bad-elf", "missing-loader"):
+        stub = _unlaunchable(workdir, "trivy-" + kind, kind)
+        old = external_tools.TRIVY_BIN
+        external_tools.TRIVY_BIN = stub
+        try:
+            result = external_tools.trivy_sbom(
+                os.path.join(TESTDATA, STEM + ".cdx.json"))
+        finally:
+            external_tools.TRIVY_BIN = old
+        assert result.status == external_tools.FAILED, kind
+        assert result.status != external_tools.FOUND, kind
+        assert "cannot execute" in result.output, kind
+
+
+def test_backend_run_degrades_when_the_command_cannot_launch(workdir):
+    """A missing or unlaunchable docker CLI must make discovery report nothing,
+    not raise -- consumers only use .ok and .lines()."""
+    from sbom_checks.backends import DockerBackend
+    stub = _unlaunchable(workdir, "fake-docker", "bad-elf")
+    backend = DockerBackend("no-such-container", docker=stub)
+
+    result = backend.run("echo hi")
+    assert result.ok is False
+    assert "cannot execute" in result.stderr
+
+    sets, considered = discovery.discover(backend)
+    assert sets == []
+    assert considered, "discovery must still explain what it looked at"
+
+
 def test_trivy_failure_is_not_reported_as_a_vulnerability(workdir):
     """trivy exits non-zero when it cannot run at all -- a rate-limited DB pull
     from ghcr.io, say. Treating that as a finding would be a phantom CVE."""

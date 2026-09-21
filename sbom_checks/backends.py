@@ -38,8 +38,16 @@ class Result(object):
 
 def _run(argv):
     # Not subprocess.run(capture_output=...): RHEL-8 targets ship python 3.6.
-    process = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = process.communicate()
+    try:
+        process = subprocess.Popen(argv, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        out, err = process.communicate()
+    except OSError as exc:
+        # An absent or unlaunchable binary (a missing docker CLI, say) must read
+        # as a failed command, not crash the caller: consumers use .ok and
+        # .lines(), so discovery degrades to "found nothing" and still prints
+        # the trail of what it looked at.
+        return Result(127, "", "cannot execute %s: %s" % (argv[0], exc))
     return Result(
         process.returncode,
         out.decode("utf-8", "replace"),
