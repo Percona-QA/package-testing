@@ -61,8 +61,27 @@
         part=$(pvs --noheadings -o pv_name -S "vg_name=$vg" 2>/dev/null | tr -d ' ' | head -1)
       fi
       base=$(basename "$part")
-      disk=$(lsblk -no PKNAME "$part" 2>/dev/null | tr -d ' ' | head -1)
       num=$(cat "/sys/class/block/$base/partition" 2>/dev/null || true)
+
+      # Parent disk from sysfs, not "lsblk -o PKNAME": on rocky-8-arm lsblk
+      # returned the partition itself (nvme0n1p5) as the first line, so the
+      # slack maths compared the partition against its own end, got 0, and
+      # silently skipped the grow. /sys/class/block/<part> is a symlink into
+      # the device tree, so the directory holding it IS the parent disk --
+      # unambiguous for both xvda5 -> xvda and nvme0n1p5 -> nvme0n1.
+      disk=$(basename "$(dirname "$(readlink -f "/sys/class/block/$base" 2>/dev/null)")" 2>/dev/null)
+      case "$disk" in
+        # readlink failure gives "." or "/"; a whole-disk root (no partition)
+        # gives the block class directory itself. Fall back to lsblk, excluding
+        # the name of the partition itself from the candidates.
+        .|/|block|"")
+          disk=$(lsblk -no PKNAME "$part" 2>/dev/null | tr -d ' ' | grep -v "^$base$" | head -1) ;;
+      esac
+      # A "parent" that is the partition itself is not a parent. Refuse it
+      # rather than compute nonsense slack from it.
+      if [ "$disk" = "$base" ]; then
+        disk=
+      fi
 
       # Unallocated bytes after the end of the root partition -- the space a
       # grow could actually claim. sysfs "size" and "start" are always in
@@ -73,8 +92,20 @@
         start=$(cat "/sys/class/block/$base/start" 2>/dev/null || echo 0)
         size=$(cat "/sys/class/block/$base/size" 2>/dev/null || echo 0)
         end=$(( start + size ))
-        if [ "$disk_sectors" -gt "$end" ]; then
-          slack=$(( (disk_sectors - end) * 512 ))
+        # Measure to the NEXT partition, not to the end of the disk: for a root
+        # partition that is not the last one, the disk end overstates what
+        # growpart could ever claim, and the task would announce space it cannot
+        # get. On the rocky layout root IS last, so the two agree there.
+        boundary=$disk_sectors
+        for sib in "/sys/class/block/$disk"/*/start; do
+          [ -f "$sib" ] || continue
+          sib_start=$(cat "$sib" 2>/dev/null || echo 0)
+          if [ "$sib_start" -gt "$end" ] && [ "$sib_start" -lt "$boundary" ]; then
+            boundary=$sib_start
+          fi
+        done
+        if [ "$boundary" -gt "$end" ]; then
+          slack=$(( (boundary - end) * 512 ))
         fi
       fi
       printf '{"src":"%s","fstype":"%s","lv":"%s","part":"%s","disk":"%s","num":"%s","slack":%s}\n' \
