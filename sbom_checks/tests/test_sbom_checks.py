@@ -425,6 +425,44 @@ def test_tool_binary_overrides_are_honoured(workdir):
         os.environ["PATH"] = old_path
 
 
+def test_vuln_mode_off_does_not_invoke_trivy(workdir, monkeypatch):
+    """SBOM_VULN_MODE=off must prevent the scan, not merely ignore its result.
+
+    Before this, `off` was behaviourally identical to `warn`: trivy still ran
+    (pulling a ~1.4GB DB) and a missing trivy still failed the check.
+    """
+    sentinel = os.path.join(workdir, "INVOKED")
+    stub = _stub(workdir, "trivy-sentinel",
+                 "#!/bin/sh\ntouch %s\nexit 0\n" % sentinel)
+    monkeypatch.setattr(external_tools, "TRIVY_BIN", stub)
+    monkeypatch.setenv(config.ENV_VULN_MODE, "off")
+
+    backend = LocalBackend()
+    sets, _ = discovery.discover(backend, sbom_dir=TESTDATA)
+    report = audit.audit(backend, sets[0], run_tools=True)
+
+    assert not os.path.exists(sentinel), "trivy was executed despite the gate being off"
+    assert report.tool_status["trivy"] == external_tools.OFF
+    assert not report.vuln_findings
+
+
+def test_vuln_mode_warn_does_invoke_trivy(workdir, monkeypatch):
+    """The control for the test above -- otherwise it could pass for the wrong
+    reason, e.g. because the stub was never wired up."""
+    sentinel = os.path.join(workdir, "INVOKED")
+    stub = _stub(workdir, "trivy-sentinel",
+                 "#!/bin/sh\ntouch %s\nexit 0\n" % sentinel)
+    monkeypatch.setattr(external_tools, "TRIVY_BIN", stub)
+    monkeypatch.setenv(config.ENV_VULN_MODE, "warn")
+
+    backend = LocalBackend()
+    sets, _ = discovery.discover(backend, sbom_dir=TESTDATA)
+    report = audit.audit(backend, sets[0], run_tools=True)
+
+    assert os.path.exists(sentinel), "trivy should have been executed"
+    assert report.tool_status["trivy"] == external_tools.OK
+
+
 def test_trivy_failure_is_not_reported_as_a_vulnerability(workdir):
     """trivy exits non-zero when it cannot run at all -- a rate-limited DB pull
     from ghcr.io, say. Treating that as a finding would be a phantom CVE."""

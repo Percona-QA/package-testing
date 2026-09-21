@@ -129,8 +129,14 @@ def audit(backend, sbom_set, expect_name=None, expect_version=None,
 
 def _run_tools(backend, sbom_set, report):
     """trivy + cyclonedx-cli, both optional and both non-fatal when absent."""
-    report.tool_status = {"cyclonedx": external_tools.MISSING,
-                          "trivy": external_tools.MISSING}
+    # Seed trivy from the gate: with SBOM_VULN_MODE=off the scan is not run at
+    # all, and every early return below must say "off" rather than "missing" --
+    # otherwise a deliberately disabled tool is reported as a setup failure.
+    vuln_off = config.vuln_mode() == config.OFF
+    report.tool_status = {
+        "cyclonedx": external_tools.MISSING,
+        "trivy": external_tools.OFF if vuln_off else external_tools.MISSING,
+    }
 
     cdx_path = sbom_set.paths.get("cdx")
     if not cdx_path:
@@ -142,7 +148,8 @@ def _run_tools(backend, sbom_set, report):
     except Exception as exc:                           # noqa: BLE001
         report.tool_notes.append("could not materialise %s: %s" % (cdx_path, exc))
         report.tool_status["cyclonedx"] = external_tools.FAILED
-        report.tool_status["trivy"] = external_tools.FAILED
+        if not vuln_off:
+            report.tool_status["trivy"] = external_tools.FAILED
         return
 
     validated = external_tools.cyclonedx_validate(local)
@@ -154,6 +161,11 @@ def _run_tools(backend, sbom_set, report):
                                  % (external_tools.spec_version(local) or "unknown spec"))
     else:
         report.findings.append(Finding("cyclonedx-cli", validated.output))
+
+    if vuln_off:
+        report.tool_notes.append("%s=off -- vulnerability scan not run"
+                                 % config.ENV_VULN_MODE)
+        return
 
     scanned = external_tools.trivy_sbom(local)
     report.tool_status["trivy"] = scanned.status

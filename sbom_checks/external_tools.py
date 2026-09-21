@@ -20,6 +20,8 @@ OK = "ok"
 MISSING = "missing"
 FAILED = "failed"
 FOUND = "found"          # ran cleanly and reported findings (trivy only)
+OFF = "off"              # the gate says do not run this tool; absence is not a
+                         # failure, so callers skip rather than requiring it
 
 
 class ToolResult(object):

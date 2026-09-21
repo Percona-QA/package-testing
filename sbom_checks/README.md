@@ -29,6 +29,17 @@ and go live automatically the moment packaging lands.
 a new upstream CVE in a vendored library is a different signal from a malformed
 SBOM, and sharing one red light means people learn to ignore both.
 
+| `SBOM_VULN_MODE` | trivy install | trivy run | tool missing or broken | CVE found |
+|---|---|---|---|---|
+| `off` | **skipped** | **not run** | skip | skip |
+| `warn` *(default)* | installed | runs | **fail** | skip, findings printed |
+| `enforce` | installed | runs | **fail** | **fail** |
+
+`off` means off end to end: the molecule job does not download trivy at all
+(saving a 49 MB download and a 168 MB binary, plus the ~1.4 GB vulnerability DB
+it would pull at scan time), the scan is never invoked, and a missing trivy
+cannot fail the build.
+
 Other environment variables:
 
 | Variable | Meaning |

@@ -26,8 +26,15 @@
     sbom_trivy_version: "0.74.0"
     sbom_bindir: "{{ sbom_bindir | default('/usr/local/bin') }}"
 
+# trivy is only installed when the vulnerability scan is actually wanted;
+# SBOM_VULN_MODE=off skips a 49 MB download and a 168 MB binary on every target.
+- name: decide whether trivy is needed
+  set_fact:
+    sbom_trivy_wanted: "{{ (sbom_vuln_mode | default('warn', true) | trim) != 'off' }}"
+
 - name: find SBOM tools already on PATH
   shell: command -v trivy || true
+  when: sbom_trivy_wanted | bool
   register: sbom_have_trivy
   changed_when: false
   failed_when: false
@@ -47,7 +54,9 @@
     mode: '0644'
     timeout: 60
   become: true
-  when: sbom_have_trivy.stdout | default('') | trim | length == 0
+  when:
+    - sbom_trivy_wanted | bool
+    - sbom_have_trivy.stdout | default('') | trim | length == 0
   register: sbom_trivy_download
   ignore_errors: true
 
@@ -68,6 +77,7 @@
       - "{{ sbom_bindir }}"
   become: true
   when:
+    - sbom_trivy_wanted | bool
     - sbom_have_trivy.stdout | default('') | trim | length == 0
     - sbom_trivy_download is not failed
     - sbom_trivy_download is not skipped
@@ -81,6 +91,7 @@
     mode: '0755'
   become: true
   when:
+    - sbom_trivy_wanted | bool
     - sbom_have_trivy.stdout | default('') | trim | length == 0
     - sbom_trivy_extract is not failed
     - sbom_trivy_extract is not skipped
@@ -91,6 +102,7 @@
     path: /var/tmp/trivy.tar.gz
     state: absent
   become: true
+  when: sbom_trivy_wanted | bool
   ignore_errors: true
 
 # --- cyclonedx-cli: a single binary, no archive ---------------------------
@@ -124,10 +136,14 @@
 # host without ICU unless invariant globalization is set.
 - name: verify the SBOM tools run
   shell: |
-    for entry in "trivy {{ sbom_trivy_bin }}" "cyclonedx {{ sbom_cyclonedx_bin }}"; do
-      name=${entry%% *}
-      path=${entry#* }
-      if [ ! -e "$path" ]; then
+    for entry in "trivy {{ sbom_trivy_bin }} {{ sbom_trivy_wanted | bool }}" \
+                 "cyclonedx {{ sbom_cyclonedx_bin }} True"; do
+      set -- $entry
+      name=$1; path=$2; wanted=$3
+      if [ "$wanted" != "True" ]; then
+        # Deliberately not installed, so "MISSING" would read as a failure.
+        echo "$name: NOT REQUESTED - its gate is off"
+      elif [ ! -e "$path" ]; then
         echo "$name: MISSING - no file at $path"
       elif [ ! -x "$path" ]; then
         echo "$name: NOT EXECUTABLE at $path"

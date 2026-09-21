@@ -105,6 +105,10 @@ def _require_tool(report, tool, label):
     unusable toolchain look like a green build.
     """
     status = report.tool_status.get(tool, external_tools.MISSING)
+    if status == external_tools.OFF:
+        # The gate disabled this tool; its absence is intentional, never a
+        # failure. Reached only defensively -- callers skip before this point.
+        pytest.skip("%s was not run because its gate is off" % label)
     if status == external_tools.MISSING:
         pytest.fail(
             "%s is not installed, but %s is on.\n"
@@ -168,6 +172,10 @@ def test_no_known_vulnerabilities(sbom):
     vendored library is a different signal from a malformed SBOM."""
     if not config.external_tools_on_target():
         pytest.skip("%s is off" % config.ENV_EXTERNAL_TOOLS)
+    # Before _require_tool: with the scan disabled, a missing or broken trivy
+    # must not fail the build for a check that was never going to run.
+    if config.vuln_mode() == config.OFF:
+        pytest.skip("%s is off" % config.ENV_VULN_MODE)
     if not sbom.vuln_findings:
         _require_tool(sbom, "trivy", "trivy")
         return

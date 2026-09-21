@@ -23,6 +23,13 @@
         # binary. Set SBOM_EXTERNAL_TOOLS=0 in the job to turn them off.
         sbom_external_tools: "{{ lookup('env', 'SBOM_EXTERNAL_TOOLS') | default('1', true) | trim }}"
 
+    - name: resolve whether the vulnerability scan is wanted
+      set_fact:
+        # SBOM_VULN_MODE=off means trivy is neither installed nor run, so the
+        # ~1.6 GB it needs (168 MB binary + a 1.4 GB vulnerability DB) is not
+        # spent on a tool the checks will refuse to use.
+        sbom_vuln_mode: "{{ lookup('env', 'SBOM_VULN_MODE') | default('warn', true) | trim }}"
+
     - name: install the external SBOM tools
       include_tasks: ../tasks/install_sbom_tools.yml
       when: sbom_external_tools not in ['0', 'false', 'no', 'off', '']
