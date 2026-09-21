@@ -161,18 +161,34 @@ def check_spdx(doc, root, components, expect_name=None, expect_version=None):
         if not package.get("licenseConcluded") and not package.get("licenseDeclared"):
             add("%s has neither licenseConcluded nor licenseDeclared" % name)
 
-    relationships = [r for r in _sequence(doc.get("relationships"))
-                     if isinstance(r, dict)]
+    relationships = []
+    for index, rel in enumerate(_sequence(doc.get("relationships"))):
+        if not isinstance(rel, dict):
+            # Report, not just filter: a dropped relationship silently changes
+            # which packages look contained, so it must not pass unremarked.
+            add("relationships[%d] is %s, expected an object"
+                % (index, type(rel).__name__))
+            continue
+        relationships.append(rel)
     describes = [r for r in relationships if r.get("relationshipType") == "DESCRIBES"]
-    if not describes and not doc.get("documentDescribes"):
+
+    # _sequence before indexing: an object here would raise KeyError on [0] and
+    # a string would yield a single character. parsers._spdx_root_id guards the
+    # same lookup; this is the second copy of that logic.
+    described_ids = _sequence(doc.get("documentDescribes"))
+    if "documentDescribes" in doc and not isinstance(doc.get("documentDescribes"), list):
+        add("documentDescribes is %s, expected an array"
+            % type(doc.get("documentDescribes")).__name__)
+
+    if not describes and not described_ids:
         add("no DESCRIBES relationship and no documentDescribes -- "
             "the document does not say which package is the product")
 
     root_id = None
     if describes:
         root_id = describes[0].get("relatedSpdxElement")
-    elif doc.get("documentDescribes"):
-        root_id = doc["documentDescribes"][0]
+    elif described_ids:
+        root_id = described_ids[0]
     else:
         root_id = SPDX_ROOT_SPDXID
 

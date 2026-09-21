@@ -703,6 +703,16 @@ MALFORMED = [
      ' "packages": [{"name": "a", "SPDXID": "SPDXRef-a"}]}', "spdx"),
     ('{"documentDescribes": {"a": 1}}', "spdx"),
     ('{"documentDescribes": "abc"}', "spdx"),
+    # An SPDX document with no packages[] returns early, before the relationship
+    # and documentDescribes block is ever reached -- so the cases above prove
+    # less than they appear to. These carry a package so that block runs.
+    ('{"packages": [{"name": "a", "SPDXID": "SPDXRef-a", "versionInfo": "1",'
+     ' "licenseConcluded": "MIT"}], "documentDescribes": {"a": 1}}', "spdx"),
+    ('{"packages": [{"name": "a", "SPDXID": "SPDXRef-a", "versionInfo": "1",'
+     ' "licenseConcluded": "MIT"}], "documentDescribes": "abc"}', "spdx"),
+    ('{"packages": [{"name": "a", "SPDXID": "SPDXRef-a", "versionInfo": "1",'
+     ' "licenseConcluded": "MIT"}], "relationships": [{"relationshipType":'
+     ' "DESCRIBES", "relatedSpdxElement": "SPDXRef-a"}, "junk", null]}', "spdx"),
 ]
 
 
@@ -716,6 +726,38 @@ def test_malformed_documents_are_reported_not_raised(raw, kind):
         return                      # a reported parse failure is a valid outcome
     findings = check(doc, root, components)
     assert findings, "a malformed document produced no findings at all"
+
+
+def _spdx_with(**extra):
+    doc = {"spdxVersion": "SPDX-2.3", "SPDXID": "SPDXRef-DOCUMENT",
+           "dataLicense": "CC0-1.0", "name": "pxb",
+           "documentNamespace": "http://example/x",
+           "packages": [{"name": "pxb", "SPDXID": "SPDXRef-pxb",
+                         "versionInfo": "9.7.1", "licenseConcluded": "GPL-2.0"}]}
+    doc.update(extra)
+    return json.dumps(doc)
+
+
+def test_non_object_relationships_are_reported_not_silently_dropped():
+    """Filtering alone is not enough: a dropped relationship changes which
+    packages look contained, so it has to be reported."""
+    raw = _spdx_with(relationships=[
+        {"relationshipType": "DESCRIBES", "spdxElementId": "SPDXRef-DOCUMENT",
+         "relatedSpdxElement": "SPDXRef-pxb"}, "junk", None])
+    doc, root, components = parsers.load_spdx(raw)
+    messages = "\n".join(str(f) for f in
+                         structural.check_spdx(doc, root, components))
+    assert "relationships[1] is str, expected an object" in messages
+    assert "relationships[2] is NoneType, expected an object" in messages
+
+
+def test_object_documentdescribes_is_reported_not_raised():
+    """structural.check_spdx keeps its own copy of the root-id lookup that
+    parsers._spdx_root_id guards; indexing [0] on an object raised KeyError."""
+    doc, root, components = parsers.load_spdx(_spdx_with(documentDescribes={"a": 1}))
+    messages = "\n".join(str(f) for f in
+                         structural.check_spdx(doc, root, components))
+    assert "documentDescribes is dict, expected an array" in messages
 
 
 def test_non_object_metadata_gives_a_missing_root_finding():
