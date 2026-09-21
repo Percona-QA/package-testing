@@ -38,7 +38,6 @@ ENV_CHECK_MODE = "SBOM_CHECK_MODE"
 ENV_VULN_MODE = "SBOM_VULN_MODE"
 ENV_LICENSE_STRICT = "SBOM_LICENSE_STRICT"
 ENV_EXTERNAL_TOOLS = "SBOM_EXTERNAL_TOOLS"
-ENV_OCI = "SBOM_CHECK_OCI"
 ENV_DIR = "SBOM_DIR"
 
 # Not a gate: the version the SBOM is expected to describe. Named PXB_VERSION to
@@ -80,12 +79,6 @@ def external_tools_on_target():
     cyclonedx-cli is a self-contained .NET binary. Deep validation belongs in the
     docker job's controlled environment."""
     return _flag(ENV_EXTERNAL_TOOLS)
-
-
-def check_oci():
-    """percona-docker publishes no OCI referrers today, so this is off unless
-    asked for explicitly."""
-    return _flag(ENV_OCI)
 
 
 def sbom_dir():

@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 
 from settings import *                                    # noqa: F401,F403,E402
-from sbom_checks import audit, config, discovery, oci      # noqa: E402
+from sbom_checks import audit, config, discovery            # noqa: E402
 from sbom_checks import external_tools                     # noqa: E402
 from sbom_checks.backends import DOCKER_BIN, DockerBackend  # noqa: E402
 from sbom_checks.models import Finding, render             # noqa: E402
@@ -160,57 +160,3 @@ class TestPxbSbom:
             pytest.skip("%s=%s\n%s" % (config.ENV_VULN_MODE, config.vuln_mode(),
                                        sbom.vuln_text()))
         pytest.fail(sbom.vuln_text())
-
-
-@pytest.fixture(scope='module')
-def referrers():
-    """CycloneDX SBOM referrers attached to the image for this architecture."""
-    if not config.check_oci():
-        pytest.skip("%s is not set" % config.ENV_OCI)
-
-    architecture = 'arm64' if os.uname()[4] in ('aarch64', 'arm64') else 'amd64'
-    digest, error = oci.manifest_digest(docker_image, architecture)
-    if error:
-        pytest.fail(error)
-
-    base = docker_image.split(':')[0]
-    reference = "%s@%s" % (base, digest) if digest else docker_image
-    print("\nresolving OCI referrers on %s" % reference)
-
-    found, error = oci.discover_referrers(reference)
-    if error:
-        pytest.fail(error)
-    return base, found
-
-
-class TestPxbOciSbom:
-    """SBOM attached to the image in the registry as an OCI referrer.
-
-    percona-docker publishes no referrers today, so this is off unless
-    SBOM_CHECK_OCI is set. Referrers attach per manifest digest, so on a
-    multi-arch image one architecture can legitimately carry one and another not
-    -- the pxb-docker-tests job runs this on both ARM and AMD agents.
-    """
-
-    def test_image_has_a_cyclonedx_referrer(self, referrers):
-        base, found = referrers
-        assert found, ("no CycloneDX SBOM referrer attached to %s for this architecture"
-                       % docker_image)
-
-    def test_attached_sbom_is_valid(self, referrers, tmpdir):
-        base, found = referrers
-        if not found:
-            pytest.skip("no referrer to validate")
-        files, error = oci.pull_referrer(base, found[0]['digest'], str(tmpdir))
-        if error:
-            pytest.fail(error)
-        assert files, "oras pull produced no files"
-
-        from sbom_checks import external_tools
-        result = external_tools.cyclonedx_validate(files[0])
-        if not result.available:
-            if config.external_tools_on_target():
-                pytest.fail("cyclonedx-cli is not installed, but %s is on"
-                            % config.ENV_EXTERNAL_TOOLS)
-            pytest.skip("cyclonedx-cli is not installed on this agent")
-        assert result.ok, result.output

@@ -36,9 +36,8 @@ Other environment variables:
 | `SBOM_DIR` | check this directory instead of discovering. Escape hatch for verifying a pre-release package. |
 | `PXB_VERSION` | the version the SBOM must describe. The only way to check this for a downloaded directory, which has no installed package to compare against. |
 | `SBOM_EXTERNAL_TOOLS` | run trivy/cyclonedx-cli, and **require** them: when on, a tool that is missing or cannot complete **fails** the check rather than skipping. On by default in both CI jobs, which install the tools; set to `0` to skip the tool-backed checks entirely |
-| `SBOM_CHECK_OCI` | also check the SBOM attached to a docker image as an OCI referrer (off: percona-docker publishes none today) |
 | `SBOM_LICENSE_STRICT` | require identical licence operand sets across formats, not just overlap |
-| `DOCKER_BIN`, `TRIVY_BIN`, `CYCLONEDX_BIN`, `ORAS_BIN` | binary overrides |
+| `DOCKER_BIN`, `TRIVY_BIN`, `CYCLONEDX_BIN` | binary overrides |
 
 ## Running it from your local host
 
@@ -136,7 +135,6 @@ the rpm inside it (a tag like `8.0.35-33` against an rpm version of `8.0.35`).
 | also run trivy / cyclonedx-cli | `SBOM_EXTERNAL_TOOLS=1` — note this also makes a missing tool a failure |
 | fail on HIGH/CRITICAL CVEs | `SBOM_VULN_MODE=enforce` |
 | require identical licences across formats | `SBOM_LICENSE_STRICT=1` |
-| also check the registry-attached SBOM | `SBOM_CHECK_OCI=1` (needs `oras`) |
 | use podman, or a docker CLI not named `docker` | `DOCKER_BIN=podman` |
 | a junit report | `--junitxml=report.xml` |
 
@@ -207,10 +205,10 @@ infrastructure at all:
 | `docker-image-tests/pxb/tests/test_pxb_sbom.py` | the Jenkins agent | the existing `docker-image-tests/pxb/run.sh` |
 | `sbom_checks.check_sbom` (CLI) | anywhere | by hand; not used by CI |
 
-Both Jenkins jobs expose the gate as a build parameter (in the
-`jenkins-pipelines` repo): `pxb-package-testing-molecule` has `SBOM_CHECK_MODE`
-and `SBOM_VULN_MODE` — passed through from `pxb-pt-testing-molecule-all` —
-and `pxb-docker-tests` adds `SBOM_CHECK_OCI`.
+Both Jenkins jobs (in the `jenkins-pipelines` repo) expose the gates as build
+parameters: `SBOM_CHECK_MODE`, `SBOM_VULN_MODE` and `SBOM_EXTERNAL_TOOLS` on
+`pxb-package-testing-molecule` — passed through from
+`pxb-pt-testing-molecule-all` — and the same three on `pxb-docker-tests`.
 
 ## What is checked
 
@@ -259,7 +257,6 @@ and `pxb-docker-tests` adds `SBOM_CHECK_OCI`.
    `failed` is still kept distinct from a finding, so a trivy that could not
    start (a rate-limited vulnerability-DB pull from ghcr.io, say) is reported as
    a broken scan rather than as a vulnerability.
-9. **OCI referrers** — opt-in, for docker images only.
 
 ## Notes and limitations
 
@@ -271,9 +268,11 @@ and `pxb-docker-tests` adds `SBOM_CHECK_OCI`.
 - **The molecule job installs both tools on the target** via
   `tasks/install_sbom_tools.yml` — trivy pinned to 0.74.0 (matching
   `installTrivy.groovy`) and cyclonedx-cli from its latest release, both
-  arch-aware. Installs are non-blocking: a platform where either will not run
-  degrades to a skipped check, never a failed converge. Disable with the
-  `SBOM_EXTERNAL_TOOLS` build parameter.
+  arch-aware, and extracted with python's `tarfile` because some AMIs ship no
+  `tar` binary. The install tasks themselves never abort the converge, but they
+  always report their failure — and with `SBOM_EXTERNAL_TOOLS` on (the default)
+  a tool that did not install then **fails** the corresponding check. Disable
+  with the `SBOM_EXTERNAL_TOOLS` build parameter.
 - **trivy currently finds almost nothing.** PXB purls are
   `pkg:generic/<name>@<version>`, which match CVE feeds poorly, and some
   components have version `unknown`. A green trivy result is not evidence of no

@@ -11,5 +11,4 @@ pytest
 # Optional external tools, NOT pip-installable, provisioned by the Jenkins job:
 #   trivy          https://github.com/aquasecurity/trivy   (vars/installTrivy.groovy)
 #   cyclonedx-cli  https://github.com/CycloneDX/cyclonedx-cli/releases
-#   oras           https://github.com/oras-project/oras/releases  (OCI referrers only)
 # All three are optional at runtime: checks that need them skip when absent.

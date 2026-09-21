@@ -15,9 +15,9 @@ Entry points:
 """
 
 from . import audit, backends, config, consistency, discovery  # noqa: F401
-from . import external_tools, licenses, models, oci, parsers, structural  # noqa: F401
+from . import external_tools, licenses, models, parsers, structural  # noqa: F401
 
 __all__ = [
     "audit", "backends", "config", "consistency", "discovery",
-    "external_tools", "licenses", "models", "oci", "parsers", "structural",
+    "external_tools", "licenses", "models", "parsers", "structural",
 ]
