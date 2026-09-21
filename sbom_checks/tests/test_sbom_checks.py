@@ -222,6 +222,37 @@ def test_sbom_dir_containing_a_space_is_searched(workdir):
         shutil.rmtree(spaced, ignore_errors=True)
 
 
+def test_sbom_dir_containing_a_quote_is_searched(workdir):
+    """A path with a single quote used to break the command outright.
+
+    The literal quotes around the interpolated value were not escaping: the
+    command became `find '/tmp/a'b' ...`, which exits 2 with "unexpected EOF",
+    and the non-zero status was reported as "directory is empty or unreadable"
+    -- a silent false negative rather than an error.
+    """
+    quoted = tempfile.mkdtemp(prefix="pxb'sbom")
+    try:
+        for name in os.listdir(TESTDATA):
+            shutil.copy(os.path.join(TESTDATA, name), os.path.join(quoted, name))
+        sets, considered = discovery.discover(LocalBackend(), sbom_dir=quoted)
+        assert len(sets) == 1, considered
+        assert sets[0].missing() == []
+    finally:
+        shutil.rmtree(quoted, ignore_errors=True)
+
+
+def test_sbom_dir_cannot_inject_shell_commands(workdir):
+    """$SBOM_DIR reaches a shell on every target, so a crafted value must be
+    treated as one literal path, never as syntax."""
+    sentinel = os.path.join(workdir, "INJECTED")
+    payload = "/tmp'; touch %s; echo '" % sentinel
+
+    sets, considered = discovery.discover(LocalBackend(), sbom_dir=payload)
+
+    assert not os.path.exists(sentinel), "the injected command executed"
+    assert sets == [], considered
+
+
 def test_sbom_dir_finds_files_nested_several_levels_deep(workdir):
     """An extracted archive can nest; the search depth must match the one used
     for the package-owned paths."""

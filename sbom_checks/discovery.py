@@ -16,6 +16,7 @@ every rejection is recorded in `considered` and printed even on a skip.
 
 import os
 import re
+import shlex
 
 from .models import SbomSet
 
@@ -62,6 +63,9 @@ def _package_manager(backend):
 def installed_packages(backend):
     """Installed percona-xtrabackup packages, main ones first."""
     manager = _package_manager(backend)
+    # PACKAGE_GLOB is a module constant, and its literal single quotes are
+    # deliberate: they stop the *shell* from globbing so that rpm and dpkg-query
+    # do the pattern matching themselves. Not a candidate for shlex.quote.
     if manager == "rpm":
         result = backend.run("rpm -qa --qf '%{NAME}\\n' '" + PACKAGE_GLOB + "'")
     elif manager == "dpkg":
@@ -80,15 +84,19 @@ def installed_packages(backend):
 def _list_package_files(backend, package):
     manager = _package_manager(backend)
     if manager == "rpm":
-        result = backend.run("rpm -ql %s" % package)
+        result = backend.run("rpm -ql %s" % shlex.quote(package))
     elif manager == "dpkg":
-        result = backend.run("dpkg -L %s" % package)
+        result = backend.run("dpkg -L %s" % shlex.quote(package))
     else:
         return []
     return result.lines() if result.ok else []
 
 
 def _find_in_dirs(backend, dirs):
+    # dirs are the SEARCH_DIRS module constants and are deliberately NOT
+    # shell-escaped: they contain globs (/usr/share/percona-xtrabackup*) that the
+    # shell has to expand. They take no external input, so the injection concern
+    # that applies to $SBOM_DIR does not reach here.
     patterns = " -o ".join(
         "-name '*%s' -o -name '*%s.gz'" % (suffix, suffix) for suffix, _ in SUFFIXES)
     # "exit 0" matters: the loop's status is that of the last [ -d ] test, which
@@ -129,11 +137,13 @@ def discover(backend, sbom_dir=None):
 
     if sbom_dir:
         considered.append("$SBOM_DIR override: %s" % sbom_dir)
-        # Quoted, and the same depth as the package search below: an unquoted
-        # path breaks on a space, and an extracted archive can nest deeper than
-        # a couple of levels. Both failed as "directory is empty or unreadable".
+        # shlex.quote, not literal quotes: this value arrives from the
+        # environment, so a path containing a quote would break the command
+        # (silently, as "directory is empty") and a crafted value could inject
+        # shell syntax. Depth matches the package search below, because an
+        # extracted archive can nest more than a couple of levels.
         result = backend.run(
-            "find '%s' -maxdepth 4 -type f 2>/dev/null" % sbom_dir)
+            "find %s -maxdepth 4 -type f 2>/dev/null" % shlex.quote(sbom_dir))
         paths = result.lines() if result.ok else []
         if not paths:
             considered.append("  -> directory is empty or unreadable")
@@ -189,10 +199,11 @@ def installed_version(backend, package):
     manager = _package_manager(backend)
     if manager == "rpm":
         # Concatenated, not %-formatted: "%{VERSION}" would break str.__mod__.
-        result = backend.run("rpm -q --qf '%{VERSION}' " + package)
+        result = backend.run("rpm -q --qf '%{VERSION}' " + shlex.quote(package))
     elif manager == "dpkg":
         result = backend.run(
-            "dpkg-query -W -f='${Version}' " + package + " 2>/dev/null")
+            "dpkg-query -W -f='${Version}' " + shlex.quote(package)
+            + " 2>/dev/null")
     else:
         return None
     if not result.ok or not result.stdout.strip():
