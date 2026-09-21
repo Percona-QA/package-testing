@@ -1,0 +1,179 @@
+---
+# Grows the root filesystem into disk space the instance already has.
+#
+# Several molecule AMIs boot with a root filesystem far smaller than the EBS
+# volume attached to them. Measured on the pxb-97 matrix:
+#
+#   rocky-8      root LV 8.9G on a 30G disk  -> ~20G unallocated
+#   rocky-8-arm  root LV 8.9G on a 30G disk  -> ~20G unallocated
+#
+# Rocky cloud images put root on LVM and their cloud-init does not extend the
+# logical volume, so the space is paid for but never usable. That left ~1.5 GB
+# free, and the SBOM vulnerability scan needs ~1.65 GB (a ~1.4 GB trivy DB plus
+# staging for the tarball), so it failed with "no space left on device" -- after
+# the package install had already pushed the filesystem to 84-89% full.
+#
+# Deliberately idempotent and non-fatal: growpart reports NOCHANGE when the
+# partition already fills the disk, and a platform with nothing to grow must be
+# left alone rather than failed. Every step reports what it did, because a
+# silent no-op here reappears much later as a confusing out-of-space error.
+
+- name: measure free space on the root filesystem
+  # -Pk: POSIX output in 1K blocks, so the column positions are stable across
+  # distributions and no human-readable suffix has to be parsed.
+  shell:
+    cmd: df -Pk / | awk 'NR==2 {print $4}'
+  become: true
+  register: grow_free_before
+  changed_when: false
+  failed_when: false
+
+- name: decide whether the root filesystem needs growing
+  set_fact:
+    # 4 GB: comfortably above the ~1.65 GB the SBOM scan needs, so healthy
+    # platforms are never touched, while the three known-short ones (1.5G, 1.4G,
+    # 0.9G free) all qualify.
+    grow_needed: "{{ (grow_free_before.stdout | default('0') | trim | int) < (4 * 1024 * 1024) }}"
+
+- name: report that the root filesystem has enough space
+  debug:
+    msg: >-
+      Root filesystem has
+      {{ (grow_free_before.stdout | default('0') | trim | int / 1024 / 1024) | round(1) }} GB
+      free, at or above the 4 GB threshold -- not growing.
+  when: not (grow_needed | bool)
+
+- name: grow the root filesystem
+  when: grow_needed | bool
+  block:
+
+    - name: install growpart
+      package:
+        name: "{{ 'cloud-guest-utils' if ansible_os_family == 'Debian' else 'cloud-utils-growpart' }}"
+        state: present
+      become: true
+      register: grow_growpart_install
+      # Non-fatal: without growpart the filesystem simply is not grown, which is
+      # the behaviour before this task existed. The report below says so.
+      ignore_errors: true
+
+    - name: resolve the root device, its disk and partition number
+      # Kept in one script because each value depends on the previous one, and
+      # the LVM walk (lv -> vg -> pv) has no single-command equivalent.
+      #
+      # The partition number comes from /sys, not from stripping digits off the
+      # device name: that is the only approach that handles both /dev/xvda5 and
+      # /dev/nvme0n1p5 without special-casing the nvme "p" separator.
+      shell:
+        cmd: |
+          # No "set -e": every lookup below has a fallback or is optional, and
+          # aborting early would print no JSON at all, leaving the caller unable
+          # to say why nothing was grown. findmnt is absent from some minimal
+          # images, so /proc/mounts and df are the fallbacks -- both universal.
+          src=$(findmnt -no SOURCE / 2>/dev/null \
+                || awk '$2 == "/" {print $1; exit}' /proc/mounts \
+                || df -P / | awk 'NR==2 {print $1}')
+          fstype=$(findmnt -no FSTYPE / 2>/dev/null \
+                   || awk '$2 == "/" {print $3; exit}' /proc/mounts)
+          part=$src
+          lv=
+          if [ -n "$(lvs --noheadings -o lv_name "$src" 2>/dev/null || true)" ]; then
+            lv=$src
+            vg=$(lvs --noheadings -o vg_name "$src" 2>/dev/null | tr -d ' ')
+            part=$(pvs --noheadings -o pv_name -S "vg_name=$vg" 2>/dev/null | tr -d ' ' | head -1)
+          fi
+          base=$(basename "$part")
+          disk=$(lsblk -no PKNAME "$part" 2>/dev/null | tr -d ' ' | head -1)
+          num=$(cat "/sys/class/block/$base/partition" 2>/dev/null || true)
+          printf '{"src":"%s","fstype":"%s","lv":"%s","part":"%s","disk":"%s","num":"%s"}\n' \
+            "$src" "$fstype" "$lv" "$part" "$disk" "$num"
+        executable: /bin/bash
+      become: true
+      register: grow_layout
+      changed_when: false
+      failed_when: false
+
+    - name: parse the resolved layout
+      # from_json rather than filter gymnastics over key=value lines: `split` is
+      # not dependably available as a filter across the ansible versions in use.
+      set_fact:
+        grow_facts: "{{ grow_layout.stdout | trim | from_json }}"
+      when: (grow_layout.stdout | default('') | trim) is match('^\{.*\}$')
+
+    - name: show the resolved disk layout
+      debug:
+        var: grow_facts
+
+    - name: grow the partition, the volume group and the filesystem
+      # growpart exits 1 on error but 2 when the partition already fills the
+      # disk; only the former is a real failure, so 2 is reported as "nothing to
+      # do". lvextend and pvresize are likewise no-ops on a second run.
+      shell:
+        cmd: |
+          set -u
+          disk="{{ grow_facts.disk | default('') }}"
+          num="{{ grow_facts.num | default('') }}"
+          lv="{{ grow_facts.lv | default('') }}"
+          part="{{ grow_facts.part | default('') }}"
+          fstype="{{ grow_facts.fstype | default('') }}"
+
+          if [ -z "$disk" ] || [ -z "$num" ]; then
+            echo "SKIP: could not resolve disk/partition (disk=$disk num=$num)"
+            exit 0
+          fi
+
+          out=$(growpart "/dev/$disk" "$num" 2>&1); rc=$?
+          echo "growpart /dev/$disk $num -> rc=$rc"
+          echo "$out"
+          if [ "$rc" -ne 0 ] && ! printf '%s' "$out" | grep -qi "NOCHANGE"; then
+            echo "FATAL: growpart failed"
+            exit 1
+          fi
+
+          if [ -n "$lv" ]; then
+            pvresize "$part" 2>&1 || echo "pvresize reported a problem"
+            # -r resizes the filesystem through fsadm in the same step, so xfs
+            # and ext4 are both handled without branching here.
+            lvextend -r -l +100%FREE "$lv" 2>&1 || echo "lvextend: nothing to extend"
+          else
+            case "$fstype" in
+              xfs)  xfs_growfs / 2>&1 || echo "xfs_growfs: nothing to do" ;;
+              ext*) resize2fs "$part" 2>&1 || echo "resize2fs: nothing to do" ;;
+              *)    echo "SKIP: unhandled root fstype $fstype" ;;
+            esac
+          fi
+          exit 0
+        executable: /bin/bash
+      become: true
+      register: grow_result
+      changed_when: false
+      failed_when: false
+      when: grow_growpart_install is not failed
+
+    - name: show what growing the filesystem did
+      debug:
+        var: grow_result.stdout_lines
+      when: grow_result is not skipped
+
+    - name: report that growpart could not be installed
+      debug:
+        msg: >-
+          growpart could not be installed, so the root filesystem was left at
+          its current size. Steps needing significant disk space may fail.
+      when: grow_growpart_install is failed
+
+    - name: measure free space after growing
+      shell:
+        cmd: df -Pk / | awk 'NR==2 {print $4}'
+      become: true
+      register: grow_free_after
+      changed_when: false
+      failed_when: false
+
+    - name: report the change in free space
+      debug:
+        msg: >-
+          Root filesystem free space:
+          {{ (grow_free_before.stdout | default('0') | trim | int / 1024 / 1024) | round(1) }} GB
+          ->
+          {{ (grow_free_after.stdout | default('0') | trim | int / 1024 / 1024) | round(1) }} GB
