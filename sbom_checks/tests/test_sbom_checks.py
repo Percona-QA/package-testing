@@ -395,6 +395,93 @@ def test_junit_label_ignores_an_empty_label(workdir):
     assert open(path).read() == original
 
 
+# --- the exported copy, and cleaning it up --------------------------------
+
+def _temp_dirs():
+    root = tempfile.gettempdir()
+    return {d for d in os.listdir(root) if d.startswith("pxb-sbom-")}
+
+
+def test_local_backend_needs_no_temporary_copy(workdir):
+    """The packaged file is on the same filesystem, so the tools read it in
+    place and nothing is written to the temp dir at all."""
+    before = _temp_dirs()
+    backend = LocalBackend()
+    sets, _ = discovery.discover(backend, sbom_dir=workdir)
+    report = audit.audit(backend, sets[0], run_tools=True)
+    assert _temp_dirs() == before, "a temporary copy was made unnecessarily"
+    # and the tools still saw a real document
+    assert report.tool_status["cyclonedx"] != external_tools.FAILED
+
+
+def test_a_copy_is_made_and_removed_when_the_file_is_gzipped(workdir):
+    """trivy and cyclonedx cannot parse .json.gz, so this path must still copy
+    -- and must still clean up after itself."""
+    import gzip
+    source = os.path.join(workdir, STEM + ".cdx.json")
+    data = open(source, "rb").read()
+    os.remove(source)
+    with gzip.open(source + ".gz", "wb") as handle:
+        handle.write(data)
+
+    before = _temp_dirs()
+    backend = LocalBackend()
+    assert backend.local_path(source + ".gz") is None, "gzip must force a copy"
+    sets, _ = discovery.discover(backend, sbom_dir=workdir)
+    report = audit.audit(backend, sets[0], run_tools=True)
+    assert _temp_dirs() == before, "the temporary copy was left behind"
+    assert report.tool_status["cyclonedx"] != external_tools.FAILED
+
+
+def test_temp_copy_is_removed_when_export_fails(workdir):
+    """The export-failure path returns early -- it must still clean up."""
+    before = _temp_dirs()
+    backend = LocalBackend()
+    backend.local_path = lambda path: None          # force the copy branch
+    def boom(path, dest_dir):
+        raise IOError("simulated export failure")
+    backend.export = boom
+
+    sets, _ = discovery.discover(backend, sbom_dir=workdir)
+    report = audit.audit(backend, sets[0], run_tools=True)
+    assert _temp_dirs() == before, "the temp dir survived an export failure"
+    assert report.tool_status["cyclonedx"] == external_tools.FAILED
+
+
+def test_temp_copy_is_removed_when_the_vuln_gate_is_off(workdir, monkeypatch):
+    """SBOM_VULN_MODE=off returns before the trivy block -- also a cleanup path."""
+    monkeypatch.setenv(config.ENV_VULN_MODE, "off")
+    before = _temp_dirs()
+    backend = LocalBackend()
+    backend.local_path = lambda path: None          # force the copy branch
+    sets, _ = discovery.discover(backend, sbom_dir=workdir)
+    audit.audit(backend, sets[0], run_tools=True)
+    assert _temp_dirs() == before
+
+
+def test_cleanup_failure_does_not_break_the_audit(workdir, monkeypatch):
+    """Tidying up must never turn into a failed audit -- the reason for
+    ignore_errors rather than TemporaryDirectory."""
+    import shutil as _shutil
+    real_rmtree = _shutil.rmtree
+    before = _temp_dirs()
+    backend = LocalBackend()
+    backend.local_path = lambda path: None          # force the copy branch
+    monkeypatch.setattr(_shutil, "rmtree",
+                        lambda *a, **k: (_ for _ in ()).throw(OSError("boom")))
+    try:
+        sets, _ = discovery.discover(backend, sbom_dir=workdir)
+        report = audit.audit(backend, sets[0], run_tools=True)
+        assert report is not None
+    finally:
+        # This case deliberately breaks cleanup, so it orphans a directory by
+        # design. Remove it with the real rmtree so the suite itself leaks
+        # nothing -- which is what the rest of these tests measure.
+        for leaked in _temp_dirs() - before:
+            real_rmtree(os.path.join(tempfile.gettempdir(), leaked),
+                        ignore_errors=True)
+
+
 # --- external tool status -------------------------------------------------
 
 def _stub(directory, name, body):

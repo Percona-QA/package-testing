@@ -5,6 +5,7 @@ molecule target-host test and the docker test.
 """
 
 import os
+import shutil
 import tempfile
 
 from . import config, consistency, external_tools, parsers, structural
@@ -142,16 +143,43 @@ def _run_tools(backend, sbom_set, report):
     if not cdx_path:
         report.tool_notes.append("no CycloneDX document -- external tools not run")
         return
-    workdir = tempfile.mkdtemp(prefix="pxb-sbom-")
-    try:
-        local = backend.export(cdx_path, workdir)
-    except Exception as exc:                           # noqa: BLE001
-        report.tool_notes.append("could not materialise %s: %s" % (cdx_path, exc))
-        report.tool_status["cyclonedx"] = external_tools.FAILED
-        if not vuln_off:
-            report.tool_status["trivy"] = external_tools.FAILED
-        return
 
+    # Prefer reading the packaged file in place. A copy is only made when the
+    # tools cannot reach the original -- the docker backend, where the file
+    # lives inside the container, or a gzipped SBOM they cannot parse. The
+    # temp directory is therefore created lazily and removed however this
+    # returns; the body below has several early returns, which is why the
+    # cleanup is a finally rather than a line at the end.
+    workdir = None
+    try:
+        local = backend.local_path(cdx_path)
+        if local is None:
+            workdir = tempfile.mkdtemp(prefix="pxb-sbom-")
+            try:
+                local = backend.export(cdx_path, workdir)
+            except Exception as exc:                   # noqa: BLE001
+                report.tool_notes.append("could not materialise %s: %s"
+                                         % (cdx_path, exc))
+                report.tool_status["cyclonedx"] = external_tools.FAILED
+                if not vuln_off:
+                    report.tool_status["trivy"] = external_tools.FAILED
+                return
+        _run_tools_on(local, report, vuln_off)
+    finally:
+        if workdir is not None:
+            # Tidying up must never fail an audit. ignore_errors covers problems
+            # met while walking the tree; the try/except covers rmtree itself
+            # raising, which ignore_errors does not. TemporaryDirectory is not
+            # used because on python 3.6-3.9 -- and these targets run 3.6 --
+            # its cleanup() raises and ignore_cleanup_errors only lands in 3.10.
+            try:
+                shutil.rmtree(workdir, ignore_errors=True)
+            except Exception:                          # noqa: BLE001
+                pass
+
+
+def _run_tools_on(local, report, vuln_off):
+    """Run the external tools against an already-readable CycloneDX file."""
     validated = external_tools.cyclonedx_validate(local)
     report.tool_status["cyclonedx"] = validated.status
     if validated.status == external_tools.MISSING:

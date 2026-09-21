@@ -75,11 +75,33 @@ class Backend(object):
         cyclonedx-cli can read it) and return the local path."""
         raise NotImplementedError
 
+    def local_path(self, path):
+        """Path the host's own tools can read directly, or None if a copy is
+        needed.
+
+        Default None: only a backend whose files are already on this filesystem
+        can answer otherwise. DockerBackend inherits this, correctly -- the file
+        lives inside the container while the tools run outside it.
+        """
+        return None
+
 
 class LocalBackend(Backend):
     """Installed packages on this machine -- the molecule target host."""
 
     name = "local"
+
+    def local_path(self, path):
+        # Same filesystem, so the tools read the packaged file in place and no
+        # temporary copy is made at all -- unless it is compressed, which
+        # neither trivy nor cyclonedx-cli can parse.
+        try:
+            with open(path, "rb") as handle:
+                if handle.read(2) == GZIP_MAGIC:
+                    return None
+        except (IOError, OSError):
+            return None
+        return path
 
     def run(self, command):
         return _run(["sh", "-c", command])
