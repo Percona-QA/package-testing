@@ -42,8 +42,9 @@ def can_mysqld_run(base_dir):
         mysqld_path = base_dir + '/bin/mysqld'
         result = subprocess.run(
             [mysqld_path, '--version'],
-            capture_output=True,
-            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,  # text= requires Python 3.7+, some test hosts still run 3.6
             timeout=5,
             check=False  # Don't raise on non-zero exit
         )
