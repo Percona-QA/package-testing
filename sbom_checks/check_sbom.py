@@ -12,7 +12,7 @@ import subprocess
 import sys
 import uuid
 
-from . import audit, config, discovery
+from . import audit, config, discovery, external_tools
 from .backends import DOCKER_BIN, DockerBackend, LocalBackend
 
 EXIT_OK = 0
@@ -32,6 +32,45 @@ def _start_container(image):
 def _stop_container(container):
     subprocess.call([DOCKER_BIN, "rm", "-f", container],
                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def _tool_problems(report, sbom_set, run_tools):
+    """Requested tools that did not produce a usable result.
+
+    Without this the CLI reported "cyclonedx-cli not installed" or "trivy could
+    not complete the scan" and still exited 0, so a run that validated nothing
+    looked identical to a clean one. The pytest entrypoint has enforced this
+    since _require_tool; this is the same rule for the CLI.
+    """
+    if not run_tools:
+        # --no-tools means the tools were never asked for, so their absence is
+        # not a setup failure.
+        return []
+    if not sbom_set.paths.get("cdx"):
+        # _run_tools returns early with cyclonedx still MISSING when there is no
+        # CycloneDX document. That MISSING means "did not run", not "binary
+        # absent", and enforcing it would blame the tool on a host where it is
+        # installed. A missing document is reported by the completeness check.
+        return []
+
+    problems = []
+    status = report.tool_status.get("cyclonedx", external_tools.MISSING)
+    if external_tools.unusable(status):
+        problems.append(
+            "cyclonedx-cli is %s, but the external tools were requested.\n"
+            "    Install it, or pass --no-tools to skip the external tools."
+            % status)
+
+    # trivy only when the vulnerability gate actually wants it. _run_tools seeds
+    # the status as OFF in that case, so this is belt and braces.
+    if config.vuln_mode() != config.OFF:
+        status = report.tool_status.get("trivy", external_tools.MISSING)
+        if external_tools.unusable(status):
+            problems.append(
+                "trivy is %s, but the vulnerability scan was requested.\n"
+                "    Install it, set %s=off, or pass --no-tools."
+                % (status, config.ENV_VULN_MODE))
+    return problems
 
 
 def build_parser():
@@ -117,6 +156,10 @@ def run(args):
                 print("  %s" % note)
 
             if not report.ok:
+                failed = True
+
+            for problem in _tool_problems(report, sbom_set, not args.no_tools):
+                print("  %s" % problem)
                 failed = True
 
             if report.vuln_findings:

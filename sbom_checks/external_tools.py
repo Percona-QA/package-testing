@@ -62,6 +62,18 @@ def have(binary):
     return shutil.which(binary) is not None if hasattr(shutil, "which") else False
 
 
+def unusable(status):
+    """True when a requested tool produced no usable result.
+
+    One predicate so the CLI and the pytest entrypoint cannot drift on what
+    counts as a setup failure. OK and FOUND are usable outcomes -- FOUND means
+    trivy ran and reported vulnerabilities, which is a finding, not a broken
+    tool. OFF means the gate deliberately did not run it, so it is never a
+    failure.
+    """
+    return status in (MISSING, FAILED)
+
+
 def _run(argv, env=None):
     merged = dict(os.environ)
     if env:

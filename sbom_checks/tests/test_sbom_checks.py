@@ -20,8 +20,9 @@ import pytest
 sys.path.insert(0, os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..")))
 
-from sbom_checks import (audit, config, consistency, discovery, external_tools,
-                         label_junit, licenses, parsers, structural)
+from sbom_checks import (audit, check_sbom, config, consistency, discovery,
+                         external_tools, label_junit, licenses, parsers,
+                         structural)
 from sbom_checks.backends import LocalBackend
 from sbom_checks.models import Component
 
@@ -864,3 +865,80 @@ def test_spec_version_is_derived_not_hardcoded():
     from sbom_checks import external_tools
     assert external_tools.spec_version(
         os.path.join(TESTDATA, STEM + ".cdx.json")) == "v1_5"
+
+
+# --- CLI enforces tool_status --------------------------------------------
+
+def _stub_tool(directory, name, rc):
+    """An executable that exits with rc, to drive a tool status."""
+    path = os.path.join(directory, name)
+    with open(path, "w") as handle:
+        handle.write("#!/bin/sh\nexit %d\n" % rc)
+    os.chmod(path, 0o755)
+    return path
+
+
+# (label, cyclonedx rc or None=absent, trivy rc or None=absent, vuln off,
+#  no-tools, expected exit)
+# rc 0 -> OK; rc 2 -> FAILED (trivy maps rc 1 to "vulnerabilities found", so a
+# broken scan must exit with something else); absent -> MISSING.
+CLI_TOOL_CASES = [
+    ("both usable",              0,    0,    False, False, 0),
+    ("cyclonedx absent",         None, 0,    False, False, 1),
+    ("trivy absent",             0,    None, False, False, 1),
+    ("both absent",              None, None, False, False, 1),
+    ("trivy scan failed",        0,    2,    False, False, 1),
+    ("trivy absent, vuln off",   0,    None, True,  False, 0),
+    ("both absent, --no-tools",  None, None, False, True,  0),
+]
+
+
+@pytest.mark.parametrize("label,cdx_rc,trivy_rc,vuln_off,no_tools,expected",
+                         CLI_TOOL_CASES)
+def test_cli_exit_code_reflects_tool_status(workdir, monkeypatch, label, cdx_rc,
+                                            trivy_rc, vuln_off, no_tools, expected):
+    """A requested tool that never ran must not exit 0.
+
+    The CLI used to read only report.ok and vuln_findings, so a missing
+    cyclonedx-cli, a missing trivy, or a trivy scan that could not complete all
+    passed silently -- a run that validated nothing looked like a clean one.
+    """
+    bindir = tempfile.mkdtemp(prefix="pxb-sbom-bin-")
+    try:
+        cdx = _stub_tool(bindir, "cdx", cdx_rc) if cdx_rc is not None else "no-such-cdx"
+        trivy = _stub_tool(bindir, "trv", trivy_rc) if trivy_rc is not None else "no-such-trivy"
+        monkeypatch.setattr(external_tools, "CYCLONEDX_BIN", cdx)
+        monkeypatch.setattr(external_tools, "TRIVY_BIN", trivy)
+        monkeypatch.setenv(config.ENV_VULN_MODE, "off" if vuln_off else "warn")
+        monkeypatch.setenv(config.ENV_CHECK_MODE, "warn")
+
+        argv = ["--mode", "dir", "--path", workdir]
+        if no_tools:
+            argv.append("--no-tools")
+        assert check_sbom.main(argv) == expected, label
+    finally:
+        shutil.rmtree(bindir, ignore_errors=True)
+
+
+def test_cli_does_not_blame_the_tool_when_there_is_no_cyclonedx_document(workdir,
+                                                                        monkeypatch):
+    """With no .cdx.json the tools never run, leaving cyclonedx MISSING. That
+    means "did not run", not "binary absent", so it must not be reported as a
+    missing tool on a host where it is installed."""
+    os.remove(os.path.join(workdir, STEM + ".cdx.json"))
+    monkeypatch.setattr(external_tools, "CYCLONEDX_BIN", "definitely-not-installed")
+    monkeypatch.setattr(external_tools, "TRIVY_BIN", "definitely-not-installed")
+    monkeypatch.setenv(config.ENV_VULN_MODE, "warn")
+
+    report = _audit(workdir, run_tools=True)
+    assert check_sbom._tool_problems(report, report.sbom_set, True) == []
+
+
+def test_unusable_predicate_matches_require_tool_semantics():
+    """The CLI and the pytest entrypoint must agree on which statuses are a
+    setup failure; OFF and FOUND never are."""
+    assert external_tools.unusable(external_tools.MISSING)
+    assert external_tools.unusable(external_tools.FAILED)
+    assert not external_tools.unusable(external_tools.OK)
+    assert not external_tools.unusable(external_tools.FOUND)
+    assert not external_tools.unusable(external_tools.OFF)
