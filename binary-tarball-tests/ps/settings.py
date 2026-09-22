@@ -305,8 +305,8 @@ ps97_files = (
 )
 
 ps97_symlinks = (
-  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.2.2'),
-  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.2.2'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
+  ('lib/libperconaserverclient.so.24','lib/libperconaserverclient.so.24.1.2'),
+  ('lib/libperconaserverclient.so','lib/libperconaserverclient.so.24.1.2'),('lib/mysql/libjemalloc.so','lib/mysql/libjemalloc.so.1')
 )
 
 ps97_openssl_files = (
