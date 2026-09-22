@@ -243,3 +243,64 @@ def test_telemetry_status(mysql_server, pro_fips_vars):
 
     assert telemetry_settings.get("percona_telemetry_disable") == "OFF", \
         "Telemetry is enabled"
+
+
+def test_opentelemetry_component(mysql_server, pro_fips_vars):
+    if pro_fips_vars['ps_version_major'] != '9.7':
+        pytest.skip('component_telemetry (OpenTelemetry) is available from PS 9.7 onwards')
+
+    mysql_server.install_component('component_telemetry')
+
+    # SELECT @@global.<var> returns MySQL's raw 0/1 for boolean sysvars,
+    # not the ON/OFF text shown by SHOW VARIABLES/SHOW STATUS.
+    expected = {
+        'telemetry.trace_enabled': '0',
+        'telemetry.metrics_enabled': '0',
+        'telemetry.log_enabled': '0',
+        'telemetry.query_text_enabled': '1',
+        'telemetry.otel_log_level': 'info',
+    }
+    for variable, value in expected.items():
+        output = mysql_server.run_query('SELECT @@global.'+variable+';')
+        assert output.strip() == value
+
+    for status_var in ('Telemetry_logs_supported', 'Telemetry_metrics_supported', 'Telemetry_traces_supported'):
+        output = mysql_server.run_query('SHOW GLOBAL STATUS LIKE "'+status_var+'";')
+        assert 'ON' in output
+
+    for variable in ('telemetry.trace_enabled', 'telemetry.log_enabled'):
+        mysql_server.run_query('SET GLOBAL '+variable+'=ON;')
+        output = mysql_server.run_query('SELECT @@global.'+variable+';')
+        assert output.strip() == '1'
+
+    # telemetry.metrics_enabled is startup-only, so a runtime SET must fail
+    with pytest.raises(subprocess.CalledProcessError):
+        mysql_server.run_query('SET GLOBAL telemetry.metrics_enabled=ON;')
+
+    mysql_server.run_query('UNINSTALL COMPONENT "file://component_telemetry";')
+    output = mysql_server.run_query(
+        'SELECT component_urn FROM mysql.component WHERE component_urn = "file://component_telemetry";'
+    )
+    assert 'component_telemetry' not in output
+
+
+def test_opentelemetry_client_plugin(host, mysql_server, pro_fips_vars):
+    if pro_fips_vars['ps_version_major'] != '9.7':
+        pytest.skip('telemetry_client (OpenTelemetry client plugin) is available from PS 9.7 onwards')
+
+    plugin_dir = mysql_server.run_query('SELECT @@global.plugin_dir;').strip()
+    assert host.file(plugin_dir+'/telemetry_client.so').exists
+
+    # --otel-help is registered by the telemetry_client plugin itself, so it
+    # only succeeds and prints the plugin variables banner when the plugin
+    # is loaded via --telemetry_client.
+    loaded_marker = '=== TELEMETRY_CLIENT PLUGIN VARIABLES ==='
+    mysql_cmd = mysql_server.mysql+' --user=root -S'+mysql_server.socket
+
+    enabled = host.run(mysql_cmd+' --telemetry_client --otel-help')
+    assert enabled.succeeded
+    assert loaded_marker in enabled.stdout + enabled.stderr
+
+    disabled = host.run(mysql_cmd+' --otel-help')
+    assert not disabled.succeeded
+    assert loaded_marker not in disabled.stdout + disabled.stderr
