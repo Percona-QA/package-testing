@@ -78,14 +78,6 @@
     when:
       - ansible_distribution_release not in ['bookworm', 'noble', 'trixie', 'resolute']
 
-#  - name: install pykmip
-#    command: "{{ item }}"
-#    with_items:
-#        - python3 -m pip install -U --break-system-packages pip
-#        - python3 -m pip install -U --break-system-packages setuptools
-#        - python3 -m pip install -U --break-system-packages pykmip
-#    when: ansible_distribution_release in ["bookworm", "noble"]
-
   - name: Ensure ~/.local/bin is in PATH for current user
     lineinfile:
       path: /home/{{ ansible_user }}/.bashrc
@@ -115,12 +107,6 @@
     command: pip3 install --break-system-packages SQLAlchemy==1.4.46
     when: ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
 
-#  - name: Check PyKMIP is importable
-#    command: python3 -c "import pykmip; print(pykmip.__version__)"
-#    register: pykmip_check
-#    failed_when: "'No module named' in pykmip_check.stderr"
-#    when:
-#      - ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
 
   - name: set the pykmip server binary path
     set_fact:
