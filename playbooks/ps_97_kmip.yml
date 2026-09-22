@@ -122,30 +122,74 @@
 #    when:
 #      - ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
 
-  - name: start pykmip server
-    shell: nohup /usr/local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
-    when:
-      - ansible_distribution_release not in ['bookworm', 'noble', 'trixie', 'resolute']
+  - name: set the pykmip server binary path
+    set_fact:
+      pykmip_bin: "{{ (ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']) | ternary('/home/' + ansible_user + '/.local/bin/pykmip-server', '/usr/local/bin/pykmip-server') }}"
 
-  - name: start pykmip server
-    shell: nohup ~/.local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
-    when: ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
-
-  - name: Wait for pykmip server to accept connections on 5696
-    wait_for:
-      host: 127.0.0.1
-      port: 5696
-      delay: 1
-      timeout: 30
-
-  - name: Check if kmip-server is running
-    shell: pgrep -x kmip-server
-    register: kmip_status
+  # Start pykmip under a transient systemd unit instead of `nohup ... &`. A
+  # backgrounded shell process is a child of the Ansible SSH session, and on
+  # some distros systemd-logind tears down the session's cgroup scope when
+  # the task's connection ends, killing the server before mysqld starts.
+  # nohup only ignores SIGHUP, it does not detach from that scope.
+  # systemd-run places pykmip in its own unit that outlives the SSH session
+  # (see pxb_97_kmip.yml, where this exact pattern already works).
+  - name: remove any stale pykmip-server transient unit from a previous run
+    command: systemctl reset-failed pykmip-server.service
     failed_when: false
     changed_when: false
 
+  - name: stop any stale pykmip-server transient unit from a previous run
+    command: systemctl stop pykmip-server.service
+    failed_when: false
+    changed_when: false
+
+  - name: start pykmip server
+    command: >
+      systemd-run --unit=pykmip-server --collect
+      --property=StandardOutput=file:/pykmip_server.out
+      --property=StandardError=file:/pykmip_server.out
+      {{ pykmip_bin }}
+      -f /package-testing/kmip/server.conf -l /pykmip_server.log
+
+  - name: wait a few seconds for pykmip server to come up
+    pause:
+      seconds: 5
+
+  - name: check pykmip server process is running
+    shell: pgrep -af pykmip-server
+    register: kmip_status
+    changed_when: false
+    failed_when: false
+
+  - name: check pykmip server is listening on port 5696
+    wait_for:
+      host: 127.0.0.1
+      port: 5696
+      state: started
+      timeout: 30
+    register: kmip_port
+    ignore_errors: true
+
+  - name: read pykmip server log
+    command: cat /pykmip_server.log
+    register: pykmip_startup_log
+    changed_when: false
+    failed_when: false
+
+  - name: read pykmip server stdout/stderr (crash traceback lands here)
+    command: cat /pykmip_server.out
+    register: pykmip_startup_out
+    changed_when: false
+    failed_when: false
+
   - debug:
-      var: kmip_status
+      msg:
+        - "pykmip process: {{ kmip_status.stdout_lines | default(['<not running>']) }}"
+        - "port 5696 reachable: {{ (kmip_port is succeeded) | ternary('yes', 'no') }}"
+        - "pykmip stdout/stderr:"
+        - "{{ pykmip_startup_out.stdout_lines | default([]) }}"
+        - "pykmip log:"
+        - "{{ pykmip_startup_log.stdout_lines | default([]) }}"
 
   - name: copy the global manifest for mysql
     copy:
