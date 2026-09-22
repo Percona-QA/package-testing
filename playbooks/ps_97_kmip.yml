@@ -131,6 +131,13 @@
     shell: nohup ~/.local/bin/pykmip-server -f /package-testing/kmip/server.conf -l /pykmip_server.log 2>&1 &
     when: ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
 
+  - name: Wait for pykmip server to accept connections on 5696
+    wait_for:
+      host: 127.0.0.1
+      port: 5696
+      delay: 1
+      timeout: 30
+
   - name: Check if kmip-server is running
     shell: pgrep -x kmip-server
     register: kmip_status
