@@ -12,7 +12,7 @@ otel_supported = bool(re.match(r'^9\.[7-9]$', ps_version_major))
 
 pytestmark = pytest.mark.skipif(not otel_supported, reason='OpenTelemetry client plugin is available from 9.7 onwards')
 
-LOADED_MESSAGE = 'Telemetry plugin <telemetry_client> is loaded.'
+LOADED_MESSAGE = '=== TELEMETRY_CLIENT PLUGIN VARIABLES ==='
 
 
 def run_mysql(host, extra_args):
