@@ -35,11 +35,13 @@ class TestOpenTelemetry:
         assert 'file://component_telemetry' in cmd.stdout
 
     def test_default_variables(self, host):
+        # SELECT @@global.<var> returns MySQL's raw 0/1 for boolean sysvars,
+        # not the ON/OFF text shown by SHOW VARIABLES/SHOW STATUS.
         expected = {
-            'telemetry.trace_enabled': 'OFF',
-            'telemetry.metrics_enabled': 'OFF',
-            'telemetry.log_enabled': 'OFF',
-            'telemetry.query_text_enabled': 'ON',
+            'telemetry.trace_enabled': '0',
+            'telemetry.metrics_enabled': '0',
+            'telemetry.log_enabled': '0',
+            'telemetry.query_text_enabled': '1',
             'telemetry.otel_log_level': 'ERROR',
         }
         for variable, value in expected.items():
@@ -62,7 +64,7 @@ class TestOpenTelemetry:
             assert cmd.succeeded
             cmd = run_sql(host, 'SELECT @@global.'+variable+';')
             assert cmd.succeeded
-            assert cmd.stdout.strip() == 'ON'
+            assert cmd.stdout.strip() == '1'
 
     def test_metrics_enabled_is_startup_only(self, host):
         cmd = run_sql(host, 'SET GLOBAL telemetry.metrics_enabled=ON;')
