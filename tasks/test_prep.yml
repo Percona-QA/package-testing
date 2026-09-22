@@ -305,22 +305,22 @@
       state: present
     when: ansible_os_family == "RedHat"
 
-  # Use the pip module (idempotent). Try a plain install first and only fall
-  # back to --break-system-packages on externally-managed environments
-  # (Debian 12+/Ubuntu 24.04+); passing that flag unconditionally would break
-  # older pip (e.g. RHEL 8) that doesn't support it.
+  # PEP 668: Debian 12+/Ubuntu 24.04+ (incl. noble/resolute)/Debian 13 mark the
+  # system Python as "externally managed" and reject `pip install` unless
+  # --break-system-packages is passed, but older pip (e.g. RHEL 8) does not
+  # understand that flag. Detect the EXTERNALLY-MANAGED marker up front and add
+  # the override only where it exists, so the install succeeds on the first try
+  # on every distro.
+  - name: detect PEP 668 externally-managed python
+    shell: ls /usr/lib/python3*/EXTERNALLY-MANAGED >/dev/null 2>&1 && echo yes || echo no
+    register: pep668_marker
+    changed_when: false
+
   - name: install pytest via pip
-    block:
-      - name: install pytest
-        pip:
-          name: pytest
-          executable: pip3
-    rescue:
-      - name: install pytest (externally-managed env)
-        pip:
-          name: pytest
-          executable: pip3
-          extra_args: --break-system-packages
+    pip:
+      name: pytest
+      executable: pip3
+      extra_args: "{{ '--break-system-packages' if pep668_marker.stdout == 'yes' else omit }}"
 
   - name: include tasks for listing already installed packages
     include_tasks: list_installed_packages.yml
