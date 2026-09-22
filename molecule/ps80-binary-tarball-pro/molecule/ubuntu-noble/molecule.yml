@@ -17,8 +17,6 @@ platforms:
       build-number: ${BUILD_NUMBER}
 provisioner:
   name: ansible
-  env:
-    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
   log: True
   playbooks:
     create: ../../../playbooks/create-noble-arm.yml
