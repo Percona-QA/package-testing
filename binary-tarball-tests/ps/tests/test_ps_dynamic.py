@@ -33,7 +33,11 @@ def is_oracle_linux_9_direct():
 
 
 def can_mysqld_run(base_dir):
-    """Check if mysqld binary can run (not blocked by GLIBC incompatibility)"""
+    """Check if mysqld binary can run (not blocked by GLIBC incompatibility).
+
+    Returns (can_run, detail) where detail is the captured stderr/exception
+    text when can_run is False, so callers can surface *why* in skip reasons.
+    """
     try:
         mysqld_path = base_dir + '/bin/mysqld'
         result = subprocess.run(
@@ -45,33 +49,34 @@ def can_mysqld_run(base_dir):
         )
         # If it returns 0, mysqld can run
         if result.returncode == 0:
-            return True
+            return True, ''
         # Check if the error is GLIBC-related in stderr
         error_output = result.stderr or ''
         if 'GLIBC' in error_output or 'GLIBCXX' in error_output:
-            return False
+            return False, error_output.strip()
         # Other errors might be acceptable (e.g., missing config files)
         # But if returncode is non-zero and no output, assume it can't run
         if result.returncode != 0 and not error_output and not result.stdout:
-            return False
-        return True
+            return False, f'mysqld --version exited {result.returncode} with no output'
+        return True, ''
     except FileNotFoundError:
         # Binary doesn't exist
-        return False
+        return False, f'{base_dir}/bin/mysqld not found'
     except Exception as e:
         # Check if the exception message contains GLIBC errors
         error_str = str(e)
         if 'GLIBC' in error_str or 'GLIBCXX' in error_str:
-            return False
+            return False, error_str
         # Any other exception means we can't determine, assume it can't run
-        return False
+        return False, error_str
 
 
 @pytest.fixture(scope='module')
 def mysql_server(request, pro_fips_vars):
     # Check if mysqld can run before attempting to initialize
-    if not can_mysqld_run(pro_fips_vars['base_dir']):
-        pytest.skip("mysqld binary cannot run due to GLIBC incompatibility (requires newer system libraries)")
+    can_run, detail = can_mysqld_run(pro_fips_vars['base_dir'])
+    if not can_run:
+        pytest.skip(f"mysqld binary cannot run due to GLIBC incompatibility (requires newer system libraries): {detail}")
     
     features = []
     # For Oracle-9, enable FIPS if fips_supported is True
@@ -101,14 +106,14 @@ def mysql_server(request, pro_fips_vars):
             error_output = str(e)
         
         if 'GLIBC' in error_output or 'GLIBCXX' in error_output:
-            pytest.skip(f"mysqld binary cannot run due to GLIBC incompatibility (requires newer system libraries)")
+            pytest.skip(f"mysqld binary cannot run due to GLIBC incompatibility (requires newer system libraries): {error_output.strip()}")
         # Re-raise if it's a different error
         raise
     except Exception as e:
         # Catch any other exception and check if it's GLIBC-related
         error_str = str(e)
         if 'GLIBC' in error_str or 'GLIBCXX' in error_str:
-            pytest.skip(f"mysqld binary cannot run due to GLIBC incompatibility (requires newer system libraries)")
+            pytest.skip(f"mysqld binary cannot run due to GLIBC incompatibility (requires newer system libraries): {error_str}")
         # Re-raise if it's a different error
         raise
 
