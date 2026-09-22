@@ -92,6 +92,24 @@
       debug:
         var: sbom_disk_before.stdout_lines
 
+    # Before anything writes them. molecule's test_sequence destroys and
+    # recreates the instance, so a Jenkins run always starts clean -- but a local
+    # "molecule converge" re-run against a surviving target does not. Without
+    # this, a run that produced no artifacts would fetch the PREVIOUS run's zip
+    # and junit report under the current platform name: stale evidence, and
+    # stale junit is published to Jenkins as this run's passing tests. Deleting
+    # up front is what lets the fetches below simply test "does it exist now".
+    - name: remove SBOM artifacts left by any previous run
+      file:
+        path: "{{ item }}"
+        state: absent
+      become: true
+      loop:
+        - /var/tmp/pxb_sbom.zip
+        - /var/tmp/pxb_sbom_report.xml
+      failed_when: false
+      changed_when: false
+
     - name: install the external SBOM tools
       include_tasks: ../tasks/install_sbom_tools.yml
       when: sbom_external_tools not in ['0', 'false', 'no', 'off', '']
@@ -195,8 +213,14 @@
         # 24 platforms run in parallel into one WORKSPACE_VAR, so the same
         # namespacing as playbooks/cleanup.yml is required or they overwrite
         # each other and only one arbitrary survivor gets published.
+        # replace('/') as well as the space: PRETTY_NAME on Debian is
+        # "Debian GNU/Linux 12 (bookworm)", and a slash turns the fetch dest
+        # into a SUBDIRECTORY. The Jenkins job collects '*_sbom-junit.xml' and
+        # '*.zip' with non-recursive globs at the workspace root, so every
+        # Debian platform silently published nothing -- hidden by
+        # allowEmptyResults/allowEmptyArchive.
         sbom_artifact_prefix: >-
-          {{ ansible_hostname }}_{{ sbom_pretty_name_output.stdout | replace(' ', '-') | trim }}_{{ sbom_arch_output.stdout | trim }}
+          {{ ansible_hostname }}_{{ sbom_pretty_name_output.stdout | replace(' ', '-') | replace('/', '-') | trim }}_{{ sbom_arch_output.stdout | trim }}
 
     - name: locate the SBOM directories shipped by the package
       # Archived as-is rather than copied into one staging directory. Copying
@@ -269,13 +293,41 @@
           target in /var/tmp/. This is expected outside Jenkins.
       when: sbom_workspace | length == 0
 
+    # Deliberately a stat rather than "the archive task succeeded": that task
+    # carries failed_when: false, which forces failed=False, so a
+    # "sbom_archive is succeeded" test would always pass regardless of what
+    # happened. The junit report has no archive task to gate on at all. Since
+    # both files were removed at the start of this run, existing now means
+    # produced now.
+    - name: check which SBOM artifacts this run actually produced
+      stat:
+        path: "{{ item }}"
+      become: true
+      register: sbom_artifacts
+      loop:
+        - /var/tmp/pxb_sbom_report.xml
+        - /var/tmp/pxb_sbom.zip
+      failed_when: false
+
+    - name: report that an SBOM artifact was not produced
+      debug:
+        msg: >-
+          {{ item.item }} was not produced by this run, so it is not fetched.
+          Nothing stale is published under this platform name.
+      loop: "{{ sbom_artifacts.results | default([]) }}"
+      loop_control:
+        label: "{{ item.item }}"
+      when: not item.stat.exists
+
     - name: fetch the SBOM junit report to the controller
       fetch:
         src: /var/tmp/pxb_sbom_report.xml
         dest: "{{ sbom_workspace }}/{{ sbom_artifact_prefix }}_sbom-junit.xml"
         flat: yes
       become: true
-      when: sbom_workspace | length > 0
+      when:
+        - sbom_workspace | length > 0
+        - sbom_artifacts.results[0].stat.exists | default(false)
       ignore_errors: yes
 
     - name: fetch the SBOM files to the controller
@@ -284,5 +336,7 @@
         dest: "{{ sbom_workspace }}/{{ sbom_artifact_prefix }}_sbom.zip"
         flat: yes
       become: true
-      when: sbom_workspace | length > 0
+      when:
+        - sbom_workspace | length > 0
+        - sbom_artifacts.results[1].stat.exists | default(false)
       ignore_errors: yes
