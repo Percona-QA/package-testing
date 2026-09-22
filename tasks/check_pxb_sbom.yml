@@ -30,68 +30,6 @@
         # spent on a tool the checks will refuse to use.
         sbom_vuln_mode: "{{ lookup('env', 'SBOM_VULN_MODE') | default('warn', true) | trim }}"
 
-    # Diagnostic only -- never fails the run. rocky-8, rocky-8-arm and
-    # al-2023-arm fail the scan with "no space left on device" writing
-    # /root/.cache/trivy/db/trivy.db, and trivy needs roughly 1.6 GB (a 168 MB
-    # binary plus a ~1.4 GB vulnerability DB). This runs BEFORE the install so
-    # the numbers are the budget actually available, and prints enough to choose
-    # between reclaiming space and moving the cache to a roomier mount.
-    - name: report disk space before installing the SBOM tools
-      shell:
-        cmd: |
-          echo "=== running as: $(id -un) ==="
-          echo
-          echo "=== filesystems ==="
-          df -hTP 2>/dev/null || df -hP
-          echo
-          echo "=== block devices (spare/unmounted volumes) ==="
-          if command -v lsblk >/dev/null 2>&1; then
-            lsblk -o NAME,SIZE,FSTYPE,MOUNTPOINT 2>/dev/null
-          else
-            echo "lsblk not available"
-          fi
-          echo
-          echo "=== candidate cache locations, by free space ==="
-          # Each writable dir trivy could use, with the mount backing it -- two
-          # candidates on the same mount are not two options.
-          # /root first and unconditionally: it backs the trivy default
-          # ~/.cache/trivy under become, and it is the mount that actually ran
-          # out. /root/.cache may not exist yet, which would skip the one entry
-          # that matters.
-          for d in /root /root/.cache /var/cache /var/tmp /tmp /home /opt /mnt /data /srv; do
-            [ -d "$d" ] || continue
-            line=$(df -Pk "$d" 2>/dev/null | awk 'NR==2 {print $4" "$6}') || continue
-            [ -n "$line" ] || continue
-            set -- $line
-            avail_mb=$(( $1 / 1024 ))
-            verdict="too small"
-            [ "$avail_mb" -ge 1600 ] && verdict="ENOUGH for trivy"
-            printf '  %-12s %6s MB free on %-20s %s\n' "$d" "$avail_mb" "$2" "$verdict"
-          done
-          echo
-          echo "=== reclaimable caches ==="
-          for d in /var/cache/dnf /var/cache/yum /var/cache/apt /var/cache/PackageKit \
-                   /root/.cache /var/tmp /tmp /var/log; do
-            [ -d "$d" ] && du -sh "$d" 2>/dev/null
-          done
-          echo
-          echo "=== largest directories (top 15) ==="
-          du -xh --max-depth=2 / 2>/dev/null | sort -rh | head -15 \
-            || echo "du unavailable or unsupported flags"
-          echo
-          echo "=== trivy needs ~1.6 GB (168 MB binary + ~1.4 GB DB) ==="
-          echo "cache dir in effect: ${TRIVY_CACHE_DIR:-<unset, trivy default ~/.cache/trivy>}"
-          exit 0
-        executable: /bin/bash
-      become: true
-      register: sbom_disk_before
-      changed_when: false
-      failed_when: false
-
-    - name: show disk space before installing the SBOM tools
-      debug:
-        var: sbom_disk_before.stdout_lines
-
     # Before anything writes them. molecule's test_sequence destroys and
     # recreates the instance, so a Jenkins run always starts clean -- but a local
     # "molecule converge" re-run against a surviving target does not. Without
@@ -150,31 +88,6 @@
       debug:
         var: pxb_sbom_result.stdout_lines
       when: pxb_sbom_result is defined and pxb_sbom_result.rc is defined and pxb_sbom_result.rc != 0
-
-    # Paired with the "before" snapshot: the difference is what the tools
-    # actually cost, which is the number that decides whether reclaiming space
-    # is enough or the cache has to move. Runs in always: so a failed scan --
-    # the case we are diagnosing -- still reports.
-    - name: report disk space after the SBOM checks
-      shell:
-        cmd: |
-          echo "=== filesystems ==="
-          df -hTP 2>/dev/null || df -hP
-          echo
-          echo "=== what the tools occupy ==="
-          for d in /root/.cache/trivy /usr/local/bin/trivy /usr/local/bin/cyclonedx; do
-            [ -e "$d" ] && du -sh "$d" 2>/dev/null
-          done
-          exit 0
-        executable: /bin/bash
-      become: true
-      register: sbom_disk_after
-      changed_when: false
-      failed_when: false
-
-    - name: show disk space after the SBOM checks
-      debug:
-        var: sbom_disk_after.stdout_lines
 
     - name: get the arch value
       shell: uname -m
