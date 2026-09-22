@@ -19,13 +19,24 @@ def _is_ps8(version):
 
 
 def _is_ps81plus(version):
-    # matches bats regex ^8.[1-9]{1}$
-    return re.match(r"^8\.[1-9]$", version) is not None
+    # The original bats regex (^8.[1-9]{1}$) only matched PS 8.1-8.9, so it
+    # silently stopped applying once PS 9.x shipped. This is meant to mean
+    # "PS 8.1 or newer" (any later major version too), so compare
+    # numerically instead of re-encoding every future major version here.
+    try:
+        major, minor = (int(x) for x in version.split("."))
+    except ValueError:
+        return False
+    return (major, minor) >= (8, 1)
 
 
 def _admin(conn, ps_admin_bin, args):
     return sh('bash -c "{bin} {conn} {args}"'.format(
         bin=ps_admin_bin, conn=conn, args=args))
+
+
+def _assert_ok(result, action):
+    assert result.returncode == 0, "{} failed (rc={}): {}".format(action, result.returncode, result.output)
 
 
 def _restart_mysql():
@@ -36,11 +47,11 @@ def _restart_mysql():
 
 # ---- QRT ----
 def install_qrt(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--enable-qrt").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--enable-qrt"), "--enable-qrt")
 
 
 def uninstall_qrt(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--disable-qrt").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--disable-qrt"), "--disable-qrt")
 
 
 def check_qrt_exists(conn):
@@ -55,7 +66,7 @@ def check_qrt_notexists(conn):
 
 # ---- Audit log ----
 def install_audit(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--enable-audit").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--enable-audit"), "--enable-audit")
 
 
 def check_audit_exists(conn):
@@ -64,7 +75,7 @@ def check_audit_exists(conn):
 
 
 def uninstall_audit(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--disable-audit").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--disable-audit"), "--disable-audit")
 
 
 def check_audit_notexists(conn):
@@ -74,7 +85,7 @@ def check_audit_notexists(conn):
 
 # ---- PAM (kept for parity; tests currently commented out) ----
 def install_pam(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--enable-pam").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--enable-pam"), "--enable-pam")
 
 
 def check_pam_exists(conn):
@@ -83,7 +94,7 @@ def check_pam_exists(conn):
 
 
 def uninstall_pam(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--disable-pam").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--disable-pam"), "--disable-pam")
 
 
 def check_pam_notexists(conn):
@@ -92,7 +103,7 @@ def check_pam_notexists(conn):
 
 
 def install_pam_compat(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--enable-pam-compat").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--enable-pam-compat"), "--enable-pam-compat")
 
 
 def check_pam_compat_exists(conn):
@@ -101,7 +112,7 @@ def check_pam_compat_exists(conn):
 
 
 def uninstall_pam_compat(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--disable-pam-compat").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--disable-pam-compat"), "--disable-pam-compat")
 
 
 def check_pam_compat_notexists(conn):
@@ -111,7 +122,7 @@ def check_pam_compat_notexists(conn):
 
 # ---- MySQL X ----
 def install_mysqlx(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--enable-mysqlx").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--enable-mysqlx"), "--enable-mysqlx")
 
 
 def check_mysqlx_exists(conn, version):
@@ -120,7 +131,7 @@ def check_mysqlx_exists(conn, version):
 
 
 def uninstall_mysqlx(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--disable-mysqlx").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--disable-mysqlx"), "--disable-mysqlx")
 
 
 def check_mysqlx_notexists(conn, version):
@@ -131,9 +142,9 @@ def check_mysqlx_notexists(conn, version):
 
 # ---- TokuDB ----
 def install_tokudb(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--enable-tokudb").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--enable-tokudb"), "--enable-tokudb")
     _restart_mysql()
-    assert _admin(conn, ps_admin_bin, "--enable-tokudb").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--enable-tokudb"), "--enable-tokudb")
 
 
 def check_tokudb_exists(conn):
@@ -144,7 +155,7 @@ def check_tokudb_exists(conn):
 
 
 def uninstall_tokudb(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--disable-tokudb").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--disable-tokudb"), "--disable-tokudb")
 
 
 def check_tokudb_notexists(conn):
@@ -156,9 +167,9 @@ def check_tokudb_notexists(conn):
 
 # ---- TokuBackup ----
 def install_tokubackup(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--enable-tokubackup").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--enable-tokubackup"), "--enable-tokubackup")
     _restart_mysql()
-    assert _admin(conn, ps_admin_bin, "--enable-tokubackup").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--enable-tokubackup"), "--enable-tokubackup")
 
 
 def check_tokubackup_exists(conn):
@@ -167,7 +178,7 @@ def check_tokubackup_exists(conn):
 
 
 def uninstall_tokubackup(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--disable-tokubackup").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--disable-tokubackup"), "--disable-tokubackup")
 
 
 def check_tokubackup_notexists(conn):
@@ -177,7 +188,7 @@ def check_tokubackup_notexists(conn):
 
 # ---- RocksDB ----
 def install_rocksdb(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--enable-rocksdb").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--enable-rocksdb"), "--enable-rocksdb")
 
 
 def check_rocksdb_exists(conn, version):
@@ -188,7 +199,7 @@ def check_rocksdb_exists(conn, version):
 
 
 def uninstall_rocksdb(conn, ps_admin_bin):
-    assert _admin(conn, ps_admin_bin, "--disable-rocksdb").returncode == 0
+    _assert_ok(_admin(conn, ps_admin_bin, "--disable-rocksdb"), "--disable-rocksdb")
 
 
 def check_rocksdb_notexists(conn):
@@ -212,14 +223,14 @@ def install_all(conn, ps_admin_bin, version):
     # First restart works around MYR-204 / PS-3817.
     _restart_mysql()
     if _is_ps81plus(version):
-        assert _admin(conn, ps_admin_bin, opt).returncode == 0
+        _assert_ok(_admin(conn, ps_admin_bin, opt), opt)
     else:
-        assert _admin(conn, ps_admin_bin, "--enable-audit " + opt).returncode == 0
+        _assert_ok(_admin(conn, ps_admin_bin, "--enable-audit " + opt), "--enable-audit " + opt)
     _restart_mysql()
     if _is_ps81plus(version):
-        assert _admin(conn, ps_admin_bin, opt).returncode == 0
+        _assert_ok(_admin(conn, ps_admin_bin, opt), opt)
     else:
-        assert _admin(conn, ps_admin_bin, "--enable-audit " + opt).returncode == 0
+        _assert_ok(_admin(conn, ps_admin_bin, "--enable-audit " + opt), "--enable-audit " + opt)
 
 
 def _all_disable_opt(version):
@@ -233,11 +244,11 @@ def _all_disable_opt(version):
 def uninstall_all(conn, ps_admin_bin, version):
     opt = _all_disable_opt(version)
     if _is_ps81plus(version):
-        assert _admin(conn, ps_admin_bin, opt).returncode == 0
+        _assert_ok(_admin(conn, ps_admin_bin, opt), opt)
     else:
-        assert _admin(conn, ps_admin_bin, "--disable-audit " + opt).returncode == 0
+        _assert_ok(_admin(conn, ps_admin_bin, "--disable-audit " + opt), "--disable-audit " + opt)
     _restart_mysql()
     if _is_ps81plus(version):
-        assert _admin(conn, ps_admin_bin, opt).returncode == 0
+        _assert_ok(_admin(conn, ps_admin_bin, opt), opt)
     else:
-        assert _admin(conn, ps_admin_bin, "--disable-audit " + opt).returncode == 0
+        _assert_ok(_admin(conn, ps_admin_bin, "--disable-audit " + opt), "--disable-audit " + opt)

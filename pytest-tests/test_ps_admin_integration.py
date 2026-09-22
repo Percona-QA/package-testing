@@ -18,7 +18,13 @@ def _is_ps8(version):
 
 
 def _is_ps81plus(version):
-    return re.match(r"^8\.[1-9]$", version) is not None
+    # ^8.[1-9]$ only matched PS 8.1-8.9 and silently stopped applying once
+    # PS 9.x shipped; this means "PS 8.1 or newer", so compare numerically.
+    try:
+        major, minor = (int(x) for x in version.split("."))
+    except ValueError:
+        return False
+    return (major, minor) >= (8, 1)
 
 
 def test_uninstall_plugins_for_cleanup_before_testing(connection, ps_admin_bin, mysql_version):
