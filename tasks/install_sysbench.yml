@@ -1,22 +1,48 @@
-# This task installs sysbench on CentOS and Debian/Ubuntu
+# This task installs sysbench (and sysbench-tpcc where published) on RHEL/CentOS
+# and Debian/Ubuntu. Newer distros do not yet carry every package in the enabled
+# repos - e.g. RHEL 10 has neither sysbench nor sysbench-tpcc, and Debian 13
+# (trixie) / Ubuntu noble / resolute lack sysbench-tpcc. So each package is
+# installed only when a candidate actually exists; its absence never fails the run.
 
-  - name: install sysbench new deb packages
+# ---- Debian / Ubuntu ----
+  - name: check which sysbench deb packages are available
+    shell: |
+      for p in sysbench sysbench-tpcc; do
+        c=$(apt-cache policy "$p" 2>/dev/null | awk '/Candidate:/{print $2}')
+        if [ -n "$c" ] && [ "$c" != "(none)" ]; then echo "$p"; fi
+      done
+      exit 0
+    register: sysbench_deb_avail
+    changed_when: false
+    when: ansible_os_family == "Debian" and (ansible_distribution_release not in ["bullseye", "jammy", "bookworm"])
+
+  - name: install available sysbench deb packages
     apt:
-      name: "{{ packages }}"
+      name: "{{ sysbench_deb_avail.stdout_lines }}"
       update_cache: no
       state: latest
-    vars:
-      packages:
-      - sysbench
-      - sysbench-tpcc
-    when: ansible_os_family == "Debian" and (ansible_distribution_release != "bullseye" and ansible_distribution_release != "jammy" and ansible_distribution_release != "bookworm")
+    when:
+      - ansible_os_family == "Debian"
+      - ansible_distribution_release not in ["bullseye", "jammy", "bookworm"]
+      - (sysbench_deb_avail.stdout_lines | default([])) | length > 0
 
-  - name: install sysbench new rpm packages
+# ---- RHEL / CentOS ----
+  - name: check which sysbench rpm packages are available
+    shell: |
+      for p in sysbench sysbench-tpcc; do
+        {{ ansible_pkg_mgr }} list --available "$p" >/dev/null 2>&1 && echo "$p"
+      done
+      exit 0
+    register: sysbench_rpm_avail
+    changed_when: false
+    when: ansible_os_family == "RedHat" and (ansible_distribution_major_version not in ["8", "9"]) and (ansible_distribution != "Amazon")
+
+  - name: install available sysbench rpm packages
     package:
-      name: "{{ packages }}"
+      name: "{{ sysbench_rpm_avail.stdout_lines }}"
       state: latest
-    vars:
-      packages:
-      - sysbench
-      - sysbench-tpcc
-    when: ansible_os_family == "RedHat" and (ansible_distribution_major_version != "9" and ansible_distribution_major_version != "8") and (ansible_distribution != "Amazon" )
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_distribution_major_version not in ["8", "9"]
+      - ansible_distribution != "Amazon"
+      - (sysbench_rpm_avail.stdout_lines | default([])) | length > 0
