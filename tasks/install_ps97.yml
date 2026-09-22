@@ -83,7 +83,7 @@
       - percona-server-rocksdb-debuginfo{{ pro_suf | default('') }}
       shared_compat_pkg: "{{ (ansible_architecture not in ['aarch64', 'arm64']) | ternary(['percona-server-shared-compat' ~ (pro_suf | default(''))], []) }}"
       percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
-      packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
+      packages: "{{ packages_base + shared_compat_pkg + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
     when: ansible_os_family == "RedHat"
     environment:
       PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
