@@ -14,13 +14,28 @@
 # Failures here are still non-fatal for the play, but they are always REPORTED:
 # the checks fail when SBOM_EXTERNAL_TOOLS is on, so "why" has to be in the log.
 #
-# Arch matters: the x86_64 asset on an aarch64 target gives an "Exec format
-# error" that surfaces far from its cause.
+# Arch matters: the x86_64 asset on an ARM target gives an "Exec format error"
+# that surfaces far from its cause. Both ARM spellings are accepted because the
+# rest of tasks/ pairs them (see tasks/install_ps97.yml), even though linux
+# reports aarch64 from uname -m and arm64 is the Darwin/BSD spelling.
+
+- name: set the architecture names this file knows about
+  set_fact:
+    sbom_arm_arches: ['aarch64', 'arm64']
+    sbom_x86_arches: ['x86_64', 'amd64']
 
 - name: set SBOM tool asset names for this architecture
   set_fact:
-    sbom_trivy_arch: "{{ 'ARM64' if ansible_architecture == 'aarch64' else '64bit' }}"
-    sbom_cdx_asset: "{{ 'cyclonedx-linux-arm64' if ansible_architecture == 'aarch64' else 'cyclonedx-linux-x64' }}"
+    sbom_trivy_arch: "{{ 'ARM64' if ansible_architecture in sbom_arm_arches else '64bit' }}"
+    sbom_cdx_asset: "{{ 'cyclonedx-linux-arm64' if ansible_architecture in sbom_arm_arches else 'cyclonedx-linux-x64' }}"
+    # Whether the architecture was actually recognised, rather than having
+    # silently fallen through to the x86 asset. Any unknown value -- not just an
+    # ARM spelling -- used to pick the x86 binary quietly, which is precisely the
+    # "Exec format error far from its cause" the comment above warns about.
+    # Reported in "show SBOM tool availability" instead of raised: this file is
+    # included from tasks/check_pxb_sbom.yml, where a fail would abort the whole
+    # converge, and a wrong binary is already caught by the --version check below.
+    sbom_arch_known: "{{ ansible_architecture in (sbom_arm_arches + sbom_x86_arches) }}"
     # Pinned to match jenkins-pipelines/vars/installTrivy.groovy, the sanctioned
     # helper, so the molecule and docker jobs scan with the same version.
     sbom_trivy_version: "0.74.0"
@@ -164,6 +179,16 @@
 - name: show SBOM tool availability
   debug:
     var: sbom_tools_present.stdout_lines
+
+- name: report an architecture this file does not recognise
+  debug:
+    msg: >-
+      ansible_architecture is {{ ansible_architecture }}, which is neither
+      {{ sbom_x86_arches | join('/') }} nor {{ sbom_arm_arches | join('/') }}.
+      The x86 assets were downloaded as a fallback, so trivy and cyclonedx-cli
+      are very likely the wrong binary format for this host -- expect the
+      --version results above to say so.
+  when: not (sbom_arch_known | bool)
 
 # ignore_errors (not failed_when: false) is what makes these conditions work:
 # failed_when: false sets failed=False on the result, so a "did it fail?" test
