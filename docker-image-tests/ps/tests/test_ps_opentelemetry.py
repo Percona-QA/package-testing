@@ -42,7 +42,7 @@ class TestOpenTelemetry:
             'telemetry.metrics_enabled': '0',
             'telemetry.log_enabled': '0',
             'telemetry.query_text_enabled': '1',
-            'telemetry.otel_log_level': 'ERROR',
+            'telemetry.otel_log_level': 'info',
         }
         for variable, value in expected.items():
             cmd = run_sql(host, 'SELECT @@global.'+variable+';')
