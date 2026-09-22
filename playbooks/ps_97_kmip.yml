@@ -10,6 +10,7 @@
     gnupg_home: /root/.gnupg
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+    kmip_venv: /opt/kmip-venv
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
@@ -50,67 +51,121 @@
   - name: remove mysql data directory
     command: rm -r /var/lib/mysql
 
-  - name: install python3-pip on RedHat
-    dnf:
+  # tar/gzip are needed by the unarchive step below to extract the portable
+  # CPython tarball; minimal RHEL/OL container images ship without tar, so
+  # unarchive falls back to unzip and fails. Install them explicitly.
+  - name: install python3-pip, tar and gzip on RedHat/CentOS
+    yum:
       name:
       - python3-pip
+      - tar
+      - gzip
       state: latest
       update_cache: yes
-    when:
-      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
+    when: ansible_os_family == "RedHat"
 
-  - name: install python3-pip on Debian/Ubuntu
+  # python3-venv is required to create the isolated virtualenv below.
+  - name: install python3-pip and python3-venv on Debian/Ubuntu
     apt:
       name:
-      - python3-pip
-      state: latest
+        - python3-pip
+        - python3-venv
+        - tar
+        - gzip
+      state: present
       update_cache: yes
     when: ansible_os_family == "Debian"
 
-  - name: install pykmip
-    command: "{{ item }}"
-    with_items:
-        - python3 -m pip install --upgrade importlib-metadata
-        - python3 -m pip install -U pip --ignore-installed
-        - python3 -m pip install --upgrade --ignore-installed setuptools
-        - python3 -m pip install --ignore-installed urllib3==1.26.6
-        - python3 -m pip install -U pykmip
-    when:
-      - ansible_distribution_release not in ['bookworm', 'noble', 'trixie', 'resolute']
+  # PyKMIP needs a Python in the 3.7 - 3.11 range: modern pykmip/cryptography
+  # require Python >= 3.7 (and no cryptography wheels ship for the old versions
+  # that still support 3.6, especially on aarch64), while ssl.wrap_socket() -
+  # which pykmip relies on - was removed in Python 3.12. Distros outside that
+  # range ship no suitable interpreter in their repos: RHEL 8 has only python 3.6,
+  # and RHEL 10 / Ubuntu 24.04+ / Debian 13 have only python >= 3.12. On those we
+  # build the venv with a self-contained, portable CPython 3.11 from
+  # python-build-standalone (the same prebuilt CPython uv uses) - a static tarball
+  # that runs on any glibc Linux and both amd64/arm64, with no OS dependency and
+  # no patching of pykmip. Distros whose system python is already 3.7 - 3.11 keep
+  # using the system python3. (Matches pxb_97_kmip.yml, where this already works -
+  # it also sidesteps the PYTHONUSERBASE-at-install-time-only bug that broke the
+  # previous `pip install --user` approach here: the venv's own interpreter always
+  # sees its own site-packages, with no separate runtime env var needed.)
+  - name: detect system python3 minor version
+    command: python3 -c "import sys; print(sys.version_info[1])"
+    register: sys_py_minor
+    changed_when: false
 
-  - name: Ensure ~/.local/bin is in PATH for current user
-    lineinfile:
-      path: /home/{{ ansible_user }}/.bashrc
-      line: 'export PATH=$HOME/.local/bin:$PATH'
-      insertafter: EOF
-    when:
-      - ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
+  - name: default the pykmip venv interpreter to the system python3
+    set_fact:
+      kmip_py_interp: python3
 
-  - name: install pykmip on bookworm/noble using user site
+  - name: provision a portable CPython 3.11 when system python is < 3.7 or >= 3.12
+    when: (sys_py_minor.stdout | int) < 7 or (sys_py_minor.stdout | int) >= 12
+    block:
+      - name: download portable CPython 3.11 (python-build-standalone)
+        get_url:
+          url: "https://github.com/astral-sh/python-build-standalone/releases/download/{{ pbs_tag }}/cpython-{{ pbs_ver }}+{{ pbs_tag }}-{{ (ansible_architecture == 'aarch64') | ternary('aarch64', 'x86_64') }}-unknown-linux-gnu-install_only.tar.gz"
+          dest: /tmp/cpython-3.11-standalone.tar.gz
+          mode: '0644'
+        vars:
+          pbs_tag: "20260807"
+          pbs_ver: "3.11.15"
+        register: pbs_dl
+        retries: 3
+        delay: 5
+        until: pbs_dl is succeeded
+
+      - name: extract portable CPython 3.11 into /opt
+        unarchive:
+          src: /tmp/cpython-3.11-standalone.tar.gz
+          dest: /opt
+          remote_src: yes
+          creates: /opt/python/bin/python3.11
+
+      - name: use the portable CPython 3.11 for the pykmip venv
+        set_fact:
+          kmip_py_interp: /opt/python/bin/python3.11
+
+  - name: show the python interpreter chosen for the pykmip venv
+    debug:
+      msg: "system python3 minor=3.{{ sys_py_minor.stdout }} -> venv interpreter: {{ kmip_py_interp }}"
+
+  - name: bootstrap pip/setuptools/wheel in the virtualenv
     pip:
       name:
+        - pip
         - setuptools
+        - wheel
+      state: latest
+      virtualenv: "{{ kmip_venv }}"
+      virtualenv_command: "{{ kmip_py_interp }} -m venv"
+    register: pip_bootstrap
+    retries: 5
+    delay: 10
+    until: pip_bootstrap is succeeded
+
+  - name: install pykmip dependencies into the virtualenv
+    pip:
+      name:
+        - importlib-metadata
         - pykmip
-      extra_args: "--user --break-system-packages"
-      executable: pip3
-    environment:
-      PYTHONUSERBASE: "/home/{{ ansible_user }}/.local"
-    when:
-      - ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
+      state: latest
+      virtualenv: "{{ kmip_venv }}"
+      virtualenv_command: "{{ kmip_py_interp }} -m venv"
+    register: pip_pykmip
+    retries: 5
+    delay: 10
+    until: pip_pykmip is succeeded
 
-  - name: downgrade SQLAlchemy as new version doesn't work with pykmip
-    command: pip3 install SQLAlchemy==1.4.46
-    when:
-      - ansible_distribution_release not in ['bookworm', 'noble', 'trixie', 'resolute']
-
-  - name: downgrade SQLAlchemy as new version doesn't work with pykmip
-    command: pip3 install --break-system-packages SQLAlchemy==1.4.46
-    when: ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']
-
-
-  - name: set the pykmip server binary path
-    set_fact:
-      pykmip_bin: "{{ (ansible_distribution_release in ['bookworm', 'noble', 'trixie', 'resolute']) | ternary('/home/' + ansible_user + '/.local/bin/pykmip-server', '/usr/local/bin/pykmip-server') }}"
+  # pykmip requires SQLAlchemy < 2.0; pin to a known-good version in the venv.
+  - name: pin SQLAlchemy in the virtualenv
+    pip:
+      name: SQLAlchemy==1.4.46
+      virtualenv: "{{ kmip_venv }}"
+    register: pip_sqlalchemy
+    retries: 5
+    delay: 10
+    until: pip_sqlalchemy is succeeded
 
   # Start pykmip under a transient systemd unit instead of `nohup ... &`. A
   # backgrounded shell process is a child of the Ansible SSH session, and on
@@ -134,7 +189,7 @@
       systemd-run --unit=pykmip-server --collect
       --property=StandardOutput=file:/pykmip_server.out
       --property=StandardError=file:/pykmip_server.out
-      {{ pykmip_bin }}
+      {{ kmip_venv }}/bin/pykmip-server
       -f /package-testing/kmip/server.conf -l /pykmip_server.log
 
   - name: wait a few seconds for pykmip server to come up
