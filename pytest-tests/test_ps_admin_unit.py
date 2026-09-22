@@ -4,15 +4,9 @@
 These tests can be run standalone (without a running server). Tests are kept in
 the original order.
 """
-import re
-
 import pytest
 
 from common import sh, is_root
-
-
-def _is_ps8(version):
-    return re.match(r"^8\.[0-9]$", version) is not None
 
 
 def test_run_ps_admin_without_any_arguments(ps_admin_bin):
@@ -20,12 +14,12 @@ def test_run_ps_admin_without_any_arguments(ps_admin_bin):
     assert res.lines[0] == "ERROR: You should specify one of the --enable or --disable options."
 
 
-def test_display_ps_admin_help_screen(ps_admin_bin, mysql_version):
+def test_display_ps_admin_help_screen(ps_admin_bin):
+    # The banner above "Valid options are:" varies in length across PS
+    # versions (e.g. PS 9.7 dropped a line compared to 8.1-8.4), so look
+    # for the heading rather than hardcoding its line number.
     res = sh("{} --help".format(ps_admin_bin))
-    if _is_ps8(mysql_version):
-        assert res.lines[1] == "Valid options are:"
-    else:
-        assert res.lines[3] == "Valid options are:"
+    assert "Valid options are:" in res.lines
 
 
 def test_run_ps_admin_with_wrong_option(ps_admin_bin):
