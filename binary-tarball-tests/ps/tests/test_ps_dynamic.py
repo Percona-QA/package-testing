@@ -288,14 +288,18 @@ def test_opentelemetry_client_plugin(host, mysql_server, pro_fips_vars):
     if pro_fips_vars['ps_version_major'] != '9.7':
         pytest.skip('telemetry_client (OpenTelemetry client plugin) is available from PS 9.7 onwards')
 
-    plugin_dir = mysql_server.run_query('SELECT @@global.plugin_dir;').strip()
+    # @@global.plugin_dir reports the build-time install prefix baked into
+    # this generic tarball, not where the tarball was actually extracted,
+    # so point --plugin_dir at the real location instead (same workaround
+    # the docs recommend when the plugin isn't found in the default dir).
+    plugin_dir = pro_fips_vars['base_dir']+'/lib/plugin'
     assert host.file(plugin_dir+'/telemetry_client.so').exists
 
     # --otel-help is registered by the telemetry_client plugin itself, so it
     # only succeeds and prints the plugin variables banner when the plugin
     # is loaded via --telemetry_client.
     loaded_marker = '=== TELEMETRY_CLIENT PLUGIN VARIABLES ==='
-    mysql_cmd = mysql_server.mysql+' --user=root -S'+mysql_server.socket
+    mysql_cmd = mysql_server.mysql+' --user=root -S'+mysql_server.socket+' --plugin_dir='+plugin_dir
 
     enabled = host.run(mysql_cmd+' --telemetry_client --otel-help')
     assert enabled.succeeded
