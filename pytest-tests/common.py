@@ -111,5 +111,36 @@ def which(cmd):
     return sh("which {} 2>/dev/null".format(cmd)).output.strip() != ""
 
 
+def detect_os_release():
+    """Parse ``/etc/os-release`` into a dict (``ID``, ``VERSION_ID``, ...)."""
+    result = {}
+    try:
+        with open("/etc/os-release") as f:
+            for line in f:
+                line = line.strip()
+                if not line or "=" not in line:
+                    continue
+                key, _, value = line.partition("=")
+                result[key] = value.strip('"')
+    except OSError:
+        pass
+    return result
+
+
+def is_rhel10():
+    """True on RHEL/CentOS/Rocky/Alma/OL 10.
+
+    On el10, dlopen'ing some components (e.g. component_keyring_vault,
+    component_telemetry) fails with "cannot allocate memory in static TLS
+    block" - the glibc static TLS surplus is too small for these components
+    on this release (see plugins_test_84.sh's component_keyring_vault skip).
+    """
+    os_release = detect_os_release()
+    return (
+        os_release.get("ID") in ("rhel", "centos", "almalinux", "rocky", "ol")
+        and os_release.get("VERSION_ID", "").startswith("10")
+    )
+
+
 def is_root():
     return os.geteuid() == 0

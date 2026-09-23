@@ -14,6 +14,12 @@ from common import sh, sql, sql_result
 
 LOADED_MARKER = "=== TELEMETRY_CLIENT PLUGIN VARIABLES ==="
 
+_STATIC_TLS_SKIP_REASON = (
+    "component_telemetry dlopen fails with 'cannot allocate memory in "
+    "static TLS block' (glibc static TLS surplus too small for this "
+    "component on el10, same as component_keyring_vault in plugins_test_84.sh)"
+)
+
 
 def _supports_opentelemetry(version):
     return re.match(r"^9\.[7-9]$", version) is not None
@@ -29,14 +35,18 @@ def _skip_if_unsupported(mysql_version):
         pytest.skip("OpenTelemetry is available from PS 9.7 onwards")
 
 
-def test_install_component(connection):
+def test_install_component(connection, is_rhel10):
+    if is_rhel10:
+        pytest.skip(_STATIC_TLS_SKIP_REASON)
     install = sql_result(connection, "INSTALL COMPONENT 'file://component_telemetry';")
     assert install.returncode == 0, install.output
     result = sql(connection, "SELECT component_urn FROM mysql.component WHERE component_urn = 'file://component_telemetry';")
     assert "file://component_telemetry" in result
 
 
-def test_default_variables(connection):
+def test_default_variables(connection, is_rhel10):
+    if is_rhel10:
+        pytest.skip(_STATIC_TLS_SKIP_REASON)
     # SELECT @@global.<var> returns MySQL's raw 0/1 for boolean sysvars,
     # not the ON/OFF text shown by SHOW VARIABLES/SHOW STATUS.
     expected = {
@@ -50,13 +60,17 @@ def test_default_variables(connection):
         assert sql(connection, "SELECT @@global.{};".format(variable)) == value
 
 
-def test_status_variables(connection):
+def test_status_variables(connection, is_rhel10):
+    if is_rhel10:
+        pytest.skip(_STATIC_TLS_SKIP_REASON)
     for status_var in ("Telemetry_logs_supported", "Telemetry_metrics_supported", "Telemetry_traces_supported"):
         assert "ON" in sql(connection, "SHOW GLOBAL STATUS LIKE '{}';".format(status_var))
     assert "READY" in sql(connection, "SHOW GLOBAL STATUS LIKE 'telemetry.run_level';")
 
 
-def test_enable_dynamic_variables(connection):
+def test_enable_dynamic_variables(connection, is_rhel10):
+    if is_rhel10:
+        pytest.skip(_STATIC_TLS_SKIP_REASON)
     for variable in ("telemetry.trace_enabled", "telemetry.log_enabled"):
         sql(connection, "SET GLOBAL {}=ON;".format(variable))
         assert sql(connection, "SELECT @@global.{};".format(variable)) == "1"
@@ -68,7 +82,9 @@ def test_metrics_enabled_is_startup_only(connection):
     assert result.returncode != 0
 
 
-def test_uninstall_component(connection):
+def test_uninstall_component(connection, is_rhel10):
+    if is_rhel10:
+        pytest.skip(_STATIC_TLS_SKIP_REASON)
     sql(connection, "UNINSTALL COMPONENT 'file://component_telemetry';")
     result = sql(connection, "SELECT component_urn FROM mysql.component WHERE component_urn = 'file://component_telemetry';")
     assert "file://component_telemetry" not in result
