@@ -10,7 +10,7 @@ import re
 
 import pytest
 
-from common import sh, sql
+from common import sh, sql, sql_result
 
 LOADED_MARKER = "=== TELEMETRY_CLIENT PLUGIN VARIABLES ==="
 
@@ -30,7 +30,8 @@ def _skip_if_unsupported(mysql_version):
 
 
 def test_install_component(connection):
-    sql(connection, "INSTALL COMPONENT 'file://component_telemetry';")
+    install = sql_result(connection, "INSTALL COMPONENT 'file://component_telemetry';")
+    assert install.returncode == 0, install.output
     result = sql(connection, "SELECT component_urn FROM mysql.component WHERE component_urn = 'file://component_telemetry';")
     assert "file://component_telemetry" in result
 

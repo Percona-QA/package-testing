@@ -136,9 +136,6 @@
   - name: include tasks for enabling PS 97 testing repo
     include_tasks: ../tasks/enable_ps97_testing_repo.yml
 
-  - name: include tasks for enabling PS 97 pro testing repo
-    include_tasks: ../tasks/enable_ps97_pro_tools_repo.yml
-
   - set_fact:
       pro: "{{ 'pro' if ('yes' in lookup('env', 'pro_test') and lookup('env', 'cur_action_to_test') != 'downgrade') else '' }}"
       pro_suf: "{{ '-pro' if ('yes' in lookup('env', 'pro_test') and lookup('env', 'cur_action_to_test') != 'downgrade') else '' }}"

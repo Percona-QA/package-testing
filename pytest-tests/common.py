@@ -57,10 +57,15 @@ def sh(cmd, **kwargs):
     return Result(completed)
 
 
+def sql_result(connection, query):
+    """Run a mysql query with the standard ``-N -s`` flags and return the full Result."""
+    return sh('mysql {conn} -N -s -e {q}'.format(
+        conn=connection, q=_shell_quote(query)))
+
+
 def sql(connection, query):
     """Run a mysql query with the standard ``-N -s`` flags and return trimmed stdout."""
-    return sh('mysql {conn} -N -s -e {q}'.format(
-        conn=connection, q=_shell_quote(query))).output.strip()
+    return sql_result(connection, query).output.strip()
 
 
 def _shell_quote(value):
