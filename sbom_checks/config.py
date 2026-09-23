@@ -69,8 +69,15 @@ def _flag(name, default=False):
 
 
 def license_strict():
-    """Require identical license operand sets across formats, not just overlap."""
-    return _flag(ENV_LICENSE_STRICT)
+    """Require identical license operand sets across formats, not just overlap.
+
+    On by default: all four files are produced by one generator in one run, so a
+    component that declares Zlib in the CycloneDX document and Zlib OR Apache-2.0
+    in the SPDX one is a generator bug, not a legitimate difference. Overlap-only
+    comparison would pass that silently. Set SBOM_LICENSE_STRICT=0 to fall back
+    to overlap if a real SBOM turns out to need it.
+    """
+    return _flag(ENV_LICENSE_STRICT, default=True)
 
 
 def external_tools_on_target():

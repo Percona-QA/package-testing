@@ -942,3 +942,63 @@ def test_unusable_predicate_matches_require_tool_semantics():
     assert not external_tools.unusable(external_tools.OK)
     assert not external_tools.unusable(external_tools.FOUND)
     assert not external_tools.unusable(external_tools.OFF)
+
+
+# --- strict licence comparison is the default -----------------------------
+
+def _widen_spdx_licence(path, component="zlib", value="Zlib OR Apache-2.0"):
+    """Make one SPDX licence a superset of the CycloneDX one: the two still
+    overlap, so only strict comparison notices."""
+    _rewrite_json(path, lambda d: [p.update(licenseConcluded=value,
+                                            licenseDeclared=value)
+                                   for p in d["packages"]
+                                   if p["name"] == component])
+
+
+def test_license_strict_is_on_by_default(monkeypatch):
+    """All four files come from one generator in one run, so a licence that
+    differs between them is a generator bug rather than a legitimate variation.
+    Overlap-only comparison passed that silently."""
+    monkeypatch.delenv(config.ENV_LICENSE_STRICT, raising=False)
+    assert config.license_strict() is True
+
+
+@pytest.mark.parametrize("value,expected", [
+    ("0", False), ("false", False), ("off", False), ("no", False),
+    ("1", True), ("true", True), ("on", True),
+    ("", True),          # unset-but-present, as ansible passes it
+])
+def test_license_strict_is_overridable(monkeypatch, value, expected):
+    monkeypatch.setenv(config.ENV_LICENSE_STRICT, value)
+    assert config.license_strict() is expected
+
+
+def test_a_widened_licence_fails_by_default(workdir, monkeypatch):
+    monkeypatch.delenv(config.ENV_LICENSE_STRICT, raising=False)
+    _widen_spdx_licence(os.path.join(workdir, STEM + ".spdx.json"))
+    report = _audit(workdir, strict_licenses=None)
+    assert not report.ok, "a licence that differs between formats must be caught"
+    assert "licence disagrees" in _messages(report)
+
+
+def test_a_widened_licence_passes_when_strictness_is_turned_off(workdir, monkeypatch):
+    monkeypatch.setenv(config.ENV_LICENSE_STRICT, "0")
+    _widen_spdx_licence(os.path.join(workdir, STEM + ".spdx.json"))
+    report = _audit(workdir, strict_licenses=None)
+    assert report.ok, _messages(report)
+
+
+def test_clean_fixtures_still_pass_under_the_strict_default(workdir, monkeypatch):
+    """The prototype SBOMs must not be broken by turning strictness on."""
+    monkeypatch.delenv(config.ENV_LICENSE_STRICT, raising=False)
+    report = _audit(workdir, strict_licenses=None)
+    assert report.ok, _messages(report)
+
+
+def test_cli_no_strict_licenses_flag_overrides_the_default(workdir, monkeypatch):
+    monkeypatch.delenv(config.ENV_LICENSE_STRICT, raising=False)
+    _widen_spdx_licence(os.path.join(workdir, STEM + ".spdx.json"))
+    base = ["--mode", "dir", "--path", workdir, "--no-tools"]
+    assert check_sbom.main(base) == 1
+    assert check_sbom.main(base + ["--no-strict-licenses"]) == 0
+    assert check_sbom.main(base + ["--strict-licenses"]) == 1

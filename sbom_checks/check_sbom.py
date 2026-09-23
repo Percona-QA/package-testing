@@ -88,8 +88,18 @@ def build_parser():
                              "(default: $PXB_VERSION)")
     parser.add_argument("--no-tools", action="store_true",
                         help="skip trivy and cyclonedx-cli even when installed")
-    parser.add_argument("--strict-licenses", action="store_true",
-                        help="require identical licence operand sets across formats")
+    # Tri-state, defaulting to None so the gate decides: strict licence
+    # comparison is on by default, and this pair exists to force either way
+    # without setting an environment variable. A plain store_true would be a
+    # no-op now that the default is on.
+    parser.add_argument("--strict-licenses", dest="strict_licenses",
+                        action="store_true", default=None,
+                        help="require identical licence operand sets across "
+                             "formats (the default)")
+    parser.add_argument("--no-strict-licenses", dest="strict_licenses",
+                        action="store_false",
+                        help="compare licences by overlap instead of requiring "
+                             "identical sets across formats")
     return parser
 
 
@@ -147,7 +157,7 @@ def run(args):
             report = audit.audit(
                 backend, sbom_set,
                 expect_name=expect_name, expect_version=expect_version,
-                strict_licenses=args.strict_licenses or None,
+                strict_licenses=args.strict_licenses,
                 run_tools=not args.no_tools,
             )
             print("")

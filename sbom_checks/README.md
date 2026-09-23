@@ -47,7 +47,7 @@ Other environment variables:
 | `SBOM_DIR` | check this directory instead of discovering. Escape hatch for verifying a pre-release package. |
 | `PXB_VERSION` | the version the SBOM must describe. The only way to check this for a downloaded directory, which has no installed package to compare against. |
 | `SBOM_EXTERNAL_TOOLS` | run trivy/cyclonedx-cli, and **require** them: when on, a tool that is missing or cannot complete **fails** the check rather than skipping. On by default in both CI jobs, which install the tools; set to `0` to skip the tool-backed checks entirely |
-| `SBOM_LICENSE_STRICT` | require identical licence operand sets across formats, not just overlap |
+| `SBOM_LICENSE_STRICT` | require identical licence operand sets across formats, not just overlap. **On by default** -- all four files come from one generator in one run, so a component whose licence differs between them is a generator bug. Set to `0` to compare by overlap instead |
 | `DOCKER_BIN`, `TRIVY_BIN`, `CYCLONEDX_BIN` | binary overrides |
 
 ## Running it from your local host
@@ -145,7 +145,7 @@ the rpm inside it (a tag like `8.0.35-33` against an rpm version of `8.0.35`).
 | fail instead of skip when no SBOM is found | `SBOM_CHECK_MODE=enforce` |
 | also run trivy / cyclonedx-cli | `SBOM_EXTERNAL_TOOLS=1` — note this also makes a missing tool a failure |
 | fail on HIGH/CRITICAL CVEs | `SBOM_VULN_MODE=enforce` |
-| require identical licences across formats | `SBOM_LICENSE_STRICT=1` |
+| compare licences by overlap instead of requiring identical sets | `SBOM_LICENSE_STRICT=0`, or `--no-strict-licenses` |
 | use podman, or a docker CLI not named `docker` | `DOCKER_BIN=podman` |
 | a junit report | `--junitxml=report.xml` |
 

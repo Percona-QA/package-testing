@@ -61,6 +61,10 @@
         SBOM_CHECK_MODE: "{{ lookup('env', 'SBOM_CHECK_MODE') | default('warn', true) }}"
         SBOM_VULN_MODE: "{{ lookup('env', 'SBOM_VULN_MODE') | default('warn', true) }}"
         SBOM_EXTERNAL_TOOLS: "{{ sbom_external_tools }}"
+        # Passed through empty when the job does not set it, so the default
+        # lives in one place -- config.license_strict(), which is on. An empty
+        # value means "use the default"; '0'/'false'/'off'/'no' turn it off.
+        SBOM_LICENSE_STRICT: "{{ lookup('env', 'SBOM_LICENSE_STRICT') | default('', true) }}"
         SBOM_DIR: "{{ lookup('env', 'SBOM_DIR') | default('', true) }}"
         # Absolute paths, because this play runs under sudo and RHEL-family
         # secure_path excludes /usr/local/bin where the tools are installed.
