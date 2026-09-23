@@ -21,9 +21,9 @@ def assert_node_status(host, hostnames):
         "jq -r '.defaultReplicaSet.topology[" + ', '.join(topology_keys) + "].status // empty'"
     ) == "ONLINE"
 
-#def test_mysqlsh_version(host):
-#    cmd = host.run("mysqlsh --version")
-#    assert os.environ['UPSTREAM_VERSION']+"-"+os.environ['PS_VERSION'] in cmd.stdout
+def test_mysqlsh_version(host):
+    cmd = host.run("mysqlsh --version")
+    assert os.environ['UPSTREAM_VERSION']+"-"+os.environ['PS_VERSION'] in cmd.stdout
 
 def test_mysqlrouter_version(host):
     cmd = host.run("mysqlrouter --version")
@@ -53,7 +53,7 @@ def test_packages(host):
     assert host.package("percona-mysql-router").is_installed
     assert os.environ['UPSTREAM_VERSION'] in host.package("percona-mysql-router").version
     assert host.package("percona-mysql-shell").is_installed
-#    assert os.environ['UPSTREAM_VERSION'] in host.package("percona-mysql-shell").version
+    assert os.environ['UPSTREAM_VERSION'] in host.package("percona-mysql-shell").version
 
 #def test_database_checksums(host):
 #    node1 = host.run("mysqlsh root@ps-node1:3306 --password=Test1234# --sql --database sbtest -e 'CHECKSUM TABLE sbtest1, sbtest2;'")
