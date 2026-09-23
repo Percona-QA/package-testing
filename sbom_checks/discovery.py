@@ -194,6 +194,33 @@ def expected_root_name(backend, sbom_set):
     return sbom_set.stem
 
 
+def version_to_assert(backend, package, explicit=None):
+    """-> (version, problem) -- the version the SBOM root component must carry.
+
+    `problem` is a message, set when a percona-xtrabackup package IS installed
+    but its version could not be read. That case has to be reported: with no
+    version, structural.check_* skips the comparison entirely
+    ("if expect_version and not _matches(...)"), producing no finding, so the
+    root test asserts against an empty list and passes having verified nothing
+    -- indistinguishable from a real pass.
+
+    Gated on installed_packages() rather than on $SBOM_DIR so that a directory
+    of downloaded files, where no package is installed and there is genuinely
+    nothing to compare against, is still allowed to pass.
+    """
+    if explicit:
+        return explicit, None
+    version = installed_version(backend, package)
+    if version:
+        return version, None
+    if installed_packages(backend):
+        return None, (
+            "a %s package is installed but its version could not be read, so the "
+            "SBOM root version was not checked against it. Expected the version "
+            "of %r from rpm/dpkg." % (PACKAGE_GLOB, package))
+    return None, None
+
+
 def installed_version(backend, package):
     """Version of an installed package, or None."""
     manager = _package_manager(backend)

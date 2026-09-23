@@ -59,11 +59,11 @@ def sbom():
     # expectation you mean it, and a disagreement with what is installed is
     # exactly the failure you asked for. Checking a downloaded directory has no
     # installed package at all, which is the case this exists for.
-    version = config.expect_version()
-    if version:
+    version, version_problem = discovery.version_to_assert(
+        backend, package, explicit=config.expect_version())
+    if config.expect_version():
         print("  expected version: %s (from %s)" % (version, config.ENV_EXPECT_VERSION))
     else:
-        version = discovery.installed_version(backend, package)
         print("  installed package: %s %s"
               % (package, version or "(version unknown -- set %s to assert one)"
                  % config.ENV_EXPECT_VERSION))
@@ -74,6 +74,12 @@ def sbom():
         expect_version=version,
         run_tools=config.external_tools_on_target(),
     )
+
+    # Without a version, structural.check_* skips the comparison and reports
+    # nothing, so the root test would pass having verified nothing. Record it as
+    # a root finding so the failure lands on the test that promises this check.
+    if version_problem:
+        report.findings.append(Finding("root", version_problem))
 
     # Both entrypoints validate sets[0]. If discovery turned up more than one,
     # say so loudly rather than silently ignoring the rest -- two SBOM sets

@@ -1002,3 +1002,65 @@ def test_cli_no_strict_licenses_flag_overrides_the_default(workdir, monkeypatch)
     assert check_sbom.main(base) == 1
     assert check_sbom.main(base + ["--no-strict-licenses"]) == 0
     assert check_sbom.main(base + ["--strict-licenses"]) == 1
+
+
+# --- the SBOM version must actually be compared against the package ---------
+
+class _FakeBackend(object):
+    """Backend whose rpm/dpkg answers are scripted, so the version-resolution
+    rule can be tested without an installed package."""
+
+    def __init__(self, packages=None, version=None, manager="rpm"):
+        self.packages = packages or []
+        self.version = version
+        self.manager = manager
+
+    def run(self, command):
+        from sbom_checks.backends import Result
+        if command.startswith("command -v"):
+            wanted = "rpm" if self.manager == "rpm" else "dpkg-query"
+            ok = command.endswith(wanted)
+            return Result(0 if ok else 1, "", "")
+        if "-qa" in command or "-W -f='${Package}" in command:
+            return Result(0, "\n".join(self.packages), "")
+        if "-q --qf" in command or "-W -f='${Version}" in command:
+            return Result(0, self.version or "", "")
+        return Result(1, "", "")
+
+
+def test_explicit_version_wins_over_the_installed_package():
+    backend = _FakeBackend(packages=["percona-xtrabackup-97"], version="9.7.1")
+    version, problem = discovery.version_to_assert(
+        backend, "percona-xtrabackup-97", explicit="9.9.9")
+    assert version == "9.9.9" and problem is None
+
+
+def test_installed_version_is_used_when_no_explicit_one():
+    backend = _FakeBackend(packages=["percona-xtrabackup-97"], version="9.7.1")
+    version, problem = discovery.version_to_assert(backend, "percona-xtrabackup-97")
+    assert version == "9.7.1" and problem is None
+
+
+def test_installed_package_with_unreadable_version_is_a_problem():
+    """The hole this closes: with no version, structural.check_* skips the
+    comparison, so the root test passed having verified nothing."""
+    backend = _FakeBackend(packages=["percona-xtrabackup-97"], version=None)
+    version, problem = discovery.version_to_assert(backend, "percona-xtrabackup-97")
+    assert version is None
+    assert problem and "percona-xtrabackup-97" in problem
+
+
+def test_no_installed_package_is_not_a_problem():
+    """A directory of downloaded files has nothing to compare against, which is
+    what PXB_VERSION exists for -- it must not be turned into a failure."""
+    backend = _FakeBackend(packages=[], version=None)
+    version, problem = discovery.version_to_assert(backend, "percona-xtrabackup-97")
+    assert version is None and problem is None
+
+
+def test_release_suffix_is_still_tolerated():
+    """rpm reports 9.7.1-rc1-1.el9 for an SBOM saying 9.7.1-rc1; tightening the
+    missing-version case must not make the normal rpm/deb versions fail."""
+    assert structural._matches("9.7.1-rc1", "9.7.1-rc1-1.el9")
+    assert structural._matches("9.7.1-rc1-1.el9", "9.7.1-rc1")
+    assert not structural._matches("9.7.1-rc1", "9.7.2")

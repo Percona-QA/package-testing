@@ -67,12 +67,18 @@ def sbom(backend):
         pytest.fail(config.absent_message(docker_image, considered))
 
     package = discovery.expected_root_name(backend, sets[0])
-    version = discovery.installed_version(backend, package)
+    version, version_problem = discovery.version_to_assert(backend, package)
     print("  installed package: %s %s" % (package, version or "(version unknown)"))
 
     report = audit.audit(backend, sets[0], expect_name=package,
                          expect_version=version,
                          run_tools=config.external_tools_on_target())
+
+    # Without a version, structural.check_* skips the comparison and reports
+    # nothing, so the root test would pass having verified nothing. Record it as
+    # a root finding so the failure lands on the test that promises this check.
+    if version_problem:
+        report.findings.append(Finding("root", version_problem))
 
     # Both entrypoints validate sets[0]. If discovery turned up more than one,
     # say so loudly rather than silently ignoring the rest -- two SBOM sets
