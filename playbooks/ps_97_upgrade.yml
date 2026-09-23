@@ -285,6 +285,16 @@
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
+      - ansible_facts['distribution_major_version'] != "10"
+
+  - name: Install iptables on RHEL10 using dnf
+    dnf:
+      name:
+        - iptables
+      state: present
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
+      - ansible_facts['distribution_major_version'] == "10"
 
   - name: Enable and start iptables service
     systemd:
@@ -293,6 +303,7 @@
       enabled: true
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
+      - ansible_facts['distribution_major_version'] != "10"
 
 
   - name: Block pmm.check-dev.percona.com IP for non REDHAT
