@@ -181,6 +181,9 @@
   - name: check that Percona Server package versions are correct
     command: /package-testing/package_check.sh ps97
 
+  - name: run pytest tests for OpenTelemetry component and client plugin
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_opentelemetry.py
+
 #  - name: run pytest unit tests for ps-admin script
 #    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_unit.py
 
