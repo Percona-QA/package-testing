@@ -18,6 +18,18 @@ def _is_ps8(version):
     return re.match(r"^8\.[0-9]$", version) is not None
 
 
+def _is_ps8plus(version):
+    # _is_ps8 above (^8.[0-9]$) matches only literal 8.0-8.9, so it silently
+    # stopped applying once PS 9.x shipped. Where _is_ps8 is used to mean
+    # "PS 8.0 or newer" (mysqlx bundled at count 2, RocksDB plugin count 17 -
+    # confirmed unchanged on a live PS 9.7 run), compare numerically instead.
+    try:
+        major, minor = (int(x) for x in version.split("."))
+    except ValueError:
+        return False
+    return (major, minor) >= (8, 0)
+
+
 def _is_ps81plus(version):
     # The original bats regex (^8.[1-9]{1}$) only matched PS 8.1-8.9, so it
     # silently stopped applying once PS 9.x shipped. This is meant to mean
@@ -131,7 +143,7 @@ def install_mysqlx(conn, ps_admin_bin):
 
 def check_mysqlx_exists(conn, version):
     result = sql(conn, 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "mysqlx%" and PLUGIN_STATUS like "ACTIVE";')
-    _assert_eq(result, "2" if _is_ps8(version) else "1", "mysqlx active plugin count")
+    _assert_eq(result, "2" if _is_ps8plus(version) else "1", "mysqlx active plugin count")
 
 
 def uninstall_mysqlx(conn, ps_admin_bin):
@@ -140,8 +152,8 @@ def uninstall_mysqlx(conn, ps_admin_bin):
 
 def check_mysqlx_notexists(conn, version):
     result = sql(conn, 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "mysqlx%" and PLUGIN_STATUS like "ACTIVE";')
-    # mirrors bats: on 8.x it expects 2 (mysqlx is bundled), else 0
-    _assert_eq(result, "2" if _is_ps8(version) else "0", "mysqlx active plugin count")
+    # mirrors bats: on 8.x+ it expects 2 (mysqlx is bundled), else 0
+    _assert_eq(result, "2" if _is_ps8plus(version) else "0", "mysqlx active plugin count")
 
 
 # ---- TokuDB ----
@@ -199,7 +211,7 @@ def check_rocksdb_exists(conn, version):
     result = sql(conn, 'select count(*) from information_schema.ENGINES where ENGINE="ROCKSDB" and SUPPORT <> "NO";')
     _assert_eq(result, "1", "RocksDB engine support")
     result = sql(conn, 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like BINARY "%ROCKSDB%" and PLUGIN_STATUS like "ACTIVE";')
-    _assert_eq(result, "17" if _is_ps8(version) else "13", "RocksDB active plugin count")
+    _assert_eq(result, "17" if _is_ps8plus(version) else "13", "RocksDB active plugin count")
 
 
 def uninstall_rocksdb(conn, ps_admin_bin):

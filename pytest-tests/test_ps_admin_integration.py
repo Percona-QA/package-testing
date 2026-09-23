@@ -17,6 +17,18 @@ def _is_ps8(version):
     return re.match(r"^8\.[0-9]$", version) is not None
 
 
+def _is_ps8plus(version):
+    # _is_ps8 above (^8.[0-9]$) matches only literal 8.0-8.9, so it silently
+    # stopped applying once PS 9.x shipped. mysqlx is bundled (non-togglable,
+    # --disable-mysqlx fails) from PS 8.0 onward - confirmed unchanged on a
+    # live PS 9.7 run - so compare numerically instead of just 8.0-8.9.
+    try:
+        major, minor = (int(x) for x in version.split("."))
+    except ValueError:
+        return False
+    return (major, minor) >= (8, 0)
+
+
 def _is_ps81plus(version):
     # ^8.[1-9]$ only matched PS 8.1-8.9 and silently stopped applying once
     # PS 9.x shipped; this means "PS 8.1 or newer", so compare numerically.
@@ -68,15 +80,15 @@ def test_uninstall_audit_log_plugin(connection, ps_admin_bin, mysql_version):
 
 
 def test_install_mysqlx_plugin(connection, ps_admin_bin, mysql_version):
-    if mysql_version == "5.6" or _is_ps8(mysql_version):
-        pytest.skip("MySQL version is not 5.7")
+    if mysql_version == "5.6" or _is_ps8plus(mysql_version):
+        pytest.skip("mysqlx is bundled (non-togglable) from PS 8.0 onward; only 5.7 has a real enable/disable")
     p.install_mysqlx(connection, ps_admin_bin)
     p.check_mysqlx_exists(connection, mysql_version)
 
 
 def test_uninstall_mysqlx_plugin(connection, ps_admin_bin, mysql_version):
-    if mysql_version == "5.6" or _is_ps8(mysql_version):
-        pytest.skip("MySQL version is not 5.7")
+    if mysql_version == "5.6" or _is_ps8plus(mysql_version):
+        pytest.skip("mysqlx is bundled (non-togglable) from PS 8.0 onward; only 5.7 has a real enable/disable")
     p.uninstall_mysqlx(connection, ps_admin_bin)
     p.check_mysqlx_notexists(connection, mysql_version)
 
