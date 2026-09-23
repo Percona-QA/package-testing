@@ -39,6 +39,10 @@ def _assert_ok(result, action):
     assert result.returncode == 0, "{} failed (rc={}): {}".format(action, result.returncode, result.output)
 
 
+def _assert_eq(actual, expected, label):
+    assert actual == expected, "{}: expected {!r}, got {!r}".format(label, expected, actual)
+
+
 def _restart_mysql():
     res = sh("systemctl restart mysql >/dev/null 3>&-")
     assert res.returncode == 0
@@ -56,12 +60,12 @@ def uninstall_qrt(conn, ps_admin_bin):
 
 def check_qrt_exists(conn):
     result = sql(conn, 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "QUERY_RESPONSE_TIME%" and PLUGIN_STATUS like "ACTIVE";')
-    assert result == "4"
+    _assert_eq(result, "4", "QRT active plugin count")
 
 
 def check_qrt_notexists(conn):
     result = sql(conn, 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "QUERY_RESPONSE_TIME%" and PLUGIN_STATUS like "ACTIVE";')
-    assert result == "0"
+    _assert_eq(result, "0", "QRT active plugin count")
 
 
 # ---- Audit log ----
@@ -71,7 +75,7 @@ def install_audit(conn, ps_admin_bin):
 
 def check_audit_exists(conn):
     result = sql(conn, 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "audit_log%" and PLUGIN_STATUS like "ACTIVE";')
-    assert result == "1"
+    _assert_eq(result, "1", "audit_log active plugin count")
 
 
 def uninstall_audit(conn, ps_admin_bin):
@@ -80,7 +84,7 @@ def uninstall_audit(conn, ps_admin_bin):
 
 def check_audit_notexists(conn):
     result = sql(conn, 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "audit_log%" and PLUGIN_STATUS like "ACTIVE";')
-    assert result == "0"
+    _assert_eq(result, "0", "audit_log active plugin count")
 
 
 # ---- PAM (kept for parity; tests currently commented out) ----
@@ -127,7 +131,7 @@ def install_mysqlx(conn, ps_admin_bin):
 
 def check_mysqlx_exists(conn, version):
     result = sql(conn, 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "mysqlx%" and PLUGIN_STATUS like "ACTIVE";')
-    assert result == ("2" if _is_ps8(version) else "1")
+    _assert_eq(result, "2" if _is_ps8(version) else "1", "mysqlx active plugin count")
 
 
 def uninstall_mysqlx(conn, ps_admin_bin):
@@ -137,7 +141,7 @@ def uninstall_mysqlx(conn, ps_admin_bin):
 def check_mysqlx_notexists(conn, version):
     result = sql(conn, 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "mysqlx%" and PLUGIN_STATUS like "ACTIVE";')
     # mirrors bats: on 8.x it expects 2 (mysqlx is bundled), else 0
-    assert result == ("2" if _is_ps8(version) else "0")
+    _assert_eq(result, "2" if _is_ps8(version) else "0", "mysqlx active plugin count")
 
 
 # ---- TokuDB ----
@@ -149,9 +153,9 @@ def install_tokudb(conn, ps_admin_bin):
 
 def check_tokudb_exists(conn):
     result = sql(conn, 'select count(*) from information_schema.ENGINES where ENGINE="TokuDB" and SUPPORT <> "NO";')
-    assert result == "1"
+    _assert_eq(result, "1", "TokuDB engine support")
     result = sql(conn, 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like BINARY "%TokuDB%" and PLUGIN_STATUS like "ACTIVE";')
-    assert result == "8"
+    _assert_eq(result, "8", "TokuDB active plugin count")
 
 
 def uninstall_tokudb(conn, ps_admin_bin):
@@ -160,9 +164,9 @@ def uninstall_tokudb(conn, ps_admin_bin):
 
 def check_tokudb_notexists(conn):
     result = sql(conn, 'select count(*) from information_schema.ENGINES where ENGINE="TokuDB" and SUPPORT <> "NO";')
-    assert result == "0"
+    _assert_eq(result, "0", "TokuDB engine support")
     result = sql(conn, 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "%tokudb%" and PLUGIN_STATUS like "ACTIVE";')
-    assert result == "0"
+    _assert_eq(result, "0", "TokuDB active plugin count")
 
 
 # ---- TokuBackup ----
@@ -174,7 +178,7 @@ def install_tokubackup(conn, ps_admin_bin):
 
 def check_tokubackup_exists(conn):
     result = sql(conn, 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "%tokudb_backup%" and PLUGIN_STATUS like "ACTIVE";')
-    assert result == "1"
+    _assert_eq(result, "1", "tokudb_backup active plugin count")
 
 
 def uninstall_tokubackup(conn, ps_admin_bin):
@@ -183,7 +187,7 @@ def uninstall_tokubackup(conn, ps_admin_bin):
 
 def check_tokubackup_notexists(conn):
     result = sql(conn, 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "%tokudb_backup%" and PLUGIN_STATUS like "ACTIVE";')
-    assert result == "0"
+    _assert_eq(result, "0", "tokudb_backup active plugin count")
 
 
 # ---- RocksDB ----
@@ -193,9 +197,9 @@ def install_rocksdb(conn, ps_admin_bin):
 
 def check_rocksdb_exists(conn, version):
     result = sql(conn, 'select count(*) from information_schema.ENGINES where ENGINE="ROCKSDB" and SUPPORT <> "NO";')
-    assert result == "1"
+    _assert_eq(result, "1", "RocksDB engine support")
     result = sql(conn, 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like BINARY "%ROCKSDB%" and PLUGIN_STATUS like "ACTIVE";')
-    assert result == ("17" if _is_ps8(version) else "13")
+    _assert_eq(result, "17" if _is_ps8(version) else "13", "RocksDB active plugin count")
 
 
 def uninstall_rocksdb(conn, ps_admin_bin):
@@ -204,9 +208,9 @@ def uninstall_rocksdb(conn, ps_admin_bin):
 
 def check_rocksdb_notexists(conn):
     result = sql(conn, 'select count(*) from information_schema.ENGINES where ENGINE="ROCKSDB" and SUPPORT <> "NO";')
-    assert result == "0"
+    _assert_eq(result, "0", "RocksDB engine support")
     result = sql(conn, 'select count(*) from information_schema.PLUGINS where PLUGIN_NAME like "%ROCKSDB%" and PLUGIN_STATUS like "ACTIVE";')
-    assert result == "0"
+    _assert_eq(result, "0", "RocksDB active plugin count")
 
 
 # ---- Aggregate ----
