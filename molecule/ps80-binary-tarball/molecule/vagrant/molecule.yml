@@ -17,6 +17,8 @@ platforms:
         ip: "192.168.50.55"
 provisioner:
   name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
   log: True
   playbooks:
     # create: ../../../playbooks/create.yml

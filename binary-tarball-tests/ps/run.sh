@@ -151,4 +151,4 @@ fi
 #  Run Tests
 # ---------------------------------------------------------
 echo "Running tests..."
-python3 -m pytest -v --junit-xml report.xml $@
+python3 -m pytest -v -rs --junit-xml report.xml $@

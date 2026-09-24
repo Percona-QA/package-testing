@@ -1,0 +1,331 @@
+---
+# This playbook does the following:
+#   enables Percona testing repository
+#   installs latest version of PS 9.7, PyKmip and runs some tests
+
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    gnupg_home: /root/.gnupg
+    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+    kmip_venv: /opt/kmip-venv
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  tasks:
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: disable selinux
+    selinux: state=disabled
+    when: ansible_os_family == "RedHat"
+
+  - name: include tasks for enabling PS 97 test repo
+    include_tasks: ../tasks/enable_ps97_main_repo.yml
+    when: lookup('env', 'install_repo') == "main"
+
+  - name: include tasks for enabling PS 97 test repo
+    include_tasks: ../tasks/enable_ps97_testing_repo.yml
+    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+
+  - name: include tasks for enabling PS 97 experimental repo
+    include_tasks: ../tasks/enable_ps97_experimental_repo.yml
+    when: lookup('env', 'install_repo') == "experimental"
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+  - name: install Percona Server 9.7 packages
+    include_tasks: ../tasks/install_ps97.yml
+
+  - name: list installed packages
+    include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: stop mysql service
+    service: name=mysql state=stopped
+
+  - name: remove mysql data directory
+    command: rm -r /var/lib/mysql
+
+  # tar/gzip are needed by the unarchive step below to extract the portable
+  # CPython tarball; minimal RHEL/OL container images ship without tar, so
+  # unarchive falls back to unzip and fails. Install them explicitly.
+  - name: install python3-pip, tar and gzip on RedHat/CentOS
+    yum:
+      name:
+      - python3-pip
+      - tar
+      - gzip
+      state: latest
+      update_cache: yes
+    when: ansible_os_family == "RedHat"
+
+  # python3-venv is required to create the isolated virtualenv below.
+  - name: install python3-pip and python3-venv on Debian/Ubuntu
+    apt:
+      name:
+        - python3-pip
+        - python3-venv
+        - tar
+        - gzip
+      state: present
+      update_cache: yes
+    when: ansible_os_family == "Debian"
+
+  # PyKMIP needs a Python in the 3.7 - 3.11 range: modern pykmip/cryptography
+  # require Python >= 3.7 (and no cryptography wheels ship for the old versions
+  # that still support 3.6, especially on aarch64), while ssl.wrap_socket() -
+  # which pykmip relies on - was removed in Python 3.12. Distros outside that
+  # range ship no suitable interpreter in their repos: RHEL 8 has only python 3.6,
+  # and RHEL 10 / Ubuntu 24.04+ / Debian 13 have only python >= 3.12. On those we
+  # build the venv with a self-contained, portable CPython 3.11 from
+  # python-build-standalone (the same prebuilt CPython uv uses) - a static tarball
+  # that runs on any glibc Linux and both amd64/arm64, with no OS dependency and
+  # no patching of pykmip. Distros whose system python is already 3.7 - 3.11 keep
+  # using the system python3. (Matches pxb_97_kmip.yml, where this already works -
+  # it also sidesteps the PYTHONUSERBASE-at-install-time-only bug that broke the
+  # previous `pip install --user` approach here: the venv's own interpreter always
+  # sees its own site-packages, with no separate runtime env var needed.)
+  - name: detect system python3 minor version
+    command: python3 -c "import sys; print(sys.version_info[1])"
+    register: sys_py_minor
+    changed_when: false
+
+  - name: default the pykmip venv interpreter to the system python3
+    set_fact:
+      kmip_py_interp: python3
+
+  - name: provision a portable CPython 3.11 when system python is < 3.7 or >= 3.12
+    when: (sys_py_minor.stdout | int) < 7 or (sys_py_minor.stdout | int) >= 12
+    block:
+      - name: download portable CPython 3.11 (python-build-standalone)
+        get_url:
+          url: "https://github.com/astral-sh/python-build-standalone/releases/download/{{ pbs_tag }}/cpython-{{ pbs_ver }}+{{ pbs_tag }}-{{ (ansible_architecture == 'aarch64') | ternary('aarch64', 'x86_64') }}-unknown-linux-gnu-install_only.tar.gz"
+          dest: /tmp/cpython-3.11-standalone.tar.gz
+          mode: '0644'
+        vars:
+          pbs_tag: "20260807"
+          pbs_ver: "3.11.15"
+        register: pbs_dl
+        retries: 3
+        delay: 5
+        until: pbs_dl is succeeded
+
+      - name: extract portable CPython 3.11 into /opt
+        unarchive:
+          src: /tmp/cpython-3.11-standalone.tar.gz
+          dest: /opt
+          remote_src: yes
+          creates: /opt/python/bin/python3.11
+
+      - name: use the portable CPython 3.11 for the pykmip venv
+        set_fact:
+          kmip_py_interp: /opt/python/bin/python3.11
+
+  - name: show the python interpreter chosen for the pykmip venv
+    debug:
+      msg: "system python3 minor=3.{{ sys_py_minor.stdout }} -> venv interpreter: {{ kmip_py_interp }}"
+
+  - name: bootstrap pip/setuptools/wheel in the virtualenv
+    pip:
+      name:
+        - pip
+        - setuptools
+        - wheel
+      state: latest
+      virtualenv: "{{ kmip_venv }}"
+      virtualenv_command: "{{ kmip_py_interp }} -m venv"
+    register: pip_bootstrap
+    retries: 5
+    delay: 10
+    until: pip_bootstrap is succeeded
+
+  - name: install pykmip dependencies into the virtualenv
+    pip:
+      name:
+        - importlib-metadata
+        - pykmip
+      state: latest
+      virtualenv: "{{ kmip_venv }}"
+      virtualenv_command: "{{ kmip_py_interp }} -m venv"
+    register: pip_pykmip
+    retries: 5
+    delay: 10
+    until: pip_pykmip is succeeded
+
+  # pykmip requires SQLAlchemy < 2.0; pin to a known-good version in the venv.
+  - name: pin SQLAlchemy in the virtualenv
+    pip:
+      name: SQLAlchemy==1.4.46
+      virtualenv: "{{ kmip_venv }}"
+    register: pip_sqlalchemy
+    retries: 5
+    delay: 10
+    until: pip_sqlalchemy is succeeded
+
+  # Start pykmip under a transient systemd unit instead of `nohup ... &`. A
+  # backgrounded shell process is a child of the Ansible SSH session, and on
+  # some distros systemd-logind tears down the session's cgroup scope when
+  # the task's connection ends, killing the server before mysqld starts.
+  # nohup only ignores SIGHUP, it does not detach from that scope.
+  # systemd-run places pykmip in its own unit that outlives the SSH session
+  # (see pxb_97_kmip.yml, where this exact pattern already works).
+  - name: remove any stale pykmip-server transient unit from a previous run
+    command: systemctl reset-failed pykmip-server.service
+    failed_when: false
+    changed_when: false
+
+  - name: stop any stale pykmip-server transient unit from a previous run
+    command: systemctl stop pykmip-server.service
+    failed_when: false
+    changed_when: false
+
+  - name: start pykmip server
+    command: >
+      systemd-run --unit=pykmip-server --collect
+      --property=StandardOutput=file:/pykmip_server.out
+      --property=StandardError=file:/pykmip_server.out
+      {{ kmip_venv }}/bin/pykmip-server
+      -f /package-testing/kmip/server.conf -l /pykmip_server.log
+
+  - name: wait a few seconds for pykmip server to come up
+    pause:
+      seconds: 5
+
+  - name: check pykmip server process is running
+    shell: pgrep -af pykmip-server
+    register: kmip_status
+    changed_when: false
+    failed_when: false
+
+  - name: check pykmip server is listening on port 5696
+    wait_for:
+      host: 127.0.0.1
+      port: 5696
+      state: started
+      timeout: 30
+    register: kmip_port
+    ignore_errors: true
+
+  - name: read pykmip server log
+    command: cat /pykmip_server.log
+    register: pykmip_startup_log
+    changed_when: false
+    failed_when: false
+
+  - name: read pykmip server stdout/stderr (crash traceback lands here)
+    command: cat /pykmip_server.out
+    register: pykmip_startup_out
+    changed_when: false
+    failed_when: false
+
+  - debug:
+      msg:
+        - "pykmip process: {{ kmip_status.stdout_lines | default(['<not running>']) }}"
+        - "port 5696 reachable: {{ (kmip_port is succeeded) | ternary('yes', 'no') }}"
+        - "pykmip stdout/stderr:"
+        - "{{ pykmip_startup_out.stdout_lines | default([]) }}"
+        - "pykmip log:"
+        - "{{ pykmip_startup_log.stdout_lines | default([]) }}"
+
+  - name: copy the global manifest for mysql
+    copy:
+        src: /package-testing/kmip/mysqld.my
+        dest: /usr/sbin/
+        remote_src: yes
+
+  - name: copy the global configuration file for mysql in Redhat/CentOS
+    copy:
+        src: /package-testing/kmip/component_keyring_kmip.cnf
+        dest: /usr/lib64/mysql/plugin/
+        remote_src: yes
+    when: ansible_os_family == "RedHat"
+
+  - name: copy the global configuration file for mysql in Debian/Ubuntu
+    copy:
+        src: /package-testing/kmip/component_keyring_kmip.cnf
+        dest: /usr/lib/mysql/plugin/
+        remote_src: yes
+    when: ansible_os_family == "Debian"
+
+  - name: copy the encryption config file on Debian/Ubuntu
+    copy:
+        src: /package-testing/kmip/encryption.j2
+        dest: /etc/mysql/conf.d/encryption.cnf
+        remote_src: yes
+    when: ansible_os_family == "Debian"
+
+  - name: append include for RedHat
+    lineinfile:
+        path: /etc/my.cnf
+        line: '!includedir /etc/my.cnf.d'
+    when: ansible_os_family == "RedHat"
+
+  - name: copy the encryption config file on RHEL/CentOS/Amazon
+    copy:
+        src: /package-testing/kmip/encryption.j2
+        dest: /etc/my.cnf.d/encryption.cnf
+        remote_src: yes
+    when: ansible_os_family == "RedHat"
+
+  - name: Start MySQL and collect logs on failure
+    block:
+      - name: Start mysql service
+        service:
+          name: mysql
+          state: started
+
+      - name: Check mysql service status
+        command: /package-testing/check_running.sh mysql running
+
+    rescue:
+      - name: Show systemctl status
+        command: systemctl status mysql --no-pager -l
+        register: mysql_status
+        ignore_errors: yes
+
+      - debug:
+          var: mysql_status.stdout_lines
+
+      - name: Show last 200 journal logs
+        command: journalctl -u mysql --no-pager -n 200
+        register: mysql_journal
+        ignore_errors: yes
+
+      - debug:
+          var: mysql_journal.stdout_lines
+
+      - name: Show MySQL error log
+        shell: |
+          if [ -f /var/log/mysql/error.log ]; then
+            cat /var/log/mysql/error.log
+          elif [ -f /var/log/mysqld.log ]; then
+            cat /var/log/mysqld.log
+          elif [ -f /var/log/mysqld.err ]; then
+            cat /var/log/mysqld.err
+          fi
+        register: mysql_errorlog
+        ignore_errors: yes
+
+      - debug:
+          var: mysql_errorlog.stdout_lines
+
+      - fail:
+          msg: "MySQL failed to start. See logs above."
+
+  - name: check mysql service status
+    command: /package-testing/check_running.sh mysql running
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: check that Percona Server package versions are correct
+    command: /package-testing/package_check.sh ps97
+
+  - name: import world database
+    command: /package-testing/plugins_test.sh

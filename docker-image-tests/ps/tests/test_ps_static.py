@@ -24,7 +24,10 @@ class TestMysqlEnvironment:
     @pytest.mark.parametrize("pkg_name", ps_packages)
     def test_packages(self, host, pkg_name):
         assert host.package(pkg_name).is_installed
-        assert host.package(pkg_name).version == ps_version_upstream
+        if pkg_name == 'percona-mysql-shell':
+            pytest.skip('percona-mysql-shell versions independently of the PS server package')
+        else:
+            assert host.package(pkg_name).version == ps_version_upstream
 
     @pytest.mark.parametrize("binary", ps_binaries)
     def test_binaries_exist(self, host, binary):
