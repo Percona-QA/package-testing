@@ -201,8 +201,9 @@ when they matter most.
 
 ### The self-test
 
-Runs the whole pipeline against the prototype fixtures in `testdata/`, with no
-infrastructure at all:
+Runs the whole pipeline against the prototype fixtures in `testdata/pxb/`, with
+no infrastructure at all. The fixtures are split per product, so a second set
+(`testdata/ps/`) can be added alongside without disturbing these:
 
 ```bash
 ~/.venvs/pxb-sbom/bin/python -m pytest -v sbom_checks/tests/

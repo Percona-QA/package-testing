@@ -2,7 +2,7 @@
 
     python3 -m sbom_checks.check_sbom --mode package
     python3 -m sbom_checks.check_sbom --mode docker --image percona/percona-xtrabackup:9.7.1
-    python3 -m sbom_checks.check_sbom --mode dir --path ./sbom_checks/testdata
+    python3 -m sbom_checks.check_sbom --mode dir --path ./sbom_checks/testdata/pxb
 
 Exit codes:  0 pass   1 fail   77 skipped (nothing to check, gate is not enforce)
 """

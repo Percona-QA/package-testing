@@ -26,7 +26,16 @@ from sbom_checks import (audit, check_sbom, config, consistency, discovery,
 from sbom_checks.backends import LocalBackend
 from sbom_checks.models import Component
 
-TESTDATA = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "testdata"))
+TESTDATA_ROOT = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "testdata"))
+PXB_TESTDATA = os.path.join(TESTDATA_ROOT, "pxb")
+
+# Per product, so sbom_checks/testdata/ps/ can sit alongside. TESTDATA must stay
+# pointed at a product directory, never at TESTDATA_ROOT: the copy loops below
+# use shutil.copy, which raises IsADirectoryError on a subdirectory, and the
+# discover()-based tests take sets[0], which would silently become the PS set
+# once a second product directory exists.
+TESTDATA = PXB_TESTDATA
 STEM = "percona-xtrabackup-97"
 ROOT_NAME = "percona-xtrabackup-97"
 ROOT_VERSION = "9.7.1-rc1"
