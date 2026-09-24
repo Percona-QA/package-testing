@@ -1,0 +1,259 @@
+---
+# Verifies the SBOM files shipped by the installed Percona XtraBackup package.
+#
+# The RedHat/Debian split that tasks/test_pgo.yml has to spell out twice lives
+# in python here instead (sbom_checks/ sniffs gzip magic rather than branching on
+# os_family), so this file is only glue.
+#
+# Gated by SBOM_CHECK_MODE (off/warn/enforce, default warn): PXB does not ship
+# SBOM files yet, so absence is a skip and only a malformed SBOM fails the run.
+#
+# trivy and cyclonedx-cli are installed on the target by tasks/install_sbom_tools.yml
+# and run by default. Both installs tolerate failure: a tool that is absent or
+# cannot run makes its check skip, never fail the converge. Set
+# SBOM_EXTERNAL_TOOLS=0 to turn them off entirely.
+
+- name: SBOM checks
+  block:
+
+    - name: resolve whether the external SBOM tools should run
+      set_fact:
+        # On by default now: the pxb97 matrix is RHEL/Oracle/Rocky 8+, Debian 12+
+        # and Jammy+, all modern enough for cyclonedx-cli's self-contained .NET
+        # binary. Set SBOM_EXTERNAL_TOOLS=0 in the job to turn them off.
+        sbom_external_tools: "{{ lookup('env', 'SBOM_EXTERNAL_TOOLS') | default('1', true) | trim }}"
+
+    - name: resolve whether the vulnerability scan is wanted
+      set_fact:
+        # SBOM_VULN_MODE=off means trivy is neither installed nor run, so the
+        # ~1.6 GB it needs (168 MB binary + a 1.4 GB vulnerability DB) is not
+        # spent on a tool the checks will refuse to use.
+        sbom_vuln_mode: "{{ lookup('env', 'SBOM_VULN_MODE') | default('warn', true) | trim }}"
+
+    # Before anything writes them. molecule's test_sequence destroys and
+    # recreates the instance, so a Jenkins run always starts clean -- but a local
+    # "molecule converge" re-run against a surviving target does not. Without
+    # this, a run that produced no artifacts would fetch the PREVIOUS run's zip
+    # and junit report under the current platform name: stale evidence, and
+    # stale junit is published to Jenkins as this run's passing tests. Deleting
+    # up front is what lets the fetches below simply test "does it exist now".
+    - name: remove SBOM artifacts left by any previous run
+      file:
+        path: "{{ item }}"
+        state: absent
+      become: true
+      loop:
+        - /var/tmp/pxb_sbom.zip
+        - /var/tmp/pxb_sbom_report.xml
+      failed_when: false
+      changed_when: false
+
+    - name: install the external SBOM tools
+      include_tasks: ../tasks/install_sbom_tools.yml
+      when: sbom_external_tools not in ['0', 'false', 'no', 'off', '']
+
+    - name: run PXB SBOM checks on the target host
+      command: >
+        python3 -m pytest -v
+        --junitxml=/var/tmp/pxb_sbom_report.xml
+        /package-testing/pytest-tests/test_pxb_sbom.py
+      environment:
+        SBOM_CHECK_MODE: "{{ lookup('env', 'SBOM_CHECK_MODE') | default('warn', true) }}"
+        SBOM_VULN_MODE: "{{ lookup('env', 'SBOM_VULN_MODE') | default('warn', true) }}"
+        SBOM_EXTERNAL_TOOLS: "{{ sbom_external_tools }}"
+        # Passed through empty when the job does not set it, so the default
+        # lives in one place -- config.license_strict(), which is on. An empty
+        # value means "use the default"; '0'/'false'/'off'/'no' turn it off.
+        SBOM_LICENSE_STRICT: "{{ lookup('env', 'SBOM_LICENSE_STRICT') | default('', true) }}"
+        SBOM_DIR: "{{ lookup('env', 'SBOM_DIR') | default('', true) }}"
+        # Absolute paths, because this play runs under sudo and RHEL-family
+        # secure_path excludes /usr/local/bin where the tools are installed.
+        # shutil.which() -- which external_tools.have() uses -- resolves an
+        # absolute path directly, so PATH stops mattering.
+        TRIVY_BIN: "{{ sbom_trivy_bin | default('trivy', true) }}"
+        CYCLONEDX_BIN: "{{ sbom_cyclonedx_bin | default('cyclonedx', true) }}"
+        # Deliberately NOT touching PATH here: prepending the tool directory also
+        # changes which python3 is selected, and a stray /usr/local/bin/python3
+        # without pytest would break the run. The absolute paths above are
+        # sufficient -- shutil.which() resolves them without consulting PATH.
+      register: pxb_sbom_result
+
+    - name: show PXB SBOM check output
+      debug:
+        var: pxb_sbom_result.stdout_lines
+
+  always:
+
+    # Runs even when the checks fail. molecule's test_sequence is
+    # destroy,create,prepare,converge,verify,cleanup,destroy -- a failing
+    # converge aborts before cleanup, so artifacts cannot be collected there.
+
+    - name: show PXB SBOM check output on failure
+      debug:
+        var: pxb_sbom_result.stdout_lines
+      when: pxb_sbom_result is defined and pxb_sbom_result.rc is defined and pxb_sbom_result.rc != 0
+
+    - name: get the arch value
+      shell: uname -m
+      register: sbom_arch_output
+      changed_when: false
+
+    - name: get the PRETTY_NAME value from /etc/os-release
+      shell: |
+        grep '^PRETTY_NAME=' /etc/os-release | cut -d'=' -f2 | tr -d '"'
+      register: sbom_pretty_name_output
+      changed_when: false
+
+    - name: resolve the controller workspace
+      set_fact:
+        # WORKSPACE_VAR is an ENVIRONMENT variable set by the Jenkins job, not an
+        # ansible variable -- ansible does not import the environment. The
+        # molecule cleanup playbooks bridge it with this same lookup in their own
+        # play-level vars:, but this file is included from the converge play,
+        # which has no such bridge. Without it both fetches fail as undefined.
+        sbom_workspace: "{{ lookup('env', 'WORKSPACE_VAR') | default('', true) | trim }}"
+
+    - name: resolve the platform label for the junit report
+      set_fact:
+        # Every platform publishes into one Jenkins result set, so without a
+        # label the table shows the same test name 24 times and a skip cannot be
+        # attributed. MOLECULE_SCENARIO_NAME matches the Jenkins parallel stage
+        # ("ubuntu-noble"); fall back to the OS/arch this task already derives so
+        # the label is never empty.
+        sbom_platform_label: >-
+          {{ lookup('env', 'MOLECULE_SCENARIO_NAME') | default('', true) | trim
+             or (sbom_pretty_name_output.stdout | replace(' ', '-') | trim
+                 ~ '_' ~ sbom_arch_output.stdout | trim) }}
+
+    - name: build the artifact name
+      set_fact:
+        # 24 platforms run in parallel into one WORKSPACE_VAR, so the same
+        # namespacing as playbooks/cleanup.yml is required or they overwrite
+        # each other and only one arbitrary survivor gets published.
+        # replace('/') as well as the space: PRETTY_NAME on Debian is
+        # "Debian GNU/Linux 12 (bookworm)", and a slash turns the fetch dest
+        # into a SUBDIRECTORY. The Jenkins job collects '*_sbom-junit.xml' and
+        # '*.zip' with non-recursive globs at the workspace root, so every
+        # Debian platform silently published nothing -- hidden by
+        # allowEmptyResults/allowEmptyArchive.
+        sbom_artifact_prefix: >-
+          {{ ansible_hostname }}_{{ sbom_pretty_name_output.stdout | replace(' ', '-') | replace('/', '-') | trim }}_{{ sbom_arch_output.stdout | trim }}
+
+    - name: locate the SBOM directories shipped by the package
+      # Archived as-is rather than copied into one staging directory. Copying
+      # flattened every /usr/share/percona-xtrabackup* directory together, so
+      # identical basenames overwrote each other and the zip could show a mixed
+      # set that never existed on disk -- misleading evidence for whoever
+      # downloads it to debug a failure. (Only the zip was ever affected: the
+      # checks above run against /usr/share/percona-xtrabackup* directly, and
+      # discovery.group() keys on (directory, stem), so validation never saw
+      # the flattened copy.)
+      #
+      # Both rpm and deb ship the files in the package's own sbom/ directory.
+      # Fall back to the package directories themselves so a layout change
+      # leaves the artifact incomplete rather than empty.
+      shell:
+        cmd: |
+          set -e
+          found=
+          for d in /usr/share/percona-xtrabackup*/sbom; do
+            [ -d "$d" ] && { printf '%s\n' "$d"; found=1; }
+          done
+          if [ -z "$found" ]; then
+            for d in /usr/share/percona-xtrabackup*; do
+              [ -d "$d" ] && printf '%s\n' "$d"
+            done
+          fi
+          exit 0
+        executable: /bin/bash
+      become: true
+      register: sbom_dirs
+      failed_when: false
+      changed_when: false
+
+    - name: show the SBOM directories that will be archived
+      debug:
+        var: sbom_dirs.stdout_lines
+
+    - name: archive the SBOM files
+      archive:
+        # A list of paths: the zip keeps each directory's own structure, so
+        # sibling directories stay distinguishable instead of colliding.
+        path: "{{ sbom_dirs.stdout_lines }}"
+        dest: /var/tmp/pxb_sbom.zip
+        format: zip
+      become: true
+      failed_when: false
+      when: sbom_dirs.stdout_lines | default([]) | length > 0
+
+    - name: label the junit report with the platform
+      command: >
+        python3 -m sbom_checks.label_junit
+        /var/tmp/pxb_sbom_report.xml
+        --label {{ sbom_platform_label | quote }}
+        --only test_pxb_sbom
+      args:
+        chdir: /package-testing
+      register: sbom_label_result
+      changed_when: false
+      # Non-blocking: an unlabelled report is still a useful report.
+      failed_when: false
+
+    - name: show the junit labelling result
+      debug:
+        var: sbom_label_result.stdout_lines
+
+    - name: report that artifacts will not be fetched
+      debug:
+        msg: >-
+          WORKSPACE_VAR is not set, so the SBOM report and files stay on the
+          target in /var/tmp/. This is expected outside Jenkins.
+      when: sbom_workspace | length == 0
+
+    # Deliberately a stat rather than "the archive task succeeded": that task
+    # carries failed_when: false, which forces failed=False, so a
+    # "sbom_archive is succeeded" test would always pass regardless of what
+    # happened. The junit report has no archive task to gate on at all. Since
+    # both files were removed at the start of this run, existing now means
+    # produced now.
+    - name: check which SBOM artifacts this run actually produced
+      stat:
+        path: "{{ item }}"
+      become: true
+      register: sbom_artifacts
+      loop:
+        - /var/tmp/pxb_sbom_report.xml
+        - /var/tmp/pxb_sbom.zip
+      failed_when: false
+
+    - name: report that an SBOM artifact was not produced
+      debug:
+        msg: >-
+          {{ item.item }} was not produced by this run, so it is not fetched.
+          Nothing stale is published under this platform name.
+      loop: "{{ sbom_artifacts.results | default([]) }}"
+      loop_control:
+        label: "{{ item.item }}"
+      when: not item.stat.exists
+
+    - name: fetch the SBOM junit report to the controller
+      fetch:
+        src: /var/tmp/pxb_sbom_report.xml
+        dest: "{{ sbom_workspace }}/{{ sbom_artifact_prefix }}_sbom-junit.xml"
+        flat: yes
+      become: true
+      when:
+        - sbom_workspace | length > 0
+        - sbom_artifacts.results[0].stat.exists | default(false)
+      ignore_errors: yes
+
+    - name: fetch the SBOM files to the controller
+      fetch:
+        src: /var/tmp/pxb_sbom.zip
+        dest: "{{ sbom_workspace }}/{{ sbom_artifact_prefix }}_sbom.zip"
+        flat: yes
+      become: true
+      when:
+        - sbom_workspace | length > 0
+        - sbom_artifacts.results[1].stat.exists | default(false)
+      ignore_errors: yes

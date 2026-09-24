@@ -1,0 +1,19 @@
+NAME                   VERSION                                    LICENSE                        LINKAGE      ORIGIN
+abseil-cpp             20250814.1                                 Apache-2.0                     shared-lib   vendored
+boost                  1.87.0                                     BSL-1.0                        header-only  vendored
+icu                    77.1                                       Unicode-DFS-2016               shared-lib   vendored
+jsmn                   unknown                                    MIT                            source       vendored
+json                   3.12.0                                     MIT                            header-only  vendored
+libbacktrace           793921876c981                              BSD-3-Clause                   static       vendored
+libkmip                5eeea918e7213f32df466be58cf9a68347ae2df2   Apache-2.0 OR BSD-3-Clause     static       vendored
+lz4                    1.10.0                                     BSD-2-Clause                   static       vendored
+opentelemetry-cpp      1.23.0                                     Apache-2.0                     static       vendored
+opentelemetry-proto    1.7.0                                      Apache-2.0                     static       vendored
+protobuf               24.4                                       BSD-3-Clause                   shared-lib   vendored
+quicklz                1.5.0                                      GPL-2.0-only                   source       vendored
+rapidjson              unknown                                    MIT                            header-only  vendored
+unordered_dense        4.4.0                                      MIT                            header-only  vendored
+xxhash-lz4             1.10.0                                     BSD-2-Clause                   static       vendored
+xxhash                 0.8.3                                      BSD-2-Clause                   static       vendored
+zlib                   1.3.2                                      Zlib                           static       vendored
+zstd                   1.5.7                                      BSD-3-Clause                   static       vendored

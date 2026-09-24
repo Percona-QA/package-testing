@@ -291,6 +291,9 @@
     when:
       - lookup('env', 'REPO_TYPE') == "PRO"
 
+  - name: check PXB SBOM files
+    include_tasks: ../tasks/check_pxb_sbom.yml
+
   - name: run backup
     command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups/
 

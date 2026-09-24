@@ -1,0 +1,85 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:5e9d7c99-5ce2-516d-2d12-b6ccb2b9ebde",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-09-02T00:00:00Z",
+    "tools": [ { "vendor": "Percona", "name": "pxb-gen-sbom", "version": "1.0" } ],
+    "component": { "type": "application", "bom-ref": "pkg:generic/percona-xtrabackup-97@9.7.1-rc1", "name": "percona-xtrabackup-97", "version": "9.7.1-rc1", "licenses": [ { "license": { "id": "GPL-2.0-only" } } ] }
+  },
+  "components": [
+    { "type": "library", "bom-ref": "pkg:generic/abseil-cpp@20250814.1", "name": "abseil-cpp", "version": "20250814.1",
+      "purl": "pkg:generic/abseil-cpp@20250814.1",
+      "licenses": [ { "license": { "id": "Apache-2.0" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "shared-lib" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/boost@1.87.0", "name": "boost", "version": "1.87.0",
+      "purl": "pkg:generic/boost@1.87.0",
+      "licenses": [ { "license": { "id": "BSL-1.0" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "header-only" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/icu@77.1", "name": "icu", "version": "77.1",
+      "purl": "pkg:generic/icu@77.1",
+      "licenses": [ { "license": { "id": "Unicode-DFS-2016" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "shared-lib" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/jsmn", "name": "jsmn", "version": "unknown",
+      "purl": "pkg:generic/jsmn",
+      "licenses": [ { "license": { "id": "MIT" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "source" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/json@3.12.0", "name": "json", "version": "3.12.0",
+      "purl": "pkg:generic/json@3.12.0",
+      "licenses": [ { "license": { "id": "MIT" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "header-only" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/libbacktrace@793921876c981", "name": "libbacktrace", "version": "793921876c981",
+      "purl": "pkg:generic/libbacktrace@793921876c981",
+      "licenses": [ { "license": { "id": "BSD-3-Clause" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "static" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/libkmip@5eeea918e7213f32df466be58cf9a68347ae2df2", "name": "libkmip", "version": "5eeea918e7213f32df466be58cf9a68347ae2df2",
+      "purl": "pkg:generic/libkmip@5eeea918e7213f32df466be58cf9a68347ae2df2",
+      "licenses": [ { "expression": "Apache-2.0 OR BSD-3-Clause" } ],
+      "properties": [ { "name": "pxb:linkage", "value": "static" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/lz4@1.10.0", "name": "lz4", "version": "1.10.0",
+      "purl": "pkg:generic/lz4@1.10.0",
+      "licenses": [ { "license": { "id": "BSD-2-Clause" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "static" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/opentelemetry-cpp@1.23.0", "name": "opentelemetry-cpp", "version": "1.23.0",
+      "purl": "pkg:generic/opentelemetry-cpp@1.23.0",
+      "licenses": [ { "license": { "id": "Apache-2.0" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "static" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/opentelemetry-proto@1.7.0", "name": "opentelemetry-proto", "version": "1.7.0",
+      "purl": "pkg:generic/opentelemetry-proto@1.7.0",
+      "licenses": [ { "license": { "id": "Apache-2.0" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "static" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/protobuf@24.4", "name": "protobuf", "version": "24.4",
+      "purl": "pkg:generic/protobuf@24.4",
+      "licenses": [ { "license": { "id": "BSD-3-Clause" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "shared-lib" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/quicklz@1.5.0", "name": "quicklz", "version": "1.5.0",
+      "purl": "pkg:generic/quicklz@1.5.0",
+      "licenses": [ { "license": { "id": "GPL-2.0-only" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "source" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/rapidjson", "name": "rapidjson", "version": "unknown",
+      "purl": "pkg:generic/rapidjson",
+      "licenses": [ { "license": { "id": "MIT" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "header-only" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/unordered_dense@4.4.0", "name": "unordered_dense", "version": "4.4.0",
+      "purl": "pkg:generic/unordered_dense@4.4.0",
+      "licenses": [ { "license": { "id": "MIT" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "header-only" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/xxhash-lz4@1.10.0", "name": "xxhash-lz4", "version": "1.10.0",
+      "purl": "pkg:generic/xxhash-lz4@1.10.0",
+      "licenses": [ { "license": { "id": "BSD-2-Clause" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "static" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/xxhash@0.8.3", "name": "xxhash", "version": "0.8.3",
+      "purl": "pkg:generic/xxhash@0.8.3",
+      "licenses": [ { "license": { "id": "BSD-2-Clause" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "static" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/zlib@1.3.2", "name": "zlib", "version": "1.3.2",
+      "purl": "pkg:generic/zlib@1.3.2",
+      "licenses": [ { "license": { "id": "Zlib" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "static" }, { "name": "pxb:origin", "value": "vendored" } ] }
+    ,{ "type": "library", "bom-ref": "pkg:generic/zstd@1.5.7", "name": "zstd", "version": "1.5.7",
+      "purl": "pkg:generic/zstd@1.5.7",
+      "licenses": [ { "license": { "id": "BSD-3-Clause" } } ],
+      "properties": [ { "name": "pxb:linkage", "value": "static" }, { "name": "pxb:origin", "value": "vendored" } ] }
+  ]
+}

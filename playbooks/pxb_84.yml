@@ -233,6 +233,9 @@
     when:
       - lookup('env', 'REPO_TYPE') == "PRO"
 
+  - name: check PXB SBOM files
+    include_tasks: ../tasks/check_pxb_sbom.yml
+
   - name: check that Percona XtraBackup version_check.sh is correct PRO
     command: /package-testing/version_check.sh pxb84 pro
     when:
