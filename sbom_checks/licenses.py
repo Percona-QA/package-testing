@@ -1,6 +1,6 @@
 """SPDX licence expression normalisation.
 
-The four PXB SBOM files express the same licence in four vocabularies:
+A product's four SBOM files express the same licence in four vocabularies:
 
   .cdx.json       licenses[].license.id  or  licenses[].expression
   .spdx.json      licenseConcluded (falling back to licenseDeclared)

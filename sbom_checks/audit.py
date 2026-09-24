@@ -12,6 +12,13 @@ from . import config, consistency, external_tools, parsers, structural
 from .models import Finding, render
 
 
+# Prefix of the temporary copy made when the tools cannot read the SBOM in place.
+# The self-test detects leaked copies by this prefix, so it must read this
+# constant rather than repeat the string: when the prefix changed from
+# "pxb-sbom-" and the test kept the old literal, every leak test passed
+# vacuously -- comparing sets that could never contain the audit's directories.
+TEMP_PREFIX = "sbom-audit-"
+
 class Report(object):
     def __init__(self, sbom_set):
         self.sbom_set = sbom_set
@@ -173,7 +180,7 @@ def _run_tools(backend, sbom_set, report):
     try:
         local = backend.local_path(cdx_path)
         if local is None:
-            workdir = tempfile.mkdtemp(prefix="pxb-sbom-")
+            workdir = tempfile.mkdtemp(prefix=TEMP_PREFIX)
             try:
                 local = backend.export(cdx_path, workdir)
             except Exception as exc:                   # noqa: BLE001

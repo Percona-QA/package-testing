@@ -1,4 +1,4 @@
-"""Parsers for the four PXB SBOM formats.
+"""Parsers for the four SBOM formats.
 
 Two traps here, both verified against the real prototype files:
 
@@ -12,6 +12,7 @@ Two traps here, both verified against the real prototype files:
 import json
 import re
 
+from . import products
 from .models import Component
 
 TABLE_COLUMNS = ("NAME", "VERSION", "LICENSE", "LINKAGE", "ORIGIN")
@@ -90,10 +91,27 @@ def load_cyclonedx(raw):
             entry.get("name", ""),
             entry.get("version", ""),
             _cdx_license(entry),
-            props.get("pxb:linkage", ""),
-            props.get("pxb:origin", ""),
+            _cdx_property(props, "linkage"),
+            _cdx_property(props, "origin"),
         ))
     return doc, root, components
+
+
+def _cdx_property(props, suffix):
+    """A component property under any registered vendor prefix.
+
+    PXB writes "pxb:linkage", PS writes "percona:linkage". Hard-coding "pxb:"
+    silently read every PS linkage and origin as an empty string -- no error,
+    just lost data. Any registered prefix is accepted rather than only the
+    selected product's, since the PXB generator is expected to move to
+    "percona:" too. The first prefix in registry order wins if a document
+    somehow carries both.
+    """
+    for prefix in products.all_cdx_property_prefixes():
+        value = props.get(prefix + suffix)
+        if value:
+            return value
+    return ""
 
 
 def _spdx_license(package):

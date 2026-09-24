@@ -1,8 +1,11 @@
-"""Command line entrypoint for the PXB SBOM checks.
+"""Command line entrypoint for the SBOM checks.
 
     python3 -m sbom_checks.check_sbom --mode package
     python3 -m sbom_checks.check_sbom --mode docker --image percona/percona-xtrabackup:9.7.1
     python3 -m sbom_checks.check_sbom --mode dir --path ./sbom_checks/testdata/pxb
+    python3 -m sbom_checks.check_sbom --product ps --mode dir --path ./sbom_checks/testdata/ps
+
+--product defaults to $SBOM_PRODUCT, else pxb.
 
 Exit codes:  0 pass   1 fail   77 skipped (nothing to check, gate is not enforce)
 """
@@ -12,7 +15,7 @@ import subprocess
 import sys
 import uuid
 
-from . import audit, config, discovery, external_tools
+from . import audit, config, discovery, external_tools, products
 from .backends import DOCKER_BIN, DockerBackend, LocalBackend
 
 EXIT_OK = 0
@@ -21,7 +24,7 @@ EXIT_SKIP = 77
 
 
 def _start_container(image):
-    name = "pxb-sbom-cli-%s" % uuid.uuid4().hex[:8]
+    name = "sbom-cli-%s" % uuid.uuid4().hex[:8]
     container = subprocess.check_output([
         DOCKER_BIN, "run", "--name", name, "--entrypoint", "sleep",
         "-d", image, "infinity",
@@ -75,7 +78,11 @@ def _tool_problems(report, sbom_set, run_tools):
 
 def build_parser():
     parser = argparse.ArgumentParser(
-        prog="check_sbom", description="Verify Percona XtraBackup SBOM files.")
+        prog="check_sbom", description="Verify Percona product SBOM files.")
+    parser.add_argument("--product", choices=sorted(products.PRODUCTS),
+                        help="which product's SBOM files these are "
+                             "(default: $%s, else %s)"
+                             % (config.ENV_PRODUCT, products.DEFAULT))
     parser.add_argument("--mode", choices=("package", "docker", "dir"), default="package",
                         help="where to look: installed packages, a docker image, "
                              "or a plain directory")
@@ -85,7 +92,8 @@ def build_parser():
     parser.add_argument("--expect-name", help="expected SBOM root component name")
     parser.add_argument("--expect-version",
                         help="expected SBOM root component version "
-                             "(default: $PXB_VERSION)")
+                             "(default: the product's version variable, "
+                             "e.g. $PXB_VERSION or $PS_VERSION)")
     parser.add_argument("--no-tools", action="store_true",
                         help="skip trivy and cyclonedx-cli even when installed")
     # Tri-state, defaulting to None so the gate decides: strict licence
@@ -105,6 +113,7 @@ def build_parser():
 
 def run(args):
     container = None
+    product = config.product(args.product)
     sbom_dir = args.path or config.sbom_dir()
 
     if args.mode == "docker":
@@ -122,7 +131,7 @@ def run(args):
         backend = LocalBackend()
 
     try:
-        sets, considered = discovery.discover(backend, sbom_dir=sbom_dir)
+        sets, considered = discovery.discover(backend, sbom_dir=sbom_dir, product=product)
 
         print("discovery:")
         for note in considered:
@@ -144,11 +153,11 @@ def run(args):
             return EXIT_FAIL
 
         expect_name = args.expect_name
-        expect_version = args.expect_version or config.expect_version()
+        expect_version = args.expect_version or config.expect_version(product)
         # Also for docker: the image installs the rpm, so the root component can
         # be cross-checked against the package the same way.
         if args.mode in ("package", "docker") and not expect_name:
-            expect_name = discovery.expected_root_name(backend, sets[0])
+            expect_name = discovery.expected_root_name(backend, sets[0], product)
             if not expect_version and expect_name:
                 expect_version = discovery.installed_version(backend, expect_name)
 

@@ -30,7 +30,7 @@ class Component(object):
 
 
 class SbomSet(object):
-    """The four files that make up one PXB SBOM, keyed by format.
+    """The four files that make up one product SBOM, keyed by format.
 
     Any of the four may be None when the artifact ships an incomplete set --
     that is itself a finding, not a crash.

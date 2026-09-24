@@ -1,6 +1,6 @@
 """Cross-format consistency.
 
-All four PXB SBOM files come from one generator in one run, so they must agree.
+A product's four SBOM files come from one generator in one run, so they must agree.
 This is what catches a generator that updates one output and forgets another.
 
 Verified against the real prototype set: all four formats yield identical

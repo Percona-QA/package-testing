@@ -1,8 +1,10 @@
-"""Percona XtraBackup SBOM verification.
+"""SBOM verification for Percona products.
 
-Validates the four files PXB ships per artifact -- CycloneDX (.cdx.json),
+Validates the four files a product ships per artifact -- CycloneDX (.cdx.json),
 SPDX (.spdx.json), a fixed-width table (.sbom.txt) and a flat licence list
 (.licenses.txt) -- in installed rpm/deb packages and in docker images.
+What differs between products (package names, install locations, property
+prefixes) is declared once in products.py; PXB is the default.
 
 Stdlib only, python 3.6 compatible: the molecule targets span centos-7 through
 debian-13 on two architectures and the docker suite is pinned to pytest 5.2.1,

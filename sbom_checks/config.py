@@ -1,7 +1,7 @@
 """The gate.
 
-PXB packages and docker images do not ship SBOM files yet, so a hard-failing
-check would break two currently-green jobs on every run. The rule is:
+The packages and docker images do not ship SBOM files yet, so a hard-failing
+check would break currently-green jobs on every run. The rule is:
 
     absence is tolerated, presence is strict.
 
@@ -25,6 +25,8 @@ Nothing else calls os.getenv for gating.
 
 import os
 
+from . import products
+
 OFF = "off"
 WARN = "warn"
 ENFORCE = "enforce"
@@ -40,10 +42,10 @@ ENV_LICENSE_STRICT = "SBOM_LICENSE_STRICT"
 ENV_EXTERNAL_TOOLS = "SBOM_EXTERNAL_TOOLS"
 ENV_DIR = "SBOM_DIR"
 
-# Not a gate: the version the SBOM is expected to describe. Named PXB_VERSION to
-# match the rest of the PXB suite (PXB_DOCKER_ACC / PXB_VERSION / PXB_REVISION)
-# rather than inventing a second spelling.
-ENV_EXPECT_VERSION = "PXB_VERSION"
+# Not a gate: which product's SBOM files are being checked. Unset in every
+# pipeline, so everything resolves to products.DEFAULT (PXB) exactly as before
+# the checks were made per-product.
+ENV_PRODUCT = "SBOM_PRODUCT"
 
 
 def _mode(name, default=WARN):
@@ -94,14 +96,28 @@ def sbom_dir():
     return os.environ.get(ENV_DIR) or None
 
 
-def expect_version():
+def product(key=None):
+    """The product being checked: key if given, else $SBOM_PRODUCT, else PXB."""
+    return products.get(key or (os.environ.get(ENV_PRODUCT) or "").strip()
+                        or products.DEFAULT)
+
+
+def expect_version_env(product_=None):
+    """Name of the variable that pins the expected version for a product --
+    PXB_VERSION for PXB, PS_VERSION for PS. Per product because each suite
+    already has its own spelling, and one shared name would be read by the
+    wrong job."""
+    return (product_ or product()).version_env
+
+
+def expect_version(product_=None):
     """Version the SBOM root component must describe, or None.
 
     Needed because a directory of downloaded SBOM files has no installed package
     to compare against -- without this, a local run can check structure and
     cross-format consistency but not which release the files are for.
     """
-    return (os.environ.get(ENV_EXPECT_VERSION) or "").strip() or None
+    return (os.environ.get(expect_version_env(product_)) or "").strip() or None
 
 
 SKIP_ABSENT = "skip-absent"

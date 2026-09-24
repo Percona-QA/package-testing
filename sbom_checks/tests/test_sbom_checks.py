@@ -1,11 +1,21 @@
 #!/usr/bin/env python3
 """Self-test for the SBOM checks, run against the prototype fixtures.
 
-PXB packages do not ship SBOM files yet, so this is the only thing proving the
+The packages do not ship SBOM files yet, so this is the only thing proving the
 parsers, structural checks and consistency logic work before packaging lands.
-Needs no VM, no container and no installed package.
+Needs no VM, no container and no installed package. Run from the repo root:
 
-    python3 -m pytest -v sbom_checks/tests/
+    ~/.venvs/pxb-sbom/bin/python -m pytest -v sbom_checks/tests/
+
+Tests that hold for any product run once per product in testdata/ (pxb, ps),
+with ids like test_clean_fixtures_pass[ps]. PS failures are deliberately left
+visible while the PS formats settle, so select a product with its marker:
+
+    ... -m "not ps"      PXB only
+    ... -m ps            PS only
+
+-m rather than -k: -k is substring matching on test names, and would silently
+drop test_non_object_relationships_... ("relationshiPS") from a "not ps" run.
 """
 
 import copy
@@ -22,41 +32,95 @@ sys.path.insert(0, os.path.abspath(
 
 from sbom_checks import (audit, check_sbom, config, consistency, discovery,
                          external_tools, label_junit, licenses, parsers,
-                         structural)
+                         products, structural)
 from sbom_checks.backends import LocalBackend
-from sbom_checks.models import Component
+from sbom_checks.models import Component, SbomSet
 
 TESTDATA_ROOT = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "testdata"))
-PXB_TESTDATA = os.path.join(TESTDATA_ROOT, "pxb")
 
-# Per product, so sbom_checks/testdata/ps/ can sit alongside. TESTDATA must stay
-# pointed at a product directory, never at TESTDATA_ROOT: the copy loops below
-# use shutil.copy, which raises IsADirectoryError on a subdirectory, and the
-# discover()-based tests take sets[0], which would silently become the PS set
-# once a second product directory exists.
-TESTDATA = PXB_TESTDATA
-STEM = "percona-xtrabackup-97"
-ROOT_NAME = "percona-xtrabackup-97"
-ROOT_VERSION = "9.7.1-rc1"
-EXPECTED_COMPONENTS = 18
+
+class FixtureSet(object):
+    """One product's example SBOM files, and what they are known to contain.
+
+    Each points at a flat product directory, never at TESTDATA_ROOT: the copy
+    loops use shutil.copy, which raises IsADirectoryError on a subdirectory,
+    and the discover()-based tests take sets[0], which would silently become
+    another product's set if the root were searched.
+    """
+
+    def __init__(self, key, stem, root_name, root_version, components):
+        self.key = key
+        self.directory = os.path.join(TESTDATA_ROOT, key)
+        self.stem = stem
+        self.root_name = root_name
+        self.root_version = root_version
+        self.components = components
+
+    def __repr__(self):
+        return "FixtureSet(%r)" % self.key
+
+
+FIXTURE_SETS = {
+    "pxb": FixtureSet("pxb", stem="percona-xtrabackup-97",
+                      root_name="percona-xtrabackup-97", root_version="9.7.1-rc1",
+                      components=18),
+    "ps": FixtureSet("ps", stem="percona-server",
+                     root_name="percona-server", root_version="9.7.2-2",
+                     components=25),
+}
+PXB = FIXTURE_SETS["pxb"]
+
+# Tests below that depend on PXB-specific content or format -- the per-component
+# .licenses.txt rows, the .sbom.txt column layout, the xxhash-lz4 component --
+# stay PXB-only and read these. Everything that holds for any product takes the
+# fixture_set fixture instead.
+TESTDATA = PXB.directory
+STEM = PXB.stem
+ROOT_NAME = PXB.root_name
+ROOT_VERSION = PXB.root_version
+EXPECTED_COMPONENTS = PXB.components
+
+
+@pytest.fixture(params=[pytest.param(key, marks=getattr(pytest.mark, key), id=key)
+                        for key in sorted(FIXTURE_SETS)])
+def fixture_set(request):
+    """Each product's fixtures in turn. Marked per product (pytest.mark.pxb,
+    pytest.mark.ps) so a run can select one with -m."""
+    return FIXTURE_SETS[request.param]
+
+
+def _copy_fixtures(fixture_set_, prefix):
+    path = tempfile.mkdtemp(prefix=prefix)
+    for name in os.listdir(fixture_set_.directory):
+        shutil.copy(os.path.join(fixture_set_.directory, name), os.path.join(path, name))
+    return path
 
 
 @pytest.fixture
 def workdir():
-    path = tempfile.mkdtemp(prefix="pxb-sbom-test-")
-    for name in os.listdir(TESTDATA):
-        shutil.copy(os.path.join(TESTDATA, name), os.path.join(path, name))
+    """A scratch copy of the PXB fixtures -- for PXB-only tests, and for tests
+    that only need a temporary directory to put stubs in."""
+    path = _copy_fixtures(PXB, "pxb-sbom-test-")
     yield path
     shutil.rmtree(path, ignore_errors=True)
 
 
-def _audit(path, **kwargs):
+@pytest.fixture
+def product_workdir(fixture_set):
+    """A scratch copy of the current fixture_set's files."""
+    path = _copy_fixtures(fixture_set, "%s-sbom-test-" % fixture_set.key)
+    yield path
+    shutil.rmtree(path, ignore_errors=True)
+
+
+def _audit(path, fixture_set_=None, **kwargs):
+    fixture_set_ = fixture_set_ or PXB
     backend = LocalBackend()
     sets, _ = discovery.discover(backend, sbom_dir=path)
     assert sets, "discovery found no SBOM set in %s" % path
-    kwargs.setdefault("expect_name", ROOT_NAME)
-    kwargs.setdefault("expect_version", ROOT_VERSION)
+    kwargs.setdefault("expect_name", fixture_set_.root_name)
+    kwargs.setdefault("expect_version", fixture_set_.root_version)
     kwargs.setdefault("run_tools", False)
     return audit.audit(backend, sets[0], **kwargs)
 
@@ -75,24 +139,29 @@ def _messages(report):
 
 # --- the happy path -------------------------------------------------------
 
-def test_fixtures_are_a_complete_set(workdir):
+def test_fixtures_are_a_complete_set(fixture_set, product_workdir):
     backend = LocalBackend()
-    sets, considered = discovery.discover(backend, sbom_dir=workdir)
+    sets, considered = discovery.discover(backend, sbom_dir=product_workdir)
     assert len(sets) == 1, considered
-    assert sets[0].stem == STEM
+    assert sets[0].stem == fixture_set.stem
     assert sets[0].missing() == []
 
 
-def test_clean_fixtures_pass(workdir):
-    report = _audit(workdir)
+def test_clean_fixtures_pass(fixture_set, product_workdir):
+    report = _audit(product_workdir, fixture_set)
     assert report.ok, _messages(report)
 
 
-def test_every_format_parses_the_same_component_count(workdir):
-    report = _audit(workdir)
+def test_every_format_parses_the_same_component_count(fixture_set, product_workdir):
+    report = _audit(product_workdir, fixture_set)
+    # Every format, not just the ones that happened to parse: iterating
+    # by_format alone passed for a set where two of the four formats failed to
+    # parse and were simply absent from it.
+    assert sorted(report.by_format) == sorted(SbomSet.FORMATS), (
+        "parsed %s of %s" % (sorted(report.by_format), sorted(SbomSet.FORMATS)))
     for fmt, components in report.by_format.items():
-        assert len(components) == EXPECTED_COMPONENTS, (
-            "%s parsed %d components, expected %d" % (fmt, len(components), EXPECTED_COMPONENTS))
+        assert len(components) == fixture_set.components, (
+            "%s parsed %d components, expected %d" % (fmt, len(components), fixture_set.components))
 
 
 def test_duplicate_xxhash_entries_are_not_a_finding(workdir):
@@ -106,9 +175,9 @@ def test_duplicate_xxhash_entries_are_not_a_finding(workdir):
 
 # --- the checks must actually catch things --------------------------------
 
-def test_missing_file_is_reported(workdir):
-    os.remove(os.path.join(workdir, STEM + ".licenses.txt"))
-    report = _audit(workdir)
+def test_missing_file_is_reported(fixture_set, product_workdir):
+    os.remove(os.path.join(product_workdir, fixture_set.stem + ".licenses.txt"))
+    report = _audit(product_workdir, fixture_set)
     assert not report.ok
     assert "missing licenses" in _messages(report)
 
@@ -123,35 +192,36 @@ def test_dropped_component_breaks_consistency(workdir):
     assert "missing from .licenses.txt" in _messages(report)
 
 
-def test_version_mismatch_between_formats_is_caught(workdir):
-    _rewrite_json(os.path.join(workdir, STEM + ".spdx.json"),
+def test_version_mismatch_between_formats_is_caught(fixture_set, product_workdir):
+    _rewrite_json(os.path.join(product_workdir, fixture_set.stem + ".spdx.json"),
                   lambda d: [p.update(versionInfo="0.0.0")
                              for p in d["packages"] if p["name"] == "zlib"])
-    report = _audit(workdir)
+    report = _audit(product_workdir, fixture_set)
     assert not report.ok
     assert "zlib" in _messages(report)
 
 
-def test_wrong_root_component_is_caught(workdir):
-    _rewrite_json(os.path.join(workdir, STEM + ".cdx.json"),
+def test_wrong_root_component_is_caught(fixture_set, product_workdir):
+    _rewrite_json(os.path.join(product_workdir, fixture_set.stem + ".cdx.json"),
                   lambda d: d["metadata"]["component"].update(version="1.2.3"))
-    report = _audit(workdir)
+    report = _audit(product_workdir, fixture_set)
     assert not report.ok
     assert "metadata.component.version" in _messages(report)
 
 
-def test_broken_bom_format_is_caught(workdir):
-    _rewrite_json(os.path.join(workdir, STEM + ".cdx.json"),
+def test_broken_bom_format_is_caught(fixture_set, product_workdir):
+    _rewrite_json(os.path.join(product_workdir, fixture_set.stem + ".cdx.json"),
                   lambda d: d.update(bomFormat="NotCycloneDX"))
-    report = _audit(workdir)
+    report = _audit(product_workdir, fixture_set)
     assert not report.ok
     assert "bomFormat" in _messages(report)
 
 
-def test_expected_version_is_asserted(workdir):
-    """A directory of downloaded files has no installed package, so PXB_VERSION
-    is the only way to check which release the SBOM is for."""
-    report = _audit(workdir, expect_version="9.9.9")
+def test_expected_version_is_asserted(fixture_set, product_workdir):
+    """A directory of downloaded files has no installed package, so the
+    product's version variable is the only way to check which release the
+    SBOM is for."""
+    report = _audit(product_workdir, fixture_set, expect_version="9.9.9")
     root = [f for f in report.findings if f.where == "root"]
     assert root, "a wrong expected version must be reported"
     assert "9.9.9" in _messages(report)
@@ -160,51 +230,67 @@ def test_expected_version_is_asserted(workdir):
     assert all(f.where == "root" for f in root)
 
 
-def test_expected_version_tolerates_a_package_release_suffix(workdir):
-    """The SBOM says 9.7.1-rc1; an rpm or a job parameter may say 9.7.1-rc1.2."""
-    report = _audit(workdir, expect_version="9.7.1-rc1.2")
+def test_expected_version_tolerates_a_package_release_suffix(fixture_set, product_workdir):
+    """The SBOM says e.g. 9.7.1-rc1; an rpm or a job parameter may say
+    9.7.1-rc1.2. Derived from each product's own version -- a PXB literal here
+    would fail for PS for a reason unrelated to anything under test."""
+    report = _audit(product_workdir, fixture_set,
+                    expect_version=fixture_set.root_version + ".2")
     assert not [f for f in report.findings if f.where == "root"], _messages(report)
 
 
-def test_expected_version_is_read_from_the_environment(monkeypatch):
-    monkeypatch.delenv(config.ENV_EXPECT_VERSION, raising=False)
-    assert config.expect_version() is None
-    monkeypatch.setenv(config.ENV_EXPECT_VERSION, "9.7.1-rc1")
-    assert config.expect_version() == "9.7.1-rc1"
-    monkeypatch.setenv(config.ENV_EXPECT_VERSION, "   ")
-    assert config.expect_version() is None
+@pytest.mark.parametrize("key,variable", [("pxb", "PXB_VERSION"), ("ps", "PS_VERSION")])
+def test_expected_version_is_read_from_the_environment(monkeypatch, key, variable):
+    product = config.product(key)
+    assert config.expect_version_env(product) == variable
+    monkeypatch.delenv(variable, raising=False)
+    assert config.expect_version(product) is None
+    monkeypatch.setenv(variable, "9.7.1-rc1")
+    assert config.expect_version(product) == "9.7.1-rc1"
+    monkeypatch.setenv(variable, "   ")
+    assert config.expect_version(product) is None
 
 
-def test_wrong_expected_name_is_reported_under_root(workdir):
-    report = _audit(workdir, expect_name="percona-xtrabackup-84")
+def test_each_product_reads_only_its_own_version_variable(monkeypatch):
+    """A PS job must not pick up PXB_VERSION, or the reverse -- each suite
+    already has its own spelling, and one shared name would be read by the
+    wrong job."""
+    monkeypatch.setenv("PXB_VERSION", "9.7.1-rc1")
+    monkeypatch.delenv("PS_VERSION", raising=False)
+    assert config.expect_version(config.product("pxb")) == "9.7.1-rc1"
+    assert config.expect_version(config.product("ps")) is None
+
+
+def test_wrong_expected_name_is_reported_under_root(fixture_set, product_workdir):
+    report = _audit(product_workdir, fixture_set, expect_name="percona-xtrabackup-84")
     root = [f for f in report.findings if f.where == "root"]
     assert root, "a wrong expected name must be reported"
     assert "percona-xtrabackup-84" in _messages(report)
 
 
-def test_invalid_json_is_reported_not_raised(workdir):
-    with open(os.path.join(workdir, STEM + ".cdx.json"), "w") as handle:
+def test_invalid_json_is_reported_not_raised(fixture_set, product_workdir):
+    with open(os.path.join(product_workdir, fixture_set.stem + ".cdx.json"), "w") as handle:
         handle.write("{ this is not json")
-    report = _audit(workdir)
+    report = _audit(product_workdir, fixture_set)
     assert not report.ok
     assert "not valid JSON" in _messages(report)
 
 
-def test_missing_licence_is_caught(workdir):
-    _rewrite_json(os.path.join(workdir, STEM + ".spdx.json"),
+def test_missing_licence_is_caught(fixture_set, product_workdir):
+    _rewrite_json(os.path.join(product_workdir, fixture_set.stem + ".spdx.json"),
                   lambda d: [p.update(licenseConcluded="NOASSERTION",
                                       licenseDeclared="NOASSERTION")
                              for p in d["packages"] if p["name"] == "lz4"])
-    report = _audit(workdir)
+    report = _audit(product_workdir, fixture_set)
     assert not report.ok
     assert "lz4" in _messages(report)
 
 
-def test_duplicate_spdxid_is_caught(workdir):
+def test_duplicate_spdxid_is_caught(fixture_set, product_workdir):
     def mutate(doc):
         doc["packages"][2]["SPDXID"] = doc["packages"][1]["SPDXID"]
-    _rewrite_json(os.path.join(workdir, STEM + ".spdx.json"), mutate)
-    report = _audit(workdir)
+    _rewrite_json(os.path.join(product_workdir, fixture_set.stem + ".spdx.json"), mutate)
+    report = _audit(product_workdir, fixture_set)
     assert not report.ok
     assert "is used by both" in _messages(report)
 
@@ -218,13 +304,13 @@ def test_licence_disagreement_is_caught(workdir):
     assert "licence disagrees" in _messages(report)
 
 
-def test_sbom_dir_containing_a_space_is_searched(workdir):
+def test_sbom_dir_containing_a_space_is_searched(fixture_set, product_workdir):
     """An unquoted path split into two arguments and reported the directory as
     empty -- indistinguishable from a package that ships no SBOM."""
     spaced = tempfile.mkdtemp(prefix="pxb sbom dir ")
     try:
-        for name in os.listdir(TESTDATA):
-            shutil.copy(os.path.join(TESTDATA, name), os.path.join(spaced, name))
+        for name in os.listdir(fixture_set.directory):
+            shutil.copy(os.path.join(fixture_set.directory, name), os.path.join(spaced, name))
         sets, considered = discovery.discover(LocalBackend(), sbom_dir=spaced)
         assert len(sets) == 1, considered
         assert sets[0].missing() == []
@@ -232,7 +318,7 @@ def test_sbom_dir_containing_a_space_is_searched(workdir):
         shutil.rmtree(spaced, ignore_errors=True)
 
 
-def test_sbom_dir_containing_a_quote_is_searched(workdir):
+def test_sbom_dir_containing_a_quote_is_searched(fixture_set, product_workdir):
     """A path with a single quote used to break the command outright.
 
     The literal quotes around the interpolated value were not escaping: the
@@ -242,8 +328,8 @@ def test_sbom_dir_containing_a_quote_is_searched(workdir):
     """
     quoted = tempfile.mkdtemp(prefix="pxb'sbom")
     try:
-        for name in os.listdir(TESTDATA):
-            shutil.copy(os.path.join(TESTDATA, name), os.path.join(quoted, name))
+        for name in os.listdir(fixture_set.directory):
+            shutil.copy(os.path.join(fixture_set.directory, name), os.path.join(quoted, name))
         sets, considered = discovery.discover(LocalBackend(), sbom_dir=quoted)
         assert len(sets) == 1, considered
         assert sets[0].missing() == []
@@ -263,38 +349,38 @@ def test_sbom_dir_cannot_inject_shell_commands(workdir):
     assert sets == [], considered
 
 
-def test_sbom_dir_finds_files_nested_several_levels_deep(workdir):
+def test_sbom_dir_finds_files_nested_several_levels_deep(fixture_set, product_workdir):
     """An extracted archive can nest; the search depth must match the one used
     for the package-owned paths."""
-    nested = os.path.join(workdir, "a", "b", "c")
+    nested = os.path.join(product_workdir, "a", "b", "c")
     os.makedirs(nested)
-    for name in os.listdir(TESTDATA):
-        shutil.move(os.path.join(workdir, name), os.path.join(nested, name))
-    sets, considered = discovery.discover(LocalBackend(), sbom_dir=workdir)
+    for name in os.listdir(fixture_set.directory):
+        shutil.move(os.path.join(product_workdir, name), os.path.join(nested, name))
+    sets, considered = discovery.discover(LocalBackend(), sbom_dir=product_workdir)
     assert len(sets) == 1, considered
     assert sets[0].missing() == []
 
 
-def test_sibling_directories_do_not_merge_into_one_set(workdir):
+def test_sibling_directories_do_not_merge_into_one_set(fixture_set, product_workdir):
     """A backup or leftover copy next to the real SBOM must stay a separate set.
 
     Keyed on the stem alone these merged, and the merged set could take
     CycloneDX from one directory and SPDX from the other -- so cross-format
     consistency would have compared unrelated documents and passed.
     """
-    real = os.path.join(workdir, "sbom")
-    backup = os.path.join(workdir, "sbom-backup")
+    real = os.path.join(product_workdir, "sbom")
+    backup = os.path.join(product_workdir, "sbom-backup")
     os.makedirs(real)
     os.makedirs(backup)
-    for name in os.listdir(TESTDATA):
-        shutil.copy(os.path.join(TESTDATA, name), os.path.join(real, name))
-        shutil.copy(os.path.join(TESTDATA, name), os.path.join(backup, name))
-    for name in os.listdir(workdir):
-        path = os.path.join(workdir, name)
+    for name in os.listdir(fixture_set.directory):
+        shutil.copy(os.path.join(fixture_set.directory, name), os.path.join(real, name))
+        shutil.copy(os.path.join(fixture_set.directory, name), os.path.join(backup, name))
+    for name in os.listdir(product_workdir):
+        path = os.path.join(product_workdir, name)
         if os.path.isfile(path):
             os.remove(path)
 
-    sets, considered = discovery.discover(LocalBackend(), sbom_dir=workdir)
+    sets, considered = discovery.discover(LocalBackend(), sbom_dir=product_workdir)
     assert len(sets) == 2, considered
     directories = sorted(s.directory for s in sets)
     assert directories == sorted([real, backup])
@@ -305,9 +391,21 @@ def test_sibling_directories_do_not_merge_into_one_set(workdir):
 
 
 def test_default_search_is_limited_to_the_package_directory():
-    """Both rpm and deb install under /usr/share/percona-xtrabackup*/; searching
-    wider picked up SBOMs belonging to other packages."""
-    assert discovery.SEARCH_DIRS == ("/usr/share/percona-xtrabackup*",)
+    """Both rpm and deb install PXB under /usr/share/percona-xtrabackup*/;
+    searching wider picked up SBOMs belonging to other packages."""
+    assert products.PXB.search_dirs == ("/usr/share/percona-xtrabackup*",)
+
+
+@pytest.mark.parametrize("key", sorted(products.PRODUCTS))
+def test_each_product_searches_only_its_own_directories(key):
+    """No product's fallback may reach into another product's directories."""
+    product = products.get(key)
+    for directory in product.search_dirs:
+        assert directory.startswith("/usr/share/"), directory
+        for other in products.PRODUCTS.values():
+            if other is not product:
+                for theirs in other.search_dirs:
+                    assert directory != theirs, (key, directory)
 
 
 def test_empty_directory_yields_no_sets(workdir):
@@ -408,27 +506,29 @@ def test_junit_label_ignores_an_empty_label(workdir):
 # --- the exported copy, and cleaning it up --------------------------------
 
 def _temp_dirs():
+    """The audit's temporary copies. Reads audit.TEMP_PREFIX rather than repeating
+    it: a stale literal here made every leak test below pass vacuously."""
     root = tempfile.gettempdir()
-    return {d for d in os.listdir(root) if d.startswith("pxb-sbom-")}
+    return {d for d in os.listdir(root) if d.startswith(audit.TEMP_PREFIX)}
 
 
-def test_local_backend_needs_no_temporary_copy(workdir):
+def test_local_backend_needs_no_temporary_copy(fixture_set, product_workdir):
     """The packaged file is on the same filesystem, so the tools read it in
     place and nothing is written to the temp dir at all."""
     before = _temp_dirs()
     backend = LocalBackend()
-    sets, _ = discovery.discover(backend, sbom_dir=workdir)
+    sets, _ = discovery.discover(backend, sbom_dir=product_workdir)
     report = audit.audit(backend, sets[0], run_tools=True)
     assert _temp_dirs() == before, "a temporary copy was made unnecessarily"
     # and the tools still saw a real document
     assert report.tool_status["cyclonedx"] != external_tools.FAILED
 
 
-def test_a_copy_is_made_and_removed_when_the_file_is_gzipped(workdir):
+def test_a_copy_is_made_and_removed_when_the_file_is_gzipped(fixture_set, product_workdir):
     """trivy and cyclonedx cannot parse .json.gz, so this path must still copy
     -- and must still clean up after itself."""
     import gzip
-    source = os.path.join(workdir, STEM + ".cdx.json")
+    source = os.path.join(product_workdir, fixture_set.stem + ".cdx.json")
     data = open(source, "rb").read()
     os.remove(source)
     with gzip.open(source + ".gz", "wb") as handle:
@@ -437,13 +537,13 @@ def test_a_copy_is_made_and_removed_when_the_file_is_gzipped(workdir):
     before = _temp_dirs()
     backend = LocalBackend()
     assert backend.local_path(source + ".gz") is None, "gzip must force a copy"
-    sets, _ = discovery.discover(backend, sbom_dir=workdir)
+    sets, _ = discovery.discover(backend, sbom_dir=product_workdir)
     report = audit.audit(backend, sets[0], run_tools=True)
     assert _temp_dirs() == before, "the temporary copy was left behind"
     assert report.tool_status["cyclonedx"] != external_tools.FAILED
 
 
-def test_temp_copy_is_removed_when_export_fails(workdir):
+def test_temp_copy_is_removed_when_export_fails(fixture_set, product_workdir):
     """The export-failure path returns early -- it must still clean up."""
     before = _temp_dirs()
     backend = LocalBackend()
@@ -452,24 +552,24 @@ def test_temp_copy_is_removed_when_export_fails(workdir):
         raise IOError("simulated export failure")
     backend.export = boom
 
-    sets, _ = discovery.discover(backend, sbom_dir=workdir)
+    sets, _ = discovery.discover(backend, sbom_dir=product_workdir)
     report = audit.audit(backend, sets[0], run_tools=True)
     assert _temp_dirs() == before, "the temp dir survived an export failure"
     assert report.tool_status["cyclonedx"] == external_tools.FAILED
 
 
-def test_temp_copy_is_removed_when_the_vuln_gate_is_off(workdir, monkeypatch):
+def test_temp_copy_is_removed_when_the_vuln_gate_is_off(fixture_set, product_workdir, monkeypatch):
     """SBOM_VULN_MODE=off returns before the trivy block -- also a cleanup path."""
     monkeypatch.setenv(config.ENV_VULN_MODE, "off")
     before = _temp_dirs()
     backend = LocalBackend()
     backend.local_path = lambda path: None          # force the copy branch
-    sets, _ = discovery.discover(backend, sbom_dir=workdir)
+    sets, _ = discovery.discover(backend, sbom_dir=product_workdir)
     audit.audit(backend, sets[0], run_tools=True)
     assert _temp_dirs() == before
 
 
-def test_cleanup_failure_does_not_break_the_audit(workdir, monkeypatch):
+def test_cleanup_failure_does_not_break_the_audit(fixture_set, product_workdir, monkeypatch):
     """Tidying up must never turn into a failed audit -- the reason for
     ignore_errors rather than TemporaryDirectory."""
     import shutil as _shutil
@@ -480,7 +580,7 @@ def test_cleanup_failure_does_not_break_the_audit(workdir, monkeypatch):
     monkeypatch.setattr(_shutil, "rmtree",
                         lambda *a, **k: (_ for _ in ()).throw(OSError("boom")))
     try:
-        sets, _ = discovery.discover(backend, sbom_dir=workdir)
+        sets, _ = discovery.discover(backend, sbom_dir=product_workdir)
         report = audit.audit(backend, sets[0], run_tools=True)
         assert report is not None
     finally:
@@ -502,14 +602,14 @@ def _stub(directory, name, body):
     return path
 
 
-def test_missing_tools_are_reported_as_missing_not_as_success(workdir):
+def test_missing_tools_are_reported_as_missing_not_as_success(fixture_set, product_workdir):
     """A tool that never ran must not look like a tool that found nothing.
 
     Before this, an absent binary produced no findings and the corresponding
     tests passed having validated nothing.
     """
     backend = LocalBackend()
-    sets, _ = discovery.discover(backend, sbom_dir=workdir)
+    sets, _ = discovery.discover(backend, sbom_dir=product_workdir)
     old_cdx, old_trivy = external_tools.CYCLONEDX_BIN, external_tools.TRIVY_BIN
     external_tools.CYCLONEDX_BIN = "/nonexistent/cyclonedx"
     external_tools.TRIVY_BIN = "/nonexistent/trivy"
@@ -539,34 +639,34 @@ def test_tools_are_found_by_absolute_path_when_not_on_PATH(workdir):
         os.environ["PATH"] = old_path
 
 
-def test_tool_binary_overrides_are_honoured(workdir):
+def test_tool_binary_overrides_are_honoured(fixture_set, product_workdir):
     """TRIVY_BIN / CYCLONEDX_BIN are how the ansible task passes those paths in."""
-    stub = _stub(workdir, "trivy-abs", "#!/bin/sh\nexit 0\n")
+    stub = _stub(product_workdir, "trivy-abs", "#!/bin/sh\nexit 0\n")
     old_bin, old_path = external_tools.TRIVY_BIN, os.environ.get("PATH", "")
     external_tools.TRIVY_BIN = stub
     os.environ["PATH"] = "/nonexistent-bin"
     try:
-        result = external_tools.trivy_sbom(os.path.join(TESTDATA, STEM + ".cdx.json"))
+        result = external_tools.trivy_sbom(os.path.join(fixture_set.directory, fixture_set.stem + ".cdx.json"))
         assert result.status == external_tools.OK, result.status
     finally:
         external_tools.TRIVY_BIN = old_bin
         os.environ["PATH"] = old_path
 
 
-def test_vuln_mode_off_does_not_invoke_trivy(workdir, monkeypatch):
+def test_vuln_mode_off_does_not_invoke_trivy(fixture_set, product_workdir, monkeypatch):
     """SBOM_VULN_MODE=off must prevent the scan, not merely ignore its result.
 
     Before this, `off` was behaviourally identical to `warn`: trivy still ran
     (pulling a ~1.4GB DB) and a missing trivy still failed the check.
     """
-    sentinel = os.path.join(workdir, "INVOKED")
-    stub = _stub(workdir, "trivy-sentinel",
+    sentinel = os.path.join(product_workdir, "INVOKED")
+    stub = _stub(product_workdir, "trivy-sentinel",
                  "#!/bin/sh\ntouch %s\nexit 0\n" % sentinel)
     monkeypatch.setattr(external_tools, "TRIVY_BIN", stub)
     monkeypatch.setenv(config.ENV_VULN_MODE, "off")
 
     backend = LocalBackend()
-    sets, _ = discovery.discover(backend, sbom_dir=TESTDATA)
+    sets, _ = discovery.discover(backend, sbom_dir=fixture_set.directory)
     report = audit.audit(backend, sets[0], run_tools=True)
 
     assert not os.path.exists(sentinel), "trivy was executed despite the gate being off"
@@ -574,17 +674,17 @@ def test_vuln_mode_off_does_not_invoke_trivy(workdir, monkeypatch):
     assert not report.vuln_findings
 
 
-def test_vuln_mode_warn_does_invoke_trivy(workdir, monkeypatch):
+def test_vuln_mode_warn_does_invoke_trivy(fixture_set, product_workdir, monkeypatch):
     """The control for the test above -- otherwise it could pass for the wrong
     reason, e.g. because the stub was never wired up."""
-    sentinel = os.path.join(workdir, "INVOKED")
-    stub = _stub(workdir, "trivy-sentinel",
+    sentinel = os.path.join(product_workdir, "INVOKED")
+    stub = _stub(product_workdir, "trivy-sentinel",
                  "#!/bin/sh\ntouch %s\nexit 0\n" % sentinel)
     monkeypatch.setattr(external_tools, "TRIVY_BIN", stub)
     monkeypatch.setenv(config.ENV_VULN_MODE, "warn")
 
     backend = LocalBackend()
-    sets, _ = discovery.discover(backend, sbom_dir=TESTDATA)
+    sets, _ = discovery.discover(backend, sbom_dir=fixture_set.directory)
     report = audit.audit(backend, sets[0], run_tools=True)
 
     assert os.path.exists(sentinel), "trivy should have been executed"
@@ -603,32 +703,32 @@ def _unlaunchable(directory, name, kind):
     return path
 
 
-def test_unlaunchable_cyclonedx_is_failed_not_an_exception(workdir):
+def test_unlaunchable_cyclonedx_is_failed_not_an_exception(fixture_set, product_workdir):
     """shutil.which() only checks the executable bit, so a resolved path can
     still fail to launch. That must be a FAILED status, not an escaping OSError
     that surfaces as a fixture crash naming no tool."""
-    stub = _unlaunchable(workdir, "cyclonedx", "bad-elf")
+    stub = _unlaunchable(product_workdir, "cyclonedx", "bad-elf")
     old = external_tools.CYCLONEDX_BIN
     external_tools.CYCLONEDX_BIN = stub
     try:
         result = external_tools.cyclonedx_validate(
-            os.path.join(TESTDATA, STEM + ".cdx.json"))
+            os.path.join(fixture_set.directory, fixture_set.stem + ".cdx.json"))
     finally:
         external_tools.CYCLONEDX_BIN = old
     assert result.status == external_tools.FAILED
     assert "cannot execute" in result.output
 
 
-def test_unlaunchable_trivy_is_failed_never_a_vulnerability(workdir):
+def test_unlaunchable_trivy_is_failed_never_a_vulnerability(fixture_set, product_workdir):
     """The rc==1 branch means "vulnerabilities found", so a launch failure must
     not land there -- otherwise a broken binary reads as a phantom CVE."""
     for kind in ("bad-elf", "missing-loader"):
-        stub = _unlaunchable(workdir, "trivy-" + kind, kind)
+        stub = _unlaunchable(product_workdir, "trivy-" + kind, kind)
         old = external_tools.TRIVY_BIN
         external_tools.TRIVY_BIN = stub
         try:
             result = external_tools.trivy_sbom(
-                os.path.join(TESTDATA, STEM + ".cdx.json"))
+                os.path.join(fixture_set.directory, fixture_set.stem + ".cdx.json"))
         finally:
             external_tools.TRIVY_BIN = old
         assert result.status == external_tools.FAILED, kind
@@ -652,41 +752,41 @@ def test_backend_run_degrades_when_the_command_cannot_launch(workdir):
     assert considered, "discovery must still explain what it looked at"
 
 
-def test_trivy_failure_is_not_reported_as_a_vulnerability(workdir):
+def test_trivy_failure_is_not_reported_as_a_vulnerability(fixture_set, product_workdir):
     """trivy exits non-zero when it cannot run at all -- a rate-limited DB pull
     from ghcr.io, say. Treating that as a finding would be a phantom CVE."""
-    stub = _stub(workdir, "trivy-fatal",
+    stub = _stub(product_workdir, "trivy-fatal",
                  "#!/bin/sh\necho 'FATAL failed to download vulnerability DB' >&2\nexit 1\n")
     old = external_tools.TRIVY_BIN
     external_tools.TRIVY_BIN = stub
     try:
-        result = external_tools.trivy_sbom(os.path.join(TESTDATA, STEM + ".cdx.json"))
+        result = external_tools.trivy_sbom(os.path.join(fixture_set.directory, fixture_set.stem + ".cdx.json"))
     finally:
         external_tools.TRIVY_BIN = old
     assert result.status == external_tools.FAILED
     assert result.status != external_tools.FOUND
 
 
-def test_trivy_findings_are_still_reported(workdir):
+def test_trivy_findings_are_still_reported(fixture_set, product_workdir):
     """rc 1 with no fatal marker is a genuine finding and must stay one."""
-    stub = _stub(workdir, "trivy-vuln",
+    stub = _stub(product_workdir, "trivy-vuln",
                  "#!/bin/sh\necho 'zlib CVE-2023-45853 HIGH'\nexit 1\n")
     old = external_tools.TRIVY_BIN
     external_tools.TRIVY_BIN = stub
     try:
-        result = external_tools.trivy_sbom(os.path.join(TESTDATA, STEM + ".cdx.json"))
+        result = external_tools.trivy_sbom(os.path.join(fixture_set.directory, fixture_set.stem + ".cdx.json"))
     finally:
         external_tools.TRIVY_BIN = old
     assert result.status == external_tools.FOUND
     assert "CVE-2023-45853" in result.output
 
 
-def test_trivy_clean_scan_is_ok(workdir):
-    stub = _stub(workdir, "trivy-clean", "#!/bin/sh\nexit 0\n")
+def test_trivy_clean_scan_is_ok(fixture_set, product_workdir):
+    stub = _stub(product_workdir, "trivy-clean", "#!/bin/sh\nexit 0\n")
     old = external_tools.TRIVY_BIN
     external_tools.TRIVY_BIN = stub
     try:
-        result = external_tools.trivy_sbom(os.path.join(TESTDATA, STEM + ".cdx.json"))
+        result = external_tools.trivy_sbom(os.path.join(fixture_set.directory, fixture_set.stem + ".cdx.json"))
     finally:
         external_tools.TRIVY_BIN = old
     assert result.status == external_tools.OK
@@ -792,12 +892,12 @@ def test_broken_metadata_does_not_discard_valid_components():
     assert [(c.name, c.version) for c in components] == [("zlib", "1.3.2")]
 
 
-def test_audit_reports_rather_than_aborts_on_a_malformed_document(workdir):
+def test_audit_reports_rather_than_aborts_on_a_malformed_document(fixture_set, product_workdir):
     """End to end: a malformed CycloneDX file must make audit() return findings,
     not raise through the pytest fixture."""
-    with open(os.path.join(workdir, STEM + ".cdx.json"), "w") as handle:
+    with open(os.path.join(product_workdir, fixture_set.stem + ".cdx.json"), "w") as handle:
         handle.write('{"metadata": "bad"}')
-    report = _audit(workdir, run_tools=False)
+    report = _audit(product_workdir, fixture_set, run_tools=False)
     assert not report.ok
     assert any(f.where == "cdx" for f in report.findings)
 
@@ -826,38 +926,38 @@ def test_table_header_change_is_a_clear_error():
     assert "format has changed" in str(excinfo.value)
 
 
-def test_cyclonedx_licence_expression_form_is_read():
+def test_cyclonedx_licence_expression_form_is_read(fixture_set):
     doc, root, components = parsers.load_cyclonedx(
-        open(os.path.join(TESTDATA, STEM + ".cdx.json"), "rb").read())
+        open(os.path.join(fixture_set.directory, fixture_set.stem + ".cdx.json"), "rb").read())
     kmip = [c for c in components if c.name == "libkmip"][0]
     assert kmip.license == "Apache-2.0 OR BSD-3-Clause"
 
 
-def test_spdx_root_package_is_excluded_from_components():
+def test_spdx_root_package_is_excluded_from_components(fixture_set):
     doc, root, components = parsers.load_spdx(
-        open(os.path.join(TESTDATA, STEM + ".spdx.json"), "rb").read())
-    assert root.name == ROOT_NAME
-    assert ROOT_NAME not in [c.name for c in components]
-    assert len(components) == EXPECTED_COMPONENTS
+        open(os.path.join(fixture_set.directory, fixture_set.stem + ".spdx.json"), "rb").read())
+    assert root.name == fixture_set.root_name
+    assert fixture_set.root_name not in [c.name for c in components]
+    assert len(components) == fixture_set.components
 
 
-def test_spdxid_mangling_does_not_break_matching():
+def test_spdxid_mangling_does_not_break_matching(fixture_set):
     """unordered_dense is SPDXRef-Package-unordered-dense; matching on SPDXID
     instead of name would lose it."""
     doc, root, components = parsers.load_spdx(
-        open(os.path.join(TESTDATA, STEM + ".spdx.json"), "rb").read())
+        open(os.path.join(fixture_set.directory, fixture_set.stem + ".spdx.json"), "rb").read())
     assert "unordered_dense" in [c.name for c in components]
 
 
-def test_gzipped_sbom_is_read_transparently(workdir):
+def test_gzipped_sbom_is_read_transparently(fixture_set, product_workdir):
     """Debian gzips files under /usr/share/doc."""
     import gzip
-    source = os.path.join(workdir, STEM + ".cdx.json")
+    source = os.path.join(product_workdir, fixture_set.stem + ".cdx.json")
     data = open(source, "rb").read()
     os.remove(source)
     with gzip.open(source + ".gz", "wb") as handle:
         handle.write(data)
-    report = _audit(workdir)
+    report = _audit(product_workdir, fixture_set)
     assert report.ok, _messages(report)
 
 
@@ -870,10 +970,10 @@ def test_licence_normalisation():
     assert licenses.is_null("NOASSERTION")
 
 
-def test_spec_version_is_derived_not_hardcoded():
+def test_spec_version_is_derived_not_hardcoded(fixture_set):
     from sbom_checks import external_tools
     assert external_tools.spec_version(
-        os.path.join(TESTDATA, STEM + ".cdx.json")) == "v1_5"
+        os.path.join(fixture_set.directory, fixture_set.stem + ".cdx.json")) == "v1_5"
 
 
 # --- CLI enforces tool_status --------------------------------------------
@@ -929,17 +1029,16 @@ def test_cli_exit_code_reflects_tool_status(workdir, monkeypatch, label, cdx_rc,
         shutil.rmtree(bindir, ignore_errors=True)
 
 
-def test_cli_does_not_blame_the_tool_when_there_is_no_cyclonedx_document(workdir,
-                                                                        monkeypatch):
+def test_cli_does_not_blame_the_tool_when_there_is_no_cyclonedx_document(fixture_set, product_workdir, monkeypatch):
     """With no .cdx.json the tools never run, leaving cyclonedx MISSING. That
     means "did not run", not "binary absent", so it must not be reported as a
     missing tool on a host where it is installed."""
-    os.remove(os.path.join(workdir, STEM + ".cdx.json"))
+    os.remove(os.path.join(product_workdir, fixture_set.stem + ".cdx.json"))
     monkeypatch.setattr(external_tools, "CYCLONEDX_BIN", "definitely-not-installed")
     monkeypatch.setattr(external_tools, "TRIVY_BIN", "definitely-not-installed")
     monkeypatch.setenv(config.ENV_VULN_MODE, "warn")
 
-    report = _audit(workdir, run_tools=True)
+    report = _audit(product_workdir, fixture_set, run_tools=True)
     assert check_sbom._tool_problems(report, report.sbom_set, True) == []
 
 
@@ -982,25 +1081,25 @@ def test_license_strict_is_overridable(monkeypatch, value, expected):
     assert config.license_strict() is expected
 
 
-def test_a_widened_licence_fails_by_default(workdir, monkeypatch):
+def test_a_widened_licence_fails_by_default(fixture_set, product_workdir, monkeypatch):
     monkeypatch.delenv(config.ENV_LICENSE_STRICT, raising=False)
-    _widen_spdx_licence(os.path.join(workdir, STEM + ".spdx.json"))
-    report = _audit(workdir, strict_licenses=None)
+    _widen_spdx_licence(os.path.join(product_workdir, fixture_set.stem + ".spdx.json"))
+    report = _audit(product_workdir, fixture_set, strict_licenses=None)
     assert not report.ok, "a licence that differs between formats must be caught"
     assert "licence disagrees" in _messages(report)
 
 
-def test_a_widened_licence_passes_when_strictness_is_turned_off(workdir, monkeypatch):
+def test_a_widened_licence_passes_when_strictness_is_turned_off(fixture_set, product_workdir, monkeypatch):
     monkeypatch.setenv(config.ENV_LICENSE_STRICT, "0")
-    _widen_spdx_licence(os.path.join(workdir, STEM + ".spdx.json"))
-    report = _audit(workdir, strict_licenses=None)
+    _widen_spdx_licence(os.path.join(product_workdir, fixture_set.stem + ".spdx.json"))
+    report = _audit(product_workdir, fixture_set, strict_licenses=None)
     assert report.ok, _messages(report)
 
 
-def test_clean_fixtures_still_pass_under_the_strict_default(workdir, monkeypatch):
+def test_clean_fixtures_still_pass_under_the_strict_default(fixture_set, product_workdir, monkeypatch):
     """The prototype SBOMs must not be broken by turning strictness on."""
     monkeypatch.delenv(config.ENV_LICENSE_STRICT, raising=False)
-    report = _audit(workdir, strict_licenses=None)
+    report = _audit(product_workdir, fixture_set, strict_licenses=None)
     assert report.ok, _messages(report)
 
 
@@ -1073,3 +1172,78 @@ def test_release_suffix_is_still_tolerated():
     assert structural._matches("9.7.1-rc1", "9.7.1-rc1-1.el9")
     assert structural._matches("9.7.1-rc1-1.el9", "9.7.1-rc1")
     assert not structural._matches("9.7.1-rc1", "9.7.2")
+
+
+# --- products are selected, never assumed --------------------------------
+
+def test_the_default_product_is_pxb(monkeypatch):
+    """Nothing in the pipelines sets SBOM_PRODUCT, so the default is what keeps
+    every existing job checking PXB exactly as before."""
+    monkeypatch.delenv(config.ENV_PRODUCT, raising=False)
+    assert config.product() is products.PXB
+    monkeypatch.setenv(config.ENV_PRODUCT, "ps")
+    assert config.product() is products.PS
+    assert config.product("pxb") is products.PXB      # explicit beats the env
+
+
+def test_an_unknown_product_is_an_error_not_a_fallback(monkeypatch):
+    """Silently checking PXB when asked for something else would report
+    findings that mean nothing."""
+    with pytest.raises(ValueError) as excinfo:
+        config.product("percona-nope")
+    assert "percona-nope" in str(excinfo.value)
+    monkeypatch.setenv(config.ENV_PRODUCT, "percona-nope")
+    with pytest.raises(ValueError):
+        config.product()
+
+
+def test_every_cyclonedx_component_keeps_its_linkage_and_origin(fixture_set):
+    """PXB writes pxb:linkage, PS writes percona:linkage. With "pxb:"
+    hard-coded, all 25 PS components silently had empty linkage and origin --
+    no error, just lost data."""
+    _, _, components = parsers.load_cyclonedx(open(os.path.join(
+        fixture_set.directory, fixture_set.stem + ".cdx.json"), "rb").read())
+    missing = [c.name for c in components if not c.linkage or not c.origin]
+    assert not missing, "linkage/origin lost for: %s" % ", ".join(missing)
+
+
+def test_a_percona_prefix_is_read_for_pxb_too():
+    """The PXB generator is expected to move from "pxb:" to "percona:"; the
+    parser must not need changing when it does."""
+    raw = json.dumps({
+        "bomFormat": "CycloneDX", "specVersion": "1.5",
+        "metadata": {"component": {"name": "x", "version": "1"}},
+        "components": [{"name": "zlib", "version": "1.3.2", "properties": [
+            {"name": "percona:linkage", "value": "static"},
+            {"name": "percona:origin", "value": "vendored"}]}]})
+    _, _, components = parsers.load_cyclonedx(raw)
+    assert (components[0].linkage, components[0].origin) == ("static", "vendored")
+
+
+def _load_entrypoint(name):
+    import importlib.util
+    here = os.path.join(os.path.dirname(__file__), "..", "..", "pytest-tests")
+    spec = importlib.util.spec_from_file_location(name, os.path.join(here, name + ".py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.mark.parametrize("entrypoint,key", [("test_pxb_sbom", "pxb"), ("test_ps_sbom", "ps")])
+def test_each_package_entrypoint_binds_its_own_product(entrypoint, key):
+    """Each file runs the shared checks against one product, chosen by which
+    file is run -- so the junit names say which product a result is for."""
+    module = _load_entrypoint(entrypoint)
+    assert module.PRODUCT == key
+    assert config.product(module.PRODUCT).key == key
+    # the shared fixture and all nine tests arrived through the import *
+    assert callable(module.sbom) and callable(module.test_no_known_vulnerabilities)
+
+
+def test_the_shared_module_cannot_overwrite_an_entrypoint_product():
+    """The entrypoints set PRODUCT and then `import *` the shared module. If the
+    shared module exported a PRODUCT of its own, it would silently rebind every
+    entrypoint to it."""
+    shared = _load_entrypoint("sbom_package_checks")
+    assert "PRODUCT" not in shared.__all__
+    assert not hasattr(shared, "PRODUCT")

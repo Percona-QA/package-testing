@@ -1,8 +1,8 @@
 """Finding the SBOM files.
 
-The final install path and filename are not fixed yet -- PXB packaging ships
-only LICENSE and manpages today -- so nothing here hardcodes a filename. The
-ladder is:
+The final install path and filename are not fixed yet, so nothing here
+hardcodes a filename, and everything product-specific -- package names, install
+locations -- comes from products.py. The ladder is:
 
   1. $SBOM_DIR                         explicit override
   2. rpm -ql / dpkg -L                 whatever the installed package declares
@@ -15,9 +15,9 @@ every rejection is recorded in `considered` and printed even on a skip.
 """
 
 import os
-import re
 import shlex
 
+from . import config
 from .models import SbomSet
 
 # Suffix -> format key. Longest first so .cdx.json wins over .json.
@@ -28,17 +28,9 @@ SUFFIXES = (
     (".licenses.txt", "licenses"),
 )
 
-# Both rpm and deb install the SBOM files under the package's own directory,
-# e.g. /usr/share/percona-xtrabackup-97/sbom/. Searching only there keeps the
-# fallback from picking up unrelated SBOMs belonging to other packages.
-SEARCH_DIRS = (
-    "/usr/share/percona-xtrabackup*",
-)
-
-PACKAGE_GLOB = "percona-xtrabackup*"
-
-# The main package, not -test-, -dbg or -debuginfo subpackages.
-MAIN_PACKAGE_RE = re.compile(r"^percona-xtrabackup(-pro)?(-\d+)?$")
+# Package names, the main-package pattern and the find(1) fallback locations are
+# per product (products.py). Searching only the product's own directories keeps
+# the fallback from picking up unrelated SBOMs belonging to other packages.
 
 
 def classify(path):
@@ -60,23 +52,25 @@ def _package_manager(backend):
     return None
 
 
-def installed_packages(backend):
-    """Installed percona-xtrabackup packages, main ones first."""
+def installed_packages(backend, product=None):
+    """Installed packages of the product, main ones first."""
+    product = product or config.product()
     manager = _package_manager(backend)
-    # PACKAGE_GLOB is a module constant, and its literal single quotes are
+    # package_glob is a registry constant, and its literal single quotes are
     # deliberate: they stop the *shell* from globbing so that rpm and dpkg-query
     # do the pattern matching themselves. Not a candidate for shlex.quote.
+    glob = product.package_glob
     if manager == "rpm":
-        result = backend.run("rpm -qa --qf '%{NAME}\\n' '" + PACKAGE_GLOB + "'")
+        result = backend.run("rpm -qa --qf '%{NAME}\\n' '" + glob + "'")
     elif manager == "dpkg":
         result = backend.run(
-            "dpkg-query -W -f='${Package}\\n' '" + PACKAGE_GLOB + "' 2>/dev/null")
+            "dpkg-query -W -f='${Package}\\n' '" + glob + "' 2>/dev/null")
     else:
         return []
     if not result.ok:
         return []
     names = sorted(set(result.lines()))
-    main = [n for n in names if MAIN_PACKAGE_RE.match(n)]
+    main = [n for n in names if product.main_package_re.match(n)]
     rest = [n for n in names if n not in main]
     return main + rest
 
@@ -93,10 +87,10 @@ def _list_package_files(backend, package):
 
 
 def _find_in_dirs(backend, dirs):
-    # dirs are the SEARCH_DIRS module constants and are deliberately NOT
-    # shell-escaped: they contain globs (/usr/share/percona-xtrabackup*) that the
-    # shell has to expand. They take no external input, so the injection concern
-    # that applies to $SBOM_DIR does not reach here.
+    # dirs are a product's search_dirs registry constants and are deliberately
+    # NOT shell-escaped: they contain globs (/usr/share/percona-xtrabackup*) that
+    # the shell has to expand. They take no external input, so the injection
+    # concern that applies to $SBOM_DIR does not reach here.
     patterns = " -o ".join(
         "-name '*%s' -o -name '*%s.gz'" % (suffix, suffix) for suffix, _ in SUFFIXES)
     # "exit 0" matters: the loop's status is that of the last [ -d ] test, which
@@ -131,8 +125,9 @@ def group(paths):
     return [sets[key] for key in sorted(sets)]
 
 
-def discover(backend, sbom_dir=None):
+def discover(backend, sbom_dir=None, product=None):
     """-> (list of SbomSet, list of human-readable notes about what was searched)"""
+    product = product or config.product()
     considered = []
 
     if sbom_dir:
@@ -154,13 +149,13 @@ def discover(backend, sbom_dir=None):
 
     paths = []
 
-    packages = installed_packages(backend)
+    packages = installed_packages(backend, product)
     if packages:
         considered.append("installed packages matching %s: %s"
-                          % (PACKAGE_GLOB, ", ".join(packages)))
+                          % (product.package_glob, ", ".join(packages)))
     else:
         considered.append("no installed package matches %s (or no rpm/dpkg available)"
-                          % PACKAGE_GLOB)
+                          % product.package_glob)
 
     for package in packages:
         files = _list_package_files(backend, package)
@@ -170,8 +165,9 @@ def discover(backend, sbom_dir=None):
         paths.extend(hits)
 
     if not paths:
-        considered.append("falling back to find(1) in: %s" % ", ".join(SEARCH_DIRS))
-        hits = _find_in_dirs(backend, SEARCH_DIRS)
+        considered.append("falling back to find(1) in: %s"
+                          % ", ".join(product.search_dirs))
+        hits = _find_in_dirs(backend, product.search_dirs)
         considered.append("  -> %d candidate file(s)" % len(hits))
         paths.extend(hits)
 
@@ -181,23 +177,24 @@ def discover(backend, sbom_dir=None):
     return sets, considered
 
 
-def expected_root_name(backend, sbom_set):
+def expected_root_name(backend, sbom_set, product=None):
     """Best guess at the name the SBOM's root component should carry.
 
     Prefers the installed package that owns the files; falls back to the
-    filename stem, which is how the prototype set is named
+    filename stem, which is how the prototype sets are named
     (percona-xtrabackup-97.cdx.json -> percona-xtrabackup-97).
     """
-    for package in installed_packages(backend):
-        if MAIN_PACKAGE_RE.match(package):
+    product = product or config.product()
+    for package in installed_packages(backend, product):
+        if product.main_package_re.match(package):
             return package
     return sbom_set.stem
 
 
-def version_to_assert(backend, package, explicit=None):
+def version_to_assert(backend, package, explicit=None, product=None):
     """-> (version, problem) -- the version the SBOM root component must carry.
 
-    `problem` is a message, set when a percona-xtrabackup package IS installed
+    `problem` is a message, set when a package of the product IS installed
     but its version could not be read. That case has to be reported: with no
     version, structural.check_* skips the comparison entirely
     ("if expect_version and not _matches(...)"), producing no finding, so the
@@ -208,16 +205,17 @@ def version_to_assert(backend, package, explicit=None):
     of downloaded files, where no package is installed and there is genuinely
     nothing to compare against, is still allowed to pass.
     """
+    product = product or config.product()
     if explicit:
         return explicit, None
     version = installed_version(backend, package)
     if version:
         return version, None
-    if installed_packages(backend):
+    if installed_packages(backend, product):
         return None, (
             "a %s package is installed but its version could not be read, so the "
             "SBOM root version was not checked against it. Expected the version "
-            "of %r from rpm/dpkg." % (PACKAGE_GLOB, package))
+            "of %r from rpm/dpkg." % (product.package_glob, package))
     return None, None
 
 

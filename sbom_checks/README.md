@@ -45,7 +45,8 @@ Other environment variables:
 | Variable | Meaning |
 |---|---|
 | `SBOM_DIR` | check this directory instead of discovering. Escape hatch for verifying a pre-release package. |
-| `PXB_VERSION` | the version the SBOM must describe. The only way to check this for a downloaded directory, which has no installed package to compare against. |
+| `SBOM_PRODUCT` | which product's SBOM files these are: `pxb` (default) or `ps`. No pipeline sets it, so every existing job checks PXB. The CLI takes `--product` instead. Per-product values -- package names, install locations, CycloneDX property prefixes -- live in `products.py`. |
+| `PXB_VERSION` / `PS_VERSION` | the version the SBOM must describe, per product. The only way to check this for a downloaded directory, which has no installed package to compare against. Each product reads only its own variable. |
 | `SBOM_EXTERNAL_TOOLS` | run trivy/cyclonedx-cli, and **require** them: when on, a tool that is missing or cannot complete **fails** the check rather than skipping. On by default in both CI jobs, which install the tools; set to `0` to skip the tool-backed checks entirely |
 | `SBOM_LICENSE_STRICT` | require identical licence operand sets across formats, not just overlap. **On by default** -- all four files come from one generator in one run, so a component whose licence differs between them is a generator bug. Set to `0` to compare by overlap instead |
 | `DOCKER_BIN`, `TRIVY_BIN`, `CYCLONEDX_BIN` | binary overrides |
@@ -201,13 +202,34 @@ when they matter most.
 
 ### The self-test
 
-Runs the whole pipeline against the prototype fixtures in `testdata/pxb/`, with
-no infrastructure at all. The fixtures are split per product, so a second set
-(`testdata/ps/`) can be added alongside without disturbing these:
+Runs the whole pipeline against the example SBOMs in `testdata/pxb/` and
+`testdata/ps/`, with no infrastructure at all. Tests that hold for any product
+run once per product, with ids like `test_clean_fixtures_pass[ps]`. Run from
+the repo root:
 
 ```bash
-~/.venvs/pxb-sbom/bin/python -m pytest -v sbom_checks/tests/
+~/.venvs/pxb-sbom/bin/python -m pytest -v sbom_checks/tests/            # both
+~/.venvs/pxb-sbom/bin/python -m pytest -v sbom_checks/tests/ -m "not ps" # PXB only
+~/.venvs/pxb-sbom/bin/python -m pytest -v sbom_checks/tests/ -m ps       # PS only
 ```
+
+The PS example files do not yet match the PXB layout of `.sbom.txt` (a preamble,
+then `COMPONENT VERSION ORIGIN LICENSE`) or the meaning of `.licenses.txt` (a
+list of licence expressions rather than one row per component), so the PS cases
+that need those two files parsed **fail on purpose** until the formats settle.
+The PXB-only run stays green. Use `-m`, not `-k`: `-k` is substring matching on
+test names, so `-k "not ps"` would also drop tests whose names merely contain
+"ps".
+
+Some tests stay PXB-only because they exercise PXB-specific content or format:
+the per-component `.licenses.txt` rows, the `.sbom.txt` column layout, and the
+`xxhash`/`xxhash-lz4` pair.
+
+For an installed package, each product has a thin entrypoint over one shared
+implementation (`pytest-tests/sbom_package_checks.py`): `test_pxb_sbom.py` and
+`test_ps_sbom.py`. The PS one is not wired into any pipeline yet; run it by
+hand against a directory with
+`SBOM_DIR=sbom_checks/testdata/ps PS_VERSION=9.7.2-2 python3 -m pytest -v pytest-tests/test_ps_sbom.py`.
 
 ## Where it is wired in
 
