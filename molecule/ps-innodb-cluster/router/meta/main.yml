@@ -1,6 +1,8 @@
 ---
 galaxy_info:
-  author: your name
+  role_name: ps_innodb_cluster_router
+  namespace: percona
+  author: Percona
   description: your description
   company: your company (optional)
 
