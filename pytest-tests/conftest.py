@@ -10,7 +10,7 @@ import os
 
 import pytest
 
-from common import detect_connection, detect_mongo_version, detect_mysql_version
+from common import detect_connection, detect_mongo_version, detect_mysql_version, is_rhel10 as _is_rhel10
 
 
 @pytest.fixture(scope="session")
@@ -36,3 +36,8 @@ def ps_admin_bin():
 @pytest.fixture(scope="session")
 def ps_tokudb_admin_bin():
     return os.getenv("PS_TOKUDB_ADMIN_BIN", "/usr/bin/ps_tokudb_admin")
+
+
+@pytest.fixture(scope="session")
+def is_rhel10():
+    return _is_rhel10()

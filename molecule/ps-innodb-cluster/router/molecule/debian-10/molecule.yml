@@ -5,8 +5,6 @@ dependency:
   name: galaxy
 driver:
   name: ec2
-lint:
-  name: yamllint
 platforms:
   - name: mysql-router-debian-10
     region: us-west-2
@@ -35,5 +33,3 @@ verifier:
     verbose: true
     s: true
     junitxml: report.xml
-  lint:
-    name: flake8

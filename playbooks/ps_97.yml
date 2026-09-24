@@ -216,6 +216,9 @@
   - name: run mysql compression tests script
     command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps97
 
+  - name: run pytest tests for OpenTelemetry component and client plugin
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_opentelemetry.py
+
   - name: install 3rd party packages with apt
     apt:
       name: "{{ packages }}"

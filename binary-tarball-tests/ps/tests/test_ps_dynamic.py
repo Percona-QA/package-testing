@@ -33,45 +33,51 @@ def is_oracle_linux_9_direct():
 
 
 def can_mysqld_run(base_dir):
-    """Check if mysqld binary can run (not blocked by GLIBC incompatibility)"""
+    """Check if mysqld binary can run (not blocked by GLIBC incompatibility).
+
+    Returns (can_run, detail) where detail is the captured stderr/exception
+    text when can_run is False, so callers can surface *why* in skip reasons.
+    """
     try:
         mysqld_path = base_dir + '/bin/mysqld'
         result = subprocess.run(
             [mysqld_path, '--version'],
-            capture_output=True,
-            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,  # text= requires Python 3.7+, some test hosts still run 3.6
             timeout=5,
             check=False  # Don't raise on non-zero exit
         )
         # If it returns 0, mysqld can run
         if result.returncode == 0:
-            return True
+            return True, ''
         # Check if the error is GLIBC-related in stderr
         error_output = result.stderr or ''
         if 'GLIBC' in error_output or 'GLIBCXX' in error_output:
-            return False
+            return False, error_output.strip()
         # Other errors might be acceptable (e.g., missing config files)
         # But if returncode is non-zero and no output, assume it can't run
         if result.returncode != 0 and not error_output and not result.stdout:
-            return False
-        return True
+            return False, f'mysqld --version exited {result.returncode} with no output'
+        return True, ''
     except FileNotFoundError:
         # Binary doesn't exist
-        return False
+        return False, f'{base_dir}/bin/mysqld not found'
     except Exception as e:
         # Check if the exception message contains GLIBC errors
         error_str = str(e)
         if 'GLIBC' in error_str or 'GLIBCXX' in error_str:
-            return False
+            return False, error_str
         # Any other exception means we can't determine, assume it can't run
-        return False
+        return False, error_str
 
 
 @pytest.fixture(scope='module')
 def mysql_server(request, pro_fips_vars):
     # Check if mysqld can run before attempting to initialize
-    if not can_mysqld_run(pro_fips_vars['base_dir']):
-        pytest.skip("mysqld binary cannot run due to GLIBC incompatibility (requires newer system libraries)")
+    can_run, detail = can_mysqld_run(pro_fips_vars['base_dir'])
+    if not can_run:
+        pytest.skip(f"mysqld binary cannot run due to GLIBC incompatibility (requires newer system libraries): {detail}")
     
     features = []
     # For Oracle-9, enable FIPS if fips_supported is True
@@ -101,14 +107,14 @@ def mysql_server(request, pro_fips_vars):
             error_output = str(e)
         
         if 'GLIBC' in error_output or 'GLIBCXX' in error_output:
-            pytest.skip(f"mysqld binary cannot run due to GLIBC incompatibility (requires newer system libraries)")
+            pytest.skip(f"mysqld binary cannot run due to GLIBC incompatibility (requires newer system libraries): {error_output.strip()}")
         # Re-raise if it's a different error
         raise
     except Exception as e:
         # Catch any other exception and check if it's GLIBC-related
         error_str = str(e)
         if 'GLIBC' in error_str or 'GLIBCXX' in error_str:
-            pytest.skip(f"mysqld binary cannot run due to GLIBC incompatibility (requires newer system libraries)")
+            pytest.skip(f"mysqld binary cannot run due to GLIBC incompatibility (requires newer system libraries): {error_str}")
         # Re-raise if it's a different error
         raise
 
@@ -243,3 +249,68 @@ def test_telemetry_status(mysql_server, pro_fips_vars):
 
     assert telemetry_settings.get("percona_telemetry_disable") == "OFF", \
         "Telemetry is enabled"
+
+
+def test_opentelemetry_component(mysql_server, pro_fips_vars):
+    if pro_fips_vars['ps_version_major'] != '9.7':
+        pytest.skip('component_telemetry (OpenTelemetry) is available from PS 9.7 onwards')
+
+    mysql_server.install_component('component_telemetry')
+
+    # SELECT @@global.<var> returns MySQL's raw 0/1 for boolean sysvars,
+    # not the ON/OFF text shown by SHOW VARIABLES/SHOW STATUS.
+    expected = {
+        'telemetry.trace_enabled': '0',
+        'telemetry.metrics_enabled': '0',
+        'telemetry.log_enabled': '0',
+        'telemetry.query_text_enabled': '1',
+        'telemetry.otel_log_level': 'info',
+    }
+    for variable, value in expected.items():
+        output = mysql_server.run_query('SELECT @@global.'+variable+';')
+        assert output.strip() == value
+
+    for status_var in ('Telemetry_logs_supported', 'Telemetry_metrics_supported', 'Telemetry_traces_supported'):
+        output = mysql_server.run_query('SHOW GLOBAL STATUS LIKE "'+status_var+'";')
+        assert 'ON' in output
+
+    for variable in ('telemetry.trace_enabled', 'telemetry.log_enabled'):
+        mysql_server.run_query('SET GLOBAL '+variable+'=ON;')
+        output = mysql_server.run_query('SELECT @@global.'+variable+';')
+        assert output.strip() == '1'
+
+    # telemetry.metrics_enabled is startup-only, so a runtime SET must fail
+    with pytest.raises(subprocess.CalledProcessError):
+        mysql_server.run_query('SET GLOBAL telemetry.metrics_enabled=ON;')
+
+    mysql_server.run_query('UNINSTALL COMPONENT "file://component_telemetry";')
+    output = mysql_server.run_query(
+        'SELECT component_urn FROM mysql.component WHERE component_urn = "file://component_telemetry";'
+    )
+    assert 'component_telemetry' not in output
+
+
+def test_opentelemetry_client_plugin(host, mysql_server, pro_fips_vars):
+    if pro_fips_vars['ps_version_major'] != '9.7':
+        pytest.skip('telemetry_client (OpenTelemetry client plugin) is available from PS 9.7 onwards')
+
+    # @@global.plugin_dir reports the build-time install prefix baked into
+    # this generic tarball, not where the tarball was actually extracted,
+    # so point --plugin_dir at the real location instead (same workaround
+    # the docs recommend when the plugin isn't found in the default dir).
+    plugin_dir = pro_fips_vars['base_dir']+'/lib/plugin'
+    assert host.file(plugin_dir+'/telemetry_client.so').exists
+
+    # --otel-help is registered by the telemetry_client plugin itself, so it
+    # only succeeds and prints the plugin variables banner when the plugin
+    # is loaded via --telemetry_client.
+    loaded_marker = '=== TELEMETRY_CLIENT PLUGIN VARIABLES ==='
+    mysql_cmd = mysql_server.mysql+' --user=root -S'+mysql_server.socket+' --plugin_dir='+plugin_dir
+
+    enabled = host.run(mysql_cmd+' --telemetry_client --otel-help')
+    assert enabled.succeeded
+    assert loaded_marker in enabled.stdout + enabled.stderr
+
+    disabled = host.run(mysql_cmd+' --otel-help')
+    assert not disabled.succeeded
+    assert loaded_marker not in disabled.stdout + disabled.stderr

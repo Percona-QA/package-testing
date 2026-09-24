@@ -33,5 +33,3 @@ verifier:
     verbose: true
     s: true
     junitxml: report.xml
-  lint:
-    name: flake8
