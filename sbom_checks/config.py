@@ -47,6 +47,17 @@ ENV_DIR = "SBOM_DIR"
 # the checks were made per-product.
 ENV_PRODUCT = "SBOM_PRODUCT"
 
+# Not a gate: the version the SBOM root component must declare, for a directory
+# of files with no installed package to compare against. One name for every
+# product, paired with SBOM_PRODUCT.
+#
+# Deliberately NOT PXB_VERSION. In the docker suite that variable is already the
+# image tag and the version each binary must report (settings.py,
+# test_container_att.py), and the PXB docker job exports it -- so reading it here
+# would turn it into an SBOM assertion in any environment that happens to set
+# it. No pipeline passes this override to the checks; it exists for manual runs.
+ENV_PRODUCT_VERSION = "SBOM_PRODUCT_VERSION"
+
 
 def _mode(name, default=WARN):
     value = (os.environ.get(name) or "").strip().lower()
@@ -102,22 +113,14 @@ def product(key=None):
                         or products.DEFAULT)
 
 
-def expect_version_env(product_=None):
-    """Name of the variable that pins the expected version for a product --
-    PXB_VERSION for PXB, PS_VERSION for PS. Per product because each suite
-    already has its own spelling, and one shared name would be read by the
-    wrong job."""
-    return (product_ or product()).version_env
-
-
-def expect_version(product_=None):
+def expect_version():
     """Version the SBOM root component must describe, or None.
 
     Needed because a directory of downloaded SBOM files has no installed package
     to compare against -- without this, a local run can check structure and
     cross-format consistency but not which release the files are for.
     """
-    return (os.environ.get(expect_version_env(product_)) or "").strip() or None
+    return (os.environ.get(ENV_PRODUCT_VERSION) or "").strip() or None
 
 
 SKIP_ABSENT = "skip-absent"

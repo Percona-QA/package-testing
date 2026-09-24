@@ -92,8 +92,7 @@ def build_parser():
     parser.add_argument("--expect-name", help="expected SBOM root component name")
     parser.add_argument("--expect-version",
                         help="expected SBOM root component version "
-                             "(default: the product's version variable, "
-                             "e.g. $PXB_VERSION or $PS_VERSION)")
+                             "(default: $%s)" % config.ENV_PRODUCT_VERSION)
     parser.add_argument("--no-tools", action="store_true",
                         help="skip trivy and cyclonedx-cli even when installed")
     # Tri-state, defaulting to None so the gate decides: strict licence
@@ -153,7 +152,7 @@ def run(args):
             return EXIT_FAIL
 
         expect_name = args.expect_name
-        expect_version = args.expect_version or config.expect_version(product)
+        expect_version = args.expect_version or config.expect_version()
         # Also for docker: the image installs the rpm, so the root component can
         # be cross-checked against the package the same way.
         if args.mode in ("package", "docker") and not expect_name:

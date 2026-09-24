@@ -96,8 +96,8 @@ def sbom(request):
     # expectation you mean it, and a disagreement with what is installed is
     # exactly the failure you asked for. Checking a downloaded directory has no
     # installed package at all, which is the case this exists for.
-    version_env = config.expect_version_env(product)
-    explicit = config.expect_version(product)
+    version_env = config.ENV_PRODUCT_VERSION
+    explicit = config.expect_version()
     version, version_problem = discovery.version_to_assert(
         backend, package, explicit=explicit, product=product)
     if explicit:
@@ -175,9 +175,8 @@ def test_sbom_set_is_complete(sbom):
 def test_root_component_is_the_expected_release(sbom):
     """The SBOM describes the package and version it is supposed to.
 
-    In a directory run this is only meaningful when the product's version
-    variable (PXB_VERSION, PS_VERSION) is set -- there is no installed package
-    to compare against.
+    In a directory run this is only meaningful when SBOM_PRODUCT_VERSION is
+    set -- there is no installed package to compare against.
     """
     assert not _only(sbom, "root"), render(_only(sbom, "root"))
 

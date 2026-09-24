@@ -5,7 +5,7 @@ Not wired into any pipeline yet -- every job invokes pytest-tests files by
 explicit path, so this file is inert until a PS job names it. Meanwhile it runs
 by hand against a directory of files:
 
-    SBOM_DIR=sbom_checks/testdata/ps PS_VERSION=9.7.2-2 \\
+    SBOM_DIR=sbom_checks/testdata/ps SBOM_PRODUCT_VERSION=9.7.2-2 \\
         python3 -m pytest -v pytest-tests/test_ps_sbom.py
 
 The checks live in sbom_package_checks.py, shared with test_pxb_sbom.py; this

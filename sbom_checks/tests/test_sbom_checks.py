@@ -218,9 +218,9 @@ def test_broken_bom_format_is_caught(fixture_set, product_workdir):
 
 
 def test_expected_version_is_asserted(fixture_set, product_workdir):
-    """A directory of downloaded files has no installed package, so the
-    product's version variable is the only way to check which release the
-    SBOM is for."""
+    """A directory of downloaded files has no installed package, so
+    SBOM_PRODUCT_VERSION is the only way to check which release the SBOM is
+    for."""
     report = _audit(product_workdir, fixture_set, expect_version="9.9.9")
     root = [f for f in report.findings if f.where == "root"]
     assert root, "a wrong expected version must be reported"
@@ -239,26 +239,26 @@ def test_expected_version_tolerates_a_package_release_suffix(fixture_set, produc
     assert not [f for f in report.findings if f.where == "root"], _messages(report)
 
 
-@pytest.mark.parametrize("key,variable", [("pxb", "PXB_VERSION"), ("ps", "PS_VERSION")])
-def test_expected_version_is_read_from_the_environment(monkeypatch, key, variable):
-    product = config.product(key)
-    assert config.expect_version_env(product) == variable
-    monkeypatch.delenv(variable, raising=False)
-    assert config.expect_version(product) is None
-    monkeypatch.setenv(variable, "9.7.1-rc1")
-    assert config.expect_version(product) == "9.7.1-rc1"
-    monkeypatch.setenv(variable, "   ")
-    assert config.expect_version(product) is None
+def test_expected_version_is_read_from_the_environment(monkeypatch):
+    assert config.ENV_PRODUCT_VERSION == "SBOM_PRODUCT_VERSION"
+    monkeypatch.delenv(config.ENV_PRODUCT_VERSION, raising=False)
+    assert config.expect_version() is None
+    monkeypatch.setenv(config.ENV_PRODUCT_VERSION, "9.7.1-rc1")
+    assert config.expect_version() == "9.7.1-rc1"
+    monkeypatch.setenv(config.ENV_PRODUCT_VERSION, "   ")
+    assert config.expect_version() is None
 
 
-def test_each_product_reads_only_its_own_version_variable(monkeypatch):
-    """A PS job must not pick up PXB_VERSION, or the reverse -- each suite
-    already has its own spelling, and one shared name would be read by the
-    wrong job."""
-    monkeypatch.setenv("PXB_VERSION", "9.7.1-rc1")
-    monkeypatch.delenv("PS_VERSION", raising=False)
-    assert config.expect_version(config.product("pxb")) == "9.7.1-rc1"
-    assert config.expect_version(config.product("ps")) is None
+@pytest.mark.parametrize("unrelated", ["PXB_VERSION", "PS_VERSION"])
+def test_the_suites_own_version_variables_are_not_an_sbom_assertion(monkeypatch,
+                                                                    unrelated):
+    """PXB_VERSION is the docker suite's image tag and expected binary version,
+    and the PXB docker job exports it. If the SBOM override read it, any such
+    environment would silently assert that value against the SBOM root -- so the
+    override has its own name, and these must have no effect on it."""
+    monkeypatch.delenv(config.ENV_PRODUCT_VERSION, raising=False)
+    monkeypatch.setenv(unrelated, "9.9.9")
+    assert config.expect_version() is None
 
 
 def test_wrong_expected_name_is_reported_under_root(fixture_set, product_workdir):
@@ -1160,7 +1160,8 @@ def test_installed_package_with_unreadable_version_is_a_problem():
 
 def test_no_installed_package_is_not_a_problem():
     """A directory of downloaded files has nothing to compare against, which is
-    what PXB_VERSION exists for -- it must not be turned into a failure."""
+    what SBOM_PRODUCT_VERSION exists for -- it must not be turned into a
+    failure."""
     backend = _FakeBackend(packages=[], version=None)
     version, problem = discovery.version_to_assert(backend, "percona-xtrabackup-97")
     assert version is None and problem is None

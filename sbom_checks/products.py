@@ -23,7 +23,7 @@ class Product(object):
     """
 
     def __init__(self, key, display_name, package_glob, main_package_re,
-                 search_dirs, cdx_property_prefixes, version_env):
+                 search_dirs, cdx_property_prefixes):
         self.key = key
         self.display_name = display_name
         # rpm/dpkg query pattern for the installed packages. Quoted literally
@@ -39,9 +39,6 @@ class Product(object):
         # Prefixes of the CycloneDX component properties that carry linkage and
         # origin, e.g. "pxb:" -> "pxb:linkage".
         self.cdx_property_prefixes = tuple(cdx_property_prefixes)
-        # Environment variable that pins the version the SBOM must describe,
-        # for a directory of files with no installed package to compare against.
-        self.version_env = version_env
 
     def __repr__(self):
         return "Product(%r)" % self.key
@@ -56,9 +53,6 @@ PXB = Product(
     # e.g. /usr/share/percona-xtrabackup-97/sbom/.
     search_dirs=("/usr/share/percona-xtrabackup*",),
     cdx_property_prefixes=("pxb:",),
-    # Matches the rest of the PXB suite (PXB_DOCKER_ACC / PXB_VERSION /
-    # PXB_REVISION) rather than inventing a second spelling.
-    version_env="PXB_VERSION",
 )
 
 PS = Product(
@@ -73,8 +67,6 @@ PS = Product(
     main_package_re=r"^percona-server-server(-pro)?$",
     search_dirs=("/usr/share/percona-server*",),
     cdx_property_prefixes=("percona:",),
-    # The convention docker-image-tests/ps/settings.py already uses.
-    version_env="PS_VERSION",
 )
 
 PRODUCTS = {p.key: p for p in (PXB, PS)}

@@ -46,7 +46,7 @@ Other environment variables:
 |---|---|
 | `SBOM_DIR` | check this directory instead of discovering. Escape hatch for verifying a pre-release package. |
 | `SBOM_PRODUCT` | which product's SBOM files these are: `pxb` (default) or `ps`. No pipeline sets it, so every existing job checks PXB. The CLI takes `--product` instead. Per-product values -- package names, install locations, CycloneDX property prefixes -- live in `products.py`. |
-| `PXB_VERSION` / `PS_VERSION` | the version the SBOM must describe, per product. The only way to check this for a downloaded directory, which has no installed package to compare against. Each product reads only its own variable. |
+| `SBOM_PRODUCT_VERSION` | the version the SBOM root component must declare, for any product. The only way to check this for a downloaded directory, which has no installed package to compare against. Independent of the docker suite's `PXB_VERSION`, which is the image tag and expected binary version -- the SBOM checks never read that. |
 | `SBOM_EXTERNAL_TOOLS` | run trivy/cyclonedx-cli, and **require** them: when on, a tool that is missing or cannot complete **fails** the check rather than skipping. On by default in both CI jobs, which install the tools; set to `0` to skip the tool-backed checks entirely |
 | `SBOM_LICENSE_STRICT` | require identical licence operand sets across formats, not just overlap. **On by default** -- all four files come from one generator in one run, so a component whose licence differs between them is a generator bug. Set to `0` to compare by overlap instead |
 | `DOCKER_BIN`, `TRIVY_BIN`, `CYCLONEDX_BIN` | binary overrides |
@@ -101,22 +101,22 @@ python3 -m venv ~/.venvs/pxb-sbom
 
 ```bash
 cd /path/to/package-testing
-SBOM_DIR=~/Downloads/pxb-sbom PXB_VERSION=9.7.1-rc1 \
+SBOM_DIR=~/Downloads/pxb-sbom SBOM_PRODUCT_VERSION=9.7.1-rc1 \
   ~/.venvs/pxb-sbom/bin/python -m pytest -v pytest-tests/test_pxb_sbom.py
 ```
 
-`PXB_VERSION` is optional but worth setting: a downloaded directory has no
+`SBOM_PRODUCT_VERSION` is optional but worth setting: a downloaded directory has no
 installed package to compare against, so without it the run checks structure,
 licences and cross-format consistency but **not which release the SBOM is for**.
 With it, `test_root_component_is_the_expected_release` verifies the root
 component in both the CycloneDX and SPDX documents. Comparison tolerates a
 package release suffix, so an SBOM saying `9.7.1-rc1` satisfies
-`PXB_VERSION=9.7.1-rc1.2`.
+`SBOM_PRODUCT_VERSION=9.7.1-rc1.2`.
 
 On a target host with PXB installed, the version is taken from the installed
-package automatically. Setting `PXB_VERSION` *replaces* that expectation rather
+package automatically. Setting `SBOM_PRODUCT_VERSION` *replaces* that expectation rather
 than adding to it — when it is set the installed version is never consulted, so
-the comparison is always SBOM-against-`PXB_VERSION`. A `PXB_VERSION` that
+the comparison is always SBOM-against-`SBOM_PRODUCT_VERSION`. A value that
 disagrees with the installed package is not itself reported.
 
 Only the version is overridable. The expected **name** always comes from the
@@ -134,7 +134,8 @@ PXB_DOCKER_ACC=percona PXB_VERSION=8.0.35-33 \
 
 The image reference is composed as `$PXB_DOCKER_ACC/percona-xtrabackup:$PXB_VERSION`
 (`docker-image-tests/pxb/settings.py`), so use `perconalab` for pre-release
-builds. Note that here `PXB_VERSION` is the image **tag**, not an assertion:
+builds. Note that here `PXB_VERSION` is the image **tag** (and the version the
+binaries must report), not an SBOM assertion -- that is `SBOM_PRODUCT_VERSION`:
 the image has the package installed, so the expected root component is read from
 the rpm inside it (a tag like `8.0.35-33` against an rpm version of `8.0.35`).
 
@@ -142,7 +143,7 @@ the rpm inside it (a tag like `8.0.35-33` against an rpm version of `8.0.35`).
 
 | Want | Add |
 |---|---|
-| assert which release the SBOM describes | `PXB_VERSION=9.7.1-rc1` |
+| assert which release the SBOM describes | `SBOM_PRODUCT_VERSION=9.7.1-rc1` |
 | fail instead of skip when no SBOM is found | `SBOM_CHECK_MODE=enforce` |
 | also run trivy / cyclonedx-cli | `SBOM_EXTERNAL_TOOLS=1` — note this also makes a missing tool a failure |
 | fail on HIGH/CRITICAL CVEs | `SBOM_VULN_MODE=enforce` |
@@ -229,7 +230,7 @@ For an installed package, each product has a thin entrypoint over one shared
 implementation (`pytest-tests/sbom_package_checks.py`): `test_pxb_sbom.py` and
 `test_ps_sbom.py`. The PS one is not wired into any pipeline yet; run it by
 hand against a directory with
-`SBOM_DIR=sbom_checks/testdata/ps PS_VERSION=9.7.2-2 python3 -m pytest -v pytest-tests/test_ps_sbom.py`.
+`SBOM_DIR=sbom_checks/testdata/ps SBOM_PRODUCT_VERSION=9.7.2-2 python3 -m pytest -v pytest-tests/test_ps_sbom.py`.
 
 ## Where it is wired in
 
@@ -265,7 +266,7 @@ parameters: `SBOM_CHECK_MODE`, `SBOM_VULN_MODE` and `SBOM_EXTERNAL_TOOLS` on
    `spdxVersion`/`SPDXID`/`dataLicense`, a `DESCRIBES` root, every package
    reachable by `CONTAINS`, unique and charset-legal SPDXIDs.
 5. **Identity** — the SBOM's root component matches what it should describe.
-   The version comes from the installed package, or from `$PXB_VERSION` when
+   The version comes from the installed package, or from `$SBOM_PRODUCT_VERSION` when
    set (the only option for a directory of downloaded files); the name comes
    from the installed package, falling back to the filename stem. Reported
    separately from structural problems, because "this SBOM is for the wrong
