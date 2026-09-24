@@ -264,7 +264,7 @@
     when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
 
 ## Changes done for telemetry: add iptables rule for Telemetry Server - install only ps package.
-## Expected resuld - telemetry_uuid file has only instanceID
+## Expected result - telemetry_uuid file has only instanceID
 
   - name: Install iptables on RHEL using yum
     yum:
