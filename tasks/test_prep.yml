@@ -185,6 +185,11 @@
     command: apt-get update -y
     when: ansible_os_family == "Debian" and ansible_distribution_release == "buster"
 
+  - name: Disable Debian Bullseye EOL security repository (packages removed from pool)
+    shell: find /etc/apt/sources.list /etc/apt/sources.list.d -name "*.list" -exec sed -i '/bullseye-security/s/^deb/#deb/' {} \;
+    become: yes
+    when: ansible_os_family == "Debian" and ansible_distribution_release == "bullseye"
+
   - name: install needed packages for running tests with apt
     apt:
       name: "{{ packages }}"
