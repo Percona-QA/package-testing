@@ -37,6 +37,12 @@
       - ansible_facts['distribution'] == "CentOS"
       - ansible_facts['distribution_major_version'] | int == 7
 
+  - name: Use archive.kernel.org CentOS vault mirror (vault.centos.org returns 403)
+    shell: find /etc/yum.repos.d -name "CentOS-*.repo" -exec sed -i 's|^baseurl=http://vault\.centos\.org/centos/\$releasever/|baseurl=https://archive.kernel.org/centos-vault/7.9.2009/|' {} \;
+    when:
+      - ansible_facts['distribution'] == "CentOS"
+      - ansible_facts['distribution_major_version'] | int == 7
+
 #  - name: Update all dnf packages without reboot
 #    ansible.builtin.dnf: name='*' state=latest
 #    when: ansible_facts['distribution'] in ['RedHat','OracleLinux']

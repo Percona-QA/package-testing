@@ -51,7 +51,7 @@
         var: disk_info.results | map(attribute='stdout') | list
 
     - name: Install cloud-utils-growpart (Rocky/Amazon)
-      dnf:
+      package:
         name: cloud-utils-growpart
         state: present
       when: ansible_distribution in ["Rocky", "Amazon"]
