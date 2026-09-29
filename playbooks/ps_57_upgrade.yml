@@ -27,7 +27,7 @@
 # Install from main repository
 
   - name: include tasks for enabling PS 57 EOL main repo
-    include_tasks: ../tasks/enable_ps57_eol_main_repo.yml
+    include_tasks: ../tasks/enable_ps57_eol_release_repo.yml
 
   - name: include tasks for local vault setup
     include_tasks: ../tasks/setup_local_vault.yml
