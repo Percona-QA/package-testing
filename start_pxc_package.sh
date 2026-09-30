@@ -86,13 +86,17 @@ for i in 1 2 3; do
   sudo mysqld --defaults-file="/etc/percona${i}.cnf" --initialize-insecure --user=mysql
 done
 
-# Start mysqld in the background, detached from the terminal so its output
-# can't mangle the tty settings of the calling shell
+# Start mysqld detached in its own session. Backgrounding sudo itself leaves
+# it running with use_pty, holding the terminal in raw mode (staircase output);
+# setsid -f lets sudo exit right away and restore the terminal.
 start_node() {
   local i=$1; shift
-  sudo mysqld --defaults-file="/etc/percona${i}.cnf" --user=mysql "$@" \
-    </dev/null >/dev/null 2>&1 &
-  node_pids[$i]=$!
+  sudo setsid -f mysqld --defaults-file="/etc/percona${i}.cnf" --user=mysql "$@" \
+    </dev/null >/dev/null 2>&1
+}
+
+node_running() {
+  pgrep -f -- "mysqld --defaults-file=/etc/percona$1.cnf " >/dev/null
 }
 
 # Wait until a node reports Synced (a joiner only opens its socket after SST)
@@ -101,8 +105,7 @@ wait_for_synced() {
   local socket="/var/lib/mysql$i/mysql.sock"
 
   while (( elapsed < timeout )); do
-    # ps rather than kill -0: sudo's process is root-owned, so kill -0 gets EPERM
-    if ! ps -p "${node_pids[$i]}" >/dev/null 2>&1; then
+    if ! node_running "$i"; then
       echo "❌ Node $i mysqld exited. Check /var/lib/mysql$i/error.log"
       exit 1
     fi
@@ -120,8 +123,6 @@ wait_for_synced() {
   echo "❌ Node $i not Synced after ${timeout}s (state: ${state:-no connection}). Check /var/lib/mysql$i/error.log"
   exit 1
 }
-
-declare -A node_pids
 
 # Step 3: Bootstrap first node
 echo "🚀 Bootstrapping Node 1..."
