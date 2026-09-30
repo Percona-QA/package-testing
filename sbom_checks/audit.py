@@ -209,7 +209,8 @@ def _run_tools_on(local, report, vuln_off):
     validated = external_tools.cyclonedx_validate(local)
     report.tool_status["cyclonedx"] = validated.status
     if validated.status == external_tools.MISSING:
-        report.tool_notes.append("cyclonedx-cli not installed -- schema validation skipped")
+        report.tool_notes.append("cyclonedx-cli not installed (looked for %s) -- schema "
+                                 "validation skipped" % external_tools.CYCLONEDX_BIN)
     elif validated.status == external_tools.OK:
         report.tool_notes.append("cyclonedx-cli validate: OK (%s)"
                                  % (external_tools.spec_version(local) or "unknown spec"))
@@ -224,7 +225,8 @@ def _run_tools_on(local, report, vuln_off):
     scanned = external_tools.trivy_sbom(local)
     report.tool_status["trivy"] = scanned.status
     if scanned.status == external_tools.MISSING:
-        report.tool_notes.append("trivy not installed -- vulnerability scan skipped")
+        report.tool_notes.append("trivy not installed (looked for %s) -- vulnerability "
+                                 "scan skipped" % external_tools.TRIVY_BIN)
     elif scanned.status == external_tools.OK:
         report.tool_notes.append("trivy sbom: no unfixed HIGH/CRITICAL findings")
     elif scanned.status == external_tools.FAILED:
