@@ -15,6 +15,7 @@ every rejection is recorded in `considered` and printed even on a skip.
 """
 
 import os
+import re
 import shlex
 
 from . import config
@@ -255,12 +256,38 @@ def version_to_assert(backend, package, explicit=None, product=None):
     return None, None
 
 
+# A pre-release tag in an rpm RELEASE: the "rc1" of 2.rc1.el9.
+_RPM_PRERELEASE = re.compile(r"^(rc|alpha|beta)\d*$", re.IGNORECASE)
+
+
+def rpm_product_version(version, release):
+    """rpm VERSION plus the pre-release tag carried in RELEASE.
+
+    percona-xtrabackup-97-9.7.1-2.rc1.el9 has VERSION 9.7.1 and RELEASE
+    2.rc1.el9 (the 2 is a rebuild number), while its SBOM says 9.7.1-rc1. A GA
+    RELEASE such as 1.el9 has no tag, and the version stays VERSION.
+    """
+    version = (version or "").strip()
+    for part in (release or "").strip().split("."):
+        if _RPM_PRERELEASE.match(part):
+            return "%s-%s" % (version, part)
+    return version
+
+
 def installed_version(backend, package):
-    """Version of an installed package, or None."""
+    """Version of an installed package as its SBOM states it, or None.
+
+    dpkg: the full Version, unchanged (9.7.1~rc1-2.trixie) -- the Debian and
+    Ubuntu SBOMs carry exactly that. rpm: see rpm_product_version.
+    """
     manager = _package_manager(backend)
     if manager == "rpm":
         # Concatenated, not %-formatted: "%{VERSION}" would break str.__mod__.
-        result = backend.run("rpm -q --qf '%{VERSION}' " + shlex.quote(package))
+        result = backend.run("rpm -q --qf '%{VERSION} %{RELEASE}' " + shlex.quote(package))
+        if not result.ok or not result.stdout.strip():
+            return None
+        fields = result.stdout.split()
+        return rpm_product_version(fields[0], fields[1] if len(fields) > 1 else "")
     elif manager == "dpkg":
         # With the status: for a package in state "un" dpkg-query prints an
         # empty version and still exits 0.
@@ -273,8 +300,4 @@ def installed_version(backend, package):
             if _dpkg_installed(status) and version:
                 return version
         return None
-    else:
-        return None
-    if not result.ok or not result.stdout.strip():
-        return None
-    return result.stdout.strip()
+    return None

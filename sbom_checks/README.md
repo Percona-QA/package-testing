@@ -109,9 +109,17 @@ SBOM_DIR=~/Downloads/pxb-sbom SBOM_PRODUCT_VERSION=9.7.1-rc1 \
 installed package to compare against, so without it the run checks structure,
 licences and cross-format consistency but **not which release the SBOM is for**.
 With it, `test_root_component_is_the_expected_release` verifies the root
-component in both the CycloneDX and SPDX documents. Comparison tolerates a
-package release suffix, so an SBOM saying `9.7.1-rc1` satisfies
-`SBOM_PRODUCT_VERSION=9.7.1-rc1.2`.
+component in both the CycloneDX and SPDX documents. The version must match
+**exactly**: `9.7.1` does not satisfy an SBOM saying `9.7.1-rc1`, and neither does
+`9.7.1-rc10`. (The root *name* is still suffix-tolerant, so `percona-xtrabackup`
+and `percona-xtrabackup-97` match.)
+
+The version taken from an installed package is the one its SBOM states:
+
+- **Debian/Ubuntu**: dpkg's `Version`, unchanged, e.g. `9.7.1~rc1-2.trixie`.
+- **rpm**: `%{VERSION}` plus the pre-release tag found in `%{RELEASE}`. So
+  `percona-xtrabackup-97-9.7.1-2.rc1.el9` (VERSION `9.7.1`, RELEASE `2.rc1.el9`)
+  gives `9.7.1-rc1`. A GA RELEASE carries no tag, and the version is `%{VERSION}`.
 
 On a target host with PXB installed, the version is taken from the installed
 package automatically. Setting `SBOM_PRODUCT_VERSION` *replaces* that expectation rather

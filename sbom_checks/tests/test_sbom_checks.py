@@ -230,13 +230,20 @@ def test_expected_version_is_asserted(fixture_set, product_workdir):
     assert all(f.where == "root" for f in root)
 
 
-def test_expected_version_tolerates_a_package_release_suffix(fixture_set, product_workdir):
-    """The SBOM says e.g. 9.7.1-rc1; an rpm or a job parameter may say
-    9.7.1-rc1.2. Derived from each product's own version -- a PXB literal here
+def test_expected_version_must_match_exactly(fixture_set, product_workdir):
+    """The root version equals the installed one or the root test fails. A
+    prefix match let 9.7.1 pass for 9.7.1-rc1, and would let 9.7.1-rc1 pass for
+    9.7.1-rc10. Derived from each product's own version -- a PXB literal here
     would fail for PS for a reason unrelated to anything under test."""
-    report = _audit(product_workdir, fixture_set,
-                    expect_version=fixture_set.root_version + ".2")
-    assert not [f for f in report.findings if f.where == "root"], _messages(report)
+    exact = _audit(product_workdir, fixture_set, expect_version=fixture_set.root_version)
+    assert not [f for f in exact.findings if f.where == "root"], _messages(exact)
+    for wrong in (fixture_set.root_version + "0",              # 9.7.1-rc10
+                  fixture_set.root_version + ".2",
+                  fixture_set.root_version.rsplit("-", 1)[0]):   # 9.7.1
+        report = _audit(product_workdir, fixture_set, expect_version=wrong)
+        root = [f for f in report.findings if f.where == "root"]
+        # one finding per format that states a root version
+        assert root and all(repr(wrong) in f.message for f in root), (wrong, _messages(report))
 
 
 def test_expected_version_is_read_from_the_environment(monkeypatch):
@@ -1167,12 +1174,17 @@ def test_no_installed_package_is_not_a_problem():
     assert version is None and problem is None
 
 
-def test_release_suffix_is_still_tolerated():
-    """rpm reports 9.7.1-rc1-1.el9 for an SBOM saying 9.7.1-rc1; tightening the
-    missing-version case must not make the normal rpm/deb versions fail."""
-    assert structural._matches("9.7.1-rc1", "9.7.1-rc1-1.el9")
-    assert structural._matches("9.7.1-rc1-1.el9", "9.7.1-rc1")
-    assert not structural._matches("9.7.1-rc1", "9.7.2")
+def test_root_names_are_suffix_tolerant_but_versions_are_exact():
+    """An SBOM root of percona-xtrabackup is accepted for the installed
+    percona-xtrabackup-97, and the reverse; versions get no such leeway."""
+    assert structural._matches("percona-xtrabackup", "percona-xtrabackup-97")
+    assert structural._matches("percona-xtrabackup-97", "percona-xtrabackup")
+    assert not structural._matches("percona-xtrabackup-97", "percona-server")
+    assert structural._version_matches("9.7.1-rc1", " 9.7.1-rc1 ")
+    assert structural._version_matches("9.7.1~rc1-2.trixie", "9.7.1~rc1-2.trixie")
+    for other in ("9.7.1", "9.7.1-rc10", "9.7.1-rc1-1.el9", "", None):
+        assert not structural._version_matches("9.7.1-rc1", other), other
+    assert not structural._version_matches("", "")
 
 
 # --- products are selected, never assumed --------------------------------
@@ -1429,7 +1441,8 @@ def test_fetched_mode_ignores_another_products_collections():
 class _PackageManager(object):
     """A scripted rpm or dpkg. packages: {name: (status, version, [files])},
     where status is a dpkg db:Status-Abbrev ("ii", "un", "rc", "hi"); rpm lists
-    only what is installed, as the real one does."""
+    only what is installed, as the real one does. For rpm, version is what
+    --qf '%{VERSION} %{RELEASE}' prints, e.g. "9.7.1 2.rc1.el9"."""
 
     def __init__(self, manager, packages):
         self.manager = manager
@@ -1482,7 +1495,7 @@ def test_dpkg_packages_that_are_only_referenced_are_not_installed():
     backend = _PackageManager("dpkg", {
         "percona-xtrabackup": ("un", "", []),
         "percona-xtrabackup-84": ("rc", "8.4.0-7", []),
-        "percona-xtrabackup-97": ("ii", "9.7.1-rc1-1.bookworm", PXB97_FILES),
+        "percona-xtrabackup-97": ("ii", "9.7.1~rc1-2.bookworm", PXB97_FILES),
     })
     assert discovery.installed_packages(backend, products.PXB) == ["percona-xtrabackup-97"]
     sets, _ = discovery.discover(backend, product=products.PXB)
@@ -1490,7 +1503,8 @@ def test_dpkg_packages_that_are_only_referenced_are_not_installed():
     name = discovery.expected_root_name(backend, sets[0], products.PXB)
     assert name == "percona-xtrabackup-97"
     version, problem = discovery.version_to_assert(backend, name, product=products.PXB)
-    assert (version, problem) == ("9.7.1-rc1-1.bookworm", None)
+    # dpkg's Version as is: the Debian/Ubuntu SBOMs carry exactly that
+    assert (version, problem) == ("9.7.1~rc1-2.bookworm", None)
 
 
 def test_dpkg_version_of_a_not_installed_package_is_none():
@@ -1501,9 +1515,9 @@ def test_dpkg_version_of_a_not_installed_package_is_none():
 
 def test_a_held_dpkg_package_still_counts_as_installed():
     backend = _PackageManager("dpkg", {
-        "percona-xtrabackup-97": ("hi", "9.7.1-rc1-1", PXB97_FILES)})
+        "percona-xtrabackup-97": ("hi", "9.7.1~rc1-2.trixie", PXB97_FILES)})
     assert discovery.installed_packages(backend, products.PXB) == ["percona-xtrabackup-97"]
-    assert discovery.installed_version(backend, "percona-xtrabackup-97") == "9.7.1-rc1-1"
+    assert discovery.installed_version(backend, "percona-xtrabackup-97") == "9.7.1~rc1-2.trixie"
 
 
 @pytest.mark.parametrize("manager", ["rpm", "dpkg"])
@@ -1521,7 +1535,7 @@ def test_the_root_is_the_package_that_owns_the_sbom_files(manager):
 def test_the_collected_manifest_names_the_owning_package():
     backend = _PackageManager("dpkg", {
         "percona-xtrabackup": ("un", "", []),
-        "percona-xtrabackup-97": ("ii", "9.7.1-rc1-1.bookworm", []),
+        "percona-xtrabackup-97": ("ii", "9.7.1~rc1-2.bookworm", []),
     })
     # files are found through $SBOM_DIR here, so no owner -- the name then
     # falls back to the one installed main package, never the "un" one
@@ -1530,7 +1544,7 @@ def test_the_collected_manifest_names_the_owning_package():
         manifest = collect_mod.collect(products.PXB, "debian-12", out,
                                        sbom_dir=PXB.directory, backend=backend)
         assert manifest["expect_name"] == "percona-xtrabackup-97"
-        assert manifest["expect_version"] == "9.7.1-rc1-1.bookworm"
+        assert manifest["expect_version"] == "9.7.1~rc1-2.bookworm"
         assert manifest["version_problem"] is None
     finally:
         shutil.rmtree(out, ignore_errors=True)
@@ -1603,3 +1617,38 @@ def test_export_replaces_a_stale_output_directory():
         assert os.listdir(out) == ["debian-12"]
     finally:
         shutil.rmtree(work, ignore_errors=True)
+
+
+# --- the installed version, as the SBOM states it --------------------------
+
+@pytest.mark.parametrize("version, release, expected", [
+    ("9.7.1", "2.rc1.el9", "9.7.1-rc1"),        # percona-xtrabackup-97-9.7.1-2.rc1.el9
+    ("9.7.1", "1.rc1.el8", "9.7.1-rc1"),        # the rebuild number is not part of it
+    ("9.7.1", "1.RC2.amzn2023", "9.7.1-RC2"),   # case kept as the package wrote it
+    ("9.7.0", "1.beta1.el9", "9.7.0-beta1"),
+    ("8.4.0", "7.1.el9", "8.4.0"),              # GA: no tag, unchanged
+    ("9.7.1", "", "9.7.1"),
+    ("9.7.1", None, "9.7.1"),
+])
+def test_rpm_version_gets_the_pre_release_tag_from_release(version, release, expected):
+    assert discovery.rpm_product_version(version, release) == expected
+
+
+def test_the_collected_manifest_carries_the_rpm_pre_release_tag():
+    """rpm %{VERSION} alone is 9.7.1; the SBOM on rpm platforms says 9.7.1-rc1."""
+    backend = _PackageManager("rpm", {
+        "percona-xtrabackup-97": ("ii", "9.7.1 2.rc1.el9", PXB97_FILES)})
+    assert discovery.installed_version(backend, "percona-xtrabackup-97") == "9.7.1-rc1"
+    out = tempfile.mkdtemp(prefix="collect-test-")
+    try:
+        manifest = collect_mod.collect(products.PXB, "rocky-9", out,
+                                       sbom_dir=PXB.directory, backend=backend)
+        assert manifest["expect_version"] == "9.7.1-rc1"
+        assert manifest["version_problem"] is None
+    finally:
+        shutil.rmtree(out, ignore_errors=True)
+
+
+def test_rpm_version_of_a_package_that_is_not_installed_is_none():
+    backend = _PackageManager("rpm", {})
+    assert discovery.installed_version(backend, "percona-xtrabackup-97") is None

@@ -21,16 +21,30 @@ SPDX_ID_RE = re.compile(r"^SPDXRef-[A-Za-z0-9.\-]+$")
 
 
 def _matches(actual, expected):
-    """Version comparison tolerant of a package release suffix.
+    """Name comparison tolerant of a suffix either way.
 
-    An SBOM may say 9.7.1-rc1 while rpm reports 9.7.1-rc1-1.el9; accept either
-    as a prefix of the other rather than demanding an exact string match.
+    Used for the root NAME only: an SBOM root of percona-xtrabackup is accepted
+    for the installed percona-xtrabackup-97, and the reverse. Versions are
+    compared exactly, with _version_matches.
     """
     a = (actual or "").strip()
     e = (expected or "").strip()
     if not a or not e:
         return False
     return a == e or a.startswith(e) or e.startswith(a)
+
+
+def _version_matches(actual, expected):
+    """The root version must equal the expected one exactly.
+
+    The expectation is the installed package's version as the SBOM states it:
+    the full dpkg Version on Debian/Ubuntu (9.7.1~rc1-2.trixie), and rpm VERSION
+    plus its pre-release tag on rpm platforms (9.7.1-rc1). A prefix match would
+    let 9.7.1 pass for 9.7.1-rc1, or 9.7.1-rc1 for 9.7.1-rc10.
+    """
+    a = (actual or "").strip()
+    e = (expected or "").strip()
+    return bool(a) and a == e
 
 
 def check_cyclonedx(doc, root, components, expect_name=None, expect_version=None):
@@ -70,7 +84,7 @@ def check_cyclonedx(doc, root, components, expect_name=None, expect_version=None
     else:
         if expect_name and not _matches(root.name, expect_name):
             add_root("metadata.component.name is %r, expected %r" % (root.name, expect_name))
-        if expect_version and not _matches(root.version, expect_version):
+        if expect_version and not _version_matches(root.version, expect_version):
             add_root("metadata.component.version is %r, expected %r"
                      % (root.version, expect_version))
 
@@ -209,7 +223,7 @@ def check_spdx(doc, root, components, expect_name=None, expect_version=None):
     else:
         if expect_name and not _matches(root.name, expect_name):
             add_root("root package name is %r, expected %r" % (root.name, expect_name))
-        if expect_version and not _matches(root.version, expect_version):
+        if expect_version and not _version_matches(root.version, expect_version):
             add_root("root package versionInfo is %r, expected %r"
                      % (root.version, expect_version))
 
