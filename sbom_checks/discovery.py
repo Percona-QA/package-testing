@@ -52,6 +52,23 @@ def _package_manager(backend):
     return None
 
 
+def _dpkg_status_lines(result):
+    """-> [(status abbrev, value)] from `dpkg-query -W -f='${db:Status-Abbrev} X'`."""
+    pairs = []
+    for line in result.lines():
+        parts = line.split(None, 1)
+        if len(parts) == 2:
+            pairs.append((parts[0], parts[1].strip()))
+    return pairs
+
+
+def _dpkg_installed(status):
+    """True for an installed package. The second letter of db:Status-Abbrev is
+    the current state: "ii" and "hi" (held) are installed; "un" (never
+    installed, only referenced) and "rc" (removed, config left) are not."""
+    return len(status) >= 2 and status[1] == "i"
+
+
 def installed_packages(backend, product=None):
     """Installed packages of the product, main ones first."""
     product = product or config.product()
@@ -62,14 +79,24 @@ def installed_packages(backend, product=None):
     glob = product.package_glob
     if manager == "rpm":
         result = backend.run("rpm -qa --qf '%{NAME}\\n' '" + glob + "'")
+        if not result.ok:
+            return []
+        names = sorted(set(result.lines()))
     elif manager == "dpkg":
+        # With the status, not just the name: dpkg-query -W also lists packages
+        # dpkg merely knows about. PXB 9.7 names percona-xtrabackup and the older
+        # lines in Conflicts/Replaces, so on Debian they all appear in state "un"
+        # (not installed) -- and the first of them alphabetically,
+        # percona-xtrabackup, was taken as the package the SBOM describes.
         result = backend.run(
-            "dpkg-query -W -f='${Package}\\n' '" + glob + "' 2>/dev/null")
+            "dpkg-query -W -f='${db:Status-Abbrev} ${Package}\\n' '" + glob
+            + "' 2>/dev/null")
+        if not result.ok:
+            return []
+        names = sorted(set(name for status, name in _dpkg_status_lines(result)
+                           if _dpkg_installed(status)))
     else:
         return []
-    if not result.ok:
-        return []
-    names = sorted(set(result.lines()))
     main = [n for n in names if product.main_package_re.match(n)]
     rest = [n for n in names if n not in main]
     return main + rest
@@ -103,7 +130,7 @@ def _find_in_dirs(backend, dirs):
     return backend.run(command).lines()
 
 
-def group(paths):
+def group(paths, owners=None):
     """Group SBOM file paths into SbomSets keyed by (directory, filename stem).
 
     Keying on the stem alone would merge sibling directories that hold the same
@@ -118,7 +145,8 @@ def group(paths):
             continue
         key = (os.path.dirname(path), stem)
         if key not in sets:
-            sets[key] = SbomSet(stem, directory=key[0])
+            sets[key] = SbomSet(stem, directory=key[0],
+                                package=(owners or {}).get(path))
         # First hit wins; discovery yields package-declared paths before find(1).
         if not sets[key].paths.get(fmt):
             sets[key].paths[fmt] = path
@@ -157,12 +185,15 @@ def discover(backend, sbom_dir=None, product=None):
         considered.append("no installed package matches %s (or no rpm/dpkg available)"
                           % product.package_glob)
 
+    owners = {}
     for package in packages:
         files = _list_package_files(backend, package)
         hits = [p for p in files if classify(p)[0]]
         considered.append("  %s: %d file(s) declared, %d look like SBOM files"
                           % (package, len(files), len(hits)))
         paths.extend(hits)
+        for path in hits:
+            owners.setdefault(path, package)
 
     if not paths:
         considered.append("falling back to find(1) in: %s"
@@ -171,7 +202,7 @@ def discover(backend, sbom_dir=None, product=None):
         considered.append("  -> %d candidate file(s)" % len(hits))
         paths.extend(hits)
 
-    sets = group(paths)
+    sets = group(paths, owners)
     considered.append("grouped into %d SBOM file set(s): %s"
                       % (len(sets), ", ".join(s.label() for s in sets) or "none"))
     return sets, considered
@@ -180,11 +211,16 @@ def discover(backend, sbom_dir=None, product=None):
 def expected_root_name(backend, sbom_set, product=None):
     """Best guess at the name the SBOM's root component should carry.
 
-    Prefers the installed package that owns the files; falls back to the
-    filename stem, which is how the prototype sets are named
+    The package whose file list declared the SBOM files, when that is a main
+    package: it is what the SBOM describes, and it stays right when more than
+    one product line is installed. Taking the first main package instead picked
+    a merely-referenced "percona-xtrabackup" on Debian. Then any installed main
+    package, then the filename stem, which is how the prototype sets are named
     (percona-xtrabackup-97.cdx.json -> percona-xtrabackup-97).
     """
     product = product or config.product()
+    if sbom_set.package and product.main_package_re.match(sbom_set.package):
+        return sbom_set.package
     for package in installed_packages(backend, product):
         if product.main_package_re.match(package):
             return package
@@ -226,9 +262,17 @@ def installed_version(backend, package):
         # Concatenated, not %-formatted: "%{VERSION}" would break str.__mod__.
         result = backend.run("rpm -q --qf '%{VERSION}' " + shlex.quote(package))
     elif manager == "dpkg":
+        # With the status: for a package in state "un" dpkg-query prints an
+        # empty version and still exits 0.
         result = backend.run(
-            "dpkg-query -W -f='${Version}' " + shlex.quote(package)
-            + " 2>/dev/null")
+            "dpkg-query -W -f='${db:Status-Abbrev} ${Version}\\n' "
+            + shlex.quote(package) + " 2>/dev/null")
+        if not result.ok:
+            return None
+        for status, version in _dpkg_status_lines(result):
+            if _dpkg_installed(status) and version:
+                return version
+        return None
     else:
         return None
     if not result.ok or not result.stdout.strip():

@@ -223,7 +223,8 @@ def _audit_fetched(product, path, request):
         # directory is where the files were on the target, so findings and the
         # multiple-sets message name the real location, not a temp path.
         sets.append(SbomSet(entry.get("stem", ""), paths=paths,
-                            directory=entry.get("directory")))
+                            directory=entry.get("directory"),
+                            package=entry.get("package")))
 
     _gate(sets, manifest.get("considered") or [], label)
 

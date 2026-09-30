@@ -79,6 +79,7 @@ def collect(product, label, out, sbom_dir=None, backend=None):
             manifest["sets"].append({
                 "stem": sbom_set.stem,
                 "directory": sbom_set.directory,
+                "package": sbom_set.package,
                 "files": files,
             })
         if sets:
@@ -122,8 +123,9 @@ def main(argv=None):
     for note in manifest["considered"]:
         print("  %s" % note)
     for sbom_set in manifest["sets"]:
-        print("  collected %s from %s: %s" % (sbom_set["stem"], sbom_set["directory"],
-                                             ", ".join(sorted(sbom_set["files"]))))
+        print("  collected %s from %s (owned by %s): %s"
+              % (sbom_set["stem"], sbom_set["directory"],
+                 sbom_set.get("package") or "no package", ", ".join(sorted(sbom_set["files"]))))
     if manifest["expect_name"]:
         print("  installed package: %s %s" % (manifest["expect_name"],
                                             manifest["expect_version"] or "(version unknown)"))

@@ -38,8 +38,12 @@ class SbomSet(object):
 
     FORMATS = ("cdx", "spdx", "table", "licenses")
 
-    def __init__(self, stem, paths=None, directory=None):
+    def __init__(self, stem, paths=None, directory=None, package=None):
         self.stem = stem
+        # The installed package whose file list (rpm -ql / dpkg -L) declared
+        # these files, or None when they were found by find(1) or $SBOM_DIR.
+        # It is what the root component should describe.
+        self.package = package
         # Sets are identified by (directory, stem), never stem alone: two
         # directories under the package dir can hold files with identical names
         # (a leftover or a backup copy), and merging them would validate

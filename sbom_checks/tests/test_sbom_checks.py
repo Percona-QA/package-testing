@@ -1421,3 +1421,116 @@ def test_fetched_mode_ignores_another_products_collections():
         assert results["test_formats_agree_with_each_other[rocky-8]"] == "passed"
     finally:
         shutil.rmtree(zips, ignore_errors=True)
+
+
+
+# --- which installed package the SBOM describes -------------------------
+
+class _PackageManager(object):
+    """A scripted rpm or dpkg. packages: {name: (status, version, [files])},
+    where status is a dpkg db:Status-Abbrev ("ii", "un", "rc", "hi"); rpm lists
+    only what is installed, as the real one does."""
+
+    def __init__(self, manager, packages):
+        self.manager = manager
+        self.packages = packages
+
+    def run(self, command):
+        from sbom_checks.backends import Result
+        installed = dict((n, p) for n, p in self.packages.items()
+                         if len(p[0]) >= 2 and p[0][1] == "i")
+        if command.startswith("command -v"):
+            wanted = "rpm" if self.manager == "rpm" else "dpkg-query"
+            return Result(0 if command.endswith(wanted) else 1, "", "")
+        if command.startswith("find "):             # the filesystem is real
+            return LocalBackend().run(command)
+        if self.manager == "rpm":
+            if " -qa " in command:
+                return Result(0, "\n".join(sorted(installed)), "")
+            if " -ql " in command:
+                name = command.split()[-1].strip("'")
+                return Result(0, "\n".join(installed.get(name, ("", "", []))[2]), "")
+            if "-q --qf" in command:
+                name = command.split()[-1].strip("'")
+                return Result(0 if name in installed else 1,
+                              installed[name][1] if name in installed else "", "")
+        else:
+            if "${Package}" in command:          # every package dpkg knows about
+                return Result(0, "\n".join("%s %s" % (p[0], n)
+                                           for n, p in sorted(self.packages.items())), "")
+            if "${Version}" in command:
+                tokens = command.split()
+                name = (tokens[-2] if tokens[-1] == "2>/dev/null" else tokens[-1]).strip("'")
+                p = self.packages.get(name)
+                return Result(0, "%s %s" % (p[0], p[1]) if p else "", "")
+            if command.startswith("dpkg -L"):
+                name = command.split()[-1].strip("'")
+                p = installed.get(name)
+                return Result(0 if p else 1, "\n".join(p[2]) if p else "", "")
+        return Result(1, "", "")
+
+
+PXB97_FILES = ["/usr/share/percona-xtrabackup-97/sbom/percona-xtrabackup-97" + s
+               for s in (".cdx.json", ".spdx.json", ".sbom.txt", ".licenses.txt")]
+
+
+def test_dpkg_packages_that_are_only_referenced_are_not_installed():
+    """The Debian failure: PXB 9.7 names percona-xtrabackup and the older lines
+    in Conflicts/Replaces, so dpkg-query -W lists them in state "un". Taking
+    the first of those described the SBOM as percona-xtrabackup, version
+    unknown -- a root failure on every deb platform."""
+    backend = _PackageManager("dpkg", {
+        "percona-xtrabackup": ("un", "", []),
+        "percona-xtrabackup-84": ("rc", "8.4.0-7", []),
+        "percona-xtrabackup-97": ("ii", "9.7.1-rc1-1.bookworm", PXB97_FILES),
+    })
+    assert discovery.installed_packages(backend, products.PXB) == ["percona-xtrabackup-97"]
+    sets, _ = discovery.discover(backend, product=products.PXB)
+    assert sets[0].package == "percona-xtrabackup-97"
+    name = discovery.expected_root_name(backend, sets[0], products.PXB)
+    assert name == "percona-xtrabackup-97"
+    version, problem = discovery.version_to_assert(backend, name, product=products.PXB)
+    assert (version, problem) == ("9.7.1-rc1-1.bookworm", None)
+
+
+def test_dpkg_version_of_a_not_installed_package_is_none():
+    """dpkg-query prints an empty version for an "un" package and exits 0."""
+    backend = _PackageManager("dpkg", {"percona-xtrabackup": ("un", "", [])})
+    assert discovery.installed_version(backend, "percona-xtrabackup") is None
+
+
+def test_a_held_dpkg_package_still_counts_as_installed():
+    backend = _PackageManager("dpkg", {
+        "percona-xtrabackup-97": ("hi", "9.7.1-rc1-1", PXB97_FILES)})
+    assert discovery.installed_packages(backend, products.PXB) == ["percona-xtrabackup-97"]
+    assert discovery.installed_version(backend, "percona-xtrabackup-97") == "9.7.1-rc1-1"
+
+
+@pytest.mark.parametrize("manager", ["rpm", "dpkg"])
+def test_the_root_is_the_package_that_owns_the_sbom_files(manager):
+    """With two product lines genuinely installed, the SBOM describes the one
+    whose file list declared it -- not whichever sorts first."""
+    backend = _PackageManager(manager, {
+        "percona-xtrabackup-84": ("ii", "8.4.0", []),
+        "percona-xtrabackup-97": ("ii", "9.7.1", PXB97_FILES),
+    })
+    sets, _ = discovery.discover(backend, product=products.PXB)
+    assert discovery.expected_root_name(backend, sets[0], products.PXB) == "percona-xtrabackup-97"
+
+
+def test_the_collected_manifest_names_the_owning_package():
+    backend = _PackageManager("dpkg", {
+        "percona-xtrabackup": ("un", "", []),
+        "percona-xtrabackup-97": ("ii", "9.7.1-rc1-1.bookworm", []),
+    })
+    # files are found through $SBOM_DIR here, so no owner -- the name then
+    # falls back to the one installed main package, never the "un" one
+    out = tempfile.mkdtemp(prefix="collect-test-")
+    try:
+        manifest = collect_mod.collect(products.PXB, "debian-12", out,
+                                       sbom_dir=PXB.directory, backend=backend)
+        assert manifest["expect_name"] == "percona-xtrabackup-97"
+        assert manifest["expect_version"] == "9.7.1-rc1-1.bookworm"
+        assert manifest["version_problem"] is None
+    finally:
+        shutil.rmtree(out, ignore_errors=True)
