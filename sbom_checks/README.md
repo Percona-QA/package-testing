@@ -193,11 +193,13 @@ Post-processing rather than a pytest hook because the docker suite is pinned to
 `pytest==5.2.1` while the targets run a modern pytest, and this touches no
 pytest internals. It is idempotent, leaves a malformed report untouched, and
 `--only` scopes the rewrite by `classname` so the docker `report.xml` keeps its
-`test_container_att.py` results unlabelled. CI applies it automatically, and both hooks live in **this** repo so they ship
-with the branch the job is pointed at rather than waiting on a pipeline merge:
-`tasks/check_pxb_sbom.yml` labels with `MOLECULE_SCENARIO_NAME` (falling back to
-OS + arch), and `docker-image-tests/pxb/run.sh` labels with `arm64` / `amd64`
-(override with `SBOM_PLATFORM_LABEL`). `run.sh` labels *before* exiting and
+`test_container_att.py` results unlabelled. CI applies it in the docker job:
+`docker-image-tests/pxb/run.sh` labels with `arm64` / `amd64` (override with
+`SBOM_PLATFORM_LABEL`), living in **this** repo so it ships with the branch the
+job is pointed at. The molecule job no longer needs it: its results are
+parametrized per platform, so the label is part of the test id
+(`test_x[rocky-8]`), taken from the `MOLECULE_SCENARIO_NAME` each target
+records in its collection. `run.sh` labels *before* exiting and
 preserves pytest's exit code, so the labels survive a failing run — which is
 when they matter most.
 
@@ -236,7 +238,8 @@ hand against a directory with
 
 | Consumer | Runs on | Invoked by |
 |---|---|---|
-| `pytest-tests/test_pxb_sbom.py` | the molecule target host | `tasks/check_pxb_sbom.yml`, included from `playbooks/pxb_{80,84,97,innovation_lts}.yml` |
+| `sbom_checks.collect` | each molecule target host | `tasks/check_pxb_sbom.yml`, included from `playbooks/pxb_{80,84,97,innovation_lts}.yml` -- collects only |
+| `pytest-tests/test_pxb_sbom.py` | the Jenkins agent, once per platform | `runSbomChecks()` in `pxb-pt-testing-molecule.groovy`, over the fetched `*_sbom.zip` |
 | `docker-image-tests/pxb/tests/test_pxb_sbom.py` | the Jenkins agent | the existing `docker-image-tests/pxb/run.sh` |
 | `sbom_checks.check_sbom` (CLI) | anywhere | by hand; not used by CI |
 
@@ -300,14 +303,17 @@ parameters: `SBOM_CHECK_MODE`, `SBOM_VULN_MODE` and `SBOM_EXTERNAL_TOOLS` on
   `/usr/share/percona-xtrabackup-NN/` instead, where nothing is compressed, but
   the reader still sniffs the gzip magic bytes — never the file extension or
   `os_family` — so either layout works.
-- **The molecule job installs both tools on the target** via
-  `tasks/install_sbom_tools.yml` — trivy pinned to 0.74.0 (matching
-  `installTrivy.groovy`) and cyclonedx-cli from its latest release, both
-  arch-aware, and extracted with python's `tarfile` because some AMIs ship no
-  `tar` binary. The install tasks themselves never abort the converge, but they
-  always report their failure — and with `SBOM_EXTERNAL_TOOLS` on (the default)
-  a tool that did not install then **fails** the corresponding check. Disable
-  with the `SBOM_EXTERNAL_TOOLS` build parameter.
+- **In the molecule job the targets only collect; everything else runs on the
+  Jenkins agent.** Each target runs `sbom_checks.collect`: discovery via
+  `rpm -ql` / `dpkg -L` (the only step that needs the installed system), the
+  installed package's name and version, and a byte-for-byte copy of exactly the
+  discovered files plus a `manifest.json` — written even when nothing is found.
+  The job then installs trivy (`installTrivy()`, pinned 0.74.0) and cyclonedx-cli
+  **once**, on the agent, and runs the whole suite per platform over the fetched
+  zips, as `test_x[<platform>]`. trivy downloads its ~1.4 GB database once per
+  build instead of once per target. A launched platform that sends no collection
+  fails `test_every_expected_platform_reported`, so a lost fetch never looks like
+  a clean run. `tasks/install_sbom_tools.yml` is no longer used by the PXB jobs.
 - **trivy currently finds almost nothing.** PXB purls are
   `pkg:generic/<name>@<version>`, which match CVE feeds poorly, and some
   components have version `unknown`. A green trivy result is not evidence of no

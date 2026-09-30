@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """PXB SBOM checks for an installed rpm/deb package.
 
-Runs ON THE MOLECULE TARGET HOST, the same way the other pytest-tests do:
+In the molecule job this runs ON THE JENKINS AGENT, once per platform, over
+the collections each target fetched back (tasks/check_pxb_sbom.yml runs only
+sbom_checks.collect on the targets):
 
-    python3 -m pytest -v /package-testing/pytest-tests/test_pxb_sbom.py
+    SBOM_FETCHED='*_sbom.zip' SBOM_EXPECTED_PLATFORMS=rocky-8,... \
+        python -m pytest -v pytest-tests/test_pxb_sbom.py
 
-The checks live in sbom_package_checks.py, shared with test_ps_sbom.py; this
-file only binds them to PXB. Keep its name: tasks/check_pxb_sbom.yml runs it by
-path, and the junit platform labelling selects its results by it
-(--only test_pxb_sbom).
+It also runs directly on a host with the package installed, or against a
+directory of files with SBOM_DIR. The checks live in sbom_package_checks.py,
+shared with test_ps_sbom.py; this file only binds them to PXB, and the job runs
+it by this path.
 """
 
 import os

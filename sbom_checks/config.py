@@ -58,6 +58,15 @@ ENV_PRODUCT = "SBOM_PRODUCT"
 # it. No pipeline passes this override to the checks; it exists for manual runs.
 ENV_PRODUCT_VERSION = "SBOM_PRODUCT_VERSION"
 
+# Not gates: the agent-side run in the molecule jobs. Each target only collects
+# its SBOM files (sbom_checks.collect) and the whole suite runs once per platform
+# on the Jenkins agent, over the zips fetched back into the workspace.
+#   SBOM_FETCHED             glob of the fetched zips, e.g. '*_sbom.zip'
+#   SBOM_EXPECTED_PLATFORMS  comma-separated labels the job launched; a label
+#                            with no zip is a failure, not an absence
+ENV_FETCHED = "SBOM_FETCHED"
+ENV_EXPECTED_PLATFORMS = "SBOM_EXPECTED_PLATFORMS"
+
 
 def _mode(name, default=WARN):
     value = (os.environ.get(name) or "").strip().lower()
@@ -111,6 +120,17 @@ def product(key=None):
     """The product being checked: key if given, else $SBOM_PRODUCT, else PXB."""
     return products.get(key or (os.environ.get(ENV_PRODUCT) or "").strip()
                         or products.DEFAULT)
+
+
+def fetched_glob():
+    """Glob of fetched collector zips, or None when not running on the agent."""
+    return (os.environ.get(ENV_FETCHED) or "").strip() or None
+
+
+def expected_platforms():
+    """Platform labels the job launched, in order, without blanks."""
+    raw = os.environ.get(ENV_EXPECTED_PLATFORMS) or ""
+    return [p.strip() for p in raw.split(",") if p.strip()]
 
 
 def expect_version():

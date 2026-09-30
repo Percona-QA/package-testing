@@ -1248,3 +1248,176 @@ def test_the_shared_module_cannot_overwrite_an_entrypoint_product():
     shared = _load_entrypoint("sbom_package_checks")
     assert "PRODUCT" not in shared.__all__
     assert not hasattr(shared, "PRODUCT")
+
+
+
+# --- collect on the target, check on the agent ----------------------------
+
+from sbom_checks import collect as collect_mod          # noqa: E402
+
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+
+
+def _collect_zip(fixture_set_, label, dest_dir, mutate=None):
+    """Run the collector over a fixture set and zip it the way ansible does."""
+    import zipfile
+    work = tempfile.mkdtemp(prefix="collect-test-")
+    try:
+        out = os.path.join(work, "x_sbom")
+        os.makedirs(out)
+        collect_mod.collect(config.product(fixture_set_.key), label, out,
+                            sbom_dir=fixture_set_.directory)
+        if mutate:
+            path = os.path.join(out, collect_mod.MANIFEST)
+            manifest = json.load(open(path))
+            mutate(manifest)
+            json.dump(manifest, open(path, "w"))
+        zip_path = os.path.join(dest_dir, "%s_sbom.zip" % label)
+        with zipfile.ZipFile(zip_path, "w") as archive:
+            for directory, _, files in os.walk(out):
+                for name in files:
+                    full = os.path.join(directory, name)
+                    archive.write(full, os.path.relpath(full, work))
+        return zip_path
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def test_collect_copies_exactly_the_discovered_files(fixture_set):
+    out = tempfile.mkdtemp(prefix="collect-test-")
+    try:
+        manifest = collect_mod.collect(config.product(fixture_set.key), "rocky-8", out,
+                                       sbom_dir=fixture_set.directory)
+        assert manifest["error"] is None
+        assert manifest["label"] == "rocky-8" and manifest["product"] == fixture_set.key
+        [entry] = manifest["sets"]
+        assert sorted(entry["files"]) == sorted(SbomSet.FORMATS)
+        for fmt, relative in entry["files"].items():
+            copied = os.path.join(out, relative)
+            source = os.path.join(fixture_set.directory, os.path.basename(relative))
+            # byte for byte, and at its absolute path under files/
+            assert open(copied, "rb").read() == open(source, "rb").read(), fmt
+            assert relative.startswith(collect_mod.FILES_DIR + os.sep)
+            assert relative.endswith(os.path.abspath(source).lstrip(os.sep))
+        assert os.path.exists(os.path.join(out, collect_mod.MANIFEST))
+    finally:
+        shutil.rmtree(out, ignore_errors=True)
+
+
+def test_collect_writes_a_manifest_even_when_nothing_is_found():
+    """Absence has to be a statement from the platform, not a missing file --
+    otherwise "no SBOM shipped" and "never reported" look the same."""
+    out = tempfile.mkdtemp(prefix="collect-test-")
+    empty = tempfile.mkdtemp(prefix="collect-empty-")
+    try:
+        manifest = collect_mod.collect(products.PXB, "debian-12", out, sbom_dir=empty)
+        assert manifest["sets"] == [] and manifest["error"] is None
+        assert manifest["considered"], "the discovery trail must still be recorded"
+        assert os.path.exists(os.path.join(out, collect_mod.MANIFEST))
+    finally:
+        shutil.rmtree(out, ignore_errors=True)
+        shutil.rmtree(empty, ignore_errors=True)
+
+
+def test_collect_records_a_discovery_failure_instead_of_raising():
+    class Broken(object):
+        def run(self, command):
+            raise OSError("simulated")
+    out = tempfile.mkdtemp(prefix="collect-test-")
+    try:
+        manifest = collect_mod.collect(products.PXB, "rhel-9", out, backend=Broken())
+        assert "OSError: simulated" in manifest["error"]
+        assert json.load(open(os.path.join(out, collect_mod.MANIFEST)))["error"]
+    finally:
+        shutil.rmtree(out, ignore_errors=True)
+
+
+def _run_fetched(zip_dir, expected, extra_env=None):
+    """Run the PXB package entrypoint in fetched mode, as the job does."""
+    import subprocess
+    import xml.etree.ElementTree as ET
+    junit = os.path.join(zip_dir, "sbom-junit.xml")
+    env = dict(os.environ)
+    for name in (config.ENV_PRODUCT_VERSION, config.ENV_DIR, config.ENV_CHECK_MODE):
+        env.pop(name, None)
+    env.update({config.ENV_FETCHED: os.path.join(zip_dir, "*_sbom.zip"),
+                config.ENV_EXPECTED_PLATFORMS: ",".join(expected),
+                config.ENV_EXTERNAL_TOOLS: "0"})
+    env.update(extra_env or {})
+    subprocess.call([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider",
+                     os.path.join(REPO_ROOT, "pytest-tests", "test_pxb_sbom.py"),
+                     "--junitxml", junit], env=env, cwd=zip_dir,
+                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    results = {}
+    for case in ET.parse(junit).iter("testcase"):
+        outcome = "passed"
+        for tag in ("failure", "error", "skipped"):
+            if case.find(tag) is not None:
+                outcome = tag
+        results[case.get("name")] = outcome
+    return results
+
+
+def test_fetched_mode_runs_every_test_once_per_platform():
+    zips = tempfile.mkdtemp(prefix="fetched-test-")
+    try:
+        for label in ("rocky-8", "debian-12"):
+            _collect_zip(PXB, label, zips)
+        results = _run_fetched(zips, ["rocky-8", "debian-12"])
+        for label in ("rocky-8", "debian-12"):
+            assert results["test_formats_agree_with_each_other[%s]" % label] == "passed"
+            assert results["test_root_component_is_the_expected_release[%s]" % label] == "passed"
+        assert results["test_every_expected_platform_reported"] == "passed"
+    finally:
+        shutil.rmtree(zips, ignore_errors=True)
+
+
+def test_fetched_mode_fails_a_platform_that_never_reported():
+    """A lost fetch must not look like a clean run."""
+    zips = tempfile.mkdtemp(prefix="fetched-test-")
+    try:
+        _collect_zip(PXB, "rocky-8", zips)
+        results = _run_fetched(zips, ["rocky-8", "rhel-9"])
+        assert results["test_every_expected_platform_reported"] == "failure"
+        assert results["test_formats_agree_with_each_other[rocky-8]"] == "passed"
+    finally:
+        shutil.rmtree(zips, ignore_errors=True)
+
+
+def test_fetched_mode_uses_the_version_read_on_the_target():
+    """The agent has no package installed; the expectation comes from the
+    manifest, and a wrong one fails that platform's root test only."""
+    zips = tempfile.mkdtemp(prefix="fetched-test-")
+    try:
+        _collect_zip(PXB, "rocky-8", zips)
+        _collect_zip(PXB, "rhel-9", zips,
+                     mutate=lambda m: m.update(expect_version="9.9.9"))
+        results = _run_fetched(zips, ["rocky-8", "rhel-9"])
+        assert results["test_root_component_is_the_expected_release[rhel-9]"] == "failure"
+        assert results["test_root_component_is_the_expected_release[rocky-8]"] == "passed"
+        assert results["test_formats_agree_with_each_other[rhel-9]"] == "passed"
+    finally:
+        shutil.rmtree(zips, ignore_errors=True)
+
+
+def test_fetched_mode_reports_a_collection_error_by_platform():
+    zips = tempfile.mkdtemp(prefix="fetched-test-")
+    try:
+        _collect_zip(PXB, "oracle-9", zips,
+                     mutate=lambda m: m.update(error="OSError: simulated"))
+        results = _run_fetched(zips, ["oracle-9"])
+        assert results["test_sbom_set_is_complete[oracle-9]"] == "error"
+    finally:
+        shutil.rmtree(zips, ignore_errors=True)
+
+
+def test_fetched_mode_ignores_another_products_collections():
+    zips = tempfile.mkdtemp(prefix="fetched-test-")
+    try:
+        _collect_zip(PXB, "rocky-8", zips)
+        _collect_zip(FIXTURE_SETS["ps"], "ps-rocky-8", zips)
+        results = _run_fetched(zips, ["rocky-8"])
+        assert not [name for name in results if "ps-rocky-8" in name]
+        assert results["test_formats_agree_with_each_other[rocky-8]"] == "passed"
+    finally:
+        shutil.rmtree(zips, ignore_errors=True)
