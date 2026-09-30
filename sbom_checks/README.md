@@ -240,6 +240,7 @@ hand against a directory with
 |---|---|---|
 | `sbom_checks.collect` | each molecule target host | `tasks/check_pxb_sbom.yml`, included from `playbooks/pxb_{80,84,97,innovation_lts}.yml` -- collects only |
 | `pytest-tests/test_pxb_sbom.py` | the Jenkins agent, once per platform | `runSbomChecks()` in `pxb-pt-testing-molecule.groovy`, over the fetched `*_sbom.zip` |
+| `sbom_checks.export` | the Jenkins agent | `archiveSbomFiles()` in `pxb-pt-testing-molecule.groovy` -- unpacks the fetched zips into `sbom/<platform>/` build artifacts |
 | `docker-image-tests/pxb/tests/test_pxb_sbom.py` | the Jenkins agent | the existing `docker-image-tests/pxb/run.sh` |
 | `sbom_checks.check_sbom` (CLI) | anywhere | by hand; not used by CI |
 
@@ -247,6 +248,15 @@ Both Jenkins jobs (in the `jenkins-pipelines` repo) expose the gates as build
 parameters: `SBOM_CHECK_MODE`, `SBOM_VULN_MODE` and `SBOM_EXTERNAL_TOOLS` on
 `pxb-package-testing-molecule` — passed through from
 `pxb-pt-testing-molecule-all` — and the same three on `pxb-docker-tests`.
+
+The molecule job also keeps every platform's collected files as build
+artifacts, under `sbom/<platform>/`: the `manifest.json` plus the SBOM files
+exactly as shipped (`.gz` kept), readable straight from the build page. To do
+the same locally over downloaded collections:
+
+```
+python3 -m sbom_checks.export --fetched '*_sbom.zip' --out sbom
+```
 
 ## What is checked
 

@@ -33,6 +33,7 @@ import json
 import os
 import shutil
 import sys
+import zipfile
 
 from . import config, discovery
 from .backends import LocalBackend
@@ -98,6 +99,23 @@ def collect(product, label, out, sbom_dir=None, backend=None):
     with open(os.path.join(out, MANIFEST), "w") as handle:
         json.dump(manifest, handle, indent=2, sort_keys=True)
     return manifest
+
+
+def read_zip_manifest(path):
+    """The manifest inside a zip of a collection -> (member name, dict), or None.
+
+    None when the file is not a readable zip, holds no manifest or more than
+    one, or the manifest is not JSON. Shared by the agent-side checks and the
+    artifact export, so both agree on what a collection zip is.
+    """
+    try:
+        with zipfile.ZipFile(path) as archive:
+            names = [n for n in archive.namelist() if os.path.basename(n) == MANIFEST]
+            if len(names) != 1:
+                return None
+            return names[0], json.loads(archive.read(names[0]).decode("utf-8"))
+    except (zipfile.BadZipFile, ValueError, IOError, OSError, KeyError):
+        return None
 
 
 def main(argv=None):

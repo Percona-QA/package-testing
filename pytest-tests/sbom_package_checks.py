@@ -94,15 +94,8 @@ def _product(request):
 
 def _zip_manifest(path):
     """The manifest inside a collector zip, or None if it cannot be read."""
-    try:
-        with zipfile.ZipFile(path) as archive:
-            names = [n for n in archive.namelist()
-                     if os.path.basename(n) == collect.MANIFEST]
-            if len(names) != 1:
-                return None
-            return json.loads(archive.read(names[0]).decode("utf-8"))
-    except (zipfile.BadZipFile, ValueError, IOError, OSError, KeyError):
-        return None
+    found = collect.read_zip_manifest(path)
+    return found[1] if found else None
 
 
 def _fetched_for(key, pattern):

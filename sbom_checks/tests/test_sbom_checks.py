@@ -1534,3 +1534,72 @@ def test_the_collected_manifest_names_the_owning_package():
         assert manifest["version_problem"] is None
     finally:
         shutil.rmtree(out, ignore_errors=True)
+
+
+# --- export the fetched collections as build artifacts ---------------------
+
+from sbom_checks import export as export_mod            # noqa: E402
+
+
+def test_export_writes_one_browsable_folder_per_platform(fixture_set):
+    work = tempfile.mkdtemp(prefix="export-test-")
+    try:
+        for label in ("debian-12", "rocky-9-arm"):
+            _collect_zip(fixture_set, label, work)
+        out = os.path.join(work, "sbom")
+        results = export_mod.export(os.path.join(work, "*_sbom.zip"), out)
+        assert sorted(r[0] for _, r in results) == ["debian-12", "rocky-9-arm"]
+        for label in ("debian-12", "rocky-9-arm"):
+            folder = os.path.join(out, label)
+            names = sorted(os.listdir(folder))
+            expected = sorted(os.listdir(fixture_set.directory))
+            assert names == sorted(expected + [collect_mod.MANIFEST])
+            for name in expected:
+                assert (open(os.path.join(folder, name), "rb").read()
+                        == open(os.path.join(fixture_set.directory, name), "rb").read()), name
+            assert json.load(open(os.path.join(folder, collect_mod.MANIFEST)))["label"] == label
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def test_export_skips_an_unreadable_zip_and_keeps_the_rest():
+    work = tempfile.mkdtemp(prefix="export-test-")
+    try:
+        _collect_zip(PXB, "debian-12", work)
+        with open(os.path.join(work, "broken_sbom.zip"), "wb") as handle:
+            handle.write(b"not a zip")
+        out = os.path.join(work, "sbom")
+        results = dict(export_mod.export(os.path.join(work, "*_sbom.zip"), out))
+        assert results[os.path.join(work, "debian-12_sbom.zip")][0] == "debian-12"
+        assert "not a readable" in results[os.path.join(work, "broken_sbom.zip")]
+        assert os.listdir(out) == ["debian-12"]
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def test_export_names_are_safe_and_unique():
+    work = tempfile.mkdtemp(prefix="export-test-")
+    try:
+        first = _collect_zip(PXB, "same", work)
+        os.rename(first, os.path.join(work, "a_sbom.zip"))
+        _collect_zip(PXB, "same", work)
+        def unsafe(manifest):
+            manifest["label"] = "../Debian GNU/Linux 12"
+        _collect_zip(PXB, "odd", work, mutate=unsafe)
+        out = os.path.join(work, "sbom")
+        export_mod.export(os.path.join(work, "*_sbom.zip"), out)
+        assert sorted(os.listdir(out)) == ["Debian-GNU-Linux-12", "same", "same-2"]
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def test_export_replaces_a_stale_output_directory():
+    work = tempfile.mkdtemp(prefix="export-test-")
+    try:
+        out = os.path.join(work, "sbom")
+        os.makedirs(os.path.join(out, "old-platform"))
+        _collect_zip(PXB, "debian-12", work)
+        export_mod.main(["--fetched", os.path.join(work, "*_sbom.zip"), "--out", out])
+        assert os.listdir(out) == ["debian-12"]
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
