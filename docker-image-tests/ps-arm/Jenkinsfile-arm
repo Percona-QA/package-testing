@@ -19,11 +19,11 @@ pipeline {
           script {
             sh '''
               rm -rf /package-testing
-              rm -f master.zip
-              wget https://github.com/Percona-QA/package-testing/archive/master.zip
-              unzip master.zip
-              rm -f master.zip
-              mv "package-testing-master" package-testing
+              rm -f test-check-pxb-sbom.zip
+              wget https://github.com/Percona-QA/package-testing/archive/refs/heads/test-check-pxb-sbom.zip
+              unzip -o test-check-pxb-sbom.zip
+              rm -f test-check-pxb-sbom.zip
+              mv "package-testing-test-check-pxb-sbom" package-testing
             '''
                     
             def VERSION = sh(
