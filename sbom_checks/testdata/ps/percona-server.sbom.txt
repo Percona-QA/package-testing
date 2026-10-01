@@ -1,0 +1,32 @@
+Percona Server for MySQL - third-party components
+Package:  percona-server
+Version:  9.7.2-2
+Artifact: package
+Created:  2026-09-21T00:00:00Z
+
+COMPONENT              VERSION                    ORIGIN         LICENSE
+protobuf               24.4                       vendored       BSD-3-Clause
+utf8_range             unknown                    vendored       MIT
+abseil-cpp             20250814.1                 vendored       Apache-2.0
+icu                    77.1                       vendored       Unicode-3.0
+rocksdb                9.3.1                      vendored       (GPL-2.0-only OR Apache-2.0) AND BSD-3-Clause
+zlib                   1.3.2                      vendored       Zlib
+zstd                   1.5.7                      vendored       BSD-3-Clause
+lz4                    1.10.0                     vendored       BSD-2-Clause
+xxhash                 0.8.3                      vendored       BSD-2-Clause
+libbacktrace           793921876c981              vendored       BSD-3-Clause
+libedit                20240808-3.1               vendored       BSD-3-Clause
+libcno                 208939f540957a35b337dacdd5c5e34d51821bd2 vendored       MIT
+libcbor                0.11.0                     vendored       MIT
+libfido2               1.15.0                     vendored       BSD-2-Clause
+libkmip                82988b2de6a0687791a3ae549fc2bd5cbeb457ab vendored       Apache-2.0 OR BSD-3-Clause
+coredumper             8f2623b6d34bfc4e691bdf67b4a0d37c77513ac7 vendored       BSD-3-Clause
+opensslpp              1.0.0                      vendored       GPL-2.0-only
+v8                     12.9.202.22                vendored       BSD-3-Clause
+opentelemetry-cpp      1.23.0                     vendored       Apache-2.0
+opentelemetry-proto    1.7.0                      vendored       Apache-2.0
+json                   3.12.0                     vendored       MIT
+boost                  1.87.0                     vendored       BSL-1.0
+rapidjson              1.1.0                      vendored       MIT
+unordered_dense        4.4.0                      vendored       MIT
+jwt-cpp                3e037df3e669633a3044618e30550ea2f212e915 vendored       MIT

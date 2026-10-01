@@ -10,7 +10,21 @@ platforms:
     vpc_subnet_id: subnet-0430e63d7cdbcd237
     instance_type: c6g.large
     ssh_user: ec2-user
-    root_device_name: /dev/sda1
+    # /dev/xvda, not /dev/sda1: Amazon Linux 2023 AMIs name their root device
+    # /dev/xvda. With /dev/sda1 the volume below was attached as a SECOND disk
+    # (it showed up as an unused 30G nvme1n1) while root stayed at the AMI
+    # default 8G -- 918 MB free, too little for the SBOM scan, and with no
+    # unallocated space on the root disk for grow_root_fs.yml to claim.
+    root_device_name: /dev/xvda
+    # ebs nested INSIDE the list item: playbooks/create_noble.yml reads
+    # item.block_device_mappings[0].ebs.volume_size, so a sibling ebs key is
+    # silently ignored and the size falls back to default(30).
+    block_device_mappings:
+      - device_name: /dev/xvda
+        ebs:
+          volume_size: 40
+          volume_type: gp2
+          delete_on_termination: true
     instance_tags:
       iit-billing-tag: ${IIT_BILLING_TAG}
       job-name: ${JOB_NAME}

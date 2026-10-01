@@ -1,0 +1,14 @@
+# The sbom_checks library itself is stdlib-only and needs nothing here.
+#
+# It has to import unchanged on RHEL-8 targets (python 3.6) and inside the
+# docker-image-tests/pxb suite (pinned pytest 5.2.1), and pip on the molecule
+# targets goes through a fragile fallback chain across 24 platforms -- so a
+# third-party dependency would be a new failure mode on every one of them.
+#
+# Only the self-test needs anything:
+pytest
+
+# Optional external tools, NOT pip-installable, provisioned by the Jenkins job:
+#   trivy          https://github.com/aquasecurity/trivy   (vars/installTrivy.groovy)
+#   cyclonedx-cli  https://github.com/CycloneDX/cyclonedx-cli/releases
+# All three are optional at runtime: checks that need them skip when absent.

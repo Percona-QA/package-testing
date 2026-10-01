@@ -7,6 +7,11 @@ pipeline {
             description: 'Choose the product version to test',
             name: 'PRODUCT_TO_TEST'
         )
+    string(name: 'PACKAGE_TESTING_REPO_URL', defaultValue: 'https://github.com/Percona-QA/package-testing.git', description: 'package-testing repository the tests are cloned from')
+    string(name: 'PACKAGE_TESTING_BRANCH', defaultValue: 'master', description: 'package-testing branch the tests are cloned from')
+    choice(name: 'SBOM_CHECK_MODE', choices: ['warn', 'enforce', 'off'], description: 'PS SBOM verification. warn: validate the SBOM files when the image ships them, skip when it does not. enforce: require them. off: skip entirely.')
+    choice(name: 'SBOM_VULN_MODE', choices: ['warn', 'enforce', 'off'], description: 'Vulnerability scanning of the SBOM. Gated separately so a new upstream CVE in a vendored library does not fail the docker tests.')
+    booleanParam(name: 'SBOM_EXTERNAL_TOOLS', defaultValue: true, description: 'Run the SBOM schema validation (cyclonedx-cli) and vulnerability scan (trivy) in the test stage. When on, a missing or unusable tool FAILS the test rather than skipping it.')
   }
   stages {
     stage('SET PS_VERSION and PS_REVISION') {
@@ -94,6 +99,61 @@ pipeline {
      
       stage('Run tests') {
         steps {
+            // SBOM tools for tests/test_ps_sbom.py, installed in THIS stage and
+            // workspace: the trivy stage runs in parallel (for ARM, on another
+            // agent), so its trivy cannot be relied on here. One catchError per
+            // tool, so a failed download of one does not skip the other; the SBOM
+            // test then reports the missing tool by name.
+            script {
+              // Defaults for the first build after the parameters were added,
+              // when params are still unset.
+              env.SBOM_CHECK_MODE = params.SBOM_CHECK_MODE ?: 'warn'
+              env.SBOM_VULN_MODE = params.SBOM_VULN_MODE ?: 'warn'
+              env.SBOM_EXTERNAL_TOOLS = (params.SBOM_EXTERNAL_TOOLS != false).toString()
+              sh 'rm -rf sbom-tools && mkdir sbom-tools'
+              if (env.SBOM_EXTERNAL_TOOLS == 'true' && env.SBOM_VULN_MODE != 'off') {
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                  // Pinned with its checksums; keep in step with installTrivy in
+                  // the jenkins-pipelines shared library.
+                  sh '''
+                    set -e
+                    TRIVY_VERSION=0.74.0
+                    if [ "$(uname -m)" = "aarch64" ]; then
+                      ARCH_NAME=ARM64
+                      TRIVY_CHECKSUM=b94ce1976bbf3c15b514b605ee88be7c6d94a29be2302847ff01cb794d47aad5
+                    else
+                      ARCH_NAME=64bit
+                      TRIVY_CHECKSUM=2ae6fe3ee734b7fdf11335663e18c75ea12dccc76062f09f164a3b0f8be4371a
+                    fi
+                    TARBALL=trivy_${TRIVY_VERSION}_Linux-${ARCH_NAME}.tar.gz
+                    rm -f "$TARBALL"
+                    curl -fsSL -o "$TARBALL" https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/${TARBALL}
+                    echo "${TRIVY_CHECKSUM}  ${TARBALL}" | sha256sum -c -
+                    tar -xzf "$TARBALL" -C sbom-tools trivy
+                    rm -f "$TARBALL"
+                    sbom-tools/trivy --version
+                  '''
+                }
+              }
+              if (env.SBOM_EXTERNAL_TOOLS == 'true') {
+                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                  // curl -f does not truncate on an HTTP error, and sbom-tools was
+                  // emptied above, so a failed download leaves no binary behind.
+                  // The agent may lack ICU, hence the invariant-globalization flag.
+                  sh '''
+                    set -e
+                    if [ "$(uname -m)" = "aarch64" ]; then
+                      CDX_ASSET=cyclonedx-linux-arm64
+                    else
+                      CDX_ASSET=cyclonedx-linux-x64
+                    fi
+                    curl -fsSL -o sbom-tools/cyclonedx https://github.com/CycloneDX/cyclonedx-cli/releases/latest/download/${CDX_ASSET}
+                    chmod +x sbom-tools/cyclonedx
+                    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 sbom-tools/cyclonedx --version
+                  '''
+                }
+              }
+            }
             sh '''
               # disable THP on the host for TokuDB
               echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" > disable_thp.sh
@@ -104,7 +164,12 @@ pipeline {
               export PATH=${PATH}:~/.local/bin
               sudo yum install -y python3 python3-pip
               rm -rf package-testing
-              git clone https://github.com/Percona-QA/package-testing.git --depth 1
+              git clone -b "${PACKAGE_TESTING_BRANCH:-master}" --depth 1 "${PACKAGE_TESTING_REPO_URL:-https://github.com/Percona-QA/package-testing.git}" package-testing
+              # SBOM settings for tests/test_ps_sbom.py; the modes come from the
+              # environment set above.
+              export SBOM_LICENSE_STRICT=1
+              export TRIVY_BIN="$WORKSPACE/sbom-tools/trivy"
+              export CYCLONEDX_BIN="$WORKSPACE/sbom-tools/cyclonedx"
               cd package-testing/docker-image-tests/ps
               pip3 install --user -r requirements.txt
               ./run.sh

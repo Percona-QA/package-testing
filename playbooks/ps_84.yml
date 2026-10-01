@@ -175,6 +175,11 @@
   - name: check that Percona Server {{ pro }} package versions are correct
     command: /package-testing/package_check.sh ps84 {{ pro }}
 
+  - name: collect PS SBOM files
+    include_tasks: ../tasks/check_sbom.yml
+    vars:
+      sbom_product: ps
+
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
 
