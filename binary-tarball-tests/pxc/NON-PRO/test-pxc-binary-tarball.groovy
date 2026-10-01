@@ -100,7 +100,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                   MINIMAL="-minimal"
                                 fi
-                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.39${MINIMAL}.tar.gz"
+                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.41${MINIMAL}.tar.gz"
                                 if [ "${EOL}" = "yes" ]; then
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
                                 else
@@ -196,7 +196,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                   MINIMAL="-minimal"
                                 fi
-                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.39${MINIMAL}.tar.gz"
+                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.41${MINIMAL}.tar.gz"
                                 if [ "${EOL}" = "yes" ]; then
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
                                 else
