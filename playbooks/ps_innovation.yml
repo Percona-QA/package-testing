@@ -130,6 +130,11 @@
   - name: check that Percona Server package versions are correct for ps{{ major_release_version }}
     command: /package-testing/package_check.sh ps{{ major_release_version }}
 
+  - name: collect PS SBOM files
+    include_tasks: ../tasks/check_sbom.yml
+    vars:
+      sbom_product: ps
+
   - name: Handle check that Percona Server version is correct
     block: 
       - name: Run the version_check.sh script for ps{{ major_release_version }}

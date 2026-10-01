@@ -117,9 +117,10 @@ and `percona-xtrabackup-97` match.)
 The version taken from an installed package is the one its SBOM states:
 
 - **Debian/Ubuntu**: dpkg's `Version`, unchanged, e.g. `9.7.1~rc1-2.trixie`.
-- **rpm**: `%{VERSION}` plus the pre-release tag found in `%{RELEASE}`. So
-  `percona-xtrabackup-97-9.7.1-2.rc1.el9` (VERSION `9.7.1`, RELEASE `2.rc1.el9`)
-  gives `9.7.1-rc1`. A GA RELEASE carries no tag, and the version is `%{VERSION}`.
+- **rpm**: `%{VERSION}` plus what `%{RELEASE}` contributes: its pre-release tag
+  if it has one, otherwise its first part, the Percona release.
+  `percona-xtrabackup-97-9.7.1-2.rc1.el9` gives `9.7.1-rc1`, and
+  `percona-server-server-9.7.2-2.1.el9` gives `9.7.2-2`.
 
 On a target host with PXB installed, the version is taken from the installed
 package automatically. Setting `SBOM_PRODUCT_VERSION` *replaces* that expectation rather
@@ -246,16 +247,23 @@ hand against a directory with
 
 | Consumer | Runs on | Invoked by |
 |---|---|---|
-| `sbom_checks.collect` | each molecule target host | `tasks/check_pxb_sbom.yml`, included from `playbooks/pxb_{80,84,97,innovation_lts}.yml` -- collects only |
-| `pytest-tests/test_pxb_sbom.py` | the Jenkins agent, once per platform | `runSbomChecks()` in `pxb-pt-testing-molecule.groovy`, over the fetched `*_sbom.zip` |
-| `sbom_checks.export` | the Jenkins agent | `archiveSbomFiles()` in `pxb-pt-testing-molecule.groovy` -- unpacks the fetched zips into `sbom/<platform>/` build artifacts |
-| `docker-image-tests/pxb/tests/test_pxb_sbom.py` | the Jenkins agent | the existing `docker-image-tests/pxb/run.sh` |
+| `sbom_checks.collect` | each molecule target host | `tasks/check_sbom.yml` (`sbom_product: pxb` or `ps`) -- collects only. PXB: via `tasks/check_pxb_sbom.yml` from `playbooks/pxb_{80,84,97,innovation_lts}.yml`. PS: from `playbooks/ps_{80,84,97,innovation}.yml` |
+| `pytest-tests/test_pxb_sbom.py`, `pytest-tests/test_ps_sbom.py` | the Jenkins agent, once per platform | `runSbomChecks(product: ...)` (jenkins-pipelines shared library), from `pxb-pt-testing-molecule.groovy` and `ps-package-testing-molecule.groovy`, over the fetched `*_sbom.zip` |
+| `sbom_checks.export` | the Jenkins agent | `archiveSbomFiles()` (shared library), from both molecule jobs -- unpacks the fetched zips into `sbom/<platform>/` build artifacts |
+| `docker-image-tests/sbom_docker_checks.py` | the Jenkins agent | the docker suites' `run.sh`, through thin bindings: `pxb/tests/test_pxb_sbom.py` (`pxb-docker-tests`), `ps/tests/test_ps_sbom.py` (`test-ps-docker-image`), `ps-arm/tests/test_ps_sbom.py` (`test-ps-docker-image-arm`) |
 | `sbom_checks.check_sbom` (CLI) | anywhere | by hand; not used by CI |
 
-Both Jenkins jobs (in the `jenkins-pipelines` repo) expose the gates as build
-parameters: `SBOM_CHECK_MODE`, `SBOM_VULN_MODE` and `SBOM_EXTERNAL_TOOLS` on
-`pxb-package-testing-molecule` — passed through from
-`pxb-pt-testing-molecule-all` — and the same three on `pxb-docker-tests`.
+Every job exposes the gates as build parameters: `SBOM_CHECK_MODE`,
+`SBOM_VULN_MODE` and `SBOM_EXTERNAL_TOOLS`. That covers
+`pxb-package-testing-molecule` (passed through from `pxb-pt-testing-molecule-all`),
+`pxb-docker-tests`, `ps-package-testing-molecule`, `test-ps-docker-image` and
+`test-ps-docker-image-arm`. The PS docker jobs also take `PACKAGE_TESTING_REPO_URL` /
+`PACKAGE_TESTING_BRANCH`, for trying a branch. Their Jenkinsfiles are still read
+from package-testing master.
+
+Other jobs that run the PS docker suites' `run.sh` pick up
+`test_ps_sbom.py` too: `test-ps-docker-image-multi` and the PS release build. With
+no SBOM settings they run in `warn` with external tools off.
 
 The molecule job also keeps every platform's collected files as build
 artifacts, under `sbom/<platform>/`: the `manifest.json` plus the SBOM files

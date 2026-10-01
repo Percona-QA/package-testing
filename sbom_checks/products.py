@@ -59,11 +59,10 @@ PS = Product(
     key="ps",
     display_name="Percona Server for MySQL",
     package_glob="percona-server*",
-    # UNCONFIRMED -- no PS pipeline runs these checks yet, and the self-test
-    # works in directory mode, so neither of the next two values is exercised.
-    # PS ships percona-server-server / -client / -shared while the SBOM root is
-    # named "percona-server"; which package owns the files, and where they are
-    # installed, still needs confirming against a real PS package.
+    # Confirmed on PS 9.7.2-2 (rpm, deb and the docker image): the files are
+    # /usr/share/percona-server/sbom/percona-server.*, owned by
+    # percona-server-server; the SBOM root is named "percona-server", which the
+    # root-name check accepts as a prefix of the owning package.
     main_package_re=r"^percona-server-server(-pro)?$",
     search_dirs=("/usr/share/percona-server*",),
     cdx_property_prefixes=("percona:",),

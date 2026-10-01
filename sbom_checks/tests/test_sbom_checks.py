@@ -1626,11 +1626,12 @@ def test_export_replaces_a_stale_output_directory():
     ("9.7.1", "1.rc1.el8", "9.7.1-rc1"),        # the rebuild number is not part of it
     ("9.7.1", "1.RC2.amzn2023", "9.7.1-RC2"),   # case kept as the package wrote it
     ("9.7.0", "1.beta1.el9", "9.7.0-beta1"),
-    ("8.4.0", "7.1.el9", "8.4.0"),              # GA: no tag, unchanged
+    ("9.7.2", "2.1.el9", "9.7.2-2"),            # percona-server-server-9.7.2-2.1.el9
+    ("8.4.0", "7.1.el9", "8.4.0-7"),            # GA: the Percona release
     ("9.7.1", "", "9.7.1"),
     ("9.7.1", None, "9.7.1"),
 ])
-def test_rpm_version_gets_the_pre_release_tag_from_release(version, release, expected):
+def test_rpm_version_takes_the_tag_or_percona_release_from_release(version, release, expected):
     assert discovery.rpm_product_version(version, release) == expected
 
 

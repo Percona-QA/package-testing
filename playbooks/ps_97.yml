@@ -178,6 +178,11 @@
     command: /package-testing/package_check.sh ps97 {{ pro }}
     when: not (ansible_os_family == "RedHat" and ansible_distribution_major_version == "8" and ansible_architecture in ["aarch64", "arm64"])
 
+  - name: collect PS SBOM files
+    include_tasks: ../tasks/check_sbom.yml
+    vars:
+      sbom_product: ps
+
   - name: include PGO flags check for INFO_BIN
     include_tasks: ../tasks/test_pgo.yml
 

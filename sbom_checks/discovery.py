@@ -261,16 +261,22 @@ _RPM_PRERELEASE = re.compile(r"^(rc|alpha|beta)\d*$", re.IGNORECASE)
 
 
 def rpm_product_version(version, release):
-    """rpm VERSION plus the pre-release tag carried in RELEASE.
+    """rpm VERSION plus the part of RELEASE the SBOM root carries.
 
-    percona-xtrabackup-97-9.7.1-2.rc1.el9 has VERSION 9.7.1 and RELEASE
-    2.rc1.el9 (the 2 is a rebuild number), while its SBOM says 9.7.1-rc1. A GA
-    RELEASE such as 1.el9 has no tag, and the version stays VERSION.
+    RELEASE holds either a pre-release tag or the Percona release:
+      percona-xtrabackup-97-9.7.1-2.rc1.el9  (RELEASE 2.rc1.el9) -> 9.7.1-rc1
+        the 2 is a rebuild number; the tag is what the SBOM says
+      percona-server-server-9.7.2-2.1.el9     (RELEASE 2.1.el9)  -> 9.7.2-2
+        the first part is the Percona release, the .1 a rebuild
+    With no RELEASE the version is VERSION alone.
     """
     version = (version or "").strip()
-    for part in (release or "").strip().split("."):
+    parts = [p for p in (release or "").strip().split(".") if p]
+    for part in parts:
         if _RPM_PRERELEASE.match(part):
             return "%s-%s" % (version, part)
+    if parts:
+        return "%s-%s" % (version, parts[0])
     return version
 
 
