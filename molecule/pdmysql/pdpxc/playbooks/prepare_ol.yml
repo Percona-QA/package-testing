@@ -1,0 +1,53 @@
+---
+# Oracle Linux prepare for pdpxc. Uses Oracle's own EPEL package
+# (oracle-epel-release-elX) instead of the Fedora epel-release RPM URL,
+# which fails to install on OL8/OL9 ("Could not open ... epel-release-latest-X.noarch.rpm").
+- name: Prepare node for running tests
+  hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: true
+  tasks:
+    - name: Update all dnf packages without reboot
+      ansible.builtin.dnf: name='*' state=latest
+
+    - name: install GPG key for Percona repos
+      rpm_key:
+        state: present
+        key: "{{ item }}"
+      with_items:
+        - https://repo.percona.com/yum/RPM-GPG-KEY-Percona
+        - https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
+      when: ansible_distribution_major_version == "8"
+
+    - name: setup Oracle EPEL repo
+      dnf:
+        name: "oracle-epel-release-el{{ ansible_distribution_major_version }}"
+        state: present
+      retries: 5
+      delay: 10
+      register: result
+      until: result is not failed
+
+    - name: setup ca-certificates release
+      dnf:
+        name: ca-certificates
+        update_cache: yes
+        state: present
+
+    - name: install needed packages for running tests
+      dnf:
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+        - unzip
+        - git
+        - wget
+
+    - name: Setup SSH keys for Oracle Linux
+      authorized_key:
+        user: ec2-user
+        key: "{{ lookup('file', playbook_dir + '/../../../playbooks/public_keys') }}"
+        state: present
+        exclusive: False
