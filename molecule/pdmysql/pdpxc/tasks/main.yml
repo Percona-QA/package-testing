@@ -78,6 +78,7 @@
   vars:
     packages:
     - percona-xtradb-cluster-full
+    - percona-xtradb-cluster
   when: ansible_os_family == "Debian"
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -89,6 +90,7 @@
   vars:
     packages:
     - percona-xtradb-cluster-full
+    - percona-xtradb-cluster
     - percona-xtradb-cluster-debugsource
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int < 8
   environment:
@@ -101,6 +103,7 @@
   vars:
     packages:
     - percona-xtradb-cluster-full
+    - percona-xtradb-cluster
     - percona-xtradb-cluster-debugsource
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int == 8
   environment:

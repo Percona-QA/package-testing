@@ -31,10 +31,10 @@ else:
     DEBPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-client',
                    'percona-xtradb-cluster-common', 'percona-xtradb-cluster-dbg',
                    'percona-xtradb-cluster-garbd-debug', 'percona-xtradb-cluster-garbd',
-                   'percona-xtradb-cluster-server', 'percona-xtradb-cluster-test', 'percona-xtradb-cluster',]
+                   'percona-xtradb-cluster-server', 'percona-xtradb-cluster-test', 'percona-xtradb-cluster']
 
-    RPMPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster',
-                   'percona-xtradb-cluster-client', 'percona-xtradb-cluster-test',
+    RPMPACKAGES = ['percona-xtradb-cluster-full', 'percona-xtradb-cluster', 'percona-xtradb-cluster-debugsource',
+                   'percona-xtradb-cluster-client', 'percona-xtradb-cluster-test', 'percona-xtradb-cluster-debuginfo',
                    'percona-xtradb-cluster-devel', 'percona-xtradb-cluster-garbd',
                    'percona-xtradb-cluster-server', 'percona-xtradb-cluster-shared']
 
