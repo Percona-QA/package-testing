@@ -22,7 +22,7 @@ provisioner:
   playbooks:
     create: ../../../../playbooks/create_noble.yml
     destroy: ../../../../playbooks/destroy-noble-arm.yml
-    prepare: ../../../../playbooks/prepare.yml
+    prepare: ../../playbooks/prepare_ol.yml
     cleanup: ../../playbooks/cleanup.yml
     converge: ../../playbooks/playbook.yml
 verifier:
