@@ -47,11 +47,19 @@
       }}
 
 # At this moment RHEL PXB packages do not support packages upgrade so we do not install them for major update on rhel. Re-check https://perconacorp.slack.com/archives/C047F39JKEW/p1700822258537029
-  - name: install Percona XtraBackup {{ major_release_version }} packages
+  - name: Install Percona XtraBackup packages
     include_tasks: ../../../tasks/install_pxb_innovation.yml
     vars:
       major_release_version: "{{ lookup('env', 'VERSION').split('.')[:2] | join('') }}"
-    when: ansible_os_family == "Debian" or (lookup('env', 'FROM_VERSION').split('.')[:2]|join('') == lookup('env', 'VERSION').split('.')[:2]|join('') and ansible_os_family == "RedHat")
+
+  - name: Set ProxySQL package name
+    set_fact:
+      proxysql_package: >-
+        {{
+          'proxysql3'
+          if lookup('env', 'PROXYSQL_VERSION').startswith('3.')
+          else 'proxysql2'
+        }}
 
   - name: Set ProxySQL package name
     set_fact:
@@ -103,7 +111,7 @@
     command: service proxysql start
     when:
       - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
-      - ansible_facts['distribution_major_version'] | int > 
+      - ansible_facts['distribution_major_version'] | int >8
 
   - name: install orchestrator new deb packages
     apt:
@@ -226,8 +234,8 @@
       pdmysql_version: "{{ lookup('env', 'VERSION').split('-')[0] }}"
 
 
-  - name: install Percona Toolkit new deb packages
-    include_tasks: ../../../tasks/install_pt.yml
+#  - name: install Percona Toolkit new deb packages
+#    include_tasks: ../../../tasks/install_pt.yml
 
   - name: Install Percona Server packages
     include_tasks: >-
@@ -367,3 +375,6 @@
       packages:
       - percona-mysql-router
     when: ansible_os_family == "Debian"
+
+  - name: List Upgraded Packages
+    include_tasks: ../../../../tasks/list_installed_packages.yml
