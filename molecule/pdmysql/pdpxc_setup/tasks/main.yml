@@ -63,8 +63,7 @@
     name: "{{ packages }}"
     update_cache: yes
   vars:
-    packages:
-    - percona-xtradb-cluster-full
+    packages: "{{ ['percona-xtradb-cluster-full'] + ([] if '9.7' in lookup('env', 'VERSION') else ['percona-xtradb-cluster']) }}"
   when: ansible_os_family == "Debian"
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -74,9 +73,7 @@
     name: "{{ packages }}"
     state: latest
   vars:
-    packages:
-    - percona-xtradb-cluster-full
-    - percona-xtradb-cluster-debugsource
+    packages: "{{ ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-debugsource'] + ([] if '9.7' in lookup('env', 'VERSION') else ['percona-xtradb-cluster']) }}"
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int < 8
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -96,10 +93,7 @@
     name: "{{ packages }}"
     state: latest
   vars:
-    packages:
-    - percona-xtradb-cluster-full
-    - percona-xtradb-cluster-debuginfo
-    - percona-xtradb-cluster-debugsource
+    packages: "{{ ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-debuginfo', 'percona-xtradb-cluster-debugsource'] + ([] if '9.7' in lookup('env', 'VERSION') else ['percona-xtradb-cluster']) }}"
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 9
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
