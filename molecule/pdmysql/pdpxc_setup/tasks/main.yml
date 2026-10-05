@@ -86,9 +86,7 @@
     name: "{{ packages }}"
     state: latest
   vars:
-    packages:
-    - percona-xtradb-cluster-full
-    - percona-xtradb-cluster-debugsource
+    packages: "{{ ['percona-xtradb-cluster-full', 'percona-xtradb-cluster-debugsource'] + ([] if '9.7' in lookup('env', 'VERSION') else ['percona-xtradb-cluster', 'percona-xtradb-cluster-shared-compat']) }}"
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int == 8
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
@@ -202,7 +200,7 @@
     update_cache: yes
   when:
     - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
-    - ansible_facts['distribution_major_version'] | int > 8
+    - ansible_facts['distribution_major_version'] | int > 8 or lookup('env', 'VERSION').split('.')[0] | int < 9
 
 #install initscripts-service manually on OL9 till DISTMYSQL-300 is fixed
 - name: install init scripts for OL9
@@ -217,19 +215,19 @@
   command: service proxysql start
   when:
     - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
-    - ansible_facts['distribution_major_version'] | int > 8
+    - ansible_facts['distribution_major_version'] | int > 8 or lookup('env', 'VERSION').split('.')[0] | int < 9
 
 - name: stop proxysql service
   command: service proxysql stop
   when:
     - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
-    - ansible_facts['distribution_major_version'] | int > 8
+    - ansible_facts['distribution_major_version'] | int > 8 or lookup('env', 'VERSION').split('.')[0] | int < 9
 
 - name: start proxysql service
   command: service proxysql start
   when:
     - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
-    - ansible_facts['distribution_major_version'] | int > 8
+    - ansible_facts['distribution_major_version'] | int > 8 or lookup('env', 'VERSION').split('.')[0] | int < 9
 
 # set root password on centos
 - name: start mysql service
