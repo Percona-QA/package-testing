@@ -128,6 +128,10 @@ tar xf "${TARBALL_NAME}"
 PXC_DIR_NAME=$(echo "${TARBALL_NAME}"|sed 's/.tar.gz$//'|sed 's/.deb$//'|sed 's/.rpm$//')
 export BASE_DIR="${PWD}/${PXC_DIR_NAME}"
 cp conf/*cnf $BASE_DIR/
+# wsrep_applier_threads is not recognized by 5.x servers; they only support wsrep_slave_threads
+if [[ "${PXC_MAJOR_VERSION}" == 5.* ]]; then
+  sed -i 's/^wsrep_applier_threads=/wsrep_slave_threads=/' $BASE_DIR/node*.cnf
+fi
 
 PRO=$(echo ${PRO})
 df -mh
