@@ -32,7 +32,7 @@ verifier:
     verbose: true
     s: true
     k: "test_pdpxc_ or test_common_"
-    m: "not telemetry_disabled"
+    m: "not pkg_source and not telemetry_enabled"
     junitxml: report.xml
 scenario:
   name: al-2023
