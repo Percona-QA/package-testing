@@ -1,0 +1,35 @@
+---
+# Stop the mysqld started by the package install before the test config is
+# applied. On Debian/Ubuntu the LSB unit can report "stopped" while mysqld
+# (started with the default pxc-cluster config) keeps running, so the next
+# start reports "already running" and the node never picks up our my.cnf.
+
+  - name: stop mysql service
+    command: systemctl stop mysql
+    ignore_errors: true
+
+  - name: stop mysql with the init script on debian/ubuntu
+    command: /etc/init.d/mysql stop
+    ignore_errors: true
+    when: ansible_os_family == "Debian"
+
+  - name: make sure no mysqld is left running
+    shell: |
+      for i in $(seq 1 30); do
+        pgrep -x mysqld >/dev/null || exit 0
+        sleep 2
+      done
+      echo "mysqld still running after stop, killing it"
+      pkill -x mysqld_safe || true
+      pkill -x mysqld || true
+      for i in $(seq 1 30); do
+        pgrep -x mysqld >/dev/null || exit 0
+        sleep 2
+      done
+      pkill -9 -x mysqld || true
+      sleep 2
+      ! pgrep -x mysqld
+    args:
+      executable: /bin/bash
+    register: stop_pxc57_leftover
+    changed_when: "'killing' in stop_pxc57_leftover.stdout"
