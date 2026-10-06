@@ -109,7 +109,7 @@
     command: /package-testing/check_telemetry.sh pxc -d
 
   - name: stop mysql service
-    command: systemctl stop mysql
+    include_tasks: ../../../../tasks/stop_pxc57_service.yml
 
   - name: copy PXC config on centos 7
     template: src=../../../../templates/my_rpm_7.j2 dest=/etc/my.cnf
