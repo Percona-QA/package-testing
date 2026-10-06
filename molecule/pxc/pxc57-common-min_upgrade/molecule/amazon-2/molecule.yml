@@ -1,12 +1,12 @@
 ---
 scenario:
-  name: min-amazon-2
+  name: amazon-2
 dependency:
   name: galaxy
 driver:
   name: ec2
 platforms:
-  - name: ${BUILD_NUMBER}-pxc2-57-common-min-amazon-2-min_upgrade-${test_type}
+  - name: ${BUILD_NUMBER}-pxc2-57-common-amazon-2-min_upgrade-${test_type}
     region: us-west-2
     image: ami-0648742c7600c103f
     vpc_subnet_id: subnet-0430e63d7cdbcd237
@@ -17,7 +17,7 @@ platforms:
       iit-billing-tag: ${IIT_BILLING_TAG}
       job-name: ${JOB_NAME}
       build-number: ${BUILD_NUMBER}
-  - name: ${BUILD_NUMBER}-pxc3-57-common-min-amazon-2-min_upgrade-${test_type}
+  - name: ${BUILD_NUMBER}-pxc3-57-common-amazon-2-min_upgrade-${test_type}
     region: us-west-2
     image: ami-0648742c7600c103f
     vpc_subnet_id: subnet-0430e63d7cdbcd237
@@ -40,8 +40,8 @@ provisioner:
     side_effect: ../../../../../playbooks/pxc57_upgrade_common.yml
   inventory:
     host_vars:
-      ${BUILD_NUMBER}-pxc2-57-common-min-amazon-2-min_upgrade-${test_type}:
+      ${BUILD_NUMBER}-pxc2-57-common-amazon-2-min_upgrade-${test_type}:
         ip_env: "{{ ansible_host }}"
-      ${BUILD_NUMBER}-pxc3-57-common-min-amazon-2-min_upgrade-${test_type}:
+      ${BUILD_NUMBER}-pxc3-57-common-amazon-2-min_upgrade-${test_type}:
         ip_env: "{{ ansible_host }}"
         sleep_before_tests: 40
