@@ -19,9 +19,13 @@
           - percona-xtradb-cluster-dbg
           - percona-xtradb-cluster-garbd-debug
           - percona-xtradb-cluster-garbd
+          - percona-xtradb-cluster-server
           - percona-xtradb-cluster-server-debug
           - percona-xtradb-cluster-test
           - percona-xtradb-cluster
+          # remove PXB together with PXC client, otherwise apt pulls distro
+          # mysql-client for percona-xtrabackup-test and it conflicts with PXC files
+          - percona-xtrabackup*
       when: ansible_os_family == "Debian"
 
     - name: remove Percona Server rpm packages
