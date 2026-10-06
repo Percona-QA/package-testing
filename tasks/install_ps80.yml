@@ -114,9 +114,16 @@
       - percona-mysql-router{{ pro_suf | default('') }}
       - percona-server-client{{ pro_suf | default('') }}
       - percona-server-test{{ pro_suf | default('') }}
-      - percona-server{{ pro_suf | default('') }}-debuginfo
+      - "{{ debuginfo_base }}{{ pro_suf | default('') }}-debuginfo"
       - percona-server-devel{{ pro_suf | default('') }}
       - percona-server-rocksdb{{ pro_suf | default('') }}
+      # on RHEL/Rocky/OL 8 aarch64 the package is percona-server-server-debuginfo
+      debuginfo_base: >-
+        {{ 'percona-server-server'
+           if (ansible_facts['distribution'] in ['RedHat', 'Rocky', 'OracleLinux']
+               and ansible_facts['distribution_major_version'] | int == 8
+               and ansible_facts['architecture'] == 'aarch64')
+           else 'percona-server' }}
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
