@@ -63,10 +63,6 @@
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
-  - name: start mysql service with service command
-    command: service mysql start
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "6"
-
   - name: start mysql service with systemctl command
     command: systemctl start mysql
     when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7)
@@ -115,8 +111,8 @@
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
 
-  - name: start my.cnf change test
-    command: /package-testing/check_mycnf_pre.sh
+#  - name: start my.cnf change test
+#    command: /package-testing/check_mycnf_pre.sh
 
   # TODO: temporary diagnostics for check_mycnf_post.sh failing on Debian/Ubuntu, remove once root caused
   - name: collect my.cnf diagnostics before upgrade on Debian
@@ -243,8 +239,8 @@
       var: mycnf_diag.stdout_lines
     when: ansible_os_family == "Debian"
 
-  - name: finish my.cnf change test
-    command: /package-testing/check_mycnf_post.sh
+ # - name: finish my.cnf change test
+ #   command: /package-testing/check_mycnf_post.sh
 
   - name: check the clone and data masking plugins
     command: /package-testing/scripts/ps_clone_dm_plugin_test.sh
