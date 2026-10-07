@@ -118,6 +118,25 @@
   - name: start my.cnf change test
     command: /package-testing/check_mycnf_pre.sh
 
+  # TODO: temporary diagnostics for check_mycnf_post.sh failing on Debian/Ubuntu, remove once root caused
+  - name: collect my.cnf diagnostics before upgrade on Debian
+    shell: |
+      ls -l /etc/mysql/my.cnf
+      readlink -f /etc/mysql/my.cnf
+      update-alternatives --display my.cnf
+      echo "--- tail of $(readlink -f /etc/mysql/my.cnf):"
+      tail -n 3 "$(readlink -f /etc/mysql/my.cnf)"
+      md5sum /etc/mysql/mysql.cnf /etc/mysql/my.cnf.fallback
+      ls -la --time-style=full-iso /etc/mysql/
+    register: mycnf_diag_pre
+    failed_when: false
+    when: ansible_os_family == "Debian"
+
+  - name: show my.cnf diagnostics before upgrade on Debian
+    debug:
+      var: mycnf_diag_pre.stdout_lines
+    when: ansible_os_family == "Debian"
+
 #
 # Enable testing repository
 #
@@ -210,7 +229,11 @@
       echo "--- tail of $(readlink -f /etc/mysql/my.cnf):"
       tail -n 5 "$(readlink -f /etc/mysql/my.cnf)"
       echo "--- md5 now: $(md5sum /etc/mysql/my.cnf | awk '{print $1}') saved: $(cat /tmp/mycnf_sum)"
-      ls -la /etc/mysql/
+      ls -la --time-style=full-iso /etc/mysql/
+      echo "--- dpkg.log remove/purge/conffile entries:"
+      grep -E " (remove|purge) |conffile" /var/log/dpkg.log | tail -n 40
+      echo "--- apt term.log cnf/alternatives messages:"
+      grep -iE "cnf|alternatives|conffile|warning" /var/log/apt/term.log | tail -n 40
     register: mycnf_diag
     failed_when: false
     when: ansible_os_family == "Debian"
