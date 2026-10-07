@@ -131,6 +131,9 @@
       grep 'PS80_PRO_VER=' /package-testing/VERSIONS | cut -d '=' -f2 | tr -d '"' | cut -d '-' -f1
     register: extracted_version
 
+  - set_fact:
+      pro: "{{ 'pro' if ('yes' in lookup('env', 'pro_test') and lookup('env', 'cur_action_to_test') != 'downgrade') else '' }}"
+
 # Upgrade packages
 #
   - name: stop mysql service with systemctl command
