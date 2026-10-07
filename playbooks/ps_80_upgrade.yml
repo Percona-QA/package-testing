@@ -1,7 +1,7 @@
 ---
 # This playbook does following:
 #   sets main Percona repo
-#   installs PS 8.0, PT and PXB 8.0
+#   installs PS 8.0
 #   changes repo to testing
 #   upgrades packages to the new version
 #   does some tests
@@ -244,8 +244,9 @@
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
 
-  - name: check that Percona XtraBackup version is correct
-    command: /package-testing/version_check.sh pxb80
+  # PXB is no longer installed by this playbook (same as ps_80.yml)
+#  - name: check that Percona XtraBackup version is correct
+#    command: /package-testing/version_check.sh pxb80
 #    when: ansible_distribution != "Amazon" or ansible_distribution_major_version != "2023"
 
   - name: run pytest unit tests for ps-admin script
