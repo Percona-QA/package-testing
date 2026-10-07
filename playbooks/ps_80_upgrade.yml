@@ -149,6 +149,17 @@
         environment:
           PERCONA_TELEMETRY_DISABLE: "1"
 
+  # shared-compat is only pulled in as a dependency on install, so install_ps80.yml
+  # doesn't upgrade it, but package_check.sh expects the new version on EL8 x86_64
+  - name: upgrade percona-server-shared-compat on RHEL8 x86_64
+    dnf:
+      name: percona-server-shared-compat
+      state: latest
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_distribution_major_version | int == 8
+      - ansible_architecture == "x86_64"
+
   - name: upgrade Percona release to new rpm packages using yum
     yum:
       name: "{{ packages }}"
@@ -190,6 +201,25 @@
   - name: check that Percona Server {{ pro }} package versions are correct
     command: /package-testing/package_check.sh ps80 {{ pro }}
 
+  # TODO: temporary diagnostics for check_mycnf_post.sh failing on Debian/Ubuntu, remove once root caused
+  - name: collect my.cnf diagnostics on Debian
+    shell: |
+      ls -l /etc/mysql/my.cnf
+      readlink -f /etc/mysql/my.cnf
+      update-alternatives --display my.cnf
+      echo "--- tail of $(readlink -f /etc/mysql/my.cnf):"
+      tail -n 5 "$(readlink -f /etc/mysql/my.cnf)"
+      echo "--- md5 now: $(md5sum /etc/mysql/my.cnf | awk '{print $1}') saved: $(cat /tmp/mycnf_sum)"
+      ls -la /etc/mysql/
+    register: mycnf_diag
+    failed_when: false
+    when: ansible_os_family == "Debian"
+
+  - name: show my.cnf diagnostics on Debian
+    debug:
+      var: mycnf_diag.stdout_lines
+    when: ansible_os_family == "Debian"
+
   - name: finish my.cnf change test
     command: /package-testing/check_mycnf_post.sh
 
@@ -208,8 +238,8 @@
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
 
-  - name: run pytest tests for PAM
-    command: python3 -m pytest -v /package-testing/scripts/ps_pam_test/ps_pam_test.py
+  - name: run PAM tests
+    include_tasks: ../tasks/pam_test.yml
 
   - name: keyring plugins test
     command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps80
