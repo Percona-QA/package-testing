@@ -83,8 +83,8 @@ def get_package_tuples():
                 f"percona-xtradb-cluster-garbd_{pxc_deb_name_suffix}",
                 f"percona-xtradb-cluster_{pxc_deb_name_suffix}",
                 f"percona-xtradb-cluster-full_{pxc_deb_name_suffix}",
-                f"libperconaserverclient22-dev_{pxc_deb_name_suffix}",
-                f"libperconaserverclient22_{pxc_deb_name_suffix}",
+                f"libperconaserverclient24-dev_{pxc_deb_name_suffix}",
+                f"libperconaserverclient24_{pxc_deb_name_suffix}",
                 f"percona-xtradb-cluster-source_{pxc_deb_name_suffix}",
                 f"percona-xtradb-cluster-common_{pxc_deb_name_suffix}",
                 f"percona-xtradb-cluster-dbg_{pxc_deb_name_suffix}" ]
@@ -114,8 +114,7 @@ def get_package_tuples():
                 f"percona-xtradb-cluster-shared-{pxc_rpm_name_suffix}",
                 f"percona-xtradb-cluster-icu-data-files-{pxc_rpm_name_suffix}"]
         if software_file != "redhat/9":
-            rpm_files.append(f"percona-xtradb-cluster-shared-compat-{pxc_rpm_name_suffix}"),
-            rpm_files.append(f"percona-xtradb-cluster-debuginfo-{pxc_rpm_name_suffix}")
+            rpm_files.append(f"percona-xtradb-cluster-shared-compat-{pxc_rpm_name_suffix}")
         for file in rpm_files:
             list.append((software_file, file, f"{BASE_PATH}/binary/redhat/{el}/x86_64/{file}"))
 
