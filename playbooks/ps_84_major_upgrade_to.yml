@@ -45,12 +45,6 @@
     vars:
       pro_suf: "{{ '-pro' if 'yes' in lookup('env', 'pro_test') else '' }}"
 
-  - name: install Percona Shell
-    include_tasks: ../tasks/install_pshell.yml
-    when:
-      - lookup('env', 'pro_test') != "yes"
-      - ansible_distribution != "Amazon"
-
   - name: start mysql service with systemctl command
     command: systemctl start mysql
     when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7)
@@ -102,9 +96,6 @@
   - name: start mysql service
     service: name=mysql state=started
 
-  - name: start my.cnf change test
-    command: /package-testing/check_mycnf_pre.sh
-
   - name: stop mysql service with systemctl command
     command: systemctl stop mysql
 
@@ -124,7 +115,6 @@
       msg: "Path exists and is a directory and is not empty"
     when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
 ### end of PS 8.0 install
-
 
   - name: include tasks for enabling PS 84 test repo
     include_tasks: ../tasks/enable_ps84_testing_repo.yml
