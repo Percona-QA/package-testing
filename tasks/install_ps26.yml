@@ -1,0 +1,81 @@
+# This task installs Percona Server 26.7 on CentOS and Debian/Ubuntu
+
+  - name: Clean apt cache
+    apt:
+      autoclean: yes
+      autoremove: yes
+    when: ansible_os_family == "Debian"
+
+  - name: install Percona Server deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: yes
+      state: latest
+    vars:
+      packages:
+      - percona-server
+      - percona-client
+      - percona-testsuite
+      - percona-server-server
+      - percona-server-server-core
+      - percona-server-client
+      - percona-server-client-core
+      - percona-server-client-plugins
+      - percona-server-common
+      - percona-server-rocksdb
+      - percona-server-test
+      - percona-server-source
+      - percona-server-js
+      - percona-mysql-router
+      - libperconaserverclient24
+      - libperconaserverclient24-dev
+    when: ansible_os_family == "Debian"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  - name: get list of enabled dnf modules on centos 8
+    command: dnf module list --enabled
+    register: enabled_dnf_modules
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
+
+  - name: list enabled dnf modules on centos 8
+    debug:
+      var: enabled_dnf_modules
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 8
+
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: yum module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: disable the mariadb module on RHEL/CentOS 8
+    command: yum module disable mariadb -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  # RPMs for 26.7 are not published yet, this list follows PS 9.7 and needs to be verified
+  - name: install Percona Server rpm packages
+    yum:
+      name: "{{ packages }}"
+      state: latest
+      disablerepo: "epel"
+      update_cache: yes
+    vars:
+      packages_base:
+      - percona-icu-data-files
+      - percona-mysql-router
+      - percona-mysql-router-debuginfo
+      - percona-server-client
+      - percona-server-client-debuginfo
+      - percona-server-client-plugins-debuginfo
+      - percona-server-debugsource
+      - percona-server-test
+      - percona-server-devel
+      - percona-server-shared
+      - percona-server-shared-debuginfo
+      - percona-server-rocksdb
+      - percona-server-rocksdb-debuginfo
+      - percona-server-js
+      shared_compat_pkg: "{{ (ansible_architecture not in ['aarch64', 'arm64'] and ansible_distribution_major_version | int == 8) | ternary(['percona-server-shared-compat'], []) }}"
+      packages: "{{ packages_base + shared_compat_pkg }}"
+    when: ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
