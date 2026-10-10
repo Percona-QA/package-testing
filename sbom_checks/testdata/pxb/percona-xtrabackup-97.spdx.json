@@ -1,0 +1,126 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "percona-xtrabackup-97-9.7.1-rc1",
+  "documentNamespace": "https://percona.com/spdx/percona-xtrabackup-97-9.7.1-rc1-5e9d7c99-5ce2-516d-2d12-b6ccb2b9ebde",
+  "creationInfo": {
+    "created": "2026-09-02T00:00:00Z",
+    "creators": [ "Tool: pxb-gen-sbom", "Organization: Percona LLC" ]
+  },
+  "packages": [
+    { "SPDXID": "SPDXRef-Package-ROOT", "name": "percona-xtrabackup-97", "versionInfo": "9.7.1-rc1", "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "GPL-2.0-only", "licenseDeclared": "GPL-2.0-only", "copyrightText": "NOASSERTION" }
+    ,{ "SPDXID": "SPDXRef-Package-abseil-cpp", "name": "abseil-cpp", "versionInfo": "20250814.1",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0", "licenseDeclared": "Apache-2.0", "copyrightText": "NOASSERTION",
+      "comment": "linkage=shared-lib origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/abseil-cpp@20250814.1" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-boost", "name": "boost", "versionInfo": "1.87.0",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "BSL-1.0", "licenseDeclared": "BSL-1.0", "copyrightText": "NOASSERTION",
+      "comment": "linkage=header-only origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/boost@1.87.0" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-icu", "name": "icu", "versionInfo": "77.1",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "Unicode-DFS-2016", "licenseDeclared": "Unicode-DFS-2016", "copyrightText": "NOASSERTION",
+      "comment": "linkage=shared-lib origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/icu@77.1" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-jsmn", "name": "jsmn", "versionInfo": "unknown",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "MIT", "licenseDeclared": "MIT", "copyrightText": "NOASSERTION",
+      "comment": "linkage=source origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/jsmn" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-json", "name": "json", "versionInfo": "3.12.0",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "MIT", "licenseDeclared": "MIT", "copyrightText": "NOASSERTION",
+      "comment": "linkage=header-only origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/json@3.12.0" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-libbacktrace", "name": "libbacktrace", "versionInfo": "793921876c981",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause", "licenseDeclared": "BSD-3-Clause", "copyrightText": "NOASSERTION",
+      "comment": "linkage=static origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/libbacktrace@793921876c981" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-libkmip", "name": "libkmip", "versionInfo": "5eeea918e7213f32df466be58cf9a68347ae2df2",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0 OR BSD-3-Clause", "licenseDeclared": "Apache-2.0 OR BSD-3-Clause", "copyrightText": "NOASSERTION",
+      "comment": "linkage=static origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/libkmip@5eeea918e7213f32df466be58cf9a68347ae2df2" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-lz4", "name": "lz4", "versionInfo": "1.10.0",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "BSD-2-Clause", "licenseDeclared": "BSD-2-Clause", "copyrightText": "NOASSERTION",
+      "comment": "linkage=static origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/lz4@1.10.0" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-opentelemetry-cpp", "name": "opentelemetry-cpp", "versionInfo": "1.23.0",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0", "licenseDeclared": "Apache-2.0", "copyrightText": "NOASSERTION",
+      "comment": "linkage=static origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/opentelemetry-cpp@1.23.0" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-opentelemetry-proto", "name": "opentelemetry-proto", "versionInfo": "1.7.0",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0", "licenseDeclared": "Apache-2.0", "copyrightText": "NOASSERTION",
+      "comment": "linkage=static origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/opentelemetry-proto@1.7.0" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-protobuf", "name": "protobuf", "versionInfo": "24.4",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause", "licenseDeclared": "BSD-3-Clause", "copyrightText": "NOASSERTION",
+      "comment": "linkage=shared-lib origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/protobuf@24.4" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-quicklz", "name": "quicklz", "versionInfo": "1.5.0",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "GPL-2.0-only", "licenseDeclared": "GPL-2.0-only", "copyrightText": "NOASSERTION",
+      "comment": "linkage=source origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/quicklz@1.5.0" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-rapidjson", "name": "rapidjson", "versionInfo": "unknown",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "MIT", "licenseDeclared": "MIT", "copyrightText": "NOASSERTION",
+      "comment": "linkage=header-only origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/rapidjson" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-unordered-dense", "name": "unordered_dense", "versionInfo": "4.4.0",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "MIT", "licenseDeclared": "MIT", "copyrightText": "NOASSERTION",
+      "comment": "linkage=header-only origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/unordered_dense@4.4.0" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-xxhash-lz4", "name": "xxhash-lz4", "versionInfo": "1.10.0",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "BSD-2-Clause", "licenseDeclared": "BSD-2-Clause", "copyrightText": "NOASSERTION",
+      "comment": "linkage=static origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/xxhash-lz4@1.10.0" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-xxhash", "name": "xxhash", "versionInfo": "0.8.3",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "BSD-2-Clause", "licenseDeclared": "BSD-2-Clause", "copyrightText": "NOASSERTION",
+      "comment": "linkage=static origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/xxhash@0.8.3" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-zlib", "name": "zlib", "versionInfo": "1.3.2",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "Zlib", "licenseDeclared": "Zlib", "copyrightText": "NOASSERTION",
+      "comment": "linkage=static origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/zlib@1.3.2" } ] }
+    ,{ "SPDXID": "SPDXRef-Package-zstd", "name": "zstd", "versionInfo": "1.5.7",
+      "downloadLocation": "NOASSERTION", "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause", "licenseDeclared": "BSD-3-Clause", "copyrightText": "NOASSERTION",
+      "comment": "linkage=static origin=vendored",
+      "externalRefs": [ { "referenceCategory": "PACKAGE-MANAGER", "referenceType": "purl", "referenceLocator": "pkg:generic/zstd@1.5.7" } ] }
+  ],
+  "relationships": [
+    { "spdxElementId": "SPDXRef-DOCUMENT", "relatedSpdxElement": "SPDXRef-Package-ROOT", "relationshipType": "DESCRIBES" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-abseil-cpp", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-boost", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-icu", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-jsmn", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-json", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-libbacktrace", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-libkmip", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-lz4", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-opentelemetry-cpp", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-opentelemetry-proto", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-protobuf", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-quicklz", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-rapidjson", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-unordered-dense", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-xxhash-lz4", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-xxhash", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-zlib", "relationshipType": "CONTAINS" }
+    ,{ "spdxElementId": "SPDXRef-Package-ROOT", "relatedSpdxElement": "SPDXRef-Package-zstd", "relationshipType": "CONTAINS" }
+  ]
+}

@@ -47,3 +47,10 @@
         state: present
         exclusive: False
       when: ansible_distribution == "Ubuntu"
+
+    # Several AMIs in this matrix boot with a root filesystem much smaller than
+    # the volume attached to them (rocky-8 ships an 8.9G LV on a 30G disk), which
+    # left too little room for the SBOM vulnerability scan and squeezes the
+    # backup tests as well. No-ops on platforms with nothing to grow.
+    - name: grow the root filesystem into unused disk space
+      include_tasks: ../../../tasks/grow_root_fs.yml

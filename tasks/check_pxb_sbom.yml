@@ -1,0 +1,6 @@
+---
+# PXB SBOM collection; the tasks live in check_sbom.yml, shared with PS.
+- name: collect the PXB SBOM files
+  include_tasks: check_sbom.yml
+  vars:
+    sbom_product: pxb

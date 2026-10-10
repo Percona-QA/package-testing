@@ -12,11 +12,15 @@ platforms:
     ssh_user: rocky
     root_device_name: /dev/sda1
     block_device_mappings:
+      # ebs nested INSIDE the list item: playbooks/create_noble.yml reads
+      # item.block_device_mappings[0].ebs.volume_size, so as a sibling key it
+      # was silently ignored and the size fell back to default(30) -- these
+      # instances got 30G, not the 40G asked for here.
       - device_name: /dev/sda1
-    ebs:
-      volume_size: 60
-      volume_type: gp2
-      delete_on_termination: true
+        ebs:
+          volume_size: 40
+          volume_type: gp2
+          delete_on_termination: true
     instance_tags:
       iit-billing-tag: ${IIT_BILLING_TAG}
       job-name: ${JOB_NAME}
