@@ -1,0 +1,39 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: ol8-arm-${BUILD_NUMBER}-${JOB_NAME}-${PLAYBOOK_VAR}
+    region: us-west-2
+    # TODO: set a valid Oracle Linux 8 arm64 (aarch64) AMI in us-west-2.
+    # No OL8 arm AMI exists in the repo yet, so this scenario stays disabled in
+    # pt-package-testing-molecule.groovy until a real AMI is filled in here.
+    image: ami-REPLACE_WITH_OL8_ARM64_AMI
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: c6g.large
+    ssh_user: ec2-user
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: ${IIT_BILLING_TAG}
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
+provisioner:
+  name: ansible
+  log: True
+  playbooks:
+    create: ../../../playbooks/create_noble.yml
+    destroy: ../../../playbooks/destroy-noble-arm.yml
+    prepare: ../../playbooks/prepare.yml
+    converge: ../../../../playbooks/${PLAYBOOK_VAR}.yml
+scenario:
+  name: ol-8-arm
+  destroy_sequence:
+    - destroy
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy

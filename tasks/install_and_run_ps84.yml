@@ -1,0 +1,37 @@
+# This task enables Percona-Server-84 (ps84) main repository, installs and starts percona-server.
+# Pure reuse of existing pieces: enable_ps84_main_repo.yml + install_ps84.yml + start/setpass glue.
+
+# Enable ps84 main repo and install ps84
+  - name: include tasks for enabling ps84 main repo
+    include_tasks: ../tasks/enable_ps84_main_repo.yml
+
+  - name: include tasks for installing ps84 packages
+    include_tasks:
+      file: ../tasks/install_ps84.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+# Start mysql service
+  - name: start mysql service on Debian
+    service:
+      name: mysql
+      state: started
+    when: ansible_os_family == "Debian"
+
+  - name: start mysql service on CentOS
+    systemd:
+      name: mysql
+      state: started
+    when: ansible_os_family == "RedHat"
+
+# On CentOS ps is started with a random root password. Reset it and store client credentials.
+  - name: set root password on CentOS
+    command: ../setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on CentOS
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"

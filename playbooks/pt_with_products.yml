@@ -1,98 +1,89 @@
 ---
-# This playbook does following:
+# Percona Toolkit "with other products" test — single, dynamic playbook.
 #
-#   installs latest version of Percona-Server-57 (ps57), Percona-Server-80 (ps80), Percona-XtraDB-Cluster-57 (pxc57), Percona-XtraDB-Cluster-80 (pxc80), MysqL server 57 (upstream57), MySQL server 80 (upstream80), Percona Server for MongoDB 44 (psmdb44), Percona Server for MongoDB 50 (psmdb50).
-#   enables Percona pt repository
-#   installs latest version of Percona-Toolkit (pt) and runs one of the pt (pt-mysql-summary or pt-psmdb-summary)
+# One product is selected at run time via the `install_with` env var. The playbook
+# installs & starts that product by REUSING the existing
+# ../tasks/install_and_run_<product>.yml task (no per-product logic is duplicated
+# here), then installs Percona Toolkit, verifies every pt tool reports the version
+# defined in VERSIONS, and runs the pt tool relevant to that product.
+#
+# Supported install_with values (each has a ../tasks/install_and_run_<product>.yml task):
+#   ps57 ps80 ps84 | pxc57 pxc80 | upstream57 upstream80 | psmdb44 psmdb50 psmdb60
+#
+# To support a new product, add its ../tasks/install_and_run_<product>.yml task
+# and, only if it is a new product family, extend `pt_tool` below. This playbook
+# needs no other change — product selection and task execution are dynamic.
 
 - hosts: all
   become: true
   become_method: sudo
   vars:
+    install_with: "{{ lookup('env', 'install_with') }}"
+    install_repo: "{{ lookup('env', 'install_repo') }}"
     gnupg_home: /root/.gnupg
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+    # All psmdb versions share one task file (it keys off install_with internally);
+    # every other product maps to its own task file by name.
+    product_task: "{{ 'psmdb' if install_with is match('psmdb') else install_with }}"
+    # pt tool to exercise, chosen by product family.
+    pt_tool: "{{ 'pt-mongodb-summary' if install_with is match('psmdb') else 'pt-mysql-summary' }}"
   environment:
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
-    
+
   tasks:
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
 
-# Include tasks to install and start [ps, pxc, MySQL, psmdb] products
-  - name: include tasks for installing and setup ps57
-    include_tasks: ../tasks/install_and_run_ps57.yml
-    when: lookup('env', 'install_with') == "ps57"
+  - name: fail early when install_with is not set
+    fail:
+      msg: >-
+        install_with env var is not set. Expected one of:
+        ps57, ps80, ps84, pxc57, pxc80, upstream57, upstream80, psmdb44, psmdb50, psmdb60
+    when: install_with | length == 0
 
-  - name: include tasks for installing and setup ps80
-    include_tasks: ../tasks/install_and_run_ps80.yml
-    when: lookup('env', 'install_with') == "ps80"
+# Dynamic product selection: install and start the chosen product by reusing its
+# existing install_and_run task.
+  - name: "install and start selected product: {{ install_with }}"
+    include_tasks: "../tasks/install_and_run_{{ product_task }}.yml"
 
-  - name: include tasks for installing and setup pxc57
-    include_tasks: ../tasks/install_and_run_pxc57.yml
-    when: lookup('env', 'install_with') == "pxc57"
-
-  - name: include tasks for installing and setup pxc80
-    include_tasks: ../tasks/install_and_run_pxc80.yml
-    when: lookup('env', 'install_with') == "pxc80"
-
-  - name: include tasks for installing and setup upstream57
-    include_tasks: ../tasks/install_and_run_upstream57.yml
-    when: lookup('env', 'install_with') == "upstream57"
-
-  - name: include tasks for installing and setup upstream 80
-    include_tasks: ../tasks/install_and_run_upstream80.yml
-    when: lookup('env', 'install_with') == "upstream80"
-
-  - name: include tasks for installing and setup psmdb 44
-    include_tasks: ../tasks/install_and_run_psmdb.yml
-    when: lookup('env', 'install_with') == "psmdb44"
-
-  - name: include tasks for installing and setup psmdb 50
-    include_tasks: ../tasks/install_and_run_psmdb.yml
-    when: lookup('env', 'install_with') == "psmdb50"
-
-  - name: include tasks for installing and setup psmdb 60
-    include_tasks: ../tasks/install_and_run_psmdb.yml
-    when: lookup('env', 'install_with') == "psmdb60"
-
-# Enable only pt repo to install pt
+# Enable only the pt repo and install Percona Toolkit.
   - name: include tasks for enabling pt testing repo
     include_tasks: ../tasks/enable_only_repo_for_pt.yml
     vars:
       repo_name: pt
       repo_type: testing
-    when: lookup('env', 'install_repo') == "testing" or lookup('env', 'install_repo') == ""
+    when: install_repo == "testing" or install_repo == ""
 
   - name: include tasks for enabling pt main repo
     include_tasks: ../tasks/enable_only_repo_for_pt.yml
     vars:
       repo_name: pt
       repo_type: release
-    when: lookup('env', 'install_repo') == "main"
+    when: install_repo == "main"
 
-  - name: include tasks for enabling  pt experimental repo
+  - name: include tasks for enabling pt experimental repo
     include_tasks: ../tasks/enable_only_repo_for_pt.yml
     vars:
       repo_name: pt
       repo_type: experimental
-    when: lookup('env', 'install_repo') == "experimental"
+    when: install_repo == "experimental"
 
-# Install pt and run tool
   - name: include tasks for pt installation
     include_tasks: ../tasks/install_pt.yml
 
-#   will fail till the PT-1959 is fixed
+# Verify every pt tool reports the version defined in VERSIONS (binary + package).
   - name: check that pt version is correct
     command: ../version_check.sh pt
+    register: pt_version_check
 
-  - name: run pt-mongodb-summary
-    command: pt-mongodb-summary
-    when: lookup('env', 'install_with') is match('psmdb')
+  - name: show pt version check output
+    debug:
+      var: pt_version_check.stdout_lines
 
-  - name: run pt-mysql-summary
-    command: pt-mysql-summary
-    when: lookup('env', 'install_with') is match('(pxc|ps|upstream)(57|80)$')
+# Exercise the pt tool relevant to the selected product.
+  - name: "run {{ pt_tool }}"
+    command: "{{ pt_tool }}"
 
   - name: remove pt packages
     include_tasks: ../tasks/remove_pt.yml
