@@ -50,16 +50,16 @@ ORCH_VER = ORCH_VER_FULL.split('-')[0]
 # Create list of supported software files
 if version.parse(PS_VER) > version.parse("8.1.0"):
     DEB_SOFTWARE_FILES=['bullseye', 'bookworm', 'jammy']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
 elif version.parse(PS_VER) > version.parse("8.0.0") and version.parse(PS_VER) < version.parse("8.1.0"):
     DEB_SOFTWARE_FILES=[ 'bullseye', 'bookworm', 'jammy']
-    RHEL_SOFTWARE_FILES=['redhat/7', 'redhat/8', 'redhat/9']
+    RHEL_SOFTWARE_FILES=[ 'redhat/8', 'redhat/9']
 elif version.parse(PS_VER) > version.parse("5.7.0") and version.parse(PS_VER) < version.parse("8.0.0"):
     assert not version.parse(PS_VER) > version.parse("5.7.0") and version.parse(PS_VER) < version.parse("8.0.0"), "PS 5.7 is not suported"
 
 SOFTWARE_FILES=DEB_SOFTWARE_FILES+RHEL_SOFTWARE_FILES+['binary','source']
 
-RHEL_EL={'redhat/7':'7', 'redhat/8':'8', 'redhat/9':'9'}
+RHEL_EL={'redhat/8':'8', 'redhat/9':'9'}
 
 BASE_PATH = f"https://downloads.percona.com/downloads/percona-distribution-mysql-ps/percona-distribution-mysql-ps-{PS_VER_UPSTREAM}"
 
@@ -106,7 +106,6 @@ def get_package_tuples():
             # Check PS sources:
                 source_files = [
                     f"percona-server-{PS_VER}.tar.gz",
-                    f"percona-mysql-shell-{PS_VER_UPSTREAM}.tar.gz",
                     f"percona-orchestrator-{ORCH_VER}.tar.gz",
                     f"percona-xtrabackup-{PXB_VER}.tar.gz"
                 ]
@@ -124,8 +123,6 @@ def get_package_tuples():
             f"percona-server-source_{ps_deb_name_suffix}",
             f"percona-server-common_{ps_deb_name_suffix}",
             f"percona-server-dbg_{ps_deb_name_suffix}",
-                # Check mysql-shell deb packages:
-            f"percona-mysql-shell_{PS_VER_UPSTREAM}-1-1.{software_file}_amd64.deb",
                 # Check orchestrator deb packages:
             f"percona-orchestrator-client_{ORCH_VER_FULL}.{software_file}_amd64.deb",
             f"percona-orchestrator-cli_{ORCH_VER_FULL}.{software_file}_amd64.deb",
