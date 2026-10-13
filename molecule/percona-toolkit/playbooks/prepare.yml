@@ -1,0 +1,32 @@
+---
+# percona-toolkit molecule prepare.
+#
+# Reuse the shared molecule prepare unchanged (SSH keys + disk resize) by
+# importing it, then add a pt-only step.
+#
+# The pt converge playbooks (pt.yml / pt_upgrade.yml / pt_with_products.yml via
+# tasks/enable_pt_repos_and_install.yml) call `command: ../version_check.sh pt`
+# with NO chdir. On a molecule/EC2 run that command executes on the remote host
+# from the login user's home directory (e.g. /home/<ssh_user>), so `..` points at
+# /home, not at the repo. tasks/test_prep.yml downloads the repo to
+# /package-testing during converge, so we expose version_check.sh (and the
+# VERSIONS file it sources relative to itself) at the parent dirs the relative
+# path resolves to. The script's other input (/package-testing/pt) is already
+# absolute. This keeps the pt playbooks' relative paths untouched.
+- import_playbook: ../../playbooks/prepare.yml
+
+- name: Expose version_check.sh where the pt relative path resolves
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Symlink version_check.sh + VERSIONS to /package-testing
+      # dangling until converge's test_prep downloads /package-testing; symlinks
+      # resolve by path at use-time, so they become valid before version_check runs.
+      command: "ln -sfn /package-testing/{{ item.name }} {{ item.dir }}/{{ item.name }}"
+      loop:
+        - { dir: /home, name: version_check.sh }
+        - { dir: /home, name: VERSIONS }
+        - { dir: /, name: version_check.sh }
+        - { dir: /, name: VERSIONS }
+      changed_when: true
