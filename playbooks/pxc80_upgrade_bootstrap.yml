@@ -24,24 +24,31 @@
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
 
+#-------------EOL (post-EOL private repo, upgrades to the "testing" sub-repo)
+  - name: include tasks for enabling EOL repo pxc 80
+    include_tasks: ../tasks/enable_pxc80_eol_tools_repo.yml
+    when: lookup('env', 'eol') == "yes"
 #-------------non pro
   - name: include tasks for enabling test repo pxc 80 non pro
     include_tasks: ../tasks/enable_pxc80_testing_repo.yml
     when:
-    - lookup('env', 'upgrade_repo') == "testing" 
+    - lookup('env', 'upgrade_repo') == "testing"
     - lookup('env', 'pro') == "no"
+    - lookup('env', 'eol') != "yes"
 
   - name: include tasks for enabling main repo pxc 80 non pro
     include_tasks: ../tasks/enable_pxc80_main_repo.yml
-    when: 
+    when:
     - lookup('env', 'upgrade_repo') == "main" or lookup('env', 'upgrade_repo') == ""
     - lookup('env', 'pro') == "no"
+    - lookup('env', 'eol') != "yes"
 
   - name: include tasks for enabling experimental repo pxc 80 non pro
     include_tasks: ../tasks/enable_pxc80_experimental_repo.yml
-    when: 
+    when:
     - lookup('env', 'upgrade_repo') == "experimental"
     - lookup('env', 'pro') == "no"
+    - lookup('env', 'eol') != "yes"
 #-----------------pro
 
   - name: include tasks for enabling test repo pxc 80 pro

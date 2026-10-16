@@ -1,0 +1,99 @@
+  # Enables the password-protected PXC 8.0 EOL (post-EOL) repository.
+  # The private repo exposes two sub-repos: "release" (GA) and "testing".
+  # For a minor upgrade we install from "release" on converge and upgrade to
+  # "testing" on side-effect. The sub-repo is chosen from install_repo_eol
+  # (main -> release, testing -> testing), mirroring enable_pxc57_eol_tools_repo.yml.
+  - name: include playbook for removing Percona repo
+    include_tasks: remove_percona_repository.yml
+
+  - name: PRINT install_repo_eol
+    debug:
+      msg: "{{ lookup('env', 'install_repo_eol') }}"
+
+  - name: disable the mysql module on RHEL/CentOS 8
+    command: /usr/bin/dnf module disable mysql -y
+    when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
+
+  - name: Install percona repository package
+    apt:
+      deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+    when: ansible_os_family == "Debian"
+
+  - name: Add the Percona Release yum repo without GPG check
+    yum:
+      name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+      disable_gpg_check: yes
+    when: ansible_os_family == "RedHat"
+
+  - name: Download Percona GPG key
+    ansible.builtin.get_url:
+      url: https://github.com/percona/percona-repositories/raw/main/deb/percona-keyring.gpg
+      dest: /tmp/percona-keyring.gpg
+      mode: '0644'
+    when: ansible_os_family == "Debian"
+
+  - name: Install Percona GPG key
+    ansible.builtin.copy:
+      src: /tmp/percona-keyring.gpg
+      dest: /etc/apt/trusted.gpg.d/percona-keyring.gpg
+      remote_src: yes
+      mode: '0644'
+    when: ansible_os_family == "Debian"
+
+  - name: select the EOL sub-repo (release for initial install, testing for upgrade)
+    set_fact:
+      pxc80_eol_repo: "{{ 'release' if lookup('env', 'install_repo_eol') == 'main' else 'testing' }}"
+
+  - name: add eol repository on debian
+    template: src=../templates/eol_deb_repo_file_pxc80.j2
+              dest=/etc/apt/sources.list.d/post-eol.list
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "{{ pxc80_eol_repo }}"
+    when:
+      - ansible_os_family == "Debian"
+
+  - name: add eol repository on Redhat AMD
+    template: src=../templates/eol_rpm_repo_file_pxc80.j2
+             dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "{{ pxc80_eol_repo }}"
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_architecture == "x86_64"
+
+  - name: add eol repository on Redhat ARM
+    template: src=../templates/eol_rpm_repo_file_pxc80_arm.j2
+             dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "{{ pxc80_eol_repo }}"
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+
+  - name: Clean and update package cache
+    shell: |
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
+
+  - name: add the tools repo
+    command: percona-release enable tools release
+
+  - name: enable pxb repo
+    command: percona-release enable pxb-80 release
+
+  - name: enable PT repo
+    command: percona-release enable pt release
+
+  - name: update deb cache
+    apt:
+      update_cache: yes
+    when:
+      - ansible_os_family == "Debian"
