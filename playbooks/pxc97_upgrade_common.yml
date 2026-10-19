@@ -47,6 +47,17 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
+      - percona-xtradb-cluster-server
+      - percona-xtradb-cluster-server-core
+      - percona-xtradb-cluster-server-debug
+      - percona-xtradb-cluster-client
+      - percona-xtradb-cluster-client-core
+      - percona-xtradb-cluster-client-plugins
+      - percona-xtradb-cluster-common
+      - percona-xtradb-cluster-garbd
+      - percona-xtradb-cluster-garbd-debug
+      - percona-xtradb-cluster-dbg
+      - percona-xtradb-cluster-test
     when:
       - ansible_os_family == "Debian"
     environment:
@@ -60,6 +71,13 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
+      - percona-xtradb-cluster-server
+      - percona-xtradb-cluster-client
+      - percona-xtradb-cluster-shared
+      - percona-xtradb-cluster-garbd
+      - percona-xtradb-cluster-test
+      - percona-xtradb-cluster-devel
+      - percona-xtradb-cluster-debuginfo
     when:
       - ansible_os_family == "RedHat"
     environment:
@@ -68,6 +86,7 @@
 
   - name: restart mysql service
     service: name=mysql state=restarted
+    throttle: 1
     when:
       - ansible_distribution != "Amazon"
 
