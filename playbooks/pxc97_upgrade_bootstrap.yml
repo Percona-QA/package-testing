@@ -86,7 +86,23 @@
       PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: restart mysql service
-    service: name=mysql state=restarted
+    block:
+      - name: restart mysql service
+        service: name=mysql state=restarted
+    rescue:
+      - name: collect mysql diagnostics after failed restart
+        shell: |
+          systemctl status mysql --no-pager -l || true
+          journalctl -xeu mysql --no-pager -n 100 || true
+          tail -n 100 /var/log/mysqld.log /var/log/mysql/error.log 2>/dev/null || true
+        register: mysql_restart_diag
+
+      - name: print mysql diagnostics after failed restart
+        debug: var=mysql_restart_diag.stdout_lines
+
+      - name: fail after printing mysql diagnostics
+        fail:
+          msg: "mysql restart failed after PXC 9.7 upgrade, see diagnostics above"
 
   - name: Sleep for 60 seconds
     shell: sleep 60
