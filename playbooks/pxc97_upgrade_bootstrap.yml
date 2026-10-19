@@ -78,6 +78,7 @@
       - percona-xtradb-cluster-test
       - percona-xtradb-cluster-devel
       - percona-xtradb-cluster-debuginfo
+      - percona-xtradb-cluster-debugsource
     when:
       - ansible_os_family == "RedHat"
     environment:
@@ -86,8 +87,6 @@
 
   - name: restart mysql service
     service: name=mysql state=restarted
-    when:
-      - ansible_distribution != "Amazon"
 
   - name: Sleep for 60 seconds
     shell: sleep 60
