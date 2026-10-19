@@ -87,6 +87,11 @@
 
   - name: restart mysql service
     block:
+      # node was started with mysql@bootstrap; mysql.service refuses to start while it is active
+      - name: stop mysql bootstrap service
+        service: name=mysql@bootstrap.service state=stopped
+        failed_when: false
+
       - name: restart mysql service
         service: name=mysql state=restarted
     rescue:
