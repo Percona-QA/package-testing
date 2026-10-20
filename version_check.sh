@@ -112,7 +112,10 @@ elif [[ "$1" =~ ^pxc9[0-9]{1}$ ]]; then
   innodb_ver=${PXC_INN_LTS_INNODB}
   wsrep=${PXC_INN_LTS_WSREP}
 elif [ "$1" = "pt" ]; then
-  version=${PT_VER}
+  # version       -> upstream version reported by the binaries' --version (e.g. 3.7.1)
+  # pkg_version   -> full package version incl. packaging revision (e.g. 3.7.1-4)
+  version=${PT_VER%-*}
+  pkg_version=${PT_VER}
 elif [ "$1" = "pxb23" ]; then
   version=${PXB23_VER}
 elif [ "$1" = "pxb24" ]; then
@@ -250,16 +253,35 @@ elif [[ ${product} = "pxc56" || ${product} = "pxc57" ]] || [[ ${product} =~ ^pxc
   fi
 
 elif [ ${product} = "pt" ]; then
+  # Binary version check: the toolkit binaries report the upstream version
+  # (e.g. 3.7.1) via --version, without the packaging revision (the -4 in 3.7.1-4).
   for i in `cat /package-testing/pt`; do
     version_check=$(${i} --version|grep -c ${version})
     if [ ${version_check} -eq 0 ]; then
-      echo "${i} version is not good!"
-      echo $(${i} --version)
+      echo "${i} version is not good! Expected ${version}, got: $(${i} --version)"
       exit 1
     else
-      echo "${i} version is correct and ${version}" >> "${log}"
+      echo "${i} version is correct and ${version}" | tee -a "${log}"
     fi
   done
+
+  # Package version check: the installed percona-toolkit package must carry the
+  # full version including the packaging revision (e.g. 3.7.1-4).
+  if command -v dpkg >/dev/null 2>&1; then
+    installed_pkg_version=$(dpkg-query -W -f='${Version}' percona-toolkit 2>/dev/null)
+  elif command -v rpm >/dev/null 2>&1; then
+    installed_pkg_version=$(rpm -q --qf '%{VERSION}-%{RELEASE}' percona-toolkit 2>/dev/null)
+  else
+    echo "Neither dpkg nor rpm found; cannot check percona-toolkit package version!"
+    exit 1
+  fi
+
+  if echo "${installed_pkg_version}" | grep -q "${pkg_version}"; then
+    echo "percona-toolkit package version is correct and ${pkg_version}" | tee -a "${log}"
+  else
+    echo "percona-toolkit package version is not good! Expected ${pkg_version}, installed: ${installed_pkg_version}"
+    exit 1
+  fi
 
 elif [ ${product} = "pmm" ]; then
   version_check=$(pmm-admin --version 2>&1|grep -c ${version})

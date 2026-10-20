@@ -6,6 +6,20 @@
       deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
     when: ansible_os_family == "Debian"
 
+  # Import the Percona GPG keys before installing percona-release. On distros that
+  # enforce gpgcheck for directly-fetched RPMs (e.g. Amazon Linux 2023) the yum
+  # module otherwise fails the percona-release signature validation. Ungated by
+  # version on purpose: the version-gated imports in test_prep/prepare use a string
+  # compare that skips AL2023 (major version "2023" < "8" lexically).
+  - name: import Percona GPG keys on centos
+    rpm_key:
+      state: present
+      key: "{{ item }}"
+    with_items:
+      - https://repo.percona.com/yum/RPM-GPG-KEY-Percona
+      - https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
+    when: ansible_os_family == "RedHat"
+
   - name: install Percona repository package on centos
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm
     when: ansible_os_family == "RedHat"
