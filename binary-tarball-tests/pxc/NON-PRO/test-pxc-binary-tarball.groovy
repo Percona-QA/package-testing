@@ -2,9 +2,6 @@ pipeline {
     agent {
         label 'docker-32gb'
     }
-    options {
-        skipDefaultCheckout()
-    }
     parameters {
         string(name: 'PXC_VERSION', defaultValue: '8.0.37-29.1', description: 'PXC full version')
         string(name: 'PXC_REVISION', defaultValue: 'f735605', description: 'PXC revision')
@@ -111,38 +108,6 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar socat
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
-                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
-                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
-                                ./run.sh || true
-                              '''
-                            junit 'package-testing/binary-tarball-tests/pxc/NON-PRO/report.xml'
-                        }
-                    }
-                }
-                stage('Debian Bullseye') {
-                    agent {
-                        label "min-bullseye-x64"
-                    }
-                    steps {
-                        script {
-                            currentBuild.displayName = "#${BUILD_NUMBER}-${PXC_VERSION}-${PXC_REVISION}"
-                        }
-                        withCredentials([usernamePassword(credentialsId: 'PS_PRIVATE_REPO_ACCESS', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
-                            sh '''
-                                echo ${BUILD_TYPE_MINIMAL}
-                                MINIMAL=""
-                                if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
-                                  MINIMAL="-minimal"
-                                fi
-                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.31${MINIMAL}.tar.gz"
-                                if [ "${EOL}" = "yes" ]; then
-                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
-                                else
-                                  TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
-                                fi
-                                rm -rf package-testing
-                                sudo apt install -y git wget tar
                                 git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
