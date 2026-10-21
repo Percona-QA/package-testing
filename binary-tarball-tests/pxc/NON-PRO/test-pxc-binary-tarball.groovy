@@ -2,6 +2,9 @@ pipeline {
     agent {
         label 'docker-32gb'
     }
+    options {
+        skipDefaultCheckout()
+    }
     parameters {
         string(name: 'PXC_VERSION', defaultValue: '8.0.37-29.1', description: 'PXC full version')
         string(name: 'PXC_REVISION', defaultValue: 'f735605', description: 'PXC revision')
