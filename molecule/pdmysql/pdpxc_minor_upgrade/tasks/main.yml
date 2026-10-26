@@ -197,6 +197,15 @@
 - name: install Percona Toolkit old packages
   include_tasks: ../../../tasks/install_pt.yml
 
+- name: Set ProxySQL package name
+  set_fact:
+    proxysql_package: >-
+      {{
+        'proxysql3'
+        if lookup('env', 'PROXYSQL_VERSION').startswith('3.')
+        else 'proxysql2'
+      }}
+
 - name: install proxysql new deb packages
   apt:
     name: "{{ packages }}"
@@ -204,7 +213,7 @@
     state: latest
   vars:
     packages:
-      - proxysql2
+      - "{{ proxysql_package }}"
   when: ansible_os_family == "Debian"
 
 - name: install proxysql new rpm packages with yum
@@ -213,7 +222,7 @@
     state: latest
   vars:
     packages:
-      - proxysql2
+      - "{{ proxysql_package }}"
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int < 8
 
 - name: install proxysql new rpm packages with dnf
@@ -222,8 +231,10 @@
     state: latest
   vars:
     packages:
-      - proxysql2
-  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
+      - "{{ proxysql_package }}"
+  when:
+    - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
+    - ansible_facts['distribution_major_version'] | int > 8 or lookup('env', 'VERSION').split('.')[0] | int < 9
 
 #install initscripts-service manually on OL9 till DISTMYSQL-300 is fixed
 - name: install init scripts for OL9
@@ -236,12 +247,15 @@
 
 - name: start proxysql service
   command: service proxysql start
+  when: not (ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int == 8 and lookup('env', 'VERSION').split('.')[0] | int >= 9)
 
 - name: stop proxysql service
   command: service proxysql stop
+  when: not (ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int == 8 and lookup('env', 'VERSION').split('.')[0] | int >= 9)
 
 - name: start proxysql service
   command: service proxysql start
+  when: not (ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int == 8 and lookup('env', 'VERSION').split('.')[0] | int >= 9)
 # set root password on centos
 - name: start mysql service
   service: name=mysql state=started
@@ -484,7 +498,7 @@
     state: latest
   vars:
     packages:
-      - proxysql2
+      - "{{ proxysql_package }}"
   when: ansible_os_family == "Debian"
 
 - name: install proxysql new rpm packages with yum
@@ -493,7 +507,7 @@
     state: latest
   vars:
     packages:
-      - proxysql2
+      - "{{ proxysql_package }}"
   when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int < 8
 
 - name: install proxysql new rpm packages with dnf
@@ -502,8 +516,10 @@
     state: latest
   vars:
     packages:
-      - proxysql2
-  when: ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon'] and ansible_facts['distribution_major_version'] | int >= 8
+      - "{{ proxysql_package }}"
+  when:
+    - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
+    - ansible_facts['distribution_major_version'] | int > 8 or lookup('env', 'VERSION').split('.')[0] | int < 9
 
 - name: Verify telemetry version and package installation
   command: /package-testing/check_tel_ver_pack.sh

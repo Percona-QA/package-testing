@@ -299,7 +299,7 @@
     - mv "package-testing-{{ branch }}" /package-testing
     vars:
       branch: "{{ lookup('env', 'TESTING_BRANCH') | default('master', true) }}"
-      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('Percona-QA', true) }}"
+      git_account: "{{ lookup('env', 'TESTING_GIT_ACCOUNT') | default('grishma123-eng', true) }}"
 
   # pytest is used by the package tests under package-testing/pytest-tests/ and
   # scripts/ps_pam_test/ (both ported from the old bats tests)
