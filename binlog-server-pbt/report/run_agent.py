@@ -23,6 +23,7 @@ import os
 import subprocess
 import sys
 import time
+import urllib.request
 from pathlib import Path
 
 PROMPT = Path(__file__).with_name("agent-prompt.md")
@@ -68,6 +69,31 @@ def describe(event):
     return "\n".join(lines) or None
 
 
+def instance_role():
+    """The EC2 instance role the container can use, via IMDSv2; exits with a clear message otherwise.
+
+    Claude Code finds the same credentials through the default AWS chain. Checking first turns
+    "Could not load credentials from any providers" into the actual reason.
+    """
+    if os.environ.get("AWS_ACCESS_KEY_ID"):
+        return "credentials from the environment"
+    imds = "http://169.254.169.254/latest"
+    try:
+        token = urllib.request.urlopen(urllib.request.Request(
+            f"{imds}/api/token", method="PUT",
+            headers={"X-aws-ec2-metadata-token-ttl-seconds": "300"}), timeout=5).read().decode()
+        role = urllib.request.urlopen(urllib.request.Request(
+            f"{imds}/meta-data/iam/security-credentials/",
+            headers={"X-aws-ec2-metadata-token": token}), timeout=5).read().decode().strip()
+    except (OSError, ValueError) as error:
+        sys.exit(f"no AWS credentials: the instance metadata service is not reachable from this container "
+                 f"({error}). The worker must be an EC2 instance with a role that may call Bedrock, and the "
+                 "container must reach 169.254.169.254 (host network, or a metadata hop limit of 2).")
+    if not role:
+        sys.exit("no AWS credentials: the EC2 worker has no instance role")
+    return f"instance role {role}"
+
+
 def main():
     model = os.environ.get("AI_MODEL") or "claude-opus-5-5"
     if model not in MODELS:
@@ -78,6 +104,7 @@ def main():
     Path("work").mkdir(exist_ok=True)
     Path.home().mkdir(parents=True, exist_ok=True)
 
+    print(f"AWS: {instance_role()}", file=sys.stderr, flush=True)
     claude = install(os.environ["CLAUDE_CODE_VERSION"])
     env = dict(
         os.environ,
@@ -110,12 +137,19 @@ def main():
 
     result = result or {}
     finished = agent.returncode == 0 and not result.get("is_error") and result.get("subtype") == "success"
+    if not result:
+        status = f"exit code {agent.returncode}, no result event"
+    elif result.get("is_error"):
+        # e.g. subtype "success" with "API Error: Could not load AWS credentials ..." as the result
+        status = "error: " + (str(result.get("result") or result.get("subtype")).strip().splitlines() or [""])[0][:200]
+    else:
+        status = result.get("subtype")
     summary = {
         "model": model,
         "bedrock_id": MODELS[model],
         "effort": effort,
         "max_turns": int(max_turns),
-        "status": result.get("subtype") or f"exit code {agent.returncode}, no result event",
+        "status": status,
         "finished": finished,
         "turns": result.get("num_turns"),
         "cost_usd": result.get("total_cost_usd"),
