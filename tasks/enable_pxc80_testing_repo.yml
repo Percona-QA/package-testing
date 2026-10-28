@@ -15,7 +15,13 @@
       name: https://repo.percona.com/yum/percona-release-latest.noarch.rpm
       disable_gpg_check: yes
     when: ansible_os_family == "RedHat"
-  
+
+  - name: Get PXC 8.0 version from VERSIONS file for gated repo path
+    ansible.builtin.shell: grep 'PXC80_VER=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: pxc80_gated_version
+    changed_when: false
+    when: lookup('env', 'eol') == "yes"
+
   - name: add eol testing repository on debian
     template: src=../templates/eol_deb_repo_file_pxc80.j2
               dest=/etc/apt/sources.list.d/post-eol.list
@@ -23,6 +29,7 @@
       client_id: "{{ lookup('env', 'USERNAME') }}"
       client_token: "{{ lookup('env', 'PASSWORD') }}"
       repo: "testing"
+      pxc_version: "{{ pxc80_gated_version.stdout }}"
     when:
       - ansible_os_family == "Debian"
       - lookup('env', 'eol') == "yes"
@@ -34,6 +41,7 @@
       client_id: "{{ lookup('env', 'USERNAME') }}"
       client_token: "{{ lookup('env', 'PASSWORD') }}"
       repo: "testing"
+      pxc_version: "{{ pxc80_gated_version.stdout }}"
     when:
       - ansible_os_family == "RedHat"
       - ansible_architecture == "x86_64"
@@ -46,6 +54,7 @@
       client_id: "{{ lookup('env', 'USERNAME') }}"
       client_token: "{{ lookup('env', 'PASSWORD') }}"
       repo: "testing"
+      pxc_version: "{{ pxc80_gated_version.stdout }}"
     when:
       - ansible_os_family == "RedHat"
       - ansible_architecture == "aarch64" or ansible_architecture == "arm64"

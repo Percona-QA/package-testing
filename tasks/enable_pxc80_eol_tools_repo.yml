@@ -10,6 +10,15 @@
     debug:
       msg: "{{ lookup('env', 'install_repo_eol') }}"
 
+  - name: Get PXC 8.0 version from VERSIONS file for gated repo path
+    ansible.builtin.shell: grep 'PXC80_VER=' /package-testing/VERSIONS | cut -d'=' -f2 | tr -d '"'
+    register: pxc80_gated_version
+    changed_when: false
+
+  - name: PRINT gated PXC 8.0 version
+    debug:
+      msg: "{{ pxc80_gated_version.stdout }}"
+
   - name: disable the mysql module on RHEL/CentOS 8
     command: /usr/bin/dnf module disable mysql -y
     when: ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
@@ -51,6 +60,7 @@
       client_id: "{{ lookup('env', 'USERNAME') }}"
       client_token: "{{ lookup('env', 'PASSWORD') }}"
       repo: "{{ pxc80_eol_repo }}"
+      pxc_version: "{{ pxc80_gated_version.stdout }}"
     when:
       - ansible_os_family == "Debian"
 
@@ -61,6 +71,7 @@
       client_id: "{{ lookup('env', 'USERNAME') }}"
       client_token: "{{ lookup('env', 'PASSWORD') }}"
       repo: "{{ pxc80_eol_repo }}"
+      pxc_version: "{{ pxc80_gated_version.stdout }}"
     when:
       - ansible_os_family == "RedHat"
       - ansible_architecture == "x86_64"
@@ -72,6 +83,7 @@
       client_id: "{{ lookup('env', 'USERNAME') }}"
       client_token: "{{ lookup('env', 'PASSWORD') }}"
       repo: "{{ pxc80_eol_repo }}"
+      pxc_version: "{{ pxc80_gated_version.stdout }}"
     when:
       - ansible_os_family == "RedHat"
       - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
