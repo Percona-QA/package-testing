@@ -29,7 +29,6 @@
 #   KNOWN_AS         failure | skipped: known bugs in junit.xml (default failure)
 #   EXTRA_RUN_ARGS   more run_property_tests.py arguments, split on spaces
 #                    (no quoting), e.g. "--filter gtid_set.*Decode --seed 42"
-#   IMAGE_ID         identity of the build image, part of the cache key
 
 set -euo pipefail
 
@@ -45,7 +44,6 @@ esac
 : "${CASES_SCALE:=1}"
 : "${KNOWN_AS:=failure}"
 : "${EXTRA_RUN_ARGS:=}"
-: "${IMAGE_ID:=unknown}"
 
 PBS_DIR="${WORKDIR}/percona-binlog-server"
 QA_DIR="${PBS_DIR}/extra/qa"
@@ -74,13 +72,17 @@ ci_env() { # NAME default
 BOOST_VERSION="$(ci_env BOOST_MAJOR 1).$(ci_env BOOST_MINOR 90).$(ci_env BOOST_PATCH 0)"
 AWS_SDK_CPP_VERSION="$(ci_env AWS_SDK_CPP_MAJOR 1).$(ci_env AWS_SDK_CPP_MINOR 11).$(ci_env AWS_SDK_CPP_PATCH 774)"
 
+# The cache key names the image by the hash of its Dockerfile, not by the
+# image ID: every 'docker build' on a fresh worker gives a new ID (new layer
+# timestamps, current apt packages) even when nothing changed.
 deps_key() {
-  local presets_sum
+  local presets_sum dockerfile_sum
+  dockerfile_sum="$(sha256sum "$(dirname "$0")/Dockerfile" | cut -c1-12)"
   presets_sum="$(cat "${PBS_DIR}/extra/cmake_presets/boost/CMakePresets.json" \
                      "${PBS_DIR}/extra/cmake_presets/aws-sdk-cpp/CMakePresets.json" \
                  | sha256sum | cut -c1-12)"
-  printf '%s/boost-%s_aws-sdk-cpp-%s_presets-%s_image-%s\n' \
-    "${PRESET}" "${BOOST_VERSION}" "${AWS_SDK_CPP_VERSION}" "${presets_sum}" "${IMAGE_ID:0:12}"
+  printf '%s/boost-%s_aws-sdk-cpp-%s_presets-%s_dockerfile-%s\n' \
+    "${PRESET}" "${BOOST_VERSION}" "${AWS_SDK_CPP_VERSION}" "${presets_sum}" "${dockerfile_sum}"
 }
 
 build_dep() { # name git-url git-ref

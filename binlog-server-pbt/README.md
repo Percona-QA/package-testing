@@ -26,8 +26,8 @@ All files stay in the Jenkins workspace. `ws/` is mounted as `/work`
    `s3://percona-jenkins-artifactory/percona-binlog-server-pbt/deps/<key>.tar.gz`.
    The key (`pbt.sh deps-key`) contains the preset, the Boost and AWS SDK
    versions (read from `.github/workflows/cmake.yml` of the branch), a hash
-   of their CMake presets and the image ID, so any change there rebuilds
-   them. `REBUILD_DEPS` forces a rebuild.
+   of their CMake presets and a hash of the `Dockerfile`, so any change
+   there rebuilds them. `REBUILD_DEPS` forces a rebuild.
 3. **Test environment** (`pbt.sh setup`): `extra/qa/setup_pbt_env.sh
    --with-mysql`, which installs libhegel, hegel-cpp, SeaweedFS and the
    Percona Server minimal tarball for `PS_VERSION`.
