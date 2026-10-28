@@ -16,6 +16,28 @@
       disable_gpg_check: yes
     when: ansible_os_family == "RedHat"
   
+  # The private EOL apt repo's InRelease is signed with the Percona key
+  # (9334A25F8507EFA5), which percona-release does not install. Fetch the Percona
+  # keyring into trusted.gpg.d so "apt update" can verify the EOL repo signature.
+  - name: Download Percona GPG key for the EOL apt repo
+    ansible.builtin.get_url:
+      url: https://github.com/percona/percona-repositories/raw/main/deb/percona-keyring.gpg
+      dest: /tmp/percona-keyring.gpg
+      mode: '0644'
+    when:
+      - ansible_os_family == "Debian"
+      - lookup('env', 'eol') == "yes"
+
+  - name: Install Percona GPG key for the EOL apt repo
+    ansible.builtin.copy:
+      src: /tmp/percona-keyring.gpg
+      dest: /etc/apt/trusted.gpg.d/percona-keyring.gpg
+      remote_src: yes
+      mode: '0644'
+    when:
+      - ansible_os_family == "Debian"
+      - lookup('env', 'eol') == "yes"
+
   - name: add eol testing repository on debian
     template: src=../templates/eol_deb_repo_file_pxc80.j2
               dest=/etc/apt/sources.list.d/post-eol.list
