@@ -10,6 +10,7 @@ with the scripts in `extra/qa` of percona-binlog-server (see
 |---|---|
 | `Dockerfile` | build and test image: Ubuntu 24.04, g++-14, libmysqlclient-dev, libcurl, runtime libraries of the Percona Server tarball |
 | `pbt.sh` | the job's steps; every step except `deps-key` runs in the image |
+| `report/` | the HTML report and its Claude Code analysis (see "Report") |
 
 ## What a build does
 
@@ -36,6 +37,8 @@ All files stay in the Jenkins workspace. `ws/` is mounted as `/work`
    --fail-on new`. New issues, regressions and infrastructure errors make
    the build UNSTABLE. The report is archived as `results/`; `junit.xml` is
    published, `summary.md` printed and summarised in the build description.
+6. **Report**: `report/report.html`, linked from the build description (see
+   below).
 
 ## Parameters
 
@@ -43,12 +46,16 @@ All files stay in the Jenkins workspace. `ws/` is mounted as `/work`
 |---|---|---|
 | `PBS_REPO`, `PBS_BRANCH` | tplavcic fork, `pbt-init-tomislav` | percona-binlog-server source |
 | `BUILD_TYPE` | `asan_gcc14` | `asan_gcc14`, `asan_gcc14-ubsan`, `release_gcc14`, `debug_gcc14` |
-| `PS_VERSION` | `8.4.5-5` | Percona Server for the private mysqld of the MySQL tests |
+| `PS_VERSION` | `8.4.10-10` | Percona Server for the private mysqld of the MySQL tests |
 | `CASES_SCALE` | `1` | `PBT_CASES_SCALE`: 0.1 smoke run, 10 nightly |
 | `EXTRA_RUN_ARGS` | | more `run_property_tests.py` arguments, split on spaces, no quoting |
 | `KNOWN_AS` | `failure` | how known bugs appear in JUnit (`failure` or `skipped`) |
 | `REBUILD_DEPS` | false | rebuild Boost and the AWS SDK and replace the cache |
-| `TESTING_REPO`, `TESTING_BRANCH` | Percona-QA, `master` | this repository |
+| `AI_REPORT` | true | let Claude Code write up the issues in the report |
+| `AI_MODEL`, `AI_EFFORT` | `claude-opus-5-5`, `medium` | model and thinking effort of the analysis |
+| `AI_SCOPE` | `all` | `all` issues, or only `new` issues, regressions, flaky failures and possibly fixed issues |
+| `AI_MAX_TURNS`, `AI_TIMEOUT_MINUTES` | `300`, `120` | limits of the Claude Code session |
+| `TESTING_REPO`, `TESTING_BRANCH` | Percona-QA, `pbt-jenkins` | this repository |
 
 ## Running it without Jenkins
 
@@ -62,12 +69,45 @@ for step in deps setup build run; do
 done
 ```
 
-## Later: Claude Code analysis
+## Report
 
-The job is laid out for an analysis stage with
-[ci-ai-kit](https://github.com/Percona-Lab/ci-ai-kit)
-(`examples/jobs-report/claude-code.Jenkinsfile`): it runs on the EC2 label
-`docker-32gb`, whose instance role may call Claude on Bedrock (Hetzner
-workers have no AWS role), every step runs in a container, the only AWS key
-credential is bound around the S3 cache transfers, and the report is in
-`results/` for an agent stage to mount read-only.
+`report/report.html` is one self-contained page (no external scripts or
+fonts): the run's totals, properties per test program, what is new in this
+run, and every issue with a filter by severity, component and text. A click
+on an issue opens its write-up (what happens, root cause, suggested fix,
+impact, how to verify), its `known_bugs.md` description and its failures with
+the minimal counterexample, the reproduce command and a link to the full log.
+`#<ISSUE>` links straight to an issue. `report/report.json` holds the same
+data.
+
+| File | Step |
+|---|---|
+| `report/prepare.py` | facts decided by code: totals, issues grouped by `known_bugs.md` ID (new failures get `NEW-nn`), failures, possibly fixed issues, and the issues to analyse (`AI_SCOPE`) -> `ai/input/base.json` |
+| `report/run_agent.py`, `report/agent-prompt.md` | Claude Code, headless on Amazon Bedrock, writes `ai/analysis/<ISSUE>.json` per issue and `ai/analysis/overview.json` |
+| `report/audit_agent.py` | checks the session transcript: no network, processes or dynamic code in what the agent wrote or ran, no writes outside `analysis/` and `work/` |
+| `report/render_report.py`, `report/template.html` | checks the analysis (fields, lengths, every file it names must exist in the source) and builds the page |
+
+The analysis follows [ci-ai-kit](https://github.com/Percona-Lab/ci-ai-kit)
+(`examples/jobs-report/claude-code.Jenkinsfile`):
+
+- the job runs on the EC2 label `docker-32gb`; its instance role
+  (`jenkins-ps80-worker`) may call Claude on Bedrock, so no key is stored in
+  Jenkins. Hetzner workers have no AWS role;
+- Claude Code is pinned (`CLAUDE_CODE_VERSION` in the job) and allowed only
+  file tools and `python3`; web tools and subagents are off;
+- its container mounts the results, the source and `ai/input` read-only, and
+  may write only `ai/analysis` and `ai/work`. Its transcript is its stdout,
+  written to `ai/log/` outside the container;
+- a failed audit keeps the analysis out of the report; a session that does
+  not finish (turn or time limit) leaves the issues it wrote up, and the
+  others show their `known_bugs.md` description. Either way the Report stage
+  is marked failed and the build result does not change;
+- with `AI_REPORT` off the report is built from the test results and
+  `known_bugs.md` only.
+
+To build the page from an archived build (or a QA host run) without Jenkins:
+
+```bash
+python3 report/prepare.py --results <run dir> --source <percona-binlog-server> --out base.json
+python3 report/render_report.py --base base.json --source <percona-binlog-server> --out out --ai off
+```

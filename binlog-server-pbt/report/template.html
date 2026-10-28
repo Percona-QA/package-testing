@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PBS Property Test Report</title>
+<style>
+/* A run header band, a summary strip, then a filterable issue ledger whose rows open in place into the full write-up. Self-contained: no external fonts or scripts. */
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --sunken: #eef0f4; --line: #d9dde5;
+  --fg: #1b2230; --muted: #5d6676; --accent: #2f5bd3; --accent-soft: #e6ecfb;
+  --high: #c2362f; --high-soft: #fbe9e7; --medium: #a8650a; --medium-soft: #fbf1df;
+  --low: #4c6a8a; --low-soft: #e8eef5; --fixed: #23824f; --fixed-soft: #e3f3ea;
+  --new: #7a3fc0; --new-soft: #f0e8fb; --code-bg: #f0f2f6;
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12161d; --surface: #191e27; --sunken: #141922; --line: #2a3140;
+  --fg: #e3e7ee; --muted: #98a2b3; --accent: #7fa2ff; --accent-soft: #1f2a45;
+  --high: #ff7a70; --high-soft: #3a1d1c; --medium: #f0b45a; --medium-soft: #36290f;
+  --low: #93b2d4; --low-soft: #1e2a38; --fixed: #5fd394; --fixed-soft: #15301f;
+  --new: #c9a2ff; --new-soft: #2c1f45; --code-bg: #0f131a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12161d; --surface: #191e27; --sunken: #141922; --line: #2a3140;
+  --fg: #e3e7ee; --muted: #98a2b3; --accent: #7fa2ff; --accent-soft: #1f2a45;
+  --high: #ff7a70; --high-soft: #3a1d1c; --medium: #f0b45a; --medium-soft: #36290f;
+  --low: #93b2d4; --low-soft: #1e2a38; --fixed: #5fd394; --fixed-soft: #15301f;
+  --new: #c9a2ff; --new-soft: #2c1f45; --code-bg: #0f131a; color-scheme: dark }
+* { box-sizing: border-box }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 15px; line-height: 1.55 }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 28px 16px 64px; display: grid; gap: 28px }
+h1, h2, h3 { text-wrap: balance; margin: 0 }
+h1 { font-size: 1.85rem; font-weight: 700; letter-spacing: -0.01em }
+h2 { font-size: 1.15rem; font-weight: 600 }
+a { color: var(--accent) }
+.eyebrow { font-size: .72rem; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 600 }
+code, .mono { font-family: var(--font-mono); font-size: .86em }
+p code, li code { background: var(--code-bg); padding: .08em .35em; border-radius: 4px; overflow-wrap: anywhere }
+header.run { display: grid; gap: 10px }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); font-size: .88rem }
+.meta b { color: var(--fg); font-weight: 600 }
+.lede { max-width: 72ch; color: var(--muted); margin: 0 }
+.banner { border: 1px solid var(--line); border-left: 4px solid var(--medium); background: var(--surface); border-radius: 8px; padding: 10px 14px; font-size: .9rem }
+.banner ul { margin: 6px 0 0; padding-left: 18px } .banner li { overflow-wrap: anywhere }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden }
+.stat { background: var(--surface); padding: 14px 16px; display: grid; gap: 2px }
+.stat .n { font-size: 1.7rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1 }
+.stat .l { font-size: .8rem; color: var(--muted) }
+.stat.high .n { color: var(--high) } .stat.medium .n { color: var(--medium) } .stat.low .n { color: var(--low) }
+.stat.fixed .n { color: var(--fixed) } .stat.new .n { color: var(--new) }
+.coverage { display: grid; gap: 8px }
+.cov-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 22px }
+.cov { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; font-size: .84rem }
+.cov .bar { grid-column: 1 / -1; height: 5px; border-radius: 3px; background: var(--sunken); overflow: hidden; display: flex }
+.cov .bar i { display: block; background: var(--fixed) } .cov .bar em { display: block; background: var(--high) } .cov .bar s { display: block; background: var(--medium) }
+.cov .num { color: var(--muted); font-variant-numeric: tabular-nums }
+.notes { display: grid; gap: 10px }
+.notes-list { display: grid; gap: 10px }
+.note { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 12px 16px; display: grid; gap: 6px; min-width: 0 }
+.note-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; justify-content: space-between }
+.note-head .mono { font-weight: 600; overflow-wrap: anywhere; min-width: 0 }
+.verdict { font-size: .78rem; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 2px 8px; border-radius: 4px }
+.note p { margin: 0; color: var(--muted); max-width: 80ch; overflow-wrap: anywhere }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center }
+.chips { display: flex; flex-wrap: wrap; gap: 6px }
+.chip { font: inherit; font-size: .84rem; border: 1px solid var(--line); background: var(--surface); color: var(--fg); padding: 5px 11px; border-radius: 999px; cursor: pointer }
+.chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600 }
+.chip:focus-visible, .row:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+select, input[type="search"] { font: inherit; font-size: .88rem; padding: 6px 10px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 8px }
+input[type="search"] { flex: 1 1 200px; min-width: 0 }
+.count { color: var(--muted); font-size: .85rem }
+.ledger { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden }
+.item + .item { border-top: 1px solid var(--line) }
+.row { display: grid; grid-template-columns: 88px 110px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: 12px 16px; background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer }
+.row:hover { background: var(--sunken) }
+.row .id { font-family: var(--font-mono); font-size: .84rem; font-weight: 600 }
+.row .t { min-width: 0; display: grid; gap: 1px }
+.row .t span:first-child { font-weight: 600 }
+.row .t span + span { color: var(--muted); font-size: .82rem }
+.row .chev { color: var(--muted); transition: transform .15s }
+.item.open .row .chev { transform: rotate(90deg) }
+.item.open .row { background: var(--sunken) }
+.sev { justify-self: start; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; white-space: nowrap }
+.sev.high { color: var(--high); background: var(--high-soft) } .sev.medium { color: var(--medium); background: var(--medium-soft) }
+.sev.low { color: var(--low); background: var(--low-soft) } .sev.fixed { color: var(--fixed); background: var(--fixed-soft) }
+.sev.new, .sev.untriaged, .sev.regression { color: var(--new); background: var(--new-soft) } .sev.unknown { color: var(--muted); background: var(--sunken) }
+.tag { font-size: .72rem; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; margin-left: 6px; white-space: nowrap; font-weight: 400 }
+.detail { padding: 6px 16px 22px; display: grid; gap: 18px; border-top: 1px dashed var(--line) }
+.detail .summary { font-size: 1.02rem; max-width: 72ch; margin: 10px 0 0 }
+.sections { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px }
+.sec { display: grid; gap: 6px; min-width: 0; align-content: start }
+.sec h3 { font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700 }
+.sec p { margin: 0; max-width: 70ch; overflow-wrap: anywhere } .sec p + p { margin-top: 8px }
+.sec.wide { grid-column: 1 / -1 }
+.sec.cause { border-left: 3px solid var(--high); padding-left: 12px } .sec.fix { border-left: 3px solid var(--fixed); padding-left: 12px }
+.noai { color: var(--muted); font-style: italic; margin: 0 }
+.fails { display: grid; gap: 10px }
+.fail { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 8px; min-width: 0; background: var(--bg) }
+.fail .name { font-family: var(--font-mono); font-size: .82rem; font-weight: 600; overflow-wrap: anywhere }
+.fail .msg { font-family: var(--font-mono); font-size: .8rem; color: var(--high); overflow-wrap: anywhere; white-space: pre-wrap; margin: 0 }
+details summary { cursor: pointer; font-size: .84rem; color: var(--accent); font-weight: 600 }
+pre.block { margin: 6px 0 0; padding: 10px 12px; background: var(--code-bg); border-radius: 6px; overflow-x: auto; font-family: var(--font-mono); font-size: .76rem; line-height: 1.5; max-height: 360px }
+.cmd { display: flex; gap: 8px; align-items: start; min-width: 0 }
+.cmd pre { flex: 1; margin: 0; min-width: 0 }
+.copy { font: inherit; font-size: .78rem; border: 1px solid var(--line); background: var(--surface); color: var(--fg); padding: 4px 10px; border-radius: 6px; cursor: pointer; white-space: nowrap }
+.props { margin: 0; padding-left: 18px; font-size: .84rem } .props code { font-size: .8rem }
+.permalink { font-size: .82rem; color: var(--muted) }
+.empty { padding: 24px 16px; color: var(--muted) }
+footer { color: var(--muted); font-size: .82rem; max-width: 84ch; display: grid; gap: 6px }
+footer p { margin: 0 }
+@media (max-width: 720px) {
+  .row { grid-template-columns: 72px minmax(0, 1fr) auto } .row .sevcell { display: none }
+  .sections { grid-template-columns: minmax(0, 1fr) }
+  h1 { font-size: 1.5rem }
+}
+@media (prefers-reduced-motion: reduce) { .row .chev { transition: none } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="run">
+    <span class="eyebrow">Percona Binlog Server · property-based testing</span>
+    <h1 id="title">Property test report</h1>
+    <p class="lede" id="lede"></p>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <section class="stats" id="stats" aria-label="Run totals"></section>
+
+  <section class="notes" id="notes" hidden aria-labelledby="notes-h">
+    <h2 id="notes-h">New in this run</h2>
+    <div class="notes-list" id="notes-list"></div>
+  </section>
+
+  <section class="coverage" aria-labelledby="cov-h">
+    <h2 id="cov-h">Properties by test program</h2>
+    <div class="cov-grid" id="coverage"></div>
+  </section>
+
+  <section style="display:grid;gap:12px" aria-labelledby="issues-h">
+    <h2 id="issues-h">Issues</h2>
+    <div class="controls">
+      <div class="chips" id="sevchips" role="group" aria-label="Filter"></div>
+      <select id="component" aria-label="Component"></select>
+      <input type="search" id="q" placeholder="Search titles, causes, property names" aria-label="Search issues">
+    </div>
+    <div class="count" id="count"></div>
+    <div class="ledger" id="ledger"></div>
+  </section>
+
+  <footer id="footer">
+    <p>Severity follows <code>extra/qa/known_bugs.md</code>: <b>high</b> means a crash, data loss or corruption, or replication stopping with valid input; <b>medium</b> means wrong results or wrongly accepted or rejected input that a user can reach, or failures under unusual but valid conditions; <b>low</b> means API-contract issues, input MySQL never produces, or astronomically unlikely conditions. New issues are untriaged until they get a row there. PBT-NNN are local IDs until the issues are filed in Jira.</p>
+    <p id="ai-note"></p>
+  </footer>
+</div>
+
+<script id="data" type="application/json">__REPORT_DATA__</script>
+<script>
+(function () {
+  const data = JSON.parse(document.getElementById('data').textContent);
+  const run = data.run, totals = data.totals, ai = data.ai || {};
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const inline = s => esc(s).replace(/`([^`]+)`/g, '<code>$1</code>');
+  const rich = s => esc(s).split(/\n\s*\n/).map(p => '<p>' + p.replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\n/g, '<br>') + '</p>').join('');
+  const sevOrder = { high: 0, medium: 1, low: 2, unknown: 3 };
+  const statusOrder = { 'new': 0, 'regression': 1, 'open': 2, 'possibly fixed': 3 };
+  const issues = data.issues.slice().sort((a, b) =>
+    (statusOrder[a.status] - statusOrder[b.status]) ||
+    ((sevOrder[a.severity] ?? sevOrder[a.proposed_severity] ?? 3) - (sevOrder[b.severity] ?? sevOrder[b.proposed_severity] ?? 3)) ||
+    a.id.localeCompare(b.id));
+  const failing = issues.filter(i => i.status !== 'possibly fixed');
+  const bySev = s => failing.filter(i => i.severity === s).length;
+  const byStatus = s => issues.filter(i => i.status === s).length;
+  const badge = i => i.status === 'possibly fixed' ? ['fixed', 'possibly fixed']
+    : i.status === 'new' ? ['new', 'new' + (i.proposed_severity ? ' · ' + i.proposed_severity + '?' : '')]
+    : i.status === 'regression' ? ['regression', 'regression · ' + i.severity]
+    : [i.severity, i.severity];
+
+  document.getElementById('title').textContent = `Property test report · ${run.variant || ''}`;
+  const mins = Math.round((run.duration_s || 0) / 60);
+  const flaky = failing.filter(i => i.failures.some(f => f.flaky)).length;
+  document.getElementById('lede').textContent = data.overview ||
+    `${totals.total} properties ran against the ${run.variant} build: ${totals.passed} passed, ${totals.failed} failed` +
+    (totals.errors ? ` and ${totals.errors} had infrastructure errors` : '') + `. ` +
+    (totals.new_issues ? `${totals.new_issues} failure${totals.new_issues === 1 ? ' is' : 's are'} new, ` : 'No failure is new, ') +
+    `${totals.regressions} ${totals.regressions === 1 ? 'is a regression' : 'are regressions'}; the failures belong to ${failing.length} issues` +
+    (flaky ? ` (${flaky} with flaky failures)` : '') + `.` +
+    (byStatus('possibly fixed') ? ` ${byStatus('possibly fixed')} known issue${byStatus('possibly fixed') === 1 ? '' : 's'} may be fixed.` : '');
+
+  const meta = [
+    ['Revision', esc((run.git_revision || '').slice(0, 7)) + (run.git_branch ? ' (' + esc(run.git_branch) + ')' : '') + (run.git_dirty ? ' dirty' : '')],
+    ['Build', esc(run.variant)], ['Host', esc(run.host)],
+    ['Started', esc((run.started || '').replace('T', ' '))], ['Duration', mins + ' min'],
+  ];
+  if (data.build && data.build.url) meta.push(['Jenkins', `<a href="${esc(data.build.url)}">${esc(data.build.name || ('#' + data.build.number))}</a>`]);
+  if (ai.mode === 'claude') meta.push(['Analysis', esc(ai.model || 'Claude') + (ai.effort ? ' · ' + esc(ai.effort) : '')]);
+  document.getElementById('meta').innerHTML = meta.map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('');
+
+  const problems = [];
+  if (ai.mode === 'off') problems.push('Claude analysis was not requested for this build: issues show the known_bugs.md description only.');
+  if (ai.mode === 'failed') problems.push('Claude analysis did not finish' + (ai.error ? ` (${esc(ai.error)})` : '') + `: ${ai.analysed || 0} of ${ai.requested || 0} issues were analysed; the others show the known_bugs.md description only.`);
+  if (ai.mode === 'rejected') problems.push('The audit of the Claude Code session failed, so its analysis is not shown: ' + esc(ai.error || ''));
+  if (ai.mode === 'claude' && ai.requested && ai.analysed < ai.requested) problems.push(`Claude analysed ${ai.analysed} of the ${ai.requested} issues it was asked about.`);
+  if (run.s3_problem) problems.push('S3 tests: ' + esc(run.s3_problem));
+  if (run.mysql_problem) problems.push('MySQL tests: ' + esc(run.mysql_problem));
+  (data.errors || []).forEach(e => problems.push(`Infrastructure error in <code>${esc(e.test)}</code>: ${esc(e.message)}`));
+  const warnings = ai.warnings || [];
+  if (problems.length || warnings.length) {
+    const box = document.getElementById('banner');
+    box.hidden = false;
+    box.innerHTML = (problems.length ? `<ul>${problems.map(p => `<li>${p}</li>`).join('')}</ul>` : '') +
+      (warnings.length ? `<details><summary>${warnings.length} check${warnings.length === 1 ? '' : 's'} on the analysis failed</summary><ul>${warnings.map(w => `<li>${esc(w)}</li>`).join('')}</ul></details>` : '');
+  }
+
+  const stat = (n, l, cls) => `<div class="stat ${cls || ''}"><span class="n">${n}</span><span class="l">${l}</span></div>`;
+  document.getElementById('stats').innerHTML =
+    stat(totals.passed + ' / ' + totals.total, 'properties passed') +
+    stat(failing.length, 'failing issues') +
+    stat(bySev('high'), 'high severity', 'high') + stat(bySev('medium'), 'medium', 'medium') + stat(bySev('low'), 'low', 'low') +
+    stat(totals.new_issues, 'new failures', 'new') + stat(totals.regressions, 'regressions', 'new') +
+    stat(byStatus('possibly fixed'), 'possibly fixed', 'fixed') +
+    (totals.errors ? stat(totals.errors, 'infrastructure errors', 'medium') : '');
+
+  const notes = data.notes || [];
+  if (notes.length) {
+    document.getElementById('notes').hidden = false;
+    document.getElementById('notes-list').innerHTML = notes.map(n => `
+      <div class="note"><div class="note-head"><span class="mono">${n.issue ? `<a href="#${esc(n.issue)}">${esc(n.test)}</a>` : esc(n.test)}</span><span class="verdict">${esc(n.verdict)}</span></div>
+      <p>${esc(n.detail)}</p></div>`).join('');
+  }
+
+  document.getElementById('coverage').innerHTML = Object.entries(data.executables).map(([exe, c]) => {
+    const t = c.passed + c.failed + (c.errors || 0);
+    return `<div class="cov"><span class="mono">${esc(exe.replace('_property_test', ''))}</span><span class="num">${c.passed}/${t}</span>` +
+      `<span class="bar"><i style="width:${100 * c.passed / t}%"></i><em style="width:${100 * c.failed / t}%"></em><s style="width:${100 * (c.errors || 0) / t}%"></s></span></div>`;
+  }).join('');
+
+  const filters = [['all', 'All failing', failing.length], ['high', 'High', bySev('high')], ['medium', 'Medium', bySev('medium')],
+    ['low', 'Low', bySev('low')], ['new', 'New', byStatus('new') + byStatus('regression')], ['flaky', 'Flaky', flaky],
+    ['possibly fixed', 'Possibly fixed', byStatus('possibly fixed')]].filter(([k, , n]) => k === 'all' || n);
+  let filter = 'all', compFilter = '', query = '';
+  const chipBox = document.getElementById('sevchips');
+  chipBox.innerHTML = filters.map(([k, l, n]) =>
+    `<button class="chip" type="button" data-f="${esc(k)}" aria-pressed="${k === 'all'}">${l} · ${n}</button>`).join('');
+  chipBox.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    filter = b.dataset.f;
+    chipBox.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    render();
+  });
+  const comps = [...new Set(issues.map(i => i.component).filter(Boolean))].sort();
+  const sel = document.getElementById('component');
+  sel.innerHTML = '<option value="">All components</option>' + comps.map(c => `<option>${esc(c)}</option>`).join('');
+  sel.addEventListener('change', () => { compFilter = sel.value; render(); });
+  const q = document.getElementById('q');
+  q.addEventListener('input', () => { query = q.value.trim().toLowerCase(); render(); });
+
+  const section = (title, text, cls) => text ? `<div class="sec ${cls || ''}"><h3>${title}</h3>${rich(text)}</div>` : '';
+  function detail(i) {
+    const fails = i.failures.length ? i.failures.map((f, k) => `
+      <div class="fail">
+        <div class="name">${esc(f.test)}${f.flaky ? '<span class="tag">flaky</span>' : ''}${f.kind ? `<span class="tag">${esc(f.kind)}</span>` : ''}${f.duration ? ` <span style="color:var(--muted);font-weight:400">· ${f.duration} s</span>` : ''}</div>
+        ${f.message ? `<pre class="msg">${esc(f.message.trim())}</pre>` : ''}
+        ${f.report ? `<details><summary>Minimal counterexample</summary><pre class="block">${esc(f.report.trim())}</pre></details>` : ''}
+        ${f.command ? `<details><summary>Reproduce</summary><div class="cmd"><pre class="block" id="cmd-${esc(i.id)}-${k}">${esc(f.command)}</pre><button class="copy" type="button" data-copy="cmd-${esc(i.id)}-${k}">Copy</button></div></details>` : ''}
+        ${f.log ? `<a href="${esc(data.artifact_base || '')}${esc(f.log)}">Full log</a>` : ''}
+      </div>`).join('') : '<p style="margin:0;color:var(--muted)">No failing property in this run.</p>';
+    const known = (i.known_description || []).join('\n\n');
+    const passed = i.passed_properties || [];
+    return `
+      ${i.summary ? `<p class="summary">${inline(i.summary)}</p>` : ''}
+      ${i.analysed ? '' : '<p class="noai">No Claude analysis for this issue in this build.</p>'}
+      <div class="sections">
+        ${section('What happens', i.description, 'wide')}
+        ${section('Root cause', i.root_cause, 'cause')}
+        ${section('Suggested fix', i.fix, 'fix')}
+        ${section('Impact', i.impact)}
+        ${section('How to verify', i.verification)}
+        ${section('known_bugs.md', known, 'wide')}
+        <div class="sec wide"><h3>Properties that check it</h3><ul class="props">${i.properties.map(p =>
+          `<li><code>${esc(p)}</code>${passed.includes(p) ? '<span class="tag">passed in this run</span>' : ''}</li>`).join('')}</ul></div>
+        <div class="sec wide"><h3>Failures in this run</h3><div class="fails">${fails}</div></div>
+      </div>
+      <div class="permalink">${i.analysed && i.confidence ? `Analysis confidence: <b>${esc(i.confidence)}</b> · ` : ''}Link to this issue: <a href="#${esc(i.id)}">#${esc(i.id)}</a></div>`;
+  }
+
+  const ledger = document.getElementById('ledger');
+  function matches(i) {
+    if (filter === 'all') { if (i.status === 'possibly fixed') return false; }
+    else if (filter === 'new') { if (i.status !== 'new' && i.status !== 'regression') return false; }
+    else if (filter === 'flaky') { if (!i.failures.some(f => f.flaky)) return false; }
+    else if (filter === 'possibly fixed') { if (i.status !== 'possibly fixed') return false; }
+    else if (i.status === 'possibly fixed' || i.severity !== filter) return false;
+    if (compFilter && i.component !== compFilter) return false;
+    if (query) {
+      const hay = [i.id, i.title, i.summary, i.description, i.root_cause, i.fix, i.component, ...(i.known_description || []), ...i.properties].join(' ').toLowerCase();
+      if (!hay.includes(query)) return false;
+    }
+    return true;
+  }
+  function render() {
+    const list = issues.filter(matches);
+    document.getElementById('count').textContent = `${list.length} issue${list.length === 1 ? '' : 's'} shown`;
+    ledger.innerHTML = list.length ? list.map(i => {
+      const [cls, label] = badge(i);
+      const n = i.failures.length;
+      return `<div class="item" id="${esc(i.id)}">
+        <button class="row" type="button" aria-expanded="false" aria-controls="d-${esc(i.id)}">
+          <span class="id">${esc(i.id)}</span>
+          <span class="sevcell"><span class="sev ${esc(cls)}">${esc(label)}</span></span>
+          <span class="t"><span>${esc(i.title)}</span><span>${esc(i.component)} · ${n ? n + ' failing propert' + (n === 1 ? 'y' : 'ies') : 'no failure in this run'}${i.failures.some(f => f.flaky) ? ' · flaky' : ''}</span></span>
+          <span class="chev" aria-hidden="true">›</span>
+        </button>
+        <div class="detail" id="d-${esc(i.id)}" hidden></div>
+      </div>`;
+    }).join('') : '<div class="empty">No issue matches these filters.</div>';
+  }
+  function toggle(item, force) {
+    const btn = item.querySelector('.row'), panel = item.querySelector('.detail');
+    const willOpen = force ?? panel.hidden;
+    if (willOpen && !panel.dataset.filled) {
+      panel.innerHTML = detail(issues.find(i => i.id === item.id)); panel.dataset.filled = '1';
+    }
+    panel.hidden = !willOpen; item.classList.toggle('open', willOpen); btn.setAttribute('aria-expanded', String(willOpen));
+  }
+  function selectText(el) { const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+  ledger.addEventListener('click', e => {
+    const copy = e.target.closest('.copy');
+    if (copy) {
+      const pre = document.getElementById(copy.dataset.copy);
+      const done = () => { copy.textContent = 'Copied'; setTimeout(() => copy.textContent = 'Copy', 1500); };
+      try { navigator.clipboard.writeText(pre.textContent).then(done, () => { selectText(pre); copy.textContent = 'Selected'; }); }
+      catch (_) { selectText(pre); copy.textContent = 'Selected'; }
+      return;
+    }
+    const row = e.target.closest('.row');
+    if (row) toggle(row.closest('.item'));
+  });
+  function openFromHash() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    const target = issues.find(i => i.id === id); if (!target) return;
+    if (!matches(target)) {
+      filter = target.status === 'possibly fixed' ? 'possibly fixed' : 'all'; compFilter = ''; query = ''; sel.value = ''; q.value = '';
+      chipBox.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.f === filter)));
+      render();
+    }
+    const item = document.getElementById(id);
+    if (item) { toggle(item, true); item.scrollIntoView({ block: 'start' }); }
+  }
+  document.querySelector('.wrap').addEventListener('click', e => {
+    const a = e.target.closest('a[href^="#"]');
+    if (a && location.hash === a.getAttribute('href')) { e.preventDefault(); openFromHash(); }
+  });
+
+  const aiNote = document.getElementById('ai-note');
+  if (ai.mode === 'claude' || ai.mode === 'failed') {
+    aiNote.textContent = `Titles, summaries, root causes, fixes and impact were written by ${ai.model || 'Claude'} (Claude Code, headless on Amazon Bedrock) from the run's results and the source of the tested revision` +
+      (ai.turns ? `, in ${ai.turns} turns` : '') + (ai.cost_usd ? ` for an estimated $${ai.cost_usd.toFixed(2)}` : '') +
+      '. Code references were checked against the source tree; suggested fixes are proposals, not reviewed patches. Failures, counterexamples and reproduce commands come from the test runner unchanged.';
+  } else {
+    aiNote.textContent = 'Failures, counterexamples and reproduce commands come from the test runner; issue descriptions come from extra/qa/known_bugs.md.';
+  }
+
+  render();
+  window.addEventListener('hashchange', openFromHash);
+  openFromHash();
+})();
+</script>
+</body>
+</html>
