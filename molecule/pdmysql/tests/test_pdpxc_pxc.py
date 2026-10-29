@@ -123,6 +123,8 @@ def test_check_rpm_package(host, package):
     dist = host.system_info.distribution
     if dist.lower() in DEB_DISTS:
         pytest.skip("This test only for RHEL based platforms")
+    if package == 'percona-xtradb-cluster-debuginfo' and host.system_info.release.split('.')[0] == '8':
+        pytest.skip("percona-xtradb-cluster-debuginfo is not built for EL8")
     pkg = host.package(package)
     assert pkg.is_installed
     if RPM_PERCONA_BUILD_VERSION:
