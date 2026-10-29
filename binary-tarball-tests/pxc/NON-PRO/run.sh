@@ -14,7 +14,7 @@ echo "Detected OS: ${OS_TYPE}"
 echo "Installing dependencies..."
 
 if [ "$OS_TYPE" = "al2023" ]; then
-  sudo dnf install -y libaio numactl openssl socat lsof libev python3 python3-pip
+  sudo dnf install -y libaio numactl openssl socat lsof libev python3 python3-pip libgcrypt
 
   #Install pytest and testinfra
   pip3 install --user pytest pytest-testinfra
@@ -23,7 +23,9 @@ if [ "$OS_TYPE" = "al2023" ]; then
   export PATH="$HOME/.local/bin:$PATH"
 
 elif [ -f /etc/redhat-release ]; then
-  sudo yum install -y libaio numactl openssl socat lsof
+  sudo yum install -y libaio numactl openssl socat lsof libgcrypt
+  # libcrypt.so.1 for bundled pxb-2.4 (separate package on EL10+, absent on older EL)
+  sudo yum install -y libxcrypt-compat || true
   # below needed for 5.6 mysql_install_db
   sudo yum install -y perl-Data-Dumper
   if [ $(grep -c "release 6" /etc/redhat-release) -eq 1 ]; then
@@ -81,7 +83,7 @@ else
   else
     sudo apt update
     sudo apt install -y python3 python3-pip python3-venv \
-      libnuma1 socat lsof curl libev4 libaio-dev
+      libnuma1 socat lsof curl libev4 libaio-dev libgcrypt20
   fi
 
   # create isolated python env
