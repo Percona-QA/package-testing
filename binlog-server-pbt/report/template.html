@@ -29,6 +29,8 @@
   --low: #93b2d4; --low-soft: #1e2a38; --fixed: #5fd394; --fixed-soft: #15301f;
   --new: #c9a2ff; --new-soft: #2c1f45; --code-bg: #0f131a; color-scheme: dark }
 * { box-sizing: border-box }
+/* the hidden attribute must win over the display rules below (collapsed issues, empty sections) */
+[hidden] { display: none !important }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 15px; line-height: 1.55 }
 .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 16px 64px; display: grid; gap: 28px }
 h1, h2, h3 { text-wrap: balance; margin: 0 }
