@@ -28,6 +28,16 @@ docker_image_latest = docker_acc + "/" + docker_product + ":" + "latest"
 docker_image_debug = docker_acc + "/" + docker_product + ":" + docker_tag + "-debug-amd64"
 docker_image_upstream = docker_acc + "/" + docker_product + ":" + pxc_version_upstream
 
+# EOL images are shipped only as a single pre-built docker tarball that the pipeline loads
+# locally; the :latest / :<major> / :<upstream> tags are never published, so point those
+# image references at the one loaded image to avoid pulling anything from Docker Hub.
+# There is no debug EOL image, so test_pxc_debug.py is skipped when EOL=yes.
+if eol == 'yes':
+    docker_image_major = docker_image
+    docker_image_latest = docker_image
+   # docker_image_debug = docker_image
+    docker_image_upstream = docker_image
+
 docker_network = 'pxc-network'
 
 base_node_name = 'pxc-docker-test-cluster-node'
