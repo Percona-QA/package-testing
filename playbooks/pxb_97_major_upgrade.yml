@@ -185,6 +185,15 @@
     set_fact:
       ps97_version_major_minor_reg: "{{ ps97_version_major_minor_register.stdout }}"
 
+  # install_ms_innovation.yml runs "dpkg -i /tmp/*.deb"; the MS 8.4 debs extracted there
+  # earlier would be installed alongside the 9.7 ones, apt -f then removes
+  # mysql-community-server and mysql.service is left masked
+  - name: remove MS 8.4 deb packages from /tmp before MS 9.7 upgrade
+    shell: rm -f /tmp/*.deb
+    when:
+      - ansible_os_family == "Debian"
+      - lookup('env', 'server_to_test') == "ms-97"
+
   - name: install MYSQL MS Server 9.7 packages (upgrade MS 8.4 -> 9.7)
     include_tasks: ../tasks/install_ms_innovation.yml
     vars:

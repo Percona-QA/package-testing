@@ -61,12 +61,26 @@
     - name: Grow root partition and filesystem to full disk on Rocky 8
       shell: |
         set -e
-        root_src=$(findmnt -n -o SOURCE /)
-        disk=/dev/$(lsblk -no PKNAME "$root_src")
-        partnum=$(cat /sys/class/block/$(basename "$root_src")/partition)
         # growpart returns 1 with NOCHANGE when the partition already fills the disk
-        growpart "$disk" "$partnum" || [ $? -eq 1 ]
-        if [ "$(findmnt -n -o FSTYPE /)" = "xfs" ]; then xfs_growfs /; else resize2fs "$root_src"; fi
+        grow_part() {
+          part=$(readlink -f "$1")
+          growpart "/dev/$(lsblk -no PKNAME "$part" | head -1)" "$(cat /sys/class/block/$(basename "$part")/partition)" || [ $? -eq 1 ]
+        }
+        root_src=$(findmnt -n -o SOURCE /)
+        if lvs "$root_src" >/dev/null 2>&1; then
+          # root on LVM (e.g. Rocky 8 arm: /dev/mapper/rocky-root): grow PV partition, PV, then LV + fs
+          vg=$(lvs --noheadings -o vg_name "$root_src" | xargs)
+          for pv in $(pvs --noheadings -o pv_name -S vg_name="$vg"); do
+            grow_part "$pv"
+            pvresize "$pv"
+          done
+          if [ "$(vgs --noheadings -o vg_free_count "$vg" | xargs)" -gt 0 ]; then
+            lvextend -r -l +100%FREE "$root_src"
+          fi
+        else
+          grow_part "$root_src"
+          if [ "$(findmnt -n -o FSTYPE /)" = "xfs" ]; then xfs_growfs /; else resize2fs "$root_src"; fi
+        fi
         df -h /
       register: grow_root
       when:
