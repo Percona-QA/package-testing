@@ -11,14 +11,24 @@
   # module otherwise fails the percona-release signature validation. Ungated by
   # version on purpose: the version-gated imports in test_prep/prepare use a string
   # compare that skips AL2023 (major version "2023" < "8" lexically).
-  - name: import Percona GPG keys on centos
+  #
+  # The RSA PERCONA-PACKAGING-KEY (4D1BB29D63D98E422B2113B19334A25F8507EFA5) is
+  # what actually signs Percona's repos today, so import it everywhere. The legacy
+  # RPM-GPG-KEY-Percona is a DSA-1024/SHA-1 key that RHEL 10's rpm-sequoia backend
+  # rejects as insecure, so skip it on RHEL 10+ (it is no longer used for signing).
+  - name: import Percona PACKAGING GPG key on centos
     rpm_key:
       state: present
-      key: "{{ item }}"
-    with_items:
-      - https://repo.percona.com/yum/RPM-GPG-KEY-Percona
-      - https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
+      key: https://repo.percona.com/yum/PERCONA-PACKAGING-KEY
     when: ansible_os_family == "RedHat"
+
+  - name: import legacy Percona GPG key on centos
+    rpm_key:
+      state: present
+      key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
+    when:
+      - ansible_os_family == "RedHat"
+      - not (ansible_distribution != "Amazon" and ansible_distribution_major_version | int >= 10)
 
   - name: install Percona repository package on centos
     yum: name=https://repo.percona.com/yum/percona-release-latest.noarch.rpm

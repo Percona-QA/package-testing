@@ -88,11 +88,22 @@
     - ansible_os_family == "RedHat" and ansible_distribution_major_version == "8"
     - ansible_facts['distribution'] != "RedHat"
 
+  # The legacy RPM-GPG-KEY-Percona (key 1C4CBDCDCD2EFD2A) is a DSA-1024 key with
+  # a SHA-1 self signature. RHEL 10's rpm-sequoia backend rejects both as
+  # insecure, so rpm --import fails. Percona no longer signs its repos with this
+  # key: repo metadata/packages (incl. the pt/tools repos) are signed with the
+  # RSA PERCONA-PACKAGING-KEY (4D1BB29D63D98E422B2113B19334A25F8507EFA5), which
+  # imports fine. So skip the dead DSA key on EL 10+ (RHEL/Rocky/Oracle/Alma) and
+  # rely on the RSA key. Amazon Linux (major "2023") still uses classic rpm and
+  # imports the DSA key fine, so it is unaffected by the EL>=10 exclusion.
   - name: install GPG key for Percona repos
     rpm_key:
       state: present
       key: https://repo.percona.com/yum/RPM-GPG-KEY-Percona
-    when: ansible_os_family == "RedHat" and ansible_distribution_major_version | int >= 8
+    when:
+      - ansible_os_family == "RedHat"
+      - ansible_distribution_major_version | int >= 8
+      - not (ansible_distribution != "Amazon" and ansible_distribution_major_version | int >= 10)
 
   - name: install GPG key for Percona repos PACKAGING
     rpm_key:

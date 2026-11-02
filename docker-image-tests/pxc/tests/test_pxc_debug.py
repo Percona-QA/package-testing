@@ -7,6 +7,7 @@ from settings import *
 
 docker_acc = os.getenv('DOCKER_ACC')
 container_name = 'pxc-docker-test-static3'
+pytestmark = pytest.mark.skipif(eol == 'yes', reason="No debug EOL docker image")
 
 @pytest.fixture(scope='module')
 def host():
