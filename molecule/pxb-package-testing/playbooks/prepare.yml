@@ -47,3 +47,35 @@
         state: present
         exclusive: False
       when: ansible_distribution == "Ubuntu"
+
+    # Rocky 8 AMI root filesystem is not grown to the EBS volume size at boot,
+    # so PXB debuginfo install fails on "/" with "needs XXXMB more space"
+    - name: Install growpart on Rocky 8
+      dnf:
+        name: cloud-utils-growpart
+        state: present
+      when:
+        - ansible_distribution == "Rocky"
+        - ansible_distribution_major_version == "8"
+
+    - name: Grow root partition and filesystem to full disk on Rocky 8
+      shell: |
+        set -e
+        root_src=$(findmnt -n -o SOURCE /)
+        disk=/dev/$(lsblk -no PKNAME "$root_src")
+        partnum=$(cat /sys/class/block/$(basename "$root_src")/partition)
+        # growpart returns 1 with NOCHANGE when the partition already fills the disk
+        growpart "$disk" "$partnum" || [ $? -eq 1 ]
+        if [ "$(findmnt -n -o FSTYPE /)" = "xfs" ]; then xfs_growfs /; else resize2fs "$root_src"; fi
+        df -h /
+      register: grow_root
+      when:
+        - ansible_distribution == "Rocky"
+        - ansible_distribution_major_version == "8"
+
+    - name: Show root filesystem size after grow on Rocky 8
+      debug:
+        var: grow_root.stdout_lines
+      when:
+        - ansible_distribution == "Rocky"
+        - ansible_distribution_major_version == "8"

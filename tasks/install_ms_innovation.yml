@@ -428,7 +428,8 @@
     yum_repository:
       name: mysql-9.7-community
       description: MySQL 9.7 Community Server
-      baseurl: "https://repo.mysql.com/yum/mysql-9.7-community/el/{{ ansible_distribution_major_version }}/$basearch/"
+      # Amazon Linux 2023 reports major version "2023"; it consumes the el9 repo
+      baseurl: "https://repo.mysql.com/yum/mysql-9.7-community/el/{{ '9' if ansible_distribution == 'Amazon' else ansible_distribution_major_version }}/$basearch/"
       enabled: yes
       gpgcheck: yes
       gpgkey: https://repo.mysql.com/RPM-GPG-KEY-mysql-2025
