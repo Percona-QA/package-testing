@@ -424,12 +424,13 @@
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
       - lookup('env', 'server_to_test') == "ms_innovation"
 
-  - name: Enable MySQL 9.7 community repo for RHEL (ms-97)
+  # repo follows pxb_version_major: 9.7 normally, 8.4 for the MS 8.4 install in pxb_97_major_upgrade.yml
+  - name: Enable MySQL {{ pxb_version_major }} community repo for RHEL (ms-97)
     yum_repository:
-      name: mysql-9.7-community
-      description: MySQL 9.7 Community Server
+      name: "mysql-{{ pxb_version_major }}-community"
+      description: "MySQL {{ pxb_version_major }} Community Server"
       # Amazon Linux 2023 reports major version "2023"; it consumes the el9 repo
-      baseurl: "https://repo.mysql.com/yum/mysql-9.7-community/el/{{ '9' if ansible_distribution == 'Amazon' else ansible_distribution_major_version }}/$basearch/"
+      baseurl: "https://repo.mysql.com/yum/mysql-{{ pxb_version_major }}-community/el/{{ '9' if ansible_distribution == 'Amazon' else ansible_distribution_major_version }}/$basearch/"
       enabled: yes
       gpgcheck: yes
       gpgkey: https://repo.mysql.com/RPM-GPG-KEY-mysql-2025
@@ -444,8 +445,10 @@
       - ansible_os_family == "RedHat"
       - lookup('env', 'server_to_test') == "ms-97"
 
+  # exclude mysql-community: on the 8.4 -> 9.7 major upgrade it would otherwise jump the
+  # installed MS 8.4 to the newest 9.7.x in the repo instead of the pinned version
   - name: YUM UPDATE after RHEL REPO ENABLE
-    shell: yum update -y
+    shell: yum update -y --exclude='mysql-community*'
     when:
       - (ansible_os_family == "RedHat" or ansible_os_family == "Amazon")
       - ansible_distribution_major_version | int >= 7
