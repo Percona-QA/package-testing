@@ -16,6 +16,11 @@ pipeline {
             choices: ['no', 'yes'],
             description: 'Use the EOL (password protected) gated repo for the tarball download'
         )
+        choice(
+            name: 'REPO',
+            choices: ['testing', 'main'],
+            description: 'EOL only: testing = qa-test gated repo, main = pxc-80-eol tarballs repo'
+        )
     }
     stages {
         stage('Binary tarball test') {
@@ -36,7 +41,11 @@ pipeline {
                                   MINIMAL="-minimal"
                                 fi
                                 TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.35${MINIMAL}.tar.gz"
-                                if [ "${EOL}" = "yes" ]; then
+                                if [ "${EOL}" = "yes" ] && [ "${REPO}" = "main" ]; then
+                                  PXC_REL="${PXC_VERSION#*-}"
+                                  PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
+                                elif [ "${EOL}" = "yes" ]; then
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
@@ -69,7 +78,11 @@ pipeline {
                                   MINIMAL="-minimal"
                                 fi
                                 TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.35${MINIMAL}.tar.gz"
-                                if [ "${EOL}" = "yes" ]; then
+                                if [ "${EOL}" = "yes" ] && [ "${REPO}" = "main" ]; then
+                                  PXC_REL="${PXC_VERSION#*-}"
+                                  PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
+                                elif [ "${EOL}" = "yes" ]; then
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
@@ -100,8 +113,16 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                   MINIMAL="-minimal"
                                 fi
-                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.39${MINIMAL}.tar.gz"
+                                GLIBC="2.39"
                                 if [ "${EOL}" = "yes" ]; then
+                                  GLIBC="2.35"
+                                fi
+                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc${GLIBC}${MINIMAL}.tar.gz"
+                                if [ "${EOL}" = "yes" ] && [ "${REPO}" = "main" ]; then
+                                  PXC_REL="${PXC_VERSION#*-}"
+                                  PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
+                                elif [ "${EOL}" = "yes" ]; then
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
@@ -133,7 +154,11 @@ pipeline {
                                   MINIMAL="-minimal"
                                 fi
                                 TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.35${MINIMAL}.tar.gz"
-                                if [ "${EOL}" = "yes" ]; then
+                                if [ "${EOL}" = "yes" ] && [ "${REPO}" = "main" ]; then
+                                  PXC_REL="${PXC_VERSION#*-}"
+                                  PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
+                                elif [ "${EOL}" = "yes" ]; then
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
@@ -164,8 +189,16 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                   MINIMAL="-minimal"
                                 fi
-                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.39${MINIMAL}.tar.gz"
+                                GLIBC="2.39"
                                 if [ "${EOL}" = "yes" ]; then
+                                  GLIBC="2.35"
+                                fi
+                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc${GLIBC}${MINIMAL}.tar.gz"
+                                if [ "${EOL}" = "yes" ] && [ "${REPO}" = "main" ]; then
+                                  PXC_REL="${PXC_VERSION#*-}"
+                                  PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
+                                elif [ "${EOL}" = "yes" ]; then
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
@@ -197,7 +230,11 @@ pipeline {
                                  MINIMAL="-minimal"
                                fi
                                TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.28${MINIMAL}.tar.gz"
-                               if [ "${EOL}" = "yes" ]; then
+                               if [ "${EOL}" = "yes" ] && [ "${REPO}" = "main" ]; then
+                                 PXC_REL="${PXC_VERSION#*-}"
+                                 PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
+                                 TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
+                               elif [ "${EOL}" = "yes" ]; then
                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
                                else
                                  TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
@@ -230,7 +267,11 @@ pipeline {
                                   MINIMAL="-minimal"
                                 fi
                                 TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.34${MINIMAL}.tar.gz"
-                                if [ "${EOL}" = "yes" ]; then
+                                if [ "${EOL}" = "yes" ] && [ "${REPO}" = "main" ]; then
+                                  PXC_REL="${PXC_VERSION#*-}"
+                                  PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
+                                elif [ "${EOL}" = "yes" ]; then
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
@@ -262,7 +303,11 @@ pipeline {
                                   MINIMAL="-minimal"
                                 fi
                                 TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.35${MINIMAL}.tar.gz"
-                                if [ "${EOL}" = "yes" ]; then
+                                if [ "${EOL}" = "yes" ] && [ "${REPO}" = "main" ]; then
+                                  PXC_REL="${PXC_VERSION#*-}"
+                                  PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
+                                elif [ "${EOL}" = "yes" ]; then
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
@@ -294,7 +339,11 @@ pipeline {
                                   MINIMAL="-minimal"
                                 fi
                                 TARBALL_NAME="Percona-XtraDB-Cluster_${PXC_VERSION}_Linux.x86_64.glibc2.34${MINIMAL}.tar.gz"
-                                if [ "${EOL}" = "yes" ]; then
+                                if [ "${EOL}" = "yes" ] && [ "${REPO}" = "main" ]; then
+                                  PXC_REL="${PXC_VERSION#*-}"
+                                  PXC_DIR_VERSION="${PXC_VERSION%%-*}-${PXC_REL%%.*}"
+                                  TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/pxc-80-eol/tarballs/Percona-XtraDB-Cluster-${PXC_DIR_VERSION}/"
+                                elif [ "${EOL}" = "yes" ]; then
                                   TARBALL_LINK="https://repo.percona.com/private/${USERNAME}-${PASSWORD}/qa-test/pxc-gated-${PXC_VERSION}/"
                                 else
                                   TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/pxc-${PXC_VERSION_MAJOR}/"
