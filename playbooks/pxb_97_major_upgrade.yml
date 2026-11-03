@@ -116,6 +116,9 @@
     debug:
       var: version_output.stdout_lines
 
+  - name: list installed PS and PXB packages BEFORE UPGRADE
+    include_tasks: ../tasks/list_installed_packages.yml
+
   - name: check that Percona XtraBackup 8.4 version is correct
     command: /package-testing/version_check.sh pxb84
 
@@ -245,6 +248,9 @@
   - name: Display version information AFTER UPGRADE
     debug:
       var: version_output.stdout_lines
+
+  - name: list installed PS and PXB packages AFTER UPGRADE
+    include_tasks: ../tasks/list_installed_packages.yml
 
   - name: start mysql service after PS upgrade RHEL
     command: systemctl start mysqld
