@@ -83,6 +83,16 @@
     vars:
       pro_suf: "{{ '-pro' if 'yes' in lookup('env', 'pro_test') else '' }}"
 
+  - name: enable pt testing repo
+    command: percona-release enable pt testing
+    when:
+      - ansible_distribution_release != "resolute"
+
+  - name: include tasks for pt installation
+    include_tasks: ../tasks/install_pt.yml
+    when:
+      - ansible_distribution_release != "resolute"
+
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
     when: 
@@ -90,44 +100,27 @@
       - ansible_distribution != "Amazon"
       - not (ansible_distribution == "Debian" and ansible_distribution_major_version|int == 11)
 
-  - name: Check mysql-shell version and bundled certifi CA certificates
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
+
+  - name: Verify telemetry version and package installation
+    command: /package-testing/check_tel_ver_pack.sh
     when:
-      - install_mysql_shell == "yes" or install_mysql_shell == ""
       - ansible_distribution != "Amazon"
-      - not (ansible_distribution == "Debian" and ansible_distribution_major_version|int == 11)
-    block:
-      - name: Get mysql-shell version
-        command: mysqlsh --version
-        register: mysqlsh_version
-        changed_when: false
+      - ansible_distribution_release != "focal"
 
-      - name: Display mysql-shell version
-        debug:
-          msg: "{{ mysqlsh_version.stdout }}"
+  - name: Enable PXB 84 repo
+    command: percona-release enable-only pxb-84-lts testing
+    when: 
+      - ansible_distribution != "Amazon"
+      - not (ansible_distribution == "Debian" and ansible_distribution_major_version|int == 13)
 
-      - name: Locate certifi cacert.pem bundled with mysql-shell
-        shell: ls /usr/lib/mysqlsh/lib/python3*/site-packages/certifi/cacert.pem /usr/lib64/mysqlsh/lib/python3*/site-packages/certifi/cacert.pem 2>/dev/null | head -n1
-        register: mysqlsh_cacert
-        changed_when: false
-        failed_when: mysqlsh_cacert.stdout == ""
-
-      - name: Search for eMudhra (emSign) and Comodo AAA certificates
-        shell: grep -nE "emSign|AAA Certificate Services|Comodo AAA" {{ mysqlsh_cacert.stdout }}
-        register: mysqlsh_cert_grep
-        changed_when: false
-        failed_when: mysqlsh_cert_grep.rc > 1
-
-      - name: Display matching certificates
-        debug:
-          var: mysqlsh_cert_grep.stdout_lines
-
-      - name: Verify only one eMudhra trust certificate is present
-        assert:
-          that:
-            - mysqlsh_cert_grep.stdout_lines | select('search', '# Label:.*emSign') | list | length == 1
-            - mysqlsh_cert_grep.stdout_lines | select('search', 'AAA Certificate Services|Comodo AAA') | list | length == 0
-          fail_msg: "Expected exactly one eMudhra (emSign) certificate and no Comodo AAA certificate in {{ mysqlsh_cacert.stdout }}"
-          success_msg: "Only one eMudhra trust certificate found: {{ mysqlsh_cert_grep.stdout_lines | select('search', '# Label:') | list }}"
+  - name: install Percona XtraBackup 8.4 packages
+    include_tasks: ../tasks/install_pxb84.yml
+    when: 
+      - lookup('env', 'install_repo') != "experimental"
+      - ansible_distribution != "Amazon" 
+      - not (ansible_distribution == "Debian" and ansible_distribution_major_version|int == 13)
 
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
@@ -154,4 +147,171 @@
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
 
-  
+  - name: Test JS component
+    command: /package-testing/scripts/js_component.sh
+
+  - name: Handle check that Percona Server version is correct
+    block:
+      - name: Run the version_check.sh script {{ pro }}
+        shell: /package-testing/version_check.sh ps84 {{ pro }} > version-check.log 2>&1
+
+      - name: Log check for warnings in the previous stage
+        command: /package-testing/scripts/log-warning-check.sh version-check.log
+        when: (lookup('env', 'check_warnings') == "yes")
+
+    rescue:
+      - name: Fetch the output of the version_check.sh logfile on the script failure
+        command: cat "version-check.log"
+        register: versioncheckoutput
+
+      - name: Display the fetched output of the version_check.log logfile
+        debug:
+          msg: "Version check output: {{ versioncheckoutput.stdout }}"
+
+      - name: Fail the task due to previous issues
+        fail:
+          msg: Failing the further tasks due to issues in the previous task.
+
+  - name: check that Percona Server {{ pro }} package versions are correct
+    command: /package-testing/package_check.sh ps84 {{ pro }}
+
+  - name: check telemetry (enabled)
+    command: /package-testing/check_telemetry.sh ps -e
+
+  # Bookworm does not support fips mode out of the box. It requires opennsl module rebuid. So we skip fips mode enabling for bookworm.
+  - name: include tasks for checking FIPS mode
+    include_tasks: ../tasks/check_ps80_fips.yml
+    when:
+      - ansible_distribution_release not in ["trixie", "bookworm", "bullseye", "focal", "noble", "resolute"]
+      - not (ansible_distribution_release == "jammy" and ansible_architecture in ["aarch64", "arm64"])
+
+#  - name: keyring plugins test
+#    command: /package-testing/scripts/ps_keyring_plugins_test/ps_keyring_plugins_test.sh ps84
+
+  - name: run Group Replication tests
+    include_tasks: ../tasks/gr_test.yml
+
+  - name: re-run ps_admin to install rocksdb
+    command: /usr/bin/ps-admin --enable-rocksdb
+
+  - name: install plugins, import world database
+    command: /package-testing/plugins_test_84.sh ps
+
+  - name: check the clone and data masking plugins
+    command: /package-testing/scripts/ps_clone_plugin_test_84.sh
+
+#  - name: check the data masking component
+#    command: /package-testing/scripts/ps_dm_component.sh
+
+  - name: check the audit log v2 plugin
+    command: /package-testing/scripts/ps_audit_log_v2_component.sh
+
+  - name: run some MyRocks tests
+    command: /package-testing/scripts/ps_myrocks_test.sh
+
+  - name: run mysql compression tests script
+    command: /package-testing/scripts/mysql-comp-test/mysql_comp_test.sh ps84
+
+  - name: run pytest unit tests for ps-admin script
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_unit.py
+
+  - name: run pytest integration tests for ps-admin script
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_ps_admin_integration.py
+
+  - name: run PAM tests
+    include_tasks: ../tasks/pam_test.yml
+
+  - name: install 3rd party packages with apt
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: ansible_os_family == "Debian"
+
+  - name: install 3rd party packages with yum
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: install 3rd party packages with dnf
+    dnf:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - rsyslog-mysql
+    when: 
+      - ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: list installed packages
+    include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: run pytest tests for mysql init scripts
+    command: python3 -m pytest -v /package-testing/pytest-tests/test_mysql_init_scripts.py
+
+  - name: start mysql service
+    service: name=mysql state=started
+
+  - name: disable all percona repos
+    command: percona-release disable all
+
+  - name: get my.cnf stats
+    stat: path=/etc/my.cnf
+    register: mycnf
+
+  - name: copy config file to backup
+    copy:
+      src: /etc/my.cnf
+      dest: /etc/my.cnf.backup
+      remote_src: yes
+    when: mycnf.stat.exists and ansible_os_family == "RedHat"
+
+  - name: remove Percona Server deb packages
+    apt:
+      name: "{{ packages }}"
+      update_cache: no
+      state: absent
+    vars:
+      packages:
+      - percona-server*
+    when: ansible_os_family == "Debian"
+
+  - name: remove Percona Server rpm packages dnf
+    dnf:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+     packages:
+      - percona-server*
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
+      - ansible_facts['distribution_major_version'] | int >= 8
+
+  - name: remove Percona Server rpm packages yum
+    yum:
+      name: "{{ packages }}"
+      state: absent
+    vars:
+     packages:
+      - percona-server*
+    when: 
+      - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
+      - ansible_facts['distribution_major_version'] | int <= 7
+
+  - name: check if process is stopped after package removal
+    command: /package-testing/check_running.sh mysql stopped
+
+  - stat:
+      path: /var/lib/mysql
+    register: p
+
+  - name: check /var/lib/mysql exists and not empty
+    fail:
+      msg: "Path exists and is a directory and is not empty"
+    when: p.stat.isdir is defined and p.stat.isdir and p.stat.size > 1000000
