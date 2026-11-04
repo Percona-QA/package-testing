@@ -73,6 +73,9 @@
     vars:
       pxb_version_major: "{{ pxb84_version_major_reg }}"
       pxb_version_major_minor: "{{ pxb84_version_major_minor_reg }}"
+      # MS 8.4.0 (from PXB84_VER) has no Debian 13 / el10 build: install the latest
+      # MS 8.4 from Oracle's MySQL repo on those instead
+      ms_from_repo: "{{ (ansible_distribution == 'Debian' and ansible_distribution_major_version == '13') or (ansible_os_family == 'RedHat' and ansible_distribution_major_version | int >= 10) }}"
     when:
       - lookup('env', 'server_to_test') == "ms-97"
 
@@ -113,6 +116,9 @@
     debug:
       var: version_output.stdout_lines
 
+  - name: list installed PS and PXB packages BEFORE UPGRADE
+    include_tasks: ../tasks/list_installed_packages.yml
+
   - name: check that Percona XtraBackup 8.4 version is correct
     command: /package-testing/version_check.sh pxb84
 
@@ -120,9 +126,13 @@
     command: systemctl start mysqld
     when: ansible_os_family == "RedHat"
 
+  # for ms-97 the root password is already set inside install_ms_innovation.yml;
+  # setpass_57.sh would retry with the consumed temporary password and fail (ERROR 1045)
   - name: set root password on centos
     command: /package-testing/setpass_57.sh
-    when: ansible_os_family == "RedHat"
+    when:
+      - ansible_os_family == "RedHat"
+      - lookup('env', 'server_to_test') != "ms-97"
 
   - name: copy .my.cnf with credentials on centos
     template: src=../templates/my_57.j2
@@ -185,6 +195,15 @@
     set_fact:
       ps97_version_major_minor_reg: "{{ ps97_version_major_minor_register.stdout }}"
 
+  # install_ms_innovation.yml runs "dpkg -i /tmp/*.deb"; the MS 8.4 debs extracted there
+  # earlier would be installed alongside the 9.7 ones, apt -f then removes
+  # mysql-community-server and mysql.service is left masked
+  - name: remove MS 8.4 deb packages from /tmp before MS 9.7 upgrade
+    shell: rm -f /tmp/*.deb
+    when:
+      - ansible_os_family == "Debian"
+      - lookup('env', 'server_to_test') == "ms-97"
+
   - name: install MYSQL MS Server 9.7 packages (upgrade MS 8.4 -> 9.7)
     include_tasks: ../tasks/install_ms_innovation.yml
     vars:
@@ -229,6 +248,9 @@
   - name: Display version information AFTER UPGRADE
     debug:
       var: version_output.stdout_lines
+
+  - name: list installed PS and PXB packages AFTER UPGRADE
+    include_tasks: ../tasks/list_installed_packages.yml
 
   - name: start mysql service after PS upgrade RHEL
     command: systemctl start mysqld

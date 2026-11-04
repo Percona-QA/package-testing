@@ -314,7 +314,7 @@
   - name: Install mysql deb packages using tarballs Debian 12 INNOVATION_LTS
     command: wget https://cdn.mysql.com//Downloads/MySQL-"{{ pxb_version_major }}"/mysql-server_"{{ pxb_version_major_minor }}"-1debian12_amd64.deb-bundle.tar
     when: 
-      - ansible_distribution == 'Debian' and ansible_distribution_version == '12.0'
+      - ansible_distribution == 'Debian' and ansible_distribution_major_version == '12'
       - lookup('env', 'server_to_test') == "ms_innovation" or lookup('env', 'server_to_test') == "ms-97"
 
   - name: Install mysql deb packages using tarballs Debian 12 MS80
@@ -334,6 +334,7 @@
     when:
       - ansible_distribution == 'Debian' and ansible_distribution_major_version == '13'
       - lookup('env', 'server_to_test') == "ms_innovation" or lookup('env', 'server_to_test') == "ms-97"
+      - not (ms_from_repo | default(false) | bool)
 
   - name: Install mysql deb packages using tarballs Debian 13 MS84
     command: wget https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-server_8.4.7-1debian13_amd64.deb-bundle.tar
@@ -380,7 +381,7 @@
   - name: extract mysql deb packages for Debian 12
     command: tar -xvf mysql-server_"{{ pxb_version_major_minor }}"-1debian12_amd64.deb-bundle.tar -C /tmp
     when: 
-      - ansible_distribution == 'Debian' and ansible_distribution_version == '12.0'
+      - ansible_distribution == 'Debian' and ansible_distribution_major_version == '12'
       - lookup('env', 'server_to_test') == "ms_innovation" or lookup('env', 'server_to_test') == "ms-97" or lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
 
   - name: extract mysql deb packages for Debian 13
@@ -394,14 +395,51 @@
     when:
       - ansible_distribution == 'Debian' and ansible_distribution_major_version == '13'
       - lookup('env', 'server_to_test') == "ms-97"
+      - not (ms_from_repo | default(false) | bool)
 
-  - name: install mysql deb packages
-    shell: dpkg -i /tmp/*.deb || apt-get install -f -y
+  # ms_from_repo: the pinned MS version has no tarball for this distro (e.g. MS 8.4.0 on
+  # Debian 13), so install the latest of the series from Oracle's MySQL APT repo instead
+  - name: Add MySQL APT repo signing key (ms_from_repo)
+    get_url:
+      url: https://repo.mysql.com/RPM-GPG-KEY-mysql-2025
+      dest: /etc/apt/keyrings/mysql.asc
+      mode: '0644'
+    when:
+      - ansible_os_family == "Debian"
+      - ms_from_repo | default(false) | bool
+
+  # plain file, not apt_repository: that module needs gpg/apt-key, absent on Debian 13
+  - name: Add MySQL {{ pxb_version_major }} LTS APT repo (ms_from_repo)
+    copy:
+      dest: /etc/apt/sources.list.d/mysql.list
+      content: "deb [signed-by=/etc/apt/keyrings/mysql.asc] http://repo.mysql.com/apt/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} mysql-{{ pxb_version_major }}-lts\n"
+      mode: '0644'
+    when:
+      - ansible_os_family == "Debian"
+      - ms_from_repo | default(false) | bool
+
+  - name: Install MySQL {{ pxb_version_major }} Community Server from APT repo (ms_from_repo)
+    apt:
+      name: mysql-community-server
+      state: present
+      update_cache: yes
     environment:
       DEBIAN_FRONTEND: noninteractive
-    when: 
+    when:
+      - ansible_os_family == "Debian"
+      - ms_from_repo | default(false) | bool
+
+  # apt (not "dpkg -i || apt-get install -f") so missing deps are pulled in and an
+  # in-place upgrade is ordered correctly; with dpkg, server-core 9.7 "Breaks"
+  # server << 9.7, and apt -f then removes mysql-community-server (unit masked/missing)
+  - name: install mysql deb packages
+    shell: apt-get install -y /tmp/*.deb
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+    when:
       - ansible_os_family == "Debian"
       - lookup('env', 'server_to_test') == "ms_innovation" or lookup('env', 'server_to_test') == "ms-97" or lookup('env', 'server_to_test') == "ms-80" or lookup('env', 'server_to_test') == "ms-84"
+      - not (ms_from_repo | default(false) | bool)
 
   - name: List the installed mysql packages (DEB)
     shell: apt list --installed 2>&1 | grep mysql
@@ -424,11 +462,13 @@
       - ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7"
       - lookup('env', 'server_to_test') == "ms_innovation"
 
-  - name: Enable MySQL 9.7 community repo for RHEL (ms-97)
+  # repo follows pxb_version_major: 9.7 normally, 8.4 for the MS 8.4 install in pxb_97_major_upgrade.yml
+  - name: Enable MySQL {{ pxb_version_major }} community repo for RHEL (ms-97)
     yum_repository:
-      name: mysql-9.7-community
-      description: MySQL 9.7 Community Server
-      baseurl: "https://repo.mysql.com/yum/mysql-9.7-community/el/{{ ansible_distribution_major_version }}/$basearch/"
+      name: "mysql-{{ pxb_version_major }}-community"
+      description: "MySQL {{ pxb_version_major }} Community Server"
+      # Amazon Linux 2023 reports major version "2023"; it consumes the el9 repo
+      baseurl: "https://repo.mysql.com/yum/mysql-{{ pxb_version_major }}-community/el/{{ '9' if ansible_distribution == 'Amazon' else ansible_distribution_major_version }}/$basearch/"
       enabled: yes
       gpgcheck: yes
       gpgkey: https://repo.mysql.com/RPM-GPG-KEY-mysql-2025
@@ -443,8 +483,10 @@
       - ansible_os_family == "RedHat"
       - lookup('env', 'server_to_test') == "ms-97"
 
+  # exclude mysql-community: on the 8.4 -> 9.7 major upgrade it would otherwise jump the
+  # installed MS 8.4 to the newest 9.7.x in the repo instead of the pinned version
   - name: YUM UPDATE after RHEL REPO ENABLE
-    shell: yum update -y
+    shell: yum update -y --exclude='mysql-community*'
     when:
       - (ansible_os_family == "RedHat" or ansible_os_family == "Amazon")
       - ansible_distribution_major_version | int >= 7
@@ -505,7 +547,8 @@
       el_suffix: "{{ '9' if ansible_distribution == 'Amazon' else ansible_distribution_major_version }}"
       packages:
       - python3-libselinux
-      - "mysql-community-server-{{ pxb_version_major_minor }}-1.el{{ el_suffix }}"
+      # ms_from_repo: pinned version not built for this EL (e.g. MS 8.4.0 on el10) -> latest of the series
+      - "{{ 'mysql-community-server' if (ms_from_repo | default(false) | bool) else 'mysql-community-server-' ~ pxb_version_major_minor ~ '-1.el' ~ el_suffix }}"
     when:
       - (ansible_os_family == "RedHat" or ansible_os_family == "Amazon")
       - ansible_distribution_major_version | int >= 9
