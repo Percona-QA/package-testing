@@ -43,6 +43,58 @@
     when: 
     - lookup('env', 'install_repo') == "experimental"
     - lookup('env', 'pro') == "no"
+#-------------eol main: switch post-eol repo from testing to released packages
+  - name: point eol repository to main on debian
+    template: src=../../../../templates/eol_deb_repo_file_pxc80.j2
+              dest=/etc/apt/sources.list.d/post-eol.list
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "main"
+    when:
+    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - lookup('env', 'pro') == "no"
+    - lookup('env', 'eol') == "yes"
+    - ansible_os_family == "Debian"
+
+  - name: point eol repository to release on Redhat AMD
+    template: src=../../../../templates/eol_rpm_repo_file_pxc80.j2
+              dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "release"
+    when:
+    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - lookup('env', 'pro') == "no"
+    - lookup('env', 'eol') == "yes"
+    - ansible_os_family == "RedHat"
+    - ansible_architecture == "x86_64"
+
+  - name: point eol repository to release on Redhat ARM
+    template: src=../../../../templates/eol_rpm_repo_file_pxc80_arm.j2
+              dest=/etc/yum.repos.d/post-eol.repo
+    vars:
+      client_id: "{{ lookup('env', 'USERNAME') }}"
+      client_token: "{{ lookup('env', 'PASSWORD') }}"
+      repo: "release"
+    when:
+    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - lookup('env', 'pro') == "no"
+    - lookup('env', 'eol') == "yes"
+    - ansible_os_family == "RedHat"
+    - ansible_architecture == "aarch64" or ansible_architecture == "arm64"
+
+  - name: clean and update package cache for eol main repo
+    shell: |
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when:
+    - lookup('env', 'install_repo') == "main" or lookup('env', 'install_repo') == ""
+    - lookup('env', 'pro') == "no"
+    - lookup('env', 'eol') == "yes"
+    - ansible_os_family == "RedHat"
+
 #-----------------pro
 
   - name: include tasks for enabling test repo pxc 80 pro
