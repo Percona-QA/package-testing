@@ -9,8 +9,15 @@
     vars:
       packages:
       - percona-mysql-shell
-      - percona-mysql-shell-dbgsym
     when: ansible_os_family == "Debian"
+
+  # percona-mysql-shell-dbgsym is published only for Debian, not for Ubuntu
+  - name: install percona-mysql-shell-dbgsym deb package on Debian
+    apt:
+      name: percona-mysql-shell-dbgsym
+      update_cache: yes
+      state: latest
+    when: ansible_distribution == "Debian"
 
   - name: install percona-mysql-shell new rpm packages using yum
     yum:
