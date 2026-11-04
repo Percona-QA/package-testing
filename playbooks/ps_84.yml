@@ -90,6 +90,45 @@
       - ansible_distribution != "Amazon"
       - not (ansible_distribution == "Debian" and ansible_distribution_major_version|int == 11)
 
+  - name: Check mysql-shell version and bundled certifi CA certificates
+    when:
+      - install_mysql_shell == "yes" or install_mysql_shell == ""
+      - ansible_distribution != "Amazon"
+      - not (ansible_distribution == "Debian" and ansible_distribution_major_version|int == 11)
+    block:
+      - name: Get mysql-shell version
+        command: mysqlsh --version
+        register: mysqlsh_version
+        changed_when: false
+
+      - name: Display mysql-shell version
+        debug:
+          msg: "{{ mysqlsh_version.stdout }}"
+
+      - name: Locate certifi cacert.pem bundled with mysql-shell
+        shell: ls /usr/lib/mysqlsh/lib/python3*/site-packages/certifi/cacert.pem /usr/lib64/mysqlsh/lib/python3*/site-packages/certifi/cacert.pem 2>/dev/null | head -n1
+        register: mysqlsh_cacert
+        changed_when: false
+        failed_when: mysqlsh_cacert.stdout == ""
+
+      - name: Search for eMudhra (emSign) and Comodo AAA certificates
+        shell: grep -nE "emSign|AAA Certificate Services|Comodo AAA" {{ mysqlsh_cacert.stdout }}
+        register: mysqlsh_cert_grep
+        changed_when: false
+        failed_when: mysqlsh_cert_grep.rc > 1
+
+      - name: Display matching certificates
+        debug:
+          var: mysqlsh_cert_grep.stdout_lines
+
+      - name: Verify only one eMudhra trust certificate is present
+        assert:
+          that:
+            - mysqlsh_cert_grep.stdout_lines | select('search', '# Label:.*emSign') | list | length == 1
+            - mysqlsh_cert_grep.stdout_lines | select('search', 'AAA Certificate Services|Comodo AAA') | list | length == 0
+          fail_msg: "Expected exactly one eMudhra (emSign) certificate and no Comodo AAA certificate in {{ mysqlsh_cacert.stdout }}"
+          success_msg: "Only one eMudhra trust certificate found: {{ mysqlsh_cert_grep.stdout_lines | select('search', '# Label:') | list }}"
+
   - name: list installed packages
     include_tasks: ../tasks/list_installed_packages.yml
 
