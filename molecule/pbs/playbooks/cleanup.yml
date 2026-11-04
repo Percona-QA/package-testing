@@ -1,0 +1,30 @@
+---
+# Logs and junit xml are fetched to Jenkins by the always: block in tasks/main.yml,
+# because molecule does not run the cleanup step when converge fails. This playbook
+# only fetches anything left behind, then stops stray test processes.
+- name: Cleanup
+  hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    WORKSPACE_VAR: "{{ lookup('env', 'WORKSPACE_VAR') }}"
+  tasks:
+    - name: Find PBS test artifacts in /var/tmp
+      find:
+        paths: /var/tmp
+        patterns:
+          - "pbs_logs_*.tar.gz"
+          - "junit-pbs-*.xml"
+        file_type: file
+      register: pbs_artifacts
+
+    - name: Fetch PBS test artifacts to Jenkins workspace
+      fetch:
+        src: "{{ item.path }}"
+        dest: "/{{ WORKSPACE_VAR }}/{{ item.path | basename }}"
+        flat: yes
+      loop: "{{ pbs_artifacts.files }}"
+
+    - name: Stop any mysqld, binlog_server or sysbench left running by the tests
+      shell: pkill -9 -u pbsqa -f 'mysqld|binlog_server|sysbench' || true
+      changed_when: false
