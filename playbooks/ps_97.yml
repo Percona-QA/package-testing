@@ -97,8 +97,6 @@
     when:
       - install_mysql_shell == "yes" or install_mysql_shell == ""
       - ansible_distribution != "Amazon"
-      # percona-mysql-shell 9.7 is not published for Debian bullseye
-      - ansible_distribution_release != "bullseye"
 
   - name: check telemetry (enabled)
     command: /package-testing/check_telemetry.sh ps -e
