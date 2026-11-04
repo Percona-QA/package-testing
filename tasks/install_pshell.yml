@@ -9,6 +9,7 @@
     vars:
       packages:
       - percona-mysql-shell
+      - percona-mysql-shell-dbgsym
     when: ansible_os_family == "Debian"
 
   - name: install percona-mysql-shell new rpm packages using yum
@@ -18,6 +19,8 @@
     vars:
       packages:
       - percona-mysql-shell
+      - percona-mysql-shell-debuginfo
+      - percona-mysql-shell-debugsource
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon"]
       - ansible_facts['distribution_major_version'] | int <= 7
@@ -29,6 +32,8 @@
     vars:
       packages:
       - percona-mysql-shell
+      - percona-mysql-shell-debuginfo
+      - percona-mysql-shell-debugsource
     when:
       - ansible_facts['distribution'] in ["RedHat", "CentOS", "OracleLinux", "Amazon", "Rocky"]
       - ansible_facts['distribution_major_version'] | int >= 8
