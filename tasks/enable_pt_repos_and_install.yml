@@ -20,9 +20,13 @@
   - name: include tasks for pt installation
     include_tasks: ../tasks/install_pt.yml
 
-# will fail till the PT-1959 is fixed
   - name: check that pt version is correct
     command: ../version_check.sh pt
+    register: pt_version_check
+
+  - name: show pt version check output
+    debug:
+      var: pt_version_check.stdout_lines
 
   - name: remove pt packages
     include_tasks: ../tasks/remove_pt.yml

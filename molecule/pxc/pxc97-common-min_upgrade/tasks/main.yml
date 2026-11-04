@@ -226,7 +226,7 @@
 
 
   - name: copy PXC config on centos 7
-    template: src=../../../../templates/my_rpm_80.j2 
+    template: src=../../../../templates/my_rpm_97.j2 
               dest=/etc/my.cnf
     when: ansible_os_family == "RedHat"
 

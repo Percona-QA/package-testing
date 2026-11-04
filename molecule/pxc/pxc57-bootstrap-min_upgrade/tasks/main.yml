@@ -131,7 +131,7 @@
       - ansible_facts['distribution_major_version'] | int >= 8
 
   - name: stop mysql service
-    command: systemctl stop mysql
+    include_tasks: ../../../../tasks/stop_pxc57_service.yml
 
   - name: copy pxc config on centos 6
     template: src=../../../../templates/my_rpm.j2 dest=/etc/my.cnf

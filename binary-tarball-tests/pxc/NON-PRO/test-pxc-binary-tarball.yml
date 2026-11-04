@@ -39,6 +39,12 @@
           - "no"
           - "yes"
         description: Use the EOL gated repo for the tarball download
+    - choice:
+        name: REPO
+        choices:
+          - "testing"
+          - "main"
+        description: "EOL only: testing = qa-test gated repo, main = pxc-80-eol tarballs repo"
     pipeline-scm:
       scm:
         - git:

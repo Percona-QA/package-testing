@@ -16,24 +16,24 @@
       - percona-client{{ pro_suf | default('') }}
       - percona-testsuite{{ pro_suf | default('') }}
       - percona-server-test{{ pro_suf | default('') }}
-  #    - percona-server-test-dbgsym{{ pro_suf | default('') }}
+      - percona-server-test-dbgsym{{ pro_suf | default('') }}
       - percona-server-source{{ pro_suf | default('') }}
       - percona-server-server{{ pro_suf | default('') }}
       - percona-server-server-core{{ pro_suf | default('') }}
-   #   - percona-server-server-core-dbgsym{{ pro_suf | default('') }}
+      - percona-server-server-core-dbgsym{{ pro_suf | default('') }}
       - percona-server-rocksdb{{ pro_suf | default('') }}
-    #  - percona-server-rocksdb-dbgsym{{ pro_suf | default('') }}
+      - percona-server-rocksdb-dbgsym{{ pro_suf | default('') }}
       - percona-server-common{{ pro_suf | default('') }}
-     # - percona-server-client-core-dbgsym{{ pro_suf | default('') }}
+      - percona-server-client-core-dbgsym{{ pro_suf | default('') }}
       - percona-server-client-core{{ pro_suf | default('') }}
-      #- percona-server-client-dbgsym{{ pro_suf | default('') }}
+      - percona-server-client-dbgsym{{ pro_suf | default('') }}
       - percona-server-client-plugins{{ pro_suf | default('') }}
-     # - percona-server-client-plugins-dbgsym{{ pro_suf | default('') }}
+      - percona-server-client-plugins-dbgsym{{ pro_suf | default('') }}
       - percona-server-client{{ pro_suf | default('') }}
       - percona-mysql-router{{ pro_suf | default('') }}
       - percona-server-rocksdb
       - percona-server
-      #- percona-mysql-router-dbgsym{{ pro_suf | default('') }}
+      - percona-mysql-router-dbgsym{{ pro_suf | default('') }}
       percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
       packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
     when: ansible_os_family == "Debian"

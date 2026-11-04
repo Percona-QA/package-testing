@@ -47,6 +47,17 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
+      - percona-xtradb-cluster-server
+      - percona-xtradb-cluster-server-core
+      - percona-xtradb-cluster-server-debug
+      - percona-xtradb-cluster-client
+      - percona-xtradb-cluster-client-core
+      - percona-xtradb-cluster-client-plugins
+      - percona-xtradb-cluster-common
+      - percona-xtradb-cluster-garbd
+      - percona-xtradb-cluster-garbd-debug
+      - percona-xtradb-cluster-dbg
+      - percona-xtradb-cluster-test
     when:
       - ansible_os_family == "Debian"
     environment:
@@ -60,6 +71,21 @@
     vars:
       packages:
       - percona-xtradb-cluster-full
+      - percona-xtradb-cluster-server
+      - percona-xtradb-cluster-client
+      - percona-xtradb-cluster-shared
+      - percona-xtradb-cluster-garbd
+      - percona-xtradb-cluster-test
+      - percona-xtradb-cluster-devel
+    when:
+      - ansible_os_family == "RedHat"
+    environment:
+      PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+      PERCONA_TELEMETRY_DISABLE: "1"
+
+  # debuginfo/debugsource are not available on every RHEL-family OS, so only upgrade them where already installed
+  - name: upgrade remaining installed PXC 9.7 rpm packages
+    command: "{{ ansible_pkg_mgr }} -y upgrade 'percona-xtradb-cluster*'"
     when:
       - ansible_os_family == "RedHat"
     environment:
@@ -67,9 +93,24 @@
       PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: restart mysql service
-    service: name=mysql state=restarted
-    when:
-      - ansible_distribution != "Amazon"
+    block:
+      - name: restart mysql service
+        service: name=mysql state=restarted
+        throttle: 1
+    rescue:
+      - name: collect mysql diagnostics after failed restart
+        shell: |
+          systemctl status mysql --no-pager -l || true
+          journalctl -xeu mysql --no-pager -n 100 || true
+          tail -n 100 /var/log/mysqld.log /var/log/mysql/error.log 2>/dev/null || true
+        register: mysql_restart_diag
+
+      - name: print mysql diagnostics after failed restart
+        debug: var=mysql_restart_diag.stdout_lines
+
+      - name: fail after printing mysql diagnostics
+        fail:
+          msg: "mysql restart failed after PXC 9.7 upgrade, see diagnostics above"
 
   - name: Sleep for 60 seconds
     shell: sleep 60

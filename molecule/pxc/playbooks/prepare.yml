@@ -81,7 +81,21 @@
         content: |
           [base]
           name=CentOS-$releasever - Base
-          baseurl=http://vault.centos.org/centos/$releasever/os/$basearch/
+          baseurl=https://archive.kernel.org/centos-vault/7.9.2009/os/$basearch/
+          gpgcheck=1
+          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+          enabled=1
+
+          [updates]
+          name=CentOS-$releasever - Updates
+          baseurl=https://archive.kernel.org/centos-vault/7.9.2009/updates/$basearch/
+          gpgcheck=1
+          gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+          enabled=1
+
+          [extras]
+          name=CentOS-$releasever - Extras
+          baseurl=https://archive.kernel.org/centos-vault/7.9.2009/extras/$basearch/
           gpgcheck=1
           gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
           enabled=1
@@ -116,9 +130,14 @@
       command: apt-get update --allow-releaseinfo-change
       when: ansible_os_family == "Debian"  and ansible_distribution_release == "buster"
 
+    - name: Point Debian Bullseye EOL security repository to snapshot.debian.org (packages removed from pool)
+      shell: find /etc/apt/sources.list /etc/apt/sources.list.d -name "*.list" -exec sed -i '/bullseye-security/{s|^\(deb\(-src\)\?\) \[\([^]]*\)\]|\1 [\3 check-valid-until=no]|;s|^\(deb\(-src\)\?\) \([^[]\)|\1 [check-valid-until=no] \3|;s|http://security\.debian\.org/debian-security|http://snapshot.debian.org/archive/debian-security/20260901T000000Z|}' {} \;
+      when: ansible_os_family == "Debian" and ansible_distribution_release == "bullseye"
+
     - name: Upgrade deb packages
       apt:
         upgrade: dist
+        update_cache: yes
       when: ansible_os_family == "Debian"
       
     - name: upgrade deb packages apt

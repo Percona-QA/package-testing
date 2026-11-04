@@ -7,7 +7,8 @@
 #   enables ps-80 repo
 #   installs 8.0 and repeats some tests
 #   removes packages
-#   NOTICE: it installs both 5.7 and 8.0 from testing repo!
+#   repos are chosen by major_upgrade_from_repo (5.7 EOL: main/testing, default main)
+#   and major_upgrade_to_repo (8.0: testing/main/experimental, default testing)
 
 - hosts: all
   become: true
@@ -23,6 +24,18 @@
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
+  - name: check that the requested major upgrade path is supported
+    fail:
+      msg: "Only ps_57 -> ps_80 major upgrade is supported by this playbook (got {{ lookup('env', 'major_upgrade_from_product') }} -> {{ lookup('env', 'major_upgrade_to_product') }})"
+    when: >-
+      lookup('env', 'major_upgrade_from_product') not in ['', 'ps_57'] or
+      lookup('env', 'major_upgrade_to_product') not in ['', 'ps_80']
+
+  - name: check that the requested PS 5.7 repo is supported
+    fail:
+      msg: "PS 5.7 EOL has no experimental repo (major_upgrade_from_repo=experimental)"
+    when: lookup('env', 'major_upgrade_from_repo') == "experimental"
+
 ### start of PS 5.7 install
   - name: include tasks for test env setup
     include_tasks: ../tasks/test_prep.yml
@@ -35,8 +48,13 @@
               dest=/package-testing/scripts/ps_keyring_plugins_test/keyring_vault_test.cnf
               mode=0664 owner=root group=root
 
-  - name: include tasks for enabling main repo
+  - name: include tasks for enabling PS 5.7 EOL main repo
     include_tasks: ../tasks/enable_ps57_eol_release_repo.yml
+    when: lookup('env', 'major_upgrade_from_repo') == "main" or lookup('env', 'major_upgrade_from_repo') == ""
+
+  - name: include tasks for enabling PS 5.7 EOL testing repo
+    include_tasks: ../tasks/enable_ps57_eol_testing_repo.yml
+    when: lookup('env', 'major_upgrade_from_repo') == "testing"
 
   - name: download and extract world database
     command: "{{ item }}"
@@ -196,8 +214,17 @@
 #      mv /etc/my.cnf.d_backup-* /etc/my.cnf.d
 #    when: (ansible_distribution == "Amazon") or (ansible_os_family == "RedHat" and ansible_distribution_major_version >= "7")
 
-  - name: include tasks for enabling PS 8 test repo
+  - name: include tasks for enabling PS 8.0 testing repo
     include_tasks: ../tasks/enable_ps8_testing_repo.yml
+    when: lookup('env', 'major_upgrade_to_repo') == "testing" or lookup('env', 'major_upgrade_to_repo') == ""
+
+  - name: include tasks for enabling PS 8.0 main repo
+    include_tasks: ../tasks/enable_ps8_main_repo.yml
+    when: lookup('env', 'major_upgrade_to_repo') == "main"
+
+  - name: include tasks for enabling PS 8.0 experimental repo
+    include_tasks: ../tasks/enable_ps8_experimental_repo.yml
+    when: lookup('env', 'major_upgrade_to_repo') == "experimental"
 
   - name: install Percona Server 8.0 packages
     include_tasks: ../tasks/install_ps80.yml

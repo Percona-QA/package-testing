@@ -95,7 +95,7 @@
       PERCONA_TELEMETRY_DISABLE: "1"
 
   - name: stop mysql service
-    command: systemctl stop mysql
+    include_tasks: ../../../../tasks/stop_pxc57_service.yml
 
   - name: copy PXC config on centos 7
     template: src=../../../../templates/my_rpm_7.j2 dest=/etc/my.cnf
@@ -132,9 +132,22 @@
     command: /package-testing/package_check.sh pxc57
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
-  - name: run pytest tests for mysql init scripts
-    shell: sleep {{ sleep_before_tests | default('0') }}; python3 -m pytest -v /package-testing/pytest-tests/test_pxc_init_scripts.py
-    throttle: 1
+  - name: run pytest tests for mysql init scripts and collect diagnostics on failure
+    block:
+      - name: run pytest tests for mysql init scripts
+        shell: sleep {{ sleep_before_tests | default('0') }}; python3 -m pytest -v /package-testing/pytest-tests/test_pxc_init_scripts.py
+        throttle: 1
+    rescue:
+      - name: DIAG - try starting mysql once more to capture a fresh failure
+        command: systemctl start mysql
+        ignore_errors: true
+
+      - name: DIAG - collect diagnostics for init scripts failure
+        include_tasks: ../../../../tasks/pxc_diagnostics.yml
+
+      - name: fail after collecting diagnostics
+        fail:
+          msg: "PXC init scripts tests failed, see DIAG output above"
 
   - name: start mysql service
     command: systemctl start mysql

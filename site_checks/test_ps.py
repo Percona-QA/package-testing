@@ -67,8 +67,8 @@ def get_package_tuples():
             f"percona-server-client_{suffix}",
             f"percona-server-rocksdb_{suffix}",
             f"percona-mysql-router_{suffix}",
-            f"libperconaserverclient21-dev_{suffix}",
-            f"libperconaserverclient21_{suffix}",
+            f"libperconaserverclient24-dev_{suffix}",
+            f"libperconaserverclient24_{suffix}",
             f"percona-server-source_{suffix}",
             f"percona-server-common_{suffix}",
             f"percona-server-dbg_{suffix}"

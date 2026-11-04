@@ -10,7 +10,7 @@ if [ "$#" = 2 ]; then
     exit 1
   fi
 elif [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps56, ps57, ps80, ps81, ps84, ps97, ps9x !"
+  echo "This script requires product parameter: ps56, ps57, ps80, ps81, ps84, ps97, ps26, ps9x !"
   echo "Usage: ./version_check.sh <prod> [pro]"
   exit 1
 fi
@@ -58,6 +58,10 @@ elif [ $1 = "ps97" ]; then
     release=${PS97_VER#*-}
     revision=${PS97_REV}
   fi
+elif [ $1 = "ps26" ]; then
+  version=${PS26_VER}
+  release=${PS26_VER#*-}
+  revision=${PS26_REV}
 elif [[ $1 =~ ^ps9[1-9]{1}$ ]]; then
   version=${PS_INN_LTS_VER}
   release=${PS_INN_LTS_VER#*-}
@@ -155,7 +159,7 @@ product=$1
 log="/tmp/${product}_package_check.log"
 echo -n > $log
 
-if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
+if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]] || [[ ${product} =~ ^ps2[0-9]{1}$ ]]; then
   if [ -f /etc/redhat-release ] || [ -f /etc/system-release ]; then
     if [ -f /etc/system-release -a $(grep -c Amazon /etc/system-release) -eq 1 ]; then
       centos_maj_version="9"
@@ -200,7 +204,7 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
           rpm_opt_package="percona-server-rocksdb percona-server-shared-compat"
         fi
       fi
-    elif [[ ${product} =~ ^ps8[3-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
+    elif [[ ${product} =~ ^ps8[3-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]] || [[ ${product} =~ ^ps2[0-9]{1}$ ]]; then
       if [[ "${centos_maj_version}" == "9" || "${centos_maj_version}" == "10" ]]; then
         rpm_num_pkgs="8"
         rpm_opt_package="percona-server-rocksdb${pro_suf}"
@@ -214,7 +218,7 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
         fi
       fi
     fi
-    if [[ ${product} =~ ^ps8[3-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]]; then
+    if [[ ${product} =~ ^ps8[3-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]] || [[ ${product} =~ ^ps2[0-9]{1}$ ]]; then
       ps_name="percona-server"
       rpm_pkgs_list="${ps_name}-server${pro_suf} ${ps_name}-test${pro_suf} ${ps_name}-devel${pro_suf} ${ps_name}-shared${pro_suf} ${ps_name}-client${pro_suf} ${ps_name}-js${pro_suf}"
     elif [ "${product}" = "ps80" ]; then

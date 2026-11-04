@@ -1,0 +1,47 @@
+---
+# Collect PXC node diagnostics after a failure. Every step is best-effort so
+# one missing file or command does not hide the rest of the output.
+
+  - name: DIAG - collect PXC diagnostics
+    shell: |
+      section() { echo; echo "===== $1 ====="; }
+      section "mysql process"
+      ps -ef | grep -E "[m]ysqld|[w]srep_sst|[x]trabackup|[s]ocat" || echo "no mysqld/SST processes"
+      section "systemctl status mysql"
+      systemctl status mysql --no-pager -l 2>&1 | tail -40
+      section "journalctl -u mysql"
+      journalctl -u mysql --no-pager -n 150 2>&1
+      section "listening ports"
+      (ss -lntp 2>/dev/null || netstat -lntp 2>/dev/null) | grep -E ":(3306|4444|4567|4568)\b" || echo "no PXC ports listening"
+      section "connectivity to cluster members"
+      for ip in {{ lookup('env', 'PXC1_IP') }} {{ lookup('env', 'PXC2_IP') }} {{ lookup('env', 'PXC3_IP') }}; do
+        for port in 3306 4444 4567 4568; do
+          if timeout 3 bash -c "</dev/tcp/$ip/$port" 2>/dev/null; then echo "$ip:$port open"; else echo "$ip:$port closed"; fi
+        done
+      done
+      section "wsrep status"
+      mysql -e "SHOW GLOBAL STATUS LIKE 'wsrep%';" 2>&1 | grep -E "wsrep_(cluster_size|cluster_status|local_state_comment|ready|connected|incoming_addresses)|ERROR"
+      section "PXC config"
+      for f in /etc/mysql/my.cnf /etc/my.cnf; do [ -f "$f" ] && { echo "--- $f"; grep -v -E "^\s*(#|$)" "$f"; }; done
+      section "grastate.dat"
+      cat /var/lib/mysql/grastate.dat 2>&1
+      section "datadir ownership"
+      ls -la /var/lib/mysql | head -30; ls -ld /var/run/mysqld 2>&1
+      section "error log"
+      for f in /var/log/mysql/error.log /var/log/mysqld.log /var/lib/mysql/*.err; do [ -f "$f" ] && { echo "--- $f"; tail -200 "$f"; }; done
+      section "SST logs"
+      for f in /var/lib/mysql/innobackup.*.log /var/lib/mysql/*sst*.log; do [ -f "$f" ] && { echo "--- $f"; tail -60 "$f"; }; done
+      section "AppArmor / SELinux denials"
+      (dmesg 2>/dev/null | grep -i -E "apparmor.*mysql|denied.*mysql" | tail -20) || true
+      (command -v getenforce >/dev/null && getenforce) || true
+      section "disk and memory"
+      df -h / /var/lib/mysql 2>&1; free -m
+      true
+    args:
+      executable: /bin/bash
+    register: pxc_diag
+    ignore_errors: true
+
+  - name: DIAG - show PXC diagnostics
+    debug:
+      msg: "{{ pxc_diag.stdout_lines | default([]) }}"

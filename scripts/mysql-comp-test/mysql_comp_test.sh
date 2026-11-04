@@ -3,16 +3,16 @@
 set -e
 
 if [ "$#" -ne 1 ]; then
-  echo "This script requires product parameter: ps56, ps57, ps8x or ps9x !"
+  echo "This script requires product parameter: ps56, ps57, ps8x, ps9x or ps2x !"
   echo "Usage: ./comp_test.sh <prod>"
   exit 1
-elif ! [[ "$1" =~ ^ps5[6-7]{1}$ || "$1" =~ ^ps8[0-9]{1}$ || "$1" =~ ^ps9[0-9]{1}$ ]]; then
+elif ! [[ "$1" =~ ^ps5[6-7]{1}$ || "$1" =~ ^ps8[0-9]{1}$ || "$1" =~ ^ps9[0-9]{1}$ || "$1" =~ ^ps2[0-9]{1}$ ]]; then
   echo "Product not recognized!"
   exit 1
 fi
 
-# PS 8.x and 9.x (ps80-ps99, including ps97): no TokuDB; RocksDB-only md5 expectations
-if [[ "$1" =~ ^ps8[0-9]{1}$ || "$1" =~ ^ps9[0-9]{1}$ ]]; then
+# PS 8.x, 9.x and 26.x (ps80-ps99, ps26): no TokuDB; RocksDB-only md5 expectations
+if [[ "$1" =~ ^ps8[0-9]{1}$ || "$1" =~ ^ps9[0-9]{1}$ || "$1" =~ ^ps2[0-9]{1}$ ]]; then
   NO_TOKUDB=1
 else
   NO_TOKUDB=0

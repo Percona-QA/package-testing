@@ -10,6 +10,7 @@ pxc_revision = os.getenv('PXC_REVISION')
 pxc57_pkg_version = os.getenv('PXC57_PKG_VERSION')
 pxc_pxb_version = os.getenv('PXC_PXB_VERSION')
 pxc_wsrep_version = os.getenv('PXC_WSREP_VERSION')
+eol = os.getenv('EOL')
 test_pwd = os.path.dirname(os.path.realpath(__file__))
 
 pxc_version_upstream, pxc_version_percona = pxc_version.split('-')
@@ -26,6 +27,15 @@ docker_image_major = docker_acc + "/" + docker_product + ":" + pxc_version_major
 docker_image_latest = docker_acc + "/" + docker_product + ":" + "latest"
 docker_image_debug = docker_acc + "/" + docker_product + ":" + docker_tag + "-debug-aarch64"
 docker_image_upstream = docker_acc + "/" + docker_product + ":" + pxc_version_upstream
+
+# EOL images are shipped only as a single pre-built docker tarball that the pipeline loads
+# locally; the :latest / :<major> / :<upstream> / :-debug-aarch64 tags are never published, so
+# point every image reference at the one loaded image to avoid pulling anything from Docker Hub.
+if eol == 'yes':
+    docker_image_major = docker_image
+    docker_image_latest = docker_image
+    docker_image_debug = docker_image
+    docker_image_upstream = docker_image
 
 docker_network = 'pxc-network'
 
