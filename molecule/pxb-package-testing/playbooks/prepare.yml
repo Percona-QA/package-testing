@@ -47,3 +47,51 @@
         state: present
         exclusive: False
       when: ansible_distribution == "Ubuntu"
+
+    # Rocky 8 AMI root filesystem is not grown to the EBS volume size at boot,
+    # so PXB debuginfo install fails on "/" with "needs XXXMB more space"
+    - name: Install growpart on Rocky 8
+      dnf:
+        name: cloud-utils-growpart
+        state: present
+      when:
+        - ansible_distribution == "Rocky"
+        - ansible_distribution_major_version == "8"
+
+    - name: Grow root partition and filesystem to full disk on Rocky 8
+      shell: |
+        set -e
+        # growpart returns 1 with NOCHANGE when the partition already fills the disk
+        grow_part() {
+          # sysfs parent of a partition is its disk (lsblk PKNAME also lists children like the LV)
+          part=$(basename "$(readlink -f "$1")")
+          disk=$(basename "$(readlink -f /sys/class/block/$part/..)")
+          growpart "/dev/$disk" "$(cat /sys/class/block/$part/partition)" || [ $? -eq 1 ]
+        }
+        root_src=$(findmnt -n -o SOURCE /)
+        if lvs "$root_src" >/dev/null 2>&1; then
+          # root on LVM (e.g. Rocky 8 arm: /dev/mapper/rocky-root): grow PV partition, PV, then LV + fs
+          vg=$(lvs --noheadings -o vg_name "$root_src" | xargs)
+          for pv in $(pvs --noheadings -o pv_name -S vg_name="$vg"); do
+            grow_part "$pv"
+            pvresize "$pv"
+          done
+          if [ "$(vgs --noheadings -o vg_free_count "$vg" | xargs)" -gt 0 ]; then
+            lvextend -r -l +100%FREE "$root_src"
+          fi
+        else
+          grow_part "$root_src"
+          if [ "$(findmnt -n -o FSTYPE /)" = "xfs" ]; then xfs_growfs /; else resize2fs "$root_src"; fi
+        fi
+        df -h /
+      register: grow_root
+      when:
+        - ansible_distribution == "Rocky"
+        - ansible_distribution_major_version == "8"
+
+    - name: Show root filesystem size after grow on Rocky 8
+      debug:
+        var: grow_root.stdout_lines
+      when:
+        - ansible_distribution == "Rocky"
+        - ansible_distribution_major_version == "8"
