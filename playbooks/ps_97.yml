@@ -198,8 +198,13 @@
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
 
-  - name: run PS-11950 mysqldump compressed-columns comment test
-    include_tasks: ../tasks/ps_mysqldump_compressed_columns_test.yml
+  - name: PS-11950 check mysqldump with compressed columns
+    command: /package-testing/scripts/mysqldump_compressed_check.sh
+    register: mysqldump_cc_check
+
+  - name: PS-11950 show mysqldump check output
+    debug:
+      var: mysqldump_cc_check.stdout_lines
 
 #   - name: install plugins, import world database
   #   command: /package-testing/plugins_test_97.sh ps

@@ -85,72 +85,15 @@ class TestDynamic:
             assert host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PS')
             assert host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
 
-    def test_ps11950_mysqldump_compressed_columns(self, host):
-        """PS-11950: mysqldump must not treat Percona compressed-column markers
-        placed inside a column COMMENT as real column-format extensions
-        (SQL injection into the dump, dump crash, stack buffer overflow)."""
-        import base64
-
-        if ps_version_major in ['5.6', '5.7']:
-            pytest.skip('compressed-column mysqldump handling test targets 8.x+')
-
-        mysql_cmd = ("mysql --user=root --password=" + ps_pwd
-                     + " -S/var/lib/mysql/mysql.sock")
-        mysqldump_cmd = ("mysqldump --user=root --password=" + ps_pwd
-                         + " -S/var/lib/mysql/mysql.sock")
-        marker = " /*!50633 COLUMN_FORMAT COMPRESSED"
-
-        def run_sql(db, sql):
-            b64 = base64.b64encode(sql.encode()).decode()
-            return host.run("echo %s | base64 -d | %s %s" % (b64, mysql_cmd, db))
-
-        cleanup_sql = ("DROP DATABASE IF EXISTS ps11950_d1;"
-                       " DROP DATABASE IF EXISTS ps11950_d2;"
-                       " DROP DATABASE IF EXISTS ps11950_d3;"
-                       " DROP USER IF EXISTS evil@localhost;")
-        run_sql("", cleanup_sql)
-        try:
-            # ---- D1: SQL injection into the dump ----
-            run_sql("", "CREATE DATABASE ps11950_d1;")
-            create_inj = (
-                "CREATE TABLE t4 (\n"
-                "  a INT COMMENT '" + marker + "',\n"
-                "  b BLOB COLUMN_FORMAT COMPRESSED,\n"
-                "  c INT COMMENT ') ENGINE=InnoDB; CREATE USER evil@localhost;"
-                " GRANT ALL ON *.* TO evil@localhost WITH GRANT OPTION;"
-                " CREATE TABLE t5 (y INT -- '\n"
-                ");"
-            )
-            res = run_sql("ps11950_d1", create_inj)
-            assert res.rc == 0, "D1: could not create injection table: %s" % res.stderr
-
-            for mode in ("", "--enable-compressed-columns"):
-                tag = mode or "default"
-                dump = host.run("%s %s --skip-comments ps11950_d1 > /tmp/ps11950_d1.sql"
-                                % (mysqldump_cmd, mode))
-                assert dump.rc == 0, "D1 (%s): mysqldump failed: %s" % (tag, dump.stderr)
-                run_sql("", "DROP USER IF EXISTS evil@localhost;")
-                host.run("%s ps11950_d1 < /tmp/ps11950_d1.sql" % mysql_cmd)
-                evil = host.run('%s -s -N -e "SELECT COUNT(*) FROM mysql.user '
-                                'WHERE user=\'evil\' AND host=\'localhost\'"' % mysql_cmd)
-                assert evil.stdout.strip() == "0", (
-                    "D1 (%s): restoring the dump created superuser evil@localhost "
-                    "(SQL injection via compressed-column marker in a COMMENT)" % tag)
-
-            # ---- D2: start marker with no closing "*/" ----
-            run_sql("", "CREATE DATABASE ps11950_d2;")
-            run_sql("ps11950_d2", "CREATE TABLE t (a INT COMMENT '" + marker + "');")
-            d2 = host.run("%s --skip-comments ps11950_d2" % mysqldump_cmd)
-            assert d2.rc == 0, "D2: mysqldump aborted/crashed on unterminated marker: %s" % d2.stderr
-
-            # ---- D3: oversized dictionary name ----
-            run_sql("", "CREATE DATABASE ps11950_d3;")
-            bigname = "x" * 500
-            run_sql("ps11950_d3", "CREATE TABLE t (a INT COMMENT '" + marker
-                    + " WITH COMPRESSION_DICTIONARY " + bigname + " */');")
-            d3 = host.run("%s --enable-compressed-columns-with-dictionaries "
-                          "--skip-comments ps11950_d3" % mysqldump_cmd)
-            assert d3.rc == 0, "D3: mysqldump aborted/crashed on oversized dictionary name: %s" % d3.stderr
-        finally:
-            run_sql("", cleanup_sql)
-            host.run("rm -f /tmp/ps11950_d1.sql")
+    def test_mysqldump_compressed_columns(self, host):
+        """PS-11950: copy the common mysqldump compressed-columns check into
+        the container and run it there."""
+        import os
+        import shlex
+        script = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                              '..', '..', '..', 'scripts', 'mysqldump_compressed_check.sh'))
+        subprocess.check_call(['docker', 'cp', script, container_name + ':/tmp/mysqldump_compressed_check.sh'])
+        args = '--user=root --password=' + ps_pwd + ' -S/var/lib/mysql/mysql.sock'
+        cmd = host.run('MYSQL_ARGS=' + shlex.quote(args) + ' bash /tmp/mysqldump_compressed_check.sh')
+        print(cmd.stdout)
+        assert cmd.rc == 0, cmd.stdout[-3000:] + cmd.stderr[-1000:]

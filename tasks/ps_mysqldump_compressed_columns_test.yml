@@ -1,7 +1,0 @@
-# PS-11950: verify mysqldump does not treat compressed-column markers placed
-# inside column COMMENTs as real column-format extensions (SQL injection into
-# the dump, dump crash, and a stack buffer overflow). Fails the build if the
-# installed mysqldump is still vulnerable.
-
-  - name: run PS-11950 mysqldump compressed-columns comment test
-    command: /package-testing/scripts/ps_mysqldump_compressed_columns_test.sh

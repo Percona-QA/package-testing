@@ -147,8 +147,13 @@
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
 
-  - name: run PS-11950 mysqldump compressed-columns comment test
-    include_tasks: ../tasks/ps_mysqldump_compressed_columns_test.yml
+  - name: PS-11950 check mysqldump with compressed columns
+    command: /package-testing/scripts/mysqldump_compressed_check.sh
+    register: mysqldump_cc_check
+
+  - name: PS-11950 show mysqldump check output
+    debug:
+      var: mysqldump_cc_check.stdout_lines
 
   - name: Test JS component
     command: /package-testing/scripts/js_component.sh
