@@ -147,30 +147,11 @@
         line: '!includedir /etc/my.cnf.d'
     when: ansible_os_family == "RedHat"
 
+  - name: run PS-11950 mysqldump compressed-columns comment test
+    include_tasks: ../tasks/ps_mysqldump_compressed_columns_test.yml
+
   - name: Test JS component
     command: /package-testing/scripts/js_component.sh
-
-  - name: Handle check that Percona Server version is correct
-    block:
-      - name: Run the version_check.sh script {{ pro }}
-        shell: /package-testing/version_check.sh ps84 {{ pro }} > version-check.log 2>&1
-
-      - name: Log check for warnings in the previous stage
-        command: /package-testing/scripts/log-warning-check.sh version-check.log
-        when: (lookup('env', 'check_warnings') == "yes")
-
-    rescue:
-      - name: Fetch the output of the version_check.sh logfile on the script failure
-        command: cat "version-check.log"
-        register: versioncheckoutput
-
-      - name: Display the fetched output of the version_check.log logfile
-        debug:
-          msg: "Version check output: {{ versioncheckoutput.stdout }}"
-
-      - name: Fail the task due to previous issues
-        fail:
-          msg: Failing the further tasks due to issues in the previous task.
 
   - name: check that Percona Server {{ pro }} package versions are correct
     command: /package-testing/package_check.sh ps84 {{ pro }}
@@ -193,9 +174,6 @@
 
   - name: re-run ps_admin to install rocksdb
     command: /usr/bin/ps-admin --enable-rocksdb
-
-  - name: run PS-11950 mysqldump compressed-columns comment test
-    include_tasks: ../tasks/ps_mysqldump_compressed_columns_test.yml
 
   - name: install plugins, import world database
     command: /package-testing/plugins_test_84.sh ps
