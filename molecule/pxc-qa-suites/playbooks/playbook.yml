@@ -1,0 +1,11 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  become_method: sudo
+  roles:
+    - role: pxc-qa-suites
+  vars:
+    qa_user: pxcqa
+    qa_home: /home/pxcqa
+    qa_venv: /opt/pxc-qa-venv

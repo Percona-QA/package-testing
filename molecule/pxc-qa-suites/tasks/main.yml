@@ -1,0 +1,464 @@
+---
+# Runs Percona-QA/pxc-qa (qa_framework.py) against a PXC binary tarball.
+# Everything is driven by env vars exported by the Jenkins job
+# pxc/jenkins/pxc-qa-suites.groovy (read here with lookup('env', ...)).
+
+  - name: Set common facts
+    set_fact:
+      pxc_version: "{{ lookup('env', 'PXC_VERSION') }}"
+      pxc_lower_version: "{{ lookup('env', 'PXC_LOWER_VERSION') | trim }}"
+      qa_suites: "{{ lookup('env', 'QA_SUITES').split(',') | map('trim') | select | join(',') }}"
+      qa_tests: "{{ lookup('env', 'QA_TESTS').split(',') | map('trim') | select | join(',') }}"
+      qa_workers: "{{ lookup('env', 'NUMBER_OF_WORKERS') | default('0', true) | int }}"
+      qa_timeout_seconds: "{{ (lookup('env', 'QA_TIMEOUT_HOURS') | default('10', true) | int) * 3600 }}"
+      qa_workdir: "{{ qa_home }}/qa_workdir"
+      pxc_basedir: "{{ qa_home }}/pxc_basedir"
+      pxc_lower_basedir: "{{ qa_home }}/pxc_lower_basedir"
+      qa_dist: "{{ ansible_distribution | lower }}{{ ansible_distribution_major_version | default('', true) }}"
+
+  # Upgrade tests exit 1 when pxc_lower_base/pxc_upper_base aren't set. Fail here,
+  # before the downloads, rather than an hour into the run.
+  - name: Require PXC_LOWER_VERSION for upgrade tests
+    assert:
+      that: pxc_lower_version | length > 0
+      fail_msg: >-
+        The upgrade suite (QA_SUITES/QA_TESTS mention "upgrade") needs PXC_LOWER_VERSION,
+        the older PXC to upgrade from. PXC_VERSION is the version upgraded to.
+    when: "'upgrade' in qa_suites or 'upgrade' in qa_tests"
+
+  - name: Pick glibc version and optional tarball URL overrides for Debian family
+    set_fact:
+      pxc_glibc: "{{ lookup('env', 'PXC_DEBIAN_GLIBC_VERSION') | default('2.35', true) }}"
+      pxc_tarball_url_override: "{{ lookup('env', 'PXC_TARBALL_URL_DEB') | trim }}"
+      pxc_lower_tarball_url_override: "{{ lookup('env', 'PXC_LOWER_TARBALL_URL_DEB') | trim }}"
+    when: ansible_os_family == "Debian"
+
+  - name: Pick glibc version and optional tarball URL overrides for RedHat family
+    set_fact:
+      pxc_glibc: "{{ lookup('env', 'PXC_RHEL_GLIBC_VERSION') | default('2.34', true) }}"
+      pxc_tarball_url_override: "{{ lookup('env', 'PXC_TARBALL_URL_RHEL') | trim }}"
+      pxc_lower_tarball_url_override: "{{ lookup('env', 'PXC_LOWER_TARBALL_URL_RHEL') | trim }}"
+    when: ansible_os_family == "RedHat"
+
+  - name: Note the PXC series under test
+    set_fact:
+      pxc_series: "{{ pxc_version.split('-')[0].split('.')[0:2] | join('') }}"
+      pxc_lower_series: "{{ pxc_lower_version.split('-')[0].split('.')[0:2] | join('') }}"
+
+  # Released tarball layout, e.g. for PXC_VERSION=8.4.7-7.1:
+  # .../Percona-XtraDB-Cluster-84/Percona-XtraDB-Cluster-8.4.7/binary/tarball/
+  #     Percona-XtraDB-Cluster_8.4.7-7.1_Linux.x86_64.glibc2.35.tar.gz
+  # 5.7 (PXC_VERSION as in the tarball name, e.g. 5.7.43-rel47-65.1) has glibc2.17 builds only:
+  #     Percona-XtraDB-Cluster-5.7.43-rel47-65.1.Linux.x86_64.glibc2.17.tar.gz
+  # The Jenkins job resolves PXC57 / PXC84 ... and always passes the URLs (PXC_TARBALL_URL_* /
+  # PXC_LOWER_TARBALL_URL_*); building them here is for runs without the job.
+  - name: Compute PXC tarball URLs
+    vars:
+      upstream: "{{ pxc_version.split('-')[0] }}"
+      low_upstream: "{{ pxc_lower_version.split('-')[0] }}"
+      file_57: "Percona-XtraDB-Cluster-{{ pxc_version }}.Linux.x86_64.glibc2.17.tar.gz"
+      file: "Percona-XtraDB-Cluster_{{ pxc_version }}_Linux.x86_64.glibc{{ pxc_glibc }}.tar.gz"
+      low_file_57: "Percona-XtraDB-Cluster-{{ pxc_lower_version }}.Linux.x86_64.glibc2.17.tar.gz"
+      low_file: "Percona-XtraDB-Cluster_{{ pxc_lower_version }}_Linux.x86_64.glibc{{ pxc_glibc }}.tar.gz"
+    set_fact:
+      pxc_tarball_url: >-
+        {{ pxc_tarball_url_override if pxc_tarball_url_override | length > 0 else
+           'https://downloads.percona.com/downloads/Percona-XtraDB-Cluster-' ~ pxc_series ~
+           '/Percona-XtraDB-Cluster-' ~ upstream ~ '/binary/tarball/' ~
+           (file_57 if pxc_series == '57' else file) }}
+      pxc_lower_tarball_url: >-
+        {{ '' if pxc_lower_version | length == 0 else
+           pxc_lower_tarball_url_override if pxc_lower_tarball_url_override | length > 0 else
+           'https://downloads.percona.com/downloads/Percona-XtraDB-Cluster-' ~ pxc_lower_series ~
+           '/Percona-XtraDB-Cluster-' ~ low_upstream ~ '/binary/tarball/' ~
+           (low_file_57 if pxc_lower_series == '57' else low_file) }}
+
+  - name: Show what will be tested
+    debug:
+      msg:
+        - "PXC tarball:       {{ pxc_tarball_url }}"
+        - "Lower PXC tarball: {{ pxc_lower_tarball_url | default('-', true) }}"
+        - "Suites: {{ qa_suites | default('(framework defaults)', true) }}  Tests: {{ qa_tests | default('-', true) }}"
+
+  - name: Create tarball and basedir directories
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: "{{ qa_user }}"
+      group: "{{ qa_user }}"
+    loop:
+      - "{{ qa_home }}/tarballs"
+      - "{{ pxc_basedir }}"
+      - "{{ pxc_lower_basedir }}"
+
+  - name: Download PXC tarball
+    get_url:
+      url: "{{ pxc_tarball_url }}"
+      dest: "{{ qa_home }}/tarballs/{{ pxc_tarball_url | basename }}"
+      mode: '0644'
+    register: pxc_download
+    retries: 5
+    delay: 20
+    until: pxc_download is succeeded
+
+  # --strip-components=1 gives a fixed basedir path, whatever the folder inside
+  # the tarball is called (released vs. branch-built tarballs differ).
+  - name: Extract PXC tarball
+    unarchive:
+      src: "{{ qa_home }}/tarballs/{{ pxc_tarball_url | basename }}"
+      dest: "{{ pxc_basedir }}"
+      remote_src: yes
+      extra_opts: ['--strip-components=1']
+      owner: "{{ qa_user }}"
+      group: "{{ qa_user }}"
+
+  - name: Download lower-version PXC tarball (upgrade suite)
+    get_url:
+      url: "{{ pxc_lower_tarball_url }}"
+      dest: "{{ qa_home }}/tarballs/{{ pxc_lower_tarball_url | basename }}"
+      mode: '0644'
+    register: pxc_lower_download
+    retries: 5
+    delay: 20
+    until: pxc_lower_download is succeeded
+    when: pxc_lower_tarball_url | length > 0
+
+  - name: Extract lower-version PXC tarball
+    unarchive:
+      src: "{{ qa_home }}/tarballs/{{ pxc_lower_tarball_url | basename }}"
+      dest: "{{ pxc_lower_basedir }}"
+      remote_src: yes
+      extra_opts: ['--strip-components=1']
+      owner: "{{ qa_user }}"
+      group: "{{ qa_user }}"
+    when: pxc_lower_tarball_url | length > 0
+
+  # The SST script (wsrep_sst_xtrabackup-v2) always runs the bundled xtrabackup with
+  # --xtrabackup-plugin-dir=<basedir>/bin/pxc_extra/pxb-<ver>/lib/plugin, but the PXC
+  # binary tarballs put those plugins (component_keyring_*.so) elsewhere, and where
+  # differs per tarball build, e.g. for PXC 8.4.7:
+  #   glibc2.35: pxc_extra/pxb-8.4/lib/xtrabackup/plugin
+  #   glibc2.34: pxc_extra/pxb-8.4/lib/lib64/xtrabackup/plugin  (pxb-8.0: lib/plugin)
+  # With a keyring (encryption runs) the donor's xtrabackup then cannot load
+  # component_keyring_file ("failed to init keyring component") and every SST fails.
+  # Where lib/plugin is missing, link it to the directory that actually holds
+  # component_keyring_file.so (skipping .build-id debug links); an existing
+  # lib/plugin is left alone.
+  - name: Link pxc_extra lib/plugin to the bundled xtrabackup plugin directory for SST
+    shell: |
+      for libdir in {{ ([pxc_basedir] + ([pxc_lower_basedir] if pxc_lower_tarball_url | length > 0 else []))
+                       | map('regex_replace', '$', '/bin/pxc_extra/pxb-*/lib') | join(' ') }}; do
+        [ -d "$libdir" ] || continue
+        if [ -e "$libdir/plugin" ]; then
+          echo "unchanged $libdir/plugin (already exists)"
+          continue
+        fi
+        component=$(find "$libdir" -path "$libdir/.build-id" -prune -o \
+                      -name component_keyring_file.so -type f -print | head -1)
+        if [ -z "$component" ]; then
+          echo "unchanged $libdir/plugin (no component_keyring_file.so found under $libdir)"
+          continue
+        fi
+        target=$(dirname "${component#$libdir/}")
+        ln -s "$target" "$libdir/plugin"
+        chown -h {{ qa_user }}:{{ qa_user }} "$libdir/plugin"
+        echo "linked $libdir/plugin -> $target"
+      done
+    register: pxb_plugin_links
+    changed_when: "'linked ' in pxb_plugin_links.stdout"
+
+  - name: Print pxc_extra plugin directory links
+    debug:
+      msg: "{{ pxb_plugin_links.stdout_lines }}"
+
+  - name: Check mysqld version from the tarball
+    command: "{{ pxc_basedir }}/bin/mysqld --version"
+    register: mysqld_version
+    changed_when: false
+
+  - name: Print mysqld version
+    debug:
+      msg: "{{ mysqld_version.stdout }}"
+
+  # SST uses the xtrabackup bundled in the PXC tarball (the SST script runs
+  # pxc_extra/pxb-<ver>/bin/xtrabackup by absolute path; see the lib/plugin link above).
+  # PXC 5.7 is the exception: its SST script runs "xtrabackup" from PATH (2.4.28 or newer),
+  # so for 5.7 (or a 5.7 lower version in an upgrade run) XtraBackup 2.4 is always installed.
+  # Tests that run "xtrabackup" themselves (replication/backup_replication.py, found
+  # via PATH) get a separately installed Percona XtraBackup package instead, like a
+  # local setup: the bundled build looks for its plugins (component_keyring_file for
+  # encryption runs) in its compile-time /usr/local/xtrabackup/lib/plugin, while the
+  # package's built-in plugin dir is where the package installs them.
+  # Installed only when such a test can run: an explicit QA_TESTS list naming
+  # backup_replication, or the replication suite (also part of the framework defaults
+  # when QA_SUITES and QA_TESTS are empty), or INSTALL_PXB=true.
+  #
+  # The job never puts a basedir path on PATH: mysqld adds its own <basedir>/bin for
+  # the SST scripts, but skips that when the string already occurs anywhere in PATH
+  # (strstr in wsrep_prepend_PATH()), and joiners then fail with
+  # "wsrep_sst_xtrabackup-v2: command not found".
+  - name: Decide whether a separate xtrabackup is needed
+    set_fact:
+      need_pxb_for_tests: >-
+        {{ lookup('env', 'INSTALL_PXB') | lower == 'true'
+           or ('backup_replication' in qa_tests if qa_tests | length > 0
+               else (qa_suites | length == 0 or 'replication' in qa_suites.split(','))) }}
+      need_pxb_for_sst: "{{ pxc_series == '57' or (pxc_lower_tarball_url | length > 0 and pxc_lower_series == '57') }}"
+      # PXC series -> percona-release repository and package of the matching XtraBackup
+      pxb_packages:
+        '57': { repo: pxb-24, package: percona-xtrabackup-24 }
+        '80': { repo: pxb-80, package: percona-xtrabackup-80 }
+        '84': { repo: pxb-84-lts, package: percona-xtrabackup-84 }
+        '97': { repo: pxb-97-lts, package: percona-xtrabackup-97 }
+
+  # One xtrabackup in /usr/bin: 2.4 when 5.7 nodes need it for SST, else the tested series.
+  - name: Pick the Percona XtraBackup series to install
+    set_fact:
+      need_pxb: "{{ need_pxb_for_tests | bool or need_pxb_for_sst | bool }}"
+      pxb_series: "{{ '57' if need_pxb_for_sst | bool else pxc_series }}"
+
+  - name: Install Percona XtraBackup package (SST for 5.7, backup_replication.py)
+    when: need_pxb | bool
+    block:
+      - name: Check a Percona XtraBackup package is mapped for PXC {{ pxb_series }}
+        assert:
+          that: pxb_series in pxb_packages
+          fail_msg: >-
+            No Percona XtraBackup repository is mapped for PXC {{ pxc_version }}.
+            Add it to pxb_packages in tasks/main.yml, or disable replication/backup_replication.py.
+
+      # A 5.7 -> 8.x upgrade run needs XtraBackup 2.4 for the 5.7 nodes' SST, and
+      # backup_replication.py on 8.x would then run that 2.4 xtrabackup.
+      - name: Check the XtraBackup for SST also suits the selected tests
+        assert:
+          that: not (need_pxb_for_tests | bool) or pxb_series == pxc_series
+          fail_msg: >-
+            PXC_LOWER_VERSION {{ pxc_lower_version }} needs XtraBackup 2.4 for SST, which can't
+            back up PXC {{ pxc_version }}: run backup_replication.py (replication suite) in a
+            separate build without a 5.7 PXC_LOWER_VERSION.
+
+      - name: Enable Percona XtraBackup repository
+        command: percona-release enable {{ pxb_packages[pxb_series].repo }} release
+        changed_when: false
+
+      - name: Install {{ pxb_packages[pxb_series].package }}
+        package:
+          name: "{{ pxb_packages[pxb_series].package }}"
+          state: latest
+          update_cache: "{{ ansible_os_family == 'Debian' }}"
+
+      - name: Check installed xtrabackup
+        command: xtrabackup --version
+        register: pxb_version
+        changed_when: false
+
+      - name: Print installed xtrabackup
+        debug:
+          msg: "{{ pxb_version.stderr_lines + pxb_version.stdout_lines }}"
+
+  - name: Decide whether pstress is needed (random_qa suite)
+    set_fact:
+      need_pstress: >-
+        {{ lookup('env', 'BUILD_PSTRESS') | lower == 'true'
+           or 'random_qa' in qa_suites or 'pstress' in qa_tests or 'random_qa' in qa_tests }}
+
+  - name: Build pstress-pxc against the PXC tarball
+    shell: |
+      runuser -u {{ qa_user }} -- bash -c '
+        set -e
+        cd {{ qa_home }}/pstress
+        cmake . -DPERCONACLUSTER=ON -DBASEDIR={{ pxc_basedir }} -DSTATIC_LIBRARY=OFF \
+                -DCMAKE_EXE_LINKER_FLAGS="-Wl,-rpath,{{ pxc_basedir }}/lib"
+        make -j$(nproc)
+        ls -l src/pstress-pxc
+      '
+    register: pstress_build
+    when: need_pstress | bool
+
+  # Point config.ini at this host's paths.
+  - name: Configure pxc-qa config.ini
+    community.general.ini_file:
+      path: "{{ qa_home }}/pxc-qa/config.ini"
+      section: "{{ item.section }}"
+      option: "{{ item.option }}"
+      value: "{{ item.value }}"
+      owner: "{{ qa_user }}"
+      group: "{{ qa_user }}"
+    loop:
+      - { section: config, option: workdir, value: "{{ qa_workdir }}" }
+      - { section: config, option: basedir, value: "{{ pxc_basedir }}" }
+      - { section: config, option: server, value: pxc }
+      - { section: config, option: user, value: root }
+      - { section: config, option: pt_basedir, value: /usr }
+      - { section: config, option: pstress_bin, value: "{{ qa_home }}/pstress/src/pstress-pxc" }
+      - { section: config, option: pstress_grammar_file, value: "{{ qa_home }}/pstress/src/grammar.sql" }
+      - { section: config, option: randgen_dir, value: "{{ qa_home }}/percona-qa/randgen" }
+      - { section: sysbench, option: sysbench_dir, value: /usr/share/sysbench }
+
+  # Only upgrade tests read these (pxc-qa checks them per test), so they are set
+  # only when a lower version was given; otherwise the repo's placeholders stay.
+  - name: Configure upgrade basedirs in config.ini
+    community.general.ini_file:
+      path: "{{ qa_home }}/pxc-qa/config.ini"
+      section: upgrade
+      option: "{{ item.option }}"
+      value: "{{ item.value }}"
+      owner: "{{ qa_user }}"
+      group: "{{ qa_user }}"
+    loop:
+      - { option: pxc_lower_base, value: "{{ pxc_lower_basedir }}" }
+      - { option: pxc_upper_base, value: "{{ pxc_basedir }}" }
+    when: pxc_lower_tarball_url | length > 0
+
+  # QA_CONFIG_OVERRIDES="sysbench.sysbench_run_time=60;config.node=3"
+  - name: Apply QA_CONFIG_OVERRIDES to config.ini
+    community.general.ini_file:
+      path: "{{ qa_home }}/pxc-qa/config.ini"
+      section: "{{ item.split('.', 1)[0] | trim }}"
+      option: "{{ item.split('.', 1)[1].split('=', 1)[0] | trim }}"
+      value: "{{ item.split('=', 1)[1] | trim }}"
+    loop: "{{ lookup('env', 'QA_CONFIG_OVERRIDES').split(';') | map('trim') | select | list }}"
+
+  # Appends to a disabled.list that comes with the pxc-qa checkout (its entries stay
+  # in effect) or creates the file. The BEGIN/END marker lines start with '#', which
+  # pxc-qa ignores as comments.
+  - name: Add DISABLED_TESTS to disabled.list
+    blockinfile:
+      path: "{{ qa_home }}/pxc-qa/disabled.list"
+      create: true
+      insertafter: EOF
+      marker: "# {mark} DISABLED_TESTS from Jenkins job {{ lookup('env', 'JOB_NAME') }}"
+      block: "{{ lookup('env', 'DISABLED_TESTS').split(',') | map('trim') | select | join('\n') }}"
+      owner: "{{ qa_user }}"
+      group: "{{ qa_user }}"
+    when: lookup('env', 'DISABLED_TESTS') | trim | length > 0
+
+  - name: Show effective disabled.list
+    command: cat {{ qa_home }}/pxc-qa/disabled.list
+    register: qa_disabled_list
+    changed_when: false
+    failed_when: false
+
+  - name: Print effective disabled.list
+    debug:
+      msg: "{{ qa_disabled_list.stdout_lines | default([]) }}"
+    when: qa_disabled_list.rc == 0
+
+  - name: Show effective config.ini
+    command: cat {{ qa_home }}/pxc-qa/config.ini
+    register: qa_config
+    changed_when: false
+
+  - name: Print effective config.ini
+    debug:
+      msg: "{{ qa_config.stdout_lines }}"
+
+  - name: Build qa_framework.py arguments
+    set_fact:
+      qa_args: >-
+        {{ (['--suites=' ~ qa_suites] if qa_suites | length > 0 else [])
+           + (['--tests=' ~ qa_tests] if qa_tests | length > 0 else [])
+           + (['--encryption-run'] if lookup('env', 'ENCRYPTION_RUN') | lower == 'true' else [])
+           + (['--debug'] if lookup('env', 'QA_DEBUG') | lower == 'true' else [])
+           + (['--number-of-workers=' ~ qa_workers] if qa_workers | int > 0 else []) }}
+
+  - block:
+    - name: Show free disk space (before tests)
+      command: df -h
+      register: df_before
+      changed_when: false
+
+    - name: Display free disk space (before tests)
+      debug:
+        msg: "{{ df_before.stdout_lines }}"
+
+    # async so a multi-hour run doesn't depend on one SSH session staying up;
+    # QA_TIMEOUT_HOURS doubles as a hard timeout.
+    # qa_framework.py starts every test with sys.executable, so running it with the
+    # venv interpreter is enough for the tests to get mysql-connector.
+    # Plain system PATH, nothing under a PXC basedir (see "Decide whether a separate
+    # xtrabackup is needed"); the packaged xtrabackup, if installed, is in /usr/bin.
+    - name: Run qa_framework.py {{ qa_args | join(' ') }}
+      shell: |
+        runuser -u {{ qa_user }} -- env \
+          PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" \
+          PYTHONIOENCODING=utf-8 \
+          PYTHONUNBUFFERED=1 \
+          QA_ARGS={{ qa_args | join(' ') | quote }} \
+        bash -c '
+          set -o pipefail
+          cd {{ qa_home }}/pxc-qa
+          {{ qa_venv }}/bin/python3 qa_framework.py $QA_ARGS 2>&1 | tee {{ qa_home }}/qa_framework_console.log
+        '
+      async: "{{ qa_timeout_seconds | int }}"
+      poll: 60
+      register: qa_run
+
+    always:
+      - name: Display qa_framework.py output
+        debug:
+          msg: "{{ qa_run.stdout_lines | default([]) }}"
+
+      - name: Copy junit converter to host
+        copy:
+          src: qa_results_to_junit.py
+          dest: "{{ qa_home }}/qa_results_to_junit.py"
+          mode: '0755'
+
+      - name: Convert test_run_results.out to junit xml
+        command: >-
+          {{ qa_venv }}/bin/python3 {{ qa_home }}/qa_results_to_junit.py
+          {{ qa_home }}/pxc-qa/test_run_results.out
+          {{ qa_workdir }}
+          /var/tmp/junit-pxc-qa-{{ qa_dist }}.xml
+          pxc-qa-{{ qa_dist }}
+          {{ qa_run.rc | default(1) }}
+          {{ qa_home }}/qa_framework_console.log
+        register: junit_result
+        failed_when: false
+
+      - name: Display junit conversion result
+        debug:
+          msg: "{{ junit_result.stdout_lines | default([]) + junit_result.stderr_lines | default([]) }}"
+
+      # Only logs/configs, never the node datadirs (they can be many GB).
+      - name: Archive framework logs
+        shell: |
+          runuser -u {{ qa_user }} -- mkdir -p {{ qa_workdir }}
+          cd {{ qa_workdir }} || exit 1
+          cp -f {{ qa_home }}/pxc-qa/test_run_results.out {{ qa_home }}/qa_framework_console.log . 2>/dev/null || true
+          ITEMS=$(ls -d test_run_results.out qa_framework_console.log log conf failed_logs w*/log w*/conf w*/failed_logs 2>/dev/null)
+          tar -czf /var/tmp/pxc_qa_logs_{{ qa_dist }}.tar.gz $ITEMS
+          ls -lh /var/tmp/pxc_qa_logs_{{ qa_dist }}.tar.gz
+        register: archive_result
+        failed_when: false
+
+      - name: Display archive information
+        debug:
+          msg: "{{ archive_result.stdout_lines | default([]) }}"
+
+      # Fetch here rather than in cleanup.yml: molecule skips cleanup when converge fails.
+      - name: Find artifacts to fetch
+        find:
+          paths: /var/tmp
+          patterns:
+            - "pxc_qa_logs_{{ qa_dist }}.tar.gz"
+            - "junit-pxc-qa-{{ qa_dist }}.xml"
+        register: qa_artifacts
+
+      - name: Fetch artifacts to Jenkins workspace
+        fetch:
+          src: "{{ item.path }}"
+          dest: "/{{ lookup('env', 'WORKSPACE_VAR') }}/{{ item.path | basename }}"
+          flat: yes
+        loop: "{{ qa_artifacts.files }}"
+        when: lookup('env', 'WORKSPACE_VAR') | length > 0
+
+      - name: Show free disk space (after tests)
+        command: df -h
+        register: df_after
+        changed_when: false
+
+      - name: Display free disk space (after tests)
+        debug:
+          msg: "{{ df_after.stdout_lines }}"
