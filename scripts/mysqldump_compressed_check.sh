@@ -45,7 +45,7 @@ fail() { echo "[mysqldump-cc] FAIL: $*"; FAILED=$((FAILED + 1)); RESULTS+=("FAIL
 
 # mysql / mysqldump with the connection options (empty array safe for set -u)
 sql()  { "${MYSQL_BIN}" ${CONN[@]+"${CONN[@]}"} --default-character-set=utf8mb4 "$@"; }
-dump() { "${MYSQLDUMP_BIN}" ${CONN[@]+"${CONN[@]}"} --default-character-set=utf8mb4 --skip-comments "$@"; }
+dump() { "${MYSQLDUMP_BIN}" ${CONN[@]+"${CONN[@]}"} --default-character-set=utf8mb4 --skip-comments --set-gtid-purged=OFF "$@"; }
 
 # True when mysqldump was killed by a signal or printed a crash message.
 crashed() {
