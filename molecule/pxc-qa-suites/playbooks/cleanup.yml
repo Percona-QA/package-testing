@@ -1,0 +1,30 @@
+---
+# Test logs and junit xml are fetched to Jenkins by the always: block in
+# tasks/main.yml, because molecule does not run the cleanup step when converge
+# fails. This playbook only fetches anything left behind, then stops stray mysqld.
+- name: Cleanup
+  hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    WORKSPACE_VAR: "{{ lookup('env', 'WORKSPACE_VAR') }}"
+  tasks:
+    - name: Find pxc-qa artifacts in /var/tmp
+      find:
+        paths: /var/tmp
+        patterns:
+          - "pxc_qa_logs_*.tar.gz"
+          - "junit-pxc-qa-*.xml"
+        file_type: file
+      register: qa_artifacts
+
+    - name: Fetch pxc-qa artifacts to Jenkins workspace
+      fetch:
+        src: "{{ item.path }}"
+        dest: "/{{ WORKSPACE_VAR }}/{{ item.path | basename }}"
+        flat: yes
+      loop: "{{ qa_artifacts.files }}"
+
+    - name: Stop any mysqld left running by the framework
+      shell: pkill -9 -u pxcqa mysqld || true
+      changed_when: false
