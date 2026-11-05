@@ -16,8 +16,8 @@ pipeline {
               rm -rf /package-testing
               rm -f master.zip
               wget https://github.com/kaushikpuneet07/package-testing/archive/PS-11950-mysqldump-compressed-columns-test.zip
-              unzip master.zip
-              rm -f master.zip
+              unzip PS-11950-mysqldump-compressed-columns-test.zip
+              rm -f PS-11950-mysqldump-compressed-columns-test.zip
               mv "package-testing-PS-11950-mysqldump-compressed-columns-test" package-testing
             '''
                     
