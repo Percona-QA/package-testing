@@ -7,8 +7,8 @@
     set_fact:
       pxc_version: "{{ lookup('env', 'PXC_VERSION') }}"
       pxc_lower_version: "{{ lookup('env', 'PXC_LOWER_VERSION') | trim }}"
-      qa_suites: "{{ lookup('env', 'QA_SUITES') | trim }}"
-      qa_tests: "{{ lookup('env', 'QA_TESTS') | trim }}"
+      qa_suites: "{{ lookup('env', 'QA_SUITES').split(',') | map('trim') | select | join(',') }}"
+      qa_tests: "{{ lookup('env', 'QA_TESTS').split(',') | map('trim') | select | join(',') }}"
       qa_workers: "{{ lookup('env', 'NUMBER_OF_WORKERS') | default('0', true) | int }}"
       qa_timeout_seconds: "{{ (lookup('env', 'QA_TIMEOUT_HOURS') | default('10', true) | int) * 3600 }}"
       qa_workdir: "{{ qa_home }}/qa_workdir"
@@ -424,7 +424,8 @@
       # Only logs/configs, never the node datadirs (they can be many GB).
       - name: Archive framework logs
         shell: |
-          cd {{ qa_workdir }} 2>/dev/null || exit 0
+          runuser -u {{ qa_user }} -- mkdir -p {{ qa_workdir }}
+          cd {{ qa_workdir }} || exit 1
           cp -f {{ qa_home }}/pxc-qa/test_run_results.out {{ qa_home }}/qa_framework_console.log . 2>/dev/null || true
           ITEMS=$(ls -d test_run_results.out qa_framework_console.log log conf failed_logs w*/log w*/conf w*/failed_logs 2>/dev/null)
           tar -czf /var/tmp/pxc_qa_logs_{{ qa_dist }}.tar.gz $ITEMS

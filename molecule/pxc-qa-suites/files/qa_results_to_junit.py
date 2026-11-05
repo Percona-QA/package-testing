@@ -84,11 +84,11 @@ def main():
     console_log = sys.argv[6] if len(sys.argv) > 6 else None
 
     cases = parse(results_file)
-    # The framework can die before writing any result line (bad basedir, import
-    # error, ...). Report that as a failure so the Jenkins build doesn't look green.
-    if not cases and exit_code != '0':
+    # A runner error or timeout can happen after some tests pass or are skipped.
+    # Preserve the nonzero exit in JUnit when no test failure already explains it.
+    if exit_code != '0' and not any(case['status'] == 'Fail' for case in cases):
         cases.append({'name': 'pxc-qa.qa_framework', 'status': 'Fail', 'time': 0,
-                      'details': ['qa_framework.py exited with ' + exit_code + ' before reporting any test',
+                      'details': ['qa_framework.py exited with ' + exit_code + ' without reporting a failing test',
                                   tail(console_log)]})
 
     suite_el = ET.Element('testsuite', name=class_prefix)
