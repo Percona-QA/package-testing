@@ -10,6 +10,10 @@ container_name = 'ps-docker-test-static'
 
 @pytest.fixture(scope='module')
 def host():
+    # Remove any leftover container from an interrupted previous run so the
+    # fixed --name docker run does not fail with a name conflict.
+    subprocess.run(['docker', 'rm', '-f', container_name],
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     docker_id = subprocess.check_output(
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e',
          'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport',
