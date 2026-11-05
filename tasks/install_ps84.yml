@@ -24,6 +24,12 @@
       - percona-server-client{{ pro_suf | default('') }}={{ ps84_version }}*
       - percona-server-rocksdb{{ pro_suf | default('') }}={{ ps84_version }}*
       - percona-mysql-router{{ pro_suf | default('') }}={{ ps84_version }}*
+      # Shared dependencies must be pinned too: the packages above depend on
+      # an exact (= {{ ps84_version }}) version of these, so leaving them
+      # unpinned makes apt pull the repo's latest and fail with broken deps.
+      - percona-server-common={{ ps84_version }}*
+      - libperconaserverclient24={{ ps84_version }}*
+      - libperconaserverclient24-dev={{ ps84_version }}*
       percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}={{ ps84_version }}*"
       packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
     when: ansible_os_family == "Debian"
