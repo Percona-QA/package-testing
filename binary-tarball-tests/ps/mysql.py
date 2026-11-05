@@ -11,6 +11,7 @@ class MySQL:
         self.socket = '/tmp/mysql.sock'
         self.logfile = base_dir+'/log/master.err'
         self.mysql = base_dir+'/bin/mysql'
+        self.mysqldump = base_dir+'/bin/mysqldump'
         self.mysqld = base_dir+'/bin/mysqld'
         self.mysqladmin = base_dir+'/bin/mysqladmin'
         self.pidfile = base_dir+'/mysql.pid'
