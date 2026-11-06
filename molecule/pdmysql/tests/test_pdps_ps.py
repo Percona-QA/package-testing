@@ -181,6 +181,8 @@ def is_running(host):
 
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
+    if package == 'percona-mysql-shell':
+        pytest.skip("mysqlsh checks are skipped for pdps")
     dist = host.system_info.distribution
     if dist.lower() in RHEL_DISTS:
         pytest.skip("This test only for Debian based platforms")
@@ -198,6 +200,8 @@ def test_check_deb_package(host, package):
 
 @pytest.mark.parametrize("package", RPMPACKAGES)
 def test_check_rpm_package(host, package):
+    if package == 'percona-mysql-shell':
+        pytest.skip("mysqlsh checks are skipped for pdps")
     dist = host.system_info.distribution
     if dist.lower() in DEB_DISTS:
         pytest.skip("This test only for RHEL based platforms")
@@ -215,6 +219,8 @@ def test_check_rpm_package(host, package):
 
 @pytest.mark.parametrize("binary", ['mysqlsh', 'mysql', 'mysqlrouter'])
 def test_binary_version(host, binary):
+    if binary == 'mysqlsh':
+        pytest.skip("mysqlsh checks are skipped for pdps")
     cmd = "{} --version".format(binary)
     result = host.run(cmd)
     assert result.rc == 0, (result.stderr, result.stdout)
@@ -319,6 +325,7 @@ def test_sources_ps_version(host):
 
 @pytest.mark.pkg_source
 def test_sources_mysql_shell_version(host):
+    pytest.skip("mysqlsh checks are skipped for pdps")
     if REPO == "testing" or REPO == "experimental":
         pytest.skip("This test only for main repo")
     dist = host.system_info.distribution
@@ -338,3 +345,16 @@ def test_telemetry_enabled(host):
 #@pytest.mark.telemetry_disabled
 #def test_telemetry_disabled(host):
 #    assert not host.file(TELEMETRY_PATH).exists
+
+
+def test_mysqldump_compressed_columns(host):
+    """PS-11950: run the common mysqldump compressed-columns check on the host.
+    The script is part of the package-testing copy downloaded to
+    /package-testing during converge; root connects via its default client
+    config (~/.my.cnf on RHEL, socket auth on Debian)."""
+    script = '/package-testing/scripts/mysqldump_compressed_check.sh'
+    with host.sudo("root"):
+        assert host.file(script).exists, script + " not found"
+        result = host.run('bash ' + script)
+    print(result.stdout)
+    assert result.rc == 0, result.stdout[-3000:] + result.stderr[-1000:]

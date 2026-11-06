@@ -314,3 +314,20 @@ def test_opentelemetry_client_plugin(host, mysql_server, pro_fips_vars):
     disabled = host.run(mysql_cmd+' --otel-help')
     assert not disabled.succeeded
     assert loaded_marker not in disabled.stdout + disabled.stderr
+
+
+def test_mysqldump_compressed_columns(mysql_server):
+    """PS-11950: run the common mysqldump compressed-columns check against
+    the tarball's own mysql/mysqldump binaries."""
+    import os
+    script = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                          '..', '..', '..', 'scripts', 'mysqldump_compressed_check.sh'))
+    env = dict(os.environ)
+    env['MYSQL_BIN'] = mysql_server.basedir + '/bin/mysql'
+    env['MYSQLDUMP_BIN'] = mysql_server.basedir + '/bin/mysqldump'
+    env['MYSQL_ARGS'] = '--user=root -S' + mysql_server.socket
+    result = subprocess.run(['bash', script], env=env,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            universal_newlines=True)
+    print(result.stdout)
+    assert result.returncode == 0, result.stdout[-3000:]

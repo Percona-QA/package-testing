@@ -1,5 +1,14 @@
 # This task installs Percona Server 8.0 on CentOS and Debian/Ubuntu
 #
+# NOTE: the PS 8.4 packages are pinned to ps84_version below. The ps-84-lts
+# testing repo now ships a newer release (8.4.13), so without this pin the job
+# would install the latest instead of the intended 8.4.11-12. apt pins with
+# "=<version>*", yum/dnf with "-<version>*" (yum does not accept "=").
+# To install the latest again, remove the version suffixes / this pin.
+
+  - name: pin Percona Server 8.4 version
+    set_fact:
+      ps84_version: "8.4.11-12"
 
   - name: install Percona Server deb packages
     apt:
@@ -8,14 +17,20 @@
       state: latest
     vars:
       packages_base:
-      - percona-server-server{{ pro_suf | default('') }}
-      - percona-server-test{{ pro_suf | default('') }}
-      - percona-server{{ pro_suf | default('') }}-dbg
-      - percona-server{{ pro_suf | default('') }}-source
-      - percona-server-client{{ pro_suf | default('') }}
-      - percona-server-rocksdb{{ pro_suf | default('') }}
-      - percona-mysql-router{{ pro_suf | default('') }}
-      percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
+      - percona-server-server{{ pro_suf | default('') }}={{ ps84_version }}*
+      - percona-server-test{{ pro_suf | default('') }}={{ ps84_version }}*
+      - percona-server{{ pro_suf | default('') }}-dbg={{ ps84_version }}*
+      - percona-server{{ pro_suf | default('') }}-source={{ ps84_version }}*
+      - percona-server-client{{ pro_suf | default('') }}={{ ps84_version }}*
+      - percona-server-rocksdb{{ pro_suf | default('') }}={{ ps84_version }}*
+      - percona-mysql-router{{ pro_suf | default('') }}={{ ps84_version }}*
+      # Shared dependencies must be pinned too: the packages above depend on
+      # an exact (= {{ ps84_version }}) version of these, so leaving them
+      # unpinned makes apt pull the repo's latest and fail with broken deps.
+      - percona-server-common={{ ps84_version }}*
+      - libperconaserverclient24={{ ps84_version }}*
+      - libperconaserverclient24-dev={{ ps84_version }}*
+      percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}={{ ps84_version }}*"
       packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
     when: ansible_os_family == "Debian"
     environment:
@@ -48,15 +63,15 @@
       update_cache: yes
     vars:
       packages_base:
-      - percona-server-server{{ pro_suf | default('') }}
-      - percona-mysql-router{{ pro_suf | default('') }}
-      - percona-server-client{{ pro_suf | default('') }}
-      - percona-server-test{{ pro_suf | default('') }}
-      - percona-server{{ pro_suf | default('') }}-debuginfo
-      - percona-server-devel{{ pro_suf | default('') }}
-      - percona-server-rocksdb{{ pro_suf | default('') }}
-      - percona-server-shared-compat{{ pro_suf | default('') }}
-      percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
+      - percona-server-server{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-mysql-router{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-server-client{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-server-test{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-server{{ pro_suf | default('') }}-debuginfo-{{ ps84_version }}*
+      - percona-server-devel{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-server-rocksdb{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-server-shared-compat{{ pro_suf | default('') }}-{{ ps84_version }}*
+      percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}-{{ ps84_version }}*"
       packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
     when:
       - ansible_os_family == "RedHat"
@@ -74,14 +89,14 @@
       update_cache: yes
     vars:
       packages_base:
-      - percona-server-server{{ pro_suf | default('') }}
-      - percona-mysql-router{{ pro_suf | default('') }}
-      - percona-server-client{{ pro_suf | default('') }}
-      - percona-server-test{{ pro_suf | default('') }}
-      - percona-server{{ pro_suf | default('') }}-debuginfo
-      - percona-server-devel{{ pro_suf | default('') }}
-      - percona-server-rocksdb{{ pro_suf | default('') }}
-      percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
+      - percona-server-server{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-mysql-router{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-server-client{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-server-test{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-server{{ pro_suf | default('') }}-debuginfo-{{ ps84_version }}*
+      - percona-server-devel{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-server-rocksdb{{ pro_suf | default('') }}-{{ ps84_version }}*
+      percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}-{{ ps84_version }}*"
       packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
     when:
       - ansible_os_family == "RedHat"
@@ -99,14 +114,14 @@
       update_cache: yes
     vars:
       packages_base:
-      - percona-server-server{{ pro_suf | default('') }}
-      - percona-mysql-router{{ pro_suf | default('') }}
-      - percona-server-client{{ pro_suf | default('') }}
-      - percona-server-test{{ pro_suf | default('') }}
-      - percona-server{{ pro_suf | default('') }}-debuginfo
-      - percona-server-devel{{ pro_suf | default('') }}
-      - percona-server-rocksdb{{ pro_suf | default('') }}
-      percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}"
+      - percona-server-server{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-mysql-router{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-server-client{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-server-test{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-server{{ pro_suf | default('') }}-debuginfo-{{ ps84_version }}*
+      - percona-server-devel{{ pro_suf | default('') }}-{{ ps84_version }}*
+      - percona-server-rocksdb{{ pro_suf | default('') }}-{{ ps84_version }}*
+      percona_server_js_pkg: "percona-server-js{{ pro_suf | default('') }}-{{ ps84_version }}*"
       packages: "{{ packages_base + (install_percona_server_js | default(true) | bool | ternary([percona_server_js_pkg], [])) }}"
     when:
       - ansible_os_family == "RedHat"

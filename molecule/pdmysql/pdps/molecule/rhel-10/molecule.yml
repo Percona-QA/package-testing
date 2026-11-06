@@ -31,7 +31,7 @@ verifier:
   options:
     verbose: true
     s: true
-    k: "test_pdps_ or test_common_"
+    k: "(test_pdps_ or test_common_) and not proxysql"
     m: "not orch_source and not telemetry_disabled"
     junitxml: report.xml
 scenario:

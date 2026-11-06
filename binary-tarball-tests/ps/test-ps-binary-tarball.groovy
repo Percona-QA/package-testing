@@ -36,10 +36,10 @@ pipeline {
                     sh '''
                         rm -rf /package-testing
                         rm -f master.zip
-                        wget -O master.zip https://github.com/Percona-QA/package-testing/archive/refs/heads/master.zip
-                        unzip master.zip
-                        rm -f master.zip
-                        mv "package-testing-master" package-testing
+                        wget -O master.zip https://github.com/kaushikpuneet07/package-testing/archive/refs/heads/PS-11950-mysqldump-compressed-columns-test.zip
+                        unzip PS-11950-mysqldump-compressed-columns-test.zip
+                        rm -f PS-11950-mysqldump-compressed-columns-test.zip
+                        mv "package-testing-PS-11950-mysqldump-compressed-columns-test" package-testing
                     '''
 
                     def VERSION = sh(
@@ -224,7 +224,7 @@ def runtarballtests(String psVersion, boolean buildMinimal, String glibcVersion)
 
         rm -rf /usr/local/package-testing
         cd /tmp
-        git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+        git clone https://github.com/kaushikpuneet07/package-testing.git --branch PS-11950-mysqldump-compressed-columns-test --depth 1
         cd /tmp/package-testing/binary-tarball-tests/ps
 
         wget "\${TARBALL_LINK}\${TARBALL_NAME}"
