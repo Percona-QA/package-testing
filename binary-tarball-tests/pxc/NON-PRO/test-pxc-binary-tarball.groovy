@@ -52,7 +52,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar socat
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch PS-11950-mysqldump-compressed-columns-test --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 df -mh
@@ -89,7 +89,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar socat
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch PS-11950-mysqldump-compressed-columns-test --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -129,7 +129,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar socat
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch PS-11950-mysqldump-compressed-columns-test --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -165,7 +165,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch PS-11950-mysqldump-compressed-columns-test --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -205,7 +205,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo apt install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch PS-11950-mysqldump-compressed-columns-test --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q ${TARBALL_LINK}${TARBALL_NAME}
                                 ./run.sh || true
@@ -241,7 +241,7 @@ pipeline {
                                fi
                                rm -rf package-testing
                                sudo yum install -y git wget tar
-                               git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                               git clone https://github.com/kaushikpuneet07/package-testing.git --branch PS-11950-mysqldump-compressed-columns-test --depth 1
                                cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                wget -q ${TARBALL_LINK}${TARBALL_NAME}
                               ./run.sh || true
@@ -278,7 +278,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch PS-11950-mysqldump-compressed-columns-test --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q "${TARBALL_LINK}${TARBALL_NAME}"
                                ./run.sh || true
@@ -314,7 +314,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch PS-11950-mysqldump-compressed-columns-test --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q "${TARBALL_LINK}${TARBALL_NAME}"
                                ./run.sh || true
@@ -350,7 +350,7 @@ pipeline {
                                 fi
                                 rm -rf package-testing
                                 sudo yum install -y git wget tar
-                                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+                                git clone https://github.com/kaushikpuneet07/package-testing.git --branch PS-11950-mysqldump-compressed-columns-test --depth 1
                                 cd package-testing/binary-tarball-tests/pxc/NON-PRO
                                 wget -q "${TARBALL_LINK}${TARBALL_NAME}"
                                ./run.sh || true
