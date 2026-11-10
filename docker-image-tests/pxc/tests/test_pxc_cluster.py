@@ -196,6 +196,19 @@ class TestCluster:
             assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PXC')
             assert cluster[0].ti_host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
 
+    def test_mysqldump_compressed_columns(self, cluster):
+        """PS-11950: copy the common mysqldump compressed-columns check into
+        the first node and run it there."""
+        if pxc_version_major != '8.4':
+            pytest.skip('PS-11950 mysqldump compressed-columns check runs for PXC 8.4 only')
+        import os
+        script = os.path.abspath(os.path.join(test_pwd, '..', '..', 'scripts', 'mysqldump_compressed_check.sh'))
+        subprocess.check_call(['docker', 'cp', script, cluster[0].node_name + ':/tmp/mysqldump_compressed_check.sh'])
+        args = '--user=root --password=' + pxc_pwd + ' -S/tmp/mysql.sock'
+        cmd = cluster[0].ti_host.run('MYSQL_ARGS=' + shlex.quote(args) + ' bash /tmp/mysqldump_compressed_check.sh')
+        print(cmd.stdout)
+        assert cmd.rc == 0, cmd.stdout[-3000:] + cmd.stderr[-1000:]
+
 class TestGardb:
     def test_cluster_size_at_startup(self, cluster, garbd):
         output = cluster[0].run_query('SHOW STATUS LIKE "wsrep_cluster_size";')

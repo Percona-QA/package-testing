@@ -155,3 +155,14 @@
     command: /package-testing/package_check.sh pxc84
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
+
+  # Runs on the bootstrap node only: the script creates and drops fixed
+  # qa_cc* schemas, so running it on several nodes of the cluster at once
+  # would make them collide.
+  - name: PS-11950 check mysqldump with compressed columns
+    command: /package-testing/scripts/mysqldump_compressed_check.sh
+    register: mysqldump_cc_check
+
+  - name: PS-11950 show mysqldump check output
+    debug:
+      var: mysqldump_cc_check.stdout_lines

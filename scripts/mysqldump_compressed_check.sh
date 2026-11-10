@@ -17,6 +17,11 @@
 #                   "--user=root -S/tmp/mysql.sock"
 #                   "--user=root --password=secret -S/var/lib/mysql/mysql.sock"
 #
+# Percona XtraDB Cluster is detected automatically: pxc_strict_mode=ENFORCING
+# refuses LOCK TABLES, so there the dump uses --single-transaction and
+# --skip-add-locks. Every test table has a primary key so the checks also run
+# with sql_require_primary_key=ON (PXC docker images).
+#
 # Expected results:
 #   build without the fix -> some checks FAIL (proves the checks work)
 #   build with the fix    -> all checks PASS
@@ -31,6 +36,7 @@ set -u
 MYSQL_BIN="${MYSQL_BIN:-mysql}"
 MYSQLDUMP_BIN="${MYSQLDUMP_BIN:-mysqldump}"
 read -r -a CONN <<< "${MYSQL_ARGS:-}"
+DUMP_OPTS=()
 
 WORKDIR=$(mktemp -d /tmp/mysqldump_cc.XXXXXX)
 MARKER=' /*!50633 COLUMN_FORMAT COMPRESSED'
@@ -45,7 +51,7 @@ fail() { echo "[mysqldump-cc] FAIL: $*"; FAILED=$((FAILED + 1)); RESULTS+=("FAIL
 
 # mysql / mysqldump with the connection options (empty array safe for set -u)
 sql()  { "${MYSQL_BIN}" ${CONN[@]+"${CONN[@]}"} --default-character-set=utf8mb4 "$@"; }
-dump() { "${MYSQLDUMP_BIN}" ${CONN[@]+"${CONN[@]}"} --default-character-set=utf8mb4 --skip-comments --set-gtid-purged=OFF "$@"; }
+dump() { "${MYSQLDUMP_BIN}" ${CONN[@]+"${CONN[@]}"} --default-character-set=utf8mb4 --skip-comments --set-gtid-purged=OFF ${DUMP_OPTS[@]+"${DUMP_OPTS[@]}"} "$@"; }
 
 # True when mysqldump was killed by a signal or printed a crash message.
 crashed() {
@@ -132,6 +138,12 @@ dump_restore_compare() {
 log "mysqldump under test: $("${MYSQLDUMP_BIN}" --version 2>&1)"
 log "server version:       $(sql -N -B -e 'SELECT @@version;' 2>&1)"
 
+# PXC: LOCK TABLES is refused under pxc_strict_mode=ENFORCING
+if sql -N -B -e 'SELECT @@pxc_strict_mode;' >/dev/null 2>&1; then
+    DUMP_OPTS=(--single-transaction --skip-add-locks)
+    log "PXC detected (pxc_strict_mode=$(sql -N -B -e 'SELECT @@pxc_strict_mode;' 2>/dev/null)), dump options: ${DUMP_OPTS[*]}"
+fi
+
 #############################################################################
 # Check 1 - comment text must not turn into statements in the dump
 #           (ticket D1; modes: default, --enable-compressed-columns)
@@ -140,6 +152,7 @@ log "Check 1: statements hidden in column comments"
 sql -e "DROP DATABASE IF EXISTS qa_cc1; CREATE DATABASE qa_cc1;"
 if ! sql qa_cc1 <<SQL
 CREATE TABLE t4 (
+  id INT PRIMARY KEY,
   a INT COMMENT '${MARKER}',
   b BLOB COLUMN_FORMAT COMPRESSED,
   c INT COMMENT ') ENGINE=InnoDB; CREATE USER evil@localhost; GRANT ALL ON *.* TO evil@localhost WITH GRANT OPTION; CREATE TABLE t5 (y INT -- '
@@ -170,7 +183,7 @@ fi
 #############################################################################
 log "Check 2: comment containing a full marker"
 sql -e "DROP DATABASE IF EXISTS qa_cc2; CREATE DATABASE qa_cc2;"
-if ! sql qa_cc2 -e "CREATE TABLE t (a INT COMMENT 'keep${MARKER} this */ text', b BLOB COLUMN_FORMAT COMPRESSED);"; then
+if ! sql qa_cc2 -e "CREATE TABLE t (id INT PRIMARY KEY, a INT COMMENT 'keep${MARKER} this */ text', b BLOB COLUMN_FORMAT COMPRESSED);"; then
     fail "check 2: could not create test table"
 else
     for mode in "" "--enable-compressed-columns" "--enable-compressed-columns-with-dictionaries"; do
@@ -185,7 +198,7 @@ fi
 #############################################################################
 log "Check 3: marker without closing */"
 sql -e "DROP DATABASE IF EXISTS qa_cc3; CREATE DATABASE qa_cc3;"
-if ! sql qa_cc3 -e "CREATE TABLE t (a INT COMMENT '${MARKER}');"; then
+if ! sql qa_cc3 -e "CREATE TABLE t (id INT PRIMARY KEY, a INT COMMENT '${MARKER}');"; then
     fail "check 3: could not create test table"
 else
     for mode in "" "--enable-compressed-columns"; do
@@ -205,7 +218,7 @@ for len in 500 387; do
     tag="check 4 (name length ${len})"
     name=$(printf '%*s' "${len}" '' | tr ' ' 'x')
     sql qa_cc4 -e "DROP TABLE IF EXISTS t${len};"
-    if ! sql qa_cc4 -e "CREATE TABLE t${len} (a INT COMMENT '${MARKER} WITH COMPRESSION_DICTIONARY ${name} */');"; then
+    if ! sql qa_cc4 -e "CREATE TABLE t${len} (id INT PRIMARY KEY, a INT COMMENT '${MARKER} WITH COMPRESSION_DICTIONARY ${name} */');"; then
         fail "${tag}: could not create test table"
         continue
     fi
