@@ -113,7 +113,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                   MINIMAL="-minimal"
                                 fi
-                                GLIBC="2.39"
+                                GLIBC="2.41"
                                 if [ "${EOL}" = "yes" ]; then
                                   GLIBC="2.35"
                                 fi
@@ -189,7 +189,7 @@ pipeline {
                                 if [ "${BUILD_TYPE_MINIMAL}" = "true" ]; then
                                   MINIMAL="-minimal"
                                 fi
-                                GLIBC="2.39"
+                                GLIBC="2.41"
                                 if [ "${EOL}" = "yes" ]; then
                                   GLIBC="2.35"
                                 fi
