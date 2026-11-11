@@ -31,8 +31,8 @@ def test_cluster_size(mysql_server):
 def test_mysqldump_compressed_columns(mysql_server):
     """PS-11950: run the common mysqldump compressed-columns check against
     the tarball's own mysql/mysqldump binaries on node1."""
-    if pxc_version_major != '8.4':
-        pytest.skip('PS-11950 mysqldump compressed-columns check runs for PXC 8.4 only')
+    if pxc_version_major not in ('8.4', '9.7'):
+        pytest.skip('PS-11950 mysqldump compressed-columns check runs for PXC 8.4 and 9.7 only')
     import os
     script = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                           '..', '..', '..', '..', 'scripts', 'mysqldump_compressed_check.sh'))
