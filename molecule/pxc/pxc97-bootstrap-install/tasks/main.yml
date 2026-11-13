@@ -226,5 +226,15 @@
     command: /package-testing/package_check.sh pxc97
     when: lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
 
+  - name: PS-11950 check mysqldump with compressed columns
+    command: /package-testing/scripts/mysqldump_compressed_check.sh
+    environment:
+      MYSQL_ARGS: "--user=root --password=U?fY)9s7|3gxUm"
+    register: mysqldump_cc_check
+
+  - name: PS-11950 show mysqldump check output
+    debug:
+      var: mysqldump_cc_check.stdout_lines
+
   - name: Sleep 60 seconds
     command: sleep 60

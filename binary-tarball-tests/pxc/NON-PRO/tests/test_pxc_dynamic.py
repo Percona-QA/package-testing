@@ -27,3 +27,21 @@ def test_cluster_size(mysql_server):
     except subprocess.CalledProcessError as e:
         pytest.skip(f"Unable to query cluster size: {e}")
     assert output.split('\t')[1].strip() == "3"
+
+def test_mysqldump_compressed_columns(mysql_server):
+    """PS-11950: run the common mysqldump compressed-columns check against
+    the tarball's own mysql/mysqldump binaries on node1."""
+    if pxc_version_major not in ('8.4', '9.7'):
+        pytest.skip('PS-11950 mysqldump compressed-columns check runs for PXC 8.4 and 9.7 only')
+    import os
+    script = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                          '..', '..', '..', '..', 'scripts', 'mysqldump_compressed_check.sh'))
+    env = dict(os.environ)
+    env['MYSQL_BIN'] = mysql_server.basedir + '/bin/mysql'
+    env['MYSQLDUMP_BIN'] = mysql_server.basedir + '/bin/mysqldump'
+    env['MYSQL_ARGS'] = '--user=root -S' + mysql_server.node1_socket
+    result = subprocess.run(['bash', script], env=env,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            universal_newlines=True)
+    print(result.stdout)
+    assert result.returncode == 0, result.stdout[-3000:]

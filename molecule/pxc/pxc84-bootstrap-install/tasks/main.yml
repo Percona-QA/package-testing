@@ -306,6 +306,16 @@
       - lookup('env', 'check_version') == "yes" or lookup('env', 'check_version') == ""
       - lookup('env', 'pro') == "no"
 
+  - name: PS-11950 check mysqldump with compressed columns
+    command: /package-testing/scripts/mysqldump_compressed_check.sh
+    environment:
+      MYSQL_ARGS: "--user=root --password=U?fY)9s7|3gxUm"
+    register: mysqldump_cc_check
+
+  - name: PS-11950 show mysqldump check output
+    debug:
+      var: mysqldump_cc_check.stdout_lines
+
 #  - name: Verify telemetry version and package installation
 #    command: /package-testing/check_tel_ver_pack.sh
 

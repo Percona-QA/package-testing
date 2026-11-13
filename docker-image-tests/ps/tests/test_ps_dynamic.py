@@ -10,6 +10,10 @@ container_name = 'ps-docker-test-dynamic'
 
 @pytest.fixture(scope='module')
 def host():
+    # Remove any leftover container from an interrupted previous run so the
+    # fixed --name docker run does not fail with a name conflict.
+    subprocess.run(['docker', 'rm', '-f', container_name],
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if ps_version_major != "8.0" and not re.match(r"^8\.[1-9]$", ps_version_major) and not re.match(r"^9\.[0-9]+$", ps_version_major):
         docker_id = subprocess.check_output(
         ['docker', 'run', '--name', container_name, '-e', 'MYSQL_ROOT_PASSWORD='+ps_pwd, '-e', 'INIT_TOKUDB=1', '-e', 'INIT_ROCKSDB=1', '-e', 'PERCONA_TELEMETRY_URL=https://check-dev.percona.com/v1/telemetry/GenericReport','-d', docker_image]).decode().strip()
@@ -84,3 +88,16 @@ class TestDynamic:
             assert host.file('/usr/local/percona/telemetry_uuid').exists
             assert host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PS')
             assert host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
+
+    def test_mysqldump_compressed_columns(self, host):
+        """PS-11950: copy the common mysqldump compressed-columns check into
+        the container and run it there."""
+        import os
+        import shlex
+        script = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                              '..', '..', '..', 'scripts', 'mysqldump_compressed_check.sh'))
+        subprocess.check_call(['docker', 'cp', script, container_name + ':/tmp/mysqldump_compressed_check.sh'])
+        args = '--user=root --password=' + ps_pwd + ' -S/var/lib/mysql/mysql.sock'
+        cmd = host.run('MYSQL_ARGS=' + shlex.quote(args) + ' bash /tmp/mysqldump_compressed_check.sh')
+        print(cmd.stdout)
+        assert cmd.rc == 0, cmd.stdout[-3000:] + cmd.stderr[-1000:]

@@ -224,3 +224,16 @@ def test_telemetry_enabled(host):
 #@pytest.mark.telemetry_disabled
 #def test_telemetry_disabled(host):
 #    assert not host.file(TELEMETRY_PATH).exists
+
+
+def test_mysqldump_compressed_columns(host):
+    """PS-11950: run the common mysqldump compressed-columns check on the host.
+    The script is part of the package-testing copy downloaded to
+    /package-testing during converge; root connects via its default client
+    config (~/.my.cnf on RHEL, socket auth on Debian)."""
+    script = '/package-testing/scripts/mysqldump_compressed_check.sh'
+    with host.sudo("root"):
+        assert host.file(script).exists, script + " not found"
+        result = host.run('bash ' + script)
+    print(result.stdout)
+    assert result.rc == 0, result.stdout[-3000:] + result.stderr[-1000:]
