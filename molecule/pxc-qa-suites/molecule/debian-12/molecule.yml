@@ -1,0 +1,44 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: debian12-${BUILD_NUMBER}-${JOB_NAME}
+    region: us-west-1
+    image: ami-071175b60c818694f
+    vpc_subnet_id: subnet-04a8ad1b1d4da874c
+    # 3 PXC nodes + sysbench/pstress load on one host: t2.large (8 GB) is too small.
+    # Override from Jenkins with the INSTANCE_TYPE parameter.
+    instance_type: ${INSTANCE_TYPE:-t3.xlarge}
+    ssh_user: admin
+    root_device_name: /dev/xvda
+    instance_tags:
+      iit-billing-tag: pxc-qa-suites
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
+provisioner:
+  name: ansible
+  log: True
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
+  playbooks:
+    create: ../../playbooks/create.yml
+    destroy: ../../playbooks/destroy.yml
+    prepare: ../../playbooks/prepare.yml
+    cleanup: ../../playbooks/cleanup.yml
+    converge: ../../playbooks/playbook.yml
+scenario:
+  name: debian-12
+  destroy_sequence:
+    - destroy
+  cleanup_sequence:
+    - cleanup
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+    - destroy

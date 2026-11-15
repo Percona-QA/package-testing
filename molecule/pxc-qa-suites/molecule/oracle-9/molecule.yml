@@ -1,0 +1,44 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: ol9-${BUILD_NUMBER}-${JOB_NAME}
+    region: us-west-2
+    image: ami-00a5d5bcea31bb02c
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    # 3 PXC nodes + sysbench/pstress load on one host: t2.large (8 GB) is too small.
+    # Override from Jenkins with the INSTANCE_TYPE parameter.
+    instance_type: ${INSTANCE_TYPE:-t3.xlarge}
+    ssh_user: ec2-user
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: pxc-qa-suites
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
+provisioner:
+  name: ansible
+  log: True
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
+  playbooks:
+    create: ../../playbooks/create.yml
+    destroy: ../../playbooks/destroy.yml
+    prepare: ../../playbooks/prepare.yml
+    cleanup: ../../playbooks/cleanup.yml
+    converge: ../../playbooks/playbook.yml
+scenario:
+  name: oracle-9
+  destroy_sequence:
+    - destroy
+  cleanup_sequence:
+    - cleanup
+  test_sequence:
+    - destroy
+    - create
+    - prepare
+    - converge
+    - verify
+    - cleanup
+    - destroy
