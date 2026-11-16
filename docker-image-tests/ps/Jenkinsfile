@@ -7,6 +7,10 @@ pipeline {
             description: 'Choose the product version to test',
             name: 'PRODUCT_TO_TEST'
         )
+    string(name: 'PS_VERSION_OVERRIDE', defaultValue: '', trim: true,
+           description: 'PS version to test, e.g. 9.7.2-3 (without -amd64). Leave empty to take <PRODUCT_TO_TEST>_VER from VERSIONS')
+    string(name: 'PS_REVISION_OVERRIDE', defaultValue: '', trim: true,
+           description: 'Expected PS revision as printed by mysqld --version, e.g. 45d3d00f. Leave empty to take <PRODUCT_TO_TEST>_REV from VERSIONS')
   }
   stages {
     stage('SET PS_VERSION and PS_REVISION') {
@@ -21,18 +25,29 @@ pipeline {
               mv "package-testing-master" package-testing
             '''
                     
-            def VERSION = sh(
-                script: '''grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
-                returnStdout: true
-                ).trim()
+            def VERSION = ''
+            def REVISION = ''
+            if (params.PS_VERSION_OVERRIDE || params.PS_REVISION_OVERRIDE) {
+                // Values passed by the caller (e.g. the rel.cd docker build) skip VERSIONS
+                if (!params.PS_VERSION_OVERRIDE || !params.PS_REVISION_OVERRIDE) {
+                    error("PS_VERSION_OVERRIDE and PS_REVISION_OVERRIDE must be set together")
+                }
+                VERSION = params.PS_VERSION_OVERRIDE
+                REVISION = params.PS_REVISION_OVERRIDE
+                echo "Using PS_VERSION_OVERRIDE and PS_REVISION_OVERRIDE parameters instead of VERSIONS"
+            } else {
+                VERSION = sh(
+                    script: '''grep ${PRODUCT_TO_TEST}_VER VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
+                    returnStdout: true
+                    ).trim()
 
-            def REVISION = sh(
-                script: ''' grep ${PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
-                returnStdout: true
-                ).trim()
-                    
-    
-             env.PS_VERSION = "${VERSION}-amd64"
+                REVISION = sh(
+                    script: ''' grep ${PRODUCT_TO_TEST}_REV VERSIONS | awk -F= '{print \$2}' | sed 's/"//g' ''',
+                    returnStdout: true
+                    ).trim()
+            }
+
+            env.PS_VERSION = "${VERSION}-amd64"
             env.PS_REVISION = "${REVISION}"
 
             echo "PS_VERSION fetched: ${env.PS_VERSION}"
