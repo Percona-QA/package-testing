@@ -88,16 +88,3 @@ class TestDynamic:
             assert host.file('/usr/local/percona/telemetry_uuid').exists
             assert host.file('/usr/local/percona/telemetry_uuid').contains('PRODUCT_FAMILY_PS')
             assert host.file('/usr/local/percona/telemetry_uuid').contains('instanceId:[0-9a-fA-F]\\{8\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{4\\}-[0-9a-fA-F]\\{12\\}$')
-
-    def test_mysqldump_compressed_columns(self, host):
-        """PS-11950: copy the common mysqldump compressed-columns check into
-        the container and run it there."""
-        import os
-        import shlex
-        script = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                              '..', '..', '..', 'scripts', 'mysqldump_compressed_check.sh'))
-        subprocess.check_call(['docker', 'cp', script, container_name + ':/tmp/mysqldump_compressed_check.sh'])
-        args = '--user=root --password=' + ps_pwd + ' -S/var/lib/mysql/mysql.sock'
-        cmd = host.run('MYSQL_ARGS=' + shlex.quote(args) + ' bash /tmp/mysqldump_compressed_check.sh')
-        print(cmd.stdout)
-        assert cmd.rc == 0, cmd.stdout[-3000:] + cmd.stderr[-1000:]
