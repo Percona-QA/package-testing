@@ -1,0 +1,252 @@
+---
+- name: Prepare node for running percona-binlog-server (PBS) tests
+  hosts: all
+  become: true
+  become_method: sudo
+  gather_facts: true
+  vars:
+    qa_user: pbsqa
+    qa_home: /home/pbsqa
+    qa_venv: /opt/pbs-qa-venv
+    pbs_version: "{{ lookup('env', 'PBS_VERSION') | trim }}"
+    pbs_repo_channel: "{{ lookup('env', 'PBS_REPO_CHANNEL') | default('experimental', true) }}"
+  tasks:
+
+    - name: Setup SSH keys for Oracle Linux or Amazon
+      authorized_key:
+        user: ec2-user
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: ansible_os_family == "RedHat"
+
+    - name: Setup SSH keys Debian
+      authorized_key:
+        user: admin
+        key: "{{ lookup('file', 'public_keys') }}"
+        state: present
+        exclusive: False
+      when: ansible_distribution == "Debian"
+
+    # percona-binlog-server for el9 needs libcrypto.so.3(OPENSSL_3.4.0), but the OL9
+    # AMI ships OpenSSL 3.0. Pulling a newer openssl-libs in underneath the running
+    # sshd can break new SSH sessions mid-run, so bring the whole host up to date and
+    # reboot it first (the PBS docker image likewise runs "microdnf -y update").
+    - name: Upgrade all packages (RedHat family)
+      dnf:
+        name: "*"
+        state: latest
+      register: rhel_upgrade
+      when: ansible_os_family == "RedHat"
+
+    - name: Reboot after the upgrade (RedHat family)
+      reboot:
+        reboot_timeout: 900
+      when:
+        - ansible_os_family == "RedHat"
+        - rhel_upgrade is changed
+
+    # The tests start mysqld with --no-defaults and no --user, and mysqld refuses to
+    # run as root, so they run as this unprivileged user.
+    - name: Create {{ qa_user }} user for running the tests (non-root)
+      user:
+        name: "{{ qa_user }}"
+        comment: "PBS QA test user"
+        home: "{{ qa_home }}"
+        create_home: true
+        shell: /bin/bash
+        state: present
+
+    - name: Install packages for Debian family
+      apt:
+        name:
+          - git
+          - tar
+          - python3
+          - python3-venv
+          - curl
+          - gnupg2
+          - lsb-release
+          - ca-certificates
+          # Percona Server tarball runtime deps (trixie renamed libaio1 to libaio1t64)
+          - libaio1t64
+          - libnuma1
+          - libatomic1
+          - procps
+          - psmisc
+          - sysbench
+        update_cache: yes
+        state: present
+      when: ansible_os_family == "Debian"
+
+    # trixie's libaio1t64 only ships libaio.so.1t64; the generic Linux tarball's
+    # mysqld is linked against libaio.so.1.
+    - name: Check for libaio.so.1 (Debian family)
+      stat:
+        path: "/usr/lib/{{ ansible_architecture }}-linux-gnu/libaio.so.1"
+      register: libaio_so_1
+      when: ansible_os_family == "Debian"
+
+    - name: Link libaio.so.1 to libaio.so.1t64 (Debian family)
+      file:
+        src: "/usr/lib/{{ ansible_architecture }}-linux-gnu/libaio.so.1t64"
+        dest: "/usr/lib/{{ ansible_architecture }}-linux-gnu/libaio.so.1"
+        state: link
+      when:
+        - ansible_os_family == "Debian"
+        - not libaio_so_1.stat.exists
+
+    # EPEL provides sysbench. It is fetched through the download.fedoraproject.org
+    # mirror redirector because the direct host dl.fedoraproject.org (Fedora's master
+    # mirror) intermittently returns 404. The epel-release rpm ships the EPEL GPG key
+    # itself (its repo file points at the local copy), so there is no separate key
+    # download; the rpm is fetched over HTTPS from Fedora.
+    - name: Setup EPEL repo (RedHat family)
+      dnf:
+        name: "https://download.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+        state: present
+        disable_gpg_check: true
+      register: epel_release
+      retries: 5
+      delay: 15
+      until: epel_release is succeeded
+      when: ansible_os_family == "RedHat"
+
+    - name: Import EPEL GPG key from the epel-release package (RedHat family)
+      rpm_key:
+        state: present
+        key: "/etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
+      when: ansible_os_family == "RedHat"
+
+    - name: Install packages for RedHat family
+      dnf:
+        name:
+          - git
+          - tar
+          - python3
+          # Percona Server tarball runtime deps
+          - libaio
+          - numactl-libs
+          - libatomic
+          - procps-ng
+          - psmisc
+          - sysbench
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Install percona-release for Debian family
+      apt:
+        deb: https://repo.percona.com/apt/percona-release_latest.generic_all.deb
+      when: ansible_os_family == "Debian"
+
+    - name: Install percona-release for RedHat family
+      command: dnf -y install https://repo.percona.com/yum/percona-release-latest.noarch.rpm
+      args:
+        creates: /usr/bin/percona-release
+      when: ansible_os_family == "RedHat"
+
+    # percona-binlog-server is published in the "tools" repository (only its
+    # experimental channel for now). It needs the Percona Server client libraries
+    # (percona-server-client on Debian, libmysqlclient.so.24 on el9) from ps-84-lts.
+    - name: Enable Percona tools ({{ pbs_repo_channel }}) and ps-84-lts repositories
+      command: "{{ item }}"
+      loop:
+        - percona-release enable tools {{ pbs_repo_channel }}
+        - percona-release enable ps-84-lts release
+      changed_when: false
+
+    # The .deb only declares "Depends: percona-server-client", but binlog_server links
+    # libperconaserverclient.so.24, which is in libperconaserverclient24 (not pulled in
+    # by percona-server-client), so install it explicitly. On el9 the rpm requires
+    # libmysqlclient.so.24 by soname, and dnf resolves it on its own.
+    - name: Install percona-binlog-server {{ pbs_version | default('(latest)', true) }} (Debian family)
+      apt:
+        name:
+          - "percona-binlog-server{{ ('=' ~ pbs_version ~ '.' ~ ansible_distribution_release) if pbs_version | length > 0 else '' }}"
+          - libperconaserverclient24
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install percona-binlog-server {{ pbs_version | default('(latest)', true) }} (RedHat family)
+      dnf:
+        name: "percona-binlog-server{{ ('-' ~ pbs_version ~ '.el' ~ ansible_distribution_major_version) if pbs_version | length > 0 else '' }}"
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: Check installed binlog_server
+      command: binlog_server version
+      register: pbs_installed_version
+      changed_when: false
+
+    - name: Print installed binlog_server
+      debug:
+        msg: "{{ pbs_installed_version.stdout_lines + pbs_installed_version.stderr_lines }}"
+
+    # The tests live in server-qa under test_scripts/pbs/ (server-qa is small, so a
+    # plain shallow clone).
+    - name: Checkout the server-qa repository (test_scripts/pbs)
+      shell: |
+        set -e
+        echo "server-qa: $PBS_QA_REPO @ $PBS_QA_BRANCH"
+        rm -rf "{{ qa_home }}/server-qa"
+        git clone -q --depth 1 --branch "$PBS_QA_BRANCH" "$PBS_QA_REPO" "{{ qa_home }}/server-qa"
+        git -C "{{ qa_home }}/server-qa" log --oneline -1
+        if [ ! -f "{{ qa_home }}/server-qa/test_scripts/pbs/pbs_test_runner.py" ]; then
+          echo "ERROR: test_scripts/pbs/pbs_test_runner.py not found in $PBS_QA_REPO @ $PBS_QA_BRANCH." \
+               "Set PBS_QA_REPO/PBS_QA_BRANCH to the repository and branch holding the pbs tests." >&2
+          exit 1
+        fi
+      environment:
+        PBS_QA_REPO: "{{ lookup('env', 'PBS_QA_REPO') | default('https://github.com/Percona-QA/server-qa.git', true) }}"
+        PBS_QA_BRANCH: "{{ lookup('env', 'PBS_QA_BRANCH') | default('main', true) }}"
+      register: pbs_checkout
+
+    - name: Print server-qa checkout
+      debug:
+        msg: "{{ pbs_checkout.stdout_lines }}"
+
+    # test_scripts/pbs/requirements.txt lists the optional Python packages the tests use
+    # (boto3, for the per-run S3 cleanup after S3-backend runs). Install them into a
+    # venv; tasks/main.yml runs pbs_test_runner.py with that interpreter, and the
+    # runner starts every test with it (sys.executable). Without requirements.txt
+    # (an older checkout) the venv is created empty.
+    # Plain commands rather than the pip module: the module needs the Python
+    # "packaging" library in the host interpreter, which the Debian 13 AMI lacks.
+    - name: Check for test_scripts/pbs/requirements.txt
+      stat:
+        path: "{{ qa_home }}/server-qa/test_scripts/pbs/requirements.txt"
+      register: pbs_requirements
+
+    - name: Create test venv
+      command: python3 -m venv {{ qa_venv }}
+      args:
+        creates: "{{ qa_venv }}/bin/python3"
+
+    - name: Install test_scripts/pbs/requirements.txt into the test venv
+      command: >-
+        {{ qa_venv }}/bin/python3 -m pip install --disable-pip-version-check
+        -r {{ qa_home }}/server-qa/test_scripts/pbs/requirements.txt
+      register: pbs_requirements_install
+      retries: 3
+      delay: 15
+      until: pbs_requirements_install is succeeded
+      when: pbs_requirements.stat.exists
+
+    - name: List packages in the test venv
+      command: "{{ qa_venv }}/bin/python3 -m pip list --disable-pip-version-check"
+      register: pbs_venv_packages
+      changed_when: false
+
+    - name: Print packages in the test venv
+      debug:
+        msg: "{{ pbs_venv_packages.stdout_lines }}"
+
+    - name: Give {{ qa_user }} ownership of its home (repo cloned as root)
+      file:
+        path: "{{ qa_home }}"
+        state: directory
+        owner: "{{ qa_user }}"
+        group: "{{ qa_user }}"
+        recurse: true

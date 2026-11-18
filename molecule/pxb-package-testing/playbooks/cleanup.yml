@@ -77,7 +77,10 @@
         dest: "/{{ WORKSPACE_VAR }}/{{ ansible_hostname }}_{{ os_id }}_{{ arch_output }}_mysql_logs.zip"
         flat: yes
       become: true
-      
+      # zip is only created when a mysql log exists (e.g. converge failed before MySQL started)
+      when:
+        - mysqld_log.stat.exists or mysql_error_log.stat.exists
+
     - name: Debug the fetch task status on localhost
       command: ls -l "/{{ WORKSPACE_VAR }}"
       register: fetch_list  

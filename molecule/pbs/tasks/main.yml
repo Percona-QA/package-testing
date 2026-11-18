@@ -1,0 +1,263 @@
+---
+# Runs server-qa test_scripts/pbs/pbs_test_runner.py (percona-binlog-server tests) against a
+# Percona Server binary tarball and the installed binlog_server.
+# Everything is driven by env vars exported by the Jenkins job
+# pbs/jenkins/pbs-qa-tests.groovy (read here with lookup('env', ...)).
+
+  - name: Set common facts
+    set_fact:
+      ps_version: "{{ lookup('env', 'PS_VERSION') | trim }}"
+      pbs_tests: "{{ lookup('env', 'PBS_TESTS') | trim }}"
+      pbs_parallel: "{{ lookup('env', 'PBS_PARALLEL') | default('0', true) | int }}"
+      pbs_timeout_seconds: "{{ (lookup('env', 'PBS_TIMEOUT_HOURS') | default('6', true) | int) * 3600 }}"
+      pbs_dir: "{{ qa_home }}/server-qa/test_scripts/pbs"
+      pbs_log_dir: "{{ qa_home }}/pbs_runner_logs"
+      pbs_config_file: "{{ qa_home }}/pbs_config.json"
+      ps_basedir: "{{ qa_home }}/ps_basedir"
+      qa_dist: "{{ ansible_distribution | lower }}{{ ansible_distribution_major_version | default('', true) }}"
+
+  - name: Pick glibc version and optional tarball URL override for Debian family
+    set_fact:
+      ps_glibc: "{{ lookup('env', 'PS_DEBIAN_GLIBC_VERSION') | default('2.35', true) }}"
+      ps_tarball_url_override: "{{ lookup('env', 'PS_TARBALL_URL_DEB') | trim }}"
+    when: ansible_os_family == "Debian"
+
+  - name: Pick glibc version and optional tarball URL override for RedHat family
+    set_fact:
+      ps_glibc: "{{ lookup('env', 'PS_RHEL_GLIBC_VERSION') | default('2.34', true) }}"
+      ps_tarball_url_override: "{{ lookup('env', 'PS_TARBALL_URL_RHEL') | trim }}"
+    when: ansible_os_family == "RedHat"
+
+  # Released tarball layout, e.g. for PS_VERSION=8.4.8-8:
+  # .../Percona-Server-8.4/Percona-Server-8.4.8-8/binary/tarball/
+  #     Percona-Server-8.4.8-8-Linux.x86_64.glibc2.35.tar.gz
+  - name: Compute Percona Server tarball URL
+    vars:
+      upstream: "{{ ps_version.split('-')[0] }}"
+      series: "{{ upstream.split('.')[0] }}.{{ upstream.split('.')[1] }}"
+    set_fact:
+      ps_tarball_url: >-
+        {{ ps_tarball_url_override if ps_tarball_url_override | length > 0 else
+           'https://downloads.percona.com/downloads/Percona-Server-' ~ series ~
+           '/Percona-Server-' ~ ps_version ~ '/binary/tarball/Percona-Server-' ~
+           ps_version ~ '-Linux.x86_64.glibc' ~ ps_glibc ~ '.tar.gz' }}
+
+  - name: Create tarball and basedir directories
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: "{{ qa_user }}"
+      group: "{{ qa_user }}"
+    loop:
+      - "{{ qa_home }}/tarballs"
+      - "{{ ps_basedir }}"
+
+  - name: Download Percona Server tarball
+    get_url:
+      url: "{{ ps_tarball_url }}"
+      dest: "{{ qa_home }}/tarballs/{{ ps_tarball_url | basename }}"
+      mode: '0644'
+    register: ps_download
+    retries: 5
+    delay: 20
+    until: ps_download is succeeded
+
+  # --strip-components=1 gives a fixed basedir path whatever the folder inside the
+  # tarball is called.
+  - name: Extract Percona Server tarball
+    unarchive:
+      src: "{{ qa_home }}/tarballs/{{ ps_tarball_url | basename }}"
+      dest: "{{ ps_basedir }}"
+      remote_src: yes
+      extra_opts: ['--strip-components=1']
+      owner: "{{ qa_user }}"
+      group: "{{ qa_user }}"
+
+  - name: Check mysqld version from the tarball
+    command: "{{ ps_basedir }}/bin/mysqld --version"
+    register: mysqld_version
+    changed_when: false
+
+  # binlog_server: the packaged /usr/bin/binlog_server (installed in prepare), its
+  # -debug variant, or a binary from PBS_BINARY_URL (e.g. an unreleased build; the
+  # package is still installed so its runtime libraries are present).
+  - name: Download binlog_server from PBS_BINARY_URL
+    get_url:
+      url: "{{ lookup('env', 'PBS_BINARY_URL') | trim }}"
+      dest: "{{ qa_home }}/binlog_server"
+      mode: '0755'
+      owner: "{{ qa_user }}"
+      group: "{{ qa_user }}"
+    when: lookup('env', 'PBS_BINARY_URL') | trim | length > 0
+
+  - name: Select binlog_server binary
+    set_fact:
+      pbs_bin: >-
+        {{ qa_home ~ '/binlog_server' if lookup('env', 'PBS_BINARY_URL') | trim | length > 0
+           else ('/usr/bin/binlog_server-debug' if lookup('env', 'PBS_USE_DEBUG_BINARY') | lower == 'true'
+                 else '/usr/bin/binlog_server') }}
+
+  - name: Check binlog_server version
+    command: "{{ pbs_bin }} version"
+    register: pbs_bin_version
+    changed_when: false
+
+  - name: Show what will be tested
+    debug:
+      msg:
+        - "Percona Server tarball: {{ ps_tarball_url }}"
+        - "mysqld:                 {{ mysqld_version.stdout }}"
+        - "binlog_server:          {{ pbs_bin }} ({{ pbs_bin_version.stdout | trim }})"
+        - "Tests: {{ pbs_tests | default('all', true) }}  parallel: {{ pbs_parallel }}"
+
+  # config.json from the server-qa checkout is the template: point it at this host's
+  # basedir/binary, then apply PBS_CONFIG_OVERRIDES ("key=value;..."; "s3.bucket=..."
+  # style keys set one nested level). Written outside the repo and passed with --config.
+  - name: Read config.json template
+    slurp:
+      src: "{{ pbs_dir }}/config.json"
+    register: pbs_config_template
+
+  - name: Set host paths in the test config
+    set_fact:
+      pbs_config: >-
+        {{ pbs_config_template.content | b64decode | from_json
+           | combine({'basedir': ps_basedir, 'binlog_server_bin': pbs_bin, 'sysbench_bin': 'sysbench'}) }}
+
+  - name: Apply PBS_CONFIG_OVERRIDES
+    vars:
+      key: "{{ item.split('=', 1)[0] | trim }}"
+      value: "{{ item.split('=', 1)[1] | trim }}"
+    set_fact:
+      pbs_config: >-
+        {{ pbs_config | combine({key.split('.', 1)[0]:
+             ({key.split('.', 1)[1]: value} if '.' in key else value)}, recursive=True) }}
+    loop: "{{ lookup('env', 'PBS_CONFIG_OVERRIDES').split(';') | map('trim') | select | list }}"
+    loop_control:
+      # print only the key, never the value (it may be a password or S3 secret)
+      label: "{{ item.split('=', 1)[0] | trim }}"
+    no_log: true
+
+  - name: Write the test config
+    copy:
+      content: "{{ pbs_config | to_nice_json }}\n"
+      dest: "{{ pbs_config_file }}"
+      owner: "{{ qa_user }}"
+      group: "{{ qa_user }}"
+      mode: '0600'
+
+  - name: Print the test config (passwords/secrets masked)
+    debug:
+      msg: >-
+        {{ pbs_config | combine({'connection': pbs_config.connection | default({}) | combine({'password': '***'}),
+                                 's3': pbs_config.s3 | default({}) | combine({'secret_access_key': '***'})},
+                                recursive=True) }}
+
+  - name: Build pbs_test_runner.py arguments
+    set_fact:
+      pbs_args: >-
+        {{ (['--run-all-tests'] if pbs_tests | length == 0 or pbs_tests == 'all' else ['--tests=' ~ pbs_tests])
+           + ['--config=' ~ pbs_config_file, '--log-dir=' ~ pbs_log_dir]
+           + (['--parallel=' ~ pbs_parallel] if pbs_parallel | int > 0 else [])
+           + (['--encryption'] if lookup('env', 'PBS_ENCRYPTION') | lower == 'true' else [])
+           + (['--verbose'] if lookup('env', 'PBS_VERBOSE') | lower == 'true' else []) }}
+
+  - block:
+    - name: Show free disk space (before tests)
+      command: df -h
+      register: df_before
+      changed_when: false
+
+    - name: Display free disk space (before tests)
+      debug:
+        msg: "{{ df_before.stdout_lines }}"
+
+    # async so a multi-hour run doesn't depend on one SSH session staying up;
+    # PBS_TIMEOUT_HOURS doubles as a hard timeout.
+    # The venv from prepare.yml (test_scripts/pbs/requirements.txt) runs the runner, and the
+    # runner starts each test with the same interpreter (sys.executable).
+    - name: Run pbs_test_runner.py {{ pbs_args | join(' ') }}
+      shell: |
+        runuser -u {{ qa_user }} -- env \
+          PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" \
+          PYTHONUNBUFFERED=1 \
+          PBS_ARGS={{ pbs_args | join(' ') | quote }} \
+        bash -c '
+          set -o pipefail
+          cd {{ pbs_dir }}
+          rm -f {{ pbs_log_dir }}/summary.json
+          {{ qa_venv }}/bin/python3 pbs_test_runner.py $PBS_ARGS 2>&1 | tee {{ qa_home }}/pbs_console.log
+        '
+      async: "{{ pbs_timeout_seconds | int }}"
+      poll: 60
+      register: pbs_run
+
+    always:
+      - name: Display pbs_test_runner.py output
+        debug:
+          msg: "{{ pbs_run.stdout_lines | default([]) }}"
+
+      - name: Copy junit converter to host
+        copy:
+          src: pbs_summary_to_junit.py
+          dest: "{{ qa_home }}/pbs_summary_to_junit.py"
+          mode: '0755'
+
+      - name: Convert summary.json to junit xml
+        command: >-
+          python3 {{ qa_home }}/pbs_summary_to_junit.py
+          {{ pbs_log_dir }}/summary.json
+          /var/tmp/junit-pbs-{{ qa_dist }}.xml
+          pbs-{{ qa_dist }}
+          {{ pbs_run.rc | default(1) }}
+          {{ qa_home }}/pbs_console.log
+        register: junit_result
+        failed_when: false
+
+      - name: Display junit conversion result
+        debug:
+          msg: "{{ junit_result.stdout_lines | default([]) + junit_result.stderr_lines | default([]) }}"
+
+      # Runner/test logs, generated configs, binsrv.log and mysqld.err, including the
+      # failed_logs/ copies - but not the mysqld datadirs or binlog storage.
+      - name: Archive test logs
+        shell: |
+          cd {{ qa_home }} || exit 0
+          ITEMS=$(ls -d pbs_runner_logs pbs_console.log 2>/dev/null)
+          [ -n "$ITEMS" ] || exit 0
+          tar -czf /var/tmp/pbs_logs_{{ qa_dist }}.tar.gz \
+              --exclude='logs/data' --exclude='logs/binsrv_data' --exclude='logs/binsrv_tmp' \
+              $ITEMS
+          ls -lh /var/tmp/pbs_logs_{{ qa_dist }}.tar.gz
+        register: archive_result
+        failed_when: false
+
+      - name: Display archive information
+        debug:
+          msg: "{{ archive_result.stdout_lines | default([]) + archive_result.stderr_lines | default([]) }}"
+
+      # Fetch here rather than in cleanup.yml: molecule skips cleanup when converge fails.
+      - name: Find artifacts to fetch
+        find:
+          paths: /var/tmp
+          patterns:
+            - "pbs_logs_{{ qa_dist }}.tar.gz"
+            - "junit-pbs-{{ qa_dist }}.xml"
+        register: pbs_artifacts
+
+      - name: Fetch artifacts to Jenkins workspace
+        fetch:
+          src: "{{ item.path }}"
+          dest: "/{{ lookup('env', 'WORKSPACE_VAR') }}/{{ item.path | basename }}"
+          flat: yes
+        loop: "{{ pbs_artifacts.files }}"
+        when: lookup('env', 'WORKSPACE_VAR') | length > 0
+
+      - name: Show free disk space (after tests)
+        command: df -h
+        register: df_after
+        changed_when: false
+
+      - name: Display free disk space (after tests)
+        debug:
+          msg: "{{ df_after.stdout_lines }}"
