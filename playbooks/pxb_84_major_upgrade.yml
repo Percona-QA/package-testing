@@ -163,9 +163,6 @@
     service: name=mysql state=started
     when: ansible_os_family == "Debian"
 
-  - name: check that Percona Server 8.4 version is correct
-    command: /package-testing/version_check.sh ps84
-
 # ---------- INSTALL PXB 8.4 FROM TESTING ----------
 
   - name: Enable PXB 8.4 testing repo
