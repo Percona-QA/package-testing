@@ -95,12 +95,22 @@
     register: sys_py_minor
     changed_when: false
 
+  # pykmip-server uses multiprocessing.Manager, whose auth handshake on Python < 3.12
+  # is HMAC-MD5. When the system OpenSSL refuses MD5 (FIPS-enabled image, e.g. Ubuntu
+  # Pro FIPS Jammy) the server dies with "ValueError: [digital envelope routines]
+  # unsupported". The portable CPython bundles its own OpenSSL, so use it there too.
+  - name: check that system python3 OpenSSL allows HMAC-MD5 (used by pykmip multiprocessing)
+    command: python3 -c "import hmac; hmac.new(b'k', b'm', 'md5').digest()"
+    register: sys_py_md5
+    changed_when: false
+    failed_when: false
+
   - name: default the pykmip venv interpreter to the system python3
     set_fact:
       kmip_py_interp: python3
 
-  - name: provision a portable CPython 3.11 when system python is < 3.7 or >= 3.12
-    when: (sys_py_minor.stdout | int) < 7 or (sys_py_minor.stdout | int) >= 12
+  - name: provision a portable CPython 3.11 when system python is < 3.7, >= 3.12 or cannot do MD5
+    when: (sys_py_minor.stdout | int) < 7 or (sys_py_minor.stdout | int) >= 12 or sys_py_md5.rc != 0
     block:
       - name: download portable CPython 3.11 (python-build-standalone)
         get_url:
