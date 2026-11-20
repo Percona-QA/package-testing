@@ -1,14 +1,16 @@
 def osConfigs = [
-    "min-noble-x64"     : "2.35",
-    "min-jammy-x64"     : "2.35",
-    "min-focal-x64"     : "2.31",
-    "min-bookworm-x64"  : "2.35",
-    "min-bullseye-x64"  : "2.31",
-    "min-trixie-x64"    : "2.31",
-    "min-ol-9-x64"      : "2.35",
-    "min-ol-8-x64"      : "2.28",
-    "min-rhel-10-x64"   : "2.35",
-    "min-al2023-x64"    : "2.35",
+    "min-noble-x64"     : [glibc: "2.35", arch: "x86_64"],
+    "min-jammy-x64"     : [glibc: "2.35", arch: "x86_64"],
+    "min-focal-x64"     : [glibc: "2.31", arch: "x86_64"],
+    "min-bookworm-x64"  : [glibc: "2.35", arch: "x86_64"],
+    "min-bullseye-x64"  : [glibc: "2.31", arch: "x86_64"],
+    "min-trixie-x64"    : [glibc: "2.31", arch: "x86_64"],
+    "min-ol-9-x64"      : [glibc: "2.35", arch: "x86_64"],
+    "min-ol-8-x64"      : [glibc: "2.28", arch: "x86_64"],
+    "min-rhel-10-x64"   : [glibc: "2.35", arch: "x86_64"],
+    "min-al2023-x64"    : [glibc: "2.35", arch: "x86_64"],
+    "min-ol-9-arm64"    : [glibc: "2.34", arch: "aarch64"],
+    "min-jammy-arm64"   : [glibc: "2.35", arch: "aarch64"],
 ]
 
 pipeline {
@@ -81,7 +83,7 @@ pipeline {
                     def parallelStages = [:]
                     def unstabilityFlag = false  // Flag to track test failures
 
-                    osConfigs.each { label, version ->
+                    osConfigs.each { label, cfg ->
                         parallelStages[label] = {
                             node(label) {
                                 stage("Test on ${label}") {
@@ -89,7 +91,7 @@ pipeline {
                                         echo "Starting tests on: ${label}"
                                         
                                         // Run the test function
-                                        runtarballtests(PS_VERSION, params.BUILD_TYPE_MINIMAL, version)
+                                        runtarballtests(PS_VERSION, params.BUILD_TYPE_MINIMAL, cfg.glibc, cfg.arch)
                                         
                                         // Check the report file existence
                                         sh """
@@ -146,7 +148,7 @@ pipeline {
         always {
             script {
 
-                osConfigs.each { label, version ->
+                osConfigs.each { label, cfg ->
                     try {
                         unstash name: "report-${label}"
 
@@ -204,7 +206,7 @@ pipeline {
 
 
 
-def runtarballtests(String psVersion, boolean buildMinimal, String glibcVersion) {
+def runtarballtests(String psVersion, boolean buildMinimal, String glibcVersion, String arch) {
     sh """
         echo "PS_VERSION is ${psVersion}"
         echo "BUILD_TYPE_MINIMAL=${buildMinimal}"
@@ -219,12 +221,12 @@ def runtarballtests(String psVersion, boolean buildMinimal, String glibcVersion)
             sudo apt install -y git wget
         fi
 
-        TARBALL_NAME="Percona-Server-${psVersion}-Linux.x86_64.glibc${glibcVersion}\${MINIMAL}.tar.gz"
+        TARBALL_NAME="Percona-Server-${psVersion}-Linux.${arch}.glibc${glibcVersion}\${MINIMAL}.tar.gz"
         TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${psVersion}/"
 
         rm -rf /usr/local/package-testing
         cd /tmp
-        git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
+        git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-arm-tar --depth 1
         cd /tmp/package-testing/binary-tarball-tests/ps
 
         wget "\${TARBALL_LINK}\${TARBALL_NAME}"
