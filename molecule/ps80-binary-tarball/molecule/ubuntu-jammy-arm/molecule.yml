@@ -1,0 +1,45 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: ec2
+platforms:
+  - name: ujammy-arm-${BUILD_NUMBER}-${JOB_NAME}
+    region: us-west-2
+    image: ami-00415b9066218a528
+    vpc_subnet_id: subnet-0430e63d7cdbcd237
+    instance_type: c6g.large
+    ssh_user: ubuntu
+    root_device_name: /dev/sda1
+    instance_tags:
+      iit-billing-tag: jenkins-ps80-worker
+      job-name: ${JOB_NAME}
+      build-number: ${BUILD_NUMBER}
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/.."
+  log: True
+  playbooks:
+    create: ../../../playbooks/create-noble-arm.yml
+    destroy: ../../playbooks/destroy.yml
+    prepare: ../../playbooks/prepare.yml
+    converge: ../../playbooks/playbook.yml
+verifier:
+  name: testinfra
+  directory: ../../tests/
+  options:
+    verbose: true
+    s: true
+  env:
+    FIPS_SUPPORTED: "no"
+scenario:
+  name: ubuntu-jammy-arm
+  destroy_sequence:
+    - destroy
+  test_sequence:
+    - create
+    - prepare
+    - converge
+    - verify
+    - destroy

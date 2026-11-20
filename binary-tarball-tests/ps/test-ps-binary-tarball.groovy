@@ -1,19 +1,14 @@
-// Map key = stage / report name, label = Jenkins agent.
-// Entries with an "image" run inside that docker container on the agent
-// (used for ARM, where only the docker-32gb-aarch64 agent is available).
 def osConfigs = [
-    "min-noble-x64"      : [label: "min-noble-x64",       glibc: "2.35", arch: "x86_64"],
-    "min-jammy-x64"      : [label: "min-jammy-x64",       glibc: "2.35", arch: "x86_64"],
-    "min-focal-x64"      : [label: "min-focal-x64",       glibc: "2.31", arch: "x86_64"],
-    "min-bookworm-x64"   : [label: "min-bookworm-x64",    glibc: "2.35", arch: "x86_64"],
-    "min-bullseye-x64"   : [label: "min-bullseye-x64",    glibc: "2.31", arch: "x86_64"],
-    "min-trixie-x64"     : [label: "min-trixie-x64",      glibc: "2.31", arch: "x86_64"],
-    "min-ol-9-x64"       : [label: "min-ol-9-x64",        glibc: "2.35", arch: "x86_64"],
-    "min-ol-8-x64"       : [label: "min-ol-8-x64",        glibc: "2.28", arch: "x86_64"],
-    "min-rhel-10-x64"    : [label: "min-rhel-10-x64",     glibc: "2.35", arch: "x86_64"],
-    "min-al2023-x64"     : [label: "min-al2023-x64",      glibc: "2.35", arch: "x86_64"],
-    "ol-9-arm64"         : [label: "docker-32gb-aarch64", glibc: "2.34", arch: "aarch64", image: "oraclelinux:9"],
-    "ubuntu-jammy-arm64" : [label: "docker-32gb-aarch64", glibc: "2.35", arch: "aarch64", image: "ubuntu:jammy"],
+    "min-noble-x64"     : "2.35",
+    "min-jammy-x64"     : "2.35",
+    "min-focal-x64"     : "2.31",
+    "min-bookworm-x64"  : "2.35",
+    "min-bullseye-x64"  : "2.31",
+    "min-trixie-x64"    : "2.31",
+    "min-ol-9-x64"      : "2.35",
+    "min-ol-8-x64"      : "2.28",
+    "min-rhel-10-x64"   : "2.35",
+    "min-al2023-x64"    : "2.35",
 ]
 
 pipeline {
@@ -86,19 +81,15 @@ pipeline {
                     def parallelStages = [:]
                     def unstabilityFlag = false  // Flag to track test failures
 
-                    osConfigs.each { label, cfg ->
+                    osConfigs.each { label, version ->
                         parallelStages[label] = {
-                            node(cfg.label) {
+                            node(label) {
                                 stage("Test on ${label}") {
                                     script {
                                         echo "Starting tests on: ${label}"
                                         
                                         // Run the test function
-                                        if (cfg.image) {
-                                            runtarballtestsdocker(PS_VERSION, env.PS_REVISION, params.BUILD_TYPE_MINIMAL, cfg.glibc, cfg.arch, cfg.image)
-                                        } else {
-                                            runtarballtests(PS_VERSION, params.BUILD_TYPE_MINIMAL, cfg.glibc, cfg.arch)
-                                        }
+                                        runtarballtests(PS_VERSION, params.BUILD_TYPE_MINIMAL, version)
                                         
                                         // Check the report file existence
                                         sh """
@@ -155,7 +146,7 @@ pipeline {
         always {
             script {
 
-                osConfigs.each { label, cfg ->
+                osConfigs.each { label, version ->
                     try {
                         unstash name: "report-${label}"
 
@@ -213,7 +204,7 @@ pipeline {
 
 
 
-def runtarballtests(String psVersion, boolean buildMinimal, String glibcVersion, String arch) {
+def runtarballtests(String psVersion, boolean buildMinimal, String glibcVersion) {
     sh """
         echo "PS_VERSION is ${psVersion}"
         echo "BUILD_TYPE_MINIMAL=${buildMinimal}"
@@ -228,12 +219,12 @@ def runtarballtests(String psVersion, boolean buildMinimal, String glibcVersion,
             sudo apt install -y git wget
         fi
 
-        TARBALL_NAME="Percona-Server-${psVersion}-Linux.${arch}.glibc${glibcVersion}\${MINIMAL}.tar.gz"
+        TARBALL_NAME="Percona-Server-${psVersion}-Linux.x86_64.glibc${glibcVersion}\${MINIMAL}.tar.gz"
         TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${psVersion}/"
 
         rm -rf /usr/local/package-testing
         cd /tmp
-        git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-arm-tar --depth 1
+        git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1
         cd /tmp/package-testing/binary-tarball-tests/ps
 
         wget "\${TARBALL_LINK}\${TARBALL_NAME}"
@@ -261,62 +252,5 @@ def runtarballtests(String psVersion, boolean buildMinimal, String glibcVersion,
         ls -la 
 
         cp report.xml ${WORKSPACE}/report.xml
-    """
-}
-
-// Runs the same tarball tests inside a docker container (e.g. oraclelinux:9 /
-// ubuntu:jammy on the aarch64 agent) so the target OS glibc is used.
-// mysqld refuses to run as root, so run.sh is executed as a non-root user
-// with passwordless sudo, like on the min-* agents.
-def runtarballtestsdocker(String psVersion, String psRevision, boolean buildMinimal, String glibcVersion, String arch, String image) {
-    sh """
-        echo "PS_VERSION is ${psVersion}"
-        echo "BUILD_TYPE_MINIMAL=${buildMinimal}"
-        echo "Running in docker image ${image} on \$(uname -m)"
-        MINIMAL=""
-        if [ "${buildMinimal}" = "true" ]; then
-            MINIMAL="-minimal"
-        fi
-        TARBALL_NAME="Percona-Server-${psVersion}-Linux.${arch}.glibc${glibcVersion}\${MINIMAL}.tar.gz"
-        TARBALL_LINK="https://downloads.percona.com/downloads/TESTING/ps-${psVersion}/"
-
-        sudo rm -rf /tmp/package-testing
-        mkdir -p /tmp/package-testing
-
-        docker run --rm -u root \
-            -v /tmp/package-testing:/tmp/package-testing \
-            -e PS_VERSION="${psVersion}" \
-            -e PS_REVISION="${psRevision}" \
-            -e TARBALL_URL="\${TARBALL_LINK}\${TARBALL_NAME}" \
-            -e HOST_UID="\$(id -u)" -e HOST_GID="\$(id -g)" \
-            -e DEBIAN_FRONTEND=noninteractive \
-            ${image} bash -c '
-                set -x
-                if [ -f /usr/bin/apt-get ]; then
-                    apt-get update -y
-                    apt-get install -y sudo git wget tar lsb-release python3 python3-pip libaio1 libnuma1 libaio-dev openssl procps
-                else
-                    dnf install -y sudo git wget tar python3 python3-pip libaio numactl openssl perl-Data-Dumper procps-ng util-linux shadow-utils
-                fi
-                touch /etc/environment
-                useradd -m tester
-                echo "tester ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/tester
-
-                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-arm-tar --depth 1 /tmp/package-testing
-                cd /tmp/package-testing/binary-tarball-tests/ps
-                wget "\${TARBALL_URL}"
-                chown -R tester:tester /tmp/package-testing
-
-                runuser -u tester -- env HOME=/home/tester PS_VERSION="\${PS_VERSION}" PS_REVISION="\${PS_REVISION}" \
-                    bash -c "cd /tmp/package-testing/binary-tarball-tests/ps && chmod +x ./run.sh && ./run.sh 2>&1 | tee output.log"
-                rc=\$?
-
-                # hand files back to the jenkins user so the pipeline can move/stash report.xml
-                chown -R "\${HOST_UID}:\${HOST_GID}" /tmp/package-testing
-                exit \$rc
-            '
-
-        ls -la /tmp/package-testing/binary-tarball-tests/ps/
-        cp /tmp/package-testing/binary-tarball-tests/ps/report.xml ${WORKSPACE}/report.xml
     """
 }
