@@ -1,0 +1,225 @@
+---
+# This playbook does following (major upgrade path PXB 8.0 -> PXB 8.4):
+#   installs PS 8.0 from release repo
+#   installs PXB 8.0 from release repo
+#   runs some tests / backup with PXB 8.0
+#   removes PXB 8.0
+#   enables PS 8.4 release repo, upgrades PS 8.0 -> 8.4
+#   enables PXB 8.4 testing repo
+#   installs PXB 8.4 (major upgrade)
+#   runs post-upgrade tests / backup with PXB 8.4
+#
+# Only server_to_test=ps-84 is supported.
+# Only runs on OS that have PS 8.0 / PXB 8.0 packages (no debian-13, rhel-10, ubuntu-resolute).
+
+- hosts: all
+  become: true
+  become_method: sudo
+  vars:
+    gnupg_home: /root/.gnupg
+    percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
+    percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
+  environment:
+    PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
+
+  tasks:
+  - name: fail if server_to_test is not supported for PXB 8.4 major upgrade
+    fail:
+      msg: "PXB 8.0 -> 8.4 major upgrade is only supported with server_to_test=ps-84 (got '{{ lookup('env', 'server_to_test') }}')"
+    when: lookup('env', 'server_to_test') != "ps-84"
+
+  - name: include tasks for test env setup
+    include_tasks: ../tasks/test_prep.yml
+
+  - name: download and extract world database
+    command: "{{ item }}"
+    with_items:
+    - wget --no-check-certificate -P /package-testing https://raw.githubusercontent.com/Percona-QA/percona-qa/master/sample_db/world.sql
+
+# ---------- INSTALL PS 8.0 (RELEASE) ----------
+
+  # installs percona-release, disables mysql dnf module on EL8, enables pxb-80 release
+  - name: include tasks for enabling PXB 8.0 release repo
+    include_tasks: ../tasks/enable_pxb_80_main_repo.yml
+
+  - name: enable PS 8.0 release repo
+    command: percona-release enable ps-80 release
+
+  - name: Clean and update package cache
+    shell: |
+      {{ ansible_pkg_mgr }} clean all
+      {{ ansible_pkg_mgr }} makecache
+    when: ansible_os_family == "RedHat"
+
+  - name: install Percona Server 8.0 packages
+    include_tasks:
+      file: ../tasks/install_ps80.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
+
+# ---------- INSTALL PXB 8.0 (RELEASE) ----------
+
+  - name: install Percona XtraBackup 8.0 packages
+    include_tasks:
+      file: ../tasks/install_pxb80.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
+
+# ---------- START MYSQL, RUN TESTS BEFORE UPGRADE ----------
+
+  - name: Print the version of the installed Percona XtraBackup BEFORE UPGRADE
+    shell: |
+      {
+        echo "XTRABACKUP VERSION is ";
+        xtrabackup --version || echo "FAILED: xtrabackup --version";
+        echo "xbstream VERSION is ";
+        xbstream --version || echo "FAILED: xbstream --version";
+        echo "xbcloud VERSION is ";
+        xbcloud --version || echo "FAILED: xbcloud --version";
+        echo "xbcrypt VERSION is ";
+        xbcrypt --version || echo "FAILED: xbcrypt --version";
+        echo "list rpm packages ";
+        rpm -qa | grep "percona" || echo "FAILED: rpm -qa | grep percona";
+        echo "list deb packages";
+        dpkg -l | grep "percona" || echo "FAILED: dpkg -l | grep percona";
+      }
+    register: version_output
+    ignore_errors: yes
+
+  - name: Display version information BEFORE UPGRADE
+    debug:
+      var: version_output.stdout_lines
+
+  - name: list installed PS and PXB packages BEFORE UPGRADE
+    include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: start mysql service with systemctl command
+    command: systemctl start mysqld
+    when: ansible_os_family == "RedHat"
+
+  - name: set root password on centos
+    command: /package-testing/setpass_57.sh
+    when: ansible_os_family == "RedHat"
+
+  - name: copy .my.cnf with credentials on centos
+    template: src=../templates/my_57.j2
+              dest=/root/.my.cnf
+              mode=0640 owner=root group=root
+    when: ansible_os_family == "RedHat"
+
+  - name: restart mysql service
+    service: name=mysqld state=restarted
+    when: ansible_os_family == "RedHat"
+
+  - name: restart mysql service debian
+    service: name=mysql state=restarted
+    when: ansible_os_family == "Debian"
+
+  - name: install plugins, import world database
+    command: /package-testing/plugins_test.sh
+
+  - name: run backup with PXB 8.0
+    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups_80/
+
+  - name: prepare backup with PXB 8.0
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups_80/
+
+# ---------- MAJOR UPGRADE: REMOVE PXB 8.0, UPGRADE PS TO 8.4, INSTALL PXB 8.4 ----------
+
+  # inline instead of tasks/remove_pxb80.yml: that task skips Rocky for dnf
+  - name: remove PXB 8.0 packages before major upgrade
+    package:
+      name: "{{ ['percona-xtrabackup-80', 'percona-xtrabackup-test-80'] + (['percona-xtrabackup-dbg-80'] if ansible_os_family == 'Debian' else ['percona-xtrabackup-80-debuginfo']) }}"
+      state: absent
+
+  - name: stop mysql service before PS upgrade RHEL
+    service: name=mysqld state=stopped
+    when: ansible_os_family == "RedHat"
+
+  - name: stop mysql service before PS upgrade Debian
+    service: name=mysql state=stopped
+    when: ansible_os_family == "Debian"
+
+  - name: disable all percona repos
+    command: percona-release disable all
+
+  - name: include tasks for enabling PS 8.4 release repo
+    include_tasks: ../tasks/enable_ps84_main_repo.yml
+
+  - name: install Percona Server 8.4 packages (upgrade PS 8.0 -> 8.4)
+    include_tasks:
+      file: ../tasks/install_ps84.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
+
+  - name: start mysql service after PS upgrade RHEL
+    service: name=mysqld state=started
+    when: ansible_os_family == "RedHat"
+
+  - name: start mysql service after PS upgrade Debian
+    service: name=mysql state=started
+    when: ansible_os_family == "Debian"
+
+# ---------- INSTALL PXB 8.4 FROM TESTING ----------
+
+  - name: Enable PXB 8.4 testing repo
+    command: percona-release enable-only pxb-84-lts testing
+
+  - name: install Percona XtraBackup 8.4 packages (major upgrade to 8.4)
+    include_tasks:
+      file: ../tasks/install_pxb84.yml
+      apply:
+        environment:
+          PERCONA_TELEMETRY_DISABLE: "1"
+
+# ---------- POST-UPGRADE CHECKS ----------
+
+  - name: Print the version of the installed Percona XtraBackup AFTER UPGRADE
+    shell: |
+      {
+        echo "XTRABACKUP VERSION is ";
+        xtrabackup --version || echo "FAILED: xtrabackup --version";
+        echo "xbstream VERSION is ";
+        xbstream --version || echo "FAILED: xbstream --version";
+        echo "xbcloud VERSION is ";
+        xbcloud --version || echo "FAILED: xbcloud --version";
+        echo "xbcrypt VERSION is ";
+        xbcrypt --version || echo "FAILED: xbcrypt --version";
+        echo "list rpm packages ";
+        rpm -qa | grep "percona" || echo "FAILED: rpm -qa | grep percona";
+        echo "list deb packages";
+        dpkg -l | grep "percona" || echo "FAILED: dpkg -l | grep percona";
+      }
+    register: version_output
+    ignore_errors: yes
+
+  - name: Display version information AFTER UPGRADE
+    debug:
+      var: version_output.stdout_lines
+
+  - name: list installed PS and PXB packages AFTER UPGRADE
+    include_tasks: ../tasks/list_installed_packages.yml
+
+  - name: check that Percona XtraBackup 8.4 version is correct
+    command: /package-testing/version_check.sh pxb84
+
+  - name: check that Percona XtraBackup 8.4 package versions are correct
+    command: /package-testing/package_check.sh pxb84
+
+  - name: run backup with PXB 8.4
+    command: /usr/bin/xtrabackup --backup --user=root --target-dir=/tmp/backups_84/
+
+  - name: prepare backup with PXB 8.4
+    command: /usr/bin/xtrabackup --prepare --user=root --target-dir=/tmp/backups_84/
+
+# ---------- CLEANUP ----------
+
+  - name: remove Percona Server and PXB 8.4 packages
+    package:
+      name:
+      - percona-server-server
+      - percona-xtrabackup-84
+      state: absent
