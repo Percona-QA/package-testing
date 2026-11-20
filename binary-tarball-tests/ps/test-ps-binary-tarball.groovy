@@ -302,7 +302,7 @@ def runtarballtestsdocker(String psVersion, String psRevision, boolean buildMini
                 useradd -m tester
                 echo "tester ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/tester
 
-                git clone https://github.com/Percona-QA/package-testing.git --branch master --depth 1 /tmp/package-testing
+                git clone https://github.com/kaushikpuneet07/package-testing.git --branch add-arm-tar --depth 1 /tmp/package-testing
                 cd /tmp/package-testing/binary-tarball-tests/ps
                 wget "\${TARBALL_URL}"
                 chown -R tester:tester /tmp/package-testing
