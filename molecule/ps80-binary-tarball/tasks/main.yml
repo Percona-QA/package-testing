@@ -9,6 +9,7 @@
           name: epel-release
       when:
         - ansible_os_family == "RedHat"
+        - ansible_distribution != "RedHat"   # RHEL has no epel-release package (e.g. RHEL 9 ARM AMI); not needed for these deps
         - ansible_distribution_version != "2023"
         - ansible_distribution_major_version | int < 10
 
@@ -128,7 +129,7 @@
 
     - name: get tarball name
       set_fact:
-        TARBALL_NAME: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.x86_64.glibc{{ GLIBC_VERSION }}.tar.gz"
+        TARBALL_NAME: "Percona-Server-{{ lookup('env', 'PS_VERSION') }}-Linux.{{ ansible_architecture }}.glibc{{ GLIBC_VERSION }}.tar.gz"
 
 
     - name: get testing repo tarball URL

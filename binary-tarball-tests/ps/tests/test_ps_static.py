@@ -20,14 +20,15 @@ def test_binaries_version(host,pro_fips_vars):
     debug = pro_fips_vars['debug']
     ps_version_percona = pro_fips_vars['ps_version_percona']
     base_dir_debug = base_dir + debug
+    arch = host.system_info.arch  # uname -m, e.g. aarch64 for ARM tarballs
 
 
     if ps_version_major in ['5.7', '5.6']:
         # Older versions without Pro support
-        assert 'mysql  Ver 14.14 Distrib ' + ps_version + ', for Linux (x86_64)' in host.check_output(
+        assert 'mysql  Ver 14.14 Distrib ' + ps_version + ', for Linux (' + arch + ')' in host.check_output(
             base_dir + '/bin/mysql --version'
         )
-        assert 'mysqld  Ver ' + ps_version + ' for Linux on x86_64 (Percona Server (GPL), Release ' + ps_version_percona + ', Revision ' + ps_revision + ')' in host.check_output(
+        assert 'mysqld  Ver ' + ps_version + ' for Linux on ' + arch + ' (Percona Server (GPL), Release ' + ps_version_percona + ', Revision ' + ps_revision + ')' in host.check_output(
             base_dir + '/bin/mysqld --version'
         )
     else:
@@ -36,15 +37,15 @@ def test_binaries_version(host,pro_fips_vars):
         mysqld_output = host.check_output(base_dir + '/bin/mysqld --version')
         if pro:
             # For PRO builds, check version-pro, release, and that revision exists (but not exact match)
-            assert f"{base_dir}/bin/mysql  Ver {ps_version}-pro for Linux on x86_64 (Percona Server Pro (GPL), Release {ps_version_percona}, Revision" in mysql_output
-            assert f"{base_dir}/bin/mysqld  Ver {ps_version}-pro for Linux on x86_64 (Percona Server Pro (GPL), Release {ps_version_percona}, Revision" in mysqld_output
+            assert f"{base_dir}/bin/mysql  Ver {ps_version}-pro for Linux on {arch} (Percona Server Pro (GPL), Release {ps_version_percona}, Revision" in mysql_output
+            assert f"{base_dir}/bin/mysqld  Ver {ps_version}-pro for Linux on {arch} (Percona Server Pro (GPL), Release {ps_version_percona}, Revision" in mysqld_output
             # Verify revision format (alphanumeric hash)
             assert re.search(r'Revision [a-f0-9]+\)', mysql_output), f"Expected revision pattern in mysql output: {mysql_output}"
             assert re.search(r'Revision [a-f0-9]+\)', mysqld_output), f"Expected revision pattern in mysqld output: {mysqld_output}"
         else:
             # For non-PRO builds, check version, release, and that revision exists (but not exact match)
-            assert f"{base_dir}/bin/mysql  Ver {ps_version} for Linux on x86_64 (Percona Server (GPL), Release {ps_version_percona}, Revision" in mysql_output
-            assert f"{base_dir}/bin/mysqld  Ver {ps_version} for Linux on x86_64 (Percona Server (GPL), Release {ps_version_percona}, Revision" in mysqld_output
+            assert f"{base_dir}/bin/mysql  Ver {ps_version} for Linux on {arch} (Percona Server (GPL), Release {ps_version_percona}, Revision" in mysql_output
+            assert f"{base_dir}/bin/mysqld  Ver {ps_version} for Linux on {arch} (Percona Server (GPL), Release {ps_version_percona}, Revision" in mysqld_output
             # Verify revision format (alphanumeric hash)
             assert re.search(r'Revision [a-f0-9]+\)', mysql_output), f"Expected revision pattern in mysql output: {mysql_output}"
             assert re.search(r'Revision [a-f0-9]+\)', mysqld_output), f"Expected revision pattern in mysqld output: {mysqld_output}"
