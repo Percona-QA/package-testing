@@ -11,6 +11,12 @@ RPM_PERCONA_BUILD_VERSION = ''
 
 REVISION = os.environ.get('PS_REVISION')
 
+# percona-mysql-shell has its own version and is rebuilt against the current PS branch, so it is checked separately.
+# If PSHELL_VERSION is not set, the shell is checked against VERSION as before.
+PSHELL_VERSION = os.environ.get('PSHELL_VERSION')          # shell own version, e.g. 8.4.10
+PSHELL_PKG_VERSION = os.environ.get('PSHELL_PKG_VERSION')  # exact package build, e.g. 8.4.10-1-3
+PSHELL_BUILT_FOR = os.environ.get('PSHELL_BUILT_FOR')      # PS version it is built for, defaults to VERSION
+
 if re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', VERSION): # if full package VERSION 8.0.32-24.2 is passed we need to re-assign it for tests
     DEB_PERCONA_BUILD_VERSION = re.sub(r'.(\d+)$',r'-\g<1>', VERSION) # convert to format passed by host.package.version for deb 8.0.32-24-2
     RPM_PERCONA_BUILD_VERSION = VERSION # re-assign for RPM tests and use 8.0.32-24.2
@@ -179,6 +185,18 @@ def is_running(host):
     return False
 
 
+def check_pshell_package(pkg_version):
+    if PSHELL_PKG_VERSION:
+        # DEB 8.4.10-1-3.jammy and RPM 8.4.10-1.3.el9 separate the build differently, so compare with dashes only
+        norm_pkg = pkg_version.replace('.', '-')
+        norm_exp = PSHELL_PKG_VERSION.replace('.', '-')
+        assert norm_pkg == norm_exp or norm_pkg.startswith(norm_exp + '-'), (PSHELL_PKG_VERSION, pkg_version)
+    elif PSHELL_VERSION:
+        assert pkg_version.startswith(PSHELL_VERSION + '-'), (PSHELL_VERSION, pkg_version)
+    else:
+        assert VERSION.split('-')[0] in pkg_version, (VERSION.split('-')[0], pkg_version)
+
+
 @pytest.mark.parametrize("package", DEBPACKAGES)
 def test_check_deb_package(host, package):
     dist = host.system_info.distribution
@@ -188,7 +206,7 @@ def test_check_deb_package(host, package):
     assert pkg.is_installed
     # percona-mysql-shell package version does not have percona version value (it is 8.0.32)
     if package == 'percona-mysql-shell':
-        assert VERSION.split('-')[0] in pkg.version, (VERSION.split('-')[0], pkg.version)
+        check_pshell_package(pkg.version)
     else:
         if DEB_PERCONA_BUILD_VERSION:
             assert DEB_PERCONA_BUILD_VERSION in pkg.version, pkg.version
@@ -205,7 +223,7 @@ def test_check_rpm_package(host, package):
     assert pkg.is_installed
     # percona-mysql-shell package does not have percona version (it is 8.0.32)
     if package == 'percona-mysql-shell':
-        assert VERSION.split('-')[0] in pkg.version, (VERSION.split('-')[0], pkg.version)
+        check_pshell_package(pkg.version+'-'+pkg.release)
     else:
         if RPM_PERCONA_BUILD_VERSION:
             assert RPM_PERCONA_BUILD_VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
@@ -213,12 +231,25 @@ def test_check_rpm_package(host, package):
             assert VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
 
 
-@pytest.mark.parametrize("binary", ['mysqlsh', 'mysql', 'mysqlrouter'])
+@pytest.mark.parametrize("binary", ['mysql', 'mysqlrouter'])
 def test_binary_version(host, binary):
     cmd = "{} --version".format(binary)
     result = host.run(cmd)
     assert result.rc == 0, (result.stderr, result.stdout)
     assert VERSION in result.stdout, result.stdout
+
+
+def test_mysqlsh_version(host):
+    # e.g. "mysqlsh   Ver 8.4.10 for Linux on x86_64 - for MySQL 8.4.13-13 (Source distribution)"
+    result = host.run("mysqlsh --version")
+    assert result.rc == 0, (result.stderr, result.stdout)
+    if not PSHELL_VERSION:
+        assert VERSION in result.stdout, result.stdout
+        return
+    match = re.search(r'Ver (\S+) for .* for MySQL (\d+\.\d+\.\d+-\d+)', result.stdout)
+    assert match, result.stdout
+    assert match.group(1) == PSHELL_VERSION, (PSHELL_VERSION, result.stdout)
+    assert match.group(2) == (PSHELL_BUILT_FOR or VERSION), (PSHELL_BUILT_FOR or VERSION, result.stdout)
 
 def test_ps_revision(host):
     if not REVISION:

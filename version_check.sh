@@ -44,6 +44,8 @@ elif [ "$1" = "ps80" ]; then
     version=${PS84_VER}
     release=${PS84_VER#*-}
     revision=${PS84_REV}
+    pshell_ver=${PSHELL84_VER}
+    pshell_pkg_ver=${PSHELL84_PKG_VER}
   fi
   elif [ "$1" = "ps97" ]; then
   if [ "$2" = "pro" ]; then
@@ -214,7 +216,44 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
 
   if [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]] || [[ ${product} =~ ^ps2[0-9]{1}$ ]]; then
     if [ -z ${install_mysql_shell} ] || [ ${install_mysql_shell} = "yes" ] ; then
-      if [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
+      # Job parameters (pshell_version, pshell_pkg_version, pshell_built_for) override the VERSIONS defaults
+      exp_shell_ver=${pshell_version:-${pshell_ver}}
+      exp_shell_pkg_ver=${pshell_pkg_version:-${pshell_pkg_ver}}
+      exp_shell_built_for=${pshell_built_for:-${version}}
+      if [ -n "${exp_shell_ver}" ]; then
+        # e.g. "mysqlsh   Ver 8.4.10 for Linux on x86_64 - for MySQL 8.4.13-13 (Source distribution)"
+        shell_out=$(mysqlsh --version)
+        shell_ver=$(sed -n 's/.*Ver \([0-9.]*\) for .*/\1/p' <<< "${shell_out}")
+        shell_built_for=$(sed -n 's/.* for MySQL \([0-9.]*-[0-9]*\).*/\1/p' <<< "${shell_out}")
+        if [ "${shell_ver}" = "${exp_shell_ver}" ]; then
+          echo "mysql-shell version ${shell_ver} is correct" >> "${log}"
+        else
+          echo "ERROR: mysql-shell version is incorrect: got ${shell_ver}, expected ${exp_shell_ver} (${shell_out})"
+          exit 1
+        fi
+        if [ "${shell_built_for}" = "${exp_shell_built_for}" ]; then
+          echo "mysql-shell is built for MySQL ${shell_built_for} which is correct" >> "${log}"
+        else
+          echo "ERROR: mysql-shell is built for MySQL ${shell_built_for}, expected ${exp_shell_built_for} (${shell_out})"
+          exit 1
+        fi
+        if [ -n "${exp_shell_pkg_ver}" ]; then
+          if command -v dpkg-query >/dev/null 2>&1; then
+            shell_pkg_ver=$(dpkg-query -W -f='${Version}' percona-mysql-shell)   # 8.4.10-1-3.jammy
+          else
+            shell_pkg_ver=$(rpm -q --qf '%{VERSION}-%{RELEASE}' percona-mysql-shell)   # 8.4.10-1.3.el9
+          fi
+          # DEB and RPM separate the build differently, so compare with dots turned into dashes
+          norm_pkg=${shell_pkg_ver//./-}
+          norm_exp=${exp_shell_pkg_ver//./-}
+          if [ "${norm_pkg}" = "${norm_exp}" ] || [[ "${norm_pkg}" == "${norm_exp}-"* ]]; then
+            echo "percona-mysql-shell package version ${shell_pkg_ver} is correct" >> "${log}"
+          else
+            echo "ERROR: percona-mysql-shell package version is incorrect: got ${shell_pkg_ver}, expected ${exp_shell_pkg_ver}"
+            exit 1
+          fi
+        fi
+      elif [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
         echo "mysql-shell version is correct" >> "${log}"
       else
         echo "ERROR: mysql-shell version is incorrect"
