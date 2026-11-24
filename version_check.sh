@@ -57,6 +57,10 @@ elif [ "$1" = "ps80" ]; then
     version=${PS97_VER}
     release=${PS97_VER#*-}
     revision=${PS97_REV}
+    pshell_ver=${PSHELL97_VER}
+    pshell_pkg_ver=${PSHELL97_PKG_VER}
+    pshell_rpm_pkg_ver=${PSHELL97_RPM_PKG_VER}
+    pshell_built_for_def=${PSHELL97_BUILT_FOR}
   fi
 elif [ "$1" = "ps26" ]; then
   version=${PS26_VER}
@@ -224,7 +228,8 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
       exp_shell_ver=${pshell_version:-${pshell_ver}}
       exp_shell_pkg_ver=${pshell_pkg_version:-${pshell_pkg_ver}}
       exp_shell_rpm_pkg_ver=${pshell_rpm_pkg_version:-${pshell_rpm_pkg_ver}}
-      exp_shell_built_for=${pshell_built_for:-${version}}
+      # the shell can be built for an older PS release than the one under test (e.g. 9.7.1-1 for PS 9.7.2-3)
+      exp_shell_built_for=${pshell_built_for:-${pshell_built_for_def:-${version}}}
       if [ -n "${exp_shell_ver}" ]; then
         # e.g. "mysqlsh   Ver 8.4.10 for Linux on x86_64 - for MySQL 8.4.13-13 (Source distribution)"
         shell_out=$(mysqlsh --version)

@@ -12,11 +12,19 @@
   become_method: sudo
   vars:
     install_mysql_shell: "{{ lookup('env', 'install_mysql_shell', default='') }}"
+    pshell_version: "{{ lookup('env', 'pshell_version', default='') }}"
+    pshell_pkg_version: "{{ lookup('env', 'pshell_pkg_version', default='') }}"
+    pshell_rpm_pkg_version: "{{ lookup('env', 'pshell_rpm_pkg_version', default='') }}"
+    pshell_built_for: "{{ lookup('env', 'pshell_built_for', default='') }}"
     gnupg_home: /root/.gnupg
     percona_key1: 4D1BB29D63D98E422B2113B19334A25F8507EFA5
     percona_key1_file: "{{ gnupg_home }}/PERCONA-PACKAGING-KEY"
   environment:
     install_mysql_shell: '{{ install_mysql_shell }}'
+    pshell_version: '{{ pshell_version }}'
+    pshell_pkg_version: '{{ pshell_pkg_version }}'
+    pshell_rpm_pkg_version: '{{ pshell_rpm_pkg_version }}'
+    pshell_built_for: '{{ pshell_built_for }}'
     PERCONA_TELEMETRY_URL: "https://check-dev.percona.com/v1/telemetry/GenericReport"
 
   tasks:
@@ -86,11 +94,13 @@
     include_tasks: ../tasks/install_pt.yml
     when: ansible_distribution_release != "resolute"
 
-  - name: enable the mysql shell testing repo
-    command: percona-release enable mysql-shell testing
-    when:
-      - install_mysql_shell == "yes" or install_mysql_shell == ""
-      - ansible_distribution != "Amazon"
+  # Disabled: the mysql-shell repo carries newer shells (e.g. 26.7.0) and "state: latest" picked those
+  # over the shell built for 9.7. The shell now comes from the ps-97-lts repo, as in ps_84.yml and ps_97_upgrade.yml.
+  # - name: enable the mysql shell testing repo
+  #   command: percona-release enable mysql-shell testing
+  #   when:
+  #     - install_mysql_shell == "yes" or install_mysql_shell == ""
+  #     - ansible_distribution != "Amazon"
 
   - name: install percona-mysql-shell package
     include_tasks: ../tasks/install_pshell.yml
