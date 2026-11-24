@@ -14,7 +14,8 @@ REVISION = os.environ.get('PS_REVISION')
 # percona-mysql-shell has its own version and is rebuilt against the current PS branch, so it is checked separately.
 # If PSHELL_VERSION is not set, the shell is checked against VERSION as before.
 PSHELL_VERSION = os.environ.get('PSHELL_VERSION')          # shell own version, e.g. 8.4.10
-PSHELL_PKG_VERSION = os.environ.get('PSHELL_PKG_VERSION')  # exact package build, e.g. 8.4.10-1-3
+PSHELL_PKG_VERSION = os.environ.get('PSHELL_PKG_VERSION')  # exact DEB package build, e.g. 8.4.10-1-3
+PSHELL_RPM_PKG_VERSION = os.environ.get('PSHELL_RPM_PKG_VERSION')  # exact RPM package build, e.g. 8.4.10-3
 PSHELL_BUILT_FOR = os.environ.get('PSHELL_BUILT_FOR')      # PS version it is built for, defaults to VERSION
 
 if re.search(r'^\d+\.\d+\.\d+-\d+\.\d+$', VERSION): # if full package VERSION 8.0.32-24.2 is passed we need to re-assign it for tests
@@ -185,12 +186,13 @@ def is_running(host):
     return False
 
 
-def check_pshell_package(pkg_version):
-    if PSHELL_PKG_VERSION:
-        # DEB 8.4.10-1-3.jammy and RPM 8.4.10-1.3.el9 separate the build differently, so compare with dashes only
+def check_pshell_package(pkg_version, expected_pkg_version):
+    # DEB 8.4.10-1-3.jammy and RPM 8.4.10-3.el10 differ, so the caller passes the expected value for its package type
+    if expected_pkg_version:
+        # compare with dashes only so the distro suffix (.jammy / .el10) is handled the same way
         norm_pkg = pkg_version.replace('.', '-')
-        norm_exp = PSHELL_PKG_VERSION.replace('.', '-')
-        assert norm_pkg == norm_exp or norm_pkg.startswith(norm_exp + '-'), (PSHELL_PKG_VERSION, pkg_version)
+        norm_exp = expected_pkg_version.replace('.', '-')
+        assert norm_pkg == norm_exp or norm_pkg.startswith(norm_exp + '-'), (expected_pkg_version, pkg_version)
     elif PSHELL_VERSION:
         assert pkg_version.startswith(PSHELL_VERSION + '-'), (PSHELL_VERSION, pkg_version)
     else:
@@ -206,7 +208,7 @@ def test_check_deb_package(host, package):
     assert pkg.is_installed
     # percona-mysql-shell package version does not have percona version value (it is 8.0.32)
     if package == 'percona-mysql-shell':
-        check_pshell_package(pkg.version)
+        check_pshell_package(pkg.version, PSHELL_PKG_VERSION)
     else:
         if DEB_PERCONA_BUILD_VERSION:
             assert DEB_PERCONA_BUILD_VERSION in pkg.version, pkg.version
@@ -223,7 +225,7 @@ def test_check_rpm_package(host, package):
     assert pkg.is_installed
     # percona-mysql-shell package does not have percona version (it is 8.0.32)
     if package == 'percona-mysql-shell':
-        check_pshell_package(pkg.version+'-'+pkg.release)
+        check_pshell_package(pkg.version+'-'+pkg.release, PSHELL_RPM_PKG_VERSION)
     else:
         if RPM_PERCONA_BUILD_VERSION:
             assert RPM_PERCONA_BUILD_VERSION in pkg.version+'-'+pkg.release, pkg.version+'-'+pkg.release
