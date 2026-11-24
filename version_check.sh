@@ -216,7 +216,10 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
   fi
 
   if [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]] || [[ ${product} =~ ^ps2[0-9]{1}$ ]]; then
-    if [ -z ${install_mysql_shell} ] || [ ${install_mysql_shell} = "yes" ] ; then
+    # percona-mysql-shell is not built for Amazon Linux 2023 (x86_64 and aarch64), so it is not installed there
+    if grep -qs '^ID="\?amzn"\?$' /etc/os-release && grep -qs '^VERSION_ID="\?2023"\?$' /etc/os-release; then
+      echo "Skipping mysql-shell version check: percona-mysql-shell is not available on Amazon Linux 2023" >> "${log}"
+    elif [ -z ${install_mysql_shell} ] || [ ${install_mysql_shell} = "yes" ] ; then
       # Job parameters (pshell_version, pshell_pkg_version, pshell_rpm_pkg_version, pshell_built_for) override the VERSIONS defaults
       exp_shell_ver=${pshell_version:-${pshell_ver}}
       exp_shell_pkg_ver=${pshell_pkg_version:-${pshell_pkg_ver}}
