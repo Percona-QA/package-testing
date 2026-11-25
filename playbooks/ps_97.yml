@@ -182,7 +182,8 @@
       - name: Fail the task due to previous issues
         fail:
           msg: Failing the further tasks due to issues in the previous task.
-    when: not (ansible_os_family == "Debian" and ansible_architecture in ["aarch64", "arm64"])
+    # Disabled: this skipped version_check.sh on all Debian/Ubuntu ARM hosts; PS 9.7 and the shell are published for ARM
+    # when: not (ansible_os_family == "Debian" and ansible_architecture in ["aarch64", "arm64"])
 
   - name: check that Percona Server {{ pro }} package versions are correct
     command: /package-testing/package_check.sh ps97 {{ pro }}
