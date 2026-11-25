@@ -90,7 +90,7 @@
           -name {{ item.item.name }} \
           -m {{ item.item.memory }} \
           -smp {{ item.item.cpus }} \
-          -drive file=/tmp/molecule-{{ item.item.name }}.raw,format=raw,if=none,id=disk0,cache=unsafe,aio=threads \
+          -drive file=/tmp/molecule-{{ item.item.name }}.raw,format=raw,if=none,id=disk0,cache=unsafe,aio=threads{{ iops_opt }} \
           -device virtio-blk-pci,drive=disk0 \
           -cdrom /tmp/cloud-init-{{ item.item.name }}.iso \
           -netdev user,id=net0,hostfwd=tcp::{{ item.item.ssh_port }}-:22 \
@@ -103,6 +103,11 @@
           -display none \
           -pidfile /tmp/qemu-{{ item.item.name }}.pid \
           2> /tmp/qemu-{{ item.item.name }}-stderr.log
+      vars:
+        # Throttle the guest disk to QEMU_IOPS total IOPS when the env var is
+        # set (exported per-run by the chaos-iops Jenkins job). Empty otherwise,
+        # so unthrottled chaos runs are unaffected.
+        iops_opt: "{{ (',throttling.iops-total=' ~ lookup('env', 'QEMU_IOPS')) if (lookup('env', 'QEMU_IOPS') | default('', true) | length > 0) else '' }}"
       when:
         - item.stdout == "not running"
         - (item.item.arch | default('amd64')) == 'amd64'
