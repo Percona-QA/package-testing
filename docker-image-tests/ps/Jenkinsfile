@@ -7,6 +7,12 @@ pipeline {
             description: 'Choose the product version to test',
             name: 'PRODUCT_TO_TEST'
         )
+    string(
+            defaultValue: '',
+            description: 'Expected percona-mysql-shell version in the image, e.g. 26.10.0. Empty uses PSHELL<major>_VER from VERSIONS.',
+            name: 'PSHELL_VERSION',
+            trim: true
+        )
   }
   stages {
     stage('SET PS_VERSION and PS_REVISION') {
