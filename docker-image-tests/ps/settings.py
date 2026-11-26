@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import platform
 import re
 
 docker_acc = os.getenv('DOCKER_ACC')
@@ -198,5 +199,35 @@ elif ps_version_major == '5.6':
     ps_binaries = ps56_binaries
     ps_plugins = ps56_plugins
     ps_functions = ps56_functions
+
+# Architecture of the image under test: from the -amd64/-arm64 tag suffix,
+# otherwise the host (multi-arch tags pull the host's platform).
+if ps_version.endswith('-arm64'):
+    docker_arch = 'aarch64'
+elif ps_version.endswith('-amd64'):
+    docker_arch = 'x86_64'
+else:
+    docker_arch = 'aarch64' if platform.machine() in ('aarch64', 'arm64') else 'x86_64'
+
+# Checks not done for ARM images (same exclusions as docker-image-tests/ps-arm)
+if docker_arch == 'aarch64':
+    arm_skip = {'percona-mysql-shell'}
+    if re.match(r'^(8|9)\.', ps_version_major):
+        arm_skip.add('/usr/bin/mysql_config-64')
+    if re.match(r'^(8\.[1-9]|9\.[0-9]+)$', ps_version_major):
+        arm_skip.add(('authentication_ldap_sasl', 'authentication_ldap_sasl.so'))
+    if not re.match(r'^9\.', ps_version_major):
+        arm_skip.add('/usr/bin/mysqlsh')
+    if re.match(r'^8\.[1-9]$', ps_version_major):
+        arm_skip.add('/usr/bin/gawk')
+    if ps_version_major == '8.0':
+        arm_skip.add('file://component_masking_functions')
+    ps_packages = tuple(x for x in ps_packages if x not in arm_skip)
+    ps_binaries = tuple(x for x in ps_binaries if x not in arm_skip)
+    ps_plugins = tuple(x for x in ps_plugins if x not in arm_skip)
+    if 'ps_components' in globals():
+        ps_components = tuple(x for x in ps_components if x not in arm_skip)
+    if re.match(r'^8\.[1-9]$', ps_version_major):
+        ps_binaries += ('/usr/bin/cat', '/usr/bin/cut', '/usr/bin/kill', '/usr/bin/tail')
 
 ps_pwd = 'pwd1234#'
