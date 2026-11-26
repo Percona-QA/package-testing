@@ -9,6 +9,10 @@ container_name = 'orch-docker-test-inspect'
 
 @pytest.fixture(scope='module')
 def inspect_data():
+    # Remove any leftover container from an interrupted previous run so the
+    # fixed --name docker run does not fail with a name conflict.
+    subprocess.run(['docker', 'rm', '-f', container_name],
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     docker_id = subprocess.check_output(
         ['docker', 'run', '--name', container_name, '-d', docker_image], stderr=subprocess.STDOUT ).decode().strip()
     inspect_data = json.loads(subprocess.check_output(['docker','inspect',container_name]))
