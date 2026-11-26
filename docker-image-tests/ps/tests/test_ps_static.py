@@ -29,7 +29,8 @@ class TestMysqlEnvironment:
     def test_packages(self, host, pkg_name):
         assert host.package(pkg_name).is_installed
         if pkg_name == 'percona-mysql-shell':
-            pytest.skip('percona-mysql-shell versions independently of the PS server package')
+            # percona-mysql-shell versions independently of the PS server package
+            assert host.package(pkg_name).version == pshell_version
         else:
             assert host.package(pkg_name).version == ps_version_upstream
 

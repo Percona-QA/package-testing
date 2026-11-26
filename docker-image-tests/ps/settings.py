@@ -12,6 +12,28 @@ ps_version_percona1 = ps_version.split('-')[1]
 ps_version_percona = ps_version_percona1.split('.')[0]
 ps_version_major = ps_version_upstream.split('.')[0] + '.' + ps_version_upstream.split('.')[1]
 
+
+def versions_default(key):
+    # read a default from the VERSIONS file at the root of package-testing
+    versions_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'VERSIONS')
+    try:
+        with open(versions_file) as f:
+            for line in f:
+                m = re.match(r'^' + key + r'="?([^"\s]*)"?', line.strip())
+                if m:
+                    return m.group(1)
+    except OSError:
+        pass
+    return None
+
+
+# percona-mysql-shell has its own version (e.g. 8.4.10 for PS 8.4.13), so it is
+# checked against PSHELL_VERSION, then PSHELL<major>_VER from VERSIONS, and
+# finally the PS upstream version (PS 8.0 ships a shell with the server version).
+pshell_version = (os.getenv('PSHELL_VERSION')
+                  or versions_default('PSHELL' + ps_version_major.replace('.', '') + '_VER')
+                  or ps_version_upstream)
+
 docker_product = 'percona-server'
 docker_tag = ps_version
 docker_image = docker_acc + "/" + docker_product + ":" + docker_tag
