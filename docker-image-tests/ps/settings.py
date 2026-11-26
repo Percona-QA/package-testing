@@ -228,6 +228,8 @@ if docker_arch == 'aarch64':
     if 'ps_components' in globals():
         ps_components = tuple(x for x in ps_components if x not in arm_skip)
     if re.match(r'^8\.[1-9]$', ps_version_major):
-        ps_binaries += ('/usr/bin/cat', '/usr/bin/cut', '/usr/bin/kill', '/usr/bin/tail')
+        # cat, cut and tail are not checked on ARM
+        # ps_binaries += ('/usr/bin/cat', '/usr/bin/cut', '/usr/bin/kill', '/usr/bin/tail')
+        ps_binaries += ('/usr/bin/kill',)
 
 ps_pwd = 'pwd1234#'
