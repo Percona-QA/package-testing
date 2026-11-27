@@ -28,8 +28,8 @@ class TestMysqlEnvironment:
     @pytest.mark.skipif(docker_acc == "perconalab", reason="Skipping tests in 'testing' repo")
     def test_binaries_version(self, host):
         if ps_version_major in ['5.7','5.6']:
-            assert host.check_output('mysql --version') == 'mysql  Ver 14.14 Distrib '+ps_version+', for Linux (x86_64) using  7.0'
-            assert host.check_output('mysqld --version') == 'mysqld  Ver '+ps_version+' for Linux on x86_64 (Percona Server (GPL), Release '+ps_version_percona+', Revision '+ps_revision+')'
+            assert host.check_output('mysql --version') == 'mysql  Ver 14.14 Distrib '+ps_version+', for Linux ('+docker_arch+') using  7.0'
+            assert host.check_output('mysqld --version') == 'mysqld  Ver '+ps_version+' for Linux on '+docker_arch+' (Percona Server (GPL), Release '+ps_version_percona+', Revision '+ps_revision+')'
         else:
-            assert host.check_output('mysql --version') == 'mysql  Ver '+ ps_version_upstream + '-' + ps_version_percona +' for Linux on x86_64 (Percona Server (GPL), Release '+ ps_version_percona +', Revision '+ ps_revision +')'
-            assert host.check_output('mysqld --version') == '/usr/sbin/mysqld  Ver '+ ps_version_upstream + '-' + ps_version_percona +' for Linux on x86_64 (Percona Server (GPL), Release '+ ps_version_percona +', Revision '+ ps_revision +')'
+            assert host.check_output('mysql --version') == 'mysql  Ver '+ ps_version_upstream + '-' + ps_version_percona +' for Linux on '+docker_arch+' (Percona Server (GPL), Release '+ ps_version_percona +', Revision '+ ps_revision +')'
+            assert host.check_output('mysqld --version') == '/usr/sbin/mysqld  Ver '+ ps_version_upstream + '-' + ps_version_percona +' for Linux on '+docker_arch+' (Percona Server (GPL), Release '+ ps_version_percona +', Revision '+ ps_revision +')'

@@ -12,6 +12,7 @@ fault tolerance. Run explicitly (not picked up by the router_docker job's
 """
 import json
 import os
+import re
 import subprocess
 
 import pytest
@@ -19,6 +20,8 @@ import pytest
 EXPECTED_ROWS = 10000
 ROUTER_VERSION = os.getenv("ROUTER_VERSION")
 PS_VERSION = os.getenv("PS_VERSION")
+PSHELL_VERSION = os.getenv("PSHELL_VERSION")
+PSHELL_BUILT_FOR = os.getenv("PSHELL_BUILT_FOR")
 
 
 def docker_exec(container, *args, timeout=30):
@@ -45,8 +48,18 @@ class TestVersions:
         # mysql1 is already stopped by Fault_tolerance() by the time this
         # suite runs (see TestReplicationSurvivors below), so check a node
         # that's still up.
+        # e.g. "mysqlsh   Ver 8.4.10 for Linux on x86_64 - for MySQL 8.4.13-13 (Source distribution)"
+        # percona-mysql-shell has its own version (8.4.10), which is not the
+        # PS version, so check it against PSHELL_VERSION like version_check.sh.
         out = docker_exec("mysql2", "mysqlsh", "--version")
-        assert PS_VERSION in out
+        if not PSHELL_VERSION:
+            pytest.skip("PSHELL_VERSION is not set")
+        shell_ver = re.search(r"Ver ([0-9.]+) for ", out)
+        assert shell_ver and shell_ver.group(1) == PSHELL_VERSION, out
+        # the shell can be built for an older PS release than the one under test
+        if PSHELL_BUILT_FOR:
+            built_for = re.search(r" for MySQL ([0-9.]+-[0-9]+)", out)
+            assert built_for and built_for.group(1) == PSHELL_BUILT_FOR, out
 
 
 class TestSbtestDataViaRouter:

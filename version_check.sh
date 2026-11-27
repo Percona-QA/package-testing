@@ -44,6 +44,9 @@ elif [ "$1" = "ps80" ]; then
     version=${PS84_VER}
     release=${PS84_VER#*-}
     revision=${PS84_REV}
+    pshell_ver=${PSHELL84_VER}
+    pshell_pkg_ver=${PSHELL84_PKG_VER}
+    pshell_rpm_pkg_ver=${PSHELL84_RPM_PKG_VER}
   fi
   elif [ "$1" = "ps97" ]; then
   if [ "$2" = "pro" ]; then
@@ -54,6 +57,10 @@ elif [ "$1" = "ps80" ]; then
     version=${PS97_VER}
     release=${PS97_VER#*-}
     revision=${PS97_REV}
+    pshell_ver=${PSHELL97_VER}
+    pshell_pkg_ver=${PSHELL97_PKG_VER}
+    pshell_rpm_pkg_ver=${PSHELL97_RPM_PKG_VER}
+    pshell_built_for_def=${PSHELL97_BUILT_FOR}
   fi
 elif [ "$1" = "ps26" ]; then
   version=${PS26_VER}
@@ -213,8 +220,52 @@ if [[ ${product} = "ps56" || ${product} = "ps57" ]] || [[ ${product} =~ ^ps8[0-9
   fi
 
   if [[ ${product} =~ ^ps8[0-9]{1}$ ]] || [[ ${product} =~ ^ps9[0-9]{1}$ ]] || [[ ${product} =~ ^ps2[0-9]{1}$ ]]; then
-    if [ -z ${install_mysql_shell} ] || [ ${install_mysql_shell} = "yes" ] ; then
-      if [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
+    # percona-mysql-shell is not built for Amazon Linux 2023 (x86_64 and aarch64), so it is not installed there
+    if grep -qs '^ID="\?amzn"\?$' /etc/os-release && grep -qs '^VERSION_ID="\?2023"\?$' /etc/os-release; then
+      echo "Skipping mysql-shell version check: percona-mysql-shell is not available on Amazon Linux 2023" >> "${log}"
+    elif [ -z ${install_mysql_shell} ] || [ ${install_mysql_shell} = "yes" ] ; then
+      # Job parameters (pshell_version, pshell_pkg_version, pshell_rpm_pkg_version, pshell_built_for) override the VERSIONS defaults
+      exp_shell_ver=${pshell_version:-${pshell_ver}}
+      exp_shell_pkg_ver=${pshell_pkg_version:-${pshell_pkg_ver}}
+      exp_shell_rpm_pkg_ver=${pshell_rpm_pkg_version:-${pshell_rpm_pkg_ver}}
+      # the shell can be built for an older PS release than the one under test (e.g. 9.7.1-1 for PS 9.7.2-3)
+      exp_shell_built_for=${pshell_built_for:-${pshell_built_for_def:-${version}}}
+      if [ -n "${exp_shell_ver}" ]; then
+        # e.g. "mysqlsh   Ver 8.4.10 for Linux on x86_64 - for MySQL 8.4.13-13 (Source distribution)"
+        shell_out=$(mysqlsh --version)
+        shell_ver=$(sed -n 's/.*Ver \([0-9.]*\) for .*/\1/p' <<< "${shell_out}")
+        shell_built_for=$(sed -n 's/.* for MySQL \([0-9.]*-[0-9]*\).*/\1/p' <<< "${shell_out}")
+        if [ "${shell_ver}" = "${exp_shell_ver}" ]; then
+          echo "mysql-shell version ${shell_ver} is correct" >> "${log}"
+        else
+          echo "ERROR: mysql-shell version is incorrect: got ${shell_ver}, expected ${exp_shell_ver} (${shell_out})"
+          exit 1
+        fi
+        if [ "${shell_built_for}" = "${exp_shell_built_for}" ]; then
+          echo "mysql-shell is built for MySQL ${shell_built_for} which is correct" >> "${log}"
+        else
+          echo "ERROR: mysql-shell is built for MySQL ${shell_built_for}, expected ${exp_shell_built_for} (${shell_out})"
+          exit 1
+        fi
+        # DEB and RPM package versions differ (DEB 8.4.10-1-3.jammy, RPM 8.4.10-3.el10), so each has its own expected value
+        if command -v dpkg-query >/dev/null 2>&1; then
+          shell_pkg_ver=$(dpkg-query -W -f='${Version}' percona-mysql-shell)
+        else
+          shell_pkg_ver=$(rpm -q --qf '%{VERSION}-%{RELEASE}' percona-mysql-shell)
+          exp_shell_pkg_ver=${exp_shell_rpm_pkg_ver}
+        fi
+        if [ -n "${exp_shell_pkg_ver}" ]; then
+          # compare with dots turned into dashes so the distro suffix (.el10 / .jammy) is handled the same way
+          norm_pkg=${shell_pkg_ver//./-}
+          norm_exp=${exp_shell_pkg_ver//./-}
+          if [ "${norm_pkg}" = "${norm_exp}" ] || [[ "${norm_pkg}" == "${norm_exp}-"* ]]; then
+            echo "percona-mysql-shell package version ${shell_pkg_ver} is correct" >> "${log}"
+          else
+            echo "ERROR: percona-mysql-shell package version is incorrect: got ${shell_pkg_ver}, expected ${exp_shell_pkg_ver}"
+            exit 1
+          fi
+        fi
+      elif [ "$(mysqlsh --version | grep -c ${version})" = 1 ]; then
         echo "mysql-shell version is correct" >> "${log}"
       else
         echo "ERROR: mysql-shell version is incorrect"

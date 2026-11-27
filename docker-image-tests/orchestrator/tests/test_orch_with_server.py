@@ -44,6 +44,17 @@ replica_stopped_attr_reference = ({"key_path": ["Key", "Hostname"], "expected_va
 @pytest.fixture(scope='module')
 def orchestrator_ip():
     docker_client = docker.from_env()
+    # Remove containers and the network left over from an interrupted previous
+    # run, otherwise creating them fails with a 409 "already exists" conflict.
+    for name in (orch_container, source_ps_container, replica_ps_container):
+        try:
+            docker_client.containers.get(name).remove(v=True, force=True)
+        except docker.errors.NotFound:
+            pass
+    for network in docker_client.networks.list(names=[network_name]):
+        # the names filter also matches partial names, so check it exactly
+        if network.name == network_name:
+            network.remove()
     docker_client.networks.create(network_name)
     docker_client.containers.run(docker_image, name=orch_container, network=network_name, detach=True)
     source_container = docker_client.containers.run(ps_docker_image, '--log-error-verbosity=3 --report_host='+source_ps_container+' --max-allowed-packet=134217728',

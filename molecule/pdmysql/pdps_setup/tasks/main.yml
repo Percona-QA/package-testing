@@ -102,7 +102,8 @@
       update_cache: yes
     when:
       - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
-      - ansible_facts['distribution_major_version'] | int > 8
+      # EL8 only gets ProxySQL with PS 8.x (not supported there with PS 9+), matching test_common_proxysql2.py
+      - ansible_facts['distribution_major_version'] | int > 8 or lookup('env', 'VERSION').split('.')[0] | int < 9
 
 
   #install initscripts-service manually on OL9 till DISTMYSQL-300 is fixed
@@ -118,19 +119,22 @@
     command: service proxysql start
     when:
       - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
-      - ansible_facts['distribution_major_version'] | int > 8
+      # EL8 only gets ProxySQL with PS 8.x (not supported there with PS 9+), matching test_common_proxysql2.py
+      - ansible_facts['distribution_major_version'] | int > 8 or lookup('env', 'VERSION').split('.')[0] | int < 9
 
   - name: stop proxysql service
     command: service proxysql stop
     when:
       - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
-      - ansible_facts['distribution_major_version'] | int > 8
+      # EL8 only gets ProxySQL with PS 8.x (not supported there with PS 9+), matching test_common_proxysql2.py
+      - ansible_facts['distribution_major_version'] | int > 8 or lookup('env', 'VERSION').split('.')[0] | int < 9
 
   - name: start proxysql service
     command: service proxysql start
     when:
       - ansible_facts['distribution'] in ['RedHat','CentOS','OracleLinux','Amazon']
-      - ansible_facts['distribution_major_version'] | int > 8
+      # EL8 only gets ProxySQL with PS 8.x (not supported there with PS 9+), matching test_common_proxysql2.py
+      - ansible_facts['distribution_major_version'] | int > 8 or lookup('env', 'VERSION').split('.')[0] | int < 9
 
   - name: install orchestrator new deb packages
     apt:
