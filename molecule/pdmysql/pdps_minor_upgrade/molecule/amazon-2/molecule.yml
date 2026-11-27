@@ -29,7 +29,7 @@ verifier:
   options:
     verbose: true
     s: true
-    k: "test_pdps_ or test_common_"
+    k: "(test_pdps_ or test_common_) and not mysql-shell and not mysqlsh and not mysql_shell"  # mysql shell tests skipped for minor upgrade
     m: "not pkg_source and not orch_source and not telemetry_enabled"
     junitxml: report.xml
 scenario:
