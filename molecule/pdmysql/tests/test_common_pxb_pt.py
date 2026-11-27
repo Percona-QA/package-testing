@@ -8,11 +8,6 @@ from packaging import version
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-# TEMPORARY: PXB tests are skipped for PDPS scenarios (pdps, pdps_minor_upgrade, pdps_setup); PDPXC still runs them.
-# PT tests below are already commented out. Remove this block to re-enable PXB tests for PDPS.
-if os.path.basename(os.environ.get('MOLECULE_PROJECT_DIRECTORY', '').rstrip('/')).startswith('pdps'):
-    pytest.skip("PXB and PT tests are temporarily disabled for PDPS", allow_module_level=True)
-
 PXB_VERSION = os.getenv("PXB_VERSION")
 DEB_PERCONA_BUILD_PXB_VERSION = ''
 RPM_PERCONA_BUILD_PXB_VERSION = ''
